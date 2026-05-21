@@ -38,20 +38,20 @@ eas login
 
 ```bash
 cd mobile
-npm install
+pnpm install
 ```
 
 ## Développement local
 
 ```bash
 # Démarrer Metro
-npm start
+pnpm start
 
 # Simulateur iOS
-npm run ios
+pnpm run ios
 
 # Émulateur Android
-npm run android
+pnpm run android
 ```
 
 > **Note** : Les notifications push et Stripe ne fonctionnent pas sur simulateur.  
@@ -90,10 +90,10 @@ cp .env.example .env.local
 
 ```bash
 # Preview (APK Android + IPA iOS en distribution interne)
-npm run build:preview
+pnpm run build:preview
 
 # Production (App Store + Google Play)
-npm run build:production
+pnpm run build:production
 ```
 
 Le premier build prend environ 15 minutes. Les suivants sont plus rapides grâce au cache.
@@ -106,8 +106,8 @@ Le premier build prend environ 15 minutes. Les suivants sont plus rapides grâce
 # - Android : google-play-service-account.json
 
 # Soumettre
-npm run submit:ios
-npm run submit:android
+pnpm run submit:ios
+pnpm run submit:android
 ```
 
 ## Structure du projet
