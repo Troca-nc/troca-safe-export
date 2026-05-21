@@ -1,63 +1,48 @@
-﻿# Troca Safe Export
+# Troca
 
-This folder is a GitHub-safe export of the Troca project. It contains source code, configuration templates, scripts, and documentation needed to develop and deploy the app without committing secrets or local caches.
-
-## What is included
-- Backend API and workers
-- Frontend web app
-- Mobile app
-- Database schema and migrations
+Troca is a marketplace-style platform with:
+- web frontend
+- mobile app
+- backend API
+- PostgreSQL schema and migrations
 - Docker and Nginx deployment files
-- Deployment and setup scripts
-- Tests and public assets
-- Sanitized environment example
+- tests, scripts, and documentation
 
-## What is intentionally excluded
-- Git history
-- Real `.env` files
-- Logs and caches
-- Build outputs and dependency folders
-- Private keys, certificates, and cloud credentials
-- Uploaded user data and database dumps
+## Quick start
 
-## Getting started
-
-1. Install dependencies in each app folder.
-2. Copy `.env.example` to the needed environment file(s) and fill in your own values.
-3. Start the backend, frontend, database, and optional Redis/worker services.
-
-### Web
-
-```bash
+```powershell
 cd frontend
 npm install
 npm run dev
 ```
 
-### Backend
-
-```bash
+```powershell
 cd backend
 npm install
 npm test
 ```
 
-### Mobile
-
-```bash
+```powershell
 cd mobile
 npm install
 npm test -- --runInBand
 ```
 
-### Docker deployment
+## Security rules
 
-```bash
-docker compose -f docker-compose.prod.yml up -d
-```
+- Never commit a real `.env` file.
+- Keep secrets in GitHub Secrets or on the server, not in the repo.
+- Do not commit logs, caches, build output, or user uploads.
+- Rotate any credential that may have existed in the original project history.
 
-## Before publishing to GitHub
-- Verify no real secrets are present in any config file.
-- Run a final scan for tokens, keys, and passwords.
-- Confirm the repository has no `.git` history from the original project.
-- Review the deployment workflow and environment examples.
+## GitHub hardening
+
+After creating the repository, enable:
+- branch protection on `main`
+- pull request reviews
+- required status checks
+- no force-push
+- no branch deletion
+- restricted workflow edits
+
+See `GITHUB_HARDENING.md` for the exact checklist.
