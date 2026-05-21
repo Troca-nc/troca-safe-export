@@ -27,9 +27,10 @@ async function fetchProfile(id: string) {
 }
 
 export async function generateMetadata(
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<Metadata> {
-  const profile = await fetchProfile(params.id)
+  const { id } = await params
+  const profile = await fetchProfile(id)
   if (!profile) {
     return generateNoindexMetadata('Profil introuvable')
   }
@@ -40,9 +41,9 @@ export async function generateMetadata(
       nom: profile.nom ?? '',
       nb_annonces: profile.nb_annonces ?? 0,
       commune: profile.commune_name ?? undefined,
-    }, `${SITE_URL}/profil/${params.id}`),
+    }, `${SITE_URL}/profil/${id}`),
     alternates: {
-      canonical: `${SITE_URL}/profil/${params.id}`,
+      canonical: `${SITE_URL}/profil/${id}`,
     },
   }
 }

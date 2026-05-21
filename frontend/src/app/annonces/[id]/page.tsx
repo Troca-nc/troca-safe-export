@@ -29,9 +29,10 @@ async function fetchAnnonce(id: string) {
 
 // ── Open Graph dynamique ──────────────────────────────────────
 export async function generateMetadata(
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<Metadata> {
-  const annonce = await fetchAnnonce(params.id)
+  const { id } = await params
+  const annonce = await fetchAnnonce(id)
   if (!annonce) {
     return {
       title: 'Annonce introuvable | Troca',
@@ -55,9 +56,10 @@ export async function generateMetadata(
 
 // ── Page ──────────────────────────────────────────────────────
 export default async function ListingDetailPage(
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const annonce = await fetchAnnonce(params.id)
+  const { id } = await params
+  const annonce = await fetchAnnonce(id)
   if (!annonce) notFound()
 
   // JSON-LD schema.org Product pour le référencement Google Shopping
@@ -98,7 +100,7 @@ export default async function ListingDetailPage(
       <JsonLd data={jsonLdData} />
       <Header />
       {/* AnnonceDetail est un Client Component — il reçoit les données prefetchées */}
-      <AnnonceDetail initialData={annonce} id={params.id} />
+      <AnnonceDetail initialData={annonce} id={id} />
     </>
   )
 }
