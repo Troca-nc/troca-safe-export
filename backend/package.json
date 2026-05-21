@@ -1,0 +1,35 @@
+{
+  "name": "troca-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node src/index.js",
+    "start": "node src/index.js",
+    "worker": "node src/worker.js",
+    "test": "node src/tests/run.js",
+    "seed:demo": "node src/scripts/seedDemo.js",
+    "demo:status": "node -e \"require('./src/services/demoSeedService').getDemoStatus().then((s)=>{console.log(JSON.stringify(s,null,2));}).catch((e)=>{console.error(e);process.exit(1);})\""
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.774.0",
+    "apple-signin-auth": "^1.4.0",
+    "archiver": "^7.0.1",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "google-auth-library": "^9.15.1",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.16",
+    "pg": "^8.13.3",
+    "redis": "^4.7.0",
+    "sharp": "^0.33.4",
+    "socket.io": "^4.8.1",
+    "stripe": "^17.7.0",
+    "twilio": "^5.4.4",
+    "uuid": "^11.0.5"
+  }
+}

@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Variables globales ─────────────────────────────── */
+:root {
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-body: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --coral:    #0A7EA4;
+  --ocean:    #08324F;
+  --lagoon:   #48CAE4;
+  --sand:     #F4F8F7;
+  --jungle:   #2D6A4F;
+  --night:    #082032;
+}
+
+/* ── Base ───────────────────────────────────────────── */
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+:focus-visible {
+  outline: 3px solid rgba(10, 126, 164, 0.45);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[role="switch"]:focus-visible,
+[role="option"]:focus-visible {
+  box-shadow: 0 0 0 4px rgba(10, 126, 164, 0.16);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  font-family: var(--font-body), system-ui, sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(72, 202, 228, 0.18), transparent 28%),
+    radial-gradient(circle at top right, rgba(10, 126, 164, 0.12), transparent 24%),
+    linear-gradient(180deg, #fbfcfc 0%, #f4f8f7 100%);
+  color: #082032;
+  min-height: 100vh;
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+/* ── Scrollbar custom ───────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #F5ECD7; }
+::-webkit-scrollbar-thumb { background: #C4B89A; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #E8521A; }
+
+/* ── Composants utilitaires ─────────────────────────── */
+@layer components {
+
+  /* Boutons */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2
+           bg-coral text-white font-semibold
+           px-5 py-2.5 rounded-xl
+           hover:bg-coral-dark active:scale-95
+           transition-all duration-150 cursor-pointer
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2
+           bg-white text-night font-semibold border border-night/10
+           px-5 py-2.5 rounded-xl
+           hover:bg-sand hover:border-night/20 active:scale-95
+           transition-all duration-150 cursor-pointer;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2
+           text-night/70 font-medium
+           px-4 py-2 rounded-xl
+           hover:bg-night/5 active:scale-95
+           transition-all duration-150 cursor-pointer;
+  }
+
+  /* Inputs */
+  .input {
+    @apply w-full px-4 py-2.5 rounded-xl
+           bg-white border border-night/15 text-night
+           placeholder:text-night/35
+           focus:outline-none focus:ring-2 focus:ring-coral/30 focus:border-coral
+           transition-all duration-150;
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-white/95 backdrop-blur-sm rounded-2xl shadow-card
+           hover:shadow-hover transition-shadow duration-200;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5
+           text-xs font-semibold rounded-full;
+  }
+
+  /* Skeleton loader */
+.skeleton {
+    @apply rounded-lg animate-pulse;
+    background-color: rgba(8, 32, 50, 0.08);
+  }
+}
+
+/* Decorative brand helpers */
+.brand-surface {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(72, 202, 228, 0.22), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(10, 126, 164, 0.18), transparent 32%),
+    linear-gradient(180deg, rgba(255,255,255,0.94), rgba(244,248,247,0.92));
+}
+
+.brand-ring {
+  box-shadow:
+    0 0 0 1px rgba(10, 126, 164, 0.14),
+    0 18px 60px rgba(8, 32, 50, 0.12);
+}
+
+/* ── Leaflet overrides ──────────────────────────────── */
+.leaflet-container {
+  font-family: var(--font-body), system-ui, sans-serif;
+  border-radius: 1rem;
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 0.75rem !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+}
+
+/* ── Swiper overrides ───────────────────────────────── */
+.swiper-pagination-bullet-active {
+  background: var(--coral) !important;
+}
+.swiper-button-next, .swiper-button-prev {
+  color: var(--coral) !important;
+}

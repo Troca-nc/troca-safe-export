@@ -1,0 +1,238 @@
+'use client'
+// src/components/listings/ListingCard.tsx
+
+import Link from 'next/link'
+import Image from 'next/image'
+import { Heart, MapPin, Clock, MailCheck, Phone, ShieldCheck } from 'lucide-react'
+import { useState } from 'react'
+import { formatDistanceToNow } from 'date-fns'
+import { fr } from 'date-fns/locale'
+import { useFavorisStore } from '@/store/favorisStore'
+import { useAuthStore } from '@/store/authStore'
+import { useRouter } from 'next/navigation'
+
+interface Listing {
+  id: string
+  title: string
+  price: number | null
+  price_negotiable: boolean
+  is_free: boolean
+  condition?: string
+  is_featured: boolean
+  is_urgent: boolean
+  published_at?: string
+  created_at?: string
+  boosted_until?: string | null
+  contre_quoi?: string | null
+  commune_name?: string
+  category_name?: string
+  category_icon?: string
+  cover_image?: string
+  user_rating?: number
+  seller_trust_score?: number
+  seller_email_verified?: boolean
+  seller_phone_verified?: boolean
+  is_pro?: boolean
+}
+
+interface Props {
+  listing: Listing
+  className?: string
+}
+
+const CONDITION_LABELS: Record<string, string> = {
+  new: 'Neuf',
+  like_new: 'Comme neuf',
+  good: 'Bon état',
+  fair: 'Correct',
+  for_parts: 'Pour pièces',
+}
+
+export function ListingCardSkeleton({ className = '' }: { className?: string }) {
+  return (
+    <div className={`card overflow-hidden animate-pulse ${className}`}>
+      <div className="aspect-[4/3] bg-sand" />
+      <div className="p-3 space-y-2">
+        <div className="h-3 bg-sand rounded-full w-4/5" />
+        <div className="h-3 bg-sand rounded-full w-3/5" />
+        <div className="h-4 bg-sand rounded-full w-2/5 mt-1" />
+        <div className="flex justify-between mt-2">
+          <div className="h-2.5 bg-sand rounded-full w-1/3" />
+          <div className="h-2.5 bg-sand rounded-full w-1/4" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export function ListingGridSkeleton({ count = 6, className = '' }: { count?: number; className?: string }) {
+  return (
+    <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 ${className}`}>
+      {Array.from({ length: count }).map((_, i) => (
+        <ListingCardSkeleton key={i} />
+      ))}
+    </div>
+  )
+}
+
+function CoverImage({ src, alt, icon }: { src?: string; alt: string; icon?: string }) {
+  const [loaded, setLoaded] = useState(false)
+  const [errored, setErrored] = useState(false)
+
+  if (!src || errored) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-sand">
+        <span className="text-4xl opacity-30">{icon || '📦'}</span>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      {!loaded && <div className="absolute inset-0 bg-sand animate-pulse" />}
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+        onLoadingComplete={() => setLoaded(true)}
+        onError={() => setErrored(true)}
+        className={`object-cover group-hover:scale-105 transition-all duration-300 ${
+          loaded ? 'opacity-100' : 'opacity-0'
+        }`}
+      />
+    </>
+  )
+}
+
+export default function ListingCard({ listing, className = '' }: Props) {
+  const router = useRouter()
+  const { isAuthenticated } = useAuthStore()
+  const { isSaved, toggle, loading } = useFavorisStore()
+
+  const saved = isSaved(listing.id)
+  const isToggling = loading.has(listing.id)
+
+  const handleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (!isAuthenticated) {
+      router.push(`/connexion?redirect=/annonces/${listing.id}`)
+      return
+    }
+
+    await toggle({
+      id: listing.id,
+      titre: listing.title,
+      prix: listing.price,
+      cover_image: listing.cover_image ?? null,
+      commune: listing.commune_name ?? null,
+      category: listing.category_name ?? null,
+    })
+  }
+
+  const formatPrice = () => {
+    if (listing.is_free) return <span className="text-jungle font-bold">Gratuit 🎁</span>
+    if (!listing.price) return <span className="text-night/50 italic text-sm">Prix à débattre</span>
+    return (
+      <span className="font-bold text-night">
+        {listing.price.toLocaleString('fr-FR')}{' '}
+        <span className="text-sm font-normal text-night/60">XPF</span>
+      </span>
+    )
+  }
+
+  const publishedAt = listing.published_at ?? listing.created_at ?? new Date().toISOString()
+  const timeAgo = formatDistanceToNow(new Date(publishedAt), {
+    addSuffix: true,
+    locale: fr,
+  })
+
+  const boosted = listing.is_featured || Boolean(listing.boosted_until && new Date(listing.boosted_until) > new Date())
+
+  return (
+    <Link href={`/annonces/${listing.id}`} className={`card block overflow-hidden group ${className}`}>
+      <div className="relative aspect-[4/3] bg-sand overflow-hidden">
+        <CoverImage src={listing.cover_image} alt={listing.title} icon={listing.category_icon} />
+
+        {listing.contre_quoi && (
+          <span className="badge absolute bottom-2 left-2 bg-night text-white text-[10px] flex items-center gap-0.5">
+            ↻ Troc
+          </span>
+        )}
+
+        <div className="absolute top-2 left-2 flex flex-col gap-1">
+          {boosted && <span className="badge bg-coral text-white text-[10px]">⭐ À la une</span>}
+          {listing.is_urgent && <span className="badge bg-amber-500 text-white text-[10px]">⚡ Urgent</span>}
+          {listing.is_pro && <span className="badge bg-ocean text-white text-[10px]">PRO</span>}
+        </div>
+
+        <button
+          onClick={handleFavorite}
+          disabled={isToggling}
+          aria-label={saved ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          className={`absolute top-2 right-2 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm transition-all ${
+            isToggling ? 'opacity-50 cursor-wait' : 'hover:scale-110 active:scale-95'
+          }`}
+        >
+          <Heart
+            className={`w-4 h-4 transition-all ${
+              saved ? 'fill-coral text-coral scale-110' : 'text-night/40 hover:text-coral/60'
+            }`}
+          />
+        </button>
+      </div>
+
+      <div className="p-3">
+        <h3 className="font-medium text-night text-sm leading-tight line-clamp-2 mb-1.5 group-hover:text-coral transition-colors">
+          {listing.title}
+        </h3>
+
+        <div className="text-base mb-2">{formatPrice()}</div>
+
+        {(listing.seller_email_verified || listing.seller_phone_verified || listing.seller_trust_score != null) && (
+          <div className="mb-2 flex flex-wrap gap-1.5">
+            {listing.seller_email_verified && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-ocean/20 bg-ocean/8 px-2 py-0.5 text-[10px] font-medium text-ocean">
+                <MailCheck className="w-3 h-3" />
+                Email vérifié
+              </span>
+            )}
+            {listing.seller_phone_verified && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-jungle/20 bg-jungle/8 px-2 py-0.5 text-[10px] font-medium text-jungle">
+                <Phone className="w-3 h-3" />
+                Téléphone vérifié
+              </span>
+            )}
+            {listing.seller_trust_score != null && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-night/10 bg-night/[0.03] px-2 py-0.5 text-[10px] font-medium text-night/60">
+                <ShieldCheck className="w-3 h-3" />
+                Confiance {Math.round(listing.seller_trust_score)}/100
+              </span>
+            )}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between text-xs text-night/45">
+          <span className="flex items-center gap-1 truncate">
+            <MapPin className="w-3 h-3 shrink-0" />
+            {listing.commune_name || 'Nouvelle-Calédonie'}
+          </span>
+          <span className="flex items-center gap-1 shrink-0">
+            <Clock className="w-3 h-3" />
+            {timeAgo}
+          </span>
+        </div>
+
+        {listing.condition && (
+          <div className="mt-1.5">
+            <span className="badge bg-sand text-night/60 text-[10px]">
+              {CONDITION_LABELS[listing.condition] ?? listing.condition}
+            </span>
+          </div>
+        )}
+      </div>
+    </Link>
+  )
+}
