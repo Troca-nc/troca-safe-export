@@ -23,8 +23,8 @@
         "applinks:troca.nc"
       ],
       "infoPlist": {
-        "NSCameraUsageDescription": "Troca utilise votre camÃ©ra pour prendre des photos de vos annonces.",
-        "NSPhotoLibraryUsageDescription": "Troca accÃ¨de Ã  vos photos pour illustrer vos annonces.",
+        "NSCameraUsageDescription": "Troca utilise votre caméra pour prendre des photos de vos annonces.",
+        "NSPhotoLibraryUsageDescription": "Troca accède à vos photos pour illustrer vos annonces.",
         "NSLocationWhenInUseUsageDescription": "Troca utilise votre position pour afficher les annonces proches.",
         "NSUserNotificationsUsageDescription": "Troca vous envoie des notifications pour vos messages et annonces.",
         "UIBackgroundModes": [
@@ -83,7 +83,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Troca accÃ¨de Ã  vos photos pour illustrer vos annonces."
+          "photosPermission": "Troca accède à vos photos pour illustrer vos annonces."
         }
       ],
       [
@@ -93,7 +93,9 @@
           "enableGooglePay": true
         }
       ],
-      "expo-apple-authentication"
+      "expo-apple-authentication",
+      "expo-asset",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
