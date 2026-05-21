@@ -51,7 +51,7 @@ mkdir -p "${DEPLOY_PATH}/nginx/logs"
 cd "${DEPLOY_PATH}"
 
 # 6. Cloner le repo
-REPO_URL="${REPO_URL:-https://github.com/Quidammm/Troca.git}"
+REPO_URL="${REPO_URL:-https://github.com/your-org/troca.git}"
 if [ ! -d .git ]; then
   git clone "$REPO_URL" .
   echo "Code clone"
