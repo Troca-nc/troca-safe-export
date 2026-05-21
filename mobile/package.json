@@ -73,6 +73,7 @@
   "pnpm": {
     "overrides": {
       "ws": "8.20.1",
+      "engine.io-client": "6.6.5",
       "@tootallnate/once": "3.0.1"
     }
   }
