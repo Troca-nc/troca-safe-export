@@ -274,6 +274,10 @@ async function matchImmediateAlerts(annonce) {
     `, [annonce.user_id]);
 
     for (const alert of alerts.rows) {
+      if (String(alert.user_id) === String(annonce.user_id)) {
+        continue;
+      }
+
       const filters = typeof alert.filters === 'string'
         ? JSON.parse(alert.filters)
         : alert.filters;

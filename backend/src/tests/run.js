@@ -19,6 +19,7 @@ const SUITES = [
 ];
 
 async function run() {
+  const { flushTests } = require('./helpers');
   console.log('\n🧪 Troca Backend — Suite de tests\n' + '─'.repeat(48));
   const start = Date.now();
 
@@ -37,6 +38,8 @@ async function run() {
   if (promises.length > 0) {
     await Promise.all(promises);
   }
+
+  await flushTests();
 
   const elapsed = ((Date.now() - start) / 1000).toFixed(2);
   const failed  = process.exitCode === 1;

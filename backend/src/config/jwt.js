@@ -5,37 +5,48 @@
 const jwt = require('jsonwebtoken');
 const { requireConfiguredEnv } = require('./env');
 
-const JWT_SECRET = requireConfiguredEnv('JWT_SECRET', {
-  fallback: 'dev_secret_change_in_prod',
-  minLength: 64,
-});
-const ACCESS_SECRET  = JWT_SECRET;
-const REFRESH_SECRET = `${JWT_SECRET}_refresh`;
+function getJwtSecret() {
+  return requireConfiguredEnv('JWT_SECRET', {
+    fallback: 'dev_secret_change_in_prod',
+    minLength: 64,
+  });
+}
 
-const ACCESS_EXPIRES =
-  process.env.JWT_EXPIRES_IN ||
-  process.env.JWT_ACCESS_EXPIRES ||
-  '15m';
+function getAccessSecret() {
+  return getJwtSecret();
+}
 
-const REFRESH_EXPIRES =
-  process.env.JWT_REFRESH_EXPIRES_IN ||
-  process.env.JWT_REFRESH_EXPIRES ||
-  '30d';
+function getRefreshSecret() {
+  return getJwtSecret();
+}
+
+function getAccessExpires() {
+  return process.env.JWT_EXPIRES_IN || process.env.JWT_ACCESS_EXPIRES || '15m';
+}
+
+function getRefreshExpires() {
+  return process.env.JWT_REFRESH_EXPIRES_IN || process.env.JWT_REFRESH_EXPIRES || '30d';
+}
 
 /**
  * Génère un access token + refresh token pour un utilisateur
  */
 const generateTokens = (userId) => {
+  const accessSecret = getAccessSecret();
+  const refreshSecret = getRefreshSecret();
+  const accessExpires = getAccessExpires();
+  const refreshExpires = getRefreshExpires();
+
   const accessToken = jwt.sign(
     { sub: userId, type: 'access' },
-    ACCESS_SECRET,
-    { expiresIn: ACCESS_EXPIRES }
+    accessSecret,
+    { expiresIn: accessExpires }
   );
 
   const refreshToken = jwt.sign(
     { sub: userId, type: 'refresh' },
-    REFRESH_SECRET,
-    { expiresIn: REFRESH_EXPIRES }
+    refreshSecret,
+    { expiresIn: refreshExpires }
   );
 
   // Date d'expiration du refresh token (pour la BDD)
@@ -49,7 +60,7 @@ const generateTokens = (userId) => {
  * Vérifie un access token et retourne le payload
  */
 const verifyAccessToken = (token) => {
-  const payload = jwt.verify(token, ACCESS_SECRET);
+  const payload = jwt.verify(token, getAccessSecret());
   if (payload.type !== 'access') throw new Error('Type de token invalide');
   return payload;
 };
@@ -58,7 +69,7 @@ const verifyAccessToken = (token) => {
  * Vérifie un refresh token et retourne le payload
  */
 const verifyRefreshToken = (token) => {
-  const payload = jwt.verify(token, REFRESH_SECRET);
+  const payload = jwt.verify(token, getRefreshSecret());
   if (payload.type !== 'refresh') throw new Error('Type de token invalide');
   return payload;
 };

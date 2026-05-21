@@ -687,7 +687,7 @@ router.post('/webhooks/stripe', async (req, res) => {
   const sig = req.headers['stripe-signature'];
 
   if (!stripeWebhookSecret) return res.status(503).json({ error: 'STRIPE_WEBHOOK_SECRET manquant' });
-  if (!sig || !req.rawBody) return res.status(400).json({ error: 'Signature manquante' });
+  if (!sig || !req.rawBody) return res.status(400).json({ error: 'Signature webhook Stripe manquante' });
 
   let event;
   try {

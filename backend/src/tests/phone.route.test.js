@@ -37,6 +37,7 @@ const dbStub = {
 
 // Override require pour database
 const origLoad = require('module')._load;
+const databaseModulePath = require.resolve('../config/database');
 require('module')._load = function (req, parent, isMain) {
   if (req.includes('config/database') || req.endsWith('database')) return dbStub;
   return origLoad.apply(this, arguments);
@@ -45,6 +46,11 @@ require('module')._load = function (req, parent, isMain) {
 process.env.TWILIO_ACCOUNT_SID = 'ACtest';
 process.env.TWILIO_AUTH_TOKEN  = 'authtoken';
 process.env.TWILIO_VERIFY_SID  = 'VAtest';
+
+require.cache[databaseModulePath] = { id: databaseModulePath, filename: databaseModulePath, loaded: true, exports: dbStub };
+delete require.cache[require.resolve('../middleware/auth')];
+delete require.cache[require.resolve('../middleware/validate')];
+delete require.cache[require.resolve('../routes/phone.route')];
 
 const router = require('../routes/phone.route');
 
@@ -57,9 +63,21 @@ function callRoute(method, path, req, res) {
       (l) => l.route?.path === path && l.route?.methods?.[method]
     );
     if (!layer) { resolve(); return; }
-    const handler = layer.route.stack[layer.route.stack.length - 1].handle;
-    const result = handler(req, res, () => resolve());
-    if (result && typeof result.then === 'function') result.then(resolve).catch(resolve);
+    req.method = method.toUpperCase();
+    req.url = path;
+
+    const finish = () => resolve();
+    const wrap = (fn) => (body) => {
+      const result = fn.call(res, body);
+      finish();
+      return result;
+    };
+
+    if (typeof res.json === 'function') res.json = wrap(res.json);
+    if (typeof res.send === 'function') res.send = wrap(res.send);
+    if (typeof res.end === 'function') res.end = wrap(res.end);
+
+    router.handle(req, res, () => {});
   });
 }
 

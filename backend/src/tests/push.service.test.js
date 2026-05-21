@@ -1,16 +1,20 @@
 'use strict';
 
 // ============================================================
-//  Tests — pushService.js
+//  Tests - pushService.js
 // ============================================================
 
 const assert = require('assert');
 const { describe, it } = require('./helpers');
 
-// ── Stub HTTPS (intercepte les requêtes Expo Push API) ────────
 const httpsSentRequests = [];
-require.cache[require.resolve('https')] = {
-  id: require.resolve('https'), loaded: true,
+const httpsModulePath = require.resolve('https');
+const originalHttpsCache = require.cache[httpsModulePath];
+
+require.cache[httpsModulePath] = {
+  id: httpsModulePath,
+  filename: httpsModulePath,
+  loaded: true,
   exports: {
     request: (_opts, callback) => {
       const body = { data: [{ status: 'ok' }] };
@@ -31,7 +35,6 @@ require.cache[require.resolve('https')] = {
   },
 };
 
-// ── Stub DB ───────────────────────────────────────────────────
 let tokenRows = [];
 let deletedTokens = [];
 const dbStub = {
@@ -55,26 +58,32 @@ require('module')._load = function (req, parent, isMain) {
 const { sendPushToUser, sendPushToUsers } = require('../services/pushService');
 require('module')._load = origLoad;
 
-describe('pushService — sendPushToUser', () => {
-  it('ne fait rien si l\'utilisateur n\'a pas de token enregistré', async () => {
+if (originalHttpsCache) {
+  require.cache[httpsModulePath] = originalHttpsCache;
+} else {
+  delete require.cache[httpsModulePath];
+}
+
+describe('pushService - sendPushToUser', () => {
+  it("ne fait rien si l'utilisateur n'a pas de token enregistre", async () => {
     httpsSentRequests.length = 0;
     tokenRows = [];
     await sendPushToUser(1, { title: 'Test', body: 'Hello' });
     assert.strictEqual(httpsSentRequests.length, 0);
   });
 
-  it('envoie une requête push si un token existe', async () => {
+  it('envoie une requete push si un token existe', async () => {
     httpsSentRequests.length = 0;
     tokenRows = [{ token: 'ExponentPushToken[test123]' }];
-    await sendPushToUser(1, { title: 'Nouveau message', body: 'Paul vous a écrit', data: { type: 'new_message' } });
+    await sendPushToUser(1, { title: 'Nouveau message', body: 'Paul vous a ecrit', data: { type: 'new_message' } });
     assert.strictEqual(httpsSentRequests.length, 1);
     const msg = httpsSentRequests[0][0];
     assert.strictEqual(msg.to, 'ExponentPushToken[test123]');
     assert.strictEqual(msg.title, 'Nouveau message');
-    assert.strictEqual(msg.channelId, 'messages'); // canal messages pour new_message
+    assert.strictEqual(msg.channelId, 'messages');
   });
 
-  it('utilise le canal "default" pour les autres types', async () => {
+  it('utilise le canal default pour les autres types', async () => {
     httpsSentRequests.length = 0;
     tokenRows = [{ token: 'ExponentPushToken[abc]' }];
     await sendPushToUser(2, { title: 'Alerte', body: 'Nouvelle annonce', data: { type: 'alert' } });
@@ -82,7 +91,7 @@ describe('pushService — sendPushToUser', () => {
     assert.strictEqual(msg.channelId, 'default');
   });
 
-  it('envoie à plusieurs tokens du même utilisateur', async () => {
+  it('envoie a plusieurs tokens du meme utilisateur', async () => {
     httpsSentRequests.length = 0;
     tokenRows = [
       { token: 'ExponentPushToken[ios1]' },
@@ -94,12 +103,11 @@ describe('pushService — sendPushToUser', () => {
   });
 });
 
-describe('pushService — sendPushToUsers', () => {
-  it('envoie à plusieurs utilisateurs', async () => {
+describe('pushService - sendPushToUsers', () => {
+  it('envoie a plusieurs utilisateurs', async () => {
     httpsSentRequests.length = 0;
     tokenRows = [{ token: 'ExponentPushToken[user1]' }];
     await sendPushToUsers([1, 2, 3], { title: 'Broadcast', body: 'Hello all' });
-    // 3 utilisateurs × 1 token chacun (même mock) = 3 requêtes
     assert.strictEqual(httpsSentRequests.length, 3);
   });
 });

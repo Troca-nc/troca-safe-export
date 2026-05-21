@@ -7,6 +7,8 @@
 const assert = require('assert');
 const jwt    = require('jsonwebtoken');
 
+let testChain = Promise.resolve();
+
 // ── Helpers d'assertion ──────────────────────────────────────
 
 function describe(label, fn) {
@@ -15,21 +17,20 @@ function describe(label, fn) {
 }
 
 function it(label, fn) {
-  try {
-    const result = fn();
-    if (result && typeof result.then === 'function') {
-      return result
-        .then(() => console.log(`    ✓ ${label}`))
-        .catch((err) => {
-          console.error(`    ✗ ${label}\n      ${err.message}`);
-          process.exitCode = 1;
-        });
+  testChain = testChain.then(async () => {
+    try {
+      await fn();
+      console.log(`    ✓ ${label}`);
+    } catch (err) {
+      console.error(`    ✗ ${label}\n      ${err.message}`);
+      process.exitCode = 1;
     }
-    console.log(`    ✓ ${label}`);
-  } catch (err) {
-    console.error(`    ✗ ${label}\n      ${err.message}`);
-    process.exitCode = 1;
-  }
+  });
+  return testChain;
+}
+
+function flushTests() {
+  return testChain;
 }
 
 // ── Factories de mock Express ─────────────────────────────────
@@ -63,12 +64,11 @@ function makeReq(overrides = {}) {
 
 // ── Token JWT de test ─────────────────────────────────────────
 
-const TEST_SECRET = process.env.JWT_SECRET || 'dev_secret_change_in_prod';
-
 function makeAccessToken(userId = 1, extra = {}) {
+  const secret = process.env.JWT_SECRET || 'dev_secret_change_in_prod';
   return jwt.sign(
     { sub: userId, type: 'access', ...extra },
-    TEST_SECRET,
+    secret,
     { expiresIn: '1h' }
   );
 }
@@ -124,5 +124,5 @@ function assertError(res, code, msgFragment = '') {
 module.exports = {
   describe, it,
   makeRes, makeReq, makeAuthReq, makeAdminReq, makeQueryMock, makeAccessToken,
-  assertStatus, assertHasKey, assertError,
+  assertStatus, assertHasKey, assertError, flushTests,
 };
