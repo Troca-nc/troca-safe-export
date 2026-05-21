@@ -105,9 +105,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "CHANGEME_eas_project_id"
+        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
       }
     },
-    "owner": "CHANGEME_expo_account"
+    "owner": "REPLACE_WITH_EXPO_OWNER"
   }
 }
