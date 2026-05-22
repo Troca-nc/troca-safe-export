@@ -62,6 +62,8 @@ const INITIAL_DRAFT: WizardDraft = {
   is_free: false,
 }
 
+const PREVIEW_STORAGE_KEY = 'preview_listing'
+
 function makeId() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID()
@@ -356,6 +358,40 @@ export default function PublishWizard() {
 
   const movePhoto = (from: number, to: number) => {
     setPhotos((current) => moveItem(current, from, to))
+  }
+
+  const handlePreview = () => {
+    const validation = validateStep()
+    if (validation) {
+      setError(validation)
+      return
+    }
+
+    if (typeof window === 'undefined') return
+
+    const payload = {
+      draft: {
+        ...draft,
+        title: draft.title.trim(),
+        description: draft.description.trim(),
+      },
+      category_name: selectedCategory?.name ?? null,
+      commune_name: selectedCommune?.name ?? null,
+      photos: photos.map((photo, index) => ({
+        id: photo.id,
+        name: photo.file.name,
+        preview: photo.preview,
+        isPrimary: index === 0,
+      })),
+      updated_at: new Date().toISOString(),
+    }
+
+    try {
+      window.sessionStorage.setItem(PREVIEW_STORAGE_KEY, JSON.stringify(payload))
+      window.open('/annonces/preview', '_blank')
+    } catch {
+      setError('Impossible d’ouvrir la prévisualisation pour le moment.')
+    }
   }
 
   // TODO: test E2E sur le wizard de publication, l'autosave et le mode simple.
@@ -667,6 +703,16 @@ export default function PublishWizard() {
                   {submitting ? 'Publication...' : 'Publier l’annonce'}
                 </button>
               )}
+
+              {draft.step === 3 ? (
+                <button
+                  type="button"
+                  onClick={handlePreview}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-lagoon/25 bg-lagoon/8 px-5 py-3 text-sm font-semibold text-night transition hover:bg-lagoon/12"
+                >
+                  Prévisualiser
+                </button>
+              ) : null}
 
               <button
                 type="button"
