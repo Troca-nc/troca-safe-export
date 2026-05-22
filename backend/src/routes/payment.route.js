@@ -81,6 +81,87 @@ function safePaymentError(provider, fallback) {
   return { error: fallback || `Erreur de paiement${provider ? ` (${provider})` : ''}` };
 }
 
+async function verifyStripeSubscriptionStatus(sessionId, userId) {
+  if (!isConfiguredValue(process.env.STRIPE_SECRET_KEY)) {
+    return { code: 503, body: { status: 'invalid', error: 'STRIPE_SECRET_KEY manquant' } };
+  }
+
+  const session = await stripe.checkout.sessions.retrieve(sessionId, {
+    expand: ['subscription', 'payment_intent'],
+  });
+
+  const { rows: pmtRows } = await query(
+    'SELECT id, type, metadata FROM payments WHERE provider_ref = $1 AND user_id = $2 LIMIT 1',
+    [sessionId, userId]
+  );
+  const payment = pmtRows[0];
+  if (!payment) {
+    return { code: 403, body: { status: 'invalid', error: 'Session non autorisée' } };
+  }
+
+  if (payment.metadata?.payment_type && payment.metadata.payment_type !== 'subscription') {
+    return { code: 403, body: { status: 'invalid', error: 'Type de paiement non cohérent' } };
+  }
+
+  if (session.metadata?.user_id !== String(userId)) {
+    return { code: 403, body: { status: 'invalid', error: 'Session non autorisée' } };
+  }
+
+  if (session.status !== 'complete') {
+    return { code: 200, body: { status: 'pending' } };
+  }
+
+  const sub = session.subscription;
+  if (!sub) {
+    return { code: 400, body: { status: 'invalid', error: 'Abonnement manquant' } };
+  }
+
+  const isTrial = sub?.status === 'trialing';
+  return {
+    code: 200,
+    body: {
+      status: isTrial ? 'ok_trial' : 'ok_subscription',
+      plan: session.metadata?.plan_id ?? null,
+      trial_end: sub?.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null,
+      period_end: sub?.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null,
+      provider: 'stripe',
+    },
+  };
+}
+
+async function verifyPayplugSubscriptionStatus(paymentId, userId) {
+  if (!payplug.isPayPlugConfigured()) {
+    return { code: 503, body: { status: 'invalid', error: 'PayPlug non configuré' } };
+  }
+
+  const resource = await payplug.verifyIPN(String(paymentId), 'subscription');
+  const meta = resource.metadata ?? {};
+  const resourceUserId = Number(meta.user_id ?? 0);
+
+  if (resourceUserId && resourceUserId !== Number(userId)) {
+    return { code: 403, body: { status: 'invalid', error: 'Ressource non autorisée' } };
+  }
+
+  const isActive = resource.is_active ?? resource.state === 'active';
+  if (!isActive) {
+    return { code: 200, body: { status: 'pending' } };
+  }
+
+  const isYearly = meta.billing_period === 'yearly';
+  const periodEnd = new Date();
+  isYearly ? periodEnd.setFullYear(periodEnd.getFullYear() + 1) : periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+  return {
+    code: 200,
+    body: {
+      status: 'ok_subscription',
+      plan: meta.plan_id ?? null,
+      period_end: periodEnd.toISOString(),
+      provider: 'payplug',
+    },
+  };
+}
+
 router.post('/boost/mobile', authenticate, paymentLimiter, validate(boostSchema), async (req, res) => {
   if (!ensureStripe(res)) return;
   const { annonce_id, boost_type, boost_duration } = req.body;
@@ -279,7 +360,7 @@ router.post('/subscription', authenticate, paymentLimiter, validate(subscription
         email: req.user.email,
         first_name: req.user.prenom || 'Client',
         last_name: req.user.nom || 'Troca',
-        return_url: `${baseUrl}/paiement/succes?type=subscription&provider=payplug&pp_sub_id={PAYPLUG_SUBSCRIPTION_ID}`,
+        return_url: `${baseUrl}/abonnement/confirmation?payment_id={PAYPLUG_SUBSCRIPTION_ID}&provider=payplug`,
         cancel_url: `${baseUrl}/paiement/annule?provider=payplug`,
         metadata: {
           payment_type: 'subscription',
@@ -320,7 +401,7 @@ router.post('/subscription', authenticate, paymentLimiter, validate(subscription
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: customerId,
-      success_url: `${baseUrl}/paiement/succes?session_id={CHECKOUT_SESSION_ID}&type=subscription`,
+      success_url: `${baseUrl}/abonnement/confirmation?session_id={CHECKOUT_SESSION_ID}&provider=stripe`,
       cancel_url: `${baseUrl}/paiement/annule`,
       subscription_data: {
         trial_period_days: 14,
@@ -608,6 +689,30 @@ router.get('/billing-documents', authenticate, async (req, res) => {
   } catch (err) {
     console.error('[payment] billing-documents error:', err.message);
     return res.status(500).json({ error: 'Erreur récupération historique de facturation' });
+  }
+});
+
+router.get('/subscriptions/verify', authenticate, paymentLimiter, async (req, res) => {
+  const { session_id: sessionId, payment_id: paymentId } = req.query;
+
+  try {
+    if (sessionId && typeof sessionId === 'string') {
+      const result = await verifyStripeSubscriptionStatus(sessionId, req.user.id);
+      return res.status(result.code).json(result.body);
+    }
+
+    if (paymentId && typeof paymentId === 'string') {
+      const result = await verifyPayplugSubscriptionStatus(paymentId, req.user.id);
+      return res.status(result.code).json(result.body);
+    }
+
+    return res.status(400).json({ status: 'invalid', error: 'Paramètre de paiement manquant' });
+  } catch (err) {
+    if (err?.code === 'PAYPLUG_NOT_CONFIGURED') {
+      return res.status(503).json({ status: 'invalid', error: 'PayPlug non configuré' });
+    }
+    console.error('[payment] subscriptions verify error:', err.message);
+    return res.status(200).json({ status: 'invalid', error: 'Vérification indisponible' });
   }
 });
 
