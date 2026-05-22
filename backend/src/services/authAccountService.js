@@ -234,7 +234,7 @@ async function rotateRefreshToken(userId, oldRefreshToken) {
 
 async function findUserByEmail(email) {
   return query(
-    `SELECT id, email, password_hash, prenom, nom, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at, email_verified, deleted_at
+    `SELECT id, email, password_hash, prenom, nom, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at, email_verified, onboarding_step, deleted_at
      FROM users WHERE email = $1`,
     [normalizeEmail(email)]
   );
@@ -243,7 +243,7 @@ async function findUserByEmail(email) {
 async function findUserById(userId) {
   return query(
     `SELECT id, email, prenom, nom, telephone, phone_verified, email_verified,
-            avatar_url, commune_id, bio, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at,
+            avatar_url, commune_id, bio, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at, onboarding_step,
             nb_annonces, note_moyenne, nb_avis, created_at
      FROM users WHERE id = $1`,
     [userId]
@@ -262,7 +262,7 @@ async function registerAccount({ email, password, prenom, nom, commune_id, accou
     const ins = await client.query(
       `INSERT INTO users (email, password_hash, prenom, nom, commune_id, is_pro, email_verified)
        VALUES ($1, $2, $3, $4, $5, $6, FALSE)
-       RETURNING id, email, prenom, nom, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at, email_verified`,
+       RETURNING id, email, prenom, nom, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at, email_verified, onboarding_step`,
       [normalizedEmail, password_hash, prenom.trim(), nom.trim(), commune_id || null, account_type === 'pro']
     );
     return ins.rows[0];

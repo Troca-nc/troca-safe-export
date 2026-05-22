@@ -11,6 +11,7 @@ import { isAxiosError } from 'axios'
 import { useMutation } from '@tanstack/react-query'
 import { api, messagesApi } from '@/lib/api'
 import { getMessagingSocket, messagingSocket, type SocketConnectionState } from '@/lib/socket'
+import { isDemoMode, showDemoToast } from '@/lib/demoMode'
 import type { Conversation, Message, OfferStatus } from '@/types/messaging.types'
 
 function parseCurrentUserId() {
@@ -260,11 +261,19 @@ export function useConversation(convId: number | null) {
 
   const sendMessage = useCallback(async (content: string): Promise<void> => {
     if (!convId || !content.trim()) return
+    if (isDemoMode()) {
+      showDemoToast('Désactivé en mode démo')
+      return
+    }
     await sendMessageMutation.mutateAsync(content)
   }, [convId, sendMessageMutation])
 
   const sendPhoto = useCallback(async (url: string): Promise<void> => {
     if (!convId) return
+    if (isDemoMode()) {
+      showDemoToast('Désactivé en mode démo')
+      return
+    }
     await sendPhotoMutation.mutateAsync(url)
   }, [convId, sendPhotoMutation])
 

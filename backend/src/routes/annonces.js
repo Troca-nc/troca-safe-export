@@ -17,7 +17,7 @@ const { query, withTransaction } = require('../config/database');
 const { authenticate, optionalAuth, requireAdmin } = require('../middleware/auth');
 const { matchImmediateAlerts } = require('../jobs/scheduler');
 const { rateLimitAnnonces, flagIfSuspicious } = require('../middleware/antiScam');
-const { buildListingSearchContext } = require('../services/listingsQuery');
+const { buildListingSearchContext, encodeListingCursor } = require('../services/listingsQuery');
 const { deletePrefix, getJson, setJson } = require('../services/sharedCache');
 const {
   mapListingSearchRow,
@@ -85,9 +85,10 @@ router.get('/', optionalAuth, async (req, res, next) => {
     const cached = await readListCache(cacheKey);
     if (cached) return res.json(cached);
 
-    const { whereClause, params, orderBy, pageNum, pageSize, offset, geo } = buildListingSearchContext(req.query);
-    const limitPlaceholder = params.length + 1;
-    const offsetPlaceholder = params.length + 2;
+    const { whereClause, params, orderBy, pageNum, pageSize, offset, geo, cursorWhere, cursorParams, sort, sortConfig } = buildListingSearchContext(req.query);
+    const cursorParamCount = cursorParams?.length || 0;
+    const limitPlaceholder = params.length + cursorParamCount + 1;
+    const offsetPlaceholder = params.length + cursorParamCount + 2;
     const distanceSelect = geo?.enabled
       ? `ROUND((
           ST_Distance(
@@ -119,7 +120,9 @@ router.get('/', optionalAuth, async (req, res, next) => {
           a.is_negotiable AS price_negotiable,
           (a.prix IS NULL) AS is_free,
           a.contre_quoi,
-          a.created_at AS published_at,
+       a.created_at AS published_at,
+          a.created_at AS created_at_sort,
+          a.boost_expires_at AS boost_expires_at,
           a.nb_vues,
           a.boost_expires_at AS boosted_until,
           ${distanceSelect},
@@ -146,16 +149,25 @@ router.get('/', optionalAuth, async (req, res, next) => {
        LEFT JOIN communes com ON com.id = a.commune_id
        LEFT JOIN provinces prov ON prov.id = com.province_id
        LEFT JOIN users u ON u.id = a.user_id
-       WHERE ${whereClause}
+       WHERE ${whereClause}${cursorWhere ? ` AND ${cursorWhere}` : ''}
        ORDER BY ${orderBy}
        LIMIT $${limitPlaceholder} OFFSET $${offsetPlaceholder}`,
-      [...params, pageSize, offset]
+      [...params, ...(cursorParams || []), pageSize, offset]
     );
 
     const total = parseInt(countRes.rows[0].total);
+    const lastRow = listRes.rows[listRes.rows.length - 1] || null
+    const nextCursor = lastRow && listRes.rows.length === pageSize
+      ? encodeListingCursor({
+          v: 1,
+          sort,
+          values: sortConfig.tupleFromRow(lastRow),
+        })
+      : null
 
     const payload = {
       data: listRes.rows.map(mapListingSearchRow),
+      nextCursor,
       pagination: {
         total,
         page:  pageNum,

@@ -149,7 +149,7 @@ router.put('/me', authenticate, async (req, res, next) => {
     params.push(req.user.id);
     const result = await query(
       `UPDATE users SET ${fields.join(', ')}, updated_at = NOW() WHERE id = $${p}
-       RETURNING id, email, prenom, nom, bio, commune_id, telephone, avatar_url, is_pro, phone_verified`,
+       RETURNING id, email, prenom, nom, bio, commune_id, telephone, avatar_url, is_pro, phone_verified, onboarding_step`,
       params
     );
 
@@ -158,6 +158,29 @@ router.put('/me', authenticate, async (req, res, next) => {
     next(err);
   }
 });
+
+// ── PATCH /api/users/me/onboarding ── Avancement onboarding ──
+
+router.patch('/me/onboarding', authenticate, async (req, res, next) => {
+  try {
+    const step = Number(req.body?.step ?? req.body?.onboarding_step ?? 0)
+    if (!Number.isFinite(step) || step < 0) {
+      return res.status(400).json({ error: 'Étape d’onboarding invalide.' })
+    }
+
+    const result = await query(
+      `UPDATE users
+       SET onboarding_step = GREATEST(COALESCE(onboarding_step, 0), $2::int), updated_at = NOW()
+       WHERE id = $1
+       RETURNING id, onboarding_step`,
+      [req.user.id, Math.min(3, Math.floor(step))]
+    )
+
+    return res.json({ data: result.rows[0] })
+  } catch (err) {
+    next(err)
+  }
+})
 
 // ── GET /api/users/:id/reviews — Avis reçus ──────────────────
 

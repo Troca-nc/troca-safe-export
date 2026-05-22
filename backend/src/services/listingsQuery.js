@@ -8,6 +8,76 @@ function toFloat(value, fallback) {
   return Number.isNaN(parsed) ? fallback : parsed
 }
 
+function toCursorEpoch(value) {
+  if (!value) return 0
+  const date = new Date(value)
+  const ts = date.getTime()
+  return Number.isNaN(ts) ? 0 : Math.floor(ts / 1000)
+}
+
+function encodeListingCursor(payload) {
+  return Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url')
+}
+
+function decodeListingCursor(token) {
+  if (!token) return null
+  try {
+    const raw = Buffer.from(String(token), 'base64url').toString('utf8')
+    const parsed = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object') return null
+    if (parsed.v !== 1 || typeof parsed.sort !== 'string' || !Array.isArray(parsed.values)) return null
+    return parsed
+  } catch {
+    return null
+  }
+}
+
+function getSortConfig(sort) {
+  switch (sort) {
+    case 'price_asc':
+      return {
+        orderBy: '-COALESCE(a.prix, 999999999) ASC, -EXTRACT(EPOCH FROM a.created_at) ASC, -a.id ASC',
+        tupleSql: ['COALESCE(a.prix, 999999999)', '-EXTRACT(EPOCH FROM a.created_at)', '-a.id'],
+        tupleFromRow: (row) => [
+          Number(row.prix ?? row.price ?? 999999999),
+          -toCursorEpoch(row.published_at ?? row.created_at),
+          -Number(row.id),
+        ],
+      }
+    case 'price_desc':
+      return {
+        orderBy: '-COALESCE(a.prix, 0) ASC, -EXTRACT(EPOCH FROM a.created_at) ASC, -a.id ASC',
+        tupleSql: ['-COALESCE(a.prix, 0)', '-EXTRACT(EPOCH FROM a.created_at)', '-a.id'],
+        tupleFromRow: (row) => [
+          -Number(row.prix ?? row.price ?? 0),
+          -toCursorEpoch(row.published_at ?? row.created_at),
+          -Number(row.id),
+        ],
+      }
+    case 'views':
+      return {
+        orderBy: '-COALESCE(a.nb_vues, 0) ASC, -EXTRACT(EPOCH FROM a.created_at) ASC, -a.id ASC',
+        tupleSql: ['-COALESCE(a.nb_vues, 0)', '-EXTRACT(EPOCH FROM a.created_at)', '-a.id'],
+        tupleFromRow: (row) => [
+          -Number(row.nb_vues ?? 0),
+          -toCursorEpoch(row.published_at ?? row.created_at),
+          -Number(row.id),
+        ],
+      }
+    case 'date':
+    default:
+      return {
+        orderBy: '-COALESCE(EXTRACT(EPOCH FROM a.boost_expires_at), 0) ASC, -EXTRACT(EPOCH FROM a.created_at) ASC, -a.id ASC',
+        tupleSql: ['-COALESCE(EXTRACT(EPOCH FROM a.boost_expires_at), 0)', '-EXTRACT(EPOCH FROM a.created_at)', '-a.id'],
+        tupleFromRow: (row) => [
+          -toCursorEpoch(row.boosted_until ?? row.boost_expires_at),
+          -toCursorEpoch(row.published_at ?? row.created_at),
+          -Number(row.id),
+        ],
+      }
+  }
+}
+
 function buildListingSearchContext(rawQuery = {}) {
   const {
     q,
@@ -25,6 +95,7 @@ function buildListingSearchContext(rawQuery = {}) {
     sort = 'date',
     page = 1,
     limit = 20,
+    after,
   } = rawQuery
 
   const pageNum = Math.max(1, toInt(page, 1))
@@ -37,6 +108,9 @@ function buildListingSearchContext(rawQuery = {}) {
   const hasGeo = Number.isFinite(toFloat(lat, NaN)) && Number.isFinite(toFloat(lng, NaN))
   const radiusKm = Math.min(100, Math.max(5, toFloat(radius, 20)))
   let geo = null
+  const sortConfig = getSortConfig(sort)
+  const decodedCursor = decodeListingCursor(after)
+  const cursorValues = decodedCursor?.sort === sort ? decodedCursor.values : null
 
   if (q) {
     conditions.push(
@@ -113,24 +187,30 @@ function buildListingSearchContext(rawQuery = {}) {
     p += 3
   }
 
-  const sortMap = {
-    date: 'a.boost_expires_at DESC NULLS LAST, a.created_at DESC',
-    price_asc: 'a.prix ASC',
-    price_desc: 'a.prix DESC',
-    views: 'a.nb_vues DESC',
-  }
+  const cursorWhere = cursorValues && cursorValues.length === 3
+    ? `(${sortConfig.tupleSql.join(', ')}) > ($${p}, $${p + 1}, $${p + 2})`
+    : ''
+  const cursorParams = cursorValues && cursorValues.length === 3 ? cursorValues : []
 
   return {
     whereClause: conditions.join(' AND '),
     params,
-    orderBy: sortMap[sort] || sortMap.date,
+    orderBy: sortConfig.orderBy,
+    cursorWhere,
+    cursorParams,
+    sort,
     pageNum,
     pageSize,
     offset,
     geo,
+    sortConfig,
+    cursorValues,
   }
 }
 
 module.exports = {
   buildListingSearchContext,
+  decodeListingCursor,
+  encodeListingCursor,
+  getSortConfig,
 }

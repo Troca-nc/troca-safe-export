@@ -9,6 +9,8 @@ interface User {
   email: string
   first_name: string
   last_name: string
+  prenom?: string
+  nom?: string
   avatar_url: string | null
   is_verified: boolean
   is_pro: boolean
@@ -17,6 +19,7 @@ interface User {
   commune_name?: string
   demo_role?: string
   pro_plan?: 'pro' | 'pro_plus'
+  onboarding_step?: number
 }
 
 export type DemoProfileKey = 'visitor' | 'particulier' | 'pro' | 'bon_plan'

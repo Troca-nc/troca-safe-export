@@ -4,6 +4,7 @@ import { useState } from 'react'
 import axios from 'axios'
 import { trackEvent } from '@/lib/analytics'
 import { API_ORIGIN } from '@/lib/api'
+import { isDemoMode, showDemoToast } from '@/lib/demoMode'
 
 function getToken(): string {
   if (typeof window === 'undefined') return ''
@@ -31,6 +32,13 @@ export function useBoostPayment() {
     setLoading(true)
     setError(null)
     try {
+      if (isDemoMode()) {
+        showDemoToast('Désactivé en mode démo')
+        const msg = 'Désactivé en mode démo'
+        setError(msg)
+        return { ok: false, error: msg }
+      }
+
       void trackEvent('checkout_start', {
         offer_type: 'boost',
         boost_type: payload.boost_type,
@@ -75,6 +83,13 @@ export function useSubscription() {
     setLoading(true)
     setError(null)
     try {
+      if (isDemoMode()) {
+        showDemoToast('Désactivé en mode démo')
+        const msg = 'Désactivé en mode démo'
+        setError(msg)
+        return { ok: false, error: msg }
+      }
+
       void trackEvent('checkout_start', {
         offer_type: 'subscription',
         plan_id: payload.plan_id,
@@ -103,6 +118,13 @@ export function useSubscription() {
     setLoading(true)
     setError(null)
     try {
+      if (isDemoMode()) {
+        showDemoToast('Désactivé en mode démo')
+        const msg = 'Désactivé en mode démo'
+        setError(msg)
+        return { ok: false, error: msg }
+      }
+
       await axios.post(
         `${API_ORIGIN}/api/payment/cancel`,
         {},

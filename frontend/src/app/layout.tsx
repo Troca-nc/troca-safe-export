@@ -10,6 +10,8 @@ import { ThemeProvider } from '@/components/ui/ThemeProvider'
 import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider'
 import PaymentFailureBanner from '@/components/PaymentFailureBanner'
 import AuthRequiredModal from '@/components/auth/AuthRequiredModal'
+import DemoBanner from '@/components/DemoBanner'
+import OnboardingWizard from '@/components/OnboardingWizard'
 import { SITE_URL } from '@/types/seo.types'
 
 export const metadata: Metadata = {
@@ -43,8 +45,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <JsonLd data={buildOrganizationSchema()} />
             <JsonLd data={buildWebSiteSchema()} />
             <AnalyticsTracker />
+            <DemoBanner />
             <PaymentFailureBanner />
             <AuthRequiredModal />
+            <OnboardingWizard />
             {children}
             <Footer />
             <MobileBottomNav />

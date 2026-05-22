@@ -5,6 +5,7 @@ import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig, type Axio
 
 import { rememberRedirectAfterLogin } from '@/lib/authRedirect'
 import { requestDraftSave } from '@/lib/draftEvents'
+import { isDemoMode, showDemoToast } from '@/lib/demoMode'
 
 function normalizeApiBase(url: string) {
   const trimmed = url.trim().replace(/\/+$/, '')
@@ -80,6 +81,16 @@ function toCachedResponse<T>(response: AxiosResponse<T>): CachedResponse<T> {
     headers: response.headers,
     config: response.config,
   }
+}
+
+function createDemoResponse<T>(data: T): AxiosResponse<T> {
+  return {
+    data,
+    status: 200,
+    statusText: 'OK',
+    headers: {},
+    config: {} as AxiosRequestConfig,
+  } as AxiosResponse<T>
 }
 
 function buildCacheKey(scope: string, url: string, params?: unknown, extra?: unknown) {
@@ -325,11 +336,44 @@ export const messagesApi = {
     () => api.get(`/messages/conversations/${convId}`, { params: { page, limit, before: before || undefined } }),
     CACHE_TTL.short,
   ),
-  startConversation: (data: object) => api.post('/messages/conversations', data),
-  sendMessage: (convId: string, content: string) =>
-    api.post(`/messages/conversations/${convId}`, { content }),
-  sendPhoto: (convId: string, photo_url: string) =>
-    api.post(`/messages/conversations/${convId}`, { type: 'photo', photo_url }),
+  startConversation: (data: object) => {
+    if (isDemoMode()) {
+      showDemoToast('Désactivé en mode démo')
+      return Promise.resolve(createDemoResponse({ data: { id: 'demo-conversation', ...data } }))
+    }
+    return api.post('/messages/conversations', data)
+  },
+  sendMessage: (convId: string, content: string) => {
+    if (isDemoMode()) {
+      showDemoToast('Désactivé en mode démo')
+      return Promise.resolve(createDemoResponse({
+        data: {
+          id: `demo-message-${Date.now()}`,
+          conv_id: convId,
+          content,
+          created_at: new Date().toISOString(),
+          sender_id: 0,
+        },
+      }))
+    }
+    return api.post(`/messages/conversations/${convId}`, { content })
+  },
+  sendPhoto: (convId: string, photo_url: string) => {
+    if (isDemoMode()) {
+      showDemoToast('Désactivé en mode démo')
+      return Promise.resolve(createDemoResponse({
+        data: {
+          id: `demo-photo-${Date.now()}`,
+          conv_id: convId,
+          type: 'photo',
+          photo_url,
+          created_at: new Date().toISOString(),
+          sender_id: 0,
+        },
+      }))
+    }
+    return api.post(`/messages/conversations/${convId}`, { type: 'photo', photo_url })
+  },
   markConversationRead: (convId: string | number) =>
     api.patch(`/messages/conversations/${convId}/read`),
 }
