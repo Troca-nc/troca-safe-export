@@ -7,6 +7,8 @@ import { ArrowLeft, CalendarDays, Clock3, MapPin, Sparkles } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
 import { bonPlansApi, metaApi } from '@/lib/api'
+import { useAutosave, useBeforeUnload } from '@/hooks/useAutosave'
+import { useAuthStore } from '@/store/authStore'
 
 type CommuneOption = {
   id: number
@@ -69,6 +71,7 @@ function formatPrice(value: number) {
 
 export default function NewListingPage() {
   const router = useRouter()
+  const userId = useAuthStore((state) => state.user?.id ?? 'guest')
   const [communces, setCommunces] = useState<CommuneOption[]>([])
   const [loadingCommunes, setLoadingCommunes] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -76,6 +79,9 @@ export default function NewListingPage() {
   const [successMessage, setSuccessMessage] = useState('')
   const [createdId, setCreatedId] = useState<number | null>(null)
   const [form, setForm] = useState<FormState>(INITIAL_FORM)
+  const autosave = useAutosave(`draft_listing_${userId}`, form, 30_000)
+
+  useBeforeUnload(autosave.isDirty && !submitting)
 
   useEffect(() => {
     let alive = true
@@ -171,6 +177,11 @@ export default function NewListingPage() {
           : 'Bon plan publié avec succès.'
       )
       setForm(INITIAL_FORM)
+      try {
+        autosave.clearDraft()
+      } catch {
+        // Ignore localStorage issues after a successful publish.
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (err: any) {
       setError(
@@ -181,6 +192,19 @@ export default function NewListingPage() {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  const restoreDraft = () => {
+    const draft = autosave.pendingDraft
+    if (!draft) return
+    setForm(draft.data)
+    setError('')
+    setSuccessMessage('')
+    autosave.acceptDraft(draft)
+  }
+
+  const ignoreDraft = () => {
+    autosave.discardDraft()
   }
 
   return (
@@ -204,6 +228,36 @@ export default function NewListingPage() {
             Retour
           </Link>
         </div>
+
+        {autosave.pendingDraft ? (
+          <div className="mb-6 rounded-[1.5rem] border border-lagoon/20 bg-lagoon/8 p-4 text-night shadow-sm">
+            {/* TODO: test E2E */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold">Brouillon restaure</p>
+                <p className="mt-1 text-sm text-night/70">
+                  Brouillon restaure {autosave.draftAgeLabel ? `- ${autosave.draftAgeLabel}` : ''}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={restoreDraft}
+                  className="rounded-2xl bg-night px-4 py-2 text-sm font-semibold text-white transition hover:bg-night/90"
+                >
+                  Restaurer
+                </button>
+                <button
+                  type="button"
+                  onClick={ignoreDraft}
+                  className="rounded-2xl border border-night/10 bg-white px-4 py-2 text-sm font-semibold text-night transition hover:bg-sand"
+                >
+                  Ignorer
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         {successMessage ? (
           <div className="mb-6 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-5 text-emerald-900">

@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
@@ -11,6 +11,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { metaApi } from '@/lib/api';
+import { useAutosave } from '@/hooks/useAutosave';
 import { Colors, FontSize, FontWeight, Radius, Spacing } from '@/constants/theme';
 import { MOBILE_FALLBACK_CATEGORIES } from '@/lib/categoryCatalog';
 import { publishListing } from '@/lib/publishListing';
@@ -45,6 +46,10 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 type Commune = PublishCommune;
+type PublishDraft = {
+  form: FormData;
+  photos: string[];
+};
 
 export default function PublierScreen() {
   const [photos, setPhotos] = useState<string[]>([]);
@@ -56,6 +61,7 @@ export default function PublierScreen() {
   const {
     control,
     handleSubmit,
+    reset,
     setValue,
     watch,
     formState: { errors },
@@ -63,6 +69,9 @@ export default function PublierScreen() {
     resolver: zodResolver(schema),
     defaultValues: { condition: 'good' },
   });
+
+  const watchedForm = watch();
+  const autosave = useAutosave<PublishDraft>('draft_listing', { form: watchedForm, photos }, 30_000);
 
   const selectedCategory = watch('category_id');
   const selectedCommune = watch('commune_id');
@@ -86,7 +95,7 @@ export default function PublierScreen() {
       .getCommunes()
       .then(({ data }) => {
         const provinces = Array.isArray(data.data) ? data.data : [];
-        const flat = provinces.flatMap((province: any) => province.communes ?? []);
+        const flat = provinces.flatMap((province: { communes?: Commune[] }) => province.communes ?? []);
         setCommunes(flat);
       })
       .catch(() => {
@@ -133,6 +142,7 @@ export default function PublierScreen() {
     setLoading(true);
     try {
       await publishListing(data, photos);
+      await autosave.clearDraft().catch(() => undefined);
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert('Annonce publiee !', 'Votre annonce est en ligne.', [
@@ -146,11 +156,41 @@ export default function PublierScreen() {
     }
   };
 
+  const restoreDraft = () => {
+    const draft = autosave.pendingDraft
+    if (!draft) return
+    reset(draft.data.form)
+    setPhotos(draft.data.photos)
+    autosave.acceptDraft(draft)
+  }
+
+  const ignoreDraft = () => {
+    void autosave.discardDraft()
+  }
+
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <View style={styles.header}>
         <Text style={styles.title}>Publier une annonce</Text>
       </View>
+
+      {autosave.pendingDraft ? (
+        <View style={styles.draftBanner}>
+          {/* TODO: test E2E */}
+          <Text style={styles.draftTitle}>Brouillon restaure</Text>
+          <Text style={styles.draftText}>
+            Brouillon restaure{autosave.draftAgeLabel ? ` - ${autosave.draftAgeLabel}` : ''}
+          </Text>
+          <View style={styles.draftActions}>
+            <TouchableOpacity style={styles.draftPrimary} onPress={restoreDraft} accessibilityRole="button">
+              <Text style={styles.draftPrimaryText}>Restaurer</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.draftSecondary} onPress={ignoreDraft} accessibilityRole="button">
+              <Text style={styles.draftSecondaryText}>Ignorer</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : null}
 
       <PhotoSection photos={photos} onAdd={pickPhoto} onRemove={removePhoto} />
 
@@ -239,4 +279,37 @@ const styles = StyleSheet.create({
   title: { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.text },
   section: { backgroundColor: Colors.white, marginTop: Spacing.sm, padding: Spacing.lg },
   sectionTitle: { fontSize: FontSize.md, fontWeight: FontWeight.semibold, color: Colors.text, marginBottom: 4 },
+  draftBanner: {
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.md,
+    marginBottom: Spacing.sm,
+    padding: Spacing.lg,
+    borderRadius: Radius.lg,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  draftTitle: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.text },
+  draftText: { marginTop: 4, fontSize: FontSize.sm, color: Colors.textSecondary },
+  draftActions: { flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.md },
+  draftPrimary: {
+    flex: 1,
+    minHeight: 44,
+    borderRadius: Radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary,
+  },
+  draftPrimaryText: { color: Colors.white, fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
+  draftSecondary: {
+    flex: 1,
+    minHeight: 44,
+    borderRadius: Radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.gray50,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  draftSecondaryText: { color: Colors.text, fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
 });
