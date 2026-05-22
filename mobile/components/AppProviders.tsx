@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
-import { useState } from 'react';
 import { Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { PushPermissionPrompt } from '@/components/PushPermissionPrompt';
+import { OfflineBanner } from '@/components/OfflineBanner';
+import { queryClient, useOfflineStatus } from '@/lib/queryClient';
 
 type AppProvidersProps = {
   children: ReactNode;
@@ -12,23 +13,11 @@ type AppProvidersProps = {
 export function AppProviders({ children }: AppProvidersProps) {
   const stripeEnabled = Platform.OS !== 'web';
   const StripeProvider = stripeEnabled ? require('@stripe/stripe-react-native').StripeProvider : null;
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 30_000,
-            retry: 1,
-          },
-          mutations: {
-            retry: 0,
-          },
-        },
-      })
-  );
+  const offline = useOfflineStatus();
 
   const content = (
     <QueryClientProvider client={queryClient}>
+      {offline ? <OfflineBanner /> : null}
       <StatusBar style="auto" />
       {children}
       <PushPermissionPrompt />

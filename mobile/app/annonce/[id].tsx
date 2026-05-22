@@ -17,6 +17,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { api, listingsApi, usersApi } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
+import { recordRecentlyViewedListing } from '@/lib/queryClient';
 import { useFavorite } from '@/hooks/useFavorite';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import {
@@ -91,7 +92,7 @@ export default function AnnonceDetail() {
 
     api
       .get(`/listings/${id}`)
-      .then(({ data }) => {
+        .then(({ data }) => {
         const detail = data.data ?? data;
         const mergedUser = detail.user
           ? {
@@ -105,6 +106,7 @@ export default function AnnonceDetail() {
 
         setAnnonce({ ...detail, user: mergedUser ?? detail.user });
         setFavorited(Boolean(detail.is_favorited));
+        recordRecentlyViewedListing(detail);
       })
       .catch(() => {
         Alert.alert('Erreur', 'Annonce introuvable');

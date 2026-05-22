@@ -9,6 +9,7 @@ import { router } from 'expo-router'
 import { tokenStorage } from '@/lib/tokenStorage'
 import { requestDraftSave } from '@/lib/draftEvents'
 import { rememberRedirectAfterLogin } from '@/lib/authRedirect'
+import { cacheListingQuery } from '@/lib/queryClient'
 
 export { tokenStorage } from '@/lib/tokenStorage'
 
@@ -143,9 +144,21 @@ export const metaApi = {
 }
 
 export const listingsApi = {
-  search: (params: object = {}) => cachedGet('listings.search', '/listings', () => api.get('/listings', { params }), params, CACHE_TTL.medium),
-  getById: (id: string) => cachedGet('listings.getById', `/listings/${id}`, () => api.get(`/listings/${id}`), undefined, CACHE_TTL.short),
-  getUserListings: (id: string, params: object = {}) => cachedGet('listings.getUserListings', `/listings/user/${id}`, () => api.get(`/listings/user/${id}`, { params }), params, CACHE_TTL.short),
+  search: (params: object = {}) => cachedGet('listings.search', '/listings', () => api.get('/listings', { params }), params, CACHE_TTL.medium)
+    .then((response) => {
+      cacheListingQuery('search', params, response.data)
+      return response
+    }),
+  getById: (id: string) => cachedGet('listings.getById', `/listings/${id}`, () => api.get(`/listings/${id}`), undefined, CACHE_TTL.short)
+    .then((response) => {
+      cacheListingQuery('detail', id, response.data)
+      return response
+    }),
+  getUserListings: (id: string, params: object = {}) => cachedGet('listings.getUserListings', `/listings/user/${id}`, () => api.get(`/listings/user/${id}`, { params }), params, CACHE_TTL.short)
+    .then((response) => {
+      cacheListingQuery('user', { id, params }, response.data)
+      return response
+    }),
   create: async (data: object) => {
     const res = await api.post('/listings', data)
     invalidateApiCache('listings.')

@@ -3,10 +3,11 @@
 // ============================================================
 
 import {
-  View, Text, FlatList, TextInput, TouchableOpacity, ScrollView,
+  View, Text, FlatList, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform,
   StyleSheet, RefreshControl, Image,
 } from 'react-native';
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { listingsApi, metaApi } from '@/lib/api';
@@ -14,6 +15,7 @@ import { useAuthStore } from '@/store/authStore';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '@/constants/theme';
 import { MOBILE_FALLBACK_CATEGORIES } from '@/lib/categoryCatalog';
 import { ListingSkeletonList } from '@/components/ListingSkeleton';
+import { getRecentlyViewedListings, type RecentlyViewedListing } from '@/lib/queryClient';
 
 interface Annonce {
   id: string;
@@ -43,6 +45,7 @@ export default function AccueilScreen() {
   const [categorie, setCategorie] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedListing[]>([]);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firstRun = useRef(true);
   const visibleCategories = categories.length > 0 ? categories : MOBILE_FALLBACK_CATEGORIES;
@@ -114,6 +117,12 @@ export default function AccueilScreen() {
       });
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      setRecentlyViewed(getRecentlyViewedListings());
+    }, [])
+  );
+
   const onRefresh = () => {
     setRefreshing(true);
     setPage(1);
@@ -164,7 +173,8 @@ export default function AccueilScreen() {
   );
 
   return (
-    <View style={styles.root}>
+    <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <View style={styles.rootContent}>
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>Bonjour {user?.prenom} 👋</Text>
@@ -198,6 +208,37 @@ export default function AccueilScreen() {
           clearButtonMode="while-editing"
         />
       </View>
+
+      {recentlyViewed.length > 0 && (
+        <View style={styles.recentSection}>
+          <View style={styles.sectionTitleRow}>
+            <Text style={styles.sectionTitle}>Vus récemment</Text>
+            <Text style={styles.sectionCount}>{recentlyViewed.length}</Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.recentRow}>
+            {recentlyViewed.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={styles.recentCard}
+                onPress={() => router.push(`/annonce/${item.id}`)}
+              >
+                {item.image_url ? (
+                  <Image source={{ uri: item.image_url }} style={styles.recentImage} resizeMode="cover" />
+                ) : (
+                  <View style={[styles.recentImage, styles.recentImagePlaceholder]}>
+                    <Ionicons name="image-outline" size={22} color={Colors.gray300} />
+                  </View>
+                )}
+                <Text style={styles.recentTitle} numberOfLines={2}>{item.title}</Text>
+                <Text style={styles.recentPrice}>
+                  {item.price != null ? `${Number(item.price).toLocaleString('fr-NC')} XPF` : 'Prix à débattre'}
+                </Text>
+                {item.commune ? <Text style={styles.recentCommune} numberOfLines={1}>{item.commune}</Text> : null}
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
 
       <FlatList
         data={annonces}
@@ -263,12 +304,14 @@ export default function AccueilScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />
         }
       />
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.background },
+  rootContent: { flex: 1, backgroundColor: Colors.background },
   header: { backgroundColor: Colors.primary, paddingTop: 56, paddingBottom: Spacing.lg, paddingHorizontal: Spacing.lg },
   quickLinks: { marginTop: 14, flexDirection: 'row', flexWrap: 'wrap', gap: 10, alignItems: 'flex-start' },
   rideShortcut: { marginTop: 14, flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', backgroundColor: Colors.white, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8 },
@@ -306,6 +349,17 @@ const styles = StyleSheet.create({
   cardPrice: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.primary, marginTop: 4 },
   cardMeta: { flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 2, flexWrap: 'wrap' },
   cardMetaText: { fontSize: FontSize.xs, color: Colors.textTertiary, flexShrink: 1 },
+  recentSection: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.md, paddingBottom: Spacing.sm },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.sm },
+  sectionTitle: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.text },
+  sectionCount: { fontSize: FontSize.xs, color: Colors.textTertiary },
+  recentRow: { gap: Spacing.sm, paddingRight: Spacing.lg },
+  recentCard: { width: 160, backgroundColor: Colors.white, borderRadius: Radius.lg, padding: Spacing.sm, ...Shadow.sm },
+  recentImage: { width: '100%', height: 96, borderRadius: Radius.md, marginBottom: Spacing.sm },
+  recentImagePlaceholder: { backgroundColor: Colors.gray100, alignItems: 'center', justifyContent: 'center' },
+  recentTitle: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold, color: Colors.text, lineHeight: 18 },
+  recentPrice: { marginTop: 4, fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.primary },
+  recentCommune: { marginTop: 2, fontSize: FontSize.xs, color: Colors.textTertiary },
   proBadge: { backgroundColor: Colors.warning, borderRadius: 4, paddingHorizontal: 4, paddingVertical: 1 },
   proText: { fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white },
   trustBadge: { backgroundColor: Colors.white, borderRadius: 999, paddingHorizontal: 5, paddingVertical: 1, flexDirection: 'row', alignItems: 'center', gap: 2, ...Shadow.sm },
