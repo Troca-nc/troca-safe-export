@@ -1,7 +1,7 @@
 // src/lib/api.ts
 // Client HTTP centralise avec cache GET leger et refresh token automatique
 
-import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
+import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig, type AxiosRequestConfig } from 'axios'
 
 import { rememberRedirectAfterLogin } from '@/lib/authRedirect'
 import { requestDraftSave } from '@/lib/draftEvents'
@@ -288,11 +288,12 @@ export const listingsApi = {
 
 // Upload
 export const uploadApi = {
-  uploadImages: (listingId: string, files: File[]) => {
+  uploadImages: (listingId: string, files: File[], config?: Pick<AxiosRequestConfig, 'onUploadProgress'>) => {
     const form = new FormData()
     files.forEach((f) => form.append('images', f))
     return api.post(`/upload/listing/${listingId}`, form, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      ...config,
     })
   },
   uploadChatPhoto: (file: File) => {

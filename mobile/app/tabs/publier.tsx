@@ -2,28 +2,30 @@
 //  Troca Mobile - Onglet Publier une annonce
 // ============================================================
 
-import { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { router } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
-import * as Haptics from 'expo-haptics';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { metaApi } from '@/lib/api';
-import { useAutosave } from '@/hooks/useAutosave';
-import { Colors, FontSize, FontWeight, Radius, Spacing } from '@/constants/theme';
-import { MOBILE_FALLBACK_CATEGORIES } from '@/lib/categoryCatalog';
-import { publishListing } from '@/lib/publishListing';
+import { useEffect, useMemo, useState } from 'react'
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { router } from 'expo-router'
+import * as ImagePicker from 'expo-image-picker'
+import * as Haptics from 'expo-haptics'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+
+import { Colors, FontSize, FontWeight, Radius, Spacing } from '@/constants/theme'
+import { MOBILE_FALLBACK_CATEGORIES } from '@/lib/categoryCatalog'
+import { metaApi } from '@/lib/api'
+import { useAutosave } from '@/hooks/useAutosave'
+import { useImageUpload } from '@/hooks/useImageUpload'
+import { createListing } from '@/lib/publishListing'
+import ImageUploader from '@/components/ImageUploader'
 import {
   CategoriesSection,
   ChipsSection,
-  PhotoSection,
+  ControlledInputSection,
   PublishCategory,
   PublishCommune,
   SubmitButton,
-  ControlledInputSection,
-} from '@/components/publier/PublishFormSections';
+} from '@/components/publier/PublishFormSections'
 
 const CONDITIONS = [
   { value: 'new', label: 'Neuf' },
@@ -31,7 +33,7 @@ const CONDITIONS = [
   { value: 'good', label: 'Bon etat' },
   { value: 'fair', label: 'Etat correct' },
   { value: 'for_parts', label: 'Pour pieces' },
-] as const;
+] as const
 
 const schema = z.object({
   titre: z.string().min(5, 'Minimum 5 caracteres').max(150),
@@ -41,22 +43,23 @@ const schema = z.object({
   commune_id: z.number({ required_error: 'Choisissez une commune' }),
   condition: z.enum(['new', 'like_new', 'good', 'fair', 'for_parts']),
   contre_quoi: z.string().max(200).optional(),
-});
+})
 
-type FormData = z.infer<typeof schema>;
+type FormData = z.infer<typeof schema>
 
-type Commune = PublishCommune;
+type Commune = PublishCommune
 type PublishDraft = {
-  form: FormData;
-  photos: string[];
-};
+  form: FormData
+  photos: string[]
+}
 
 export default function PublierScreen() {
-  const [photos, setPhotos] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<PublishCategory[]>([]);
-  const [communes, setCommunes] = useState<Commune[]>([]);
-  const [communesLoading, setCommunesLoading] = useState(true);
+  const [loading, setLoading] = useState(false)
+  const [listingId, setListingId] = useState<string | number | null>(null)
+  const [categories, setCategories] = useState<PublishCategory[]>([])
+  const [communes, setCommunes] = useState<Commune[]>([])
+  const [communesLoading, setCommunesLoading] = useState(true)
+  const imageUpload = useImageUpload()
 
   const {
     control,
@@ -68,99 +71,143 @@ export default function PublierScreen() {
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { condition: 'good' },
-  });
+  })
 
-  const watchedForm = watch();
-  const autosave = useAutosave<PublishDraft>('draft_listing', { form: watchedForm, photos }, 30_000);
+  const watchedForm = watch()
+  const draftPhotos = useMemo(() => imageUpload.items.map((item) => item.uri), [imageUpload.items])
+  const autosave = useAutosave<PublishDraft>('draft_listing', { form: watchedForm, photos: draftPhotos }, 30_000)
 
-  const selectedCategory = watch('category_id');
-  const selectedCommune = watch('commune_id');
-  const selectedCondition = watch('condition');
-  const visibleCategories = categories.length > 0 ? categories : (MOBILE_FALLBACK_CATEGORIES as PublishCategory[]);
+  const selectedCategory = watch('category_id')
+  const selectedCommune = watch('commune_id')
+  const selectedCondition = watch('condition')
+  const visibleCategories = categories.length > 0 ? categories : (MOBILE_FALLBACK_CATEGORIES as PublishCategory[])
 
   useEffect(() => {
     metaApi
       .getCategories()
       .then(({ data }) => {
-        const raw = Array.isArray(data.data) ? data.data : [];
-        setCategories(raw);
+        const raw = Array.isArray(data.data) ? data.data : []
+        setCategories(raw)
       })
       .catch(() => {
-        setCategories(MOBILE_FALLBACK_CATEGORIES as PublishCategory[]);
-      });
-  }, []);
+        setCategories(MOBILE_FALLBACK_CATEGORIES as PublishCategory[])
+      })
+  }, [])
 
   useEffect(() => {
     metaApi
       .getCommunes()
       .then(({ data }) => {
-        const provinces = Array.isArray(data.data) ? data.data : [];
-        const flat = provinces.flatMap((province: { communes?: Commune[] }) => province.communes ?? []);
-        setCommunes(flat);
+        const provinces = Array.isArray(data.data) ? data.data : []
+        const flat = provinces.flatMap((province: { communes?: Commune[] }) => province.communes ?? [])
+        setCommunes(flat)
       })
       .catch(() => {
-        Alert.alert('Erreur', 'Impossible de charger les communes');
+        Alert.alert('Erreur', 'Impossible de charger les communes')
       })
-      .finally(() => setCommunesLoading(false));
-  }, []);
+      .finally(() => setCommunesLoading(false))
+  }, [])
 
+  // TODO: test E2E sur le flux upload d'images, retry individuel et réordonnancement.
   const pickPhoto = async () => {
-    if (photos.length >= 8) {
-      Alert.alert('Maximum 8 photos');
-      return;
+    if (imageUpload.items.length >= 8) {
+      Alert.alert('Maximum 8 photos')
+      return
     }
 
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync()
     if (!perm.granted) {
-      Alert.alert('Permission refusee', "Autorisez l'acces aux photos dans les reglages.");
-      return;
+      Alert.alert('Permission refusee', "Autorisez l'acces aux photos dans les reglages.")
+      return
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
-      selectionLimit: 8 - photos.length,
+      selectionLimit: 8 - imageUpload.items.length,
       quality: 0.8,
-    });
+    })
 
     if (!result.canceled) {
-      setPhotos((prev) => [...prev, ...result.assets.map((a) => a.uri)].slice(0, 8));
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      imageUpload.addPhotos(result.assets.map((asset) => asset.uri))
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
     }
-  };
+  }
 
   const removePhoto = (idx: number) => {
-    setPhotos((prev) => prev.filter((_, i) => i !== idx));
-  };
+    imageUpload.removeImage(idx)
+  }
+
+  const finalizePublication = async () => {
+    await autosave.clearDraft().catch(() => undefined)
+    imageUpload.resetUploads()
+    setListingId(null)
+
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+    Alert.alert('Annonce publiee !', 'Votre annonce est en ligne.', [
+      { text: 'Voir mes annonces', onPress: () => router.push('/profil') },
+      { text: 'Accueil', onPress: () => router.push('/tabs/accueil') },
+    ])
+  }
+
+  const uploadPendingPhotos = async (currentListingId: string | number) => {
+    const uploadResult = await imageUpload.uploadQueued(currentListingId)
+    if (uploadResult.hasErrors) {
+      Alert.alert(
+        'Certaines photos ont échoué',
+        'Vous pouvez réessayer individuellement sans perdre le brouillon.',
+      )
+      return false
+    }
+
+    await finalizePublication()
+    return true
+  }
 
   const onSubmit = async (data: FormData) => {
-    if (photos.length === 0) {
-      Alert.alert('Photos requises', 'Ajoutez au moins une photo a votre annonce.');
-      return;
+    if (imageUpload.items.length === 0) {
+      Alert.alert('Photos requises', 'Ajoutez au moins une photo a votre annonce.')
+      return
     }
 
-    setLoading(true);
+    setLoading(true)
     try {
-      await publishListing(data, photos);
-      await autosave.clearDraft().catch(() => undefined);
+      let currentListingId = listingId
+      if (currentListingId == null) {
+        const created = await createListing(data)
+        currentListingId = created.id
+        setListingId(currentListingId)
+      }
 
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert('Annonce publiee !', 'Votre annonce est en ligne.', [
-        { text: 'Voir mes annonces', onPress: () => router.push('/profil') },
-        { text: 'Accueil', onPress: () => router.push('/tabs/accueil') },
-      ]);
-    } catch (err: any) {
-      Alert.alert('Erreur', err?.response?.data?.error ?? "Impossible de publier l'annonce");
+      await uploadPendingPhotos(currentListingId)
+    } catch (err: unknown) {
+      const responseError = err as { response?: { data?: { error?: string } } }
+      Alert.alert('Erreur', responseError?.response?.data?.error ?? "Impossible de publier l'annonce")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
+
+  const retryPhoto = async (index: number) => {
+    imageUpload.queueRetry(index)
+
+    if (listingId == null) {
+      return
+    }
+
+    setLoading(true)
+    try {
+      await uploadPendingPhotos(listingId)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const restoreDraft = () => {
     const draft = autosave.pendingDraft
     if (!draft) return
     reset(draft.data.form)
-    setPhotos(draft.data.photos)
+    imageUpload.replacePhotos(draft.data.photos)
     autosave.acceptDraft(draft)
   }
 
@@ -192,7 +239,17 @@ export default function PublierScreen() {
         </View>
       ) : null}
 
-      <PhotoSection photos={photos} onAdd={pickPhoto} onRemove={removePhoto} />
+      <ImageUploader
+        items={imageUpload.items}
+        onAdd={pickPhoto}
+        onRemove={removePhoto}
+        onRetry={retryPhoto}
+        onReorder={(nextItems) => {
+          const nextUris = nextItems.map((item) => item.uri)
+          imageUpload.replacePhotos(nextUris)
+        }}
+        disabled={loading}
+      />
 
       <CategoriesSection
         categories={visibleCategories}
@@ -262,7 +319,7 @@ export default function PublierScreen() {
 
       <SubmitButton loading={loading} onPress={handleSubmit(onSubmit)} />
     </ScrollView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -312,4 +369,4 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   draftSecondaryText: { color: Colors.text, fontSize: FontSize.sm, fontWeight: FontWeight.semibold },
-});
+})
