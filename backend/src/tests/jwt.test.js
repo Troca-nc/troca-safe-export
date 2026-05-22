@@ -22,6 +22,25 @@ describe('JWT — generateTokens', () => {
     const { accessToken, refreshToken } = generateTokens(1);
     assert.notStrictEqual(accessToken, refreshToken);
   });
+
+  it('aligne la date d expiration du refresh sur JWT_REFRESH_EXPIRES', () => {
+    const previous = process.env.JWT_REFRESH_EXPIRES;
+    process.env.JWT_REFRESH_EXPIRES = '2h';
+
+    try {
+      const before = Date.now();
+      const { refreshExpiresAt } = generateTokens(1);
+      const delta = refreshExpiresAt.getTime() - before;
+      const expected = 2 * 60 * 60 * 1000;
+      assert.ok(delta >= expected - 5_000 && delta <= expected + 5_000, `Delta=${delta}`);
+    } finally {
+      if (previous === undefined) {
+        delete process.env.JWT_REFRESH_EXPIRES;
+      } else {
+        process.env.JWT_REFRESH_EXPIRES = previous;
+      }
+    }
+  });
 });
 
 describe('JWT — verifyAccessToken', () => {

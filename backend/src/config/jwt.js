@@ -3,6 +3,7 @@
 // ============================================================
 
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { requireConfiguredEnv } = require('./env');
 
 function getJwtSecret() {
@@ -28,6 +29,31 @@ function getRefreshExpires() {
   return process.env.JWT_REFRESH_EXPIRES_IN || process.env.JWT_REFRESH_EXPIRES || '30d';
 }
 
+function parseDurationToMs(duration, fallbackMs = 30 * 24 * 60 * 60 * 1000) {
+  const normalized = String(duration || '').trim();
+  const match = normalized.match(/^(\d+)(ms|s|m|h|d|w)?$/i);
+  if (!match) return fallbackMs;
+
+  const amount = Number(match[1]);
+  if (!Number.isFinite(amount) || amount <= 0) return fallbackMs;
+
+  const unit = (match[2] || 'ms').toLowerCase();
+  const multipliers = {
+    ms: 1,
+    s: 1000,
+    m: 60 * 1000,
+    h: 60 * 60 * 1000,
+    d: 24 * 60 * 60 * 1000,
+    w: 7 * 24 * 60 * 60 * 1000,
+  };
+
+  return Math.round(amount * (multipliers[unit] || 1));
+}
+
+function getRefreshExpiresMs() {
+  return parseDurationToMs(getRefreshExpires());
+}
+
 /**
  * Génère un access token + refresh token pour un utilisateur
  */
@@ -36,22 +62,23 @@ const generateTokens = (userId) => {
   const refreshSecret = getRefreshSecret();
   const accessExpires = getAccessExpires();
   const refreshExpires = getRefreshExpires();
+  const accessJti = crypto.randomUUID();
+  const refreshJti = crypto.randomUUID();
 
   const accessToken = jwt.sign(
     { sub: userId, type: 'access' },
     accessSecret,
-    { expiresIn: accessExpires }
+    { expiresIn: accessExpires, jwtid: accessJti }
   );
 
   const refreshToken = jwt.sign(
     { sub: userId, type: 'refresh' },
     refreshSecret,
-    { expiresIn: refreshExpires }
+    { expiresIn: refreshExpires, jwtid: refreshJti }
   );
 
-  // Date d'expiration du refresh token (pour la BDD)
-  const refreshExpiresAt = new Date();
-  refreshExpiresAt.setDate(refreshExpiresAt.getDate() + 30);
+  // Date d'expiration du refresh token (pour la BDD) alignée sur JWT_REFRESH_EXPIRES
+  const refreshExpiresAt = new Date(Date.now() + getRefreshExpiresMs());
 
   return { accessToken, refreshToken, refreshExpiresAt };
 };
@@ -74,4 +101,4 @@ const verifyRefreshToken = (token) => {
   return payload;
 };
 
-module.exports = { generateTokens, verifyAccessToken, verifyRefreshToken };
+module.exports = { generateTokens, getRefreshExpires, getRefreshExpiresMs, verifyAccessToken, verifyRefreshToken };

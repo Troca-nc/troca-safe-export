@@ -26,7 +26,7 @@ const {
   deleteRefreshToken,
   findUserById,
   loginAccount,
-  refreshSession,
+  refreshSessionWithRotation,
   registerAccount,
   resendVerification,
   requestPasswordReset,
@@ -119,12 +119,13 @@ router.post('/login', loginLimiter, async (req, res, next) => {
   }
 });
 
+// TODO: test refresh rotation after deploy with Redis blacklist enabled.
 router.post('/refresh', refreshLimiter, async (req, res, next) => {
   try {
     const { error, value } = refreshSchema.validate(req.body);
     if (error) return res.status(400).json({ error: 'refresh_token manquant.' });
 
-    const { accessToken, refreshToken: newRefresh } = await refreshSession(value.refresh_token);
+    const { accessToken, refreshToken: newRefresh } = await refreshSessionWithRotation(value.refresh_token);
 
     return res.json({
       data: {

@@ -11,6 +11,7 @@ const SUITES = [
   './jwt.test',
   './auth.middleware.test',
   './email.service.test',
+  './authAccountService.test',
   './phone.route.test',
   './alert.route.test',
   './scheduler.test',

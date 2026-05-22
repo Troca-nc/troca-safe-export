@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { query, withTransaction } = require('../config/database');
 const { getRedisClient } = require('../config/redis');
-const { generateTokens, verifyRefreshToken } = require('../config/jwt');
+const { generateTokens, getRefreshExpiresMs, verifyRefreshToken } = require('../config/jwt');
 
 function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
@@ -17,6 +17,11 @@ function createHttpError(status, message, code) {
     err.code = code;
   }
   return err;
+}
+
+function buildRefreshBlacklistKey(refreshToken) {
+  const hash = crypto.createHash('sha256').update(String(refreshToken || '')).digest('hex');
+  return `refresh:blacklist:${hash}`;
 }
 
 function buildSafeUser(user) {
@@ -177,7 +182,54 @@ async function persistRefreshToken(userId, refreshToken, refreshExpiresAt) {
 }
 
 async function deleteRefreshToken(refreshToken) {
+  await revokeRefreshToken(refreshToken);
+}
+
+async function blacklistRefreshToken(refreshToken) {
+  const client = await getRedisClient();
+  if (!client || !refreshToken) return false;
+
+  try {
+    await client.set(buildRefreshBlacklistKey(refreshToken), '1', {
+      PX: Math.max(1, getRefreshExpiresMs()),
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function isRefreshTokenBlacklisted(refreshToken) {
+  const client = await getRedisClient();
+  if (!client || !refreshToken) return false;
+
+  try {
+    return Boolean(await client.get(buildRefreshBlacklistKey(refreshToken)));
+  } catch {
+    return false;
+  }
+}
+
+async function revokeRefreshToken(refreshToken) {
   await query(`DELETE FROM refresh_tokens WHERE token = $1`, [refreshToken]).catch(() => {});
+  await blacklistRefreshToken(refreshToken).catch(() => {});
+}
+
+async function rotateRefreshToken(userId, oldRefreshToken) {
+  const { accessToken, refreshToken: newRefresh, refreshExpiresAt } = generateTokens(userId);
+
+  await withTransaction(async (client) => {
+    await client.query(`DELETE FROM refresh_tokens WHERE token = $1`, [oldRefreshToken]);
+    await client.query(
+      `INSERT INTO refresh_tokens (user_id, token, expires_at)
+       VALUES ($1, $2, $3)`,
+      [userId, newRefresh, refreshExpiresAt]
+    );
+  });
+
+  await blacklistRefreshToken(oldRefreshToken).catch(() => {});
+
+  return { accessToken, refreshToken: newRefresh };
 }
 
 async function findUserByEmail(email) {
@@ -283,18 +335,27 @@ async function loginAccount({ email, password }, meta = {}) {
   };
 }
 
-async function refreshSession(refreshToken) {
+// SECURITY: rotation active, old refresh tokens are revoked and blacklisted on use.
+// TODO: test refresh rotation after deploy with Redis blacklist enabled.
+async function refreshSessionWithRotation(refreshToken) {
   let payload;
   try {
     payload = verifyRefreshToken(refreshToken);
   } catch {
-    throw createHttpError(401, 'Token de rafraîchissement invalide ou expiré.');
+    throw createHttpError(401, 'Token de rafraÃ®chissement invalide ou expirÃ©.');
   }
 
-  await query(
+  if (await isRefreshTokenBlacklisted(refreshToken)) {
+    throw createHttpError(401, 'Token de rafraÃ®chissement invalide ou expirÃ©.');
+  }
+
+  const tokenRow = await query(
     `SELECT id FROM refresh_tokens WHERE token = $1 AND user_id = $2 AND expires_at > NOW()`,
     [refreshToken, payload.sub]
   ).catch(() => ({ rows: [] }));
+  if (!tokenRow.rows[0]) {
+    throw createHttpError(401, 'Token de rafraÃ®chissement invalide ou expirÃ©.');
+  }
 
   const user = await query(
     `SELECT id, email, prenom, nom, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at, email_verified
@@ -305,14 +366,7 @@ async function refreshSession(refreshToken) {
     throw createHttpError(401, 'Utilisateur introuvable.');
   }
 
-  const { accessToken, refreshToken: newRefresh, refreshExpiresAt } = generateTokens(payload.sub);
-  await deleteRefreshToken(refreshToken);
-  await persistRefreshToken(payload.sub, newRefresh, refreshExpiresAt);
-
-  return {
-    accessToken,
-    refreshToken: newRefresh,
-  };
+  return rotateRefreshToken(payload.sub, refreshToken);
 }
 
 async function requestPasswordReset(email) {
@@ -399,8 +453,10 @@ async function resetPasswordWithToken(token, password) {
 
 module.exports = {
   buildSafeUser,
+  blacklistRefreshToken,
   confirmEmail,
   createHttpError,
+  buildRefreshBlacklistKey,
   createPasswordResetToken,
   createVerificationToken,
   deleteRefreshToken,
@@ -409,11 +465,13 @@ module.exports = {
   loginAccount,
   normalizeEmail,
   persistRefreshToken,
-  refreshSession,
+  refreshSessionWithRotation,
   registerAccount,
   resendVerification,
   requestPasswordReset,
   resetPasswordWithToken,
+  revokeRefreshToken,
+  rotateRefreshToken,
   upsertEmailVerificationToken,
   upsertPasswordResetToken,
 };
