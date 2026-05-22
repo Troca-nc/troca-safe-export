@@ -15,8 +15,126 @@ const { v4: uuidv4 }      = require('uuid');
 const { authenticate }    = require('../middleware/auth');
 const { validate }        = require('../middleware/validate');
 const { query }           = require('../config/database');
+const { buildListingSearchContext } = require('../services/listingsQuery');
+const { sendMail } = require('../services/emailService');
 
 const router = Router();
+const BASE_URL = process.env.BASE_URL || 'https://troca.nc';
+
+function normalizeAlertFilters(filters) {
+  if (!filters || typeof filters !== 'object') return {};
+  const source = filters;
+  const normalized = {
+    q: source.q || '',
+    category_id: source.category_id || source.categorie_id || '',
+    categorie: source.categorie || source.category_name || '',
+    commune_id: source.commune_id || '',
+    commune: source.commune || source.commune_name || '',
+    price_min: source.price_min ?? source.prix_min ?? '',
+    price_max: source.price_max ?? source.prix_max ?? '',
+    condition: source.condition || '',
+    troc: source.troc || '',
+    province_id: source.province_id || '',
+    lat: source.lat || '',
+    lng: source.lng || '',
+    radius: source.radius || 20,
+  };
+
+  if (normalized.troc === true || normalized.troc === 1) {
+    normalized.troc = 'true';
+  }
+
+  return normalized;
+}
+
+function alertFiltersToListingQuery(filters) {
+  return {
+    q: filters.q || '',
+    category_id: filters.category_id || '',
+    commune_id: filters.commune_id || '',
+    province_id: filters.province_id || '',
+    price_min: filters.price_min || '',
+    price_max: filters.price_max || '',
+    condition: filters.condition || '',
+    troc: filters.troc || '',
+    lat: filters.lat || '',
+    lng: filters.lng || '',
+    radius: filters.radius || 20,
+    page: 1,
+    limit: 1,
+  };
+}
+
+function buildAlertSummary(filters) {
+  const parts = [];
+  if (filters.q) parts.push(filters.q);
+  if (filters.categorie) parts.push(filters.categorie);
+  else if (filters.category_id) parts.push(`Catégorie ${filters.category_id}`);
+  if (filters.commune) parts.push(filters.commune);
+  else if (filters.commune_id) parts.push(`Commune ${filters.commune_id}`);
+  if (filters.condition) {
+    const conditionLabel = {
+      new: 'Neuf',
+      like_new: 'Comme neuf',
+      good: 'Bon état',
+      fair: 'Correct',
+      for_parts: 'Pour pièces',
+    }[filters.condition];
+    parts.push(conditionLabel || filters.condition);
+  }
+  if (filters.troc === 'true') parts.push('Troc');
+  if (filters.price_max) parts.push(`< ${Number(filters.price_max).toLocaleString('fr-FR')} XPF`);
+  return parts.join(' · ') || 'Toutes les annonces';
+}
+
+async function countMatchingListings(filters) {
+  const searchContext = buildListingSearchContext(alertFiltersToListingQuery(filters));
+  const countRes = await query(
+    `SELECT COUNT(*) AS total
+     FROM annonces a
+     LEFT JOIN categories cat    ON cat.id = a.category_id
+     LEFT JOIN categories parent ON parent.id = cat.parent_id
+     LEFT JOIN communes com      ON com.id = a.commune_id
+     LEFT JOIN provinces prov    ON prov.id = com.province_id
+     WHERE ${searchContext.whereClause}`,
+    searchContext.params
+  );
+  return Number.parseInt(countRes.rows[0]?.total ?? '0', 10);
+}
+
+async function sendConfirmationEmail({ email, prenom, label, filters, frequency, count }) {
+  if (!email) return;
+
+  const frequencyLabel = {
+    immediate: 'immédiate',
+    daily: 'quotidienne',
+    weekly: 'hebdomadaire',
+  }[frequency] || frequency;
+
+  const criteria = buildAlertSummary(filters);
+
+  await sendMail({
+    to: email,
+    subject: '[Troca] Votre alerte de recherche est active',
+    html: `
+      <p>Bonjour ${prenom || 'bonjour'},</p>
+      <p>Votre alerte <strong>${label}</strong> a bien été créée.</p>
+      <p><strong>${count.toLocaleString('fr-FR')} annonces</strong> correspondent actuellement à ces critères.</p>
+      <p>Fréquence de notification : <strong>${frequencyLabel}</strong></p>
+      <p>Critères suivis : <strong>${criteria}</strong></p>
+      <p><a href="${BASE_URL}/alertes">Gérer mes alertes</a></p>
+      <p style="color:#9ca3af;font-size:12px;">Vous pouvez à tout moment modifier ou désactiver cette alerte depuis votre espace.</p>
+    `,
+    text: [
+      `Bonjour ${prenom || ''}`.trim(),
+      `Votre alerte "${label}" a bien été créée.`,
+      `${count.toLocaleString('fr-FR')} annonces correspondent actuellement à ces critères.`,
+      `Fréquence de notification : ${frequencyLabel}.`,
+      `Critères suivis : ${criteria}.`,
+      `Gérer mes alertes : ${BASE_URL}/alertes`,
+    ].join('\n\n'),
+  });
+}
 
 // ── Désabonnement par email (sans auth) ──────────────────────
 
@@ -97,13 +215,32 @@ router.post('/', validate(createSchema), async (req, res, next) => {
   try {
     const { label, filters, frequency } = req.body;
     const token = uuidv4().replace(/-/g, '');
+    const normalizedFilters = normalizeAlertFilters(filters);
+    let nbResults = 0;
+
+    try {
+      nbResults = await countMatchingListings(normalizedFilters);
+    } catch (countErr) {
+      console.error('[alerts] count error:', countErr.message);
+    }
 
     const result = await query(
-      `INSERT INTO search_alerts (user_id, label, filters, frequency, unsubscribe_token)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id, label, filters, frequency, status, created_at`,
-      [req.user.id, label, JSON.stringify(filters), frequency, token]
+      `INSERT INTO search_alerts (user_id, label, filters, frequency, unsubscribe_token, nb_results)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id, label, filters, frequency, status, nb_results, created_at`,
+      [req.user.id, label, JSON.stringify(normalizedFilters), frequency, token, nbResults]
     );
+
+    void sendConfirmationEmail({
+      email: req.user.email,
+      prenom: req.user.prenom,
+      label,
+      filters: normalizedFilters,
+      frequency,
+      count: Number(result.rows[0]?.nb_results ?? nbResults ?? 0),
+    }).catch((err) => {
+      console.error('[alerts] confirmation email error:', err.message);
+    });
 
     return res.status(201).json({ data: result.rows[0] });
   } catch (err) {

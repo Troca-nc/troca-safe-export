@@ -11,13 +11,16 @@ const { describe, it, makeRes, makeAuthReq, assertStatus, assertError } = requir
 let mockAlerts = [];
 let lastInserted = null;
 let lastUpdated  = null;
+let mockCount = 0;
+let sentEmails = [];
 
 const dbStub = {
   query: async (sql, params) => {
     const s = sql.trim().toUpperCase();
+    if (s.includes('COUNT(*)')) return { rows: [{ total: String(mockCount) }], rowCount: 1 };
     if (s.startsWith('SELECT')) return { rows: mockAlerts, rowCount: mockAlerts.length };
     if (s.startsWith('INSERT')) {
-      lastInserted = { label: params[1], filters: params[2], frequency: params[3] };
+      lastInserted = { label: params[1], filters: params[2], frequency: params[3], nb_results: params[5] };
       return { rows: [{ id: 1, ...lastInserted, status: 'active', created_at: new Date().toISOString() }], rowCount: 1 };
     }
     if (s.startsWith('UPDATE')) {
@@ -30,12 +33,15 @@ const dbStub = {
 
 const origLoad = require('module')._load;
 const databaseModulePath = require.resolve('../config/database');
+const emailModulePath = require.resolve('../services/emailService');
 require('module')._load = function (req, parent, isMain) {
   if (req.includes('config/database') || req.endsWith('database')) return dbStub;
+  if (req.includes('services/emailService')) return { sendMail: async (payload) => { sentEmails.push(payload); return { simulated: true }; } };
   return origLoad.apply(this, arguments);
 };
 
 require.cache[databaseModulePath] = { id: databaseModulePath, filename: databaseModulePath, loaded: true, exports: dbStub };
+require.cache[emailModulePath] = { id: emailModulePath, filename: emailModulePath, loaded: true, exports: { sendMail: async (payload) => { sentEmails.push(payload); return { simulated: true }; } } };
 delete require.cache[require.resolve('../middleware/auth')];
 delete require.cache[require.resolve('../middleware/validate')];
 delete require.cache[require.resolve('../routes/alert.route')];
@@ -105,12 +111,17 @@ describe('GET /api/alerts', () => {
 describe('POST /api/alerts', () => {
   it('crée une alerte avec label + frequency', async () => {
     lastInserted = null;
+    mockCount = 7;
+    sentEmails = [];
     const req = makeAuthReq(1, { body: { label: 'Vélo Nouméa', frequency: 'daily', filters: { q: 'vélo' } } });
     const res = makeRes();
     await callRoute('post', '/', req, res);
     assertStatus(res, 201);
     assert.ok(res._payload?.data?.id);
     assert.strictEqual(lastInserted?.label, 'Vélo Nouméa');
+    assert.strictEqual(lastInserted?.nb_results, 7);
+    assert.strictEqual(sentEmails.length, 1);
+    assert.ok(String(sentEmails[0].subject).includes('alerte'));
   });
 
   it('refuse si label manquant', async () => {

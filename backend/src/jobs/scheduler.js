@@ -227,21 +227,28 @@ async function matchAlerteAnnonces(alert) {
     params.push(`%${filters.q}%`);
     idx++;
   }
-  if (filters.categorie_id) {
-    conditions.push(`a.categorie_id = $${idx++}`);
-    params.push(filters.categorie_id);
+  if (filters.category_id || filters.categorie_id) {
+    conditions.push(`a.category_id = $${idx++}`);
+    params.push(filters.category_id || filters.categorie_id);
   }
   if (filters.commune_id) {
     conditions.push(`a.commune_id = $${idx++}`);
     params.push(filters.commune_id);
   }
-  if (filters.prix_min != null) {
+  if (filters.price_min != null || filters.prix_min != null) {
     conditions.push(`a.prix_xpf >= $${idx++}`);
-    params.push(filters.prix_min);
+    params.push(filters.price_min ?? filters.prix_min);
   }
-  if (filters.prix_max != null) {
+  if (filters.price_max != null || filters.prix_max != null) {
     conditions.push(`a.prix_xpf <= $${idx++}`);
-    params.push(filters.prix_max);
+    params.push(filters.price_max ?? filters.prix_max);
+  }
+  if (filters.condition) {
+    conditions.push(`a.condition = $${idx++}`);
+    params.push(filters.condition);
+  }
+  if (String(filters.troc) === 'true' || String(filters.troc) === '1') {
+    conditions.push(`a.contre_quoi IS NOT NULL AND a.contre_quoi <> ''`);
   }
 
   const result = await query(`
@@ -285,10 +292,12 @@ async function matchImmediateAlerts(annonce) {
       // Test simple côté JS pour l'immediate (évite une requête par alerte)
       const matches = (
         (!filters.q             || annonce.titre?.toLowerCase().includes(filters.q.toLowerCase())) &&
-        (!filters.categorie_id  || String(annonce.categorie_id) === String(filters.categorie_id)) &&
+        (!(filters.category_id || filters.categorie_id) || String(annonce.category_id) === String(filters.category_id || filters.categorie_id)) &&
         (!filters.commune_id    || String(annonce.commune_id)   === String(filters.commune_id))   &&
-        (!filters.prix_min      || (annonce.prix_xpf ?? 0) >= filters.prix_min) &&
-        (!filters.prix_max      || (annonce.prix_xpf ?? 0) <= filters.prix_max)
+        (!filters.price_min && !filters.prix_min || (annonce.prix ?? annonce.prix_xpf ?? 0) >= Number(filters.price_min ?? filters.prix_min)) &&
+        (!filters.price_max && !filters.prix_max || (annonce.prix ?? annonce.prix_xpf ?? 0) <= Number(filters.price_max ?? filters.prix_max)) &&
+        (!filters.condition     || String(annonce.condition) === String(filters.condition)) &&
+        (String(filters.troc) !== 'true' && String(filters.troc) !== '1' || Boolean(annonce.contre_quoi))
       );
 
       if (!matches) continue;

@@ -1,8 +1,9 @@
 ﻿'use client'
 // src/app/annonces/page.tsx
 
-import { Suspense, useState, useEffect, useCallback } from 'react'
+import { Suspense, useState, useEffect, useCallback, useMemo } from 'react'
 import {
+  Bell,
   ChevronDown,
   List,
   Map,
@@ -12,12 +13,16 @@ import {
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import Header from '@/components/layout/Header'
+import SearchAlertModal from '@/components/SearchAlertModal'
 import ListingCard from '@/components/listings/ListingCard'
 import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
 import { listingsApi, metaApi } from '@/lib/api'
+import { consumePendingAuthAction, peekPendingAuthAction } from '@/lib/authAction'
 import { FALLBACK_CATEGORIES } from '@/lib/categoryCatalog'
 import { getCategoryIcon } from '@/lib/categoryPresentation'
 import { useListingFilters, type ListingFilters } from '@/hooks/useListingFilters'
+import { useAuthActionStore } from '@/store/authActionStore'
+import { useAuthStore } from '@/store/authStore'
 
 const AnnoncesMap = dynamic(() => import('@/components/annonces/AnnoncesMap'), { ssr: false })
 
@@ -85,6 +90,9 @@ function ListingsPageContent() {
   const [viewMode,    setViewMode]    = useState<'list' | 'map'>('list')
   const [openFamilySlug, setOpenFamilySlug] = useState<string | null>(null)
   const [geoLoading, setGeoLoading] = useState(false)
+  const [searchAlertOpen, setSearchAlertOpen] = useState(false)
+  const { user } = useAuthStore()
+  const { openAuthModal } = useAuthActionStore()
   const {
     filters,
     setFilter,
@@ -107,6 +115,14 @@ function ListingsPageContent() {
         setCategories(FALLBACK_CATEGORIES)
         setCommunes(FALLBACK_PROVINCES)
       })
+  }, [])
+
+  useEffect(() => {
+    const pending = peekPendingAuthAction()
+    if (pending?.type === 'search_alert') {
+      setSearchAlertOpen(true)
+      consumePendingAuthAction()
+    }
   }, [])
 
   // Charger les annonces
@@ -243,6 +259,24 @@ function ListingsPageContent() {
     filters.category === cat.slug || (cat.subcategories || []).some((sub: any) => sub.slug === filters.category)
   const selectedProvince = communes.find((province: any) => String(province.id) === String(filters.province_id))
   const selectedProvinceCommunes = selectedProvince?.communes || []
+  const selectedCategoryLabel = useMemo(() => {
+    if (!filters.category) return null
+    const family = visibleCategories.find((cat: any) =>
+      cat.slug === filters.category ||
+      (cat.subcategories || []).some((sub: any) => sub.slug === filters.category)
+    )
+    if (!family) return filters.category
+    const directMatch = family.subcategories?.find((sub: any) => sub.slug === filters.category)
+    return directMatch?.name ?? family.name
+  }, [filters.category, visibleCategories])
+  const selectedCommuneLabel = useMemo(() => {
+    if (!filters.commune_id) return null
+    for (const province of communes) {
+      const commune = (province.communes || []).find((item: any) => String(item.id) === String(filters.commune_id))
+      if (commune) return commune.name
+    }
+    return filters.commune_id
+  }, [communes, filters.commune_id])
   const sortedProvinces = [...communes].sort((a: any, b: any) => {
     const order = (value: any) => {
       const code = String(value?.code || '').toUpperCase()
@@ -264,6 +298,20 @@ function ListingsPageContent() {
 
     setOpenFamilySlug(cat.slug)
     updateFilter('category', cat.slug)
+  }
+
+  const handleCreateSearchAlert = () => {
+    if (typeof window === 'undefined') return
+    const redirectTo = `${window.location.pathname}${window.location.search}`
+    if (!user) {
+      openAuthModal({
+        type: 'search_alert',
+        redirectTo,
+      })
+      return
+    }
+
+    setSearchAlertOpen(true)
   }
 
   // Sidebar filtres
@@ -614,6 +662,15 @@ function ListingsPageContent() {
             <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-night/40 pointer-events-none" />
           </div>
 
+          <button
+            type="button"
+            onClick={handleCreateSearchAlert}
+            className="inline-flex items-center gap-2 rounded-xl border border-coral/20 bg-coral/6 px-3 py-2 text-sm font-semibold text-coral transition hover:border-coral/30 hover:bg-coral/10"
+          >
+            <Bell className="h-4 w-4" />
+            Créer une alerte
+          </button>
+
           {/* Bouton filtres mobile */}
           <button
             onClick={() => setFiltersOpen(!filtersOpen)}
@@ -797,6 +854,14 @@ function ListingsPageContent() {
           </div>
         </div>
       </div>
+
+      <SearchAlertModal
+        open={searchAlertOpen}
+        onClose={() => setSearchAlertOpen(false)}
+        filters={filters}
+        categoryLabel={selectedCategoryLabel}
+        communeLabel={selectedCommuneLabel}
+      />
     </div>
   )
 }

@@ -430,6 +430,29 @@ export const subscriptionsApi = {
   ),
 }
 
+export const alertsApi = {
+  list: () => cachedGet(
+    buildCacheKey('alerts.list', '/alerts'),
+    () => api.get('/alerts'),
+    CACHE_TTL.short,
+  ),
+  create: async (data: object) => {
+    const res = await api.post('/alerts', data)
+    invalidateApiCache('alerts.')
+    return res
+  },
+  update: async (id: number | string, data: object) => {
+    const res = await api.patch(`/alerts/${id}`, data)
+    invalidateApiCache('alerts.')
+    return res
+  },
+  delete: async (id: number | string) => {
+    const res = await api.delete(`/alerts/${id}`)
+    invalidateApiCache('alerts.')
+    return res
+  },
+}
+
 // Users
 export const usersApi = {
   getProfile: (id: string) => cachedGet(
