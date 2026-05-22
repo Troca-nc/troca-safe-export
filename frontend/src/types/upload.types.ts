@@ -3,6 +3,10 @@
 export interface UploadedImage {
   key:         string   // clé S3 ex: "annonces/abc123/0.webp"
   url:         string   // URL publique CDN
+  thumbnail_url?: string | null
+  medium_url?: string | null
+  original_url?: string | null
+  variants?:    Record<string, { path?: string; url?: string }>
   width:       number
   height:      number
   size_bytes:  number   // taille après compression

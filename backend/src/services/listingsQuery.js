@@ -3,6 +3,11 @@ function toInt(value, fallback) {
   return Number.isNaN(parsed) ? fallback : parsed
 }
 
+function toFloat(value, fallback) {
+  const parsed = parseFloat(String(value))
+  return Number.isNaN(parsed) ? fallback : parsed
+}
+
 function buildListingSearchContext(rawQuery = {}) {
   const {
     q,
@@ -14,6 +19,9 @@ function buildListingSearchContext(rawQuery = {}) {
     province_id,
     condition,
     troc,
+    lat,
+    lng,
+    radius,
     sort = 'date',
     page = 1,
     limit = 20,
@@ -26,6 +34,9 @@ function buildListingSearchContext(rawQuery = {}) {
   const conditions = [`a.status = 'active'`, `a.deleted_at IS NULL`]
   const params = []
   let p = 1
+  const hasGeo = Number.isFinite(toFloat(lat, NaN)) && Number.isFinite(toFloat(lng, NaN))
+  const radiusKm = Math.min(100, Math.max(5, toFloat(radius, 20)))
+  let geo = null
 
   if (q) {
     conditions.push(
@@ -80,6 +91,28 @@ function buildListingSearchContext(rawQuery = {}) {
     conditions.push(`a.contre_quoi IS NOT NULL AND a.contre_quoi <> ''`)
   }
 
+  if (hasGeo) {
+    const userLng = toFloat(lng, 0)
+    const userLat = toFloat(lat, 0)
+    conditions.push(`com.latitude IS NOT NULL AND com.longitude IS NOT NULL`)
+    conditions.push(
+      `ST_DWithin(
+        ST_SetSRID(ST_MakePoint(com.longitude, com.latitude), 4326)::geography,
+        ST_SetSRID(ST_MakePoint($${p}, $${p + 1}), 4326)::geography,
+        $${p + 2} * 1000
+      )`
+    )
+    params.push(userLng, userLat, radiusKm)
+    geo = {
+      enabled: true,
+      lngParam: p,
+      latParam: p + 1,
+      radiusParam: p + 2,
+      radiusKm,
+    }
+    p += 3
+  }
+
   const sortMap = {
     date: 'a.boost_expires_at DESC NULLS LAST, a.created_at DESC',
     price_asc: 'a.prix ASC',
@@ -94,6 +127,7 @@ function buildListingSearchContext(rawQuery = {}) {
     pageNum,
     pageSize,
     offset,
+    geo,
   }
 }
 

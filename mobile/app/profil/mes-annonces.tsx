@@ -15,6 +15,7 @@ import {
 import { useEffect, useState, useCallback } from 'react'
 import { router, Stack } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
+import { useMutation } from '@tanstack/react-query'
 import { listingsApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '@/constants/theme'
@@ -39,6 +40,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   active: { label: 'Active', color: Colors.success },
   inactive: { label: 'Inactive', color: Colors.gray400 },
   expired: { label: 'Expiree', color: Colors.danger },
+  sold: { label: 'Vendue', color: Colors.primary },
 }
 
 const normalizeListing = (item: any): Listing => ({
@@ -61,6 +63,22 @@ export default function MesAnnoncesScreen() {
   const [annonces, setAnnonces] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const statusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: 'active' | 'inactive' | 'sold' }) => {
+      await listingsApi.update(id, { status })
+    },
+    onMutate: async ({ id, status }) => {
+      const previous = annonces
+      setAnnonces((current) => current.map((item) => (item.id === id ? { ...item, status } : item)))
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        setAnnonces(context.previous)
+      }
+      Alert.alert('Erreur', 'Impossible de modifier le statut')
+    },
+  })
 
   const fetchListings = useCallback(async () => {
     if (!user?.id) return
@@ -80,23 +98,57 @@ export default function MesAnnoncesScreen() {
     fetchListings()
   }, [fetchListings])
 
-  const toggleStatus = async (item: Listing) => {
-    const newStatus = item.status === 'active' ? 'inactive' : 'active'
+  const updateStatus = async (item: Listing, status: 'active' | 'inactive' | 'sold') => {
+    await statusMutation.mutateAsync({ id: item.id, status })
+  }
+
+  const toggleStatus = (item: Listing) => {
+    if (item.status === 'active') {
+      Alert.alert(
+        'Modifier le statut',
+        'Choisissez une action pour cette annonce.',
+        [
+          { text: 'Annuler', style: 'cancel' },
+          {
+            text: 'Desactiver',
+            onPress: async () => {
+              try {
+                await updateStatus(item, 'inactive')
+              } catch {
+                // rollback géré par la mutation
+              }
+            },
+          },
+          {
+            text: 'Marquer vendue',
+            onPress: async () => {
+              try {
+                await updateStatus(item, 'sold')
+              } catch {
+                // rollback géré par la mutation
+              }
+            },
+          },
+        ]
+      )
+      return
+    }
+
+    const nextStatus: 'active' | 'inactive' = item.status === 'inactive' ? 'active' : 'inactive'
     Alert.alert(
-      newStatus === 'inactive' ? "Desactiver l'annonce ?" : "Reactiver l'annonce ?",
-      newStatus === 'inactive'
-        ? 'Elle ne sera plus visible dans les recherches.'
-        : 'Elle sera a nouveau visible.',
+      nextStatus === 'active' ? "Reactiver l'annonce ?" : "Desactiver l'annonce ?",
+      nextStatus === 'active'
+        ? 'Elle sera a nouveau visible.'
+        : 'Elle ne sera plus visible dans les recherches.',
       [
         { text: 'Annuler', style: 'cancel' },
         {
           text: 'Confirmer',
           onPress: async () => {
             try {
-              await listingsApi.update(item.id, { status: newStatus })
-              setAnnonces((prev) => prev.map((x) => (x.id === item.id ? { ...x, status: newStatus } : x)))
+              await updateStatus(item, nextStatus)
             } catch {
-              Alert.alert('Erreur', 'Impossible de modifier le statut')
+              // rollback géré par la mutation
             }
           },
         },
@@ -171,7 +223,9 @@ export default function MesAnnoncesScreen() {
               size={20}
               color={Colors.primary}
             />
-            <Text style={styles.actionLabel}>{item.status === 'active' ? 'Desactiver' : 'Activer'}</Text>
+            <Text style={styles.actionLabel}>
+              {item.status === 'active' ? 'Desactiver' : item.status === 'sold' ? 'Reactiver' : 'Activer'}
+            </Text>
           </TouchableOpacity>
           <View style={styles.actionDivider} />
           <TouchableOpacity style={styles.action} onPress={() => deleteAnnonce(item)}>

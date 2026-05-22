@@ -8,6 +8,7 @@
 
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { isAxiosError } from 'axios'
+import { useMutation } from '@tanstack/react-query'
 import { api, messagesApi } from '@/lib/api'
 import { getMessagingSocket, messagingSocket, type SocketConnectionState } from '@/lib/socket'
 import type { Conversation, Message, OfferStatus } from '@/types/messaging.types'
@@ -85,7 +86,7 @@ export function useConversations() {
 
     const socket = getMessagingSocket()
     const onNotif = (notif: { type: string }) => {
-      if (notif.type === 'new_message') fetchConvs()
+      if (notif.type === 'new_message' || notif.type === 'message_read') fetchConvs()
     }
 
     socket.on('notification', onNotif)
@@ -118,6 +119,61 @@ export function useConversation(convId: number | null) {
   const currentUserId = useRef<number | null>(null)
   const cursorRef = useRef<string | null>(null)
   const pageRef = useRef(1)
+
+  const sendMessageMutation = useMutation({
+    mutationFn: async (content: string) => {
+      if (!convId) return
+      await api.post(`/messages/conversations/${convId}`, { content })
+    },
+    onMutate: async (content) => {
+      if (!convId) return null
+      const optimistic: Message = {
+        id: Date.now(),
+        conv_id: convId,
+        sender_id: Number(currentUserId.current ?? 0),
+        type: 'text',
+        content,
+        created_at: new Date().toISOString(),
+        pending: true,
+      }
+      setMessages((prev) => [...prev, optimistic])
+      return { optimistic }
+    },
+    onError: (_err, _content, context) => {
+      if (!context?.optimistic) return
+      setMessages((prev) =>
+        prev.map((m) => m.id === context.optimistic.id ? { ...m, pending: false, failed: true } : m)
+      )
+    },
+  })
+
+  const sendPhotoMutation = useMutation({
+    mutationFn: async (url: string) => {
+      if (!convId) return
+      await api.post(`/messages/conversations/${convId}`, { type: 'photo', photo_url: url })
+    },
+    onMutate: async (url) => {
+      if (!convId) return null
+      const optimistic: Message = {
+        id: Date.now(),
+        conv_id: convId,
+        sender_id: Number(currentUserId.current ?? 0),
+        type: 'photo',
+        content: null,
+        photo_url: url,
+        created_at: new Date().toISOString(),
+        pending: true,
+      }
+      setMessages((prev) => [...prev, optimistic])
+      return { optimistic }
+    },
+    onError: (_err, _url, context) => {
+      if (!context?.optimistic) return
+      setMessages((prev) =>
+        prev.map((m) => m.id === context.optimistic.id ? { ...m, pending: false, failed: true } : m)
+      )
+    },
+  })
 
   useEffect(() => {
     currentUserId.current = parseCurrentUserId()
@@ -162,6 +218,7 @@ export function useConversation(convId: number | null) {
     const socket = socketRef.current
     // TODO: test E2E sur la reconnexion WS, la file pending et le join/leave conversation.
     socket.emit('join_conversation', convId)
+    void messagesApi.markConversationRead(convId)
 
     const onNewMessage = (msg: Message) => {
       setMessages(prev => {
@@ -176,14 +233,18 @@ export function useConversation(convId: number | null) {
 
     const onMessagesRead = ({ byUserId }: { byUserId: number }) => {
       if (Number(byUserId) !== Number(currentUserId.current)) {
-        setMessages(prev => prev.map(m => ({ ...m, read_at: m.read_at ?? new Date().toISOString() })))
+        setMessages(prev => prev.map((m) => (
+          Number(m.sender_id) === Number(currentUserId.current)
+            ? { ...m, read_at: m.read_at ?? new Date().toISOString() }
+            : m
+        )))
       }
     }
 
     socket.on('new_message', onNewMessage)
     socket.on('user_typing', onUserTyping)
+    socket.on('message_read', onMessagesRead)
     socket.on('messages_read', onMessagesRead)
-    socket.emit('mark_read', convId)
 
     void socket.connect()
 
@@ -191,6 +252,7 @@ export function useConversation(convId: number | null) {
       socket.emit('leave_conversation', convId)
       socket.off('new_message', onNewMessage)
       socket.off('user_typing', onUserTyping)
+      socket.off('message_read', onMessagesRead)
       socket.off('messages_read', onMessagesRead)
       if (typingTimer.current) clearTimeout(typingTimer.current)
     }
@@ -198,50 +260,13 @@ export function useConversation(convId: number | null) {
 
   const sendMessage = useCallback(async (content: string): Promise<void> => {
     if (!convId || !content.trim()) return
-
-    const optimistic: Message = {
-      id: Date.now(),
-      conv_id: convId,
-      sender_id: Number(currentUserId.current ?? 0),
-      type: 'text',
-      content,
-      created_at: new Date().toISOString(),
-      pending: true,
-    }
-    setMessages(prev => [...prev, optimistic])
-
-    try {
-      await api.post(`/messages/conversations/${convId}`, { content })
-    } catch {
-      setMessages(prev =>
-        prev.map(m => m.id === optimistic.id ? { ...m, pending: false, failed: true } : m)
-      )
-    }
-  }, [convId])
+    await sendMessageMutation.mutateAsync(content)
+  }, [convId, sendMessageMutation])
 
   const sendPhoto = useCallback(async (url: string): Promise<void> => {
     if (!convId) return
-
-    const optimistic: Message = {
-      id: Date.now(),
-      conv_id: convId,
-      sender_id: Number(currentUserId.current ?? 0),
-      type: 'photo',
-      content: null,
-      photo_url: url,
-      created_at: new Date().toISOString(),
-      pending: true,
-    }
-    setMessages(prev => [...prev, optimistic])
-
-    try {
-      await api.post(`/messages/conversations/${convId}`, { type: 'photo', photo_url: url })
-    } catch {
-      setMessages(prev =>
-        prev.map(m => m.id === optimistic.id ? { ...m, failed: true, pending: false } : m)
-      )
-    }
-  }, [convId])
+    await sendPhotoMutation.mutateAsync(url)
+  }, [convId, sendPhotoMutation])
 
   const makeOffer = useCallback(async (amount_xpf: number): Promise<void> => {
     if (!convId) return

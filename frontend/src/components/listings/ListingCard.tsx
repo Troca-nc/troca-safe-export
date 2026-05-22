@@ -2,14 +2,13 @@
 // src/components/listings/ListingCard.tsx
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { Heart, MapPin, Clock, MailCheck, Phone, ShieldCheck } from 'lucide-react'
-import { useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { useFavorisStore } from '@/store/favorisStore'
 import { useAuthStore } from '@/store/authStore'
 import { useRouter } from 'next/navigation'
+import { useFavorite } from '@/hooks/useFavorite'
+import ListingImage from '@/components/ListingImage'
 export { ListingSkeleton as ListingCardSkeleton, ListingSkeletonGrid as ListingGridSkeleton } from '@/components/ListingSkeleton'
 
 interface Listing {
@@ -29,6 +28,7 @@ interface Listing {
   category_name?: string
   category_icon?: string
   cover_image?: string
+  distance_km?: number | null
   user_rating?: number
   seller_trust_score?: number
   seller_email_verified?: boolean
@@ -50,42 +50,24 @@ const CONDITION_LABELS: Record<string, string> = {
 }
 
 function CoverImage({ src, alt, icon }: { src?: string; alt: string; icon?: string }) {
-  const [loaded, setLoaded] = useState(false)
-  const [errored, setErrored] = useState(false)
-
-  if (!src || errored) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-sand">
-        <span className="text-4xl opacity-30">{icon || '📦'}</span>
-      </div>
-    )
-  }
-
   return (
-    <>
-      {!loaded && <div className="absolute inset-0 bg-sand animate-pulse" />}
-      <Image
-        src={src}
-        alt={alt}
-        fill
-        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-        onLoadingComplete={() => setLoaded(true)}
-        onError={() => setErrored(true)}
-        className={`object-cover group-hover:scale-105 transition-all duration-300 ${
-          loaded ? 'opacity-100' : 'opacity-0'
-        }`}
-      />
-    </>
+    <ListingImage
+      src={src}
+      alt={alt}
+      fallbackIcon={icon}
+      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+      imgClassName="group-hover:scale-105 transition-all duration-300"
+    />
   )
 }
 
 export default function ListingCard({ listing, className = '' }: Props) {
   const router = useRouter()
   const { isAuthenticated } = useAuthStore()
-  const { isSaved, toggle, loading } = useFavorisStore()
+  const { isFavorited, toggleFavorite, isToggling } = useFavorite()
 
-  const saved = isSaved(listing.id)
-  const isToggling = loading.has(listing.id)
+  const saved = isFavorited(listing.id)
+  const isLoading = isToggling.has(listing.id)
 
   const handleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -96,7 +78,7 @@ export default function ListingCard({ listing, className = '' }: Props) {
       return
     }
 
-    await toggle({
+    await toggleFavorite({
       id: listing.id,
       titre: listing.title,
       prix: listing.price,
@@ -144,10 +126,10 @@ export default function ListingCard({ listing, className = '' }: Props) {
 
         <button
           onClick={handleFavorite}
-          disabled={isToggling}
+          disabled={isLoading}
           aria-label={saved ? 'Retirer des favoris' : 'Ajouter aux favoris'}
           className={`absolute top-2 right-2 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm transition-all ${
-            isToggling ? 'opacity-50 cursor-wait' : 'hover:scale-110 active:scale-95'
+            isLoading ? 'opacity-50 cursor-wait' : 'hover:scale-110 active:scale-95'
           }`}
         >
           <Heart
@@ -162,6 +144,12 @@ export default function ListingCard({ listing, className = '' }: Props) {
         <h3 className="font-medium text-night text-sm leading-tight line-clamp-2 mb-1.5 group-hover:text-coral transition-colors">
           {listing.title}
         </h3>
+
+        {listing.distance_km != null && (
+          <p className="mb-1 text-[11px] font-medium text-ocean">
+            À {Math.round(listing.distance_km)} km
+          </p>
+        )}
 
         <div className="text-base mb-2">{formatPrice()}</div>
 

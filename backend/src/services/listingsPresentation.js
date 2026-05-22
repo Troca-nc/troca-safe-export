@@ -1,3 +1,5 @@
+const { buildUploadPublicUrl, normalizeImageVariants } = require('./imageService')
+
 function toNumber(value, fallback = null) {
   if (value === null || value === undefined || value === '') return fallback
   const parsed = Number(value)
@@ -9,6 +11,7 @@ function toBoolean(value) {
 }
 
 function mapListingSearchRow(row) {
+  const coverImage = row.cover_image_thumbnail ?? row.cover_image ?? null
   return {
     id: row.id,
     titre: row.titre ?? row.title ?? '',
@@ -22,6 +25,7 @@ function mapListingSearchRow(row) {
     published_at: row.published_at ?? row.created_at ?? null,
     nb_vues: toNumber(row.nb_vues, 0),
     boosted_until: row.boosted_until ?? null,
+    distance_km: toNumber(row.distance_km, null),
     commune_id: row.commune_id ?? null,
     category_id: row.category_id ?? null,
     category_name: row.category_name ?? null,
@@ -37,7 +41,11 @@ function mapListingSearchRow(row) {
     seller_trust_score: toNumber(row.seller_trust_score, null),
     seller_trust_level: row.seller_trust_level ?? null,
     user_rating: toNumber(row.user_rating, null),
-    cover_image: row.cover_image ?? null,
+    cover_image: coverImage && /^data:|^https?:\/\//i.test(String(coverImage))
+      ? coverImage
+      : row.cover_image_id
+        ? buildUploadPublicUrl(row.cover_image_id, 'thumb_400')
+        : coverImage,
   }
 }
 
@@ -62,6 +70,48 @@ function buildSellerPayload(listing) {
 }
 
 function mapListingDetailResponse(listing, isFavorited = false) {
+  const images = Array.isArray(listing.images)
+    ? listing.images.map((img) => {
+        const variants = normalizeImageVariants(img) || {}
+        const original = variants.original?.url || img.url || null
+        const thumb400 = variants.thumb_400?.url || img.thumbnail_url || null
+        const thumb800 = variants.thumb_800?.url || img.medium_url || null
+
+        const resolvedOriginal = original && /^data:|^https?:\/\//i.test(String(original))
+          ? original
+          : img.id
+            ? buildUploadPublicUrl(img.id, 'original')
+            : original
+        const resolvedThumb400 = thumb400
+          ? /^data:|^https?:\/\//i.test(String(thumb400))
+            ? thumb400
+            : img.id
+              ? buildUploadPublicUrl(img.id, 'thumb_400')
+              : thumb400
+          : img.id
+            ? buildUploadPublicUrl(img.id, 'thumb_400')
+            : resolvedOriginal
+        const resolvedThumb800 = thumb800
+          ? /^data:|^https?:\/\//i.test(String(thumb800))
+            ? thumb800
+            : img.id
+              ? buildUploadPublicUrl(img.id, 'thumb_800')
+              : thumb800
+          : img.id
+            ? buildUploadPublicUrl(img.id, 'thumb_800')
+            : resolvedOriginal
+
+        return {
+          id: img.id,
+          url: resolvedOriginal,
+          thumbnail_url: resolvedThumb400,
+          medium_url: resolvedThumb800,
+          original_url: resolvedOriginal,
+          is_cover: Boolean(img.is_cover),
+        }
+      })
+    : []
+
   return {
     data: {
       id: listing.id,
@@ -87,13 +137,7 @@ function mapListingDetailResponse(listing, isFavorited = false) {
       category_icon: listing.category_icon,
       published_at: listing.created_at,
       contre_quoi: listing.contre_quoi,
-      images: Array.isArray(listing.images)
-        ? listing.images.map((img) => ({
-            id: img.id,
-            url: img.url,
-            thumbnail_url: img.url ? img.url.replace(/\.webp$/i, '_thumb.webp') : null,
-          }))
-        : [],
+      images,
       user: buildSellerPayload(listing),
       is_favorited: isFavorited,
     },

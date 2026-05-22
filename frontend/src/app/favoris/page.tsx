@@ -14,6 +14,7 @@ import { fr } from 'date-fns/locale'
 import Header from '@/components/layout/Header'
 import { useFavorisStore } from '@/store/favorisStore'
 import { useAuthStore }    from '@/store/authStore'
+import { useFavorite } from '@/hooks/useFavorite'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -116,7 +117,8 @@ function EmptyFavoris({ filtered }: { filtered: boolean }) {
 export default function FavorisPage() {
   const router = useRouter()
   const { isAuthenticated } = useAuthStore()
-  const { items, toggle, isSaved } = useFavorisStore()
+  const { items } = useFavorisStore()
+  const { toggleFavorite } = useFavorite()
 
   const [search,   setSearch]   = useState('')
   const [sort,     setSort]     = useState<SortKey>('savedAt_desc')
@@ -172,13 +174,29 @@ export default function FavorisPage() {
   const handleRemove = async (item: typeof items[0]) => {
     setRemoving(prev => new Set(prev).add(item.id))
     await new Promise(r => setTimeout(r, 200)) // micro-délai pour l'animation
-    await toggle(item)
+    await toggleFavorite({
+      id: item.id,
+      titre: item.titre,
+      prix: item.prix,
+      cover_image: item.cover_image,
+      commune: item.commune,
+      category: item.category,
+    })
     setRemoving(prev => { const s = new Set(prev); s.delete(item.id); return s })
   }
 
   const handleRemoveAll = async () => {
     if (!confirm(`Supprimer les ${items.length} favoris ?`)) return
-    for (const item of items) await toggle(item)
+    for (const item of items) {
+      await toggleFavorite({
+        id: item.id,
+        titre: item.titre,
+        prix: item.prix,
+        cover_image: item.cover_image,
+        commune: item.commune,
+        category: item.category,
+      })
+    }
   }
 
   return (

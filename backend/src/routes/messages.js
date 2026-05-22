@@ -12,7 +12,7 @@ const Joi = require('joi');
 const { authenticate } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');
 const { messageLimiter } = require('../middleware/rateLimit');
-const { emitNewMessage } = require('../services/websocketServer');
+const { emitNewMessage, emitConversationRead } = require('../services/websocketServer');
 const { sendNewMessageEmail } = require('../services/emailService');
 const { sendPushToUser } = require('../services/pushService');
 const { notifyNewMessage } = require('../services/notificationService');
@@ -22,6 +22,7 @@ const {
   listConversationsForUser,
   loadConversationThread,
   loadMessageNotificationTarget,
+  markConversationMessagesRead,
   startConversation,
 } = require('../services/messageConversationService');
 
@@ -64,6 +65,28 @@ router.get('/conversations/:id', async (req, res, next) => {
         messages: thread.messages,
       },
       pagination: thread.pagination,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// TODO: test E2E sur l'ouverture de conversation, le PATCH read et le double-check.
+router.patch('/conversations/:id/read', async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    const readCount = await markConversationMessagesRead(id, userId);
+    if (readCount > 0) {
+      await emitConversationRead(id, userId, readCount);
+    }
+
+    res.json({
+      data: {
+        conversation_id: Number(id),
+        read_count: readCount,
+      },
     });
   } catch (err) {
     next(err);

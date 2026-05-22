@@ -1,118 +1,166 @@
 // ============================================================
-//  Troca Mobile — Service Notifications Push (Expo)
-//  Enregistrement du token + gestion des réceptions
+//  Troca Mobile - Service Notifications Push (Expo)
+//  Registration token + reception handling
 // ============================================================
 
-import * as Notifications from 'expo-notifications';
-import * as Device        from 'expo-device';
-import Constants          from 'expo-constants';
-import { Platform }       from 'react-native';
-import { api }            from '@/lib/api';
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import * as Device from 'expo-device'
+import Constants from 'expo-constants'
+import * as Notifications from 'expo-notifications'
+import { Platform } from 'react-native'
 
-// Comportement par défaut : afficher l'alerte même si l'app est au premier plan
+import { api } from '@/lib/api'
+
+// Default behavior: show the alert even if the app is foregrounded
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
     shouldPlaySound: true,
-    shouldSetBadge:  true,
+    shouldSetBadge: true,
   }),
-});
+})
 
-// ── Enregistrement du token push ─────────────────────────────
+const PUSH_PROMPT_SNOOZE_KEY = 'push_permission_prompt_snooze_until'
+const PUSH_PROMPT_BLOCKED_KEY = 'push_permission_prompt_blocked_forever'
 
-export async function registerPushToken(): Promise<string | null> {
-  // Les notifications push ne fonctionnent pas sur simulateur
-  if (!Device.isDevice) {
-    console.log('[push] Simulateur détecté — notifications push ignorées');
-    return null;
+type NotifHandler = (notif: Notifications.Notification) => void
+type ResponseHandler = (response: Notifications.NotificationResponse) => void
+type PromptListener = () => void
+
+const promptListeners = new Set<PromptListener>()
+
+export function subscribePushPermissionPrompt(listener: PromptListener) {
+  promptListeners.add(listener)
+  return () => {
+    promptListeners.delete(listener)
+  }
+}
+
+export function requestPushPermissionPrompt() {
+  for (const listener of promptListeners) {
+    listener()
+  }
+}
+
+export async function shouldPromptForPushPermission(): Promise<boolean> {
+  if (Platform.OS === 'web' || !Device.isDevice) return false
+
+  const blocked = await AsyncStorage.getItem(PUSH_PROMPT_BLOCKED_KEY)
+  if (blocked === 'true') return false
+
+  const snoozedUntil = Number(await AsyncStorage.getItem(PUSH_PROMPT_SNOOZE_KEY) || '0')
+  if (snoozedUntil > Date.now()) return false
+
+  const { status } = await Notifications.getPermissionsAsync()
+  if (status === 'granted') return false
+  if (status === 'denied') {
+    await AsyncStorage.setItem(PUSH_PROMPT_BLOCKED_KEY, 'true')
+    return false
   }
 
-  // Demander la permission
-  const { status: existing } = await Notifications.getPermissionsAsync();
-  let finalStatus = existing;
+  return true
+}
+
+export async function deferPushPermissionPrompt(days = 7) {
+  const until = Date.now() + days * 24 * 60 * 60 * 1000
+  await AsyncStorage.setItem(PUSH_PROMPT_SNOOZE_KEY, String(until))
+}
+
+export async function suppressPushPermissionPromptForever() {
+  await AsyncStorage.setItem(PUSH_PROMPT_BLOCKED_KEY, 'true')
+}
+
+type RegisterPushTokenOptions = {
+  requestPermission?: boolean
+}
+
+export async function registerPushToken(options: RegisterPushTokenOptions = {}): Promise<string | null> {
+  const { requestPermission = true } = options
+
+  // Push notifications do not work on simulators.
+  if (!Device.isDevice) {
+    console.log('[push] Simulator detected - push notifications ignored')
+    return null
+  }
+
+  const { status: existing } = await Notifications.getPermissionsAsync()
+  let finalStatus = existing
 
   if (existing !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
+    if (!requestPermission) {
+      return null
+    }
+
+    const { status } = await Notifications.requestPermissionsAsync()
+    finalStatus = status
   }
 
   if (finalStatus !== 'granted') {
-    console.log('[push] Permission refusée');
-    return null;
+    if (requestPermission) {
+      await suppressPushPermissionPromptForever()
+    }
+    console.log('[push] Permission refused')
+    return null
   }
 
-  // Canal Android (obligatoire pour Android 8+)
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {
-      name:        'Troca',
-      importance:  Notifications.AndroidImportance.MAX,
+      name: 'Troca',
+      importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor:  '#2563eb',
-    });
+      lightColor: '#2563eb',
+    })
 
     await Notifications.setNotificationChannelAsync('messages', {
-      name:        'Messages',
-      importance:  Notifications.AndroidImportance.HIGH,
+      name: 'Messages',
+      importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 100],
-      lightColor:  '#2563eb',
-    });
+      lightColor: '#2563eb',
+    })
   }
 
-  // Récupérer le token Expo Push
-  const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+  const projectId = Constants.expoConfig?.extra?.eas?.projectId
   if (!projectId) {
-    console.warn('[push] projectId EAS non configuré dans app.json');
-    return null;
+    console.warn('[push] EAS projectId missing in app.json')
+    return null
   }
 
-  const { data: pushToken } = await Notifications.getExpoPushTokenAsync({ projectId });
-  console.log('[push] Token Expo enregistré');
+  const { data: pushToken } = await Notifications.getExpoPushTokenAsync({ projectId })
+  console.log('[push] Expo token registered')
 
-  // Envoyer le token au backend pour l'associer à l'utilisateur
   await api.post('/users/push-token', {
-    token:    pushToken,
+    token: pushToken,
     platform: Platform.OS,
-  }).catch((err) => console.warn('[push] Erreur enregistrement token:', err.message));
+  }).catch((err) => console.warn('[push] Token registration error:', err.message))
 
-  return pushToken;
+  return pushToken
 }
-
-// ── Listeners ─────────────────────────────────────────────────
-
-type NotifHandler = (notif: Notifications.Notification) => void;
-type ResponseHandler = (response: Notifications.NotificationResponse) => void;
 
 export function setupNotificationListeners(
   onNotification: NotifHandler,
-  onResponse:     ResponseHandler,
+  onResponse: ResponseHandler,
 ) {
-  // Notification reçue pendant que l'app est active
-  const notifSub = Notifications.addNotificationReceivedListener(onNotification);
-
-  // L'utilisateur a tapé sur la notification
-  const responseSub = Notifications.addNotificationResponseReceivedListener(onResponse);
+  const notifSub = Notifications.addNotificationReceivedListener(onNotification)
+  const responseSub = Notifications.addNotificationResponseReceivedListener(onResponse)
 
   return () => {
-    notifSub.remove();
-    responseSub.remove();
-  };
+    notifSub.remove()
+    responseSub.remove()
+  }
 }
 
-// ── Badge ──────────────────────────────────────────────────────
-
 export async function setBadge(count: number) {
-  await Notifications.setBadgeCountAsync(count);
+  await Notifications.setBadgeCountAsync(count)
 }
 
 export async function clearBadge() {
-  await Notifications.setBadgeCountAsync(0);
+  await Notifications.setBadgeCountAsync(0)
 }
 
-// ── Notification locale (debug / test) ───────────────────────
-
+// TODO: test E2E sur le prompt de notifications apres premier message recu et le cooldown de 7 jours.
 export async function sendLocalNotification(title: string, body: string) {
   await Notifications.scheduleNotificationAsync({
     content: { title, body, sound: true },
-    trigger: null, // immédiat
-  });
+    trigger: null,
+  })
 }

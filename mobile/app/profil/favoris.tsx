@@ -19,6 +19,7 @@ import * as Haptics from 'expo-haptics'
 import { favoritesApi } from '@/lib/api'
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '@/constants/theme'
 import { ListingSkeletonList } from '@/components/ListingSkeleton'
+import { useFavorite } from '@/hooks/useFavorite'
 
 interface Annonce {
   id: string
@@ -47,6 +48,7 @@ export default function FavorisScreen() {
   const [favoris, setFavoris] = useState<Annonce[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const { toggleFavorite } = useFavorite()
 
   const fetch = useCallback(async () => {
     try {
@@ -87,12 +89,22 @@ export default function FavorisScreen() {
   }, [fetch])
 
   const removeFavori = async (id: string) => {
+    const previous = favoris
+    setFavoris((prev) => prev.filter((item) => item.id !== id))
     try {
-      await favoritesApi.toggleFavorite(id)
+      const item = previous.find((entry) => entry.id === id)
+      if (!item) return
+      await toggleFavorite({
+        id: item.id,
+        titre: item.titre ?? item.title ?? '',
+        prix: item.prix_xpf ?? item.price ?? null,
+        cover_image: item.image_url ?? item.cover_image ?? null,
+        commune: item.commune ?? item.commune_name ?? null,
+        category: null,
+      })
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-      setFavoris((prev) => prev.filter((a) => a.id !== id))
     } catch {
-      Alert.alert('Erreur')
+      setFavoris(previous)
     }
   }
 

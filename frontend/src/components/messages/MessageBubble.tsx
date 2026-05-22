@@ -51,7 +51,7 @@ function TextBubble({ message, isMine }: { message: Message; isMine: boolean }) 
         {isMine && (
           message.failed   ? <AlertCircle size={10} className="text-red-400" /> :
           message.pending  ? <Clock size={10} /> :
-          message.read_at  ? <CheckCheck size={10} className="text-coral" /> :
+          message.read_at  ? <CheckCheck size={10} className="text-sky-500" /> :
                              <Check size={10} />
         )}
       </div>

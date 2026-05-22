@@ -44,10 +44,21 @@ function createPreview(file: File) {
   return ''
 }
 
-function toUploadedImage(item: QueueItem, payload: { id?: number | string; url: string; thumbnail_url?: string | null }): UploadedImage {
+function toUploadedImage(item: QueueItem, payload: {
+  id?: number | string
+  url: string
+  thumbnail_url?: string | null
+  medium_url?: string | null
+  original_url?: string | null
+  variants?: Record<string, { path?: string; url?: string }>
+}): UploadedImage {
   return {
     key: String(payload.id ?? item.id),
     url: payload.url,
+    thumbnail_url: payload.thumbnail_url ?? null,
+    medium_url: payload.medium_url ?? payload.url ?? null,
+    original_url: payload.original_url ?? payload.url ?? null,
+    variants: payload.variants,
     width: 0,
     height: 0,
     size_bytes: item.file?.size ?? 0,

@@ -14,6 +14,9 @@ export interface ListingFilters {
   price_max: string
   condition: string
   troc: string
+  lat: string
+  lng: string
+  radius: number
   sort: ListingSort
   page: number
 }
@@ -27,6 +30,9 @@ const DEFAULT_FILTERS: ListingFilters = {
   price_max: '',
   condition: '',
   troc: '',
+  lat: '',
+  lng: '',
+  radius: 20,
   sort: 'date',
   page: 1,
 }
@@ -97,6 +103,8 @@ function fromSearchParams(searchParams: Pick<URLSearchParams, 'get'>): ListingFi
     condition: searchParams.get('condition') ?? '',
     troc: searchParams.get('troc') === 'true' ? 'true' : '',
   }
+  const radiusParam = Number.parseInt(searchParams.get('radius') ?? '20', 10)
+  const radius = Number.isFinite(radiusParam) && radiusParam > 0 ? radiusParam : 20
 
   return {
     q: searchParams.get('q') ?? '',
@@ -107,6 +115,9 @@ function fromSearchParams(searchParams: Pick<URLSearchParams, 'get'>): ListingFi
     price_max: searchParams.get('max') ?? searchParams.get('price_max') ?? '',
     condition: location.condition || legacyLocation.condition,
     troc: location.troc || legacyLocation.troc,
+    lat: searchParams.get('lat') ?? '',
+    lng: searchParams.get('lng') ?? '',
+    radius,
     sort: parseSort(searchParams.get('sort')),
     page: parsePage(searchParams.get('page')),
   }
@@ -119,6 +130,9 @@ function toSearchString(filters: ListingFilters) {
   if (filters.category) params.set('cat', filters.category)
   if (filters.price_min) params.set('min', filters.price_min)
   if (filters.price_max) params.set('max', filters.price_max)
+  if (filters.lat) params.set('lat', filters.lat)
+  if (filters.lng) params.set('lng', filters.lng)
+  if (filters.radius !== 20 || (filters.lat && filters.lng)) params.set('radius', String(filters.radius))
   const location = encodeLocationToken(filters)
   if (location) params.set('r', location)
   if (filters.sort !== 'date') params.set('sort', filters.sort)
@@ -175,11 +189,30 @@ export function useListingFilters() {
     }))
   }, [])
 
+  const setLocation = useCallback((lat: string, lng: string) => {
+    setFilters((current) => ({
+      ...current,
+      lat,
+      lng,
+      page: 1,
+    }))
+  }, [])
+
+  const clearLocation = useCallback(() => {
+    setFilters((current) => ({
+      ...current,
+      lat: '',
+      lng: '',
+      page: 1,
+    }))
+  }, [])
+
   const resetFilters = useCallback(() => {
     setFilters(DEFAULT_FILTERS)
   }, [])
 
   const activeFilterCount = useMemo(() => {
+    const geoActive = filters.lat && filters.lng ? 1 : 0
     const locationActive = filters.commune_id || filters.province_id ? 1 : 0
 
     return [
@@ -190,6 +223,8 @@ export function useListingFilters() {
       filters.price_max,
       filters.condition,
       filters.troc,
+      geoActive ? 'geo' : '',
+      geoActive && filters.radius !== 20 ? 'radius' : '',
       filters.sort !== 'date' ? filters.sort : '',
     ].filter(Boolean).length
   }, [filters])
@@ -198,6 +233,8 @@ export function useListingFilters() {
     filters,
     setFilter,
     setPage,
+    setLocation,
+    clearLocation,
     resetFilters,
     activeFilterCount,
     hasActiveFilters: activeFilterCount > 0,

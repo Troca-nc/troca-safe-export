@@ -10,7 +10,7 @@ export async function bootstrapPushNotifications({ onNotification, onResponse }:
   if (Platform.OS === 'web') return () => undefined;
 
   const { registerPushToken, setupNotificationListeners } = await import('@/lib/notifications');
-  registerPushToken().catch(() => {});
+  registerPushToken({ requestPermission: false }).catch(() => {});
 
   return setupNotificationListeners(
     onNotification ?? (() => undefined),

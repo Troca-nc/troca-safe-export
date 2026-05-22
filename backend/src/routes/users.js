@@ -32,7 +32,7 @@ router.get('/me/favoris', authenticate, async (req, res, next) => {
               u.phone_verified AS seller_phone_verified, u.trust_score AS seller_trust_score,
               u.trust_level AS seller_trust_level,
               f.created_at AS favorited_at,
-              (SELECT url FROM annonce_images WHERE annonce_id = a.id AND is_cover = TRUE LIMIT 1) AS cover_image
+              (SELECT thumbnail_url FROM annonce_images WHERE annonce_id = a.id AND is_cover = TRUE LIMIT 1) AS cover_image
        FROM favoris f
        JOIN annonces a  ON a.id = f.annonce_id AND a.deleted_at IS NULL AND a.status = 'active'
        LEFT JOIN categories cat ON cat.id = a.category_id

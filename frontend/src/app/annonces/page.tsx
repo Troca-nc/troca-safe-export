@@ -35,6 +35,8 @@ const CONDITION_OPTIONS = [
   { value: 'for_parts', label: 'Pour pieces' },
 ]
 
+const RADIUS_OPTIONS = [5, 10, 20, 50, 100]
+
 const FALLBACK_PROVINCES = [
   {
     id: 1,
@@ -82,10 +84,13 @@ function ListingsPageContent() {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [viewMode,    setViewMode]    = useState<'list' | 'map'>('list')
   const [openFamilySlug, setOpenFamilySlug] = useState<string | null>(null)
+  const [geoLoading, setGeoLoading] = useState(false)
   const {
     filters,
     setFilter,
     setPage,
+    setLocation,
+    clearLocation,
     resetFilters,
     activeFilterCount,
   } = useListingFilters()
@@ -117,6 +122,11 @@ function ListingsPageContent() {
       if (filters.price_max)  params.price_max  = filters.price_max
       if (filters.condition)  params.condition  = filters.condition
       if (filters.troc === 'true') params.troc = 'true'
+      if (filters.lat && filters.lng) {
+        params.lat = filters.lat
+        params.lng = filters.lng
+        params.radius = filters.radius
+      }
       // Resoudre category slug -> id
       if (filters.category) {
         const found = visibleCategories.flatMap((c: any) => [c, ...(c.subcategories || [])])
@@ -193,6 +203,40 @@ function ListingsPageContent() {
     setOpenFamilySlug(null)
     resetFilters()
   }
+
+  const snapRadius = useCallback((value: number) => {
+    return RADIUS_OPTIONS.reduce((best, current) => (
+      Math.abs(current - value) < Math.abs(best - value) ? current : best
+    ), RADIUS_OPTIONS[0])
+  }, [])
+
+  const handleUseLocation = useCallback(() => {
+    // TODO: test E2E sur la géolocalisation manuelle et le rayon de recherche.
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      window.alert('La géolocalisation n’est pas disponible dans ce navigateur.')
+      return
+    }
+
+    setGeoLoading(true)
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation(
+          position.coords.latitude.toFixed(6),
+          position.coords.longitude.toFixed(6)
+        )
+        setGeoLoading(false)
+      },
+      () => {
+        setGeoLoading(false)
+        window.alert('Impossible de récupérer votre position pour le moment.')
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 8000,
+        maximumAge: 60_000,
+      }
+    )
+  }, [setLocation])
 
   const isCategoryActive = (slug: string) => filters.category === slug
   const isParentCategoryActive = (cat: any) =>
@@ -403,6 +447,66 @@ function ListingsPageContent() {
           </div>
         </div>
       </div>
+
+      <div className="space-y-2 rounded-2xl border border-night/8 bg-sand/20 p-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-night/40">
+              Rayon de recherche
+            </label>
+            <p className="mt-1 text-xs text-night/45">
+              Distance max autour de votre position partagée.
+            </p>
+          </div>
+          <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-night shadow-sm">
+            {filters.radius} km
+          </div>
+        </div>
+        <input
+          type="range"
+          min={RADIUS_OPTIONS[0]}
+          max={RADIUS_OPTIONS[RADIUS_OPTIONS.length - 1]}
+          step={1}
+          value={filters.radius}
+          onChange={(e) => updateFilter('radius', snapRadius(Number(e.target.value)))}
+          className="w-full accent-coral"
+          aria-label="Rayon de recherche en kilomètres"
+        />
+        <div className="flex justify-between text-[10px] text-night/35">
+          {RADIUS_OPTIONS.map((value) => (
+            <span key={value}>{value} km</span>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2 pt-1">
+          <button
+            type="button"
+            onClick={handleUseLocation}
+            disabled={geoLoading}
+            className="rounded-full bg-night px-3 py-2 text-xs font-medium text-white disabled:opacity-60"
+          >
+            {geoLoading ? 'Localisation…' : 'Utiliser ma position'}
+          </button>
+          {filters.lat && filters.lng && (
+            <button
+              type="button"
+              onClick={clearLocation}
+              className="rounded-full border border-night/10 bg-white px-3 py-2 text-xs font-medium text-night/60 hover:bg-sand"
+            >
+              Effacer la position
+            </button>
+          )}
+        </div>
+        {filters.lat && filters.lng ? (
+          <p className="text-[11px] text-jungle">
+            Position partagée activée.
+          </p>
+        ) : (
+          <p className="text-[11px] text-night/40">
+            Aucune demande de permission n’est envoyée tant que vous ne cliquez pas sur le bouton.
+          </p>
+        )}
+      </div>
+
       {/* Prix */}
       <div>
         <h3 className="font-semibold text-night text-sm mb-3">Prix (XPF)</h3>

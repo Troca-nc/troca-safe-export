@@ -68,6 +68,9 @@ const updateSchema = baseListingSchema.fork(
   ['category_id', 'commune_id', 'condition'],
   (f) => f.optional()
 );
+const updateSchemaWithStatus = updateSchema.keys({
+  status: Joi.string().valid('active', 'inactive', 'sold').optional(),
+});
 
 const signalerSchema = Joi.object({
   reason:  Joi.string().valid('spam','fake','prohibited','offensive','other').required(),
@@ -82,9 +85,17 @@ router.get('/', optionalAuth, async (req, res, next) => {
     const cached = await readListCache(cacheKey);
     if (cached) return res.json(cached);
 
-    const { whereClause, params, orderBy, pageNum, pageSize, offset } = buildListingSearchContext(req.query);
+    const { whereClause, params, orderBy, pageNum, pageSize, offset, geo } = buildListingSearchContext(req.query);
     const limitPlaceholder = params.length + 1;
     const offsetPlaceholder = params.length + 2;
+    const distanceSelect = geo?.enabled
+      ? `ROUND((
+          ST_Distance(
+            ST_SetSRID(ST_MakePoint(com.longitude, com.latitude), 4326)::geography,
+            ST_SetSRID(ST_MakePoint($${geo.lngParam}, $${geo.latParam}), 4326)::geography
+          ) / 1000.0
+        )::numeric, 1) AS distance_km`
+      : 'NULL::numeric AS distance_km';
 
     const countRes = await query(
       `SELECT COUNT(*) AS total
@@ -111,6 +122,7 @@ router.get('/', optionalAuth, async (req, res, next) => {
           a.created_at AS published_at,
           a.nb_vues,
           a.boost_expires_at AS boosted_until,
+          ${distanceSelect},
           a.commune_id,
           cat.id AS category_id,
           cat.name AS category_name, cat.slug AS category_slug, cat.icon AS category_icon,
@@ -122,9 +134,12 @@ router.get('/', optionalAuth, async (req, res, next) => {
           u.trust_score AS seller_trust_score,
           u.trust_level AS seller_trust_level,
           u.note_moyenne AS user_rating,
-          (SELECT url FROM annonce_images
+          (SELECT thumbnail_url FROM annonce_images
            WHERE annonce_id = a.id AND is_cover = TRUE
-           LIMIT 1) AS cover_image
+           LIMIT 1) AS cover_image_thumbnail,
+          (SELECT id FROM annonce_images
+           WHERE annonce_id = a.id AND is_cover = TRUE
+           LIMIT 1) AS cover_image_id
        FROM annonces a
        LEFT JOIN categories cat ON cat.id = a.category_id
        LEFT JOIN categories parent ON parent.id = cat.parent_id
@@ -180,7 +195,13 @@ router.get('/:id', optionalAuth, async (req, res, next) => {
           u.phone_verified AS seller_phone_verified,
           COALESCE(
             json_agg(
-              json_build_object('id', img.id, 'url', img.url, 'is_cover', img.is_cover)
+              json_build_object(
+                'id', img.id,
+                'url', img.url,
+                'thumbnail_url', img.thumbnail_url,
+                'variants', img.variants,
+                'is_cover', img.is_cover
+              )
               ORDER BY img.is_cover DESC, img.sort_order
             ) FILTER (WHERE img.id IS NOT NULL),
             '[]'
@@ -308,7 +329,7 @@ router.put('/:id', authenticate, async (req, res, next) => {
       return res.status(403).json({ error: 'Vous ne pouvez modifier que vos propres annonces.' });
     }
 
-    const { error, value } = updateSchema.validate(req.body);
+    const { error, value } = updateSchemaWithStatus.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
 
     const fields = [];
@@ -374,6 +395,12 @@ router.put('/:id', authenticate, async (req, res, next) => {
     if (Object.prototype.hasOwnProperty.call(value, 'phone')) {
       fields.push(`phone = $${p}`);
       params.push(value.phone || null);
+      p++;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(value, 'status') && value.status !== undefined) {
+      fields.push(`status = $${p}`);
+      params.push(value.status);
       p++;
     }
 
@@ -518,7 +545,8 @@ router.get('/user/:userId', optionalAuth, async (req, res, next) => {
       `SELECT a.id, a.titre, a.prix, a.condition, a.created_at, a.nb_vues AS view_count, a.status,
               cat.name AS category_name,
               com.name AS commune_name,
-              (SELECT url FROM annonce_images WHERE annonce_id = a.id AND is_cover = TRUE LIMIT 1) AS cover_image
+              (SELECT thumbnail_url FROM annonce_images WHERE annonce_id = a.id AND is_cover = TRUE LIMIT 1) AS cover_image,
+              (SELECT id FROM annonce_images WHERE annonce_id = a.id AND is_cover = TRUE LIMIT 1) AS cover_image_id
        FROM annonces a
        LEFT JOIN categories cat ON cat.id = a.category_id
        LEFT JOIN communes com   ON com.id = a.commune_id

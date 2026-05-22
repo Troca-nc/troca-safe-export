@@ -10,6 +10,7 @@ import {
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { router, useLocalSearchParams, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useMutation } from '@tanstack/react-query';
 import { api, messagesApi } from '@/lib/api';
 import { getSocket, messagingSocket } from '@/lib/socket';
 import { useAuthStore } from '@/store/authStore';
@@ -51,6 +52,31 @@ export default function ConversationScreen() {
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const didInitialScroll = useRef(false);
+  const sendMessageMutation = useMutation({
+    mutationFn: async (content: string) => {
+      await api.post(`/messages/conversations/${id}`, { content });
+    },
+    onMutate: async (content) => {
+      const optimistic: Message = {
+        id: Date.now(),
+        sender_id: Number(user!.id),
+        type: 'text',
+        content,
+        created_at: new Date().toISOString(),
+        is_read: false,
+        pending: true,
+      };
+      setMessages((prev) => [...prev, optimistic]);
+      scheduleScroll();
+      return { optimistic };
+    },
+    onError: (_err, _content, context) => {
+      if (!context?.optimistic) return;
+      setMessages((prev) =>
+        prev.map((m) => (m.id === context.optimistic.id ? { ...m, pending: false, failed: true } : m))
+      );
+    },
+  });
 
   const scheduleScroll = useCallback((delay = 100) => {
     if (scrollTimer.current) clearTimeout(scrollTimer.current);
@@ -64,6 +90,7 @@ export default function ConversationScreen() {
       const { data } = await messagesApi.getMessages(String(id), 1, 30);
       setConv(data.data.conversation);
       setMessages(data.data.messages ?? []);
+      void messagesApi.markConversationRead(String(id)).catch(() => {});
     } catch {
       Alert.alert('Erreur', 'Conversation introuvable');
       router.back();
@@ -95,7 +122,6 @@ export default function ConversationScreen() {
       socket = s;
       socketRef.current = s;
       socket.emit('join_conversation', id);
-      socket.emit('mark_read', id);
 
       onNewMessage = (msg: Message) => {
         setMessages((prev) => {
@@ -144,24 +170,10 @@ export default function ConversationScreen() {
     setText('');
     setSending(true);
 
-    const optimistic: Message = {
-      id: Date.now(),
-      sender_id: Number(user!.id),
-      type: 'text',
-      content,
-      created_at: new Date().toISOString(),
-      is_read: false,
-      pending: true,
-    };
-    setMessages((prev) => [...prev, optimistic]);
-    scheduleScroll();
-
     try {
-      await api.post(`/messages/conversations/${id}`, { content });
+      await sendMessageMutation.mutateAsync(content);
     } catch {
-      setMessages((prev) =>
-        prev.map((m) => (m.id === optimistic.id ? { ...m, pending: false, failed: true } : m))
-      );
+      // rollback handled by onError
     } finally {
       setSending(false);
     }

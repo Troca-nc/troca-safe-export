@@ -65,7 +65,7 @@ export default function MessagesTab() {
 
     getSocket().then((socket) => {
       const onNotif = (n: { type: string }) => {
-        if (n.type === 'new_message') fetchConvs();
+        if (n.type === 'new_message' || n.type === 'message_read') fetchConvs();
       };
       socket.on('notification', onNotif);
       cleanup = () => socket.off('notification', onNotif);

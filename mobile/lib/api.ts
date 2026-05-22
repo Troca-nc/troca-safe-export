@@ -178,6 +178,7 @@ export const messagesApi = {
   startConversation: (data: object) => api.post('/messages/conversations', data),
   sendMessage: (convId: string, content: string) => api.post(`/messages/conversations/${convId}`, { content }),
   sendPhoto: (convId: string, photo_url: string) => api.post(`/messages/conversations/${convId}`, { type: 'photo', photo_url }),
+  markConversationRead: (convId: string | number) => api.patch(`/messages/conversations/${convId}/read`),
 }
 
 export const statsApi = {

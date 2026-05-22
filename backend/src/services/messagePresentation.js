@@ -89,6 +89,7 @@ function mapMessageRow(msg, convId) {
     photo_url: msg.photo_url,
     is_offer: msg.is_offer,
     offer: msg.offer || null,
+    read_at: msg.read_at || null,
     created_at: msg.created_at,
   };
 }

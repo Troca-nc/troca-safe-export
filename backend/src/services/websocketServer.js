@@ -9,6 +9,7 @@ const { verifyAccessToken } = require('../config/jwt');
 const { query }             = require('../config/database');
 const { logger }            = require('../utils/logger');
 const { recordWebsocket }    = require('./observability');
+const { markConversationMessagesRead } = require('./messageConversationService');
 const {
   initWebsocketBridge,
   publishConversationEvent,
@@ -17,6 +18,22 @@ const {
 } = require('./websocketBridge');
 
 let _io = null;
+
+async function emitConversationRead(convId, userId, readCount = 0) {
+  if (!readCount) return 0;
+
+  await publishConversationEvent(convId, 'message_read', {
+    convId,
+    byUserId: userId,
+    readCount,
+  });
+  await publishConversationEvent(convId, 'messages_read', {
+    convId,
+    byUserId: userId,
+    readCount,
+  });
+  return readCount;
+}
 
 /**
  * Initialise socket.io sur le serveur HTTP Express
@@ -113,12 +130,11 @@ function initSocket(httpServer) {
     // Marquer comme lu
     socket.on('mark_read', async (convId) => {
       try {
-        await query(
-          'UPDATE messages SET read_at = NOW() WHERE conv_id = $1 AND sender_id != $2 AND read_at IS NULL',
-          [convId, userId]
-        );
+        const readCount = await markConversationMessagesRead(convId, userId);
         recordWebsocket('message', { type: 'mark_read', conv_id: convId, user_id: userId });
-        publishConversationEvent(convId, 'messages_read', { convId, byUserId: userId }).catch(() => {});
+        if (readCount > 0) {
+          emitConversationRead(convId, userId, readCount).catch(() => {});
+        }
       } catch (err) {
         logger.error('ws_mark_read_error', { error: err, user_id: userId, conv_id: convId });
       }
@@ -154,4 +170,4 @@ function notifyUser(userId, type, data) {
   publishUserEvent(userId, 'notification', { type, ...data }).catch(() => {});
 }
 
-module.exports = { initSocket, getIO, emitNewMessage, notifyUser, shutdownWebsocketBridge };
+module.exports = { initSocket, getIO, emitNewMessage, notifyUser, emitConversationRead, shutdownWebsocketBridge };

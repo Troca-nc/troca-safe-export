@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import ListingImageComponent from '@/components/ListingImage'
 import {
   AlertTriangle,
   BadgeCheck,
@@ -24,10 +25,12 @@ type TrustState = {
   className: string
 }
 
-type ListingImage = {
+type ListingImageItem = {
   id: number
   url: string
   thumbnail_url?: string | null
+  medium_url?: string | null
+  original_url?: string | null
 }
 
 type ListingUser = {
@@ -64,7 +67,7 @@ type ListingDetail = {
   category_icon?: string | null
   published_at?: string
   contre_quoi?: string | null
-  images?: ListingImage[]
+  images?: ListingImageItem[]
   user: ListingUser
 }
 
@@ -134,7 +137,7 @@ export function ListingHeroCard({
       <div className="bg-white rounded-3xl border border-night/8 overflow-hidden shadow-sm">
         <div className="aspect-[4/3] bg-sand relative">
           {activeCover ? (
-            <img src={activeCover} alt={listing.title} className="w-full h-full object-cover" />
+            <ListingImageComponent src={activeCover} alt={listing.title} sizes="(max-width: 768px) 100vw, 60vw" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-5xl text-night/20">📦</div>
           )}
@@ -158,11 +161,15 @@ export function ListingHeroCard({
                 key={image.id}
                 type="button"
                 onClick={() => onPickImage(index)}
-                className={`w-20 h-20 rounded-2xl overflow-hidden shrink-0 border-2 transition-colors ${
+                className={`relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 border-2 transition-colors ${
                   index === activeImage ? 'border-coral' : 'border-transparent'
                 }`}
               >
-                <img src={image.thumbnail_url ?? image.url} alt="" className="w-full h-full object-cover" />
+                <ListingImageComponent
+                  src={image.thumbnail_url ?? image.url}
+                  alt=""
+                  sizes="160px"
+                />
               </button>
             ))}
           </div>
@@ -566,10 +573,11 @@ export function SellerListingsSection({
           >
             <div className="aspect-[4/3] bg-sand overflow-hidden relative">
               {item.cover_image ? (
-                <img
+                <ListingImageComponent
                   src={item.cover_image}
                   alt={item.title ?? item.titre ?? 'Annonce'}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  imgClassName="group-hover:scale-105 transition-transform duration-300"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-3xl opacity-30">📦</div>

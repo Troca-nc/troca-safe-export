@@ -14,6 +14,11 @@ const { v4: uuidv4 } = require('uuid');
 const { query }      = require('../config/database');
 const { authenticate } = require('../middleware/auth');
 const { uploadLimiter } = require('../middleware/rateLimit');
+const {
+  buildUploadPublicUrl,
+  processImageVariants,
+  removeImageFiles,
+} = require('../services/imageService');
 
 const router = express.Router();
 router.use(authenticate);
@@ -118,14 +123,35 @@ router.post('/listing/:id', uploadLimiter, upload.array('images', MAX_IMAGES), a
     const savedImages = [];
     for (let i = 0; i < req.files.length; i++) {
       const file      = req.files[i];
-      const processed = await processImage(file.buffer, `annonces/${listingId}`);
+      const processed = await processImageVariants(file.buffer, file, listingId);
       const isFirst   = existingCount === 0 && i === 0;
 
+      const insertResult = await query(`
+        INSERT INTO annonce_images (annonce_id, url, thumbnail_url, variants, sort_order, is_cover)
+        VALUES ($1, '', '', $2::jsonb, $3, $4)
+        RETURNING id
+      `, [listingId, JSON.stringify(processed.relativePaths), existingCount + i, isFirst]);
+
+      const imageId = insertResult.rows[0].id;
+      const publicUrls = {
+        original: buildUploadPublicUrl(imageId, 'original'),
+        thumb_400: buildUploadPublicUrl(imageId, 'thumb_400'),
+        thumb_800: buildUploadPublicUrl(imageId, 'thumb_800'),
+      };
+      const variants = {
+        original: { path: processed.relativePaths.original, url: publicUrls.original },
+        thumb_400: { path: processed.relativePaths.thumb_400, url: publicUrls.thumb_400 },
+        thumb_800: { path: processed.relativePaths.thumb_800, url: publicUrls.thumb_800 },
+      };
+
       const result = await query(`
-        INSERT INTO annonce_images (annonce_id, url, thumbnail_url, sort_order, is_cover)
-        VALUES ($1, $2, $3, $4, $5)
-        RETURNING id, url, thumbnail_url, sort_order, is_cover
-      `, [listingId, processed.url, processed.thumbnail_url, existingCount + i, isFirst]);
+        UPDATE annonce_images
+        SET url = $1,
+            thumbnail_url = $2,
+            variants = $3::jsonb
+        WHERE id = $4
+        RETURNING id, url, thumbnail_url, variants, sort_order, is_cover
+      `, [publicUrls.original, publicUrls.thumb_400, JSON.stringify(variants), imageId]);
 
       savedImages.push(result.rows[0]);
     }
@@ -238,14 +264,8 @@ router.delete('/image/:id', async (req, res, next) => {
       `, [img.annonce_id]);
     }
 
-    // Supprimer le fichier local (en background)
-    const uploadRoot = getUploadDir();
-    const pathname = new URL(img.url).pathname.replace(/^\/uploads\//, '');
-    const localPath = path.join(uploadRoot, pathname);
-    const thumbPath = localPath.replace(/\.webp$/, '_thumb.webp');
-
-    fs.unlink(localPath).catch(() => {});
-    fs.unlink(thumbPath).catch(() => {});
+    // Supprimer les fichiers physiques (en background)
+    removeImageFiles(img).catch(() => {});
 
     res.json({ message: 'Photo supprimée' });
   } catch (err) {

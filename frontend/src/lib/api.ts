@@ -330,6 +330,8 @@ export const messagesApi = {
     api.post(`/messages/conversations/${convId}`, { content }),
   sendPhoto: (convId: string, photo_url: string) =>
     api.post(`/messages/conversations/${convId}`, { type: 'photo', photo_url }),
+  markConversationRead: (convId: string | number) =>
+    api.patch(`/messages/conversations/${convId}/read`),
 }
 
 // Communes and categories
@@ -418,6 +420,14 @@ export const notificationsApi = {
   ),
   markAllRead: () => api.post('/users/notifications/read-all').finally(() => invalidateApiCache('notifications.')),
   markRead: (id: number) => api.post(`/users/notifications/${id}/read`).finally(() => invalidateApiCache('notifications.')),
+}
+
+export const subscriptionsApi = {
+  getStatus: () => cachedGet(
+    buildCacheKey('subscriptions.getStatus', '/subscriptions/status'),
+    () => api.get('/subscriptions/status'),
+    CACHE_TTL.short,
+  ),
 }
 
 // Users

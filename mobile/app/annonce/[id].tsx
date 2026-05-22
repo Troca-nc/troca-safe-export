@@ -11,11 +11,13 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { useMutation } from '@tanstack/react-query';
 import { useStripe } from '@stripe/stripe-react-native';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { api, listingsApi, usersApi } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
+import { useFavorite } from '@/hooks/useFavorite';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import {
   buildMobileShareLinks,
@@ -53,6 +55,7 @@ import {
 export default function AnnonceDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAuthStore();
+  const { toggleFavorite } = useFavorite();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   const [annonce, setAnnonce] = useState<ListingDetail | null>(null);
@@ -66,6 +69,21 @@ export default function AnnonceDetail() {
   const [sellerReviews, setSellerReviews] = useState<SellerReview[]>([]);
   const [relatedListings, setRelatedListings] = useState<RelatedListing[]>([]);
   const [sellerLoading, setSellerLoading] = useState(false);
+  const reportMutation = useMutation({
+    mutationFn: async ({ reason }: { reason: 'spam' | 'fake' | 'prohibited' | 'offensive' | 'other' }) => {
+      if (!annonce) return;
+      await api.post(`/listings/${annonce.id}/signaler`, { reason });
+    },
+    onMutate: () => {
+      setReporting(true);
+    },
+    onError: (err: any) => {
+      Alert.alert('Erreur', err?.response?.data?.error ?? "Impossible d'envoyer le signalement");
+    },
+    onSettled: () => {
+      setReporting(false);
+    },
+  });
 
   useEffect(() => {
     if (!id) return;
@@ -243,17 +261,19 @@ export default function AnnonceDetail() {
 
   const handleFavorite = async () => {
     if (!annonce) return;
+    const next = !favorited;
+    setFavorited(next);
     try {
-      const { data } = await api.post(`/listings/${annonce.id}/favoris`);
-      const next =
-        data.favorited ??
-        data.data?.favorited ??
-        data.is_favorited ??
-        data.data?.is_favorited ??
-        !favorited;
-      setFavorited(Boolean(next));
+      await toggleFavorite({
+        id: String(annonce.id),
+        titre: annonce.title,
+        prix: annonce.price,
+        cover_image: images[0] ?? null,
+        commune: annonce.commune_name ?? null,
+        category: annonce.category_name ?? null,
+      });
     } catch {
-      Alert.alert('Erreur', 'Impossible de modifier les favoris');
+      setFavorited(!next);
     }
   };
 
@@ -341,14 +361,11 @@ export default function AnnonceDetail() {
 
   const submitReport = async (reason: 'spam' | 'fake' | 'prohibited' | 'offensive' | 'other') => {
     if (!annonce || reporting) return;
-    setReporting(true);
     try {
-      await api.post(`/listings/${annonce.id}/signaler`, { reason });
+      await reportMutation.mutateAsync({ reason });
       Alert.alert('Merci', 'Le signalement a été envoyé à notre équipe de moderation.');
-    } catch (err: any) {
-      Alert.alert('Erreur', err?.response?.data?.error ?? "Impossible d'envoyer le signalement");
-    } finally {
-      setReporting(false);
+    } catch {
+      // rollback handled by the mutation
     }
   };
 

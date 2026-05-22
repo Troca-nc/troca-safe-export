@@ -181,6 +181,7 @@ CREATE TABLE IF NOT EXISTS annonce_images (
   annonce_id     INTEGER      NOT NULL REFERENCES annonces(id) ON DELETE CASCADE,
   url            VARCHAR(500) NOT NULL,
   thumbnail_url  VARCHAR(500) NOT NULL,
+  variants       JSONB        NOT NULL DEFAULT '{}'::jsonb,
   position       SMALLINT     NOT NULL DEFAULT 0,
   created_at     TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );

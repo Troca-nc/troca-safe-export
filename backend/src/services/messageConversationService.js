@@ -41,7 +41,7 @@ async function listConversationsForUser(userId) {
       l.titre AS listing_title,
       l.prix AS listing_price,
       l.status AS listing_status,
-      img.url AS listing_image,
+      img.thumbnail_url AS listing_image,
       buyer.prenom AS buyer_first_name,
       buyer.nom AS buyer_last_name,
       buyer.avatar_url AS buyer_avatar,
@@ -69,9 +69,9 @@ async function listConversationsForUser(userId) {
     JOIN users seller ON seller.id = c.seller_id
     LEFT JOIN annonces l ON l.id = c.annonce_id
     LEFT JOIN LATERAL (
-      SELECT url FROM annonce_images
-      WHERE annonce_id = c.annonce_id AND is_cover = TRUE
-      LIMIT 1
+      SELECT thumbnail_url FROM annonce_images
+       WHERE annonce_id = c.annonce_id AND is_cover = TRUE
+       LIMIT 1
     ) img ON TRUE
     LEFT JOIN LATERAL (
       SELECT content, created_at, sender_id, type
@@ -93,11 +93,11 @@ async function loadConversationThread(userId, conversationId, page = 1, limit = 
   const convResult = await query(
     `SELECT c.id, c.annonce_id, c.buyer_id, c.seller_id, c.status, c.created_at, c.updated_at,
             a.titre AS listing_title, a.prix AS listing_price, a.status AS listing_status,
-            img.url AS listing_image
+            img.thumbnail_url AS listing_image
      FROM conversations c
      JOIN annonces a ON a.id = c.annonce_id
      LEFT JOIN LATERAL (
-       SELECT url FROM annonce_images
+       SELECT thumbnail_url FROM annonce_images
        WHERE annonce_id = c.annonce_id AND is_cover = TRUE
        LIMIT 1
      ) img ON TRUE
@@ -150,11 +150,6 @@ async function loadConversationThread(userId, conversationId, page = 1, limit = 
     `, [conversationId, safeLimit, offset]);
   }
 
-  await query(`
-    UPDATE messages SET read_at = NOW()
-    WHERE conv_id = $1 AND sender_id != $2 AND read_at IS NULL
-  `, [conversationId, userId]);
-
   const conversation = convResult.rows[0];
   const orderedMessages = messages.rows.reverse();
   const nextCursor = orderedMessages[0]
@@ -185,6 +180,19 @@ async function loadConversationThread(userId, conversationId, page = 1, limit = 
       before: nextCursor,
     },
   };
+}
+
+async function markConversationMessagesRead(conversationId, userId) {
+  const result = await query(`
+    UPDATE messages
+    SET read_at = NOW()
+    WHERE conv_id = $1
+      AND sender_id != $2
+      AND read_at IS NULL
+    RETURNING id
+  `, [conversationId, userId]);
+
+  return result.rowCount ?? result.rows.length ?? 0;
 }
 
 async function startConversation(userId, listingId, message) {
@@ -347,5 +355,6 @@ module.exports = {
   listConversationsForUser,
   loadConversationThread,
   loadMessageNotificationTarget,
+  markConversationMessagesRead,
   startConversation,
 };

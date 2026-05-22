@@ -8,7 +8,7 @@ import { fr } from 'date-fns/locale'
 import { ArrowLeft, Heart } from 'lucide-react'
 import { listingsApi, messagesApi, usersApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
-import { useFavorisStore } from '@/store/favorisStore'
+import { useFavorite } from '@/hooks/useFavorite'
 import ShareButton from '@/components/annonces/ShareButton'
 import {
   ListingHeroCard,
@@ -24,6 +24,8 @@ type ListingImage = {
   id: number
   url: string
   thumbnail_url?: string | null
+  medium_url?: string | null
+  original_url?: string | null
 }
 
 type ListingUser = {
@@ -175,7 +177,7 @@ function buildAssociatedSearches(listing: ListingDetail) {
 export default function AnnonceDetail({ id, initialData }: Props) {
   const router = useRouter()
   const { user } = useAuthStore()
-  const { isSaved, toggle } = useFavorisStore()
+  const { isFavorited, toggleFavorite } = useFavorite()
   const [listing, setListing] = useState<ListingDetail | null>(initialData ?? null)
   const [loading, setLoading] = useState(!initialData)
   const [activeImage, setActiveImage] = useState(0)
@@ -259,9 +261,13 @@ export default function AnnonceDetail({ id, initialData }: Props) {
   const currentUserId = user ? String(user.id) : null
   const ownerId = listing ? String(listing.user.id) : null
   const isOwner = Boolean(listing && currentUserId === ownerId)
-  const saved = listing ? isSaved(String(listing.id)) || Boolean(listing.is_favorited) : false
+  const saved = listing ? isFavorited(String(listing.id)) || Boolean(listing.is_favorited) : false
   const images = listing?.images ?? []
-  const activeCover = images[activeImage]?.url ?? images[0]?.url ?? null
+  const activeCover = images[activeImage]?.medium_url
+    ?? images[activeImage]?.url
+    ?? images[0]?.medium_url
+    ?? images[0]?.url
+    ?? null
   const associatedSearches = useMemo(() => (listing ? buildAssociatedSearches(listing) : []), [listing])
   const primaryCategoryHref = listing?.category_id ? `/annonces?category_id=${listing.category_id}` : '/annonces'
   const trustState = TRUST_LABELS[((listing?.user?.trust_level ?? 'inconnu') as keyof typeof TRUST_LABELS)] ?? TRUST_LABELS.inconnu
@@ -297,7 +303,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
 
   const handleFavorite = async () => {
     if (!listing) return
-    await toggle({
+    await toggleFavorite({
       id: String(listing.id),
       titre: listing.title,
       prix: listing.price,
@@ -305,7 +311,6 @@ export default function AnnonceDetail({ id, initialData }: Props) {
       commune: listing.commune_name ?? null,
       category: listing.category_name ?? null,
     })
-    setListing((current) => (current ? { ...current, is_favorited: !saved } : current))
   }
 
   const handleMessageSeller = async () => {

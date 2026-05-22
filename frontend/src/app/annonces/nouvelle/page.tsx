@@ -6,9 +6,29 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, CalendarDays, Clock3, MapPin, Sparkles } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
+import PublishWizard from '@/components/PublishWizard/PublishWizard'
 import { bonPlansApi, metaApi } from '@/lib/api'
 import { useAutosave, useBeforeUnload } from '@/hooks/useAutosave'
 import { useAuthStore } from '@/store/authStore'
+
+export default function NewListingPage() {
+  const [mode, setMode] = useState<'wizard' | 'simple' | null>(null)
+
+  useEffect(() => {
+    const queryMode = new URLSearchParams(window.location.search).get('mode')
+    setMode(queryMode === 'simple' ? 'simple' : 'wizard')
+  }, [])
+
+  if (mode === null) {
+    return <div className="min-h-screen bg-sand-light" />
+  }
+
+  if (mode !== 'simple') {
+    return <PublishWizard />
+  }
+
+  return <SimpleBonPlanPage />
+}
 
 type CommuneOption = {
   id: number
@@ -69,7 +89,7 @@ function formatPrice(value: number) {
   return `${new Intl.NumberFormat('fr-FR').format(value)} XPF`
 }
 
-export default function NewListingPage() {
+function SimpleBonPlanPage() {
   const router = useRouter()
   const userId = useAuthStore((state) => state.user?.id ?? 'guest')
   const [communces, setCommunces] = useState<CommuneOption[]>([])
@@ -79,7 +99,7 @@ export default function NewListingPage() {
   const [successMessage, setSuccessMessage] = useState('')
   const [createdId, setCreatedId] = useState<number | null>(null)
   const [form, setForm] = useState<FormState>(INITIAL_FORM)
-  const autosave = useAutosave(`draft_listing_${userId}`, form, 30_000)
+  const autosave = useAutosave(`draft_bon_plan_${userId}`, form, 30_000)
 
   useBeforeUnload(autosave.isDirty && !submitting)
 

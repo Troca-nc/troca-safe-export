@@ -1,5 +1,17 @@
 'use strict';
 
+async function setSubscriptionPaymentStatus(query, providerSubId, paymentStatus) {
+  if (!providerSubId) return;
+  await query(
+    `UPDATE subscriptions
+     SET payment_status = $2,
+         payment_status_updated_at = NOW(),
+         updated_at = NOW()
+     WHERE provider_sub_id = $1`,
+    [providerSubId, paymentStatus]
+  );
+}
+
 async function processStripeWebhookEvent({
   event,
   stripe,
@@ -16,7 +28,7 @@ async function processStripeWebhookEvent({
     const intent = event.data.object;
     const paymentRef = intent.id;
     const { rows: paymentRows } = await query(
-      `SELECT id FROM payments WHERE provider_ref = $1 LIMIT 1`,
+      `SELECT id, metadata, type FROM payments WHERE provider_ref = $1 LIMIT 1`,
       [paymentRef]
     );
     if (paymentRows[0]) {
@@ -25,6 +37,37 @@ async function processStripeWebhookEvent({
          WHERE id = $1 AND status = 'pending'`,
         [paymentRows[0].id]
       );
+      if (paymentRows[0].type === 'subscription') {
+        await setSubscriptionPaymentStatus(
+          query,
+          paymentRows[0].metadata?.provider_sub_id || intent.subscription || intent.metadata?.provider_sub_id || null,
+          'failed'
+        );
+      }
+    }
+    return;
+  }
+
+  if (event.type === 'charge.failed') {
+    const charge = event.data.object;
+    const paymentRef = charge.payment_intent || charge.id;
+    const { rows: paymentRows } = await query(
+      `SELECT id, metadata, type FROM payments WHERE provider_ref = $1 LIMIT 1`,
+      [paymentRef]
+    );
+    if (paymentRows[0]) {
+      await query(
+        `UPDATE payments SET status = 'failed', updated_at = NOW()
+         WHERE id = $1 AND status IN ('pending', 'succeeded')`,
+        [paymentRows[0].id]
+      );
+      if (paymentRows[0].type === 'subscription') {
+        await setSubscriptionPaymentStatus(
+          query,
+          paymentRows[0].metadata?.provider_sub_id || charge.subscription || charge.metadata?.provider_sub_id || null,
+          'failed'
+        );
+      }
     }
     return;
   }
@@ -143,13 +186,16 @@ async function processStripeWebhookEvent({
           await client.query(
             `INSERT INTO subscriptions
                (user_id, plan_id, billing_period, provider, provider_sub_id, status,
-                current_period_start, current_period_end, cancel_at_period_end)
-             VALUES ($1, $2, $3, 'stripe', $4, $5, $6, $7, FALSE)
+                current_period_start, current_period_end, cancel_at_period_end,
+                payment_status, payment_status_updated_at)
+             VALUES ($1, $2, $3, 'stripe', $4, $5, $6, $7, FALSE, 'succeeded', NOW())
              ON CONFLICT (provider_sub_id)
              DO UPDATE SET
                status = EXCLUDED.status,
                current_period_start = EXCLUDED.current_period_start,
                current_period_end = EXCLUDED.current_period_end,
+               payment_status = 'succeeded',
+               payment_status_updated_at = NOW(),
                updated_at = NOW()`,
             [payment.user_id, planId, billingPeriod, stripeSubId, stripeSub.status, periodStart, periodEnd]
           );
@@ -220,13 +266,16 @@ async function processStripeWebhookEvent({
           await client.query(
             `INSERT INTO subscriptions
                (user_id, plan_id, billing_period, provider, provider_sub_id, status,
-                current_period_start, current_period_end, cancel_at_period_end)
-             VALUES ($1, $2, $3, 'stripe', $4, $5, $6, $7, FALSE)
+                current_period_start, current_period_end, cancel_at_period_end,
+                payment_status, payment_status_updated_at)
+             VALUES ($1, $2, $3, 'stripe', $4, $5, $6, $7, FALSE, 'succeeded', NOW())
              ON CONFLICT (provider_sub_id)
              DO UPDATE SET
                status = EXCLUDED.status,
                current_period_start = EXCLUDED.current_period_start,
                current_period_end = EXCLUDED.current_period_end,
+               payment_status = 'succeeded',
+               payment_status_updated_at = NOW(),
                updated_at = NOW()`,
             [userId, planId, billingPeriod, subId, stripeSub.status, periodStart, periodEnd]
           );
@@ -269,7 +318,10 @@ async function processStripeWebhookEvent({
     await query(
       `UPDATE subscriptions
        SET status = $2, current_period_start = $3, current_period_end = $4,
-           cancel_at_period_end = $5, updated_at = NOW()
+           cancel_at_period_end = $5,
+           payment_status = CASE WHEN $2 = 'active' THEN 'succeeded' ELSE payment_status END,
+           payment_status_updated_at = CASE WHEN $2 = 'active' THEN NOW() ELSE payment_status_updated_at END,
+           updated_at = NOW()
        WHERE provider_sub_id = $1`,
       [subId, sub.status, periodStart, periodEnd, sub.cancel_at_period_end]
     );
@@ -306,7 +358,12 @@ async function processStripeWebhookEvent({
       const stripeSub = await stripe.subscriptions.retrieve(subId);
       const periodEnd = new Date(stripeSub.current_period_end * 1000);
       await query(
-        `UPDATE subscriptions SET current_period_end = $2, updated_at = NOW() WHERE provider_sub_id = $1`,
+        `UPDATE subscriptions
+         SET current_period_end = $2,
+             payment_status = 'succeeded',
+             payment_status_updated_at = NOW(),
+             updated_at = NOW()
+         WHERE provider_sub_id = $1`,
         [subId, periodEnd]
       );
       await query(
@@ -354,7 +411,12 @@ async function processStripeWebhookEvent({
     if (subId) {
       const inv = event.data.object;
       await query(
-        `UPDATE subscriptions SET status = 'past_due', updated_at = NOW() WHERE provider_sub_id = $1`,
+        `UPDATE subscriptions
+         SET status = 'past_due',
+             payment_status = 'failed',
+             payment_status_updated_at = NOW(),
+             updated_at = NOW()
+         WHERE provider_sub_id = $1`,
         [subId]
       );
       const { rows } = await query(
@@ -601,10 +663,11 @@ async function processPayplugWebhook({
         await client.query(
           `INSERT INTO subscriptions
              (user_id, plan_id, billing_period, provider, provider_sub_id, status,
-              current_period_start, current_period_end, cancel_at_period_end)
-           VALUES ($1, $2, $3, 'payplug', $4, 'active', NOW(), $5, FALSE)
+              current_period_start, current_period_end, cancel_at_period_end,
+              payment_status, payment_status_updated_at)
+           VALUES ($1, $2, $3, 'payplug', $4, 'active', NOW(), $5, FALSE, 'succeeded', NOW())
            ON CONFLICT (provider_sub_id)
-           DO UPDATE SET status = 'active', current_period_end = $5, updated_at = NOW()`,
+           DO UPDATE SET status = 'active', current_period_end = $5, payment_status = 'succeeded', payment_status_updated_at = NOW(), updated_at = NOW()`,
           [userId, planId, period, resourceId, periodEnd]
         );
 
