@@ -13,6 +13,7 @@ import { useAuthStore } from '@/store/authStore'
 import SocialAuthButtons from '@/components/auth/SocialAuthButtons'
 import TurnstileChallenge from '@/components/auth/TurnstileChallenge'
 import { DEMO_ACCOUNTS } from '@/lib/demoApi'
+import { consumeRedirectAfterLogin } from '@/lib/authRedirect'
 
 const schema = z.object({
   email: z.string().email('Email invalide'),
@@ -42,7 +43,7 @@ export default function LoginPage() {
         return
       }
       await login(data.email, data.password, turnstileToken || undefined)
-      router.push('/')
+      router.push(consumeRedirectAfterLogin('/'))
     } catch (err: any) {
       if (err?.response?.data?.code === 'EMAIL_NOT_VERIFIED') {
         router.push(`/verification-email?email=${encodeURIComponent(data.email)}`)
@@ -60,7 +61,7 @@ export default function LoginPage() {
         return
       }
       await login(DEMO_ACCOUNTS[key].email, DEMO_ACCOUNTS[key].password, turnstileToken || undefined)
-      router.push(key === 'admin' ? '/admin/dashboard' : '/')
+      router.push(consumeRedirectAfterLogin(key === 'admin' ? '/admin/dashboard' : '/'))
     } catch (err: any) {
       setServerError(err?.response?.data?.error || 'Connexion démo impossible')
     }

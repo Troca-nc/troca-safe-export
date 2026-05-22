@@ -4,12 +4,14 @@
 
 import { useEffect } from 'react';
 import { Stack } from 'expo-router';
+import { usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Button, Text, View, Platform } from 'react-native';
 import { useAuthStore } from '@/store/authStore';
 import { AppProviders } from '@/components/AppProviders';
 import { usePushNotificationRouting } from '@/hooks/usePushNotificationRouting';
+import { setCurrentPath } from '@/lib/navigationState';
 
 if (Platform.OS !== 'web') {
   SplashScreen.preventAutoHideAsync();
@@ -17,10 +19,15 @@ if (Platform.OS !== 'web') {
 
 export default function RootLayout() {
   const { hydrate, user } = useAuthStore();
+  const pathname = usePathname();
 
   useEffect(() => {
     hydrate().finally(() => SplashScreen.hideAsync());
   }, [hydrate]);
+
+  useEffect(() => {
+    setCurrentPath(pathname);
+  }, [pathname]);
 
   usePushNotificationRouting(Boolean(user));
 

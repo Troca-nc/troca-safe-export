@@ -4,8 +4,11 @@
 // ============================================================
 
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
+import { router } from 'expo-router'
 
 import { tokenStorage } from '@/lib/tokenStorage'
+import { requestDraftSave } from '@/lib/draftEvents'
+import { rememberRedirectAfterLogin } from '@/lib/authRedirect'
 
 export { tokenStorage } from '@/lib/tokenStorage'
 
@@ -289,8 +292,12 @@ api.interceptors.response.use(
     } catch (err) {
       queue.forEach((q) => q.reject(err))
       queue = []
+      // TODO: test E2E for auth expiry redirect and draft save flow.
+      requestDraftSave()
+      await rememberRedirectAfterLogin()
       await tokenStorage.clear()
       clearApiCache()
+      router.replace('/auth/login')
       return Promise.reject(err)
     } finally {
       isRefreshing = false

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import axios from 'axios'
 import { API_ORIGIN } from '@/lib/api'
+import { consumeRedirectAfterLogin } from '@/lib/authRedirect'
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ''
 const SOCIAL_AUTH_ENABLED =
   GOOGLE_CLIENT_ID.trim() !== '' && !GOOGLE_CLIENT_ID.toLowerCase().includes('changeme')
@@ -87,7 +88,7 @@ export default function SocialAuthButtons({ redirectTo = '/', mode = 'connexion'
     localStorage.setItem('access_token',  data.access_token)
     localStorage.setItem('refresh_token', data.refresh_token)
     setUser(data.user as any)
-    router.push(redirectTo)
+    router.push(consumeRedirectAfterLogin(redirectTo))
   }
 
   // ── Google ───────────────────────────────────────────────────────────────────

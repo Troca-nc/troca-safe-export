@@ -3,6 +3,9 @@
 
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 
+import { rememberRedirectAfterLogin } from '@/lib/authRedirect'
+import { requestDraftSave } from '@/lib/draftEvents'
+
 function normalizeApiBase(url: string) {
   const trimmed = url.trim().replace(/\/+$/, '')
   if (!trimmed) return 'http://localhost:3001/api'
@@ -57,6 +60,16 @@ function getRequestId() {
     return crypto.randomUUID()
   }
   return `req_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`
+}
+
+function redirectToLoginAfterAuthFailure() {
+  if (typeof window === 'undefined') return
+
+  // TODO: test E2E for auth expiry redirect and draft save flow.
+  requestDraftSave()
+  rememberRedirectAfterLogin()
+  clearTokens()
+  window.location.assign('/connexion')
 }
 
 function toCachedResponse<T>(response: AxiosResponse<T>): CachedResponse<T> {
@@ -168,8 +181,7 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem('refresh_token')
 
       if (!refreshToken) {
-        clearTokens()
-        window.location.href = '/connexion'
+        redirectToLoginAfterAuthFailure()
         return Promise.reject(error)
       }
 
@@ -188,8 +200,7 @@ api.interceptors.response.use(
       } catch {
         queue.forEach((p) => p.reject(error))
         queue = []
-        clearTokens()
-        window.location.href = '/connexion'
+        redirectToLoginAfterAuthFailure()
         return Promise.reject(error)
       } finally {
         isRefreshing = false

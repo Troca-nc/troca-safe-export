@@ -12,6 +12,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { z }               from 'zod';
 import { zodResolver }     from '@hookform/resolvers/zod';
 import { useAuthStore }    from '@/store/authStore';
+import { consumeRedirectAfterLogin } from '@/lib/authRedirect';
 import SocialAuthButtons   from '@/components/ui/SocialAuthButtons';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '@/constants/theme';
 import { DEMO_ACCOUNTS, isDemoModeEnabled } from '@/lib/demo';
@@ -41,7 +42,7 @@ export default function LoginScreen() {
   const onSubmit = async (data: FormData) => {
     try {
       await login(data.email, data.password);
-      // La navigation est gérée par le RootLayout (isHydrated + user)
+      router.replace(await consumeRedirectAfterLogin('/tabs/accueil'));
     } catch (err: any) {
       Alert.alert(
         'Connexion impossible',
