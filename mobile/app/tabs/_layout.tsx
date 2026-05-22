@@ -38,6 +38,7 @@ export default function TabsLayout() {
         tabBarShowLabel: true,
         tabBarStyle:     styles.tabBar,
         tabBarLabelStyle: styles.label,
+        tabBarItemStyle: styles.tabItem,
         tabBarActiveTintColor:   Colors.primary,
         tabBarInactiveTintColor: Colors.gray400,
       }}
@@ -98,7 +99,14 @@ const styles = StyleSheet.create({
     borderTopWidth:  1,
   },
   label:      { fontSize: FontSize.xs, marginTop: -2 },
-  iconWrap:   { position: 'relative', alignItems: 'center', justifyContent: 'center' },
+  tabItem:    { minHeight: 44 },
+  iconWrap:   {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+    minWidth: 44,
+  },
   badge: {
     position: 'absolute', top: -4, right: -8,
     backgroundColor: Colors.danger,

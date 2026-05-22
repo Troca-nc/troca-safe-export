@@ -173,7 +173,12 @@ export default function FavorisScreen() {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.heart} onPress={() => removeFavori(item.id)}>
+      <TouchableOpacity
+        style={styles.heart}
+        onPress={() => removeFavori(item.id)}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        accessibilityLabel="Retirer des favoris"
+      >
         <Ionicons name="heart" size={22} color={Colors.danger} />
       </TouchableOpacity>
     </TouchableOpacity>
@@ -281,7 +286,14 @@ const styles = StyleSheet.create({
   actionsRow: { flexDirection: 'row', justifyContent: 'flex-start', marginTop: 8 },
   sellerBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.full, paddingHorizontal: 10, paddingVertical: 6, backgroundColor: Colors.white },
   sellerBtnText: { fontSize: 11, fontWeight: FontWeight.semibold, color: Colors.primary },
-  heart: { padding: Spacing.sm },
+  heart: {
+    width: 44,
+    height: 44,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   sep: { height: 1, backgroundColor: Colors.border, marginLeft: 80 + Spacing.md * 2 },
   empty: { alignItems: 'center', paddingTop: 80, padding: Spacing.xl },
   emptyIcon: { fontSize: 56 },

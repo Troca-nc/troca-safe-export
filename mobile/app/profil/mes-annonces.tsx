@@ -247,7 +247,12 @@ export default function MesAnnoncesScreen() {
           headerTintColor: Colors.primary,
           headerStyle: { backgroundColor: Colors.white },
           headerRight: () => (
-            <TouchableOpacity onPress={() => router.push('/tabs/publier')} style={{ marginRight: Spacing.md }}>
+            <TouchableOpacity
+              onPress={() => router.push('/tabs/publier')}
+              style={styles.headerIconBtn}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityLabel="Publier une annonce"
+            >
               <Ionicons name="add-circle-outline" size={24} color={Colors.primary} />
             </TouchableOpacity>
           ),
@@ -356,4 +361,11 @@ const styles = StyleSheet.create({
   emptyTitle: { fontSize: FontSize.lg, fontWeight: FontWeight.semibold, color: Colors.text, marginTop: Spacing.md },
   emptyBtn: { marginTop: Spacing.lg, backgroundColor: Colors.primary, paddingHorizontal: Spacing.xl, paddingVertical: 12, borderRadius: Radius.md },
   emptyBtnText: { color: Colors.white, fontWeight: FontWeight.bold },
+  headerIconBtn: {
+    marginRight: Spacing.md,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 })

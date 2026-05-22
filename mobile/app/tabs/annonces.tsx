@@ -191,6 +191,8 @@ export default function AnnoncesTab() {
           <TouchableOpacity
             style={[styles.filterBtn, showFilters && styles.filterBtnActive]}
             onPress={() => setShowFilters((f) => !f)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityLabel="Afficher les filtres"
           >
             <Ionicons name="options-outline" size={20} color={showFilters ? Colors.white : Colors.primary} />
           </TouchableOpacity>
@@ -354,6 +356,8 @@ const styles = StyleSheet.create({
   filterBtn: {
     width: 44,
     height: 44,
+    minWidth: 44,
+    minHeight: 44,
     borderRadius: Radius.md,
     borderWidth: 1,
     borderColor: Colors.primary,

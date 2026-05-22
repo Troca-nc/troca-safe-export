@@ -428,7 +428,12 @@ export default function AnnonceDetail() {
           headerRight: () => (
             <View style={{ flexDirection: 'row', gap: 16, marginRight: Spacing.md }}>
               {!isOwner && (
-                <TouchableOpacity onPress={handleFavorite} accessibilityLabel="Favori">
+                <TouchableOpacity
+                  onPress={handleFavorite}
+                  accessibilityLabel="Favori"
+                  style={styles.headerIconBtn}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
                   <Ionicons
                     name={favorited ? 'heart' : 'heart-outline'}
                     size={22}
@@ -436,7 +441,12 @@ export default function AnnonceDetail() {
                   />
                 </TouchableOpacity>
               )}
-              <TouchableOpacity onPress={handleShare} accessibilityLabel="Partager">
+              <TouchableOpacity
+                onPress={handleShare}
+                accessibilityLabel="Partager"
+                style={styles.headerIconBtn}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
                 <Ionicons name="share-outline" size={22} color={Colors.primary} />
               </TouchableOpacity>
             </View>
@@ -554,5 +564,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.gray700,
     lineHeight: 24,
+  },
+  headerIconBtn: {
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -221,7 +221,12 @@ export default function PublicSellerProfileMobile() {
           headerTintColor: Colors.primary,
           headerStyle: { backgroundColor: Colors.white },
           headerRight: () => (
-            <TouchableOpacity onPress={handleShare} accessibilityLabel="Partager ce profil" style={{ marginRight: 6 }}>
+            <TouchableOpacity
+              onPress={handleShare}
+              accessibilityLabel="Partager ce profil"
+              style={styles.headerIconBtn}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
               <Ionicons name="share-outline" size={22} color={Colors.primary} />
             </TouchableOpacity>
           ),
@@ -309,5 +314,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
     color: Colors.textSecondary,
+  },
+  headerIconBtn: {
+    marginRight: 6,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

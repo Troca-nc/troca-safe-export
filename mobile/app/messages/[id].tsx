@@ -305,6 +305,7 @@ export default function ConversationScreen() {
                   disabled={!text.trim() || sending}
                   accessibilityRole="button"
                   accessibilityLabel="Envoyer le message"
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
                   <Ionicons name="send" size={20} color={Colors.white} />
                 </TouchableOpacity>
@@ -337,7 +338,16 @@ const styles = StyleSheet.create({
   typingText: { fontSize: FontSize.sm, color: Colors.textSecondary, fontStyle: 'italic' },
   inputBar: { flexDirection: 'row', alignItems: 'flex-end', backgroundColor: Colors.white, padding: Spacing.sm, borderTopWidth: 1, borderTopColor: Colors.border, gap: Spacing.sm },
   input: { flex: 1, backgroundColor: Colors.gray50, borderRadius: Radius.xl, paddingHorizontal: Spacing.md, paddingTop: 10, paddingBottom: 10, fontSize: FontSize.md, color: Colors.text, maxHeight: 120, borderWidth: 1, borderColor: Colors.border },
-  sendBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center' },
+  sendBtn: {
+    width: 44,
+    height: 44,
+    minWidth: 44,
+    minHeight: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   sendBtnDisabled: { backgroundColor: Colors.gray300 },
   connectionRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: Spacing.md, paddingBottom: Spacing.sm, backgroundColor: Colors.white },
   connectionDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.gray300 },

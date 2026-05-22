@@ -66,6 +66,7 @@ export function PhotoSection({ photos, onAdd, onRemove }: PhotoSectionProps) {
               onPress={() => onRemove(idx)}
               accessibilityRole="button"
               accessibilityLabel={`Supprimer la photo ${idx + 1}`}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
               <Ionicons name="close-circle" size={22} color={Colors.danger} />
             </TouchableOpacity>
@@ -261,7 +262,15 @@ const styles = StyleSheet.create({
     padding: 3,
   },
   photoPrimaryText: { color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold, textAlign: 'center' },
-  photoRemove: { position: 'absolute', top: -6, right: -6 },
+  photoRemove: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   photoAdd: {
     width: 104,
     height: 104,

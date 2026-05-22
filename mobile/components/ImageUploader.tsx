@@ -61,6 +61,7 @@ function UploadTile({
         style={[styles.dragHandle, disabled && styles.dragHandleDisabled]}
         accessibilityRole="button"
         accessibilityLabel="Déplacer la photo"
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       >
         <Ionicons name="reorder-three" size={24} color={Colors.white} />
       </TouchableOpacity>
@@ -90,6 +91,7 @@ function UploadTile({
             style={[styles.retryBtn, disabled && styles.retryBtnDisabled]}
             disabled={disabled}
             accessibilityRole="button"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Text style={styles.retryText}>Réessayer</Text>
           </TouchableOpacity>
@@ -110,6 +112,7 @@ function UploadTile({
           style={[styles.actionBtn, (disabled || index === 0) && styles.actionBtnDisabled]}
           accessibilityRole="button"
           accessibilityLabel="Déplacer vers le haut"
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           <Ionicons name="chevron-up" size={16} color={Colors.white} />
         </TouchableOpacity>
@@ -119,6 +122,7 @@ function UploadTile({
           style={[styles.actionBtn, (disabled || index === total - 1) && styles.actionBtnDisabled]}
           accessibilityRole="button"
           accessibilityLabel="Déplacer vers le bas"
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           <Ionicons name="chevron-down" size={16} color={Colors.white} />
         </TouchableOpacity>
@@ -128,6 +132,7 @@ function UploadTile({
           style={[styles.actionBtn, styles.removeBtn, disabled && styles.actionBtnDisabled]}
           accessibilityRole="button"
           accessibilityLabel="Supprimer la photo"
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           <Ionicons name="close" size={16} color={Colors.white} />
         </TouchableOpacity>
@@ -217,6 +222,8 @@ const styles = StyleSheet.create({
     left: 6,
     width: 44,
     height: 44,
+    minWidth: 44,
+    minHeight: 44,
     borderRadius: 22,
     backgroundColor: 'rgba(15,23,42,0.55)',
     alignItems: 'center',
@@ -231,13 +238,30 @@ const styles = StyleSheet.create({
   overlayError: { color: Colors.white, fontSize: FontSize.xs, fontWeight: FontWeight.semibold, marginBottom: 8, textAlign: 'center' },
   progressTrack: { width: '100%', height: 4, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.18)', overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: Colors.white },
-  retryBtn: { minHeight: 44, minWidth: 88, backgroundColor: Colors.white, borderRadius: Radius.full, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12 },
+  retryBtn: {
+    minHeight: 44,
+    minWidth: 88,
+    backgroundColor: Colors.white,
+    borderRadius: Radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+  },
   retryBtnDisabled: { opacity: 0.75 },
   retryText: { color: Colors.text, fontSize: 12, fontWeight: FontWeight.semibold },
   doneBadge: { position: 'absolute', top: 6, right: 6, flexDirection: 'row', alignItems: 'center', gap: 2, backgroundColor: '#16a34a', borderRadius: Radius.full, paddingHorizontal: 6, paddingVertical: 3, zIndex: 4 },
   doneText: { color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold },
   actions: { position: 'absolute', left: 6, right: 6, bottom: 6, flexDirection: 'row', gap: 6, justifyContent: 'space-between', zIndex: 4 },
-  actionBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(15,23,42,0.72)', alignItems: 'center', justifyContent: 'center' },
+  actionBtn: {
+    width: 44,
+    height: 44,
+    minWidth: 44,
+    minHeight: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(15,23,42,0.72)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   actionBtnDisabled: { opacity: 0.35 },
   removeBtn: { backgroundColor: 'rgba(220,38,38,0.85)' },
   add: { marginTop: Spacing.sm, width: '31%', aspectRatio: 1, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.gray300, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center', minHeight: 104 },
