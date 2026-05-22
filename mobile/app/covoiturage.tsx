@@ -8,6 +8,8 @@ import {
   TextInput,
   ActivityIndicator,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -121,7 +123,8 @@ export default function CovoiturageScreen() {
   const rideCount = useMemo(() => rides.length, [rides]);
 
   return (
-    <View style={styles.root}>
+    <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <View style={styles.rootContent}>
       <View style={styles.header}>
         <Text style={styles.kicker}>Covoiturage</Text>
         <Text style={styles.title}>Trajets simples, confiance claire, reservation rapide.</Text>
@@ -136,7 +139,7 @@ export default function CovoiturageScreen() {
         </View>
       ) : null}
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters} keyboardShouldPersistTaps="handled">
         <TextInput
           style={styles.filterInput}
           placeholder="Depart"
@@ -233,12 +236,14 @@ export default function CovoiturageScreen() {
         <Ionicons name="home" size={18} color={Colors.white} />
         <Text style={styles.fabText}>Accueil</Text>
       </TouchableOpacity>
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.background, paddingHorizontal: Spacing.lg },
+  root: { flex: 1, backgroundColor: Colors.background },
+  rootContent: { flex: 1, backgroundColor: Colors.background, paddingHorizontal: Spacing.lg },
   header: { paddingTop: 56, paddingBottom: Spacing.md },
   kicker: { fontSize: FontSize.xs, fontWeight: FontWeight.bold, textTransform: 'uppercase', color: Colors.primary, letterSpacing: 1.2 },
   title: { fontSize: 28, fontWeight: FontWeight.bold, color: Colors.text, marginTop: 6 },

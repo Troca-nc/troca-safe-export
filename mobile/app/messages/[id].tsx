@@ -234,7 +234,7 @@ export default function ConversationScreen() {
 
       <KeyboardAvoidingView
         style={styles.root}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
         {loading
@@ -243,9 +243,11 @@ export default function ConversationScreen() {
               <FlatList
                 ref={listRef}
                 data={messages}
+                inverted
                 keyExtractor={(item) => String(item.id)}
                 renderItem={renderMessage}
                 contentContainerStyle={styles.list}
+                keyboardShouldPersistTaps="handled"
                 ListHeaderComponent={
                   conv?.annonce ? (
                     <View style={styles.convMeta}>

@@ -8,6 +8,8 @@ import {
   TextInput,
   ActivityIndicator,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
   Linking,
   Share,
 } from 'react-native';
@@ -248,7 +250,8 @@ export function ServiceDirectoryScreen({
   };
 
   return (
-    <View style={styles.root}>
+    <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <View style={styles.rootContent}>
       <View style={styles.header}>
         <Text style={styles.kicker}>{eyebrow}</Text>
         <Text style={styles.title}>{title}</Text>
@@ -261,7 +264,7 @@ export function ServiceDirectoryScreen({
         </View>
       ) : null}
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters} keyboardShouldPersistTaps="handled">
         <TextInput
           style={[styles.filterInput, { minWidth: 180 }]}
           placeholder={searchPlaceholder}
@@ -366,12 +369,14 @@ export function ServiceDirectoryScreen({
           <Text style={styles.footerBtnText}>{mode === 'promo' ? 'Evenements' : 'Bons plans'}</Text>
         </TouchableOpacity>
       </View>
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.background, paddingHorizontal: Spacing.lg },
+  root: { flex: 1, backgroundColor: Colors.background },
+  rootContent: { flex: 1, backgroundColor: Colors.background, paddingHorizontal: Spacing.lg },
   header: { paddingTop: 56, paddingBottom: Spacing.md },
   kicker: { fontSize: FontSize.xs, fontWeight: FontWeight.bold, textTransform: 'uppercase', color: Colors.primary, letterSpacing: 1.2 },
   title: { fontSize: 28, fontWeight: FontWeight.bold, color: Colors.text, marginTop: 6 },

@@ -10,6 +10,8 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   Image,
   RefreshControl,
@@ -173,7 +175,8 @@ export default function AnnoncesTab() {
   );
 
   return (
-    <View style={styles.root}>
+    <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <View style={styles.rootContent}>
       <View style={styles.topBar}>
         <View style={styles.searchRow}>
           <View style={styles.searchWrap}>
@@ -214,7 +217,7 @@ export default function AnnoncesTab() {
 
             <View>
               <Text style={styles.filterTitle}>Catégorie</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 <View style={styles.chipsRow}>
                   <TouchableOpacity
                     style={[styles.sortChip, categoryId === null && styles.sortChipActive]}
@@ -250,7 +253,7 @@ export default function AnnoncesTab() {
             {communes.length > 0 && (
               <View>
                 <Text style={styles.filterTitle}>Commune</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                   <View style={styles.chipsRow}>
                     <TouchableOpacity
                       style={[styles.sortChip, commune === null && styles.sortChipActive]}
@@ -328,11 +331,13 @@ export default function AnnoncesTab() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
       />
     </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.background },
+  rootContent: { flex: 1, backgroundColor: Colors.background },
   topBar: {
     backgroundColor: Colors.white,
     paddingTop: 52,

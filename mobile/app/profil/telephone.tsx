@@ -152,7 +152,7 @@ export default function TelephoneScreen() {
 
       <KeyboardAvoidingView
         style={{ flex: 1, backgroundColor: Colors.background }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <View style={styles.root}>
 
