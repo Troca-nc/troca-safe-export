@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile — Vérification téléphone (Twilio Verify)
+//  Troca Mobile - Verification telephone
 //  /app/profil/telephone.tsx
 // ============================================================
 
@@ -7,60 +7,139 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   Alert, ActivityIndicator, KeyboardAvoidingView, Platform,
 } from 'react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { router, Stack } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
-import { api } from '@/lib/api';
+import { phoneApi } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { Colors, Spacing, Radius, FontSize, FontWeight } from '@/constants/theme';
 
 type Step = 'input' | 'code';
+type DeliveryChannel = 'sms' | 'email';
+
+function maskPhoneNumber(telephone: string) {
+  if (!telephone) return '';
+  if (telephone.length <= 4) return telephone;
+  return `${telephone.slice(0, 4)} ${'*'.repeat(Math.max(2, telephone.length - 6))}${telephone.slice(-2)}`;
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (typeof error === 'object' && error !== null) {
+    const response = error as { response?: { data?: { error?: string } } };
+    if (typeof response.response?.data?.error === 'string' && response.response.data.error) {
+      return response.response.data.error;
+    }
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return fallback;
+}
 
 export default function TelephoneScreen() {
   const { user, refreshMe } = useAuthStore();
-  const [step, setStep]         = useState<Step>('input');
-  const [phone, setPhone]       = useState('');
-  const [code, setCode]         = useState('');
-  const [loading, setLoading]   = useState(false);
+  const [step, setStep] = useState<Step>('input');
+  const [phone, setPhone] = useState('');
+  const [code, setCode] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const [deliveryChannel, setDeliveryChannel] = useState<DeliveryChannel>('sms');
+  const [deliveryTarget, setDeliveryTarget] = useState('');
 
-  // Normaliser : si 6 chiffres NC sans indicatif → ajouter +687
+  // TODO: test E2E for OTP resend and email fallback flow.
+  useEffect(() => {
+    if (step !== 'code' || cooldown <= 0) return undefined;
+
+    const timer = setInterval(() => {
+      setCooldown((current) => {
+        if (current <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return current - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [cooldown, step]);
+
+  // Normaliser : si 6 chiffres NC sans indicatif -> ajouter +687
   const normalize = (val: string) => {
     const digits = val.replace(/\D/g, '');
     if (digits.length <= 6) return digits; // saisie en cours
     return digits.startsWith('687') ? `+${digits}` : `+687${digits}`;
   };
 
-  // ── Étape 1 : envoyer le SMS ──────────────────────────────
+  const maskFallback = (telephone: string) => {
+    const normalized = normalize(telephone);
+    return maskPhoneNumber(normalized);
+  };
+
+  // Etape 1 : envoyer le code
   const sendCode = async () => {
     const normalized = normalize(phone);
     if (normalized.replace(/\D/g, '').length < 6) {
-      Alert.alert('Numéro invalide', 'Entrez votre numéro de téléphone NC (6 chiffres).');
+      Alert.alert('Numéro invalide', 'Entrez votre numéro NC (6 chiffres).');
       return;
     }
+
     setLoading(true);
     try {
-      await api.post('/phone/send', { telephone: normalized });
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      const { data } = await phoneApi.send(normalized);
+      const nextChannel = (data.channel === 'email' ? 'email' : 'sms') as DeliveryChannel;
       setStep('code');
-    } catch (err: any) {
-      Alert.alert('Erreur', err?.response?.data?.error ?? 'Impossible d\'envoyer le SMS');
-    } finally { setLoading(false); }
+      setCooldown(Number(data.cooldown ?? 60));
+      setDeliveryChannel(nextChannel);
+      setDeliveryTarget(typeof data.masked === 'string' && data.masked ? data.masked : maskFallback(normalized));
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (err: unknown) {
+      Alert.alert('Erreur', getErrorMessage(err, 'Impossible d\'envoyer le code'));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // ── Étape 2 : vérifier le code ────────────────────────────
-  const verifyCode = async () => {
-    if (code.length !== 6) { Alert.alert('Code invalide', 'Le code doit contenir 6 chiffres.'); return; }
+  const resendCode = async (channel: DeliveryChannel) => {
+    const normalized = normalize(phone);
     setLoading(true);
     try {
-      await api.post('/phone/verify', { telephone: normalize(phone), code });
+      const { data } = await phoneApi.resend(normalized, channel);
+      const nextChannel = (data.channel === 'email' ? 'email' : 'sms') as DeliveryChannel;
+      setStep('code');
+      setCooldown(Number(data.cooldown ?? 60));
+      setDeliveryChannel(nextChannel);
+      setDeliveryTarget(typeof data.masked === 'string' && data.masked ? data.masked : maskFallback(normalized));
+      setCode('');
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (err: unknown) {
+      Alert.alert('Erreur', getErrorMessage(err, 'Impossible de renvoyer le code'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Etape 2 : vérifier le code
+  const verifyCode = async () => {
+    if (code.length !== 6) {
+      Alert.alert('Code invalide', 'Le code doit contenir 6 chiffres.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await phoneApi.verify(normalize(phone), code);
       await refreshMe();
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert('✅ Téléphone vérifié !', '', [{ text: 'OK', onPress: () => router.back() }]);
-    } catch (err: any) {
-      Alert.alert('Code incorrect', err?.response?.data?.error ?? 'Réessayez');
+      Alert.alert('Téléphone vérifié !', '', [{ text: 'OK', onPress: () => router.back() }]);
+    } catch (err: unknown) {
+      Alert.alert('Code incorrect', getErrorMessage(err, 'Réessayez'));
       setCode('');
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -90,7 +169,7 @@ export default function TelephoneScreen() {
               <>
                 <Text style={styles.title}>Votre numéro de téléphone</Text>
                 <Text style={styles.hint}>
-                  Entrez votre numéro NC (6 chiffres). Vous recevrez un SMS de vérification.
+                  Entrez votre numéro NC (6 chiffres). Vous recevrez un code de vérification.
                 </Text>
 
                 <View style={styles.phoneRow}>
@@ -125,8 +204,8 @@ export default function TelephoneScreen() {
               <>
                 <Text style={styles.title}>Code de vérification</Text>
                 <Text style={styles.hint}>
-                  Entrez le code à 6 chiffres envoyé au{'\n'}
-                  <Text style={{ fontWeight: FontWeight.bold }}>+687 {phone}</Text>
+                  {deliveryChannel === 'email' ? 'Code envoyé par email à' : 'Code envoyé au'}{'\n'}
+                  <Text style={{ fontWeight: FontWeight.bold }}>{deliveryTarget}</Text>
                 </Text>
 
                 <TextInput
@@ -152,8 +231,28 @@ export default function TelephoneScreen() {
                   }
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.resend} onPress={() => { setStep('input'); setCode(''); }}>
-                  <Text style={styles.resendText}>Modifier le numéro / Renvoyer</Text>
+                <View style={styles.resendArea}>
+                  <TouchableOpacity
+                    style={styles.resend}
+                    onPress={() => resendCode('sms')}
+                    disabled={loading || cooldown > 0}
+                  >
+                    <Text style={styles.resendText}>
+                      {cooldown > 0 ? `Renvoyer dans ${cooldown}s` : 'Renvoyer par SMS'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.emailFallback}
+                    onPress={() => resendCode('email')}
+                    disabled={loading}
+                  >
+                    <Text style={styles.emailFallbackText}>Envoyer par email à la place</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <TouchableOpacity style={styles.resend} onPress={() => { setStep('input'); setCode(''); setCooldown(0); }}>
+                  <Text style={styles.resendText}>Modifier le numéro</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -179,6 +278,9 @@ const styles = StyleSheet.create({
   btn:            { backgroundColor: Colors.primary, borderRadius: Radius.md, paddingVertical: 14, alignItems: 'center' },
   btnDisabled:    { opacity: 0.5 },
   btnText:        { color: Colors.white, fontSize: FontSize.md, fontWeight: FontWeight.bold },
-  resend:         { alignItems: 'center', marginTop: Spacing.lg },
+  resendArea:     { gap: Spacing.sm, marginTop: Spacing.lg },
+  resend:         { alignItems: 'center' },
   resendText:     { color: Colors.primary, fontSize: FontSize.sm },
+  emailFallback:  { alignItems: 'center' },
+  emailFallbackText: { color: Colors.textSecondary, fontSize: FontSize.sm, textDecorationLine: 'underline' },
 });

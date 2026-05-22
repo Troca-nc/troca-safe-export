@@ -131,6 +131,12 @@ export const authApi = {
   me: () => api.get('/auth/me'),
 }
 
+export const phoneApi = {
+  send: (telephone: string) => api.post('/phone/send', { telephone }),
+  verify: (telephone: string, code: string) => api.post('/phone/verify', { telephone, code }),
+  resend: (telephone: string, channel: 'sms' | 'email' = 'sms') => api.post('/auth/otp/resend', { telephone, channel }),
+}
+
 export const metaApi = {
   getCommunes: () => cachedGet('meta.getCommunes', '/communes', () => api.get('/communes'), undefined, CACHE_TTL.static),
   getCategories: () => cachedGet('meta.getCategories', '/categories', () => api.get('/categories'), undefined, CACHE_TTL.static),

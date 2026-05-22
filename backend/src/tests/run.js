@@ -12,6 +12,7 @@ const SUITES = [
   './auth.middleware.test',
   './email.service.test',
   './authAccountService.test',
+  './auth.route.test',
   './phone.route.test',
   './alert.route.test',
   './scheduler.test',

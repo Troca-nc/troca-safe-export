@@ -17,10 +17,16 @@ const {
   registerLimiter,
   forgotPasswordLimiter,
   verificationLimiter,
+  phoneLimiter,
   refreshLimiter,
 } = require('../middleware/rateLimit');
 const { sendResetEmail, sendWelcomeEmail, sendVerificationEmail } = require('../services/emailService');
 const { verifyTurnstileToken } = require('../services/turnstile');
+const { query } = require('../config/database');
+const {
+  normalizePhoneNumber,
+  resendPhoneOtp,
+} = require('../services/phoneOtpService');
 const {
   confirmEmail,
   deleteRefreshToken,
@@ -63,6 +69,11 @@ const forgotSchema = Joi.object({
 const resetSchema = Joi.object({
   token: Joi.string().required(),
   password: Joi.string().min(8).max(100).required(),
+});
+
+const resendOtpSchema = Joi.object({
+  telephone: Joi.string().pattern(/^\+?[0-9]{6,15}$/).required(),
+  channel: Joi.string().valid('sms', 'email').default('sms'),
 });
 
 router.post('/register', registerLimiter, async (req, res, next) => {
@@ -217,6 +228,40 @@ router.post('/resend-verification', verificationLimiter, async (req, res, next) 
     await sendVerificationEmail(result.user.email, result.user.prenom, result.token);
 
     return res.json({ message: 'Si un compte existe, un nouveau lien de confirmation a été envoyé.' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/otp/resend', authenticate, phoneLimiter, async (req, res, next) => {
+  try {
+    const { error, value } = resendOtpSchema.validate(req.body || {});
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
+    const normalized = normalizePhoneNumber(value.telephone);
+    const { rows } = await query(
+      'SELECT id FROM users WHERE telephone = $1 AND phone_verified = TRUE AND id != $2',
+      [normalized, req.user.id]
+    );
+    if (rows[0]) {
+      return res.status(409).json({ error: 'Ce numéro est déjà associé à un autre compte' });
+    }
+
+    const result = await resendPhoneOtp({
+      user: req.user,
+      telephone: normalized,
+      preferChannel: value.channel,
+    });
+
+    return res.json({
+      success: true,
+      message: result.message,
+      channel: result.channel,
+      masked: result.masked,
+      expires_at: result.expires_at,
+      cooldown: result.cooldown,
+      telephone: normalized,
+    });
   } catch (err) {
     next(err);
   }

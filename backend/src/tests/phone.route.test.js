@@ -6,6 +6,7 @@
 
 const assert = require('assert');
 const { describe, it, makeRes, makeAuthReq, assertStatus, assertError } = require('./helpers');
+const { storeOtpRecord } = require('../services/phoneOtpService');
 
 // ── Stubs ─────────────────────────────────────────────────────
 
@@ -129,6 +130,36 @@ describe('POST /api/phone/verify', () => {
     const res = makeRes();
     await callRoute('post', '/verify', req, res);
     assertStatus(res, 400);
+  });
+
+  it('valide aussi un code issu du fallback email', async () => {
+    twilioVerifyStatus = 'pending';
+    dbRows = [];
+    await storeOtpRecord({
+      telephone: '+687751234',
+      code: '654321',
+      userId: 1,
+      channel: 'email',
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    });
+
+    const req = makeAuthReq(1, { body: { telephone: '+687751234', code: '654321' } });
+    const res = makeRes();
+    await callRoute('post', '/verify', req, res);
+    assertStatus(res, 200);
+    assert.strictEqual(res._payload?.verified, true);
+  });
+});
+
+describe('POST /api/phone/resend', () => {
+  it('renvoie un code par email en secours', async () => {
+    twilioVerifyStatus = 'pending';
+    dbRows = [];
+    const req = makeAuthReq(1, { body: { telephone: '+687751234', channel: 'email' } });
+    const res = makeRes();
+    await callRoute('post', '/resend', req, res);
+    assertStatus(res, 200);
+    assert.strictEqual(res._payload?.channel, 'email');
   });
 });
 

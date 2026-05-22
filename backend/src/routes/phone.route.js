@@ -1,41 +1,28 @@
 'use strict';
 
 // ============================================================
-//  Troca — Route vérification téléphone (Twilio Verify)
-//  POST /api/phone/send      — Envoyer le code SMS
-//  POST /api/phone/verify    — Vérifier le code
-//  DELETE /api/phone         — Supprimer le numéro
+//  Troca - Route verification telephone
+//  POST /api/phone/send      - Envoyer le code
+//  POST /api/phone/verify    - Verifier le code
+//  POST /api/phone/resend    - Renvoyer le code
+//  DELETE /api/phone         - Supprimer le numero
 // ============================================================
 
 const { Router } = require('express');
-const Joi        = require('joi');
-const twilio     = require('twilio');
-const { authenticate }    = require('../middleware/auth');
-const { validate }        = require('../middleware/validate');
-const { phoneLimiter }    = require('../middleware/rateLimit');
-const { query }           = require('../config/database');
-const { isConfiguredValue } = require('../config/env');
+const Joi = require('joi');
+const { authenticate } = require('../middleware/auth');
+const { validate } = require('../middleware/validate');
+const { phoneLimiter } = require('../middleware/rateLimit');
+const { query } = require('../config/database');
+const {
+  normalizePhoneNumber,
+  sendPhoneOtp,
+  verifyPhoneOtp,
+  resendPhoneOtp,
+} = require('../services/phoneOtpService');
 
 const router = Router();
 router.use(authenticate);
-
-// ── Client Twilio ────────────────────────────────────────────
-
-const twilioClient = (isConfiguredValue(process.env.TWILIO_ACCOUNT_SID) && isConfiguredValue(process.env.TWILIO_AUTH_TOKEN))
-  ? twilio(process.env.TWILIO_ACCOUNT_SID.trim(), process.env.TWILIO_AUTH_TOKEN.trim())
-  : null;
-
-const VERIFY_SID = isConfiguredValue(process.env.TWILIO_VERIFY_SID) ? process.env.TWILIO_VERIFY_SID.trim() : '';
-
-function ensureTwilio(res) {
-  if (!twilioClient || !VERIFY_SID) {
-    res.status(503).json({ error: 'Vérification téléphone non configurée', code: 'TWILIO_NOT_CONFIGURED' });
-    return false;
-  }
-  return true;
-}
-
-// ── Schémas ──────────────────────────────────────────────────
 
 const sendSchema = {
   body: Joi.object({
@@ -49,78 +36,112 @@ const sendSchema = {
 const verifySchema = {
   body: Joi.object({
     telephone: Joi.string().pattern(/^\+?[0-9]{6,15}$/).required(),
-    code:      Joi.string().length(6).pattern(/^[0-9]+$/).required()
+    code: Joi.string().length(6).pattern(/^[0-9]+$/).required()
       .messages({ 'string.length': 'Le code doit contenir 6 chiffres' }),
   }),
 };
 
-// ── POST /api/phone/send ─────────────────────────────────────
+const resendSchema = {
+  body: Joi.object({
+    telephone: Joi.string()
+      .pattern(/^\+?[0-9]{6,15}$/)
+      .required()
+      .messages({ 'string.pattern.base': 'Numéro de téléphone invalide' }),
+    channel: Joi.string().valid('sms', 'email').default('sms'),
+  }),
+};
 
-router.post('/send', phoneLimiter, validate(sendSchema), async (req, res) => {
-  if (!ensureTwilio(res)) return;
-
-  const { telephone } = req.body;
-
-  // Normaliser : ajouter +687 si numéro NC sans indicatif
-  const normalized = telephone.startsWith('+') ? telephone : `+687${telephone.replace(/^0/, '')}`;
-
-  // Vérifier que ce numéro n'est pas déjà utilisé par un autre compte
-  const existing = await query(
+function ensureUniquePhone(req, res, normalized) {
+  return query(
     'SELECT id FROM users WHERE telephone = $1 AND phone_verified = TRUE AND id != $2',
     [normalized, req.user.id]
-  );
-  if (existing.rows[0]) {
-    return res.status(409).json({ error: 'Ce numéro est déjà associé à un autre compte' });
-  }
+  ).then((existing) => {
+    if (existing.rows[0]) {
+      res.status(409).json({ error: 'Ce numéro est déjà associé à un autre compte' });
+      return false;
+    }
+    return true;
+  });
+}
+
+router.post('/send', phoneLimiter, validate(sendSchema), async (req, res) => {
+  const normalized = normalizePhoneNumber(req.body.telephone);
+  if (!(await ensureUniquePhone(req, res, normalized))) return;
 
   try {
-    await twilioClient.verify.v2.services(VERIFY_SID)
-      .verifications.create({ to: normalized, channel: 'sms' });
+    const result = await sendPhoneOtp({
+      user: req.user,
+      telephone: normalized,
+      preferChannel: 'sms',
+    });
 
-    // Sauvegarder le numéro (non encore vérifié)
-    await query(
-      'UPDATE users SET telephone = $1, updated_at = NOW() WHERE id = $2',
-      [normalized, req.user.id]
-    );
-
-    return res.json({ message: 'Code SMS envoyé', telephone: normalized });
+    return res.json({
+      success: true,
+      message: result.message,
+      channel: result.channel,
+      masked: result.masked,
+      expires_at: result.expires_at,
+      cooldown: result.cooldown,
+      telephone: normalized,
+    });
   } catch (err) {
-    console.error('[phone] Twilio send error:', err.message);
-    return res.status(500).json({ error: 'Impossible d\'envoyer le SMS. Vérifiez le numéro.' });
+    const status = err.status || 500;
+    return res.status(status).json({
+      error: err.message || 'Impossible d\'envoyer le code. Vérifiez le numéro.',
+      code: err.code || 'PHONE_SEND_FAILED',
+    });
   }
 });
-
-// ── POST /api/phone/verify ───────────────────────────────────
 
 router.post('/verify', phoneLimiter, validate(verifySchema), async (req, res) => {
-  if (!ensureTwilio(res)) return;
-
-  const { telephone, code } = req.body;
-  const normalized = telephone.startsWith('+') ? telephone : `+687${telephone.replace(/^0/, '')}`;
+  const normalized = normalizePhoneNumber(req.body.telephone);
 
   try {
-    const check = await twilioClient.verify.v2.services(VERIFY_SID)
-      .verificationChecks.create({ to: normalized, code });
+    const result = await verifyPhoneOtp({
+      user: req.user,
+      telephone: normalized,
+      code: req.body.code,
+    });
 
-    if (check.status !== 'approved') {
-      return res.status(400).json({ error: 'Code incorrect ou expiré' });
-    }
-
-    await query(
-      `UPDATE users
-       SET telephone = $1, phone_verified = TRUE, updated_at = NOW()
-       WHERE id = $2`,
-      [normalized, req.user.id]
-    );
-
-    return res.json({ message: 'Téléphone vérifié avec succès', verified: true });
+    return res.json(result);
   } catch (err) {
-    console.error('[phone] Twilio verify error:', err.message);
-    return res.status(500).json({ error: 'Erreur lors de la vérification' });
+    const status = err.status || 500;
+    return res.status(status).json({
+      error: err.message || 'Erreur lors de la vérification',
+      code: err.code || 'PHONE_VERIFY_FAILED',
+    });
   }
 });
 
-// ── DELETE /api/phone ────────────────────────────────────────
+router.post('/resend', phoneLimiter, validate(resendSchema), async (req, res) => {
+  const normalized = normalizePhoneNumber(req.body.telephone);
+  if (!(await ensureUniquePhone(req, res, normalized))) return;
+
+  try {
+    const result = await resendPhoneOtp({
+      user: req.user,
+      telephone: normalized,
+      preferChannel: req.body.channel,
+    });
+
+    return res.json({
+      success: true,
+      message: result.message,
+      channel: result.channel,
+      masked: result.masked,
+      expires_at: result.expires_at,
+      cooldown: result.cooldown,
+      telephone: normalized,
+    });
+  } catch (err) {
+    const status = err.status || 500;
+    return res.status(status).json({
+      error: err.message || 'Impossible de renvoyer le code',
+      code: err.code || 'OTP_RESEND_FAILED',
+      retry_after: err.retryAfter || null,
+    });
+  }
+});
 
 router.delete('/', async (req, res) => {
   await query(

@@ -249,6 +249,12 @@ export const authApi = {
   resendVerification: (email: string, turnstileToken?: string) => api.post('/auth/resend-verification', { email, turnstile_token: turnstileToken }),
 }
 
+export const phoneApi = {
+  send: (telephone: string) => api.post('/phone/send', { telephone }),
+  verify: (telephone: string, code: string) => api.post('/phone/verify', { telephone, code }),
+  resend: (telephone: string, channel: 'sms' | 'email' = 'sms') => api.post('/auth/otp/resend', { telephone, channel }),
+}
+
 // Listings
 export const listingsApi = {
   search: (params: object = {}) => cachedGet(

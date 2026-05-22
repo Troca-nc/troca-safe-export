@@ -6,8 +6,11 @@ export interface SendOtpPayload {
 
 export interface SendOtpResponse {
   success:    boolean
+  channel?:   'sms' | 'email'
+  cooldown?:  number
   expires_at: string   // ISO — expiration du code (10 min)
   masked:     string   // ex: "+687••••34" pour affichage
+  message?:   string
 }
 
 export interface VerifyOtpPayload {
@@ -25,10 +28,13 @@ export interface PhoneVerificationState {
   step:       'input' | 'otp' | 'verified'
   telephone:  string
   masked:     string
+  deliveryChannel?: 'sms' | 'email'
+  deliveryTarget?: string
   expires_at: string | null
   loading:    boolean
   error:      string | null
   cooldown:   number   // secondes avant de pouvoir renvoyer
+  success?:   string
 }
 
 // Préfixes téléphoniques Nouvelle-Calédonie

@@ -3,7 +3,7 @@
 
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef } from 'react'
 import { Phone, ShieldCheck, RefreshCw, ChevronDown, CheckCircle, Loader2 } from 'lucide-react'
 import { usePhoneVerification } from '@/hooks/usePhoneVerification'
 import { NC_PHONE_PREFIXES, DEFAULT_PREFIX } from '@/types/phone.types'
@@ -207,6 +207,8 @@ export default function PhoneVerification({
 
   // ── Étape 2 : Saisie du code OTP ──────────────────────────────────────────
   if (state.step === 'otp') {
+    const deliveryLabel = state.deliveryChannel === 'email' ? 'Code envoyé par email à' : 'SMS envoyé au'
+
     return (
       <div className={`${containerClass} ${className}`}>
         {variant === 'card' && (
@@ -216,14 +218,14 @@ export default function PhoneVerification({
             </div>
             <div>
               <h2 className="font-semibold text-night">Entrez votre code</h2>
-              <p className="text-xs text-night/50">SMS envoyé au {state.masked}</p>
+              <p className="text-xs text-night/50">{deliveryLabel} {state.masked}</p>
             </div>
           </div>
         )}
 
         {variant === 'inline' && (
           <p className="text-sm text-night/60 mb-4">
-            Code envoyé au <strong>{state.masked}</strong>
+            {deliveryLabel} <strong>{state.masked}</strong>
           </p>
         )}
 
@@ -262,7 +264,7 @@ export default function PhoneVerification({
 
           <button
             type="button"
-            onClick={resendOtp}
+            onClick={() => resendOtp('sms')}
             disabled={state.cooldown > 0 || state.loading}
             className="flex items-center gap-1 hover:text-coral disabled:opacity-40 transition-colors"
           >
@@ -273,6 +275,15 @@ export default function PhoneVerification({
             }
           </button>
         </div>
+
+        <button
+          type="button"
+          onClick={() => resendOtp('email')}
+          disabled={state.loading}
+          className="mt-3 text-xs text-night/45 underline underline-offset-2 hover:text-coral disabled:opacity-40"
+        >
+          Envoyer par email à la place
+        </button>
       </div>
     )
   }

@@ -1418,7 +1418,7 @@ async function handleRoute(req, res) {
     return json(res, 200, { data: { ok: true, path: pathname, admin: true } });
   }
 
-  if (pathname === '/api/phone/send' || pathname === '/api/phone/verify') {
+  if (pathname === '/api/phone/send' || pathname === '/api/phone/verify' || pathname === '/api/auth/otp/resend') {
     return json(res, 200, { data: { ok: true, demo: true } });
   }
 
@@ -1439,4 +1439,3 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
   console.log(`[demo-server] Troca demo API listening on http://localhost:${PORT}`);
 });
-
