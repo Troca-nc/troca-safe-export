@@ -6,16 +6,17 @@ import {
   View, Text, FlatList, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform,
   StyleSheet, RefreshControl, Image,
 } from 'react-native';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { listingsApi, metaApi } from '@/lib/api';
+import { metaApi } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '@/constants/theme';
 import { MOBILE_FALLBACK_CATEGORIES } from '@/lib/categoryCatalog';
 import { ListingSkeletonList } from '@/components/ListingSkeleton';
 import { getRecentlyViewedListings, type RecentlyViewedListing } from '@/lib/queryClient';
+import { useInfiniteListings } from '@/hooks/useInfiniteListings';
 
 interface Annonce {
   id: string;
@@ -37,20 +38,40 @@ interface Annonce {
 
 export default function AccueilScreen() {
   const { user } = useAuthStore();
-  const [annonces, setAnnonces] = useState<Annonce[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [categorie, setCategorie] = useState<number | null>(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
   const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedListing[]>([]);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const firstRun = useRef(true);
   const visibleCategories = categories.length > 0 ? categories : MOBILE_FALLBACK_CATEGORIES;
-  const isInitialLoading = loading && annonces.length === 0;
-  const isLoadingMore = loading && annonces.length > 0;
+  const queryFilters = useMemo(() => ({
+    q: debouncedSearch,
+    category_id: categorie ?? '',
+    limit: 20,
+    sort: 'date',
+    page: 1,
+  }), [debouncedSearch, categorie]);
+  const {
+    listings,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+    error,
+    isError,
+  } = useInfiniteListings(queryFilters);
+  const annonces = useMemo(() => listings.map(normalize), [listings]);
+  const isInitialLoading = isLoading && annonces.length === 0;
+  const isLoadingMore = isFetchingNextPage && annonces.length > 0;
+  const loadError = useMemo(() => {
+    if (!isError) return '';
+    return error instanceof Error && error.message === 'timeout'
+      ? 'Le chargement des annonces prend trop de temps. Essayez de réessayer.'
+      : 'Les annonces sont temporairement indisponibles.';
+  }, [error, isError]);
 
   const normalize = (item: any): Annonce => ({
     id: String(item.id),
@@ -70,41 +91,13 @@ export default function AccueilScreen() {
     user: item.user ?? { is_pro: item.is_pro ?? false },
   });
 
-  const fetchAnnonces = useCallback(async (reset = false) => {
-    try {
-      const p = reset ? 1 : page;
-      const params: Record<string, any> = { page: p, limit: 20 };
-      if (search) params.q = search;
-      if (categorie) params.category_id = categorie;
-
-      const { data } = await listingsApi.search(params);
-      const items: Annonce[] = (data.data ?? []).map(normalize);
-
-      setAnnonces((prev) => (reset ? items : [...prev, ...items]));
-      setHasMore(items.length === 20);
-      if (reset) setPage(1);
-    } catch (err) {
-      console.error('[accueil] fetch error', err);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [page, search, categorie]);
-
   useEffect(() => {
-    if (firstRun.current) {
-      firstRun.current = false;
-      fetchAnnonces(true);
-      return;
-    }
-
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchAnnonces(true), 350);
+    debounceRef.current = setTimeout(() => setDebouncedSearch(search), 350);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [search, categorie, fetchAnnonces]);
-  useEffect(() => { if (page > 1) fetchAnnonces(); }, [page]);
+  }, [search]);
 
   useEffect(() => {
     metaApi.getCategories()
@@ -125,12 +118,12 @@ export default function AccueilScreen() {
 
   const onRefresh = () => {
     setRefreshing(true);
-    setPage(1);
-    fetchAnnonces(true);
+    void refetch().finally(() => setRefreshing(false));
   };
 
   const loadMore = () => {
-    if (hasMore && !loading) setPage((p) => p + 1);
+    if (!hasNextPage || isFetchingNextPage) return;
+    void fetchNextPage();
   };
 
   const renderItem = ({ item }: { item: Annonce }) => (
@@ -240,6 +233,16 @@ export default function AccueilScreen() {
         </View>
       )}
 
+      {loadError && annonces.length > 0 ? (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorBannerText}>{loadError}</Text>
+          <TouchableOpacity style={styles.retryBtn} onPress={() => void refetch()}>
+            <Text style={styles.retryTxt}>Réessayer</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
+      {/* TODO: test E2E sur le chargement initial et la pagination infinie du flux d'accueil mobile. */}
       <FlatList
         data={annonces}
         keyExtractor={(item) => item.id}
@@ -284,6 +287,13 @@ export default function AccueilScreen() {
             <View style={styles.skeletonWrap}>
               {/* TODO: test E2E sur le chargement initial et la pagination du flux d'accueil mobile. */}
               <ListingSkeletonList count={6} variant="grid" />
+            </View>
+          ) : loadError ? (
+            <View style={styles.empty}>
+              <Text style={styles.emptyText}>Les annonces sont temporairement indisponibles</Text>
+              <TouchableOpacity style={styles.retryBtn} onPress={() => void refetch()}>
+                <Text style={styles.retryTxt}>Réessayer</Text>
+              </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.empty}>
@@ -366,6 +376,22 @@ const styles = StyleSheet.create({
   trustText: { fontSize: 9, fontWeight: FontWeight.bold, color: Colors.primary },
   empty: { alignItems: 'center', padding: Spacing.xl },
   emptyText: { color: Colors.textSecondary, fontSize: FontSize.md },
+  errorBanner: {
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.md,
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
+    backgroundColor: '#FEF3C7',
+  },
+  errorBannerText: { color: '#92400E', fontSize: FontSize.sm, marginBottom: Spacing.sm },
+  retryBtn: {
+    marginTop: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.primary,
+  },
+  retryTxt: { color: Colors.white, fontSize: FontSize.sm, fontWeight: FontWeight.bold },
   skeletonWrap: { paddingHorizontal: Spacing.md, paddingTop: Spacing.md },
   footerSkeleton: { paddingHorizontal: Spacing.md, paddingBottom: Spacing.md },
 });

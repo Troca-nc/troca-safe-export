@@ -1,7 +1,7 @@
 ﻿'use client'
 // src/app/annonces/page.tsx
 
-import { Suspense, useState, useEffect, useCallback, useMemo } from 'react'
+import { Suspense, useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import {
   Bell,
   ChevronDown,
@@ -16,10 +16,11 @@ import Header from '@/components/layout/Header'
 import SearchAlertModal from '@/components/SearchAlertModal'
 import ListingCard from '@/components/listings/ListingCard'
 import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
-import { listingsApi, metaApi } from '@/lib/api'
+import { metaApi } from '@/lib/api'
 import { consumePendingAuthAction, peekPendingAuthAction } from '@/lib/authAction'
 import { FALLBACK_CATEGORIES } from '@/lib/categoryCatalog'
 import { getCategoryIcon } from '@/lib/categoryPresentation'
+import { useInfiniteListings } from '@/hooks/useInfiniteListings'
 import { useListingFilters, type ListingFilters } from '@/hooks/useListingFilters'
 import { useAuthActionStore } from '@/store/authActionStore'
 import { useAuthStore } from '@/store/authStore'
@@ -80,29 +81,61 @@ const FALLBACK_PROVINCES = [
 ]
 
 function ListingsPageContent() {
-  const [listings,    setListings]    = useState<any[]>([])
-  const [pagination,  setPagination]  = useState({ total: 0, page: 1, pages: 1 })
   const [categories,  setCategories]  = useState<any[]>([])
   const [communes,    setCommunes]    = useState<any[]>([])
-  const [loading,     setLoading]     = useState(true)
-  const [loadError,   setLoadError]   = useState('')
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [viewMode,    setViewMode]    = useState<'list' | 'map'>('list')
   const [openFamilySlug, setOpenFamilySlug] = useState<string | null>(null)
   const [geoLoading, setGeoLoading] = useState(false)
   const [searchAlertOpen, setSearchAlertOpen] = useState(false)
+  const sentinelRef = useRef<HTMLDivElement | null>(null)
   const { user } = useAuthStore()
   const { openAuthModal } = useAuthActionStore()
   const {
     filters,
     setFilter,
-    setPage,
     setLocation,
     clearLocation,
     resetFilters,
     activeFilterCount,
   } = useListingFilters()
   const visibleCategories = categories.length > 0 ? categories : FALLBACK_CATEGORIES
+  const listingFilters = useMemo(() => ({
+    q: filters.q,
+    category: filters.category,
+    commune_id: filters.commune_id,
+    province_id: filters.province_id,
+    price_min: filters.price_min,
+    price_max: filters.price_max,
+    condition: filters.condition,
+    troc: filters.troc,
+    lat: filters.lat,
+    lng: filters.lng,
+    radius: filters.radius,
+    sort: filters.sort,
+    page: 1,
+    limit: 24,
+  }), [filters])
+  const {
+    listings,
+    total,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+    error,
+    isError,
+  } = useInfiniteListings(listingFilters)
+  const isInitialLoading = isLoading && listings.length === 0
+  const isLoadingMore = isFetchingNextPage && listings.length > 0
+  const loadError = useMemo(() => {
+    if (!isError) return ''
+    if (error instanceof Error && error.message === 'timeout') {
+      return 'Le chargement des annonces prend trop de temps. Essayez de recharger la page.'
+    }
+    return 'Les annonces sont temporairement indisponibles.'
+  }, [error, isError])
 
   // Charger categories et communes une seule fois
   useEffect(() => {
@@ -124,55 +157,6 @@ function ListingsPageContent() {
       consumePendingAuthAction()
     }
   }, [])
-
-  // Charger les annonces
-  const fetchListings = useCallback(async () => {
-    setLoading(true)
-    setLoadError('')
-    try {
-      const params: Record<string, string | number> = { sort: filters.sort, page: filters.page, limit: 24 }
-      if (filters.q)          params.q          = filters.q
-      if (filters.commune_id) params.commune_id = filters.commune_id
-      else if (filters.province_id) params.province_id = filters.province_id
-      if (filters.price_min)  params.price_min  = filters.price_min
-      if (filters.price_max)  params.price_max  = filters.price_max
-      if (filters.condition)  params.condition  = filters.condition
-      if (filters.troc === 'true') params.troc = 'true'
-      if (filters.lat && filters.lng) {
-        params.lat = filters.lat
-        params.lng = filters.lng
-        params.radius = filters.radius
-      }
-      // Resoudre category slug -> id
-      if (filters.category) {
-        const found = visibleCategories.flatMap((c: any) => [c, ...(c.subcategories || [])])
-          .find((c: any) => c.slug === filters.category)
-        if (found) params.category_id = found.id
-      }
-
-      const result = await Promise.race([
-        listingsApi.search(params),
-        new Promise((_, reject) => {
-          window.setTimeout(() => reject(new Error('timeout')), 6000)
-        }),
-      ]) as any
-      const { data } = result
-      setListings(data.data)
-      setPagination(data.pagination)
-    } catch (err) {
-      setListings([])
-      setPagination({ total: 0, page: 1, pages: 1 })
-      setLoadError(
-        err instanceof Error && err.message === 'timeout'
-          ? 'Le chargement des annonces prend trop de temps. Essayez de recharger la page.'
-          : 'Les annonces sont temporairement indisponibles.'
-      )
-    } finally {
-      setLoading(false)
-    }
-  }, [filters, visibleCategories])
-
-  useEffect(() => { fetchListings() }, [fetchListings])
 
   useEffect(() => {
     if (!filters.category) {
@@ -202,14 +186,29 @@ function ListingsPageContent() {
     }
   }, [filters.commune_id, filters.province_id, communes, setFilter])
 
+  useEffect(() => {
+    if (viewMode !== 'list') return
+    if (!hasNextPage || isFetchingNextPage) return
+
+    const element = sentinelRef.current
+    if (!element || typeof IntersectionObserver === 'undefined') return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          void fetchNextPage()
+        }
+      },
+      { rootMargin: '400px 0px' }
+    )
+
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, viewMode])
+
   const updateFilter = (key: keyof ListingFilters, value: string | number) => {
     if (key === 'category' && value === '') {
       setOpenFamilySlug(null)
-    }
-
-    if (key === 'page') {
-      setPage(Number(value))
-      return
     }
 
     setFilter(key, value as never)
@@ -767,8 +766,8 @@ function ListingsPageContent() {
             {/* Resultats */}
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-night/50">
-                {loading ? 'Chargement...' : (
-                  <><span className="font-semibold text-night">{pagination.total}</span> annonce{pagination.total > 1 ? 's' : ''}</>
+                {isLoading ? 'Chargement...' : (
+                  <><span className="font-semibold text-night">{total}</span> annonce{total > 1 ? 's' : ''}</>
                 )}
               </p>
               {filters.q && (
@@ -784,7 +783,7 @@ function ListingsPageContent() {
                 <p className="mt-1">{loadError}</p>
                 <button
                   type="button"
-                  onClick={() => void fetchListings()}
+                  onClick={() => void refetch()}
                   className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-semibold text-night shadow-sm"
                 >
                   Réessayer
@@ -793,7 +792,7 @@ function ListingsPageContent() {
             ) : null}
 
             {/* TODO: test E2E sur le chargement initial et la pagination sans perte de contexte. */}
-            {loading && listings.length === 0 ? (
+            {isInitialLoading ? (
               <ListingSkeletonGrid count={6} className="grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4" />
             ) : listings.length === 0 ? (
               <div className="text-center py-20">
@@ -811,7 +810,7 @@ function ListingsPageContent() {
                     Effacer les filtres
                   </button>
                   {loadError ? (
-                    <button onClick={() => void fetchListings()} className="btn-primary">
+                    <button onClick={() => void refetch()} className="btn-primary">
                       Réessayer
                     </button>
                   ) : null}
@@ -821,34 +820,20 @@ function ListingsPageContent() {
               <>
                 <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                   {listings.map((listing) => (
-                    <ListingCard key={listing.id} listing={listing} />
+                    <ListingCard
+                      key={String((listing as { id?: string | number }).id ?? '')}
+                      listing={listing as unknown as Parameters<typeof ListingCard>[0]['listing']}
+                    />
                   ))}
                 </div>
 
-                {loading && listings.length > 0 ? (
+                {isLoadingMore ? (
                   <div className="mt-4">
                     <ListingSkeletonGrid count={2} className="grid-cols-2 md:grid-cols-2 xl:grid-cols-2 gap-4" />
                   </div>
                 ) : null}
 
-                {/* Pagination */}
-                {pagination.pages > 1 && (
-                  <div className="flex justify-center gap-2 mt-8">
-                    {[...Array(pagination.pages)].map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setPage(i + 1)}
-                        className={`w-9 h-9 rounded-xl text-sm font-medium transition-colors ${
-                          pagination.page === i + 1
-                            ? 'bg-coral text-white'
-                            : 'bg-white text-night hover:bg-sand'
-                        }`}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                {hasNextPage ? <div ref={sentinelRef} aria-hidden="true" className="h-8" /> : null}
               </>
             )}
           </div>

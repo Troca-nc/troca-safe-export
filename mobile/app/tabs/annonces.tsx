@@ -2,7 +2,7 @@
 //  Troca Mobile - Onglet Annonces
 // ============================================================
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -18,11 +18,12 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { listingsApi, metaApi } from '@/lib/api';
+import { metaApi } from '@/lib/api';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '@/constants/theme';
 import { MOBILE_FALLBACK_CATEGORIES } from '@/lib/categoryCatalog';
 import { MobileListing, normalizeListing } from '@/lib/listingNormalization';
 import { ListingSkeletonList } from '@/components/ListingSkeleton';
+import { useInfiniteListings } from '@/hooks/useInfiniteListings';
 
 const SORTS = [
   { value: 'date', label: 'Plus récentes' },
@@ -31,10 +32,9 @@ const SORTS = [
 ];
 
 export default function AnnoncesTab() {
-  const [annonces, setAnnonces] = useState<MobileListing[]>([]);
-  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [categoryId, setCategoryId] = useState<number | null>(null);
   const [sort, setSort] = useState('date');
   const [prixMin, setPrixMin] = useState('');
@@ -43,41 +43,45 @@ export default function AnnoncesTab() {
   const [categories, setCategories] = useState<any[]>([]);
   const [communes, setCommunes] = useState<any[]>([]);
   const [commune, setCommune] = useState<number | null>(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const firstFilterRun = useRef(true);
   const visibleCategories = categories.length > 0 ? categories : MOBILE_FALLBACK_CATEGORIES;
-  const isInitialLoading = loading && annonces.length === 0;
-  const isLoadingMore = loading && annonces.length > 0;
+  const queryFilters = useMemo(() => ({
+    q: debouncedSearch,
+    category_id: categoryId ?? '',
+    price_min: prixMin,
+    price_max: prixMax,
+    commune_id: commune ?? '',
+    sort,
+    limit: 20,
+    page: 1,
+  }), [debouncedSearch, categoryId, prixMin, prixMax, commune, sort]);
+  const {
+    listings,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+    error,
+    isError,
+  } = useInfiniteListings(queryFilters);
+  const annonces = useMemo(() => listings.map(normalizeListing), [listings]);
+  const isInitialLoading = isLoading && annonces.length === 0;
+  const isLoadingMore = isFetchingNextPage && annonces.length > 0;
+  const loadError = useMemo(() => {
+    if (!isError) return '';
+    return error instanceof Error && error.message === 'timeout'
+      ? 'Le chargement des annonces prend trop de temps. Essayez de réessayer.'
+      : 'Les annonces sont temporairement indisponibles.';
+  }, [error, isError]);
 
-  const fetchAnnonces = useCallback(
-    async (reset = false) => {
-      if (loading && !reset) return;
-      setLoading(true);
-      try {
-        const p = reset ? 1 : page;
-        const params: Record<string, any> = { page: p, limit: 20, sort };
-        if (search) params.q = search;
-        if (prixMin) params.price_min = prixMin;
-        if (prixMax) params.price_max = prixMax;
-        if (commune) params.commune_id = commune;
-        if (categoryId) params.category_id = categoryId;
-
-        const { data } = await listingsApi.search(params);
-        const items = (data.data ?? []).map(normalizeListing);
-        setAnnonces((prev) => (reset ? items : [...prev, ...items]));
-        setHasMore(items.length === 20);
-        if (reset) setPage(1);
-      } catch (err) {
-        console.error('[annonces] fetch error', err);
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-      }
-    },
-    [loading, page, search, sort, prixMin, prixMax, commune, categoryId]
-  );
+  useEffect(() => {
+    if (debounce.current) clearTimeout(debounce.current);
+    debounce.current = setTimeout(() => setDebouncedSearch(search), 350);
+    return () => {
+      if (debounce.current) clearTimeout(debounce.current);
+    };
+  }, [search]);
 
   useEffect(() => {
     metaApi
@@ -98,32 +102,19 @@ export default function AnnoncesTab() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (firstFilterRun.current) {
-      firstFilterRun.current = false;
-      fetchAnnonces(true);
-      return;
-    }
-
-    if (debounce.current) clearTimeout(debounce.current);
-    debounce.current = setTimeout(() => fetchAnnonces(true), 350);
-    return () => {
-      if (debounce.current) clearTimeout(debounce.current);
-    };
-  }, [search, sort, prixMin, prixMax, commune, categoryId, fetchAnnonces]);
-
-  const onRefresh = () => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    setPage(1);
-    fetchAnnonces(true);
-  };
-  const loadMore = () => {
-    if (hasMore && !loading) setPage((p) => p + 1);
-  };
+    try {
+      await refetch();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refetch]);
 
-  useEffect(() => {
-    if (page > 1) fetchAnnonces();
-  }, [page, fetchAnnonces]);
+  const loadMore = useCallback(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+    void fetchNextPage();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const renderItem = ({ item }: { item: MobileListing }) => (
     <TouchableOpacity
@@ -300,6 +291,16 @@ export default function AnnoncesTab() {
         )}
       </View>
 
+      {loadError && annonces.length > 0 ? (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorBannerText}>{loadError}</Text>
+          <TouchableOpacity style={styles.retryBtn} onPress={() => void refetch()}>
+            <Text style={styles.retryTxt}>Réessayer</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
+      {/* TODO: test E2E sur le chargement initial et la pagination infinie des annonces mobile. */}
       <FlatList
         data={annonces}
         keyExtractor={(item) => item.id}
@@ -312,6 +313,13 @@ export default function AnnoncesTab() {
             <View style={styles.skeletonWrap}>
               {/* TODO: test E2E sur le chargement initial et la pagination des annonces mobile. */}
               <ListingSkeletonList count={6} variant="grid" />
+            </View>
+          ) : loadError ? (
+            <View style={styles.empty}>
+              <Text style={styles.emptyText}>Les annonces sont temporairement indisponibles</Text>
+              <TouchableOpacity style={styles.retryBtn} onPress={() => void refetch()}>
+                <Text style={styles.retryTxt}>Réessayer</Text>
+              </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.empty}>
@@ -443,6 +451,22 @@ const styles = StyleSheet.create({
   cardMetaTxt: { fontSize: FontSize.xs, color: Colors.textTertiary },
   empty: { alignItems: 'center', padding: Spacing.xl },
   emptyText: { color: Colors.textSecondary, fontSize: FontSize.md },
+  errorBanner: {
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.md,
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
+    backgroundColor: '#FEF3C7',
+  },
+  errorBannerText: { color: '#92400E', fontSize: FontSize.sm, marginBottom: Spacing.sm },
+  retryBtn: {
+    marginTop: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.primary,
+  },
+  retryTxt: { color: Colors.white, fontSize: FontSize.sm, fontWeight: FontWeight.bold },
   skeletonWrap: { padding: Spacing.md },
   footerSkeleton: { paddingHorizontal: Spacing.md, paddingBottom: Spacing.md },
 });

@@ -71,7 +71,13 @@ function createStorage(): StorageAdapter {
   // Security: on mobile we keep the cache in MMKV for fast offline reads.
   // TODO: test E2E sur le cache hors ligne et la restauration des annonces vues.
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { MMKV } = require('react-native-mmkv') as typeof import('react-native-mmkv')
+  const { MMKV } = require('react-native-mmkv') as {
+    MMKV: new (options: { id: string }) => {
+      getString: (key: string) => string | undefined
+      set: (key: string, value: string) => void
+      delete: (key: string) => void
+    }
+  }
   const mmkv = new MMKV({ id: 'troca-mobile-cache' })
   return {
     getString: (key) => mmkv.getString(key) ?? null,
