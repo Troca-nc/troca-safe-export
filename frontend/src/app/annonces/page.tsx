@@ -2,7 +2,6 @@
 // src/app/annonces/page.tsx
 
 import { Suspense, useState, useEffect, useCallback } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
 import {
   ChevronDown,
   List,
@@ -74,9 +73,6 @@ const FALLBACK_PROVINCES = [
 ]
 
 function ListingsPageContent() {
-  const searchParams = useSearchParams()
-  const router       = useRouter()
-
   const [listings,    setListings]    = useState<any[]>([])
   const [pagination,  setPagination]  = useState({ total: 0, page: 1, pages: 1 })
   const [categories,  setCategories]  = useState<any[]>([])
@@ -86,21 +82,14 @@ function ListingsPageContent() {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [viewMode,    setViewMode]    = useState<'list' | 'map'>('list')
   const [openFamilySlug, setOpenFamilySlug] = useState<string | null>(null)
+  const {
+    filters,
+    setFilter,
+    setPage,
+    resetFilters,
+    activeFilterCount,
+  } = useListingFilters()
   const visibleCategories = categories.length > 0 ? categories : FALLBACK_CATEGORIES
-
-  // Filtres locaux (sync avec URL)
-  const [filters, setFilters] = useState({
-    q:          searchParams.get('q')          || '',
-    category:   searchParams.get('category')   || '',
-    commune_id: searchParams.get('commune_id') || '',
-    province_id: searchParams.get('province_id') || '',
-    price_min:  searchParams.get('price_min')  || '',
-    price_max:  searchParams.get('price_max')  || '',
-    condition:  searchParams.get('condition')  || '',
-    troc:       searchParams.get('troc')       || '',
-    sort:       searchParams.get('sort')       || 'date',
-    page:       parseInt(searchParams.get('page') || '1'),
-  })
 
   // Charger categories et communes une seule fois
   useEffect(() => {
@@ -120,7 +109,7 @@ function ListingsPageContent() {
     setLoading(true)
     setLoadError('')
     try {
-      const params: any = { sort: filters.sort, page: filters.page, limit: 24 }
+      const params: Record<string, string | number> = { sort: filters.sort, page: filters.page, limit: 24 }
       if (filters.q)          params.q          = filters.q
       if (filters.commune_id) params.commune_id = filters.commune_id
       else if (filters.province_id) params.province_id = filters.province_id
@@ -183,47 +172,27 @@ function ListingsPageContent() {
     )
 
     if (matchingProvince && String(matchingProvince.id) !== String(filters.province_id)) {
-      setFilters((prev) => ({
-        ...prev,
-        province_id: String(matchingProvince.id),
-      }))
+      setFilter('province_id', String(matchingProvince.id))
     }
-  }, [filters.commune_id, filters.province_id, communes])
+  }, [filters.commune_id, filters.province_id, communes, setFilter])
 
-  const updateFilter = (key: string, value: string | number) => {
-    setFilters((prev) => {
-      const next = { ...prev, [key]: value, page: 1 }
+  const updateFilter = (key: keyof ListingFilters, value: string | number) => {
+    if (key === 'category' && value === '') {
+      setOpenFamilySlug(null)
+    }
 
-      if (key === 'province_id') {
-        next.commune_id = ''
-      }
+    if (key === 'page') {
+      setPage(Number(value))
+      return
+    }
 
-      if (key === 'category' && value === '') {
-        setOpenFamilySlug(null)
-      }
-
-      return next
-    })
+    setFilter(key, value as never)
   }
 
   const clearFilters = () => {
     setOpenFamilySlug(null)
-    setFilters({
-      q: '',
-      category: '',
-      commune_id: '',
-      province_id: '',
-      price_min: '',
-      price_max: '',
-      condition: '',
-      troc: '',
-      sort: 'date',
-      page: 1,
-    })
+    resetFilters()
   }
-
-  const activeFilterCount = [filters.category, filters.commune_id, filters.price_min,
-    filters.price_max, filters.condition, filters.province_id, filters.troc].filter(Boolean).length
 
   const isCategoryActive = (slug: string) => filters.category === slug
   const isParentCategoryActive = (cat: any) =>
@@ -695,13 +664,19 @@ function ListingsPageContent() {
                   ))}
                 </div>
 
+                {loading && listings.length > 0 ? (
+                  <div className="mt-4">
+                    <ListingSkeletonGrid count={2} className="grid-cols-2 md:grid-cols-2 xl:grid-cols-2 gap-4" />
+                  </div>
+                ) : null}
+
                 {/* Pagination */}
                 {pagination.pages > 1 && (
                   <div className="flex justify-center gap-2 mt-8">
                     {[...Array(pagination.pages)].map((_, i) => (
                       <button
                         key={i}
-                        onClick={() => setFilters((f) => ({ ...f, page: i + 1 }))}
+                        onClick={() => setPage(i + 1)}
                         className={`w-9 h-9 rounded-xl text-sm font-medium transition-colors ${
                           pagination.page === i + 1
                             ? 'bg-coral text-white'
