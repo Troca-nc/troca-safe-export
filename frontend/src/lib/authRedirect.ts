@@ -15,6 +15,18 @@ export function rememberRedirectAfterLogin() {
   }
 }
 
+export function rememberExplicitRedirectAfterLogin(path: string) {
+  if (typeof window === 'undefined') return
+  const redirectPath = path.trim()
+  if (!redirectPath || !redirectPath.startsWith('/')) return
+
+  try {
+    window.sessionStorage.setItem(REDIRECT_AFTER_LOGIN_KEY, redirectPath)
+  } catch {
+    // Ignore storage issues and keep the login flow working.
+  }
+}
+
 export function consumeRedirectAfterLogin(fallback = '/') {
   if (typeof window === 'undefined') return fallback
 

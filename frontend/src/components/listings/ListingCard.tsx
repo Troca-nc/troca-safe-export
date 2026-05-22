@@ -2,13 +2,15 @@
 // src/components/listings/ListingCard.tsx
 
 import Link from 'next/link'
+import { useEffect, useRef } from 'react'
 import { Heart, MapPin, Clock, MailCheck, Phone, ShieldCheck } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useAuthStore } from '@/store/authStore'
-import { useRouter } from 'next/navigation'
 import { useFavorite } from '@/hooks/useFavorite'
 import ListingImage from '@/components/ListingImage'
+import { consumePendingAuthAction, peekPendingAuthAction } from '@/lib/authAction'
+import { useAuthActionStore } from '@/store/authActionStore'
 export { ListingSkeleton as ListingCardSkeleton, ListingSkeletonGrid as ListingGridSkeleton } from '@/components/ListingSkeleton'
 
 interface Listing {
@@ -62,19 +64,49 @@ function CoverImage({ src, alt, icon }: { src?: string; alt: string; icon?: stri
 }
 
 export default function ListingCard({ listing, className = '' }: Props) {
-  const router = useRouter()
   const { isAuthenticated } = useAuthStore()
   const { isFavorited, toggleFavorite, isToggling } = useFavorite()
+  const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
+  const replayedRef = useRef(false)
 
   const saved = isFavorited(listing.id)
   const isLoading = isToggling.has(listing.id)
+
+  useEffect(() => {
+    replayedRef.current = false
+  }, [listing.id])
+
+  useEffect(() => {
+    if (!isAuthenticated || replayedRef.current) return
+
+    const pending = peekPendingAuthAction()
+    if (!pending || pending.type !== 'favorite_listing' || pending.listingId !== listing.id) return
+
+    replayedRef.current = true
+    consumePendingAuthAction()
+    void toggleFavorite({
+      id: listing.id,
+      titre: listing.title,
+      prix: listing.price,
+      cover_image: listing.cover_image ?? null,
+      commune: listing.commune_name ?? null,
+      category: listing.category_name ?? null,
+    })
+  }, [isAuthenticated, listing.category_name, listing.commune_name, listing.cover_image, listing.id, listing.price, listing.title, toggleFavorite])
 
   const handleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
 
     if (!isAuthenticated) {
-      router.push(`/connexion?redirect=/annonces/${listing.id}`)
+      const redirectTo = typeof window !== 'undefined'
+        ? `${window.location.pathname}${window.location.search}`
+        : `/annonces/${listing.id}`
+      openAuthModal({
+        type: 'favorite_listing',
+        listingId: listing.id,
+        redirectTo,
+      })
       return
     }
 

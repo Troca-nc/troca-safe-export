@@ -444,7 +444,7 @@ export function ReviewFormSection({
   onNoteChange,
   onCommentChange,
   onSubmit,
-  loginHref,
+  onRequireAuth,
 }: {
   canReview: boolean
   submitting: boolean
@@ -455,7 +455,7 @@ export function ReviewFormSection({
   onNoteChange: (value: number) => void
   onCommentChange: (value: string) => void
   onSubmit: () => void
-  loginHref: string
+  onRequireAuth?: () => void
 }) {
   if (!canReview) {
     return (
@@ -467,9 +467,23 @@ export function ReviewFormSection({
         <p className="text-sm text-night/60 leading-6">
           Connectez-vous pour noter ce vendeur, ajouter des etoiles et partager votre retour avec la communaute.
         </p>
-        <Link href={loginHref} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-night text-white px-4 py-3 text-sm font-medium">
-          Se connecter pour noter
-        </Link>
+        {onRequireAuth ? (
+          <button
+            type="button"
+            onClick={onRequireAuth}
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-night px-4 py-3 text-sm font-medium text-white"
+          >
+            Se connecter pour noter
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-night px-4 py-3 text-sm font-medium text-white opacity-60"
+            disabled
+          >
+            Se connecter pour noter
+          </button>
+        )}
       </div>
     )
   }

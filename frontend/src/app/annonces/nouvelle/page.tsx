@@ -3,24 +3,67 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, CalendarDays, Clock3, MapPin, Sparkles } from 'lucide-react'
+import { ArrowLeft, CalendarDays, Clock3, Lock, MapPin, Sparkles } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
 import PublishWizard from '@/components/PublishWizard/PublishWizard'
 import { bonPlansApi, metaApi } from '@/lib/api'
 import { useAutosave, useBeforeUnload } from '@/hooks/useAutosave'
 import { useAuthStore } from '@/store/authStore'
+import { useAuthActionStore } from '@/store/authActionStore'
 
 export default function NewListingPage() {
   const [mode, setMode] = useState<'wizard' | 'simple' | null>(null)
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
 
   useEffect(() => {
     const queryMode = new URLSearchParams(window.location.search).get('mode')
     setMode(queryMode === 'simple' ? 'simple' : 'wizard')
   }, [])
 
+  useEffect(() => {
+    if (isAuthenticated) return
+    openAuthModal({
+      type: 'publish_listing',
+      redirectTo: '/annonces/nouvelle',
+    })
+  }, [isAuthenticated, openAuthModal])
+
   if (mode === null) {
     return <div className="min-h-screen bg-sand-light" />
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-sand-light">
+        <Header />
+        <main className="mx-auto max-w-3xl px-4 py-10 md:py-14">
+          <div className="rounded-[2rem] border border-night/8 bg-white p-6 shadow-sm md:p-8">
+            <div className="inline-flex items-center gap-2 rounded-full border border-coral/15 bg-coral/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-coral">
+              <Lock className="h-3.5 w-3.5" />
+              Connexion requise
+            </div>
+            <h1 className="mt-4 text-3xl font-bold text-night">Publier une annonce</h1>
+            <p className="mt-3 text-sm leading-6 text-night/60">
+              Connectez-vous pour conserver votre brouillon, joindre vos photos et publier sans perdre vos données.
+            </p>
+            <button
+              type="button"
+              onClick={() =>
+                openAuthModal({
+                  type: 'publish_listing',
+                  redirectTo: '/annonces/nouvelle',
+                })
+              }
+              className="mt-6 inline-flex items-center justify-center rounded-2xl bg-night px-4 py-3 text-sm font-semibold text-white transition hover:bg-night/90"
+            >
+              Se connecter pour continuer
+            </button>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   if (mode !== 'simple') {

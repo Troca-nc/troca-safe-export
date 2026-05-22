@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { formatDistanceToNow, parseISO } from 'date-fns'
@@ -8,6 +8,8 @@ import { fr } from 'date-fns/locale'
 import { ArrowLeft, Heart } from 'lucide-react'
 import { listingsApi, messagesApi, usersApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
+import { consumePendingAuthAction, peekPendingAuthAction } from '@/lib/authAction'
+import { useAuthActionStore } from '@/store/authActionStore'
 import { useFavorite } from '@/hooks/useFavorite'
 import ShareButton from '@/components/annonces/ShareButton'
 import {
@@ -176,8 +178,9 @@ function buildAssociatedSearches(listing: ListingDetail) {
 
 export default function AnnonceDetail({ id, initialData }: Props) {
   const router = useRouter()
-  const { user } = useAuthStore()
+  const { user, isAuthenticated } = useAuthStore()
   const { isFavorited, toggleFavorite } = useFavorite()
+  const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
   const [listing, setListing] = useState<ListingDetail | null>(initialData ?? null)
   const [loading, setLoading] = useState(!initialData)
   const [activeImage, setActiveImage] = useState(0)
@@ -191,6 +194,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
   const [reviewSubmitting, setReviewSubmitting] = useState(false)
   const [reviewFeedback, setReviewFeedback] = useState<string | null>(null)
   const [reviewError, setReviewError] = useState<string | null>(null)
+  const replayedMessageRef = useRef(false)
 
   useEffect(() => {
     if (initialData) {
@@ -222,6 +226,21 @@ export default function AnnonceDetail({ id, initialData }: Props) {
   useEffect(() => {
     setActiveImage(0)
   }, [listing?.id])
+
+  useEffect(() => {
+    replayedMessageRef.current = false
+  }, [listing?.id])
+
+  useEffect(() => {
+    if (!isAuthenticated || !listing || replayedMessageRef.current) return
+
+    const pending = peekPendingAuthAction()
+    if (!pending || pending.type !== 'message_seller' || pending.listingId !== String(listing.id)) return
+
+    replayedMessageRef.current = true
+    consumePendingAuthAction()
+    void handleMessageSeller()
+  }, [isAuthenticated, listing, listing?.id])
 
   useEffect(() => {
     if (!listing?.user?.id) return
@@ -303,6 +322,14 @@ export default function AnnonceDetail({ id, initialData }: Props) {
 
   const handleFavorite = async () => {
     if (!listing) return
+    if (!isAuthenticated) {
+      openAuthModal({
+        type: 'favorite_listing',
+        listingId: String(listing.id),
+        redirectTo: `/annonces/${listing.id}`,
+      })
+      return
+    }
     await toggleFavorite({
       id: String(listing.id),
       titre: listing.title,
@@ -315,6 +342,14 @@ export default function AnnonceDetail({ id, initialData }: Props) {
 
   const handleMessageSeller = async () => {
     if (!listing) return
+    if (!isAuthenticated) {
+      openAuthModal({
+        type: 'message_seller',
+        listingId: String(listing.id),
+        redirectTo: `/annonces/${listing.id}`,
+      })
+      return
+    }
     setSendingMessage(true)
     try {
       const starter = `Bonjour, votre annonce "${listing.title}" m'interesse. Est-elle toujours disponible ?`
@@ -421,14 +456,20 @@ export default function AnnonceDetail({ id, initialData }: Props) {
             canReview={Boolean(!isOwner && user)}
             submitting={reviewSubmitting}
             feedback={reviewFeedback}
-            error={reviewError}
-            reviewNote={reviewNote}
-            reviewComment={reviewComment}
-            onNoteChange={setReviewNote}
-            onCommentChange={setReviewComment}
-            onSubmit={handleSubmitReview}
-            loginHref={`/connexion?redirect=/annonces/${listing.id}`}
-          />
+          error={reviewError}
+          reviewNote={reviewNote}
+          reviewComment={reviewComment}
+          onNoteChange={setReviewNote}
+          onCommentChange={setReviewComment}
+          onSubmit={handleSubmitReview}
+          onRequireAuth={() =>
+            openAuthModal({
+              type: 'review_seller',
+              listingId: String(listing.id),
+              redirectTo: `/annonces/${listing.id}`,
+            })
+          }
+        />
 
           <SecurityTipsCard />
         </div>

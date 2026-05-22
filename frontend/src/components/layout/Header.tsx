@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { Search, MessageCircle, Plus, User, Menu, X, ChevronDown, LogOut, Heart, Home, Car } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
+import { useAuthActionStore } from '@/store/authActionStore'
 import NotificationBell from '@/components/ui/NotificationBell'
 import DemoModeSwitcher from '@/components/ui/DemoModeSwitcher'
 import { ThemeToggle }    from '@/components/ui/ThemeProvider'
@@ -16,6 +17,7 @@ import { ThemeToggle }    from '@/components/ui/ThemeProvider'
 export function MobileBottomNav() {
   const pathname       = usePathname()
   const { isAuthenticated } = useAuthStore()
+  const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href)
@@ -40,16 +42,34 @@ export function MobileBottomNav() {
         {navItems.map(({ href, icon: Icon, label, isCta }) =>
           isCta ? (
             // Bouton Déposer — pill coral surélevé
-            <Link
-              key={href}
-              href={href}
-              className="flex flex-col items-center gap-0.5 -mt-5"
-            >
-              <span className="w-14 h-14 rounded-full bg-coral flex items-center justify-center shadow-lg shadow-coral/40 ring-4 ring-white">
-                <Icon className="w-6 h-6 text-white" strokeWidth={2.5} />
-              </span>
-              <span className="text-[10px] font-semibold text-coral mt-0.5">{label}</span>
-            </Link>
+            isAuthenticated ? (
+              <Link
+                key={href}
+                href={href}
+                className="flex flex-col items-center gap-0.5 -mt-5"
+              >
+                <span className="w-14 h-14 rounded-full bg-coral flex items-center justify-center shadow-lg shadow-coral/40 ring-4 ring-white">
+                  <Icon className="w-6 h-6 text-white" strokeWidth={2.5} />
+                </span>
+                <span className="text-[10px] font-semibold text-coral mt-0.5">{label}</span>
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() =>
+                  openAuthModal({
+                    type: 'publish_listing',
+                    redirectTo: '/annonces/nouvelle',
+                  })
+                }
+                className="flex flex-col items-center gap-0.5 -mt-5"
+              >
+                <span className="w-14 h-14 rounded-full bg-coral flex items-center justify-center shadow-lg shadow-coral/40 ring-4 ring-white">
+                  <Icon className="w-6 h-6 text-white" strokeWidth={2.5} />
+                </span>
+                <span className="text-[10px] font-semibold text-coral mt-0.5">{label}</span>
+              </button>
+            )
           ) : (
             <Link
               key={href}
@@ -79,6 +99,7 @@ export default function Header() {
   const router = useRouter()
   const pathname = usePathname()
   const { user, isAuthenticated, logout } = useAuthStore()
+  const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
   const [menuOpen,     setMenuOpen]     = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [searchQuery,  setSearchQuery]  = useState('')
@@ -155,13 +176,29 @@ export default function Header() {
           </div>
 
           {/* ── Bouton Déposer TOUJOURS VISIBLE sur mobile ── */}
-          <Link
-            href="/annonces/nouvelle"
-            className="md:hidden flex items-center gap-1.5 bg-coral text-white text-sm font-semibold px-3 py-2 rounded-xl shadow-sm shadow-coral/30 active:scale-95 transition-transform shrink-0"
-          >
-            <Plus className="w-4 h-4" strokeWidth={2.5} />
-            Déposer
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              href="/annonces/nouvelle"
+              className="md:hidden flex items-center gap-1.5 bg-coral text-white text-sm font-semibold px-3 py-2 rounded-xl shadow-sm shadow-coral/30 active:scale-95 transition-transform shrink-0"
+            >
+              <Plus className="w-4 h-4" strokeWidth={2.5} />
+              Déposer
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={() =>
+                openAuthModal({
+                  type: 'publish_listing',
+                  redirectTo: '/annonces/nouvelle',
+                })
+              }
+              className="md:hidden flex items-center gap-1.5 bg-coral text-white text-sm font-semibold px-3 py-2 rounded-xl shadow-sm shadow-coral/30 active:scale-95 transition-transform shrink-0"
+            >
+              <Plus className="w-4 h-4" strokeWidth={2.5} />
+              Déposer
+            </button>
+          )}
 
           {/* Actions desktop */}
           <div className="hidden md:flex items-center gap-2">
@@ -239,9 +276,18 @@ export default function Header() {
               <>
                 <Link href="/connexion"  className="btn-ghost text-sm">Se connecter</Link>
                 <Link href="/inscription" className="btn-secondary text-sm py-2">S'inscrire</Link>
-                <Link href="/annonces/nouvelle" className="btn-primary text-sm py-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    openAuthModal({
+                      type: 'publish_listing',
+                      redirectTo: '/annonces/nouvelle',
+                    })
+                  }
+                  className="btn-primary text-sm py-2"
+                >
                   <Plus className="w-4 h-4" /> Déposer
-                </Link>
+                </button>
               </>
             )}
           </div>
