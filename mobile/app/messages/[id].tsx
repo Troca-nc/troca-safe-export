@@ -11,10 +11,9 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { router, useLocalSearchParams, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { api, messagesApi } from '@/lib/api';
-import { getSocket } from '@/lib/socket';
+import { getSocket, messagingSocket } from '@/lib/socket';
 import { useAuthStore } from '@/store/authStore';
 import { Colors, Spacing, Radius, FontSize, FontWeight } from '@/constants/theme';
-import type { Socket } from 'socket.io-client';
 
 interface Message {
   id: number;
@@ -45,8 +44,10 @@ export default function ConversationScreen() {
   const [text, setText] = useState('');
   const [typing, setTyping] = useState(false);
   const [sending, setSending] = useState(false);
+  const [connectionState, setConnectionState] = useState(messagingSocket.getSnapshot().state);
+  const [reconnectInMs, setReconnectInMs] = useState<number | null>(messagingSocket.getSnapshot().reconnectInMs);
   const listRef = useRef<FlatList>(null);
-  const socketRef = useRef<Socket | null>(null);
+  const socketRef = useRef<typeof messagingSocket | null>(null);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const didInitialScroll = useRef(false);
@@ -75,14 +76,20 @@ export default function ConversationScreen() {
     fetchConv();
   }, [fetchConv]);
 
+  useEffect(() => messagingSocket.subscribeStatus((snapshot) => {
+    setConnectionState(snapshot.state);
+    setReconnectInMs(snapshot.reconnectInMs);
+  }), []);
+
   useEffect(() => {
     if (!id) return;
 
     let alive = true;
-    let socket: Socket | null = null;
+    let socket: typeof messagingSocket | null = null;
     let onNewMessage: ((msg: Message) => void) | null = null;
     let onTyping: ((payload: { isTyping: boolean }) => void) | null = null;
 
+    // TODO: test E2E sur la reconnexion WS et la reprise des événements en file d'attente.
     getSocket().then((s) => {
       if (!alive) return;
       socket = s;
@@ -169,6 +176,12 @@ export default function ConversationScreen() {
     }, 2500);
   };
 
+  const connectionLabel = connectionState === 'connected'
+    ? 'Connecté'
+    : connectionState === 'reconnecting'
+      ? `Reconnexion… ${Math.max(1, Math.ceil((reconnectInMs ?? 1000) / 1000))}s`
+      : 'Hors ligne — les événements seront réémis dès le retour réseau';
+
   const renderMessage = ({ item }: { item: Message }) => {
     const isMine = Number(item.sender_id) === Number(user?.id);
     return (
@@ -242,6 +255,27 @@ export default function ConversationScreen() {
                 }
               />
 
+              <View style={styles.connectionRow} accessibilityRole="text">
+                <View
+                  style={[
+                    styles.connectionDot,
+                    connectionState === 'connected' && styles.connectionDotConnected,
+                    connectionState === 'reconnecting' && styles.connectionDotReconnecting,
+                    connectionState === 'offline' && styles.connectionDotOffline,
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.connectionText,
+                    connectionState === 'connected' && styles.connectionTextConnected,
+                    connectionState === 'reconnecting' && styles.connectionTextReconnecting,
+                    connectionState === 'offline' && styles.connectionTextOffline,
+                  ]}
+                >
+                  {connectionLabel}
+                </Text>
+              </View>
+
               <View style={styles.inputBar}>
                 <TextInput
                   style={styles.input}
@@ -293,4 +327,13 @@ const styles = StyleSheet.create({
   input: { flex: 1, backgroundColor: Colors.gray50, borderRadius: Radius.xl, paddingHorizontal: Spacing.md, paddingTop: 10, paddingBottom: 10, fontSize: FontSize.md, color: Colors.text, maxHeight: 120, borderWidth: 1, borderColor: Colors.border },
   sendBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center' },
   sendBtnDisabled: { backgroundColor: Colors.gray300 },
+  connectionRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: Spacing.md, paddingBottom: Spacing.sm, backgroundColor: Colors.white },
+  connectionDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.gray300 },
+  connectionDotConnected: { backgroundColor: '#22c55e' },
+  connectionDotReconnecting: { backgroundColor: '#f59e0b' },
+  connectionDotOffline: { backgroundColor: '#ef4444' },
+  connectionText: { fontSize: FontSize.xs },
+  connectionTextConnected: { color: '#15803d' },
+  connectionTextReconnecting: { color: '#d97706' },
+  connectionTextOffline: { color: '#b91c1c' },
 });

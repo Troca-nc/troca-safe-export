@@ -1,11 +1,4 @@
-// ============================================================
-//  Troca Mobile — Client WebSocket fiable (socket.io)
-// ============================================================
-
-import NetInfo from '@react-native-community/netinfo'
 import { io, Socket } from 'socket.io-client'
-
-import { tokenStorage } from '@/lib/tokenStorage'
 
 export type SocketConnectionState = 'connected' | 'reconnecting' | 'offline'
 
@@ -26,55 +19,53 @@ interface QueuedEmit {
 const DEFAULT_BACKOFF_MS = 1_000
 const MAX_BACKOFF_MS = 30_000
 
-const WS_URL = (process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001/api')
-  .replace('/api', '')
+function normalizeApiBase(url: string) {
+  const trimmed = url.trim().replace(/\/+$/, '')
+  if (!trimmed) return 'http://localhost:3001'
+  return trimmed.endsWith('/api') ? trimmed.replace(/\/api$/, '') : trimmed
+}
 
 class ReliableMessagingSocket {
+  private readonly url: string
+  private readonly tokenProvider: () => string | null | Promise<string | null>
   private socket: Socket | null = null
   private readonly listeners = new Map<string, Set<SocketHandler>>()
   private readonly statusListeners = new Set<StatusListener>()
   private readonly pendingMessages: QueuedEmit[] = []
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null
   private reconnectDeadline: number | null = null
-  private reconnectCountdown: ReturnType<typeof setInterval> | null = null
   private reconnectDelayMs = DEFAULT_BACKOFF_MS
+  private reconnectCountdown: ReturnType<typeof setInterval> | null = null
   private manualDisconnect = false
-  private networkOnline = true
+  private browserOnline = true
   private status: SocketConnectionState = 'offline'
-  private initialised = false
 
-  constructor() {
-    void this.bootstrapNetworkListeners()
+  constructor(url: string, tokenProvider: () => string | null | Promise<string | null>) {
+    this.url = normalizeApiBase(url)
+    this.tokenProvider = tokenProvider
+
+    if (typeof window !== 'undefined') {
+      this.browserOnline = window.navigator.onLine
+      window.addEventListener('online', this.handleBrowserOnline)
+      window.addEventListener('offline', this.handleBrowserOffline)
+    }
   }
 
-  private async bootstrapNetworkListeners() {
-    if (this.initialised) return
-    this.initialised = true
+  private handleBrowserOnline = () => {
+    this.browserOnline = true
+    void this.connect()
+  }
 
-    const state = await NetInfo.fetch()
-    this.networkOnline = Boolean(state.isConnected)
-    if (this.networkOnline) {
-      void this.connect()
-    } else {
-      this.setStatus('offline')
-    }
-
-    NetInfo.addEventListener((nextState) => {
-      const online = Boolean(nextState.isConnected)
-      this.networkOnline = online
-      if (online) {
-        void this.connect()
-      } else {
-        this.clearReconnectTimer()
-        this.setStatus('offline')
-      }
-    })
+  private handleBrowserOffline = () => {
+    this.browserOnline = false
+    this.clearReconnectTimer()
+    this.setStatus('offline')
   }
 
   private createSocket(token: string) {
-    const socket = io(WS_URL, {
+    const socket = io(this.url, {
       auth: { token },
-      transports: ['websocket'],
+      transports: ['websocket', 'polling'],
       autoConnect: false,
       reconnection: false,
     })
@@ -124,7 +115,7 @@ class ReliableMessagingSocket {
   }
 
   private async resolveToken() {
-    const token = await tokenStorage.getAccess()
+    const token = await this.tokenProvider()
     return token?.trim() || null
   }
 
@@ -160,7 +151,7 @@ class ReliableMessagingSocket {
   }
 
   private async scheduleReconnect() {
-    if (!this.networkOnline) {
+    if (!this.browserOnline) {
       this.setStatus('offline')
       return
     }
@@ -194,7 +185,7 @@ class ReliableMessagingSocket {
 
   async connect() {
     if (this.manualDisconnect) return
-    if (!this.networkOnline) {
+    if (!this.browserOnline) {
       this.setStatus('offline')
       return
     }
@@ -228,7 +219,7 @@ class ReliableMessagingSocket {
     }
 
     this.pendingMessages.push({ event, args })
-    this.setStatus(this.networkOnline ? 'reconnecting' : 'offline')
+    this.setStatus(this.browserOnline ? 'reconnecting' : 'offline')
     void this.connect()
     this.notifyStatus()
   }
@@ -278,15 +269,16 @@ class ReliableMessagingSocket {
   }
 }
 
-const messagingSocket = new ReliableMessagingSocket()
+const API_ORIGIN = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')
 
-export { messagingSocket }
-
-export function getSocket(): Promise<ReliableMessagingSocket> {
-  void messagingSocket.connect()
-  return Promise.resolve(messagingSocket)
+const accessTokenProvider = () => {
+  if (typeof window === 'undefined') return null
+  return window.localStorage.getItem('access_token')
 }
 
-export function disconnectSocket() {
-  messagingSocket.disconnect(true)
+export const messagingSocket = new ReliableMessagingSocket(API_ORIGIN, accessTokenProvider)
+
+export function getMessagingSocket() {
+  void messagingSocket.connect()
+  return messagingSocket
 }

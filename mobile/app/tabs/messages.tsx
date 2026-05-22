@@ -11,7 +11,7 @@ import { router } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { messagesApi } from '@/lib/api';
-import { getSocket } from '@/lib/socket';
+import { getSocket, messagingSocket } from '@/lib/socket';
 import { setBadge } from '@/lib/notifications';
 import { Colors, Spacing, Radius, FontSize, FontWeight } from '@/constants/theme';
 import { formatDistanceToNow } from 'date-fns';
@@ -33,6 +33,8 @@ export default function MessagesTab() {
   const [convs, setConvs]           = useState<Conversation[]>([]);
   const [loading, setLoading]       = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [connectionState, setConnectionState] = useState(messagingSocket.getSnapshot().state);
+  const [reconnectInMs, setReconnectInMs] = useState<number | null>(messagingSocket.getSnapshot().reconnectInMs);
 
   const fetchConvs = useCallback(async () => {
     try {
@@ -51,6 +53,11 @@ export default function MessagesTab() {
 
   // Refresh quand on revient sur l'onglet
   useFocusEffect(useCallback(() => { fetchConvs(); }, [fetchConvs]));
+
+  useEffect(() => messagingSocket.subscribeStatus((snapshot) => {
+    setConnectionState(snapshot.state);
+    setReconnectInMs(snapshot.reconnectInMs);
+  }), []);
 
   // Écouter les nouvelles notifications WS pour rafraîchir la liste
   useEffect(() => {
@@ -128,6 +135,30 @@ export default function MessagesTab() {
     <View style={styles.root}>
       <View style={styles.header}>
         <Text style={styles.title}>Messages</Text>
+        <View style={styles.connectionRow}>
+          <View
+            style={[
+              styles.connectionDot,
+              connectionState === 'connected' && styles.connectionDotConnected,
+              connectionState === 'reconnecting' && styles.connectionDotReconnecting,
+              connectionState === 'offline' && styles.connectionDotOffline,
+            ]}
+          />
+          <Text
+            style={[
+              styles.connectionText,
+              connectionState === 'connected' && styles.connectionTextConnected,
+              connectionState === 'reconnecting' && styles.connectionTextReconnecting,
+              connectionState === 'offline' && styles.connectionTextOffline,
+            ]}
+          >
+            {connectionState === 'connected'
+              ? 'Connecté'
+              : connectionState === 'reconnecting'
+                ? `Reconnexion… ${Math.max(1, Math.ceil((reconnectInMs ?? 1000) / 1000))}s`
+                : 'Hors ligne — file d’attente active'}
+          </Text>
+        </View>
       </View>
 
       {loading
@@ -160,6 +191,15 @@ const styles = StyleSheet.create({
   root:       { flex: 1, backgroundColor: Colors.background },
   header:     { backgroundColor: Colors.white, paddingTop: 56, paddingBottom: Spacing.md, paddingHorizontal: Spacing.lg, borderBottomWidth: 1, borderBottomColor: Colors.border },
   title:      { fontSize: FontSize.xxl, fontWeight: FontWeight.bold, color: Colors.text },
+  connectionRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
+  connectionDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.gray300 },
+  connectionDotConnected: { backgroundColor: '#22c55e' },
+  connectionDotReconnecting: { backgroundColor: '#f59e0b' },
+  connectionDotOffline: { backgroundColor: '#ef4444' },
+  connectionText: { fontSize: FontSize.xs },
+  connectionTextConnected: { color: '#15803d' },
+  connectionTextReconnecting: { color: '#d97706' },
+  connectionTextOffline: { color: '#b91c1c' },
   list:       { flexGrow: 1 },
   item:       { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.white, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.md },
   itemUnread: { backgroundColor: Colors.primaryLight },

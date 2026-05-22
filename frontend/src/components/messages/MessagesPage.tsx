@@ -13,14 +13,50 @@ import MessageBubble from '@/components/messages/MessageBubble'
 import ChatInput from '@/components/messages/ChatInput'
 import type { Conversation } from '@/types/messaging.types'
 
+function ConnectionBadge({
+  state,
+  reconnectInMs,
+}: {
+  state: 'connected' | 'reconnecting' | 'offline'
+  reconnectInMs: number | null
+}) {
+  if (state === 'connected') {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-[10px] text-emerald-500/85">
+        <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.12)]" />
+        Connecté
+      </span>
+    )
+  }
+
+  if (state === 'reconnecting') {
+    const seconds = Math.max(1, Math.ceil((reconnectInMs ?? 1000) / 1000))
+    return (
+      <span className="inline-flex items-center gap-1.5 text-[10px] text-amber-500 animate-pulse">
+        <span className="w-2 h-2 rounded-full bg-amber-500" />
+        Reconnexion… {seconds}s
+      </span>
+    )
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[10px] text-rose-500">
+      <span className="w-2 h-2 rounded-full bg-rose-500" />
+      Hors ligne
+    </span>
+  )
+}
+
 // ── Header de conversation ────────────────────────────────────────────────────
 
 function ConvHeader({
-  conv, typing, connected, onBack,
+  conv, typing, connected, connectionState, reconnectInMs, onBack,
 }: {
   conv:      Conversation
   typing:    boolean
   connected: boolean
+  connectionState: 'connected' | 'reconnecting' | 'offline'
+  reconnectInMs: number | null
   onBack:    () => void
 }) {
   const u = conv.other_user
@@ -58,7 +94,7 @@ function ConvHeader({
             {conv.annonce.prix.toLocaleString('fr-FR')} XPF
           </span>
         )}
-        {/* Statut connexion */}
+        <ConnectionBadge state={connectionState} reconnectInMs={reconnectInMs} />
         <span className={connected ? 'text-emerald-500' : 'text-night/20'}>
           {connected ? <Wifi size={13} /> : <WifiOff size={13} />}
         </span>
@@ -130,7 +166,7 @@ export default function MessagesPage() {
 
   const convId = activeConv?.id ?? null
   const {
-    messages, loading: msgsLoading, typing, connected,
+    messages, loading: msgsLoading, typing, connected, connectionState, reconnectInMs,
     sendMessage, sendPhoto, makeOffer, respondOffer, onTyping, loadMore, hasMore,
   } = useConversation(convId)
 
@@ -200,6 +236,8 @@ export default function MessagesPage() {
               conv={activeConv}
               typing={typing}
               connected={connected}
+              connectionState={connectionState}
+              reconnectInMs={reconnectInMs}
               onBack={() => setActiveConv(null)}
             />
 
@@ -249,7 +287,7 @@ export default function MessagesPage() {
               onTyping={onTyping}
               isBuyer={isBuyer}
               annoncePrix={activeConv.annonce.prix}
-              disabled={!connected}
+              disabled={false}
             />
           </>
         ) : (
