@@ -10,6 +10,7 @@ import { fr } from 'date-fns/locale'
 import { useFavorisStore } from '@/store/favorisStore'
 import { useAuthStore } from '@/store/authStore'
 import { useRouter } from 'next/navigation'
+export { ListingSkeleton as ListingCardSkeleton, ListingSkeletonGrid as ListingGridSkeleton } from '@/components/ListingSkeleton'
 
 interface Listing {
   id: string
@@ -46,33 +47,6 @@ const CONDITION_LABELS: Record<string, string> = {
   good: 'Bon état',
   fair: 'Correct',
   for_parts: 'Pour pièces',
-}
-
-export function ListingCardSkeleton({ className = '' }: { className?: string }) {
-  return (
-    <div className={`card overflow-hidden animate-pulse ${className}`}>
-      <div className="aspect-[4/3] bg-sand" />
-      <div className="p-3 space-y-2">
-        <div className="h-3 bg-sand rounded-full w-4/5" />
-        <div className="h-3 bg-sand rounded-full w-3/5" />
-        <div className="h-4 bg-sand rounded-full w-2/5 mt-1" />
-        <div className="flex justify-between mt-2">
-          <div className="h-2.5 bg-sand rounded-full w-1/3" />
-          <div className="h-2.5 bg-sand rounded-full w-1/4" />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export function ListingGridSkeleton({ count = 6, className = '' }: { count?: number; className?: string }) {
-  return (
-    <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 ${className}`}>
-      {Array.from({ length: count }).map((_, i) => (
-        <ListingCardSkeleton key={i} />
-      ))}
-    </div>
-  )
 }
 
 function CoverImage({ src, alt, icon }: { src?: string; alt: string; icon?: string }) {

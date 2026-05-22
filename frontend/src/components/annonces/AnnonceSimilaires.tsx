@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Heart, MapPin } from 'lucide-react'
 import { listingsApi } from '@/lib/api'
+import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
 
 interface Listing {
   id:           string
@@ -72,17 +73,7 @@ export default function AnnonceSimilaires({ annonceId, categorieId, communeId, t
     return (
       <section className="mt-10">
         <h2 className="font-semibold text-night text-lg mb-4">Annonces similaires</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-2xl overflow-hidden animate-pulse">
-              <div className="bg-gray-100 aspect-[4/3]" />
-              <div className="p-3 space-y-2">
-                <div className="h-3 bg-gray-100 rounded w-3/4" />
-                <div className="h-4 bg-gray-100 rounded w-1/2" />
-              </div>
-            </div>
-          ))}
-        </div>
+        <ListingSkeletonGrid count={6} className="grid-cols-2 md:grid-cols-3 gap-3" />
       </section>
     )
   }

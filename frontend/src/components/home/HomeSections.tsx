@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { type FormEvent } from 'react'
 import { ArrowRight, Search, Sparkles } from 'lucide-react'
 
-import ListingCard, { ListingCardSkeleton } from '@/components/listings/ListingCard'
+import ListingCard from '@/components/listings/ListingCard'
+import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
 import type { CategoryNode } from '@/lib/categoryCatalog'
 import { FEATURED_SEARCHES, SEARCH_ALERTS, getCategoryIcon } from '@/lib/categoryPresentation'
 
@@ -131,11 +132,7 @@ export function FeaturedListingsSection({
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <ListingCardSkeleton key={i} />
-          ))}
-        </div>
+        <ListingSkeletonGrid count={8} className="grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" />
       ) : listings.length > 0 ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {listings.map((listing) => (

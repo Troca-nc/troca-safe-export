@@ -10,7 +10,6 @@ import {
   StyleSheet,
   Image,
   Alert,
-  ActivityIndicator,
   RefreshControl,
 } from 'react-native'
 import { useEffect, useState, useCallback } from 'react'
@@ -19,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { listingsApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '@/constants/theme'
+import { ListingSkeletonList } from '@/components/ListingSkeleton'
 
 type Listing = {
   id: string
@@ -201,7 +201,10 @@ export default function MesAnnoncesScreen() {
       />
 
       {loading ? (
-        <ActivityIndicator color={Colors.primary} style={{ flex: 1 }} />
+        <View style={styles.loading}>
+          {/* TODO: test E2E sur le chargement initial et la pagination de mes annonces mobile. */}
+          <ListingSkeletonList count={6} variant="list" />
+        </View>
       ) : (
         <FlatList
           data={annonces}
@@ -265,6 +268,7 @@ export default function MesAnnoncesScreen() {
 
 const styles = StyleSheet.create({
   list: { padding: Spacing.md, paddingBottom: 32 },
+  loading: { flex: 1, backgroundColor: Colors.background, padding: Spacing.md, gap: Spacing.sm },
   summary: { marginBottom: Spacing.md, gap: 10 },
   summaryIntro: { backgroundColor: Colors.white, borderRadius: Radius.lg, padding: Spacing.md, ...Shadow.sm },
   summaryTitle: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.text },

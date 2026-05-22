@@ -12,7 +12,6 @@ import {
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import Header from '@/components/layout/Header'
-import { ListingGridSkeleton } from '@/components/listings/ListingCard'
 import { useFavorisStore } from '@/store/favorisStore'
 import { useAuthStore }    from '@/store/authStore'
 

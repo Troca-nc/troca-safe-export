@@ -10,7 +10,6 @@ import {
   StyleSheet,
   Image,
   Alert,
-  ActivityIndicator,
   RefreshControl,
 } from 'react-native'
 import { useEffect, useState, useCallback } from 'react'
@@ -19,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
 import { favoritesApi } from '@/lib/api'
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '@/constants/theme'
+import { ListingSkeletonList } from '@/components/ListingSkeleton'
 
 interface Annonce {
   id: string
@@ -180,7 +180,10 @@ export default function FavorisScreen() {
       />
 
       {loading ? (
-        <ActivityIndicator color={Colors.primary} style={{ flex: 1 }} />
+        <View style={styles.loading}>
+          {/* TODO: test E2E sur le chargement initial des favoris mobile. */}
+          <ListingSkeletonList count={6} variant="list" />
+        </View>
       ) : (
         <FlatList
           data={favoris}
@@ -239,6 +242,7 @@ export default function FavorisScreen() {
 
 const styles = StyleSheet.create({
   list: { flexGrow: 1, backgroundColor: Colors.white },
+  loading: { flex: 1, backgroundColor: Colors.white, padding: Spacing.md, gap: Spacing.sm },
   headerCard: { margin: Spacing.md, marginBottom: Spacing.sm, borderRadius: Radius.lg, backgroundColor: Colors.white, padding: Spacing.md, ...Shadow.sm },
   headerTitle: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.text },
   headerSubtitle: { marginTop: 4, fontSize: FontSize.sm, color: Colors.textSecondary, lineHeight: 18 },

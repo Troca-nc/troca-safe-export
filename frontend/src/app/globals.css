@@ -124,8 +124,27 @@ h1, h2, h3, .font-display {
 
   /* Skeleton loader */
 .skeleton {
-    @apply rounded-lg animate-pulse;
-    background-color: rgba(8, 32, 50, 0.08);
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    background: linear-gradient(
+      90deg,
+      rgba(8, 32, 50, 0.06) 0%,
+      rgba(8, 32, 50, 0.11) 20%,
+      rgba(8, 32, 50, 0.06) 40%,
+      rgba(8, 32, 50, 0.06) 100%
+    );
+    background-size: 300% 100%;
+    animation: shimmer 1.35s linear infinite;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
   }
 }
 

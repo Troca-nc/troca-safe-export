@@ -4,7 +4,7 @@
 
 import {
   View, Text, FlatList, TextInput, TouchableOpacity, ScrollView,
-  StyleSheet, ActivityIndicator, RefreshControl, Image,
+  StyleSheet, RefreshControl, Image,
 } from 'react-native';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { router } from 'expo-router';
@@ -13,6 +13,7 @@ import { listingsApi, metaApi } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '@/constants/theme';
 import { MOBILE_FALLBACK_CATEGORIES } from '@/lib/categoryCatalog';
+import { ListingSkeletonList } from '@/components/ListingSkeleton';
 
 interface Annonce {
   id: string;
@@ -45,6 +46,8 @@ export default function AccueilScreen() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firstRun = useRef(true);
   const visibleCategories = categories.length > 0 ? categories : MOBILE_FALLBACK_CATEGORIES;
+  const isInitialLoading = loading && annonces.length === 0;
+  const isLoadingMore = loading && annonces.length > 0;
 
   const normalize = (item: any): Annonce => ({
     id: String(item.id),
@@ -236,14 +239,23 @@ export default function AccueilScreen() {
           </ScrollView>
         }
         ListEmptyComponent={
-          loading ? null : (
+          isInitialLoading ? (
+            <View style={styles.skeletonWrap}>
+              {/* TODO: test E2E sur le chargement initial et la pagination du flux d'accueil mobile. */}
+              <ListingSkeletonList count={6} variant="grid" />
+            </View>
+          ) : (
             <View style={styles.empty}>
               <Text style={styles.emptyText}>Aucune annonce trouvée</Text>
             </View>
           )
         }
         ListFooterComponent={
-          loading ? <ActivityIndicator color={Colors.primary} style={{ margin: Spacing.lg }} /> : null
+          isLoadingMore ? (
+            <View style={styles.footerSkeleton}>
+              <ListingSkeletonList count={2} variant="grid" />
+            </View>
+          ) : null
         }
         onEndReached={loadMore}
         onEndReachedThreshold={0.3}
@@ -300,4 +312,6 @@ const styles = StyleSheet.create({
   trustText: { fontSize: 9, fontWeight: FontWeight.bold, color: Colors.primary },
   empty: { alignItems: 'center', padding: Spacing.xl },
   emptyText: { color: Colors.textSecondary, fontSize: FontSize.md },
+  skeletonWrap: { paddingHorizontal: Spacing.md, paddingTop: Spacing.md },
+  footerSkeleton: { paddingHorizontal: Spacing.md, paddingBottom: Spacing.md },
 });

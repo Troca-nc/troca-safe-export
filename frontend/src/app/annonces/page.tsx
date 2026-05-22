@@ -14,9 +14,11 @@ import {
 import dynamic from 'next/dynamic'
 import Header from '@/components/layout/Header'
 import ListingCard from '@/components/listings/ListingCard'
+import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
 import { listingsApi, metaApi } from '@/lib/api'
 import { FALLBACK_CATEGORIES } from '@/lib/categoryCatalog'
 import { getCategoryIcon } from '@/lib/categoryPresentation'
+import { useListingFilters, type ListingFilters } from '@/hooks/useListingFilters'
 
 const AnnoncesMap = dynamic(() => import('@/components/annonces/AnnoncesMap'), { ssr: false })
 
@@ -482,7 +484,7 @@ function ListingsPageContent() {
       {/* Effacer tous les filtres */}
       {activeFilterCount > 0 && (
         <button onClick={clearFilters} className="btn-ghost text-sm text-red-500 w-full justify-center">
-          <X className="w-4 h-4" /> Effacer tous les filtres ({activeFilterCount})
+          <X className="w-4 h-4" /> Réinitialiser les filtres ({activeFilterCount})
         </button>
       )}
     </div>
@@ -660,18 +662,9 @@ function ListingsPageContent() {
               </div>
             ) : null}
 
-            {loading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-                {[...Array(12)].map((_, i) => (
-                  <div key={i} className="card overflow-hidden">
-                    <div className="skeleton aspect-[4/3]" />
-                    <div className="p-3 space-y-2">
-                      <div className="skeleton h-4 w-3/4" />
-                      <div className="skeleton h-3 w-1/2" />
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {/* TODO: test E2E sur le chargement initial et la pagination sans perte de contexte. */}
+            {loading && listings.length === 0 ? (
+              <ListingSkeletonGrid count={6} className="grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4" />
             ) : listings.length === 0 ? (
               <div className="text-center py-20">
                 <span className="text-6xl mb-4 block" aria-hidden="true">🔍</span>

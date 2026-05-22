@@ -12,7 +12,6 @@ import {
   ScrollView,
   StyleSheet,
   Image,
-  ActivityIndicator,
   RefreshControl,
 } from 'react-native';
 import { router } from 'expo-router';
@@ -21,6 +20,7 @@ import { listingsApi, metaApi } from '@/lib/api';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '@/constants/theme';
 import { MOBILE_FALLBACK_CATEGORIES } from '@/lib/categoryCatalog';
 import { MobileListing, normalizeListing } from '@/lib/listingNormalization';
+import { ListingSkeletonList } from '@/components/ListingSkeleton';
 
 const SORTS = [
   { value: 'date', label: 'Plus récentes' },
@@ -46,6 +46,8 @@ export default function AnnoncesTab() {
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firstFilterRun = useRef(true);
   const visibleCategories = categories.length > 0 ? categories : MOBILE_FALLBACK_CATEGORIES;
+  const isInitialLoading = loading && annonces.length === 0;
+  const isLoadingMore = loading && annonces.length > 0;
 
   const fetchAnnonces = useCallback(
     async (reset = false) => {
@@ -300,14 +302,25 @@ export default function AnnoncesTab() {
         numColumns={2}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.list}
-        ListEmptyComponent={
-          !loading ? (
+      ListEmptyComponent={
+          isInitialLoading ? (
+            <View style={styles.skeletonWrap}>
+              {/* TODO: test E2E sur le chargement initial et la pagination des annonces mobile. */}
+              <ListingSkeletonList count={6} variant="grid" />
+            </View>
+          ) : (
             <View style={styles.empty}>
               <Text style={styles.emptyText}>Aucune annonce trouvée</Text>
             </View>
+          )
+        }
+        ListFooterComponent={
+          isLoadingMore ? (
+            <View style={styles.footerSkeleton}>
+              <ListingSkeletonList count={2} variant="grid" />
+            </View>
           ) : null
         }
-        ListFooterComponent={loading ? <ActivityIndicator color={Colors.primary} style={{ margin: Spacing.lg }} /> : null}
         onEndReached={loadMore}
         onEndReachedThreshold={0.3}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
@@ -421,4 +434,6 @@ const styles = StyleSheet.create({
   cardMetaTxt: { fontSize: FontSize.xs, color: Colors.textTertiary },
   empty: { alignItems: 'center', padding: Spacing.xl },
   emptyText: { color: Colors.textSecondary, fontSize: FontSize.md },
+  skeletonWrap: { padding: Spacing.md },
+  footerSkeleton: { paddingHorizontal: Spacing.md, paddingBottom: Spacing.md },
 });
