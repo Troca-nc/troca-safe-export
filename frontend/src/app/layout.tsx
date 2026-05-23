@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr">
       {/* pb-16 : compense la barre de nav fixe en bas sur mobile */}
-      <body className="bg-sand-light dark:bg-night text-night dark:text-white font-body antialiased pb-16 md:pb-0">
+      <body className="bg-sand-light dark:bg-night text-night dark:text-white font-body antialiased pb-16 pt-14 md:pb-0 md:pt-14">
         <ThemeProvider>
           <ReactQueryProvider>
             <JsonLd data={buildOrganizationSchema()} />

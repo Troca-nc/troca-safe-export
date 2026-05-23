@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AlertTriangle, X } from 'lucide-react'
 import { DEMO_TOAST_EVENT, isDemoMode } from '@/lib/demoMode'
 
@@ -32,28 +32,23 @@ export default function DemoBanner() {
     return () => window.removeEventListener(DEMO_TOAST_EVENT, handleToast as EventListener)
   }, [])
 
-  const bannerClass = useMemo(
-    () => 'sticky top-0 z-[80] border-b border-amber-300/70 bg-amber-100/95 px-4 py-3 text-sm text-amber-950 backdrop-blur',
-    []
-  )
-
   if (!isDemoMode()) return null
 
   return (
     <>
-      <div className={bannerClass}>
+      <div className="fixed inset-x-0 top-0 z-[120] border-b border-amber-300/80 bg-amber-300 px-4 py-3 text-sm text-amber-950 shadow-[0_10px_30px_rgba(245,158,11,0.22)]">
         <div className="mx-auto flex max-w-7xl items-center gap-3">
           <AlertTriangle className="h-4 w-4 shrink-0 text-amber-700" />
           <p className="flex-1 font-medium">
-            Mode démo activé — les données sont fictives et aucune action n&apos;est réelle
+            ⚠️ Mode démonstration — Aucun paiement réel ne sera effectué
           </p>
-          <span className="rounded-full bg-white/70 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-800">
+          <span className="rounded-full bg-black/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-950">
             Démo
           </span>
         </div>
       </div>
 
-      <div className="pointer-events-none fixed right-4 top-16 z-[90] flex w-[min(92vw,22rem)] flex-col gap-2">
+      <div className="pointer-events-none fixed right-4 top-20 z-[130] flex w-[min(92vw,22rem)] flex-col gap-2">
         {toasts.map((toast) => (
           <div
             key={toast.id}

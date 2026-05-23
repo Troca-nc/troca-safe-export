@@ -38,6 +38,7 @@ const stripeWebhookSecret = isConfiguredValue(process.env.STRIPE_WEBHOOK_SECRET)
   ? process.env.STRIPE_WEBHOOK_SECRET.trim()
   : '';
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+const demoModeEnabled = process.env.DEMO_MODE === 'true';
 const stripe = isConfiguredValue(process.env.STRIPE_SECRET_KEY)
   ? new Stripe(process.env.STRIPE_SECRET_KEY.trim(), { apiVersion: '2023-10-16' })
   : null;
@@ -79,6 +80,19 @@ async function hasExistingSubscription(userId) {
 
 function safePaymentError(provider, fallback) {
   return { error: fallback || `Erreur de paiement${provider ? ` (${provider})` : ''}` };
+}
+
+function buildDemoPaymentUrl(path, params = {}) {
+  const query = new URLSearchParams();
+  query.set('demo', '1');
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null) {
+      query.set(key, String(value));
+    }
+  }
+
+  return `${baseUrl}${path}?${query.toString()}`;
 }
 
 async function verifyStripeSubscriptionStatus(sessionId, userId) {
@@ -163,11 +177,27 @@ async function verifyPayplugSubscriptionStatus(paymentId, userId) {
 }
 
 router.post('/boost/mobile', authenticate, paymentLimiter, validate(boostSchema), async (req, res) => {
-  if (!ensureStripe(res)) return;
   const { annonce_id, boost_type, boost_duration } = req.body;
 
   const boost = findBoost(boost_type, boost_duration);
   if (!boost) return res.status(400).json({ error: 'Boost introuvable dans le catalogue' });
+
+  if (demoModeEnabled) {
+    return res.json({
+      data: {
+        client_secret: 'demo_client_secret_boost',
+        customer_id: 'demo_customer',
+        ephemeral_key: 'demo_ephemeral_key',
+        boost,
+        amount_display: formatXpfEur(boost.price_xpf),
+        demo: true,
+        success: true,
+        message: 'Paiement simulé',
+      },
+    });
+  }
+
+  if (!ensureStripe(res)) return;
 
   const { rows: annonceRows } = await query(
     `SELECT id, titre FROM annonces WHERE id = $1 AND user_id = $2 AND status = 'active'`,
@@ -227,10 +257,22 @@ router.post('/boost/mobile', authenticate, paymentLimiter, validate(boostSchema)
 });
 
 router.post('/boost', authenticate, paymentLimiter, validate(boostSchema), async (req, res) => {
-  if (!ensureStripe(res)) return;
   const { annonce_id, boost_type, boost_duration, provider } = req.body;
 
   if (provider === 'payplug') {
+    if (demoModeEnabled) {
+      return res.json({
+        success: true,
+        demo: true,
+        provider,
+        message: 'Paiement simulé',
+        checkout_url: buildDemoPaymentUrl('/paiement/succes', {
+          type: 'boost',
+          provider,
+        }),
+      });
+    }
+
     if (!payplug.isPayPlugConfigured()) {
       return res.status(503).json({ error: 'PayPlug non configuré — vérifiez PAYPLUG_SECRET_KEY' });
     }
@@ -279,6 +321,21 @@ router.post('/boost', authenticate, paymentLimiter, validate(boostSchema), async
       return res.status(500).json(safePaymentError('payplug', 'Impossible de finaliser le paiement PayPlug pour ce boost'));
     }
   }
+
+  if (demoModeEnabled) {
+    return res.json({
+      success: true,
+      demo: true,
+      provider: 'stripe',
+      message: 'Paiement simulé',
+      checkout_url: buildDemoPaymentUrl('/paiement/succes', {
+        type: 'boost',
+        provider: 'stripe',
+      }),
+    });
+  }
+
+  if (!ensureStripe(res)) return;
 
   const boost = findBoost(boost_type, boost_duration);
   if (!boost) return res.status(400).json({ error: 'Boost introuvable' });
@@ -338,10 +395,23 @@ router.post('/boost', authenticate, paymentLimiter, validate(boostSchema), async
 });
 
 router.post('/subscription', authenticate, paymentLimiter, validate(subscriptionSchema), async (req, res) => {
-  if (!ensureStripe(res)) return;
   const { plan_id, billing_period, provider } = req.body;
 
   if (provider === 'payplug') {
+    if (demoModeEnabled) {
+      return res.json({
+        success: true,
+        demo: true,
+        provider,
+        message: 'Paiement simulé',
+        checkout_url: buildDemoPaymentUrl('/abonnement/confirmation', {
+          payment_id: 'demo_payplug_subscription',
+          provider,
+          type: 'subscription',
+        }),
+      });
+    }
+
     if (!payplug.isPayPlugConfigured()) {
       return res.status(503).json({ error: 'PayPlug non configuré — vérifiez PAYPLUG_SECRET_KEY' });
     }
@@ -387,6 +457,22 @@ router.post('/subscription', authenticate, paymentLimiter, validate(subscription
       return res.status(500).json(safePaymentError('payplug', 'Impossible de finaliser l’abonnement PayPlug'));
     }
   }
+
+  if (demoModeEnabled) {
+    return res.json({
+      success: true,
+      demo: true,
+      provider: 'stripe',
+      message: 'Paiement simulé',
+      checkout_url: buildDemoPaymentUrl('/abonnement/confirmation', {
+        session_id: 'demo_stripe_subscription',
+        provider: 'stripe',
+        type: 'subscription',
+      }),
+    });
+  }
+
+  if (!ensureStripe(res)) return;
 
   const plan = getWebPlan(plan_id, billing_period);
   if (!plan) return res.status(400).json({ error: 'Plan introuvable' });
@@ -436,7 +522,6 @@ router.post('/subscribe', authenticate, paymentLimiter, validate(subscriptionSch
 });
 
 router.post('/subscribe/mobile', authenticate, paymentLimiter, validate(mobilePlanSchema), async (req, res) => {
-  if (!ensureStripe(res)) return;
   const { plan } = req.body;
 
   const planConfig = getMobilePlan(plan);
@@ -444,6 +529,26 @@ router.post('/subscribe/mobile', authenticate, paymentLimiter, validate(mobilePl
   if (!planConfig.price_id.startsWith('price_')) {
     return res.status(500).json({ error: "Price ID Stripe non configuré — vérifiez les variables d'environnement" });
   }
+
+  if (demoModeEnabled) {
+    return res.json({
+      data: {
+        client_secret: 'demo_client_secret_subscription',
+        customer_id: 'demo_customer',
+        ephemeral_key: 'demo_ephemeral_key',
+        subscription_id: `demo_subscription_${plan}`,
+        status: 'active',
+        trial_end: null,
+        plan,
+        amount_display: formatXpfEur(planConfig.amount_xpf),
+        demo: true,
+        success: true,
+        message: 'Paiement simulé',
+      },
+    });
+  }
+
+  if (!ensureStripe(res)) return;
 
   try {
     const customerId = await getOrCreateStripeCustomer(stripe, req.user.id, req.user.email);
@@ -696,6 +801,17 @@ router.get('/subscriptions/verify', authenticate, paymentLimiter, async (req, re
   const { session_id: sessionId, payment_id: paymentId } = req.query;
 
   try {
+    if (demoModeEnabled) {
+      return res.json({
+        status: 'ok_subscription',
+        plan: req.query.plan_id ?? 'pro',
+        trial_end: null,
+        period_end: new Date(Date.now() + 30 * 86_400_000).toISOString(),
+        provider: (req.query.provider ?? 'stripe'),
+        demo: true,
+      });
+    }
+
     if (sessionId && typeof sessionId === 'string') {
       const result = await verifyStripeSubscriptionStatus(sessionId, req.user.id);
       return res.status(result.code).json(result.body);
@@ -1021,14 +1137,36 @@ router.post('/webhooks/stripe', async (req, res) => {
 });
 
 router.get('/verify-payplug', authenticate, paymentLimiter, async (req, res) => {
-  if (!payplug.isPayPlugConfigured()) {
-    return res.status(503).json({ error: 'PayPlug non configuré' });
-  }
-
   const { id, type, resource_type = 'payment' } = req.query;
   if (!id) return res.status(400).json({ status: 'invalid', error: 'id manquant' });
 
   try {
+    if (demoModeEnabled) {
+      if (resource_type === 'payment') {
+        return res.json({
+          status: 'ok_boost',
+          annonce_id: req.query.annonce_id ?? null,
+          annonce_titre: null,
+          boost_type: req.query.boost_type ?? null,
+          boost_days: req.query.duration ? Number(req.query.duration) : null,
+          provider: 'payplug',
+          demo: true,
+        });
+      }
+
+      return res.json({
+        status: 'ok_subscription',
+        plan: req.query.plan_id ?? null,
+        period_end: new Date(Date.now() + 30 * 86_400_000).toISOString(),
+        provider: 'payplug',
+        demo: true,
+      });
+    }
+
+    if (!payplug.isPayPlugConfigured()) {
+      return res.status(503).json({ error: 'PayPlug non configuré' });
+    }
+
     const resource = await payplug.verifyIPN(String(id), String(resource_type));
 
     const meta = resource.metadata ?? {};

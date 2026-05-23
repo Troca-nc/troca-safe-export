@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react';
-import { Platform } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { PushPermissionPrompt } from '@/components/PushPermissionPrompt';
 import { OfflineBanner } from '@/components/OfflineBanner';
+import { DemoModeBanner } from '@/components/DemoModeBanner';
+import { isDemoModeEnabled } from '@/lib/demo';
 import { queryClient, useOfflineStatus } from '@/lib/queryClient';
 
 type AppProvidersProps = {
@@ -14,13 +16,17 @@ export function AppProviders({ children }: AppProvidersProps) {
   const stripeEnabled = Platform.OS !== 'web';
   const StripeProvider = stripeEnabled ? require('@stripe/stripe-react-native').StripeProvider : null;
   const offline = useOfflineStatus();
+  const demoModeEnabled = isDemoModeEnabled();
 
   const content = (
     <QueryClientProvider client={queryClient}>
-      {offline ? <OfflineBanner /> : null}
-      <StatusBar style="auto" />
-      {children}
-      <PushPermissionPrompt />
+      <View style={styles.shell}>
+        {offline ? <OfflineBanner /> : null}
+        <DemoModeBanner />
+        <StatusBar style="auto" />
+        <View style={[styles.content, demoModeEnabled ? styles.contentWithDemo : null]}>{children}</View>
+        <PushPermissionPrompt />
+      </View>
     </QueryClientProvider>
   );
 
@@ -35,3 +41,15 @@ export function AppProviders({ children }: AppProvidersProps) {
     </StripeProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  shell: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+  },
+  contentWithDemo: {
+    paddingTop: 48,
+  },
+});

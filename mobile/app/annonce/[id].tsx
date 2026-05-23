@@ -52,6 +52,7 @@ import {
   SellerSummaryCard,
   SellerZoneCard,
 } from '@/components/annonce/AnnonceDetailSections';
+import { isDemoModeEnabled } from '@/lib/demo';
 
 export default function AnnonceDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -92,15 +93,16 @@ export default function AnnonceDetail() {
 
     api
       .get(`/listings/${id}`)
-        .then(({ data }) => {
+      .then(({ data }) => {
         const detail = data.data ?? data;
+        const detailUser = detail.user as Partial<ListingDetail['user']> | undefined;
         const mergedUser = detail.user
           ? {
               ...detail.user,
               email_verified: detail.seller_email_verified ?? detail.user.email_verified,
               phone_verified: detail.seller_phone_verified ?? detail.user.phone_verified,
               commune_name: detail.seller_commune_name ?? detail.user.commune_name,
-              province_name: detail.seller_province_name ?? detail.user.province_name,
+              province_name: detail.seller_province_name ?? detailUser?.province_name ?? null,
             }
           : detail.user;
 
@@ -176,18 +178,20 @@ export default function AnnonceDetail() {
     : null;
   const trustScore = annonce?.user?.trust_score;
   const trustLevel = annonce?.user?.trust_level;
+  const listingTitle = title;
+  const listingPrice = priceValue;
   const isOwner = annonce?.user?.id === Number(user?.id);
   const shareContent = useMemo<MobileShareContent | null>(() => {
     if (!annonce) return null;
-    const location = [annonce.commune_name, annonce.province_name].filter(Boolean).join(', ');
+    const location = [annonce.commune_name, annonce.user?.province_name].filter(Boolean).join(', ');
     return {
       kind: 'annonce',
       itemId: annonce.id,
-      title: `${title} | Troca`,
-      description: [priceValue ? money(priceValue) : null, location || 'Nouvelle-Caledonie'].filter(Boolean).join(' • '),
+      title: `${listingTitle} | Troca`,
+      description: [listingPrice ? money(listingPrice) : null, location || 'Nouvelle-Caledonie'].filter(Boolean).join(' • '),
       url: `https://troca.nc/annonces/${annonce.id}`,
     };
-  }, [annonce, priceValue, title]);
+  }, [annonce, listingPrice, listingTitle]);
   const shareLinks = useMemo(() => (shareContent ? buildMobileShareLinks(shareContent) : null), [shareContent]);
 
   const handleContact = async () => {
@@ -225,6 +229,10 @@ export default function AnnonceDetail() {
 
   const handleBoost = async () => {
     if (!annonce) return;
+    if (isDemoModeEnabled()) {
+      Alert.alert('Paiement simulé — Mode démo actif', 'Votre boost a été enregistré en simulation.');
+      return;
+    }
     setBoosting(true);
     try {
       const { data } = await api.post('/payment/boost/mobile', {
@@ -268,8 +276,8 @@ export default function AnnonceDetail() {
     try {
       await toggleFavorite({
         id: String(annonce.id),
-        titre: annonce.title,
-        prix: annonce.price,
+        titre: listingTitle,
+        prix: listingPrice,
         cover_image: images[0] ?? null,
         commune: annonce.commune_name ?? null,
         category: annonce.category_name ?? null,

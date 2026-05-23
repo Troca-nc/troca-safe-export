@@ -6,6 +6,7 @@
 import { useState } from 'react'
 import { X, Star, AlertCircle, Zap, Camera, TrendingUp, Loader2 } from 'lucide-react'
 import { useBoostPayment } from '@/hooks/usePayment'
+import DemoModeNotice from '@/components/DemoModeNotice'
 import { BOOST_CATALOG, formatXPF } from '@/types/monetisation.types'
 import type { BoostOption, BoostType, BoostDuration, PaymentProvider } from '@/types/monetisation.types'
 
@@ -100,6 +101,8 @@ export default function BoostModal({ annonce, onClose }: BoostModalProps) {
         </div>
 
         <div className="p-5 space-y-5">
+
+          <DemoModeNotice />
 
           {/* Sélection du boost */}
           <div>

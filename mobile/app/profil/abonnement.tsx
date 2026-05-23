@@ -14,6 +14,7 @@ import { WebView } from 'react-native-webview'
 import { PaymentProviderSelector, type PaymentProvider } from '@/components/PaymentProviderSelector'
 import { Colors, FontSize, FontWeight, Radius, Shadow, Spacing } from '@/constants/theme'
 import { api } from '@/lib/api'
+import { isDemoModeEnabled } from '@/lib/demo'
 import { useAuthStore } from '@/store/authStore'
 
 type Plan = 'pro_mensuel' | 'pro_annuel' | 'pro_plus_mensuel' | 'pro_plus_annuel'
@@ -98,10 +99,16 @@ export default function AbonnementScreen() {
   const [payplugCheckoutUrl, setPayplugCheckoutUrl] = useState<string | null>(null)
   const [verifyingPayplug, setVerifyingPayplug] = useState(false)
   const [loading, setLoading] = useState(false)
+  const demoModeEnabled = isDemoModeEnabled()
 
   const subscriptionPayload = useMemo(() => getSubscriptionPayload(selectedPlan), [selectedPlan])
 
   const handleStripeSubscription = async () => {
+    if (demoModeEnabled) {
+      Alert.alert('Paiement simulé — Mode démo actif', 'Votre abonnement a été enregistré en simulation.');
+      return;
+    }
+
     const { data } = await api.post('/payment/subscribe/mobile', { plan: selectedPlan })
 
     const { error: initError } = await initPaymentSheet({
@@ -131,6 +138,14 @@ export default function AbonnementScreen() {
     setVerifyingPayplug(true)
 
     try {
+      if (demoModeEnabled) {
+        setPayplugCheckoutUrl(null)
+        await refreshMe()
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+        Alert.alert('Paiement simulé — Mode démo actif', 'Votre abonnement a été enregistré en simulation.');
+        return
+      }
+
       for (let attempt = 0; attempt < 10; attempt += 1) {
         const { data } = await api.get('/payment/verify-payplug', {
           params: {
@@ -182,6 +197,11 @@ export default function AbonnementScreen() {
     setLoading(true)
 
     try {
+      if (demoModeEnabled) {
+        Alert.alert('Paiement simulé — Mode démo actif', 'Votre abonnement a été enregistré en simulation.');
+        return
+      }
+
       if (paymentProvider === 'payplug') {
         const { data } = await api.post('/payment/subscribe', {
           ...subscriptionPayload,
@@ -235,6 +255,13 @@ export default function AbonnementScreen() {
             professionnels de Nouvelle-Calédonie.
           </Text>
         </View>
+
+        {demoModeEnabled && (
+          <View style={styles.demoNotice}>
+            <Ionicons name="warning" size={16} color="#7C2D12" />
+            <Text style={styles.demoNoticeText}>Mode démonstration — Aucun paiement réel ne sera effectué.</Text>
+          </View>
+        )}
 
         <View style={styles.features}>
           {FEATURES.map((feature, index) => (
@@ -334,9 +361,17 @@ export default function AbonnementScreen() {
           </View>
 
           <View style={styles.webviewBody}>
+            {demoModeEnabled ? (
+              <View style={styles.demoNoticeModal}>
+                <Ionicons name="warning" size={16} color="#7C2D12" />
+                <Text style={styles.demoNoticeText}>Mode démonstration — Aucun paiement réel ne sera effectué.</Text>
+              </View>
+            ) : null}
+
             {payplugCheckoutUrl ? (
               <WebView
                 source={{ uri: payplugCheckoutUrl }}
+                style={styles.webviewFrame}
                 onNavigationStateChange={(navState) => {
                   if (verifyingPayplug) return
                   void handlePayplugNavigation(navState.url)
@@ -394,6 +429,36 @@ const styles = StyleSheet.create({
   feature: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   featureIcon: { fontSize: 20, width: 28, textAlign: 'center' },
   featureText: { fontSize: FontSize.md, color: Colors.text, flex: 1 },
+  demoNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.md,
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+  },
+  demoNoticeModal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    margin: Spacing.lg,
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+  },
+  demoNoticeText: {
+    flex: 1,
+    color: '#7C2D12',
+    fontSize: FontSize.sm,
+    fontWeight: FontWeight.semibold,
+    lineHeight: 20,
+  },
   plansTitle: { fontSize: FontSize.lg, fontWeight: FontWeight.bold, color: Colors.text, paddingHorizontal: Spacing.lg, marginBottom: Spacing.sm },
   planCard: { backgroundColor: Colors.white, marginHorizontal: Spacing.lg, marginBottom: Spacing.sm, borderRadius: Radius.lg, padding: Spacing.lg, borderWidth: 2, borderColor: Colors.border, ...Shadow.sm },
   planCardActive: { borderColor: Colors.primary },
@@ -450,6 +515,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray100,
   },
   webviewBody: { flex: 1, backgroundColor: Colors.white },
+  webviewFrame: { flex: 1 },
   webviewLoading: {
     flex: 1,
     alignItems: 'center',

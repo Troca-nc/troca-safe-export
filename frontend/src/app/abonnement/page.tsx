@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { ArrowRight, Check, ShieldCheck, Sparkles, Star, TrendingUp } from 'lucide-react'
 
+import DemoModeNotice from '@/components/DemoModeNotice'
 import { PaymentProviderSelector } from '@/components/monetisation/PaymentProviderSelector'
 import { useSubscription } from '@/hooks/usePayment'
 import { trackEvent } from '@/lib/analytics'
@@ -267,6 +268,7 @@ export default function AbonnementPage() {
             onChange={setProvider}
             className="rounded-[1.75rem] border border-night/8 bg-sand/35 p-5"
           />
+          <DemoModeNotice className="mt-4" />
           <p className="mt-3 text-sm text-night/55">
             Votre choix s&apos;applique au prochain checkout. Stripe est conseillé pour les cartes
             internationales, PayPlug pour les cartes OPT-NC et le réseau local.
