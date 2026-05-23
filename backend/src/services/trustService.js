@@ -35,7 +35,7 @@ async function computeTrustScore(userId) {
       u.phone_verified,
       u.email_verified,
       u.avatar_url IS NOT NULL                              AS has_avatar,
-      u.is_pro,
+      CASE WHEN u.is_pro = TRUE AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
       u.note_moyenne,
       u.nb_avis,
       u.nb_annonces,

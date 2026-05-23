@@ -105,7 +105,7 @@ router.get('/', optionalAuth, async (req, res, next) => {
          u.id AS author_id,
          u.prenom AS author_prenom,
          u.nom AS author_nom,
-         u.is_pro AS author_is_pro,
+         CASE WHEN u.is_pro = TRUE AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS author_is_pro,
          com.name AS commune_name
        FROM bon_plans bp
        LEFT JOIN users u ON u.id = bp.user_id

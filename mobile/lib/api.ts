@@ -234,6 +234,16 @@ export const notificationsApi = {
   markRead: (id: number) => api.post(`/users/notifications/${id}/read`).finally(() => invalidateApiCache('notifications.')),
 }
 
+export const subscriptionsApi = {
+  getStatus: () => cachedGet(
+    'subscriptions.status',
+    '/subscriptions/status',
+    () => api.get('/subscriptions/status'),
+    undefined,
+    CACHE_TTL.short,
+  ),
+}
+
 export const favoritesApi = {
   getFavorites: () => cachedGet('favorites.get', '/users/me/favoris', () => api.get('/users/me/favoris'), undefined, CACHE_TTL.short),
   toggleFavorite: (id: string) => api.post(`/listings/${id}/favoris`).finally(() => invalidateApiCache('favorites.')),

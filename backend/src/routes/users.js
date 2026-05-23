@@ -28,7 +28,7 @@ router.get('/me/favoris', authenticate, async (req, res, next) => {
       `SELECT a.id, a.titre, a.prix, a.condition, a.created_at,
               cat.name AS category_name, com.name AS commune_name,
               u.id AS seller_id, u.prenom AS seller_prenom, u.nom AS seller_nom,
-              u.is_pro AS seller_is_pro, u.email_verified AS seller_email_verified,
+              CASE WHEN u.is_pro = TRUE AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS seller_is_pro, u.email_verified AS seller_email_verified,
               u.phone_verified AS seller_phone_verified, u.trust_score AS seller_trust_score,
               u.trust_level AS seller_trust_level,
               f.created_at AS favorited_at,
@@ -56,7 +56,8 @@ router.get('/:id', async (req, res, next) => {
   try {
     const result = await query(
       `SELECT
-          u.id, u.prenom, u.nom, u.avatar_url, u.bio, u.is_pro,
+          u.id, u.prenom, u.nom, u.avatar_url, u.bio,
+          CASE WHEN u.is_pro = TRUE AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
           u.nb_annonces, u.note_moyenne, u.nb_avis, u.created_at,
           u.phone_verified, u.email_verified,
           u.commune_id,

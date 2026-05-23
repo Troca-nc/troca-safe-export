@@ -4,16 +4,17 @@
 
 import { Suspense, useState, useEffect } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import {
   Star, MapPin, Calendar, Shield, CheckCircle2,
-  Edit3, Save, X, Package, MessageCircle, Heart
+  Edit3, Save, X, Package, MessageCircle, Heart, AlertTriangle, Clock3, CreditCard
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import Header from '@/components/layout/Header'
 import ListingCard from '@/components/listings/ListingCard'
-import { usersApi } from '@/lib/api'
+import { subscriptionsApi, usersApi } from '@/lib/api'
 import { inferDemoAccount } from '@/lib/demoApi'
 import { useAuthStore } from '@/store/authStore'
 import ProfileDemoPreview from '@/components/ui/ProfileDemoPreview'
@@ -23,6 +24,57 @@ const TABS = [
   { id: 'listings', label: 'Annonces',     icon: <Package   className="w-4 h-4" /> },
   { id: 'reviews',  label: 'Avis reçus',   icon: <Star      className="w-4 h-4" /> },
 ]
+
+type SubscriptionStatus = {
+  plan?: 'free' | 'pro' | 'pro_plus' | null
+  status?: 'active' | 'expiring_soon' | 'expired' | 'payment_failed' | null
+  current_period_end?: string | null
+  days_remaining?: number | null
+  payment_provider?: 'stripe' | 'payplug' | null
+  payment_status?: 'pending' | 'succeeded' | 'failed' | 'refunded' | null
+}
+
+function getSubscriptionStatusMeta(status?: SubscriptionStatus | null) {
+  if (!status || status.plan === 'free') return null
+
+  if (status.status === 'payment_failed') {
+    return {
+      tone: 'danger' as const,
+      label: 'Paiement échoué',
+      description: 'Mettez à jour votre moyen de paiement pour conserver vos avantages Pro.',
+      cta: { href: '/parametres#factures', label: 'Mettre à jour mon moyen de paiement' },
+      icon: AlertTriangle,
+    }
+  }
+
+  if (status.status === 'expired') {
+    return {
+      tone: 'danger' as const,
+      label: 'Abonnement expiré',
+      description: 'Votre abonnement a expiré. Réactivez-le pour retrouver vos avantages Pro.',
+      cta: { href: '/profil/abonnement', label: 'Réactiver mon abonnement' },
+      icon: AlertTriangle,
+    }
+  }
+
+  if (status.status === 'expiring_soon' && typeof status.days_remaining === 'number') {
+    return {
+      tone: 'warning' as const,
+      label: `Expire dans ${status.days_remaining} jour${status.days_remaining > 1 ? 's' : ''}`,
+      description: 'Votre abonnement arrive à échéance. Renouvelez pour éviter une interruption.',
+      cta: { href: '/profil/abonnement', label: 'Renouveler maintenant' },
+      icon: Clock3,
+    }
+  }
+
+  return {
+    tone: 'success' as const,
+    label: 'Actif',
+    description: 'Votre abonnement est actif et vos avantages Pro sont disponibles.',
+    cta: null,
+    icon: CheckCircle2,
+  }
+}
 
 function ProfilePageContent() {
   const params   = useParams<{ id?: string }>()
@@ -43,6 +95,20 @@ function ProfilePageContent() {
   const [editing,   setEditing]   = useState(false)
   const [loading,   setLoading]   = useState(true)
   const [saving,    setSaving]    = useState(false)
+
+  const { data: subscriptionStatusData } = useQuery({
+    queryKey: ['subscriptions', 'status'],
+    queryFn: async () => {
+      const response = await subscriptionsApi.getStatus()
+      return response.data as { data: SubscriptionStatus | null }
+    },
+    enabled: Boolean(isOwn && profileId && !demoActive),
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    retry: 0,
+  })
+  const subscriptionStatus = subscriptionStatusData?.data ?? null
+  const subscriptionMeta = getSubscriptionStatusMeta(subscriptionStatus)
 
   const { register, handleSubmit, reset } = useForm()
 
@@ -377,6 +443,63 @@ function ProfilePageContent() {
             </div>
           </div>
         </div>
+
+        {isOwn && !demoActive && subscriptionMeta && (
+          <div
+            className={`rounded-[1.5rem] border p-4 shadow-sm ${
+              subscriptionMeta.tone === 'danger'
+                ? 'border-red-200 bg-red-50'
+                : subscriptionMeta.tone === 'warning'
+                  ? 'border-amber-200 bg-amber-50'
+                  : 'border-emerald-200 bg-emerald-50'
+            }`}
+          >
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-start gap-3">
+                <subscriptionMeta.icon
+                  className={`mt-0.5 h-5 w-5 shrink-0 ${
+                    subscriptionMeta.tone === 'danger'
+                      ? 'text-red-600'
+                      : subscriptionMeta.tone === 'warning'
+                        ? 'text-amber-600'
+                        : 'text-emerald-600'
+                  }`}
+                />
+                <div>
+                  <p className="text-sm font-semibold text-night">{subscriptionMeta.label}</p>
+                  <p className="text-sm text-night/60">{subscriptionMeta.description}</p>
+                  <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/75 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-night/60">
+                    {subscriptionStatus?.plan === 'pro_plus'
+                      ? 'Pro+'
+                      : subscriptionStatus?.plan === 'pro'
+                        ? 'Pro'
+                        : 'Gratuit'}
+                    {subscriptionStatus?.payment_provider ? ` · ${subscriptionStatus.payment_provider.toUpperCase()}` : ''}
+                    {typeof subscriptionStatus?.days_remaining === 'number' && subscriptionStatus.days_remaining > 0
+                      ? ` · ${subscriptionStatus.days_remaining} j`
+                      : ''}
+                  </div>
+                </div>
+              </div>
+
+              {subscriptionMeta.cta && (
+                <Link
+                  href={subscriptionMeta.cta.href}
+                  className={`inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                    subscriptionMeta.tone === 'danger'
+                      ? 'bg-red-600 text-white hover:bg-red-700'
+                      : subscriptionMeta.tone === 'warning'
+                        ? 'bg-night text-white hover:bg-night/90'
+                        : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                  }`}
+                >
+                  <CreditCard className="h-4 w-4" />
+                  {subscriptionMeta.cta.label}
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
 
         <ProfileDemoPreview mode="account" />
 

@@ -19,6 +19,7 @@ import { statsApi } from '@/lib/api';
 import { disconnectSocket } from '@/lib/socket';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '@/constants/theme';
 import { DEMO_ACCOUNTS, isDemoModeEnabled } from '@/lib/demo';
+import { SubscriptionStatusBanner } from '@/components/SubscriptionStatusBanner';
 
 interface MenuItem {
   icon: keyof typeof Ionicons.glyphMap;
@@ -160,6 +161,8 @@ export default function ProfilTab() {
         <Ionicons name="person-outline" size={15} color={Colors.primary} />
         <Text style={styles.publicProfileBtnText}>Voir ma vitrine publique</Text>
       </TouchableOpacity>
+
+      <SubscriptionStatusBanner />
 
       {demoModeEnabled && (
         <View style={styles.section}>
