@@ -1,5 +1,7 @@
 'use strict';
 
+const { activateBonPlanFromPayment } = require('./bonPlansService');
+
 async function setSubscriptionPaymentStatus(query, providerSubId, paymentStatus) {
   if (!providerSubId) return;
   await query(
@@ -333,9 +335,22 @@ async function processStripeWebhookEvent({
         `UPDATE users SET is_pro = TRUE, pro_expires_at = $2, updated_at = NOW()
          WHERE id = (SELECT user_id FROM subscriptions WHERE provider_sub_id = $1 LIMIT 1)`,
         [subId, periodEnd]
-      );
+        );
+      }
     }
-  }
+
+    if (meta.payment_type === 'bon_plan') {
+      await withTransaction(async (client) => {
+        await activateBonPlanFromPayment(
+          client,
+          payment,
+          meta,
+          paymentRef,
+          'stripe',
+          intent
+        );
+      });
+    }
 
   if (event.type === 'customer.subscription.deleted') {
     const subId = event.data.object.id;
@@ -567,6 +582,19 @@ async function processPayplugWebhook({
          VALUES ($1, $2, $3, $4, 'payplug') ON CONFLICT DO NOTHING`,
         [annonceId, boostType, expiresAt, payment.id]
       ).catch(() => {});
+    }
+
+    if (meta.payment_type === 'bon_plan') {
+      await withTransaction(async (client) => {
+        await activateBonPlanFromPayment(
+          client,
+          payment,
+          meta,
+          resourceId,
+          'payplug',
+          resource
+        );
+      });
     }
   }
 

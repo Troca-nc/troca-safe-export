@@ -411,12 +411,46 @@ export const bonPlansApi = {
     () => api.get('/bon-plans', { params }),
     CACHE_TTL.short,
   ),
+  getById: (id: string | number) => cachedGet(
+    buildCacheKey('bonPlans.getById', `/bon-plans/${id}`),
+    () => api.get(`/bon-plans/${id}`),
+    CACHE_TTL.short,
+  ),
+  businesses: (params: object = {}) => cachedGet(
+    buildCacheKey('bonPlans.businesses', '/bon-plans/businesses', params),
+    () => api.get('/bon-plans/businesses', { params }),
+    CACHE_TTL.static,
+  ),
+  getPrefs: () => api.get('/bon-plans/notifications/prefs'),
+  savePrefs: (data: object) => api.put('/bon-plans/notifications/prefs', data).finally(() => invalidateApiCache('bonPlans.')),
   create: async (data: object) => {
     const res = await api.post('/bon-plans', data)
     invalidateApiCache('bonPlans.')
     invalidateApiCache('stats.')
     return res
   },
+}
+
+export const businessesApi = {
+  list: (params: object = {}) => cachedGet(
+    buildCacheKey('businesses.list', '/businesses', params),
+    () => api.get('/businesses', { params }),
+    CACHE_TTL.short,
+  ),
+  getBySlug: (slug: string) => cachedGet(
+    buildCacheKey('businesses.getBySlug', `/businesses/${slug}`),
+    () => api.get(`/businesses/${slug}`),
+    CACHE_TTL.short,
+  ),
+  getReviews: (slug: string, params: object = {}) => cachedGet(
+    buildCacheKey('businesses.getReviews', `/businesses/${slug}/reviews`, params),
+    () => api.get(`/businesses/${slug}/reviews`, { params }),
+    CACHE_TTL.short,
+  ),
+  addReview: (slug: string, data: object) => api.post(`/businesses/${slug}/reviews`, data),
+  updateReview: (slug: string, reviewId: string | number, data: object) => api.put(`/businesses/${slug}/reviews/${reviewId}`, data),
+  reportReview: (slug: string, reviewId: string | number, data: object = {}) => api.post(`/businesses/${slug}/reviews/${reviewId}/report`, data),
+  replyReview: (slug: string, reviewId: string | number, data: object) => api.post(`/businesses/${slug}/reviews/${reviewId}/reply`, data),
 }
 
 export const covoiturageApi = {

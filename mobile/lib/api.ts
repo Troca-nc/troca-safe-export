@@ -206,7 +206,51 @@ export const bonPlansApi = {
     params,
     CACHE_TTL.short,
   ),
+  getById: (id: string | number) => cachedGet(
+    'bonPlans.getById',
+    `/bon-plans/${id}`,
+    () => api.get(`/bon-plans/${id}`),
+    undefined,
+    CACHE_TTL.short,
+  ),
+  businesses: (params: object = {}) => cachedGet(
+    'bonPlans.businesses',
+    '/bon-plans/businesses',
+    () => api.get('/bon-plans/businesses', { params }),
+    params,
+    CACHE_TTL.static,
+  ),
+  getPrefs: () => api.get('/bon-plans/notifications/prefs'),
+  savePrefs: (data: object) => api.put('/bon-plans/notifications/prefs', data).finally(() => invalidateApiCache('bonPlans.')),
   create: (data: object) => api.post('/bon-plans', data).finally(() => invalidateApiCache('bonPlans.')),
+}
+
+export const businessesApi = {
+  list: (params: object = {}) => cachedGet(
+    'businesses.list',
+    '/businesses',
+    () => api.get('/businesses', { params }),
+    params,
+    CACHE_TTL.short,
+  ),
+  getBySlug: (slug: string) => cachedGet(
+    'businesses.getBySlug',
+    `/businesses/${slug}`,
+    () => api.get(`/businesses/${slug}`),
+    undefined,
+    CACHE_TTL.short,
+  ),
+  getReviews: (slug: string, params: object = {}) => cachedGet(
+    'businesses.getReviews',
+    `/businesses/${slug}/reviews`,
+    () => api.get(`/businesses/${slug}/reviews`, { params }),
+    params,
+    CACHE_TTL.short,
+  ),
+  addReview: (slug: string, data: object) => api.post(`/businesses/${slug}/reviews`, data),
+  updateReview: (slug: string, reviewId: string | number, data: object) => api.put(`/businesses/${slug}/reviews/${reviewId}`, data),
+  reportReview: (slug: string, reviewId: string | number, data: object = {}) => api.post(`/businesses/${slug}/reviews/${reviewId}/report`, data),
+  replyReview: (slug: string, reviewId: string | number, data: object) => api.post(`/businesses/${slug}/reviews/${reviewId}/reply`, data),
 }
 
 export const covoiturageApi = {

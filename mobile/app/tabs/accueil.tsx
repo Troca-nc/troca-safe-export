@@ -10,13 +10,14 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { metaApi } from '@/lib/api';
+import { bonPlansApi, metaApi } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '@/constants/theme';
 import { MOBILE_FALLBACK_CATEGORIES } from '@/lib/categoryCatalog';
 import { ListingSkeletonList } from '@/components/ListingSkeleton';
 import { getRecentlyViewedListings, type RecentlyViewedListing } from '@/lib/queryClient';
 import { useInfiniteListings } from '@/hooks/useInfiniteListings';
+import BonPlanCard from '@/components/BonPlanCard';
 
 interface Annonce {
   id: string;
@@ -44,8 +45,31 @@ export default function AccueilScreen() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [categorie, setCategorie] = useState<number | null>(null);
   const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedListing[]>([]);
+  const [featuredBonPlans, setFeaturedBonPlans] = useState<any[]>([]);
+  const [featuredBonPlansLoading, setFeaturedBonPlansLoading] = useState(true);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const visibleCategories = categories.length > 0 ? categories : MOBILE_FALLBACK_CATEGORIES;
+
+  function normalize(item: any): Annonce {
+    return {
+      id: String(item.id),
+      titre: item.titre ?? item.title ?? '',
+      title: item.title ?? item.titre ?? '',
+      prix_xpf: item.prix_xpf ?? item.price ?? null,
+      price: item.price ?? item.prix_xpf ?? null,
+      commune: item.commune ?? item.commune_name ?? null,
+      commune_name: item.commune_name ?? item.commune ?? null,
+      image_url: item.image_url ?? item.cover_image ?? item.images?.[0]?.url ?? null,
+      cover_image: item.cover_image ?? item.image_url ?? item.images?.[0]?.url ?? null,
+      created_at: item.created_at ?? item.published_at,
+      published_at: item.published_at ?? item.created_at,
+      is_pro: item.is_pro ?? item.user?.is_pro ?? false,
+      trust_score: item.trust_score ?? item.seller_trust_score ?? null,
+      trust_level: item.trust_level ?? item.seller_trust_level ?? null,
+      user: item.user ?? { is_pro: item.is_pro ?? false },
+    };
+  }
+
   const queryFilters = useMemo(() => ({
     q: debouncedSearch,
     category_id: categorie ?? '',
@@ -73,24 +97,6 @@ export default function AccueilScreen() {
       : 'Les annonces sont temporairement indisponibles.';
   }, [error, isError]);
 
-  const normalize = (item: any): Annonce => ({
-    id: String(item.id),
-    titre: item.titre ?? item.title ?? '',
-    title: item.title ?? item.titre ?? '',
-    prix_xpf: item.prix_xpf ?? item.price ?? null,
-    price: item.price ?? item.prix_xpf ?? null,
-    commune: item.commune ?? item.commune_name ?? null,
-    commune_name: item.commune_name ?? item.commune ?? null,
-    image_url: item.image_url ?? item.cover_image ?? item.images?.[0]?.url ?? null,
-    cover_image: item.cover_image ?? item.image_url ?? item.images?.[0]?.url ?? null,
-    created_at: item.created_at ?? item.published_at,
-    published_at: item.published_at ?? item.created_at,
-    is_pro: item.is_pro ?? item.user?.is_pro ?? false,
-    trust_score: item.trust_score ?? item.seller_trust_score ?? null,
-    trust_level: item.trust_level ?? item.seller_trust_level ?? null,
-    user: item.user ?? { is_pro: item.is_pro ?? false },
-  });
-
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => setDebouncedSearch(search), 350);
@@ -108,6 +114,28 @@ export default function AccueilScreen() {
       .catch(() => {
         setCategories(MOBILE_FALLBACK_CATEGORIES as any);
       });
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+    const loadBonPlans = async () => {
+      setFeaturedBonPlansLoading(true);
+      try {
+        const { data } = await bonPlansApi.list({ limit: 4 });
+        if (!alive) return;
+        setFeaturedBonPlans(Array.isArray(data?.data) ? data.data : []);
+      } catch {
+        if (!alive) return;
+        setFeaturedBonPlans([]);
+      } finally {
+        if (alive) setFeaturedBonPlansLoading(false);
+      }
+    };
+
+    void loadBonPlans();
+    return () => {
+      alive = false;
+    };
   }, []);
 
   useFocusEffect(
@@ -232,6 +260,32 @@ export default function AccueilScreen() {
           </ScrollView>
         </View>
       )}
+
+      <View style={styles.bonPlanSection}>
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionTitle}>Bons Plans du moment</Text>
+          <TouchableOpacity onPress={() => router.push('/bons-plans' as any)}>
+            <Text style={styles.sectionLink}>Voir tout</Text>
+          </TouchableOpacity>
+        </View>
+        {featuredBonPlansLoading ? (
+          <View style={styles.featuredLoading}>
+            <ListingSkeletonList count={2} variant="list" />
+          </View>
+        ) : featuredBonPlans.length > 0 ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.bonPlanRow}>
+            {featuredBonPlans.map((item) => (
+              <View key={item.id} style={styles.bonPlanCardWrap}>
+                <BonPlanCard bonPlan={item} />
+              </View>
+            ))}
+          </ScrollView>
+        ) : (
+          <View style={styles.emptyBonPlan}>
+            <Text style={styles.emptyText}>Aucun bon plan actif pour le moment</Text>
+          </View>
+        )}
+      </View>
 
       {loadError && annonces.length > 0 ? (
         <View style={styles.errorBanner}>
@@ -363,6 +417,7 @@ const styles = StyleSheet.create({
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.sm },
   sectionTitle: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.text },
   sectionCount: { fontSize: FontSize.xs, color: Colors.textTertiary },
+  sectionLink: { fontSize: FontSize.xs, color: Colors.primary, fontWeight: FontWeight.semibold },
   recentRow: { gap: Spacing.sm, paddingRight: Spacing.lg },
   recentCard: { width: 160, backgroundColor: Colors.white, borderRadius: Radius.lg, padding: Spacing.sm, ...Shadow.sm },
   recentImage: { width: '100%', height: 96, borderRadius: Radius.md, marginBottom: Spacing.sm },
@@ -370,6 +425,11 @@ const styles = StyleSheet.create({
   recentTitle: { fontSize: FontSize.sm, fontWeight: FontWeight.semibold, color: Colors.text, lineHeight: 18 },
   recentPrice: { marginTop: 4, fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Colors.primary },
   recentCommune: { marginTop: 2, fontSize: FontSize.xs, color: Colors.textTertiary },
+  bonPlanSection: { paddingHorizontal: Spacing.lg, paddingVertical: Spacing.md },
+  bonPlanRow: { gap: Spacing.sm, paddingRight: Spacing.lg },
+  bonPlanCardWrap: { width: 290 },
+  featuredLoading: { marginTop: Spacing.sm },
+  emptyBonPlan: { backgroundColor: Colors.white, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border },
   proBadge: { backgroundColor: Colors.warning, borderRadius: 4, paddingHorizontal: 4, paddingVertical: 1 },
   proText: { fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white },
   trustBadge: { backgroundColor: Colors.white, borderRadius: 999, paddingHorizontal: 5, paddingVertical: 1, flexDirection: 'row', alignItems: 'center', gap: 2, ...Shadow.sm },

@@ -1,10 +1,13 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { ArrowRight } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
 import { HomeSpotlightSection } from '@/components/home/HomeSpotlightSection'
+import BonPlanCard from '@/components/bon-plans/BonPlanCard'
 import {
   BonPlanSection,
   FeaturedListingsSection,
@@ -155,6 +158,23 @@ export default function HomePage() {
         eventItems={eventBonPlans}
         rideItems={covoiturages}
       />
+
+      <section className="mx-auto max-w-7xl px-4 pb-10">
+        <div className="mb-5 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Bons Plans du moment</p>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Les dernières promos actives sur Troca</h2>
+          </div>
+          <Link href="/bons-plans" className="hidden items-center gap-1 text-sm font-semibold text-coral hover:underline md:inline-flex">
+            Voir tous les bons plans <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {(promoBonPlans.length > 0 ? promoBonPlans : eventBonPlans).slice(0, 4).map((item) => (
+            <BonPlanCard key={item.id} bonPlan={item} compact />
+          ))}
+        </div>
+      </section>
 
       <BonPlanSection
         promoItems={promoBonPlans}

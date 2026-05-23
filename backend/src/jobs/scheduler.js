@@ -14,6 +14,7 @@ const { notifyListingExpiring } = require('../services/notificationService');
 const { withLock }        = require('../services/sharedCache');
 const { logger }          = require('../utils/logger');
 const { recordJob }       = require('../services/observability');
+const { flushBonPlanViews } = require('../services/bonPlansService');
 
 async function runSingletonJob(lockName, ttlMs, task) {
   const started = await withLock(lockName, ttlMs, async () => {
@@ -51,6 +52,49 @@ function startBoostExpiryJob() {
   }, { timezone: 'Pacific/Noumea' });
 
   logger.info('cron_job_started', { job: 'boost-expiry' });
+}
+
+function startBonPlanMaintenanceJob() {
+  const flushIntervalMs = Math.max(15 * 60 * 1000, Number(process.env.BON_PLAN_VIEWS_FLUSH_INTERVAL_MS || 3600000));
+
+  cron.schedule('15 * * * *', async () => {
+    recordJob('started', { job: 'bon-plan-expiry' });
+    await runSingletonJob('cron:bon-plan-expiry', 45 * 60 * 1000, async () => {
+      try {
+        const result = await query(`
+          UPDATE bon_plans
+          SET status = 'expired', updated_at = NOW()
+          WHERE status = 'active'
+            AND published_until IS NOT NULL
+            AND published_until < NOW()
+          RETURNING id
+        `);
+        if (result.rowCount > 0) {
+          logger.info('cron_bon_plans_expired', { count: result.rowCount });
+        }
+      } catch (err) {
+        recordJob('error', { job: 'bon-plan-expiry', message: err.message });
+        logger.error('cron_bon_plans_expiry_error', { error: err });
+      }
+    });
+  }, { timezone: 'Pacific/Noumea' });
+
+  setInterval(() => {
+    runSingletonJob('cron:bon-plan-views', flushIntervalMs - 5_000, async () => {
+      try {
+        const result = await flushBonPlanViews();
+        if (result?.flushed) {
+          logger.info('cron_bon_plan_views_flushed', { count: result.flushed });
+        }
+      } catch (err) {
+        recordJob('error', { job: 'bon-plan-views', message: err.message });
+        logger.error('cron_bon_plan_views_error', { error: err });
+      }
+    }).catch(() => {});
+  }, flushIntervalMs).unref?.();
+
+  logger.info('cron_job_started', { job: 'bon-plan-expiry' });
+  logger.info('cron_job_started', { job: 'bon-plan-views-flush', interval_ms: flushIntervalMs });
 }
 
 // ── 2. Envoi des alertes daily ───────────────────────────────
@@ -388,6 +432,7 @@ function startReviewReminderJob() {
 
 function startAllJobs() {
   startBoostExpiryJob();
+  startBonPlanMaintenanceJob();
   startExpiringListingsJob();
   startReviewReminderJob();
   startDailyAlertsJob();
