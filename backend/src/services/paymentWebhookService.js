@@ -185,15 +185,16 @@ async function processStripeWebhookEvent({
         await withTransaction(async (client) => {
           await client.query(
             `INSERT INTO subscriptions
-               (user_id, plan_id, billing_period, provider, provider_sub_id, status,
+               (user_id, plan_id, billing_period, provider, provider_sub_id, payment_provider, status,
                 current_period_start, current_period_end, cancel_at_period_end,
                 payment_status, payment_status_updated_at)
-             VALUES ($1, $2, $3, 'stripe', $4, $5, $6, $7, FALSE, 'succeeded', NOW())
+             VALUES ($1, $2, $3, 'stripe', $4, 'stripe', $5, $6, $7, FALSE, 'succeeded', NOW())
              ON CONFLICT (provider_sub_id)
              DO UPDATE SET
                status = EXCLUDED.status,
                current_period_start = EXCLUDED.current_period_start,
                current_period_end = EXCLUDED.current_period_end,
+               payment_provider = EXCLUDED.payment_provider,
                payment_status = 'succeeded',
                payment_status_updated_at = NOW(),
                updated_at = NOW()`,
@@ -265,15 +266,16 @@ async function processStripeWebhookEvent({
         await withTransaction(async (client) => {
           await client.query(
             `INSERT INTO subscriptions
-               (user_id, plan_id, billing_period, provider, provider_sub_id, status,
+               (user_id, plan_id, billing_period, provider, provider_sub_id, payment_provider, status,
                 current_period_start, current_period_end, cancel_at_period_end,
                 payment_status, payment_status_updated_at)
-             VALUES ($1, $2, $3, 'stripe', $4, $5, $6, $7, FALSE, 'succeeded', NOW())
+             VALUES ($1, $2, $3, 'stripe', $4, 'stripe', $5, $6, $7, FALSE, 'succeeded', NOW())
              ON CONFLICT (provider_sub_id)
              DO UPDATE SET
                status = EXCLUDED.status,
                current_period_start = EXCLUDED.current_period_start,
                current_period_end = EXCLUDED.current_period_end,
+               payment_provider = EXCLUDED.payment_provider,
                payment_status = 'succeeded',
                payment_status_updated_at = NOW(),
                updated_at = NOW()`,
@@ -561,8 +563,8 @@ async function processPayplugWebhook({
       );
 
       await query(
-        `INSERT INTO annonce_boosts (annonce_id, type, expires_at, payment_id)
-         VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING`,
+        `INSERT INTO annonce_boosts (annonce_id, type, expires_at, payment_id, payment_provider)
+         VALUES ($1, $2, $3, $4, 'payplug') ON CONFLICT DO NOTHING`,
         [annonceId, boostType, expiresAt, payment.id]
       ).catch(() => {});
     }
@@ -662,12 +664,12 @@ async function processPayplugWebhook({
       await withTransaction(async (client) => {
         await client.query(
           `INSERT INTO subscriptions
-             (user_id, plan_id, billing_period, provider, provider_sub_id, status,
+             (user_id, plan_id, billing_period, provider, provider_sub_id, payment_provider, status,
               current_period_start, current_period_end, cancel_at_period_end,
               payment_status, payment_status_updated_at)
-           VALUES ($1, $2, $3, 'payplug', $4, 'active', NOW(), $5, FALSE, 'succeeded', NOW())
+           VALUES ($1, $2, $3, 'payplug', $4, 'payplug', 'active', NOW(), $5, FALSE, 'succeeded', NOW())
            ON CONFLICT (provider_sub_id)
-           DO UPDATE SET status = 'active', current_period_end = $5, payment_status = 'succeeded', payment_status_updated_at = NOW(), updated_at = NOW()`,
+           DO UPDATE SET status = 'active', current_period_end = $5, payment_provider = EXCLUDED.payment_provider, payment_status = 'succeeded', payment_status_updated_at = NOW(), updated_at = NOW()`,
           [userId, planId, period, resourceId, periodEnd]
         );
 

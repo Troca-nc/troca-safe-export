@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Check, ShieldCheck, Sparkles, Star, TrendingUp } from 'lucide-react'
+import { PaymentProviderSelector } from '@/components/monetisation/PaymentProviderSelector'
 import { PRO_PLANS, formatXPF, type BillingPeriod, type PaymentProvider } from '@/types/monetisation.types'
 import { useSubscription } from '@/hooks/usePayment'
 import { trackEvent } from '@/lib/analytics'
@@ -45,7 +46,7 @@ export default function AbonnementPage() {
       </div>
 
       <div className="mx-auto max-w-6xl px-4 py-12">
-        <div className="mb-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+        <div className="mb-8 flex flex-col gap-4">
           <div className="inline-flex items-center gap-1 rounded-2xl bg-sand p-1">
             {(['monthly', 'yearly'] as BillingPeriod[]).map((period) => {
               const active = billing === period
@@ -72,23 +73,11 @@ export default function AbonnementPage() {
             })}
           </div>
 
-          <div className="flex items-center gap-2 rounded-2xl border border-night/10 bg-white p-1 shadow-sm">
-            {([
-              { value: 'stripe', label: 'Stripe' },
-              { value: 'payplug', label: 'PayPlug' },
-            ] as { value: PaymentProvider; label: string }[]).map((item) => (
-              <button
-                key={item.value}
-                type="button"
-                onClick={() => setProvider(item.value)}
-                className={`rounded-xl px-3 py-2 text-sm transition ${
-                  provider === item.value ? 'bg-night text-white' : 'text-night/60 hover:text-night'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
+          <PaymentProviderSelector
+            value={provider}
+            onChange={setProvider}
+            className="rounded-3xl border border-night/8 bg-white p-5 shadow-sm"
+          />
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">

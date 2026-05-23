@@ -15,6 +15,7 @@ import {
   TrendingUp,
   Zap,
 } from 'lucide-react'
+import { PaymentProviderSelector } from '@/components/monetisation/PaymentProviderSelector'
 import { useSubscription } from '@/hooks/usePayment'
 import { trackEvent } from '@/lib/analytics'
 import { PRO_PLANS, formatXPF } from '@/types/monetisation.types'
@@ -239,24 +240,7 @@ export default function ProPage() {
                 Le moyen de paiement est secondaire. Vous pouvez rester sur Stripe, ou choisir PayPlug si vous préférez une carte locale.
                 Le choix se fera au moment du checkout sécurisé.
               </p>
-              <div className="mt-4 flex flex-wrap gap-3">
-                {([
-                  { value: 'stripe', label: 'Stripe', sub: 'International' },
-                  { value: 'payplug', label: 'Carte locale', sub: 'BCI / BNC via PayPlug' },
-                ] as { value: PaymentProvider; label: string; sub: string }[]).map((item) => (
-                  <button
-                    key={item.value}
-                    type="button"
-                    onClick={() => setProvider(item.value)}
-                    className={`rounded-2xl border-2 px-4 py-2 text-left text-xs font-medium transition-all ${
-                      provider === item.value ? 'border-coral bg-coral/8 text-coral' : 'border-night/10 text-night/50 hover:border-night/25'
-                    }`}
-                  >
-                    <span className="block">{item.label}</span>
-                    <span className="block text-[10px] opacity-60">{item.sub}</span>
-                  </button>
-                ))}
-              </div>
+              <PaymentProviderSelector value={provider} onChange={setProvider} className="mt-4" />
             </div>
           </details>
         </div>
