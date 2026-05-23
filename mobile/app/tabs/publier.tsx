@@ -18,6 +18,7 @@ import { useAutosave } from '@/hooks/useAutosave'
 import { useImageUpload } from '@/hooks/useImageUpload'
 import { createListing } from '@/lib/publishListing'
 import ImageUploader from '@/components/ImageUploader'
+import CategoryFieldsSection from '@/components/publier/CategoryFieldsSection'
 import {
   CategoriesSection,
   ChipsSection,
@@ -43,9 +44,9 @@ const schema = z.object({
   commune_id: z.number({ required_error: 'Choisissez une commune' }),
   condition: z.enum(['new', 'like_new', 'good', 'fair', 'for_parts']),
   contre_quoi: z.string().max(200).optional(),
-})
+}).passthrough()
 
-type FormData = z.infer<typeof schema>
+type FormData = z.infer<typeof schema> & { metadata?: Record<string, unknown> }
 
 type Commune = PublishCommune
 type PublishDraft = {
@@ -81,6 +82,7 @@ export default function PublierScreen() {
   const selectedCommune = watch('commune_id')
   const selectedCondition = watch('condition')
   const visibleCategories = categories.length > 0 ? categories : (MOBILE_FALLBACK_CATEGORIES as PublishCategory[])
+  const selectedCategorySlug = visibleCategories.find((category) => category.id === selectedCategory)?.slug ?? ''
 
   useEffect(() => {
     metaApi
@@ -174,7 +176,10 @@ export default function PublierScreen() {
     try {
       let currentListingId = listingId
       if (currentListingId == null) {
-        const created = await createListing(data)
+        const created = await createListing({
+          ...data,
+          metadata: data.metadata ?? {},
+        })
         currentListingId = created.id
         setListingId(currentListingId)
       }
@@ -257,6 +262,14 @@ export default function PublierScreen() {
         onSelect={(categoryId) => setValue('category_id', categoryId, { shouldValidate: true })}
         error={errors.category_id?.message}
       />
+
+      {selectedCategorySlug ? (
+        <CategoryFieldsSection
+          categorySlug={selectedCategorySlug}
+          control={control}
+          errors={errors}
+        />
+      ) : null}
 
       <ChipsSection
         title="Commune"

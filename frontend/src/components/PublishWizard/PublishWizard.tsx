@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
 import {
   ArrowLeft,
   CalendarDays,
@@ -17,6 +18,7 @@ import {
 import { listingsApi, metaApi, uploadApi } from '@/lib/api'
 import { useAutosave, useBeforeUnload } from '@/hooks/useAutosave'
 import { useAuthStore } from '@/store/authStore'
+import CategoryFields from '@/components/annonces/CategoryFields'
 
 type CommuneOption = {
   id: number
@@ -41,6 +43,7 @@ type WizardDraft = {
   condition: 'new' | 'like_new' | 'good' | 'fair' | 'for_parts'
   price_negotiable: boolean
   is_free: boolean
+  metadata: Record<string, unknown>
 }
 
 type PhotoItem = {
@@ -60,6 +63,7 @@ const INITIAL_DRAFT: WizardDraft = {
   condition: 'good',
   price_negotiable: false,
   is_free: false,
+  metadata: {},
 }
 
 const PREVIEW_STORAGE_KEY = 'preview_listing'
@@ -237,6 +241,14 @@ export default function PublishWizard() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const metadataForm = useForm<{ metadata: Record<string, unknown> }>({ defaultValues: { metadata: {} } })
+  const {
+    register: registerMetadata,
+    formState: { errors: metadataErrors },
+  } = metadataForm
+  const metadataValues = metadataForm.watch()
+  const metadataPayload = metadataValues?.metadata ?? {}
+  const metadataSignature = JSON.stringify(metadataPayload)
 
   const {
     pendingDraft,
@@ -278,7 +290,21 @@ export default function PublishWizard() {
       ...pendingDraft.data,
       step: Number(pendingDraft.data.step || current.step),
     }))
+    metadataForm.reset({ metadata: (pendingDraft.data.metadata as Record<string, unknown>) ?? {} })
   }, [pendingDraft])
+
+  useEffect(() => {
+    setDraft((current) => {
+      const currentSignature = JSON.stringify(current.metadata ?? {})
+      if (currentSignature === metadataSignature) {
+        return current
+      }
+      return {
+        ...current,
+        metadata: metadataPayload,
+      }
+    })
+  }, [metadataSignature, metadataPayload])
 
   useEffect(() => {
     return () => {
@@ -318,6 +344,7 @@ export default function PublishWizard() {
       ...pending.data,
       step: Number(pending.data.step || current.step),
     }))
+    metadataForm.reset({ metadata: (pending.data.metadata as Record<string, unknown>) ?? {} })
     acceptDraft(pending)
     setError('')
     setSuccess(null)
@@ -325,6 +352,7 @@ export default function PublishWizard() {
 
   const ignoreDraft = () => {
     discardDraft()
+    metadataForm.reset({ metadata: {} })
   }
 
   const addPhotos = (files: FileList | File[]) => {
@@ -360,10 +388,15 @@ export default function PublishWizard() {
     setPhotos((current) => moveItem(current, from, to))
   }
 
-  const handlePreview = () => {
+  const handlePreview = async () => {
     const validation = validateStep()
     if (validation) {
       setError(validation)
+      return
+    }
+
+    if (selectedCategory?.slug && !(await metadataForm.trigger())) {
+      setError('Merci de compléter les caractéristiques spécifiques.')
       return
     }
 
@@ -374,6 +407,7 @@ export default function PublishWizard() {
         ...draft,
         title: draft.title.trim(),
         description: draft.description.trim(),
+        metadata: metadataPayload,
       },
       category_name: selectedCategory?.name ?? null,
       commune_name: selectedCommune?.name ?? null,
@@ -413,10 +447,14 @@ export default function PublishWizard() {
     return ''
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     const validation = validateStep()
     if (validation) {
       setError(validation)
+      return
+    }
+    if (draft.step === 1 && selectedCategory?.slug && !(await metadataForm.trigger())) {
+      setError('Merci de compléter les caractéristiques spécifiques.')
       return
     }
     setError('')
@@ -435,6 +473,11 @@ export default function PublishWizard() {
       return
     }
 
+    if (selectedCategory?.slug && !(await metadataForm.trigger())) {
+      setError('Merci de compléter les caractéristiques spécifiques.')
+      return
+    }
+
     setSubmitting(true)
     setError('')
 
@@ -450,6 +493,7 @@ export default function PublishWizard() {
         price_negotiable: draft.price_negotiable,
         is_negotiable: draft.price_negotiable,
         duration_days: Number(draft.duration_days),
+        metadata: metadataPayload,
       }
 
       const response = await listingsApi.create(payload)
@@ -582,6 +626,14 @@ export default function PublishWizard() {
                     className="w-full rounded-3xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/20"
                   />
                 </label>
+
+                {selectedCategory?.slug ? (
+                  <CategoryFields
+                    categorySlug={selectedCategory.slug}
+                    register={registerMetadata}
+                    errors={metadataErrors}
+                  />
+                ) : null}
               </div>
             )}
 

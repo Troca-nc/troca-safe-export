@@ -17,6 +17,7 @@ export type PublishCategory = {
   name?: string;
   label?: string;
   icon?: string;
+  slug?: string;
 };
 
 export type PublishCommune = {

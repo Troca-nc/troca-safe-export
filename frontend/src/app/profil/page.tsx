@@ -443,6 +443,9 @@ function ProfilePageContent() {
         <Link href="/messages" className="btn-ghost px-4 py-2 text-sm">
           Ouvrir mes messages
         </Link>
+        <Link href="/profil/alertes-trajet" className="btn-ghost px-4 py-2 text-sm">
+          Mes alertes trajet
+        </Link>
       </div>
 
       {!demoActive && isOwn && (
