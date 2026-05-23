@@ -54,7 +54,7 @@ const boostSchema = {
 
 const subscriptionSchema = {
   body: Joi.object({
-    plan_id: Joi.string().valid('pro', 'pro_plus').required(),
+    plan_id: Joi.string().valid('pro').required(),
     billing_period: Joi.string().valid('monthly', 'yearly').required(),
     provider: Joi.string().valid('stripe', 'payplug').default('stripe'),
   }),
@@ -62,7 +62,7 @@ const subscriptionSchema = {
 
 const mobilePlanSchema = {
   body: Joi.object({
-    plan: Joi.string().valid('pro_mensuel', 'pro_annuel', 'pro_plus_mensuel', 'pro_plus_annuel').required(),
+    plan: Joi.string().valid('pro_mensuel', 'pro_annuel').required(),
   }),
 };
 
@@ -594,7 +594,7 @@ router.post('/subscribe/mobile', authenticate, paymentLimiter, validate(mobilePl
        ON CONFLICT (provider_sub_id) DO NOTHING`,
       [
         req.user.id,
-        plan.includes('plus') ? 'pro_plus' : 'pro',
+        'pro',
         plan.includes('annuel') ? 'yearly' : 'monthly',
         subscription.id,
         subscription.status === 'trialing' ? 'trialing' : 'active',
@@ -603,7 +603,7 @@ router.post('/subscribe/mobile', authenticate, paymentLimiter, validate(mobilePl
 
     await query(
       `UPDATE users SET is_pro = TRUE, pro_plan = $2, updated_at = NOW() WHERE id = $1`,
-      [req.user.id, plan.includes('plus') ? 'pro_plus' : 'pro']
+      [req.user.id, 'pro']
     );
 
     return res.json({
@@ -1010,7 +1010,7 @@ router.post('/webhooks/stripe', async (req, res) => {
 
           const { rows: userRows } = await query('SELECT email, prenom FROM users WHERE id = $1', [userId]);
           if (userRows[0]) {
-            const planLabel = planId === 'pro_plus' ? 'Pro Plus' : 'Pro';
+            const planLabel = 'Pro';
             const periodLabel = billingPeriod === 'yearly' ? 'annuel' : 'mensuel';
             const amountXpf = getWebPlan(planId, billingPeriod)?.amount_xpf ?? 0;
             await sendMail({
@@ -1336,7 +1336,7 @@ router.post('/webhooks/payplug', async (req, res) => {
           [userId]
         );
         if (userRows[0]) {
-          const planLabel = planId === 'pro_plus' ? 'Pro Plus' : 'Pro';
+          const planLabel = 'Pro';
           const periodLabel = isYearly ? 'annuel' : 'mensuel';
           const planSlug = `${planId}_${isYearly ? 'annuel' : 'mensuel'}`;
           const planConfig = payplug.PAYPLUG_SUBSCRIPTION_PLANS[planSlug];

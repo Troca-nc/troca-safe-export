@@ -47,7 +47,7 @@ const registerSchema = Joi.object({
   prenom: Joi.string().min(1).max(100).required(),
   nom: Joi.string().min(1).max(100).required(),
   commune_id: Joi.number().integer().optional(),
-  account_type: Joi.string().valid('particulier', 'pro').default('particulier'),
+  account_type: Joi.string().valid('personal', 'professional', 'particulier', 'pro').default('personal'),
   turnstile_token: Joi.string().allow('').optional(),
 });
 

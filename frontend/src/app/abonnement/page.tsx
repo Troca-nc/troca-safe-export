@@ -8,36 +8,17 @@ import DemoModeNotice from '@/components/DemoModeNotice'
 import { PaymentProviderSelector } from '@/components/monetisation/PaymentProviderSelector'
 import { useSubscription } from '@/hooks/usePayment'
 import { trackEvent } from '@/lib/analytics'
-import { PRO_PLANS, type BillingPeriod, type PaymentProvider, type PlanId } from '@/types/monetisation.types'
+import { PRO_PLANS, type BillingPeriod, type PaymentProvider } from '@/types/monetisation.types'
 
 const XPF_PER_EUR = 119.3317
+const PRO_PLAN = PRO_PLANS[0]
 
-type FeatureRow = {
-  label: string
-  free: string
-  pro: string
-  proPlus: string
-}
-
-type PricingCard = {
-  id: 'free' | PlanId
-  label: string
-  highlight?: boolean
-  badge?: string
-  intro: string
-  monthlyXpf: number
-  yearlyXpf: number
-  yearlyNote?: string
-  features: Array<{
-    label: string
-    value: string
-  }>
-  cta?: {
-    label: string
-    href?: string
-    planId?: PlanId
-  }
-}
+const BOOST_PRICING = [
+  { label: '3 jours', publicXpf: 500, proXpf: 400 },
+  { label: '7 jours', publicXpf: 900, proXpf: 720 },
+  { label: '14 jours', publicXpf: 1500, proXpf: 1200 },
+  { label: '30 jours', publicXpf: 2500, proXpf: 2000 },
+]
 
 function formatEur(amountXpf: number) {
   return (amountXpf / XPF_PER_EUR).toLocaleString('fr-FR', {
@@ -46,126 +27,29 @@ function formatEur(amountXpf: number) {
   })
 }
 
-function formatPricePair(amountXpf: number) {
-  return `${amountXpf.toLocaleString('fr-FR')} XPF (${formatEur(amountXpf)} €)`
+function formatXpfEur(amountXpf: number) {
+  return `${amountXpf.toLocaleString('fr-FR')} XPF (${formatEur(amountXpf)} EUR)`
 }
 
-function getMonthlyEquivalent(yearlyXpf: number) {
-  return Math.round(yearlyXpf / 12)
-}
-
-function getMonthsSaved(monthlyXpf: number, yearlyXpf: number) {
+function getSavingsMonths(monthlyXpf: number, yearlyXpf: number) {
   if (!monthlyXpf) return 0
   return Math.max(0, Math.round(12 - yearlyXpf / monthlyXpf))
 }
 
-const FREE_PLAN: PricingCard = {
-  id: 'free',
-  label: 'Gratuit',
-  intro: 'Pour essayer Troca sans engagement et publier vos premières annonces.',
-  monthlyXpf: 0,
-  yearlyXpf: 0,
-  features: [
-    { label: 'Annonces actives', value: '1 annonce' },
-    { label: 'Photos par annonce', value: '3 photos' },
-    { label: 'Boosts', value: 'Non inclus' },
-    { label: 'Badge vendeur vérifié', value: 'Non' },
-    { label: "Statistiques d'annonce", value: 'Vue simple' },
-    { label: 'Support', value: 'Standard' },
-  ],
-  cta: {
-    label: 'Créer mon compte',
-    href: '/inscription',
-  },
+function PlanFeature({ enabled, text }: { enabled: boolean; text: string }) {
+  return (
+    <li className={`flex items-start gap-3 text-sm ${enabled ? 'text-night/75' : 'text-night/40'}`}>
+      <span
+        className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
+          enabled ? 'bg-emerald-100 text-emerald-700' : 'bg-sand text-night/35'
+        }`}
+      >
+        <Check size={12} />
+      </span>
+      <span>{text}</span>
+    </li>
+  )
 }
-
-const PRO_PLAN = PRO_PLANS.find((plan) => plan.id === 'pro') ?? PRO_PLANS[0]
-const PRO_PLUS_PLAN = PRO_PLANS.find((plan) => plan.id === 'pro_plus') ?? PRO_PLANS[1]
-
-const PRICING_PLANS: PricingCard[] = [
-  FREE_PLAN,
-  {
-    id: 'pro',
-    label: PRO_PLAN.label,
-    intro: 'Le meilleur équilibre pour les vendeurs réguliers qui veulent gagner du temps et de la visibilité.',
-    monthlyXpf: PRO_PLAN.price_monthly,
-    yearlyXpf: PRO_PLAN.price_yearly,
-    yearlyNote: 'Économisez 2 mois sur la formule annuelle',
-    features: [
-      { label: 'Annonces actives', value: '5 annonces' },
-      { label: 'Photos par annonce', value: '10 photos' },
-      { label: 'Boosts', value: 'À la carte' },
-      { label: 'Badge vendeur vérifié', value: 'Oui' },
-      { label: "Statistiques d'annonce", value: 'Détaillées' },
-      { label: 'Support', value: 'Email prioritaire' },
-    ],
-    cta: {
-      label: 'Choisir Pro',
-      planId: 'pro',
-    },
-  },
-  {
-    id: 'pro_plus',
-    label: PRO_PLUS_PLAN.label,
-    highlight: true,
-    badge: 'Recommandé',
-    intro: 'La formule la plus lisible pour les pros qui publient souvent et veulent maximiser leur présence.',
-    monthlyXpf: PRO_PLUS_PLAN.price_monthly,
-    yearlyXpf: PRO_PLUS_PLAN.price_yearly,
-    yearlyNote: 'Économisez 2 mois sur la formule annuelle',
-    features: [
-      { label: 'Annonces actives', value: '25 annonces' },
-      { label: 'Photos par annonce', value: '15 photos' },
-      { label: 'Boosts', value: '3 offerts / mois' },
-      { label: 'Badge vendeur vérifié', value: 'Oui + prioritaire' },
-      { label: "Statistiques d'annonce", value: 'Avancées' },
-      { label: 'Support', value: 'Téléphone prioritaire' },
-    ],
-    cta: {
-      label: 'Choisir Pro+',
-      planId: 'pro_plus',
-    },
-  },
-]
-
-const COMPARISON_ROWS: FeatureRow[] = [
-  {
-    label: 'Annonces actives',
-    free: '1',
-    pro: '5',
-    proPlus: '25',
-  },
-  {
-    label: 'Photos par annonce',
-    free: '3',
-    pro: '10',
-    proPlus: '15',
-  },
-  {
-    label: 'Boosts',
-    free: 'Non',
-    pro: 'À la carte',
-    proPlus: '3 offerts / mois',
-  },
-  {
-    label: 'Badge vendeur vérifié',
-    free: 'Non',
-    pro: 'Oui',
-    proPlus: 'Oui + prioritaire',
-  },
-  {
-    label: "Statistiques d'annonce",
-    free: 'Basique',
-    pro: 'Détaillées',
-    proPlus: 'Avancées',
-  },
-  {
-    label: 'Support prioritaire',
-    free: 'Non',
-    pro: 'Email',
-    proPlus: 'Téléphone',
-  },
-]
 
 export default function AbonnementPage() {
   const [billing, setBilling] = useState<BillingPeriod>('monthly')
@@ -173,50 +57,51 @@ export default function AbonnementPage() {
   const { initiateSubscription, loading, error } = useSubscription()
 
   const annualSavingsMonths = useMemo(
-    () => getMonthsSaved(PRO_PLAN.price_monthly, PRO_PLAN.price_yearly),
+    () => getSavingsMonths(PRO_PLAN.price_monthly, PRO_PLAN.price_yearly),
     []
   )
 
-  const handleSubscribe = (planId: PlanId) => {
+  const currentPrice = billing === 'monthly' ? PRO_PLAN.price_monthly : PRO_PLAN.price_yearly
+  const monthlyEquivalent = billing === 'yearly' ? Math.round(PRO_PLAN.price_yearly / 12) : PRO_PLAN.price_monthly
+
+  const handleSubscribe = () => {
     void trackEvent('subscription_cta_click', {
-      plan_id: planId,
+      plan_id: 'pro',
       billing_period: billing,
       provider,
     })
 
     void initiateSubscription({
-      plan_id: planId,
+      plan_id: 'pro',
       billing_period: billing,
       provider,
     })
   }
 
-  const periodLabel = billing === 'monthly' ? '/mois' : '/an'
-
   return (
     <div className="min-h-screen bg-sand-light">
       <section className="bg-night px-4 py-16 text-center text-white">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-coral/20 px-3 py-1.5 text-xs font-medium text-coral">
-          <Star size={12} /> Abonnements Troca
+          <Star size={12} /> Developpez votre activite sur Troca
         </div>
         <h1 className="font-display text-4xl font-bold leading-tight md:text-5xl">
-          Gratuit, Pro, Pro+
+          La plateforme des professionnels
           <br />
-          comparez en 5 secondes
+          en Nouvelle-Caledonie
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-white/70 md:text-base">
-          Les prix sont affichés en XPF en priorité avec l&apos;équivalent en euros, et le choix du
-          moyen de paiement guide automatiquement le tunnel Stripe ou PayPlug.
+        <p className="mx-auto mt-4 max-w-3xl text-sm leading-6 text-white/70 md:text-base">
+          Gratuit pour commencer sans friction. Pro pour les professionnels qui veulent plus de
+          visibilité, plus de photos, des statistiques et des boosts moins chers.
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-white/45">
           <span className="flex items-center gap-1">
-            <ShieldCheck size={12} /> Paiement sécurisé
+            <ShieldCheck size={12} /> Paiement securise
           </span>
           <span className="flex items-center gap-1">
-            <Check size={12} /> Résiliation à tout moment
+            <Check size={12} /> Resiliation a tout moment
           </span>
           <span className="flex items-center gap-1">
-            <Sparkles size={12} /> 14 jours d&apos;essai
+            <Sparkles size={12} /> 14 jours d'essai si configure
           </span>
         </div>
       </section>
@@ -225,12 +110,12 @@ export default function AbonnementPage() {
         <div className="flex flex-col gap-4 rounded-[2rem] border border-night/8 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">
-              Tarif lisible
+              Choisissez votre rythme
             </p>
             <h2 className="mt-1 text-2xl font-bold text-night">Mensuel ou annuel</h2>
             <p className="mt-1 max-w-2xl text-sm text-night/60">
-              Le mode annuel met en avant la réduction réalisée sur 12 mois. Vous voyez le prix
-              réduit immédiatement, sans calcul mental.
+              L&apos;option annuelle affiche directement la reduction sur 12 mois. Pas de calcul,
+              juste un prix clair.
             </p>
           </div>
 
@@ -252,7 +137,7 @@ export default function AbonnementPage() {
                     <span className="flex items-center gap-1.5">
                       Annuel
                       <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
-                        Économisez {annualSavingsMonths} mois
+                        2 mois offerts
                       </span>
                     </span>
                   )}
@@ -270,159 +155,194 @@ export default function AbonnementPage() {
           />
           <DemoModeNotice className="mt-4" />
           <p className="mt-3 text-sm text-night/55">
-            Votre choix s&apos;applique au prochain checkout. Stripe est conseillé pour les cartes
-            internationales, PayPlug pour les cartes OPT-NC et le réseau local.
+            Stripe est recommande pour les cartes internationales. PayPlug est recommande pour les
+            cartes OPT-NC et le reseau local.
           </p>
         </div>
 
         <section className="mt-10 grid gap-6 lg:grid-cols-3">
-          {PRICING_PLANS.map((plan) => {
-            const isPaidPlan = plan.id !== 'free'
-            const yearlySavings = isPaidPlan
-              ? getMonthsSaved(plan.monthlyXpf, plan.yearlyXpf)
-              : 0
-            const selectedPrice = billing === 'monthly' ? plan.monthlyXpf : plan.yearlyXpf
-            const monthlyEquivalent = isPaidPlan && billing === 'yearly'
-              ? getMonthlyEquivalent(plan.yearlyXpf)
-              : plan.monthlyXpf
-            const yearlyDisplay = plan.yearlyXpf > 0 ? formatPricePair(plan.yearlyXpf) : 'Gratuit'
-
-            return (
-              <article
-                key={plan.id}
-                className={`relative flex h-full flex-col rounded-[2rem] border-2 bg-white p-6 shadow-sm transition-all ${
-                  plan.highlight
-                    ? 'border-coral shadow-xl ring-2 ring-coral/10 lg:scale-[1.03]'
-                    : 'border-night/8'
-                }`}
+          <article className="flex h-full flex-col rounded-[2rem] border border-night/8 bg-white p-6 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">Gratuit</p>
+            <h3 className="mt-2 text-2xl font-bold text-night">Pour particuliers</h3>
+            <p className="mt-2 text-sm leading-6 text-night/60">
+              Publiez sans friction avec les fonctionnalites de base pour rester actif sur la
+              plateforme.
+            </p>
+            <div className="mt-4 rounded-2xl bg-sand/40 p-4">
+              <div className="text-3xl font-bold text-night">0 XPF</div>
+              <div className="text-xs text-night/45">Toujours gratuit</div>
+            </div>
+            <ul className="mt-6 space-y-3">
+              <PlanFeature enabled text="Jusqu'a 5 annonces actives" />
+              <PlanFeature enabled text="Jusqu'a 6 photos par annonce" />
+              <PlanFeature enabled text="Chat integre et verification telephone" />
+              <PlanFeature enabled text="Boosts a l'acte" />
+              <PlanFeature enabled={false} text="Statistiques et badge Pro" />
+            </ul>
+            <div className="mt-auto pt-6">
+              <Link
+                href="/inscription"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-night px-4 py-3 text-sm font-semibold text-white transition hover:bg-night/80"
               >
-                {plan.badge ? (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-coral px-4 py-1 text-xs font-bold text-white shadow">
-                    {plan.badge}
+                Creer mon compte
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+          </article>
+
+          <article className="relative flex h-full flex-col rounded-[2rem] border-2 border-coral bg-white p-6 shadow-xl ring-2 ring-coral/10 lg:scale-[1.02]">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-coral px-4 py-1 text-xs font-bold text-white shadow">
+              Recommande
+            </div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">Pro</p>
+            <h3 className="mt-2 text-2xl font-bold text-night">Developpez votre activite</h3>
+            <p className="mt-2 text-sm leading-6 text-night/60">
+              4 900 XPF/mois ou 44 900 XPF/an. Le meilleur choix pour les professionnels qui
+              veulent plus de volume, plus de photos et moins de frais sur les boosts.
+            </p>
+            <div className="mt-4 rounded-2xl bg-night p-4 text-white">
+              <div className="text-3xl font-bold">{formatXpfEur(currentPrice)}</div>
+              <div className="mt-1 text-xs text-white/70">
+                {billing === 'yearly'
+                  ? `${formatXpfEur(monthlyEquivalent)} / mois en moyenne`
+                  : `${formatXpfEur(PRO_PLAN.price_yearly)} / an`}
+              </div>
+              {billing === 'yearly' ? (
+                <div className="mt-2 inline-flex rounded-full bg-emerald-400/20 px-2 py-1 text-[11px] font-semibold text-emerald-200">
+                  Economisez {annualSavingsMonths} mois
+                </div>
+              ) : null}
+            </div>
+            <ul className="mt-6 space-y-3">
+              {PRO_PLAN.features.map((feature) => (
+                <PlanFeature key={feature} enabled text={feature} />
+              ))}
+            </ul>
+            <div className="mt-auto pt-6">
+              <button
+                type="button"
+                onClick={handleSubscribe}
+                disabled={loading}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-coral px-4 py-3 text-sm font-semibold text-white transition hover:bg-coral-dark disabled:opacity-60"
+              >
+                {loading ? 'Redirection...' : "Commencer l'essai gratuit 14 jours"}
+                {!loading ? <ArrowRight size={16} /> : null}
+              </button>
+              <p className="mt-3 text-center text-[11px] leading-5 text-night/50">
+                Si aucun essai n&apos;est configure, le tunnel passe directement en abonnement.
+              </p>
+            </div>
+          </article>
+
+          <article className="flex h-full flex-col rounded-[2rem] border border-night/8 bg-white p-6 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">Boosts</p>
+            <h3 className="mt-2 text-2xl font-bold text-night">A la carte</h3>
+            <p className="mt-2 text-sm leading-6 text-night/60">
+              Les boosts restent disponibles pour tous les utilisateurs. Les abonnes Pro paient
+              moins cher.
+            </p>
+            <div className="mt-4 rounded-2xl bg-sand/40 p-4">
+              <div className="text-sm font-semibold text-night">Tarifs public / Pro</div>
+              <div className="mt-3 space-y-2 text-sm text-night/70">
+                {BOOST_PRICING.map((boost) => (
+                  <div key={boost.label} className="flex items-center justify-between gap-3">
+                    <span>{boost.label}</span>
+                    <span className="text-right">
+                      <strong>{boost.publicXpf.toLocaleString('fr-FR')} XPF</strong>
+                      <br />
+                      <span className="text-xs text-night/45">
+                        Pro {boost.proXpf.toLocaleString('fr-FR')} XPF
+                      </span>
+                    </span>
                   </div>
-                ) : null}
-
-                <div className="mb-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">
-                    {plan.id === 'free' ? 'Sans engagement' : 'Offre payante'}
-                  </p>
-                  <h3 className="mt-2 text-2xl font-bold text-night">{plan.label}</h3>
-                  <p className="mt-2 text-sm leading-6 text-night/60">{plan.intro}</p>
-                </div>
-
-                <div className="rounded-2xl bg-sand/40 p-4">
-                  {plan.id === 'free' ? (
-                    <div className="flex items-end gap-2">
-                      <span className="text-3xl font-bold text-night">Gratuit</span>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex items-end gap-2">
-                        <span className="text-3xl font-bold text-night">
-                          {formatPricePair(selectedPrice)}
-                        </span>
-                        <span className="mb-1 text-sm text-night/40">{periodLabel}</span>
-                      </div>
-                      <p className="mt-1 text-xs text-night/55">
-                        {billing === 'yearly'
-                          ? `${formatPricePair(monthlyEquivalent)} / mois en moyenne`
-                          : `${formatPricePair(plan.yearlyXpf)} / an`}
-                      </p>
-                      {billing === 'yearly' ? (
-                        <p className="mt-2 inline-flex rounded-full bg-emerald-100 px-2 py-1 text-[11px] font-semibold text-emerald-700">
-                          Économisez {yearlySavings} mois
-                        </p>
-                      ) : null}
-                    </>
-                  )}
-                </div>
-
-                <ul className="mt-6 space-y-3">
-                  {plan.features.map((feature) => (
-                    <li key={`${plan.id}-${feature.label}`} className="flex items-start gap-3 text-sm">
-                      <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-                        <Check size={12} />
-                      </span>
-                      <span className="text-night/70">
-                        <span className="font-semibold text-night">{feature.value}</span>{' '}
-                        {feature.label}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="mt-auto pt-6">
-                  {plan.cta?.href ? (
-                    <Link
-                      href={plan.cta.href}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-night px-4 py-3 text-sm font-semibold text-white transition hover:bg-night/80"
-                    >
-                      {plan.cta.label}
-                      <ArrowRight size={16} />
-                    </Link>
-                  ) : plan.cta?.planId ? (
-                    <button
-                      type="button"
-                      onClick={() => handleSubscribe(plan.cta?.planId ?? 'pro')}
-                      disabled={loading}
-                      className={`flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white transition disabled:opacity-60 ${
-                        plan.highlight ? 'bg-coral hover:bg-coral-dark' : 'bg-night hover:bg-night/80'
-                      }`}
-                    >
-                      {loading ? 'Redirection...' : plan.cta.label}
-                      {!loading ? <ArrowRight size={16} /> : null}
-                    </button>
-                  ) : null}
-
-                  {plan.id !== 'free' ? (
-                    <p className="mt-3 text-center text-[11px] leading-5 text-night/50">
-                      {plan.yearlyNote}
-                    </p>
-                  ) : (
-                    <p className="mt-3 text-center text-[11px] leading-5 text-night/50">
-                      Commencez gratuitement puis passez en Pro ou Pro+ quand vous êtes prêt.
-                    </p>
-                  )}
-                </div>
-              </article>
-            )
-          })}
+                ))}
+              </div>
+            </div>
+            <ul className="mt-6 space-y-3">
+              <PlanFeature enabled text="Boost a la une" />
+              <PlanFeature enabled text="Badge urgent" />
+              <PlanFeature enabled text="Photos supplementaires" />
+              <PlanFeature enabled text="Disponible pour particuliers et pros" />
+            </ul>
+            <div className="mt-auto pt-6">
+              <Link
+                href="/annonces"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-night/10 bg-sand px-4 py-3 text-sm font-semibold text-night transition hover:bg-sand/80"
+              >
+                Voir les boosts
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+          </article>
         </section>
 
         <section className="mt-10 rounded-[2rem] border border-night/8 bg-white p-6 shadow-sm">
           <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">
-                Comparatif express
+                Pourquoi Pro ?
               </p>
-              <h2 className="mt-1 text-2xl font-bold text-night">Pourquoi payer plus ?</h2>
+              <h2 className="mt-1 text-2xl font-bold text-night">Un usage pro, un revenu recurrent</h2>
             </div>
             <p className="max-w-2xl text-sm text-night/55">
-              En un coup d&apos;oeil, voyez ce qui change vraiment entre les trois niveaux.
+              Gratuit pour faire grossir le reseau. Pro pour les pros. Boosts a l'acte pour tout le
+              monde.
             </p>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
-              <thead className="border-b border-night/8 text-night/45">
-                <tr>
-                  <th className="py-3 pr-4 font-medium">Fonctionnalité</th>
-                  <th className="py-3 pr-4 font-medium">Gratuit</th>
-                  <th className="py-3 pr-4 font-medium">Pro</th>
-                  <th className="py-3 pr-4 font-medium">Pro+</th>
-                </tr>
-              </thead>
-              <tbody>
-                {COMPARISON_ROWS.map((row) => (
-                  <tr key={row.label} className="border-b border-night/5 last:border-0">
-                    <td className="py-3 pr-4 font-semibold text-night">{row.label}</td>
-                    <td className="py-3 pr-4 text-night/70">{row.free}</td>
-                    <td className="py-3 pr-4 text-night/70">{row.pro}</td>
-                    <td className="py-3 pr-4 text-night/70">{row.proPlus}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="grid gap-4 md:grid-cols-3">
+            {[
+              'Gestion de volume sans friction',
+              'Plus de visibilite et de photos',
+              'Revenus recurrents simples a comprendre',
+            ].map((item) => (
+              <div key={item} className="rounded-2xl bg-sand/40 p-4 text-sm text-night/70">
+                {item}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-10 rounded-[2rem] border border-night/8 bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">
+                Ils font confiance a Troca Pro
+              </p>
+              <h2 className="mt-1 text-2xl font-bold text-night">Logos clients a venir</h2>
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {['Logo client 1', 'Logo client 2', 'Logo client 3'].map((label) => (
+              <div key={label} className="flex h-24 items-center justify-center rounded-2xl border border-dashed border-night/10 bg-sand/30 text-sm text-night/35">
+                {label}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-10 rounded-[2rem] border border-night/8 bg-white p-6 shadow-sm">
+          <h2 className="text-2xl font-bold text-night">FAQ</h2>
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            {[
+              {
+                q: 'Qui est Pro pour vous ?',
+                a: 'Les professionnels qui publient souvent, gèrent plusieurs annonces ou veulent des outils de visibilite et de statistiques.',
+              },
+              {
+                q: 'Puis-je annuler ?',
+                a: "Oui, vous pouvez resilier a tout moment depuis votre espace client. L'acces reste actif jusqu'a la fin de la periode en cours.",
+              },
+              {
+                q: 'Quels moyens de paiement ?',
+                a: 'Carte internationale via Stripe ou carte OPT-NC / reseau local via PayPlug.',
+              },
+            ].map((item) => (
+              <article key={item.q} className="rounded-2xl bg-sand/30 p-4">
+                <h3 className="font-semibold text-night">{item.q}</h3>
+                <p className="mt-2 text-sm leading-6 text-night/65">{item.a}</p>
+              </article>
+            ))}
           </div>
         </section>
 
@@ -431,17 +351,17 @@ export default function AbonnementPage() {
             <div className="flex items-start gap-3">
               <TrendingUp className="mt-0.5 h-5 w-5 shrink-0 text-coral" />
               <div>
-                <p className="text-sm font-semibold text-night">Le plus important à retenir</p>
+                <p className="text-sm font-semibold text-night">Le plus important a retenir</p>
                 <p className="mt-1 text-sm text-night/60">
-                  Gratuit pour commencer. Pro pour gagner du temps. Pro+ pour maximiser la
-                  visibilité et la crédibilité vendeur.
+                  Gratuit pour grossir le reseau. Pro pour les professionnels. Boosts pour
+                  accelerer quand il faut.
                 </p>
               </div>
             </div>
             <div className="flex flex-wrap gap-2 text-[11px] text-night/55">
               <span className="rounded-full bg-sand px-3 py-1">Stripe / PayPlug</span>
-              <span className="rounded-full bg-sand px-3 py-1">14 jours d&apos;essai</span>
-              <span className="rounded-full bg-sand px-3 py-1">Annulation à tout moment</span>
+              <span className="rounded-full bg-sand px-3 py-1">Paiement local</span>
+              <span className="rounded-full bg-sand px-3 py-1">Annulation a tout moment</span>
             </div>
           </div>
         </div>
@@ -453,7 +373,7 @@ export default function AbonnementPage() {
         ) : null}
 
         <div className="mt-8 text-center text-sm text-night/55">
-          Besoin d&apos;un détail avant de vous lancer ?{' '}
+          Besoin d&apos;un detail avant de vous lancer ?{' '}
           <Link href="/contact" className="font-semibold text-coral hover:underline">
             Contactez-nous
           </Link>

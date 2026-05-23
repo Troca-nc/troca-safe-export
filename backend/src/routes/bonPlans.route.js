@@ -142,13 +142,13 @@ router.post('/', authenticate, async (req, res, next) => {
     );
 
     const user = userRes.rows[0];
-    const isProPlus = user?.is_pro && user?.pro_plan === 'pro_plus';
+     const isPro = user?.is_pro && user?.pro_plan === 'pro';
     const lastOffer = user?.last_bon_plan_offer_at ? new Date(user.last_bon_plan_offer_at) : null;
     const monthKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
     const lastKey = lastOffer
       ? `${lastOffer.getUTCFullYear()}-${String(lastOffer.getUTCMonth() + 1).padStart(2, '0')}`
       : null;
-    const freeIncluded = isProPlus && lastKey !== monthKey;
+    const freeIncluded = isPro && lastKey !== monthKey;
     const priceXpf = freeIncluded ? 0 : basePrice;
     const expiresAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
 

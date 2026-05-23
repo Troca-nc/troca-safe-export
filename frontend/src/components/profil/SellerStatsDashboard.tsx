@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react'
 import { BarChart2, Eye, Heart, MessageCircle, Star, TrendingUp, Award, Clock } from 'lucide-react'
 import { statsApi } from '@/lib/api'
+import PlanBadge from '@/components/PlanBadge'
 
 interface Stats {
   totaux: {
@@ -90,9 +91,7 @@ export default function SellerStatsDashboard() {
       <div className="flex items-center gap-2">
         <BarChart2 className="w-5 h-5 text-coral shrink-0" />
         <h2 className="font-semibold text-night text-sm sm:text-base">Statistiques Pro</h2>
-        <span className="text-[10px] sm:text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium ml-auto">
-          ⭐ Compte Pro
-        </span>
+        <PlanBadge className="ml-auto" />
       </div>
 
       {/* KPIs */}

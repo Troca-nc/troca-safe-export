@@ -9,7 +9,7 @@ import { isDemoModeEnabled } from '@/lib/demo'
 import { useAuthStore } from '@/store/authStore'
 
 type SubscriptionStatus = {
-  plan?: 'free' | 'pro' | 'pro_plus' | null
+  plan?: 'free' | 'pro' | null
   status?: 'active' | 'expiring_soon' | 'expired' | 'payment_failed' | null
   current_period_end?: string | null
   days_remaining?: number | null
@@ -95,7 +95,7 @@ export function SubscriptionStatusBanner() {
           <View style={styles.badgeRow}>
             <View style={styles.badge}>
               <Text style={styles.badgeText}>
-                {status?.plan === 'pro_plus' ? 'Pro+' : status?.plan === 'pro' ? 'Pro' : 'Gratuit'}
+                {status?.plan === 'pro' ? 'Pro' : 'Gratuit'}
               </Text>
             </View>
             {status?.payment_provider ? (

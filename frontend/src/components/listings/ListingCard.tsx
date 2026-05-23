@@ -9,6 +9,7 @@ import { fr } from 'date-fns/locale'
 import { useAuthStore } from '@/store/authStore'
 import { useFavorite } from '@/hooks/useFavorite'
 import ListingImage from '@/components/ListingImage'
+import PlanBadge from '@/components/PlanBadge'
 import { consumePendingAuthAction, peekPendingAuthAction } from '@/lib/authAction'
 import { useAuthActionStore } from '@/store/authActionStore'
 export { ListingSkeleton as ListingCardSkeleton, ListingSkeletonGrid as ListingGridSkeleton } from '@/components/ListingSkeleton'
@@ -153,7 +154,7 @@ export default function ListingCard({ listing, className = '' }: Props) {
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           {boosted && <span className="badge bg-coral text-white text-[10px]">⭐ À la une</span>}
           {listing.is_urgent && <span className="badge bg-amber-500 text-white text-[10px]">⚡ Urgent</span>}
-          {listing.is_pro && <span className="badge bg-ocean text-white text-[10px]">PRO</span>}
+          {listing.is_pro ? <PlanBadge className="shadow-sm" /> : null}
         </div>
 
         <button

@@ -12,6 +12,7 @@ interface User {
   nom:       string;
   is_admin:  boolean;
   is_pro:    boolean;
+  account_type?: 'personal' | 'professional';
   avatar_url?: string | null;
   email_verified?: boolean;
   telephone_verifie?: boolean;

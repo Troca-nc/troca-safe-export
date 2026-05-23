@@ -98,7 +98,7 @@ function AbonnementSection() {
             <div className="flex items-center gap-2">
               <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
               <span className="text-sm font-semibold text-amber-800">
-                {user.pro_plan === 'pro_plus' ? 'Compte Pro Plus' : 'Compte Pro'} actif
+                Compte Pro actif
               </span>
             </div>
             {sub?.status === 'trialing' && (

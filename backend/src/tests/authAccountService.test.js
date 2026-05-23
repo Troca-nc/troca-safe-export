@@ -33,7 +33,7 @@ const dbStub = {
       return { rows: [{ id: 1 }], rowCount: 1 };
     }
 
-    if (normalized.startsWith('SELECT ID, EMAIL, PRENOM, NOM, IS_ADMIN, CASE WHEN IS_PRO = TRUE AND (PRO_EXPIRES_AT IS NULL OR PRO_EXPIRES_AT > NOW()) THEN TRUE ELSE FALSE END AS IS_PRO')) {
+    if (normalized.startsWith('SELECT ID, EMAIL, PRENOM, NOM, IS_ADMIN, ACCOUNT_TYPE, CASE WHEN IS_PRO = TRUE AND (PRO_EXPIRES_AT IS NULL OR PRO_EXPIRES_AT > NOW()) THEN TRUE ELSE FALSE END AS IS_PRO')) {
       return {
         rows: [{
           id: params[0],
@@ -41,6 +41,7 @@ const dbStub = {
           prenom: 'Test',
           nom: 'User',
           is_admin: false,
+          account_type: 'personal',
           is_pro: false,
           pro_plan: null,
           pro_expires_at: null,

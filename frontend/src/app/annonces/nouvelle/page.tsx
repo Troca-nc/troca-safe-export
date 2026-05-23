@@ -236,7 +236,7 @@ function SimpleBonPlanPage() {
       setCreatedId(created?.id ?? null)
       setSuccessMessage(
         created?.free_included
-          ? 'Bon plan publié gratuitement dans le cadre de votre offre Pro Plus du mois.'
+          ? 'Bon plan publié gratuitement dans le cadre de votre offre Pro du mois.'
           : 'Bon plan publié avec succès.'
       )
       setForm(INITIAL_FORM)
@@ -283,7 +283,7 @@ function SimpleBonPlanPage() {
             <h1 className="mt-3 font-display text-3xl font-bold text-night md:text-4xl">Publier un bon plan local</h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-night/60 md:text-base">
               Partagez une promo, un concert, une ouverture ou un petit événement local. Les particuliers paient peu,
-              les pros ont plus de visibilité, et les Pro Plus ont un bon plan offert chaque mois.
+              les pros ont plus de visibilité, et les abonnés Pro ont un bon plan offert chaque mois.
             </p>
           </div>
           <Link href="/annonces" className="hidden items-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-2.5 text-sm font-semibold text-night shadow-sm transition hover:-translate-y-0.5 md:inline-flex">
@@ -583,7 +583,7 @@ function SimpleBonPlanPage() {
               <p className="mt-4 text-sm uppercase tracking-[0.18em] text-white/45">Tarif estimatif</p>
               <p className="mt-2 text-4xl font-bold text-white">{formatPrice(estimatedPrice)}</p>
               <p className="mt-3 text-sm leading-relaxed text-white/70">
-                Le prix est calculé selon le profil choisi et la durée. Si vous êtes Pro Plus et que votre bon plan offert
+                Le prix est calculé selon le profil choisi et la durée. Si vous êtes Pro et que votre bon plan offert
                 du mois est encore disponible, le tarif peut tomber à 0 XPF.
               </p>
 

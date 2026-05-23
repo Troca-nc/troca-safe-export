@@ -23,7 +23,7 @@ CREATE INDEX IF NOT EXISTS idx_payments_provider ON payments (provider, provider
 CREATE TABLE IF NOT EXISTS subscriptions (
   id                    SERIAL PRIMARY KEY,
   user_id               INTEGER      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  plan_id               VARCHAR(20)  NOT NULL CHECK (plan_id IN ('pro', 'pro_plus')),
+  plan_id               VARCHAR(20)  NOT NULL CHECK (plan_id IN ('pro')),
   billing_period        VARCHAR(10)  NOT NULL CHECK (billing_period IN ('monthly', 'yearly')),
   provider              VARCHAR(20)  NOT NULL CHECK (provider IN ('stripe', 'payplug')),
   provider_sub_id       VARCHAR(255) NOT NULL UNIQUE,

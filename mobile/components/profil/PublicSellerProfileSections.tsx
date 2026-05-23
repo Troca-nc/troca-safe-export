@@ -70,7 +70,7 @@ export function PublicSellerProfileHero({ sellerLabel, initials, profile, locati
           {profile.is_pro && (
             <View style={styles.proBadge}>
               <Ionicons name="star" size={11} color={Colors.warning} />
-              <Text style={styles.proText}>PRO</Text>
+              <Text style={styles.proText}>Pro ✓</Text>
             </View>
           )}
         </View>

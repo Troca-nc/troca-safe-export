@@ -294,7 +294,7 @@ async function processStripeWebhookEvent({
 
         const { rows: userRows } = await query('SELECT email, prenom FROM users WHERE id = $1', [userId]);
         if (userRows[0]) {
-          const planLabel = planId === 'pro_plus' ? 'Pro Plus' : 'Pro Essentiel';
+            const planLabel = 'Pro';
           const periodLabel = billingPeriod === 'yearly' ? 'annuel' : 'mensuel';
           const amountXpf = getWebPlan(planId, billingPeriod)?.amount_xpf ?? 0;
           await sendMail({
@@ -698,7 +698,7 @@ async function processPayplugWebhook({
 
       const { rows: userRows } = await query('SELECT email, prenom FROM users WHERE id = $1', [userId]);
       if (userRows[0]) {
-        const planLabel = planId === 'pro_plus' ? 'Pro Plus' : 'Pro Essentiel';
+        const planLabel = 'Pro';
         const periodLabel = isYearly ? 'annuel' : 'mensuel';
         const xpf = expectedAmountXpf || paymentAmountXpf;
 

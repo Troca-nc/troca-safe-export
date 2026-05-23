@@ -9,7 +9,7 @@ import { useAuthStore } from '@/store/authStore'
 
 type SubscriptionStatusResponse = {
   data: {
-    plan?: 'free' | 'pro' | 'pro_plus' | null
+    plan?: 'free' | 'pro' | null
     status?: 'active' | 'expiring_soon' | 'expired' | 'payment_failed' | null
     current_period_end?: string | null
     days_remaining?: number | null
@@ -102,7 +102,7 @@ export default function PaymentFailureBanner() {
             </p>
             <div className="mt-1 inline-flex items-center gap-2 rounded-full bg-white/20 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]">
               {copy.tone === 'danger' ? <AlertTriangle className="h-3 w-3" /> : null}
-              {status?.plan === 'pro_plus' ? 'Pro+' : status?.plan === 'pro' ? 'Pro' : 'Gratuit'}
+              {status?.plan === 'pro' ? 'Pro' : 'Gratuit'}
               {typeof status?.days_remaining === 'number' && status.days_remaining > 0
                 ? ` · ${status.days_remaining} j restants`
                 : null}

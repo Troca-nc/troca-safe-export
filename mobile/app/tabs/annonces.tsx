@@ -138,7 +138,7 @@ export default function AnnoncesTab() {
         )}
         {(item.is_pro || item.user?.is_pro) && (
           <View style={styles.proBadge}>
-            <Text style={styles.proText}>PRO</Text>
+            <Text style={styles.proText}>Pro ✓</Text>
           </View>
         )}
         {item.trust_score != null && (

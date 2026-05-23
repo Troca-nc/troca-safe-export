@@ -323,7 +323,7 @@ function BonPlanCard({ item }: { item: BonPlanItem }) {
         </span>
         {item.is_free_included ? (
           <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
-            Offre Pro Plus
+            Offre Pro
           </span>
         ) : null}
       </div>

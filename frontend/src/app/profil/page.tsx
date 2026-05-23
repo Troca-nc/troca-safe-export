@@ -26,7 +26,7 @@ const TABS = [
 ]
 
 type SubscriptionStatus = {
-  plan?: 'free' | 'pro' | 'pro_plus' | null
+  plan?: 'free' | 'pro' | null
   status?: 'active' | 'expiring_soon' | 'expired' | 'payment_failed' | null
   current_period_end?: string | null
   days_remaining?: number | null
@@ -469,11 +469,7 @@ function ProfilePageContent() {
                   <p className="text-sm font-semibold text-night">{subscriptionMeta.label}</p>
                   <p className="text-sm text-night/60">{subscriptionMeta.description}</p>
                   <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/75 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-night/60">
-                    {subscriptionStatus?.plan === 'pro_plus'
-                      ? 'Pro+'
-                      : subscriptionStatus?.plan === 'pro'
-                        ? 'Pro'
-                        : 'Gratuit'}
+                    {subscriptionStatus?.plan === 'pro' ? 'Pro' : 'Gratuit'}
                     {subscriptionStatus?.payment_provider ? ` · ${subscriptionStatus.payment_provider.toUpperCase()}` : ''}
                     {typeof subscriptionStatus?.days_remaining === 'number' && subscriptionStatus.days_remaining > 0
                       ? ` · ${subscriptionStatus.days_remaining} j`

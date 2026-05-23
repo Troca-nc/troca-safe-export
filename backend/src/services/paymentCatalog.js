@@ -12,43 +12,34 @@ function formatXpfEur(xpf) {
 }
 
 const BOOST_CATALOG = [
-  { type: 'une', duration: 7, price_xpf: 1200, label: 'Boost a la une — 7 jours' },
-  { type: 'une', duration: 14, price_xpf: 2000, label: 'Boost a la une — 14 jours' },
+  { type: 'une', duration: 7, price_xpf: 900, label: 'Boost à la une — 7 jours' },
+  { type: 'une', duration: 14, price_xpf: 1500, label: 'Boost à la une — 14 jours' },
+  { type: 'une', duration: 30, price_xpf: 2500, label: 'Boost à la une — 30 jours' },
   { type: 'urgent', duration: 7, price_xpf: 500, label: 'Boost urgent — 7 jours' },
-  { type: 'remonte', duration: 3, price_xpf: 400, label: 'Boost remontee — 3 jours' },
+  { type: 'remonte', duration: 3, price_xpf: 400, label: 'Boost remontée — 3 jours' },
   { type: 'photos', duration: 30, price_xpf: 300, label: 'Pack photos — 30 jours' },
 ];
 
 const PRO_PLANS = {
   pro: {
-    monthly: { amount_xpf: 3900, stripe_price_id: process.env.STRIPE_PRICE_PRO_MENSUEL || '' },
-    yearly: { amount_xpf: 39000, stripe_price_id: process.env.STRIPE_PRICE_PRO_ANNUEL || '' },
-  },
-  pro_plus: {
-    monthly: { amount_xpf: 7900, stripe_price_id: process.env.STRIPE_PRICE_PRO_PLUS_MENSUEL || '' },
-    yearly: { amount_xpf: 79000, stripe_price_id: process.env.STRIPE_PRICE_PRO_PLUS_ANNUEL || '' },
+    monthly: { amount_xpf: 4900, stripe_price_id: process.env.STRIPE_PRICE_PRO_MENSUEL || '' },
+    yearly: { amount_xpf: 44900, stripe_price_id: process.env.STRIPE_PRICE_PRO_ANNUEL || '' },
   },
 };
 
 const MOBILE_PLANS = {
   pro_mensuel: process.env.STRIPE_PRICE_PRO_MENSUEL || '',
   pro_annuel: process.env.STRIPE_PRICE_PRO_ANNUEL || '',
-  pro_plus_mensuel: process.env.STRIPE_PRICE_PRO_PLUS_MENSUEL || '',
-  pro_plus_annuel: process.env.STRIPE_PRICE_PRO_PLUS_ANNUEL || '',
 };
 
 const MOBILE_PLANS_XPF = {
-  pro_mensuel: 3900,
-  pro_annuel: 39000,
-  pro_plus_mensuel: 7900,
-  pro_plus_annuel: 79000,
+  pro_mensuel: 4900,
+  pro_annuel: 44900,
 };
 
 const MOBILE_PLANS_LABEL = {
-  pro_mensuel: 'Pro Essentiel mensuel',
-  pro_annuel: 'Pro Essentiel annuel',
-  pro_plus_mensuel: 'Pro Plus mensuel',
-  pro_plus_annuel: 'Pro Plus annuel',
+  pro_mensuel: 'Pro mensuel',
+  pro_annuel: 'Pro annuel',
 };
 
 function findBoost(boostType, boostDuration) {

@@ -132,16 +132,6 @@ const PAYPLUG_SUBSCRIPTION_PLANS = {
     interval: 'year',
     interval_count: 1,
   },
-  pro_plus_mensuel: {
-    amount_cents: Math.round((MOBILE_PLANS_XPF.pro_plus_mensuel / XPF_PER_EUR) * 100),
-    interval: 'month',
-    interval_count: 1,
-  },
-  pro_plus_annuel: {
-    amount_cents: Math.round((MOBILE_PLANS_XPF.pro_plus_annuel / XPF_PER_EUR) * 100),
-    interval: 'year',
-    interval_count: 1,
-  },
 };
 
 async function createSubscription({

@@ -472,6 +472,11 @@ export const subscriptionsApi = {
     () => api.get('/subscriptions/status'),
     CACHE_TTL.short,
   ),
+  getPlans: () => cachedGet(
+    buildCacheKey('subscriptions.getPlans', '/subscriptions/plans'),
+    () => api.get('/subscriptions/plans'),
+    CACHE_TTL.medium,
+  ),
 }
 
 export const alertsApi = {

@@ -17,7 +17,7 @@ import { api } from '@/lib/api'
 import { isDemoModeEnabled } from '@/lib/demo'
 import { useAuthStore } from '@/store/authStore'
 
-type Plan = 'pro_mensuel' | 'pro_annuel' | 'pro_plus_mensuel' | 'pro_plus_annuel'
+type Plan = 'pro_mensuel' | 'pro_annuel'
 
 type ErrorLike = {
   response?: {
@@ -45,22 +45,6 @@ const PLANS = [
     saving: '2 mois offerts',
     highlight: true,
   },
-  {
-    id: 'pro_plus_mensuel' as Plan,
-    label: 'Pro Plus Mensuel',
-    price: '35 000',
-    period: 'par mois',
-    saving: null,
-    highlight: false,
-  },
-  {
-    id: 'pro_plus_annuel' as Plan,
-    label: 'Pro Plus Annuel',
-    price: '312 000',
-    period: 'par an',
-    saving: '2 mois offerts',
-    highlight: false,
-  },
 ] as const
 
 const FEATURES = [
@@ -70,12 +54,11 @@ const FEATURES = [
   { icon: '📊', text: 'Statistiques de vues détaillées' },
   { icon: '🏷️', text: 'Badge Pro visible sur votre profil' },
   { icon: '⚡', text: 'Support prioritaire' },
-  { icon: '✨', text: 'Pro Plus pour vendeurs intensifs' },
 ]
 
 function getSubscriptionPayload(plan: Plan) {
   return {
-    plan_id: plan.includes('plus') ? 'pro_plus' : 'pro',
+    plan_id: 'pro',
     billing_period: plan.includes('annuel') ? 'yearly' : 'monthly',
   } as const
 }

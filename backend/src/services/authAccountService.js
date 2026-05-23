@@ -10,6 +10,12 @@ function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
 }
 
+function normalizeAccountType(accountType) {
+  const value = String(accountType || '').trim().toLowerCase();
+  if (value === 'professional' || value === 'pro') return 'professional';
+  return 'personal';
+}
+
 function createHttpError(status, message, code) {
   const err = new Error(message);
   err.status = status;
@@ -234,7 +240,7 @@ async function rotateRefreshToken(userId, oldRefreshToken) {
 
 async function findUserByEmail(email) {
   return query(
-    `SELECT id, email, password_hash, prenom, nom, is_admin,
+    `SELECT id, email, password_hash, prenom, nom, is_admin, account_type,
             CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
             CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN pro_plan ELSE NULL END AS pro_plan,
             pro_expires_at, last_bon_plan_offer_at, email_verified, onboarding_step, deleted_at
@@ -246,7 +252,7 @@ async function findUserByEmail(email) {
 async function findUserById(userId) {
   return query(
     `SELECT id, email, prenom, nom, telephone, phone_verified, email_verified,
-            avatar_url, commune_id, bio, is_admin,
+            avatar_url, commune_id, bio, is_admin, account_type,
             CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
             CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN pro_plan ELSE NULL END AS pro_plan,
             pro_expires_at, last_bon_plan_offer_at, onboarding_step,
@@ -258,6 +264,7 @@ async function findUserById(userId) {
 
 async function registerAccount({ email, password, prenom, nom, commune_id, account_type }) {
   const normalizedEmail = normalizeEmail(email);
+  const normalizedAccountType = normalizeAccountType(account_type);
   const existing = await query('SELECT id FROM users WHERE email = $1', [normalizedEmail]);
   if (existing.rows.length > 0) {
     throw createHttpError(409, 'Cet email est déjà utilisé.');
@@ -266,10 +273,10 @@ async function registerAccount({ email, password, prenom, nom, commune_id, accou
   const password_hash = await bcrypt.hash(password, 12);
   const user = await withTransaction(async (client) => {
     const ins = await client.query(
-      `INSERT INTO users (email, password_hash, prenom, nom, commune_id, is_pro, email_verified)
-       VALUES ($1, $2, $3, $4, $5, $6, FALSE)
-       RETURNING id, email, prenom, nom, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at, email_verified, onboarding_step`,
-      [normalizedEmail, password_hash, prenom.trim(), nom.trim(), commune_id || null, account_type === 'pro']
+      `INSERT INTO users (email, password_hash, prenom, nom, commune_id, is_pro, account_type, email_verified)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE)
+       RETURNING id, email, prenom, nom, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at, email_verified, onboarding_step, account_type`,
+      [normalizedEmail, password_hash, prenom.trim(), nom.trim(), commune_id || null, normalizedAccountType === 'professional', normalizedAccountType]
     );
     return ins.rows[0];
   });
@@ -364,7 +371,7 @@ async function refreshSessionWithRotation(refreshToken) {
   }
 
   const user = await query(
-    `SELECT id, email, prenom, nom, is_admin,
+    `SELECT id, email, prenom, nom, is_admin, account_type,
             CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
             CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN pro_plan ELSE NULL END AS pro_plan,
             pro_expires_at, last_bon_plan_offer_at, email_verified
@@ -380,7 +387,7 @@ async function refreshSessionWithRotation(refreshToken) {
 
 async function requestPasswordReset(email) {
   const result = await query(
-    `SELECT id, email, prenom, pro_plan, pro_expires_at, last_bon_plan_offer_at, email_verified FROM users WHERE email = $1 AND deleted_at IS NULL`,
+    `SELECT id, email, prenom, account_type, pro_plan, pro_expires_at, last_bon_plan_offer_at, email_verified FROM users WHERE email = $1 AND deleted_at IS NULL`,
     [normalizeEmail(email)]
   );
 
@@ -412,7 +419,7 @@ async function confirmEmail(token) {
     `UPDATE users
      SET email_verified = TRUE, updated_at = NOW()
      WHERE id = $1
-     RETURNING id, email, prenom, nom, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at, email_verified`,
+     RETURNING id, email, prenom, nom, is_admin, account_type, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at, email_verified`,
     [tokenRow.rows[0].user_id]
   );
 
@@ -423,7 +430,7 @@ async function confirmEmail(token) {
 
 async function resendVerification(email) {
   const result = await query(
-    `SELECT id, email, prenom, pro_plan, pro_expires_at, last_bon_plan_offer_at, email_verified
+    `SELECT id, email, prenom, account_type, pro_plan, pro_expires_at, last_bon_plan_offer_at, email_verified
      FROM users WHERE email = $1 AND deleted_at IS NULL`,
     [normalizeEmail(email)]
   );

@@ -18,7 +18,8 @@ interface User {
   rating: number
   commune_name?: string
   demo_role?: string
-  pro_plan?: 'pro' | 'pro_plus'
+  account_type?: 'personal' | 'professional'
+  pro_plan?: 'pro'
   onboarding_step?: number
 }
 

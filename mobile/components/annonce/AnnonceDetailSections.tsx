@@ -166,7 +166,7 @@ export function SellerSummaryCard({
             <Text style={styles.sellerName}>{sellerName}</Text>
             {seller?.is_pro && (
               <View style={styles.proBadge}>
-                <Text style={styles.proText}>PRO</Text>
+                <Text style={styles.proText}>Pro ✓</Text>
               </View>
             )}
           </View>

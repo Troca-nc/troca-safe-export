@@ -135,7 +135,7 @@ export default function FavorisScreen() {
           )}
           {item.user?.is_pro && (
             <View style={styles.proBadge}>
-              <Text style={styles.proText}>PRO</Text>
+              <Text style={styles.proText}>Pro ✓</Text>
             </View>
           )}
           {item.user?.email_verified && (

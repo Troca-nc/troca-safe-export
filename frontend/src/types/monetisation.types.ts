@@ -25,7 +25,7 @@ export const BOOST_CATALOG: BoostOption[] = [
   { type: 'photos', duration: 30, label: 'Pack photos', description: "Jusqu'a 15 photos pendant 30 jours", price_xpf: 300, emoji: '📷' },
 ]
 
-export type PlanId = 'pro' | 'pro_plus'
+export type PlanId = 'pro'
 export type BillingPeriod = 'monthly' | 'yearly'
 
 export interface ProPlan {
@@ -45,42 +45,22 @@ export interface ProPlan {
 export const PRO_PLANS: ProPlan[] = [
   {
     id: 'pro',
-    label: 'Pro Essentiel',
-    price_monthly: 3900,
-    price_yearly: 39000,
+    label: 'Pro',
+    price_monthly: 4900,
+    price_yearly: 44900,
     savings_pct: 17,
-    highlight: false,
+    highlight: true,
     stripe_price_id_monthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY ?? '',
     stripe_price_id_yearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY ?? '',
     payplug_plan_id_monthly: process.env.NEXT_PUBLIC_PAYPLUG_PLAN_PRO_MONTHLY ?? '',
     payplug_plan_id_yearly: process.env.NEXT_PUBLIC_PAYPLUG_PLAN_PRO_YEARLY ?? '',
     features: [
-      '5 annonces actives incluses',
-      'Vitrine vendeur professionnelle',
-      'Badge Pro sur vos annonces',
-      'Statistiques simples (vues, contacts)',
-      'Boosts et mises en avant a la carte',
-      'Support prioritaire par email',
-    ],
-  },
-  {
-    id: 'pro_plus',
-    label: 'Pro Plus',
-    price_monthly: 7900,
-    price_yearly: 79000,
-    savings_pct: 17,
-    highlight: true,
-    stripe_price_id_monthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_PLUS_MONTHLY ?? '',
-    stripe_price_id_yearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_PLUS_YEARLY ?? '',
-    payplug_plan_id_monthly: process.env.NEXT_PUBLIC_PAYPLUG_PLAN_PRO_PLUS_MONTHLY ?? '',
-    payplug_plan_id_yearly: process.env.NEXT_PUBLIC_PAYPLUG_PLAN_PRO_PLUS_YEARLY ?? '',
-    features: [
-      'Tout du plan Pro Essentiel',
-      '25 annonces actives incluses',
-      'Vitrine premium et priorite de visibilite',
-      '1 bon plan visible 3 jours offert par mois',
-      '3 boosts A la une offerts par mois',
-      'Support telephonique prioritaire',
+      'Annonces illimitées',
+      '12 photos par annonce',
+      'Badge Pro vérifié',
+      'Statistiques d\'annonce',
+      'Boosts à tarif réduit',
+      'Support prioritaire',
     ],
   },
 ]

@@ -3,8 +3,68 @@
 const { Router } = require('express');
 const { authenticate } = require('../middleware/auth');
 const { query } = require('../config/database');
+const { PRO_PLANS, BOOST_CATALOG, XPF_PER_EUR } = require('../services/paymentCatalog');
 
 const router = Router();
+
+function xpfToEur(xpf) {
+  return Math.round(xpf / XPF_PER_EUR);
+}
+
+router.get('/plans', async (_req, res) => {
+  const pro = PRO_PLANS.pro || { monthly: { amount_xpf: 4900 }, yearly: { amount_xpf: 44900 } };
+  return res.json({
+    data: {
+      plans: [
+        {
+          id: 'free',
+          name: 'Gratuit',
+          price_monthly_xpf: 0,
+          price_yearly_xpf: 0,
+          target: 'personal',
+          features: {
+            maxActiveListings: 5,
+            maxPhotosPerListing: 6,
+            listingDurationDays: 60,
+            chat: true,
+            phoneVerification: true,
+            listingStats: false,
+            sellerBadge: false,
+            boosts: 'paid',
+          },
+        },
+        {
+          id: 'pro',
+          name: 'Pro',
+          price_monthly_xpf: pro.monthly.amount_xpf,
+          price_yearly_xpf: pro.yearly.amount_xpf,
+          price_monthly_eur: xpfToEur(pro.monthly.amount_xpf),
+          price_yearly_eur: xpfToEur(pro.yearly.amount_xpf),
+          savings_months: 2,
+          target: 'professional',
+          features: {
+            maxActiveListings: 'unlimited',
+            maxPhotosPerListing: 12,
+            listingDurationDays: 'permanent',
+            chat: true,
+            phoneVerification: true,
+            listingStats: true,
+            sellerBadge: true,
+            boosts: 'discount',
+            pinnedPerCategory: 1,
+            prioritySupport: true,
+          },
+        },
+      ],
+      boosts: BOOST_CATALOG.map((boost) => ({
+        type: boost.type,
+        duration_days: boost.duration,
+        price_xpf: boost.price_xpf,
+        price_xpf_pro: Math.max(1, Math.round(boost.price_xpf * 0.8)),
+      })),
+    },
+  });
+});
 
 router.get('/status', authenticate, async (req, res) => {
   try {

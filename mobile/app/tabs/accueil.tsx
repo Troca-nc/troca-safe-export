@@ -151,7 +151,7 @@ export default function AccueilScreen() {
           <Text style={styles.cardMetaText}>{item.commune ?? item.commune_name ?? 'NC'}</Text>
           {(item.is_pro || item.user?.is_pro) && (
             <View style={styles.proBadge}>
-              <Text style={styles.proText}>PRO</Text>
+              <Text style={styles.proText}>Pro ✓</Text>
             </View>
           )}
           {item.trust_score != null && (
