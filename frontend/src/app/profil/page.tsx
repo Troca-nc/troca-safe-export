@@ -14,7 +14,7 @@ import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import Header from '@/components/layout/Header'
 import ListingCard from '@/components/listings/ListingCard'
-import { subscriptionsApi, usersApi } from '@/lib/api'
+import { bonPlansApi, subscriptionsApi, usersApi } from '@/lib/api'
 import { inferDemoAccount } from '@/lib/demoApi'
 import { useAuthStore } from '@/store/authStore'
 import ProfileDemoPreview from '@/components/ui/ProfileDemoPreview'
@@ -95,6 +95,16 @@ function ProfilePageContent() {
   const [editing,   setEditing]   = useState(false)
   const [loading,   setLoading]   = useState(true)
   const [saving,    setSaving]    = useState(false)
+  const [bonPlanPrefs, setBonPlanPrefs] = useState({
+    notify_all: false,
+    notify_categories: [] as string[],
+    notify_businesses: [] as string[],
+    via_push: true,
+    via_email: false,
+  })
+  const [bonPlanBusinesses, setBonPlanBusinesses] = useState<Array<{ name: string }>>([])
+  const [bonPlanBusinessInput, setBonPlanBusinessInput] = useState('')
+  const [savingBonPlanPrefs, setSavingBonPlanPrefs] = useState(false)
 
   const { data: subscriptionStatusData } = useQuery({
     queryKey: ['subscriptions', 'status'],
@@ -120,6 +130,37 @@ function ProfilePageContent() {
     }
     loadProfile()
   }, [profileId, demoActive])
+
+  useEffect(() => {
+    if (activeTab !== 'notifications' || !isOwn || demoActive) return
+
+    let alive = true
+    const loadBonPlanPrefs = async () => {
+      try {
+        const [prefsRes, businessesRes] = await Promise.all([
+          bonPlansApi.getPrefs(),
+          bonPlansApi.businesses(),
+        ])
+        if (!alive) return
+        const prefs = prefsRes.data?.data ?? {}
+        setBonPlanPrefs({
+          notify_all: Boolean(prefs.notify_all),
+          notify_categories: Array.isArray(prefs.notify_categories) ? prefs.notify_categories : [],
+          notify_businesses: Array.isArray(prefs.notify_businesses) ? prefs.notify_businesses : [],
+          via_push: prefs.via_push !== false,
+          via_email: Boolean(prefs.via_email),
+        })
+        setBonPlanBusinesses(Array.isArray(businessesRes.data?.data) ? businessesRes.data.data : [])
+      } catch {
+        if (!alive) return
+      }
+    }
+
+    void loadBonPlanPrefs()
+    return () => {
+      alive = false
+    }
+  }, [activeTab, demoActive, isOwn])
 
   const loadProfile = async () => {
     try {
@@ -403,6 +444,159 @@ function ProfilePageContent() {
           Ouvrir mes messages
         </Link>
       </div>
+
+      {!demoActive && isOwn && (
+        <div className="mt-6 rounded-[1.5rem] border border-night/8 bg-white p-4">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Bons Plans</p>
+              <h3 className="mt-1 text-lg font-bold text-night">Recevoir les promos des enseignes</h3>
+              <p className="mt-1 text-sm text-night/60">
+                Choisissez vos catégories ou enseignes favorites. Vous pouvez tout recevoir ou filtrer finement selon vos intérêts.
+              </p>
+            </div>
+            <Link href="/bons-plans" className="btn-ghost px-4 py-2 text-sm">
+              Voir les bons plans
+            </Link>
+          </div>
+
+          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            <label className="flex items-center gap-3 rounded-2xl border border-night/10 bg-sand/30 p-3">
+              <input
+                type="checkbox"
+                checked={bonPlanPrefs.notify_all}
+                onChange={(event) => setBonPlanPrefs((current) => ({ ...current, notify_all: event.target.checked }))}
+                className="h-4 w-4 rounded border-night/20 text-coral focus:ring-coral"
+              />
+              <span>
+                <span className="block text-sm font-semibold text-night">Toutes les nouvelles promos</span>
+                <span className="block text-xs text-night/50">Recevoir chaque bon plan publié sur Troca.</span>
+              </span>
+            </label>
+
+            <div className="rounded-2xl border border-night/10 bg-sand/30 p-3">
+              <span className="block text-sm font-semibold text-night">Canaux</span>
+              <label className="mt-2 flex items-center gap-3 text-sm text-night/70">
+                <input
+                  type="checkbox"
+                  checked={bonPlanPrefs.via_push}
+                  onChange={(event) => setBonPlanPrefs((current) => ({ ...current, via_push: event.target.checked }))}
+                  className="h-4 w-4 rounded border-night/20 text-coral focus:ring-coral"
+                />
+                Notifications push
+              </label>
+              <label className="mt-2 flex items-center gap-3 text-sm text-night/70">
+                <input
+                  type="checkbox"
+                  checked={bonPlanPrefs.via_email}
+                  onChange={(event) => setBonPlanPrefs((current) => ({ ...current, via_email: event.target.checked }))}
+                  className="h-4 w-4 rounded border-night/20 text-coral focus:ring-coral"
+                />
+                Par email
+              </label>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-night">Catégories favorites</label>
+              <div className="flex flex-wrap gap-2">
+                {['alimentation', 'mode', 'beaute', 'high_tech', 'auto_moto', 'maison', 'restauration', 'services', 'sport', 'voyages'].map((category) => {
+                  const active = bonPlanPrefs.notify_categories.includes(category)
+                  return (
+                    <button
+                      key={category}
+                      type="button"
+                      onClick={() => setBonPlanPrefs((current) => ({
+                        ...current,
+                        notify_categories: active
+                          ? current.notify_categories.filter((item) => item !== category)
+                          : [...current.notify_categories, category],
+                      }))}
+                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                        active
+                          ? 'border-coral bg-coral text-white'
+                          : 'border-night/10 bg-white text-night/65 hover:border-coral/30 hover:text-coral'
+                      }`}
+                    >
+                      {category.replace('_', ' ')}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-night">Enseignes favorites</label>
+              <div className="flex flex-wrap gap-2">
+                {bonPlanPrefs.notify_businesses.map((business) => (
+                  <span key={business} className="inline-flex items-center gap-2 rounded-full border border-night/10 bg-white px-3 py-1.5 text-xs font-medium text-night/70">
+                    {business}
+                    <button
+                      type="button"
+                      onClick={() => setBonPlanPrefs((current) => ({
+                        ...current,
+                        notify_businesses: current.notify_businesses.filter((item) => item !== business),
+                      }))}
+                      className="text-night/30 hover:text-coral"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="mt-3 flex gap-2">
+                <input
+                  list="bon-plans-businesses"
+                  value={bonPlanBusinessInput}
+                  onChange={(event) => setBonPlanBusinessInput(event.target.value)}
+                  placeholder="Ajouter une enseigne"
+                  className="flex-1 rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm outline-none focus:border-coral/35 focus:ring-4 focus:ring-coral/10"
+                />
+                <button
+                  type="button"
+                  className="btn-primary rounded-2xl px-4 py-3 text-sm"
+                  onClick={() => {
+                    const nextName = bonPlanBusinessInput.trim()
+                    if (!nextName) return
+                    setBonPlanPrefs((current) => ({
+                      ...current,
+                      notify_businesses: Array.from(new Set([...current.notify_businesses, nextName])),
+                    }))
+                    setBonPlanBusinessInput('')
+                  }}
+                >
+                  Ajouter
+                </button>
+              </div>
+              <datalist id="bon-plans-businesses">
+                {bonPlanBusinesses.map((business) => (
+                  <option key={business.name} value={business.name} />
+                ))}
+              </datalist>
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              className="btn-primary px-4 py-2 text-sm disabled:opacity-60"
+              disabled={savingBonPlanPrefs}
+              onClick={async () => {
+                setSavingBonPlanPrefs(true)
+                try {
+                  await bonPlansApi.savePrefs(bonPlanPrefs)
+                } finally {
+                  setSavingBonPlanPrefs(false)
+                }
+              }}
+            >
+              {savingBonPlanPrefs ? 'Enregistrement…' : 'Enregistrer les préférences Bons Plans'}
+            </button>
+            <p className="text-xs text-night/50">Les notifications Bons Plans sont indépendantes des alertes de recherche.</p>
+          </div>
+        </div>
+      )}
     </div>
   ) : null
 

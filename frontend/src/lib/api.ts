@@ -453,6 +453,23 @@ export const businessesApi = {
   replyReview: (slug: string, reviewId: string | number, data: object) => api.post(`/businesses/${slug}/reviews/${reviewId}/reply`, data),
 }
 
+export const adminBusinessesApi = {
+  list: (params: object = {}) => cachedGet(
+    buildCacheKey('adminBusinesses.list', '/admin/businesses', params),
+    () => api.get('/admin/businesses', { params }),
+    CACHE_TTL.short,
+  ),
+  verify: (id: string | number) => api.patch(`/admin/businesses/${id}/verify`).finally(() => invalidateApiCache('adminBusinesses.')),
+  unverify: (id: string | number) => api.patch(`/admin/businesses/${id}/unverify`).finally(() => invalidateApiCache('adminBusinesses.')),
+  reportedReviews: () => cachedGet(
+    buildCacheKey('adminBusinesses.reportedReviews', '/admin/businesses/reviews/reported'),
+    () => api.get('/admin/businesses/reviews/reported'),
+    CACHE_TTL.short,
+  ),
+  keepReview: (id: string | number) => api.patch(`/admin/businesses/reviews/${id}/keep`).finally(() => invalidateApiCache('adminBusinesses.')),
+  deleteReview: (id: string | number) => api.delete(`/admin/businesses/reviews/${id}`).finally(() => invalidateApiCache('adminBusinesses.')),
+}
+
 export const covoiturageApi = {
   list: (params: object = {}) => cachedGet(
     buildCacheKey('covoiturage.list', '/covoiturage', params),

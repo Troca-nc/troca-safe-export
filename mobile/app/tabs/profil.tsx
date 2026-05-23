@@ -98,7 +98,10 @@ export default function ProfilTab() {
     },
     {
       title: 'Notifications',
-      items: [{ icon: 'notifications-outline', label: 'Mes alertes de recherche', onPress: () => router.push('/profil/alertes') }],
+      items: [
+        { icon: 'notifications-outline', label: 'Mes alertes de recherche', onPress: () => router.push('/profil/alertes') },
+        { icon: 'pricetag-outline', label: 'Bons Plans', onPress: () => router.push('/profil/bons-plans') },
+      ],
     },
     {
       title: 'Paramètres',

@@ -11,6 +11,7 @@ export default function ProfilLayout() {
       <Stack.Screen name="favoris"       />
       <Stack.Screen name="telephone"     />
       <Stack.Screen name="alertes"       />
+      <Stack.Screen name="bons-plans"    />
       <Stack.Screen name="abonnement"    />
       <Stack.Screen name="confidentialite" />
       <Stack.Screen name="aide"          />
