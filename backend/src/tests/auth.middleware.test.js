@@ -15,6 +15,7 @@ process.env.JWT_SECRET = 'test_jwt_secret_minimum_64_chars_xxxxxxxxxxxxxxxxxxxxx
 // Mock du module database AVANT de charger auth.js
 const fakeUser = { id: 1, email: 'test@troca.nc', prenom: 'Jean', nom: 'Test', is_admin: false, is_pro: false, deleted_at: null };
 let mockRows = [fakeUser];
+const blacklistedTokens = new Set();
 
 // Patch require cache pour database
 const Module = require('module');
@@ -25,6 +26,11 @@ Module._load = function (request, parent, isMain) {
       query: async () => ({ rows: mockRows }),
       withTransaction: async (fn) => fn({ query: async () => ({ rows: mockRows }) }),
       checkConnection: async () => new Date().toISOString(),
+    };
+  }
+  if (request.includes('services/authAccountService')) {
+    return {
+      isAccessTokenBlacklisted: async (token) => blacklistedTokens.has(token),
     };
   }
   return _originalLoad.apply(this, arguments);
@@ -70,6 +76,18 @@ describe('authenticate — token valide', () => {
     if (result && typeof result.then === 'function') {
       result.then(() => {}).catch(done);
     }
+  });
+
+  it('refuse un token révoqué', () => {
+    const token = makeAccessToken(1);
+    blacklistedTokens.add(token);
+    const req   = makeReq({ headers: { authorization: `Bearer ${token}` } });
+    const res   = makeRes();
+    mockRows = [fakeUser];
+
+    authenticate(req, res, () => { throw new Error('next ne doit pas être appelée'); });
+    assertStatus(res, 401);
+    blacklistedTokens.delete(token);
   });
 });
 

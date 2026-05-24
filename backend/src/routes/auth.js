@@ -29,6 +29,7 @@ const {
 } = require('../services/phoneOtpService');
 const {
   confirmEmail,
+  blacklistAccessToken,
   deleteRefreshToken,
   findUserById,
   loginAccount,
@@ -160,7 +161,12 @@ router.get('/me', authenticate, async (req, res, next) => {
 
 router.post('/logout', async (req, res, next) => {
   try {
+    const header = req.headers.authorization;
+    const accessToken = header && header.startsWith('Bearer ') ? header.split(' ')[1] : null;
     const { refresh_token } = req.body;
+    if (accessToken) {
+      await blacklistAccessToken(accessToken);
+    }
     if (refresh_token) {
       await deleteRefreshToken(refresh_token);
     }

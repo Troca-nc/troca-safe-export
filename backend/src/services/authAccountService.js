@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { query, withTransaction } = require('../config/database');
 const { getRedisClient } = require('../config/redis');
-const { generateTokens, getRefreshExpiresMs, verifyRefreshToken } = require('../config/jwt');
+const { generateTokens, getRefreshExpiresMs, verifyAccessToken, verifyRefreshToken } = require('../config/jwt');
 
 function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
@@ -28,6 +28,11 @@ function createHttpError(status, message, code) {
 function buildRefreshBlacklistKey(refreshToken) {
   const hash = crypto.createHash('sha256').update(String(refreshToken || '')).digest('hex');
   return `refresh:blacklist:${hash}`;
+}
+
+function buildAccessBlacklistKey(accessToken) {
+  const hash = crypto.createHash('sha256').update(String(accessToken || '')).digest('hex');
+  return `access:blacklist:${hash}`;
 }
 
 function buildSafeUser(user) {
@@ -205,12 +210,39 @@ async function blacklistRefreshToken(refreshToken) {
   }
 }
 
+async function blacklistAccessToken(accessToken) {
+  const client = await getRedisClient();
+  if (!client || !accessToken) return false;
+
+  try {
+    const payload = verifyAccessToken(accessToken);
+    const ttlMs = Math.max(1, (Number(payload.exp || 0) * 1000) - Date.now());
+    await client.set(buildAccessBlacklistKey(accessToken), '1', {
+      PX: ttlMs,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function isRefreshTokenBlacklisted(refreshToken) {
   const client = await getRedisClient();
   if (!client || !refreshToken) return false;
 
   try {
     return Boolean(await client.get(buildRefreshBlacklistKey(refreshToken)));
+  } catch {
+    return false;
+  }
+}
+
+async function isAccessTokenBlacklisted(accessToken) {
+  const client = await getRedisClient();
+  if (!client || !accessToken) return false;
+
+  try {
+    return Boolean(await client.get(buildAccessBlacklistKey(accessToken)));
   } catch {
     return false;
   }
@@ -469,10 +501,12 @@ async function resetPasswordWithToken(token, password) {
 
 module.exports = {
   buildSafeUser,
+  blacklistAccessToken,
   blacklistRefreshToken,
   confirmEmail,
   createHttpError,
   buildRefreshBlacklistKey,
+  buildAccessBlacklistKey,
   createPasswordResetToken,
   createVerificationToken,
   deleteRefreshToken,
@@ -486,6 +520,7 @@ module.exports = {
   resendVerification,
   requestPasswordReset,
   resetPasswordWithToken,
+  isAccessTokenBlacklisted,
   revokeRefreshToken,
   rotateRefreshToken,
   upsertEmailVerificationToken,

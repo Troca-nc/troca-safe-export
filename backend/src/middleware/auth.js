@@ -4,6 +4,7 @@
 
 const { verifyAccessToken } = require('../config/jwt');
 const { query } = require('../config/database');
+const { isAccessTokenBlacklisted } = require('../services/authAccountService');
 
 /**
  * Middleware obligatoire — bloque si non connecté
@@ -16,6 +17,9 @@ const authenticate = async (req, res, next) => {
     }
 
     const token = header.split(' ')[1];
+    if (await isAccessTokenBlacklisted(token)) {
+      return res.status(401).json({ error: 'Session expirée. Veuillez vous reconnecter.', code: 'TOKEN_REVOKED' });
+    }
     const payload = verifyAccessToken(token);
 
     // Vérifier que l'utilisateur existe encore
@@ -92,6 +96,10 @@ const optionalAuth = async (req, res, next) => {
       return next();
     }
     const token = header.split(' ')[1];
+    if (await isAccessTokenBlacklisted(token)) {
+      req.user = null;
+      return next();
+    }
     const payload = verifyAccessToken(token);
     const result = await query(
       'SELECT id, email, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at FROM users WHERE id = $1 AND deleted_at IS NULL',
