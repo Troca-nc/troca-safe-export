@@ -78,14 +78,14 @@ describe('authenticate — token valide', () => {
     }
   });
 
-  it('refuse un token révoqué', () => {
+  it('refuse un token révoqué', async () => {
     const token = makeAccessToken(1);
     blacklistedTokens.add(token);
     const req   = makeReq({ headers: { authorization: `Bearer ${token}` } });
     const res   = makeRes();
     mockRows = [fakeUser];
 
-    authenticate(req, res, () => { throw new Error('next ne doit pas être appelée'); });
+    await authenticate(req, res, () => { throw new Error('next ne doit pas être appelée'); });
     assertStatus(res, 401);
     blacklistedTokens.delete(token);
   });
