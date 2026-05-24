@@ -1,16 +1,24 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
+import { useCallback } from 'react'
 import { Mail, Shield, FileText, Lock, MessageCircle } from 'lucide-react'
 
 const links = [
-  { href: '/mentions-legales', label: 'Mentions legales', icon: FileText },
+  { href: '/mentions-legales', label: 'Mentions légales', icon: FileText },
+  { href: '/politique-de-confidentialite', label: 'Confidentialité', icon: Lock },
   { href: '/cgu', label: 'CGU', icon: FileText },
-  { href: '/confidentialite', label: 'Confidentialite', icon: Lock },
-  { href: '/securite', label: 'Securite', icon: Shield },
+  { href: '/cgv', label: 'CGV', icon: Shield },
+  { href: '/politique-cookies', label: 'Cookies', icon: Lock },
   { href: '/contact', label: 'Contact', icon: MessageCircle },
 ]
 
 export default function Footer() {
+  const openCookieBanner = useCallback(() => {
+    window.dispatchEvent(new Event('troca-cookie-banner-open'))
+  }, [])
+
   return (
     <footer className="border-t border-night/10 bg-white/80 backdrop-blur-sm">
       <div className="mx-auto max-w-7xl px-4 py-8">
@@ -29,13 +37,12 @@ export default function Footer() {
               <div>
                 <span className="block font-display text-lg font-bold text-night">Troca</span>
                 <span className="block text-[10px] font-semibold uppercase tracking-[0.22em] text-coral/80">
-                  Nouvelle-Caledonie
+                  Nouvelle-Calédonie
                 </span>
               </div>
             </div>
             <p className="max-w-xl text-sm leading-relaxed text-night/60">
-              Petites annonces en Nouvelle-Caledonie. Achetez, vendez, echangez et contactez des
-              vendeurs locaux depuis le web ou le mobile.
+              Petites annonces en Nouvelle-Calédonie. Achetez, vendez, échangez et contactez des vendeurs locaux depuis le web ou le mobile.
             </p>
           </div>
 
@@ -52,6 +59,14 @@ export default function Footer() {
                   {label}
                 </Link>
               ))}
+              <button
+                type="button"
+                onClick={openCookieBanner}
+                className="inline-flex items-center gap-2 text-left text-sm text-night/60 transition-colors hover:text-coral"
+              >
+                <Lock className="h-4 w-4" />
+                Gérer mes cookies
+              </button>
               <a
                 href="mailto:contact@troca.nc"
                 className="inline-flex items-center gap-2 text-sm text-night/60 transition-colors hover:text-coral"
@@ -64,8 +79,8 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 flex flex-col gap-2 border-t border-night/10 pt-4 text-xs text-night/40 sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 Troca. Tous droits reserves.</p>
-          <p>Nouvelle-Caledonie.</p>
+          <p>© 2026 Troca. Tous droits réservés.</p>
+          <p>Nouvelle-Calédonie.</p>
         </div>
       </div>
     </footer>

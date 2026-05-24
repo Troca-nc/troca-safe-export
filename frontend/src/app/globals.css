@@ -179,3 +179,36 @@ h1, h2, h3, .font-display {
 .swiper-button-next, .swiper-button-prev {
   color: var(--coral) !important;
 }
+
+.legal-content h2 {
+  @apply mt-10 mb-4 text-2xl font-bold text-night;
+}
+
+.legal-content h3 {
+  @apply mt-6 mb-3 text-xl font-semibold text-night;
+}
+
+.legal-content table {
+  @apply w-full border-collapse overflow-hidden rounded-2xl border border-night/10 text-sm;
+}
+
+.legal-content thead tr {
+  @apply bg-sand/80;
+}
+
+.legal-content th {
+  @apply px-4 py-3 text-left font-semibold text-night;
+}
+
+.legal-content td {
+  @apply border-t border-night/10 px-4 py-3 align-top text-night/75;
+}
+
+.legal-content ul,
+.legal-content ol {
+  @apply space-y-2 pl-5;
+}
+
+.legal-content a {
+  @apply text-coral underline underline-offset-2;
+}

@@ -33,6 +33,7 @@ const uploadRouter    = require('./routes/upload');
 const uploadsRouter   = require('./routes/uploads');
 const adminRouter     = require('./routes/admin.routes');
 const rgpdRouter      = require('./routes/rgpd.route');
+const legalRouter     = require('./routes/legal');
 const paymentRouter   = require('./routes/payment.route');
 const subscriptionsRouter = require('./routes/subscriptions');
 const phoneRouter     = require('./routes/phone.route');
@@ -46,6 +47,7 @@ const businessesRouter     = require('./routes/businesses.route');
 const businessesAdminRouter = require('./routes/businesses.admin.route');
 const covoiturageRouter    = require('./routes/covoiturage.route');
 const demoRouter           = require('./routes/demo.route');
+const trocRouter           = require('./routes/troc');
 
 // ── Application ───────────────────────────────────────────────
 const app    = express();
@@ -146,6 +148,7 @@ app.use('/api/upload',     uploadRouter);
 app.use('/uploads',        uploadsRouter);
 app.use('/api/admin',      adminRouter);
 app.use('/api/rgpd',       rgpdRouter);
+app.use('/api',            legalRouter);
 app.use('/api/payment',    paymentRouter);
 app.use('/api/subscriptions', subscriptionsRouter);
 app.use('/api/phone',      phoneRouter);
@@ -158,6 +161,7 @@ app.use('/api/businesses', businessesRouter);
 app.use('/api/admin/businesses', businessesAdminRouter);
 app.use('/api/covoiturage', covoiturageRouter);
 app.use('/api/demo',       demoRouter);
+app.use('/api/troc',       trocRouter);
 
 // Auth sociale (Google / Apple) — chargement optionnel
 try {

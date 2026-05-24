@@ -80,7 +80,7 @@ function baseTemplate(content) {
     <div class="body">${content}</div>
     <div class="footer">
       Troca — La plateforme de petites annonces de Nouvelle-Calédonie<br>
-      <a href="${BASE_URL()}/confidentialite">Confidentialité</a> · 
+      <a href="${BASE_URL()}/politique-de-confidentialite">Confidentialité</a> ·
       <a href="${BASE_URL()}/cgu">CGU</a>
     </div>
   </div>

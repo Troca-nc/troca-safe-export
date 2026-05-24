@@ -193,7 +193,7 @@ export default function SocialAuthButtons({ redirectTo = '/', mode = 'connexion'
           {' '}et notre{' '}
           <a href="/mentions-legales" className="underline hover:text-night/60">mentions legales</a>
           {' '}ainsi que notre{' '}
-          <a href="/confidentialite" className="underline hover:text-night/60">politique de confidentialité</a>.
+          <a href="/politique-de-confidentialite" className="underline hover:text-night/60">politique de confidentialité</a>.
         </p>
     </div>
   )

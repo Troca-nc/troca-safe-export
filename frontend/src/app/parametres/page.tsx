@@ -577,7 +577,7 @@ export default function ParametresPage() {
           <div className="flex items-center justify-center gap-4 text-xs text-night/35">
             <Link href="/cgu" className="hover:text-night/60">CGU</Link>
             <span>·</span>
-            <Link href="/confidentialite" className="hover:text-night/60">Politique de confidentialité</Link>
+            <Link href="/politique-de-confidentialite" className="hover:text-night/60">Politique de confidentialité</Link>
             <span>·</span>
             <a href="mailto:privacy@troca.nc" className="hover:text-night/60">Contact DPO</a>
           </div>

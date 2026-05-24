@@ -13,11 +13,13 @@ const SUITES = [
   './email.service.test',
   './authAccountService.test',
   './auth.route.test',
+  './legal.route.test',
   './phone.route.test',
   './alert.route.test',
   './scheduler.test',
   './push.service.test',
   './payment.route.test',
+  './trocService.test',
 ];
 
 async function run() {
