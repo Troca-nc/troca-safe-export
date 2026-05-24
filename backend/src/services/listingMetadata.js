@@ -144,7 +144,7 @@ const CATEGORY_SCHEMAS = {
   dons: buildDonSchema(),
   vente: buildImmobilierSchema(),
   'location-longue-duree': buildImmobilierSchema(),
-  immobilier: Joi.object().unknown(true).default({}),
+  immobilier: buildImmobilierSchema(),
 };
 
 function getMetadataSchema(categorySlug) {
