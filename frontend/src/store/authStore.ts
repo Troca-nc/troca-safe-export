@@ -3,6 +3,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { authApi, saveTokens, clearTokens } from '@/lib/api'
 import { useFavorisStore } from '@/store/favorisStore'
+import { getStoredAccessToken, getStoredRefreshToken } from '@/lib/tokenStorage'
 
 interface User {
   id: string
@@ -94,7 +95,7 @@ type RealAuthBackup = {
 function readRealAuthBackup(): RealAuthBackup | null {
   if (typeof window === 'undefined') return null
   try {
-    const raw = localStorage.getItem(REAL_AUTH_BACKUP_KEY)
+    const raw = window.sessionStorage.getItem(REAL_AUTH_BACKUP_KEY)
     return raw ? JSON.parse(raw) : null
   } catch {
     return null
@@ -103,12 +104,12 @@ function readRealAuthBackup(): RealAuthBackup | null {
 
 function writeRealAuthBackup(state: RealAuthBackup) {
   if (typeof window === 'undefined') return
-  localStorage.setItem(REAL_AUTH_BACKUP_KEY, JSON.stringify(state))
+  window.sessionStorage.setItem(REAL_AUTH_BACKUP_KEY, JSON.stringify(state))
 }
 
 function clearRealAuthBackup() {
   if (typeof window === 'undefined') return
-  localStorage.removeItem(REAL_AUTH_BACKUP_KEY)
+  window.sessionStorage.removeItem(REAL_AUTH_BACKUP_KEY)
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -148,8 +149,8 @@ export const useAuthStore = create<AuthState>()(
           writeRealAuthBackup({
             user: get().user,
             isAuthenticated: get().isAuthenticated,
-            access_token: typeof window !== 'undefined' ? localStorage.getItem('access_token') : null,
-            refresh_token: typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null,
+            access_token: typeof window !== 'undefined' ? getStoredAccessToken() : null,
+            refresh_token: typeof window !== 'undefined' ? getStoredRefreshToken() : null,
           })
         }
 
@@ -200,7 +201,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
-        const refreshToken = localStorage.getItem('refresh_token')
+          const refreshToken = getStoredRefreshToken()
         if (refreshToken) {
           await authApi.logout(refreshToken).catch(() => {})
         }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { api } from '@/lib/api'
+import { getStoredAccessToken } from '@/lib/tokenStorage'
 import type { ActionModeration } from '@/types/admin.types'
 
 function useStaticResource<T>(initialData: T) {
@@ -125,7 +126,7 @@ export type AdminObservabilitySnapshot = {
 }
 
 async function fetchAdminObservability(): Promise<AdminObservabilitySnapshot> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') ?? '' : ''
+  const token = typeof window !== 'undefined' ? getStoredAccessToken() : ''
   const response = await fetch('/api/admin/observability', {
     method: 'GET',
     headers: token ? { authorization: `Bearer ${token}` } : {},

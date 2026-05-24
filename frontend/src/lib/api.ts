@@ -6,6 +6,7 @@ import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig, type Axio
 import { rememberRedirectAfterLogin } from '@/lib/authRedirect'
 import { requestDraftSave } from '@/lib/draftEvents'
 import { isDemoMode, showDemoToast } from '@/lib/demoMode'
+import { clearStoredTokens, getStoredAccessToken, getStoredRefreshToken, saveStoredTokens } from '@/lib/tokenStorage'
 
 function normalizeApiBase(url: string) {
   const trimmed = url.trim().replace(/\/+$/, '')
@@ -53,7 +54,7 @@ function stableSerialize(value: unknown): string {
 
 function getAuthToken() {
   if (typeof window === 'undefined') return ''
-  return localStorage.getItem('access_token') ?? ''
+  return getStoredAccessToken()
 }
 
 function getRequestId() {
@@ -151,7 +152,7 @@ export function clearApiCache() {
 // Intercepteur requete : ajoute le Bearer token
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('access_token')
+    const token = getStoredAccessToken()
     if (token) config.headers.Authorization = `Bearer ${token}`
   }
   config.headers['x-request-id'] = config.headers['x-request-id'] ?? getRequestId()
@@ -189,7 +190,7 @@ api.interceptors.response.use(
       }
 
       isRefreshing = true
-      const refreshToken = localStorage.getItem('refresh_token')
+      const refreshToken = getStoredRefreshToken()
 
       if (!refreshToken) {
         redirectToLoginAfterAuthFailure()
@@ -224,14 +225,14 @@ api.interceptors.response.use(
 
 // Helpers tokens
 export const saveTokens = (access: string, refresh: string) => {
-  localStorage.setItem('access_token', access)
-  localStorage.setItem('refresh_token', refresh)
+  saveStoredTokens(access, refresh)
 }
 
 export const clearTokens = () => {
-  localStorage.removeItem('access_token')
-  localStorage.removeItem('refresh_token')
-  localStorage.removeItem('user')
+  clearStoredTokens()
+  if (typeof window !== 'undefined') {
+    window.localStorage.removeItem('user')
+  }
   clearApiCache()
 }
 
@@ -301,6 +302,35 @@ export const listingsApi = {
     invalidateApiCache('stats.')
     return res
   },
+}
+
+export const trocApi = {
+  list: (params: object = {}) => cachedGet(
+    buildCacheKey('troc.list', '/troc', params),
+    () => api.get('/troc', { params }),
+    CACHE_TTL.short,
+  ),
+  swipeFeed: (params: object = {}) => cachedGet(
+    buildCacheKey('troc.swipeFeed', '/troc/swipe-feed', params),
+    () => api.get('/troc/swipe-feed', { params }),
+    CACHE_TTL.short,
+  ),
+  getById: (id: string | number) => cachedGet(
+    buildCacheKey('troc.getById', `/troc/${id}`),
+    () => api.get(`/troc/${id}`),
+    CACHE_TTL.short,
+  ),
+  getProposalsReceived: () => api.get('/troc/proposals/received'),
+  getProposalsSent: () => api.get('/troc/proposals/sent'),
+  getCycles: () => api.get('/troc/cycles'),
+  sendProposal: (id: string | number, data: object) => api.post(`/troc/${id}/proposals`, data),
+  swipe: (data: { listing_id: string | number; direction: 'left' | 'right' }) => api.post('/troc/swipes', data),
+  acceptProposal: (id: string | number) => api.patch(`/troc/proposals/${id}/accept`),
+  declineProposal: (id: string | number) => api.patch(`/troc/proposals/${id}/decline`),
+  counterProposal: (id: string | number, data: object) => api.patch(`/troc/proposals/${id}/counter`, data),
+  completeProposal: (id: string | number) => api.patch(`/troc/proposals/${id}/complete`),
+  confirmCycle: (id: string | number) => api.patch(`/troc/cycles/${id}/confirm`),
+  getUserBadges: (id: string | number) => api.get(`/users/${id}/troc-badges`),
 }
 
 // Upload
@@ -549,6 +579,29 @@ export const alertsApi = {
   delete: async (id: number | string) => {
     const res = await api.delete(`/alerts/${id}`)
     invalidateApiCache('alerts.')
+    return res
+  },
+}
+
+export const covoitAlertsApi = {
+  list: () => cachedGet(
+    buildCacheKey('covoitAlerts.list', '/covoiturage/alerts'),
+    () => api.get('/covoiturage/alerts'),
+    CACHE_TTL.short,
+  ),
+  create: async (data: object) => {
+    const res = await api.post('/covoiturage/alerts', data)
+    invalidateApiCache('covoitAlerts.')
+    return res
+  },
+  update: async (id: number | string, data: object) => {
+    const res = await api.patch(`/covoiturage/alerts/${id}`, data)
+    invalidateApiCache('covoitAlerts.')
+    return res
+  },
+  delete: async (id: number | string) => {
+    const res = await api.delete(`/covoiturage/alerts/${id}`)
+    invalidateApiCache('covoitAlerts.')
     return res
   },
 }

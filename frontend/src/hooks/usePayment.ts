@@ -5,10 +5,11 @@ import axios from 'axios'
 import { trackEvent } from '@/lib/analytics'
 import { API_ORIGIN } from '@/lib/api'
 import { isDemoMode, showDemoToast } from '@/lib/demoMode'
+import { getStoredAccessToken } from '@/lib/tokenStorage'
 
 function getToken(): string {
   if (typeof window === 'undefined') return ''
-  return localStorage.getItem('access_token') ?? ''
+  return getStoredAccessToken()
 }
 
 const authHeaders = () => ({

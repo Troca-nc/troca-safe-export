@@ -15,6 +15,7 @@ import axios from 'axios'
 import { useEffect } from 'react'
 import { Star, Receipt, CreditCard, Calendar, AlertCircle, ExternalLink } from 'lucide-react'
 import { API_ORIGIN } from '@/lib/api'
+import { getStoredAccessToken } from '@/lib/tokenStorage'
 const COOKIE_STORAGE_KEY = 'troca-cookie-consent'
 const COOKIE_BANNER_EVENT = 'troca-cookie-banner-open'
 
@@ -55,7 +56,7 @@ function AbonnementSection() {
 
   useEffect(() => {
     axios.get(`${API_ORIGIN}/api/payment/my-subscription`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
+      headers: { Authorization: `Bearer ${getStoredAccessToken()}` },
     })
       .then(({ data }) => setSub(data.data))
       .catch(() => {})
@@ -67,7 +68,7 @@ function AbonnementSection() {
     setError('')
     try {
       const { data } = await axios.post(`${API_ORIGIN}/api/payment/cancel`, {}, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
+        headers: { Authorization: `Bearer ${getStoredAccessToken()}` },
       })
       setCancelled(true)
       setSub((prev: any) => ({ ...prev, cancel_at_period_end: true, cancel_at: data.cancel_at }))
@@ -176,7 +177,7 @@ function FacturesSection() {
 
   useEffect(() => {
     axios.get(`${API_ORIGIN}/api/payment/billing-documents`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
+      headers: { Authorization: `Bearer ${getStoredAccessToken()}` },
     })
       .then(({ data }) => setInvoices(data.data ?? []))
       .catch(() => {})
@@ -312,7 +313,7 @@ function ExportSection() {
     try {
       const res = await axios.get(`${API_ORIGIN}/api/rgpd/exporter-donnees`, {
         responseType: 'blob',
-        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
+        headers: { Authorization: `Bearer ${getStoredAccessToken()}` },
       })
       const url  = URL.createObjectURL(res.data)
       const link = document.createElement('a')
@@ -390,7 +391,7 @@ function SuppressionSection() {
       await axios.post(
         `${API_ORIGIN}/api/rgpd/supprimer-compte`,
         { confirmation, password },
-        { headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` } }
+        { headers: { Authorization: `Bearer ${getStoredAccessToken()}` } }
       )
       // Déconnecter et rediriger
       await logout()

@@ -1,4 +1,5 @@
 import { io, Socket } from 'socket.io-client'
+import { getStoredAccessToken } from './tokenStorage'
 
 export type SocketConnectionState = 'connected' | 'reconnecting' | 'offline'
 
@@ -273,7 +274,7 @@ const API_ORIGIN = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL || 'http://l
 
 const accessTokenProvider = () => {
   if (typeof window === 'undefined') return null
-  return window.localStorage.getItem('access_token')
+  return getStoredAccessToken()
 }
 
 export const messagingSocket = new ReliableMessagingSocket(API_ORIGIN, accessTokenProvider)

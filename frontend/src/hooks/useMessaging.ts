@@ -12,11 +12,12 @@ import { useMutation } from '@tanstack/react-query'
 import { api, messagesApi } from '@/lib/api'
 import { getMessagingSocket, messagingSocket, type SocketConnectionState } from '@/lib/socket'
 import { isDemoMode, showDemoToast } from '@/lib/demoMode'
+import { getStoredAccessToken } from '@/lib/tokenStorage'
 import type { Conversation, Message, OfferStatus } from '@/types/messaging.types'
 
 function parseCurrentUserId() {
   if (typeof window === 'undefined') return null
-  const token = window.localStorage.getItem('access_token')
+  const token = getStoredAccessToken()
   if (!token) return null
 
   try {

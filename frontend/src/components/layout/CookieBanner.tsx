@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { Cookie, X, ChevronDown, ChevronUp } from 'lucide-react'
 import axios from 'axios'
 import { API_ORIGIN } from '@/lib/api'
+import { getStoredAccessToken } from '@/lib/tokenStorage'
 
 const STORAGE_KEY = 'troca-cookie-consent'
 const OPEN_EVENT = 'troca-cookie-banner-open'
@@ -128,7 +129,7 @@ export default function CookieBanner() {
     window.dispatchEvent(new CustomEvent('troca-cookie-consent-changed', { detail: state }))
 
     // Persister côté serveur si connecté
-    const token = localStorage.getItem('access_token')
+    const token = getStoredAccessToken()
     if (token) {
       await axios.post(`${API_ORIGIN}/api/rgpd/consentement`, choice, {
         headers: { Authorization: `Bearer ${token}` },
