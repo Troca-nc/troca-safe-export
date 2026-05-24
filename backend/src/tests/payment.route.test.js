@@ -25,13 +25,14 @@ function loadPaymentRouter() {
   return require('../routes/payment.route');
 }
 
-function invokeRouter(router, { method, url, body, headers }) {
+function invokeRouter(router, { method, url, body, headers, rawBody }) {
   return new Promise((resolve, reject) => {
     const req = {
       method,
       url,
       body: body || {},
       headers: headers || {},
+      rawBody: rawBody ?? Buffer.from(JSON.stringify(body || {})),
     };
 
     const res = {
@@ -86,6 +87,36 @@ async function run() {
 
     assert.strictEqual(result.code, 400);
     assert.strictEqual(result.body.error, 'Signature webhook Stripe manquante');
+  });
+
+  await it('retourne 503 si secret PayPlug absent', async () => {
+    delete process.env.PAYPLUG_WEBHOOK_SECRET;
+    const router = loadPaymentRouter();
+    const result = await invokeRouter(router, {
+      method: 'POST',
+      url: '/webhooks/payplug',
+      body: { id: 'pp_evt_test', object: 'payment' },
+      rawBody: Buffer.from(JSON.stringify({ id: 'pp_evt_test', object: 'payment' })),
+      headers: { 'x-payplug-signature': 'sha256=deadbeef' },
+    });
+
+    assert.strictEqual(result.code, 503);
+    assert.strictEqual(result.body.error, 'PAYPLUG_WEBHOOK_SECRET manquant');
+  });
+
+  await it('retourne 400 si signature PayPlug invalide', async () => {
+    process.env.PAYPLUG_WEBHOOK_SECRET = 'ppwhsec_test';
+    const router = loadPaymentRouter();
+    const result = await invokeRouter(router, {
+      method: 'POST',
+      url: '/webhooks/payplug',
+      body: { id: 'pp_evt_test', object: 'payment' },
+      rawBody: Buffer.from(JSON.stringify({ id: 'pp_evt_test', object: 'payment' })),
+      headers: { 'x-payplug-signature': 'sha256=deadbeef' },
+    });
+
+    assert.strictEqual(result.code, 400);
+    assert.strictEqual(result.body.error, 'Signature webhook PayPlug invalide');
   });
 }
 

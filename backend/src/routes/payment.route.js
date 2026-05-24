@@ -6,6 +6,7 @@
 // ============================================================
 
 const { Router } = require('express');
+const crypto = require('crypto');
 const Stripe = require('stripe');
 const { authenticate } = require('../middleware/auth');
 const { paymentLimiter } = require('../middleware/rateLimit');
@@ -36,6 +37,9 @@ const router = Router();
 
 const stripeWebhookSecret = isConfiguredValue(process.env.STRIPE_WEBHOOK_SECRET)
   ? process.env.STRIPE_WEBHOOK_SECRET.trim()
+  : '';
+const payplugWebhookSecret = isConfiguredValue(process.env.PAYPLUG_WEBHOOK_SECRET)
+  ? process.env.PAYPLUG_WEBHOOK_SECRET.trim()
   : '';
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 const demoModeEnabled = process.env.DEMO_MODE === 'true';
@@ -76,6 +80,24 @@ async function hasExistingSubscription(userId) {
     [userId]
   );
   return !!rows[0];
+}
+
+function getPayplugSignature(req) {
+  const raw = req.headers['x-payplug-signature'] ?? req.headers['payplug-signature'];
+  if (Array.isArray(raw)) return raw[0] || '';
+  return typeof raw === 'string' ? raw.trim() : '';
+}
+
+function verifyPayplugSignature(rawBody, signature) {
+  if (!payplugWebhookSecret || !rawBody || !signature) return false;
+  const expected = crypto.createHmac('sha256', payplugWebhookSecret).update(rawBody).digest('hex');
+  const provided = signature.replace(/^sha256=/i, '').trim().toLowerCase();
+  if (!expected || !provided || expected.length !== provided.length) return false;
+  try {
+    return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(provided, 'hex'));
+  } catch {
+    return false;
+  }
 }
 
 function safePaymentError(provider, fallback) {
@@ -200,10 +222,16 @@ router.post('/boost/mobile', authenticate, paymentLimiter, validate(boostSchema)
   if (!ensureStripe(res)) return;
 
   const { rows: annonceRows } = await query(
-    `SELECT id, titre FROM annonces WHERE id = $1 AND user_id = $2 AND status = 'active'`,
+    `SELECT a.id, a.titre, cat.slug AS category_slug
+     FROM annonces a
+     LEFT JOIN categories cat ON cat.id = a.category_id
+     WHERE a.id = $1 AND a.user_id = $2 AND a.status = 'active'`,
     [annonce_id, req.user.id]
   );
   if (!annonceRows[0]) return res.status(403).json({ error: 'Annonce introuvable ou non autorisée' });
+  if ((annonceRows[0].category_slug || '').toLowerCase() === 'dons' || (annonceRows[0].category_slug || '').toLowerCase() === 'don') {
+    return res.status(400).json({ error: 'Les dons ne peuvent pas être boostés.' });
+  }
 
   try {
     const customerId = await getOrCreateStripeCustomer(stripe, req.user.id, req.user.email);
@@ -281,10 +309,16 @@ router.post('/boost', authenticate, paymentLimiter, validate(boostSchema), async
     if (!boost) return res.status(400).json({ error: 'Boost introuvable' });
 
     const { rows: annonceRows } = await query(
-      `SELECT id, titre FROM annonces WHERE id = $1 AND user_id = $2 AND status = 'active'`,
+      `SELECT a.id, a.titre, cat.slug AS category_slug
+       FROM annonces a
+       LEFT JOIN categories cat ON cat.id = a.category_id
+       WHERE a.id = $1 AND a.user_id = $2 AND a.status = 'active'`,
       [annonce_id, req.user.id]
     );
     if (!annonceRows[0]) return res.status(403).json({ error: 'Annonce introuvable ou non autorisée' });
+    if ((annonceRows[0].category_slug || '').toLowerCase() === 'dons' || (annonceRows[0].category_slug || '').toLowerCase() === 'don') {
+      return res.status(400).json({ error: 'Les dons ne peuvent pas être boostés.' });
+    }
 
     try {
       const payment = await payplug.createPayment({
@@ -341,10 +375,16 @@ router.post('/boost', authenticate, paymentLimiter, validate(boostSchema), async
   if (!boost) return res.status(400).json({ error: 'Boost introuvable' });
 
   const { rows: annonceRows } = await query(
-    `SELECT id, titre FROM annonces WHERE id = $1 AND user_id = $2 AND status = 'active'`,
+    `SELECT a.id, a.titre, cat.slug AS category_slug
+     FROM annonces a
+     LEFT JOIN categories cat ON cat.id = a.category_id
+     WHERE a.id = $1 AND a.user_id = $2 AND a.status = 'active'`,
     [annonce_id, req.user.id]
   );
   if (!annonceRows[0]) return res.status(403).json({ error: 'Annonce introuvable ou non autorisée' });
+  if ((annonceRows[0].category_slug || '').toLowerCase() === 'dons' || (annonceRows[0].category_slug || '').toLowerCase() === 'don') {
+    return res.status(400).json({ error: 'Les dons ne peuvent pas être boostés.' });
+  }
 
   try {
     const customerId = await getOrCreateStripeCustomer(stripe, req.user.id, req.user.email);
@@ -1224,9 +1264,16 @@ router.get('/verify-payplug', authenticate, paymentLimiter, async (req, res) => 
 router.post('/webhooks/payplug', async (req, res) => {
   const resourceId = req.body?.id;
   const resourceType = req.body?.object ?? 'payment';
+  const signature = getPayplugSignature(req);
 
+  if (!payplugWebhookSecret) {
+    return res.status(503).json({ error: 'PAYPLUG_WEBHOOK_SECRET manquant' });
+  }
   if (!resourceId) {
     return res.status(400).json({ error: 'Payload IPN invalide' });
+  }
+  if (!verifyPayplugSignature(req.rawBody, signature)) {
+    return res.status(400).json({ error: 'Signature webhook PayPlug invalide' });
   }
 
   try {
