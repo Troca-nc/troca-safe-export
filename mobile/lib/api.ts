@@ -15,6 +15,8 @@ export { tokenStorage } from '@/lib/tokenStorage'
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001/api'
 
+export const API_ORIGIN = API_URL
+
 export const api = axios.create({
   baseURL: API_URL,
   timeout: 15000,
@@ -288,6 +290,41 @@ export const subscriptionsApi = {
   ),
 }
 
+export const trocApi = {
+  list: (params: object = {}) => cachedGet(
+    'troc.list',
+    '/troc',
+    () => api.get('/troc', { params }),
+    params,
+    CACHE_TTL.short,
+  ),
+  swipeFeed: (params: object = {}) => cachedGet(
+    'troc.swipeFeed',
+    '/troc/swipe-feed',
+    () => api.get('/troc/swipe-feed', { params }),
+    params,
+    CACHE_TTL.short,
+  ),
+  getById: (id: string | number) => cachedGet(
+    'troc.getById',
+    `/troc/${id}`,
+    () => api.get(`/troc/${id}`),
+    undefined,
+    CACHE_TTL.short,
+  ),
+  getProposalsReceived: () => api.get('/troc/proposals/received'),
+  getProposalsSent: () => api.get('/troc/proposals/sent'),
+  getCycles: () => api.get('/troc/cycles'),
+  sendProposal: (id: string | number, data: object) => api.post(`/troc/${id}/proposals`, data).finally(() => invalidateApiCache('troc.')),
+  swipe: (data: { listing_id: string | number; direction: 'left' | 'right' }) => api.post('/troc/swipes', data).finally(() => invalidateApiCache('troc.')),
+  acceptProposal: (id: string | number) => api.patch(`/troc/proposals/${id}/accept`).finally(() => invalidateApiCache('troc.')),
+  declineProposal: (id: string | number) => api.patch(`/troc/proposals/${id}/decline`).finally(() => invalidateApiCache('troc.')),
+  counterProposal: (id: string | number, data: object) => api.patch(`/troc/proposals/${id}/counter`, data).finally(() => invalidateApiCache('troc.')),
+  completeProposal: (id: string | number) => api.patch(`/troc/proposals/${id}/complete`).finally(() => invalidateApiCache('troc.')),
+  confirmCycle: (id: string | number) => api.patch(`/troc/cycles/${id}/confirm`).finally(() => invalidateApiCache('troc.')),
+  getUserBadges: (id: string | number) => api.get(`/users/${id}/troc-badges`),
+}
+
 export const favoritesApi = {
   getFavorites: () => cachedGet('favorites.get', '/users/me/favoris', () => api.get('/users/me/favoris'), undefined, CACHE_TTL.short),
   toggleFavorite: (id: string) => api.post(`/listings/${id}/favoris`).finally(() => invalidateApiCache('favorites.')),
@@ -298,6 +335,13 @@ export const alertsApi = {
   toggleAlert: (id: number, status: 'active' | 'paused') =>
     api.patch(`/alerts/${id}`, { status }).finally(() => invalidateApiCache('alerts.')),
   deleteAlert: (id: number) => api.delete(`/alerts/${id}`).finally(() => invalidateApiCache('alerts.')),
+}
+
+export const covoitAlertsApi = {
+  getAlerts: () => cachedGet('covoitAlerts.get', '/covoiturage/alerts', () => api.get('/covoiturage/alerts'), undefined, CACHE_TTL.short),
+  createAlert: (data: object) => api.post('/covoiturage/alerts', data).finally(() => invalidateApiCache('covoitAlerts.')),
+  toggleAlert: (id: number | string, data: object) => api.patch(`/covoiturage/alerts/${id}`, data).finally(() => invalidateApiCache('covoitAlerts.')),
+  deleteAlert: (id: number | string) => api.delete(`/covoiturage/alerts/${id}`).finally(() => invalidateApiCache('covoitAlerts.')),
 }
 
 export const usersApi = {
