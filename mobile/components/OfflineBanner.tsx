@@ -5,7 +5,7 @@ import { Colors, FontSize, FontWeight, Radius, Spacing } from '@/constants/theme
 
 export function OfflineBanner() {
   return (
-    <View style={styles.banner} accessibilityRole="status">
+    <View style={styles.banner} accessibilityRole="text">
       <Ionicons name="cloud-offline-outline" size={16} color={Colors.white} />
       <Text style={styles.text}>Vous êtes hors ligne</Text>
     </View>

@@ -117,7 +117,7 @@ export default function ConfidentialiteScreen() {
         />
 
         <ActionCard
-          icon="cookie-outline"
+          icon="shield-checkmark-outline"
           title="Cookies et consentement"
           description="Modifier vos préférences de cookies et relire l’information sur la mesure d’audience."
           actionLabel="Gérer les cookies"

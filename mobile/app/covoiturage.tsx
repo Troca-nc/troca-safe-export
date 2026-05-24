@@ -226,6 +226,10 @@ export default function CovoiturageScreen() {
             <View style={styles.empty}>
               <Text style={styles.emptyTitle}>Aucun trajet trouve</Text>
               <Text style={styles.emptyText}>Modifiez vos filtres ou publiez le premier trajet du jour.</Text>
+              <TouchableOpacity style={styles.emptyBtn} onPress={() => router.push('/profil/alertes-trajet')} activeOpacity={0.85}>
+                <Ionicons name="notifications-outline" size={16} color={Colors.white} />
+                <Text style={styles.emptyBtnText}>Créer une alerte</Text>
+              </TouchableOpacity>
             </View>
           }
           contentContainerStyle={{ paddingBottom: Spacing.xl }}
@@ -273,11 +277,13 @@ const styles = StyleSheet.create({
   cardBody: { marginTop: 8, fontSize: FontSize.sm, color: Colors.text, lineHeight: 20 },
   cardFooter: { marginTop: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   cardFooterText: { fontSize: FontSize.xs, color: Colors.textTertiary },
-  secondaryBtn: { backgroundColor: Colors.sand, borderRadius: Radius.lg, paddingHorizontal: Spacing.md, paddingVertical: 10 },
+  secondaryBtn: { backgroundColor: Colors.gray100, borderRadius: Radius.lg, paddingHorizontal: Spacing.md, paddingVertical: 10 },
   secondaryBtnText: { color: Colors.text, fontWeight: FontWeight.semibold },
   empty: { alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.xl },
   emptyTitle: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Colors.text },
   emptyText: { marginTop: 4, fontSize: FontSize.sm, color: Colors.textSecondary, textAlign: 'center' },
+  emptyBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: Spacing.md, paddingHorizontal: Spacing.md, paddingVertical: 12, borderRadius: Radius.lg, backgroundColor: Colors.primary, minHeight: 44 },
+  emptyBtnText: { color: Colors.white, fontWeight: FontWeight.semibold },
   fab: { position: 'absolute', right: 16, bottom: 20, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: Colors.primary, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 12, ...Shadow.md },
   fabText: { color: Colors.white, fontWeight: FontWeight.semibold },
 });

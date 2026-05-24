@@ -192,8 +192,8 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 28,
     lineHeight: 34,
-    fontWeight: FontWeight.extrabold,
-    color: Colors.textPrimary,
+    fontWeight: FontWeight.bold,
+    color: Colors.text,
   },
   subtitle: {
     marginTop: 8,
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     minHeight: 44,
-    color: Colors.textPrimary,
+    color: Colors.text,
     fontSize: FontSize.md,
   },
   chipsRow: {
