@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS users (
   phone_verified      BOOLEAN       NOT NULL DEFAULT FALSE,
   email_verified      BOOLEAN       NOT NULL DEFAULT FALSE,
   avatar_url          VARCHAR(500)  DEFAULT NULL,
-  commune_id          INTEGER       DEFAULT NULL,
+  commune_id          INTEGER       DEFAULT NULL REFERENCES communes(id) ON DELETE SET NULL,
   bio                 TEXT          DEFAULT NULL,
   is_admin            BOOLEAN       NOT NULL DEFAULT FALSE,
   is_pro              BOOLEAN       NOT NULL DEFAULT FALSE,
@@ -168,7 +168,7 @@ CREATE INDEX IF NOT EXISTS idx_annonces_prix       ON annonces (prix);
 CREATE INDEX IF NOT EXISTS idx_annonces_boost      ON annonces (is_boosted, boost_expires_at) WHERE is_boosted = TRUE;
 -- Recherche full-text
 CREATE INDEX IF NOT EXISTS idx_annonces_fts ON annonces
-  USING gin(to_tsvector('french', unaccent(titre) || ' ' || unaccent(description)));
+  USING gin(to_tsvector('french', lower(coalesce(titre, '')) || ' ' || lower(coalesce(description, ''))));
 
 DROP TRIGGER IF EXISTS trg_annonces_updated_at ON annonces;
 CREATE TRIGGER trg_annonces_updated_at
