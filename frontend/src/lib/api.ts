@@ -248,8 +248,7 @@ export const authApi = {
       ...data,
       ...(turnstileToken ? { turnstile_token: turnstileToken } : {}),
     }),
-  logout: (refreshToken?: string) =>
-    refreshToken ? api.post('/auth/logout', { refresh_token: refreshToken }) : api.post('/auth/logout'),
+  logout: () => api.post('/auth/logout'),
   me: () => api.get('/auth/me'),
   verifyEmail: (token: string) => api.post('/auth/verify-email', { token }),
   forgotPassword: (email: string, turnstileToken?: string) =>

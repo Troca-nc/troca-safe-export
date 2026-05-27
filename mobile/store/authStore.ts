@@ -104,8 +104,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // ── Déconnexion ───────────────────────────────────────────
   logout: async () => {
     try {
-      const refresh = await tokenStorage.getRefresh();
-      if (refresh) await api.post('/auth/logout', { refresh_token: refresh }).catch(() => {});
+      await api.post('/auth/logout').catch(() => {});
     } finally {
       await tokenStorage.clear();
       clearApiCache?.();
