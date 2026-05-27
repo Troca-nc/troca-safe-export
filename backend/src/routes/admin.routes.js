@@ -5,11 +5,293 @@
 // ============================================================
 
 const express = require('express')
-const { query, withTransaction } = require('../config/database')
-const { authenticate, requireAdmin } = require('../middleware/auth')
+const { query, withTransaction, checkConnection, pool } = require('../config/database')
+const { getRedisClient } = require('../config/redis')
+const { requireAdminToken, adminRateLimit } = require('../middleware/adminApiToken')
+const { getSnapshot } = require('../services/observability')
 
 const router = express.Router()
-router.use(authenticate, requireAdmin)
+router.use(adminRateLimit, requireAdminToken)
+
+function toInt(value, fallback = 0) {
+  const parsed = Number.parseInt(String(value ?? '').trim(), 10)
+  return Number.isFinite(parsed) ? parsed : fallback
+}
+
+function normalizePeriod(period = '30d') {
+  const value = String(period || '30d').trim().toLowerCase()
+  if (value.endsWith('d')) {
+    const days = toInt(value, 30)
+    return Math.min(365, Math.max(1, days))
+  }
+  if (value.endsWith('m')) {
+    return Math.min(365, Math.max(30, toInt(value, 30) * 30))
+  }
+  return 30
+}
+
+function startDateFromDays(days) {
+  const date = new Date()
+  date.setHours(0, 0, 0, 0)
+  date.setDate(date.getDate() - (days - 1))
+  return date
+}
+
+function dateIso(date) {
+  return date.toISOString().slice(0, 10)
+}
+
+async function readRedisListJson(key, limit = 50) {
+  const redis = await getRedisClient()
+  if (!redis) return []
+  const rows = await redis.lRange(key, 0, Math.max(0, limit - 1)).catch(() => [])
+  return rows.map((row) => {
+    try {
+      return JSON.parse(row)
+    } catch {
+      return null
+    }
+  }).filter(Boolean)
+}
+
+function getAdminActorId(req) {
+  return Number(req?.user?.id || 0)
+}
+
+async function logAdminAction(req, action, targetType, targetId, metadata = {}) {
+  const adminId = Number(req?.user?.id || 0)
+  if (!adminId) return
+  await query(
+    `INSERT INTO admin_logs (admin_id, action, target_type, target_id, metadata)
+     VALUES ($1, $2, $3, $4, $5)`,
+    [adminId, action, targetType, String(targetId), JSON.stringify(metadata)]
+  ).catch(() => {})
+}
+
+function assertSafeSqlIdentifier(value, label) {
+  if (typeof value !== 'string' || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(value)) {
+    throw new Error(`Identifiant SQL invalide pour ${label}`)
+  }
+  return value
+}
+
+function assertSafeSqlCondition(value) {
+  if (typeof value !== 'string') {
+    throw new Error('Condition SQL invalide')
+  }
+  const trimmed = value.trim() || 'TRUE'
+  if (/[;`]|--|\/\*/.test(trimmed)) {
+    throw new Error('Condition SQL invalide')
+  }
+  return trimmed
+}
+
+async function countDaysSeries(tableName, dateColumn, startDate, endDate, extraWhere = 'TRUE') {
+  const safeTableName = assertSafeSqlIdentifier(tableName, 'tableName')
+  const safeDateColumn = assertSafeSqlIdentifier(dateColumn, 'dateColumn')
+  const safeExtraWhere = assertSafeSqlCondition(extraWhere)
+
+  return query(
+    `
+      WITH days AS (
+        SELECT generate_series($1::date, $2::date, interval '1 day')::date AS day
+      )
+      SELECT
+        days.day::text AS date,
+        COUNT(t.*)::int AS count
+      FROM days
+      LEFT JOIN ${safeTableName} t
+        ON DATE(t.${safeDateColumn}) = days.day AND ${safeExtraWhere}
+      GROUP BY days.day
+      ORDER BY days.day ASC
+    `,
+    [dateIso(startDate), dateIso(endDate)]
+  )
+}
+
+async function getLatestSubscriptionSnapshot(userId) {
+  const result = await query(
+    `SELECT id, user_id, plan_id, billing_period, provider, payment_provider, status, payment_status,
+            current_period_end, current_period_start, cancel_at_period_end, created_at, updated_at
+     FROM subscriptions
+     WHERE user_id = $1
+     ORDER BY created_at DESC
+     LIMIT 20`,
+    [userId]
+  ).catch(() => ({ rows: [] }))
+  return result.rows
+}
+
+async function getCurrentProSubscribers() {
+  const result = await query(
+    `SELECT u.id, u.prenom, u.nom, u.email, u.created_at AS since,
+            COALESCE(SUM(p.amount_xpf), 0)::int AS revenue_generated,
+            COUNT(*) FILTER (WHERE p.type = 'subscription')::int AS subscription_count
+     FROM users u
+     LEFT JOIN payments p ON p.user_id = u.id AND p.status = 'succeeded'
+     WHERE u.is_pro = TRUE
+     GROUP BY u.id, u.prenom, u.nom, u.email, u.created_at
+     ORDER BY revenue_generated DESC, u.created_at DESC
+     LIMIT 10`
+  ).catch(() => ({ rows: [] }))
+
+  return result.rows.map((row) => ({
+    id: row.id,
+    name: `${row.prenom || ''} ${row.nom || ''}`.trim() || row.email,
+    email: row.email,
+    since: row.since,
+    revenue_generated: Number(row.revenue_generated || 0),
+    plan: 'pro',
+  }))
+}
+
+async function getErrorLogsFromRedis(limit = 50) {
+  const logs = await readRedisListJson('error_logs', limit)
+  return logs
+    .slice(0, limit)
+    .map((entry) => ({
+      id: entry.id || entry.request_id || `${entry.timestamp || Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      ts: entry.timestamp || entry.ts || new Date().toISOString(),
+      level: entry.level || 'error',
+      message: entry.message || 'Erreur',
+      route: entry.route || `${entry.method || 'GET'} ${entry.path || '/'}`,
+      method: entry.method || 'GET',
+      path: entry.path || '/',
+      user_id: entry.user_id ?? null,
+      user_email: entry.user_email ?? null,
+      stack: entry.stack || null,
+      request_id: entry.request_id ?? null,
+      body: entry.body || null,
+    }))
+}
+
+router.get('/observability', async (req, res, next) => {
+  try {
+    const snapshot = await getSnapshot()
+    return res.json({ data: snapshot })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.get('/health/full', async (_req, res, next) => {
+  try {
+    const startedAt = Date.now()
+    const snapshot = await getSnapshot()
+    const redis = await getRedisClient()
+
+    let redisStatus = {
+      status: 'degraded',
+      memory_mb: null,
+      keys_count: null,
+      queue_length: null,
+    }
+
+    if (redis) {
+      const [dbSize, memoryInfo] = await Promise.all([
+        redis.dbSize().catch(() => 0),
+        redis.info('memory').catch(() => ''),
+      ])
+      const usedMemory = Number(memoryInfo.match(/used_memory:(\d+)/)?.[1] || 0)
+      redisStatus = {
+        status: 'ok',
+        memory_mb: Math.round(usedMemory / 1024 / 1024),
+        keys_count: Number(dbSize || 0),
+        queue_length: Number(await redis.llen('error_logs').catch(() => 0)),
+      }
+    }
+
+    const errors1h = snapshot.errors.filter((entry) => {
+      const ts = new Date(entry.ts || entry.timestamp || Date.now()).getTime()
+      return Date.now() - ts <= 60 * 60 * 1000
+    }).length
+
+    const errors24h = snapshot.errors.filter((entry) => {
+      const ts = new Date(entry.ts || entry.timestamp || Date.now()).getTime()
+      return Date.now() - ts <= 24 * 60 * 60 * 1000
+    }).length
+
+    const workerLastRun = snapshot.cluster?.nodes?.[0]?.last_job_at || snapshot.cluster?.nodes?.[0]?.updated_at || null
+
+    return res.json({
+      data: {
+        backend: {
+          status: 'ok',
+          uptime: process.uptime(),
+          memory_mb: Math.round(process.memoryUsage().rss / 1024 / 1024),
+          response_time_ms: Date.now() - startedAt,
+        },
+        db: {
+          status: 'ok',
+          active_connections: pool.totalCount - pool.idleCount,
+          pool_size: pool.options?.max ?? null,
+          slow_queries_count: 0,
+        },
+        redis: redisStatus,
+        worker: {
+          status: snapshot.jobs.errors > 0 ? 'degraded' : 'ok',
+          last_run_at: workerLastRun,
+          failed_jobs_24h: snapshot.jobs.errors || 0,
+        },
+        errors_1h: errors1h,
+        errors_24h: errors24h,
+      },
+    })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.get('/health/errors', async (req, res, next) => {
+  try {
+    const hours = Math.min(168, Math.max(1, toInt(req.query.hours, 24)))
+    const limit = Math.min(200, Math.max(1, toInt(req.query.limit, 50)))
+    const logs = await getErrorLogsFromRedis(limit)
+    const since = Date.now() - hours * 60 * 60 * 1000
+    return res.json({
+      data: logs.filter((entry) => new Date(entry.ts).getTime() >= since).slice(0, limit),
+    })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.get('/health/slow-queries', async (req, res, next) => {
+  try {
+    const limit = Math.min(100, Math.max(1, toInt(req.query.limit, 20)))
+    const result = await query(
+      `SELECT
+         query,
+         calls::int,
+         total_exec_time::numeric(12,2) AS total_exec_time_ms,
+         mean_exec_time::numeric(12,2) AS mean_exec_time_ms,
+         rows::int
+       FROM pg_stat_statements
+       ORDER BY mean_exec_time DESC
+       LIMIT $1`,
+      [limit]
+    ).catch(() => ({ rows: [] }))
+
+    return res.json({ data: result.rows })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.get('/alerts/active', async (_req, res, next) => {
+  try {
+    const redis = await getRedisClient()
+    if (!redis) {
+      return res.json({ data: [] })
+    }
+
+    const payload = await redis.get('admin:alerts').catch(() => '[]')
+    const data = JSON.parse(payload || '[]')
+    return res.json({ data })
+  } catch (err) {
+    next(err)
+  }
+})
 
 // ── GET /admin/stats ─────────────────────────────────────
 
@@ -81,6 +363,626 @@ router.get('/stats', async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
+router.get('/stats/users', async (req, res, next) => {
+  try {
+    const days = normalizePeriod(req.query.period)
+    const startDate = startDateFromDays(days)
+    const endDate = new Date()
+    const [summary, chartNew, chartActive] = await Promise.all([
+      query(
+        `SELECT
+           COUNT(*)::int AS total,
+           COUNT(*) FILTER (WHERE DATE(created_at) = CURRENT_DATE)::int AS new_today,
+           COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days')::int AS new_this_week,
+           COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '30 days')::int AS new_this_month,
+           COUNT(*) FILTER (WHERE phone_verified = TRUE)::int AS phone_verified_total,
+           COUNT(*) FILTER (WHERE nb_annonces > 0)::int AS activation_total,
+           COUNT(*) FILTER (WHERE is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()))::int AS pro_subscribers
+         FROM users
+         WHERE deleted_at IS NULL`
+      ),
+      query(
+        `WITH days AS (
+           SELECT generate_series($1::date, $2::date, interval '1 day')::date AS day
+         )
+         SELECT days.day::text AS date,
+                COUNT(u.id)::int AS count
+         FROM days
+         LEFT JOIN users u ON DATE(u.created_at) = days.day AND u.deleted_at IS NULL
+         GROUP BY days.day
+         ORDER BY days.day ASC`,
+        [dateIso(startDate), dateIso(endDate)]
+      ),
+      query(
+        `WITH days AS (
+           SELECT generate_series($1::date, $2::date, interval '1 day')::date AS day
+         ), active_users AS (
+           SELECT DISTINCT DATE(created_at) AS day, user_id
+           FROM analytics_events
+           WHERE user_id IS NOT NULL
+             AND created_at >= $1::date
+         )
+         SELECT days.day::text AS date,
+                COUNT(active_users.user_id)::int AS count
+         FROM days
+         LEFT JOIN active_users ON active_users.day = days.day
+         GROUP BY days.day
+         ORDER BY days.day ASC`,
+        [dateIso(startDate), dateIso(endDate)]
+      ),
+    ])
+
+    const total = Number(summary.rows[0]?.total ?? 0)
+    const phoneVerifiedRate = total ? Number(summary.rows[0]?.phone_verified_total ?? 0) / total : 0
+    const activationRate = total ? Number(summary.rows[0]?.activation_total ?? 0) / total : 0
+    const proSubscribers = Number(summary.rows[0]?.pro_subscribers ?? 0)
+
+    return res.json({
+      data: {
+        total,
+        new_today: Number(summary.rows[0]?.new_today ?? 0),
+        new_this_week: Number(summary.rows[0]?.new_this_week ?? 0),
+        new_this_month: Number(summary.rows[0]?.new_this_month ?? 0),
+        active_dau: Number(chartActive.rows[chartActive.rows.length - 1]?.count ?? 0),
+        active_wau: Number(summary.rows[0]?.new_this_week ?? 0),
+        active_mau: Number(summary.rows[0]?.new_this_month ?? 0),
+        phone_verified_rate: phoneVerifiedRate,
+        activation_rate: activationRate,
+        pro_subscribers: proSubscribers,
+        pro_churned_this_month: 0,
+        chart_new_users: chartNew.rows,
+        chart_active_users: chartActive.rows,
+      },
+    })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.get('/stats/listings', async (req, res, next) => {
+  try {
+    const days = normalizePeriod(req.query.period)
+    const startDate = startDateFromDays(days)
+    const endDate = new Date()
+    const [summary, byCategory, chartPublished] = await Promise.all([
+      query(
+        `SELECT
+           COUNT(*) FILTER (WHERE a.status = 'active' AND a.deleted_at IS NULL)::int AS total_active,
+           COUNT(*) FILTER (WHERE DATE(a.created_at) = CURRENT_DATE)::int AS published_today,
+           COUNT(*) FILTER (WHERE a.created_at >= NOW() - INTERVAL '7 days')::int AS published_this_week,
+           COUNT(*) FILTER (WHERE EXISTS (SELECT 1 FROM annonce_images ai WHERE ai.annonce_id = a.id))::int AS with_photos_count,
+           COUNT(*)::int AS total_listings,
+           COALESCE(ROUND(AVG((SELECT COUNT(*) FROM annonce_images ai WHERE ai.annonce_id = a.id))::numeric, 2), 0) AS avg_photos_per_listing
+         FROM annonces a
+         WHERE a.deleted_at IS NULL`
+      ),
+      query(
+        `SELECT
+           COALESCE(cat.name, 'Sans catégorie') AS category,
+           COUNT(*)::int AS count,
+           COALESCE(ROUND(100.0 * COUNT(*) / NULLIF(SUM(COUNT(*)) OVER (), 0), 2), 0) AS pct
+         FROM annonces a
+         LEFT JOIN categories cat ON cat.id = a.category_id
+         WHERE a.deleted_at IS NULL
+         GROUP BY COALESCE(cat.name, 'Sans catégorie')
+         ORDER BY count DESC`
+      ),
+      query(
+        `WITH days AS (
+           SELECT generate_series($1::date, $2::date, interval '1 day')::date AS day
+         )
+         SELECT days.day::text AS date,
+                COALESCE(cat.slug, 'unknown') AS category,
+                COUNT(a.id)::int AS count
+         FROM days
+         LEFT JOIN annonces a ON DATE(a.created_at) = days.day AND a.deleted_at IS NULL
+         LEFT JOIN categories cat ON cat.id = a.category_id
+         GROUP BY days.day, cat.slug
+         ORDER BY days.day ASC, count DESC`,
+        [dateIso(startDate), dateIso(endDate)]
+      ),
+    ])
+
+    const rows = summary.rows[0] || {}
+    const totalList = Number(rows.total_listings || 0) || 1
+
+    const categoryLookup = Object.fromEntries(byCategory.rows.map((item) => [item.category, item]))
+    const categoryCounts = [
+      'Troc',
+      'Covoiturage',
+      'Services',
+      'Locations courte durée',
+      'Immobilier',
+      'Dons',
+    ].map((name) => ({
+      category: name,
+      count: Number(categoryLookup[name]?.count || 0),
+      pct: Number(categoryLookup[name]?.pct || 0),
+    }))
+
+    return res.json({
+      data: {
+        total_active: Number(rows.total_active || 0),
+        published_today: Number(rows.published_today || 0),
+        published_this_week: Number(rows.published_this_week || 0),
+        by_category: categoryCounts.length ? categoryCounts : byCategory.rows,
+        with_photos_rate: totalList ? Number(rows.with_photos_count || 0) / totalList : 0,
+        avg_photos_per_listing: Number(rows.avg_photos_per_listing || 0),
+        troc_active: categoryLookup['Troc'] ? Number(categoryLookup['Troc'].count || 0) : 0,
+        covoit_active: categoryLookup['Covoiturage'] ? Number(categoryLookup['Covoiturage'].count || 0) : 0,
+        services_active: categoryLookup['Services'] ? Number(categoryLookup['Services'].count || 0) : 0,
+        locations_active: categoryLookup['Locations courte durée'] ? Number(categoryLookup['Locations courte durée'].count || 0) : 0,
+        immobilier_active: categoryLookup['Immobilier'] ? Number(categoryLookup['Immobilier'].count || 0) : 0,
+        dons_active: categoryLookup['Dons'] ? Number(categoryLookup['Dons'].count || 0) : 0,
+        chart_published: chartPublished.rows,
+      },
+    })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.get('/stats/revenue', async (req, res, next) => {
+  try {
+    const days = normalizePeriod(req.query.period)
+    const startDate = startDateFromDays(days)
+    const endDate = new Date()
+    const [currentSubs, previousSubs, chartRevenue, topProUsers] = await Promise.all([
+      query(
+        `SELECT
+           COALESCE(SUM(CASE WHEN billing_period = 'monthly' THEN 4900 ELSE 44900 / 12 END), 0)::int AS mrr_xpf,
+           COUNT(*) FILTER (WHERE status = 'active' AND payment_status = 'succeeded')::int AS pro_subscribers_active,
+           COUNT(*) FILTER (WHERE DATE(created_at) >= CURRENT_DATE - INTERVAL '30 days')::int AS pro_subscribers_new,
+           COUNT(*) FILTER (WHERE payment_status = 'failed' AND updated_at >= NOW() - INTERVAL '30 days')::int AS pro_subscribers_churned
+         FROM subscriptions
+         WHERE payment_status = 'succeeded'
+           AND (current_period_end IS NULL OR current_period_end > NOW())`
+      ),
+      query(
+        `SELECT
+           COALESCE(SUM(CASE WHEN billing_period = 'monthly' THEN 4900 ELSE 44900 / 12 END), 0)::int AS mrr_xpf
+         FROM subscriptions
+         WHERE payment_status = 'succeeded'
+           AND (current_period_end IS NULL OR current_period_end > NOW() - INTERVAL '30 days')`
+      ),
+      query(
+        `WITH days AS (
+           SELECT generate_series($1::date, $2::date, interval '1 day')::date AS day
+         )
+         SELECT
+           days.day::text AS date,
+           COALESCE(SUM(CASE WHEN p.type = 'subscription' THEN p.amount_xpf ELSE 0 END), 0)::int AS subscriptions,
+           COALESCE(SUM(CASE WHEN p.type = 'boost' THEN p.amount_xpf ELSE 0 END), 0)::int AS boosts,
+           COALESCE(SUM(CASE WHEN p.type = 'bon_plan' THEN p.amount_xpf ELSE 0 END), 0)::int AS bon_plans,
+           COALESCE(SUM(CASE WHEN p.type = 'driver_badge' THEN p.amount_xpf ELSE 0 END), 0)::int AS badges
+         FROM days
+         LEFT JOIN payments p ON DATE(p.created_at) = days.day AND p.status = 'succeeded'
+         GROUP BY days.day
+         ORDER BY days.day ASC`,
+        [dateIso(startDate), dateIso(endDate)]
+      ),
+      getCurrentProSubscribers(),
+    ])
+
+    const current = currentSubs.rows[0] || {}
+    const previous = previousSubs.rows[0] || {}
+    const mrr = Number(current.mrr_xpf || 0)
+    const previousMrr = Number(previous.mrr_xpf || 0)
+
+    return res.json({
+      data: {
+        mrr_xpf: mrr,
+        mrr_trend: previousMrr ? ((mrr - previousMrr) / previousMrr) * 100 : 0,
+        arr_xpf: mrr * 12,
+        revenue_this_month: {
+          subscriptions_xpf: Number(current.mrr_xpf || 0),
+          boosts_xpf: 0,
+          bon_plans_xpf: 0,
+          driver_badges_xpf: 0,
+          total_xpf: Number(current.mrr_xpf || 0),
+        },
+        revenue_last_month: {
+          subscriptions_xpf: Number(previous.mrr_xpf || 0),
+          boosts_xpf: 0,
+          bon_plans_xpf: 0,
+          driver_badges_xpf: 0,
+          total_xpf: Number(previous.mrr_xpf || 0),
+        },
+        pro_subscribers_active: Number(current.pro_subscribers_active || 0),
+        pro_subscribers_new: Number(current.pro_subscribers_new || 0),
+        pro_subscribers_churned: Number(current.pro_subscribers_churned || 0),
+        churn_rate: Number(current.pro_subscribers_active || 0)
+          ? Number(current.pro_subscribers_churned || 0) / Number(current.pro_subscribers_active || 0)
+          : 0,
+        ltv_estimate_xpf: Number(current.pro_subscribers_active || 0)
+          ? Math.round(Number(current.mrr_xpf || 0) / Math.max(0.01, Number(current.pro_subscribers_churned || 0) / Number(current.pro_subscribers_active || 0)))
+          : 0,
+        chart_revenue: chartRevenue.rows,
+        top_pro_users: topProUsers,
+      },
+    })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.get('/stats/engagement', async (req, res, next) => {
+  try {
+    const days = normalizePeriod(req.query.period)
+    const startDate = startDateFromDays(days)
+    const endDate = new Date()
+    const [messages, troc, covoit, bonPlans, chartMessages, chartTroc] = await Promise.all([
+      query(
+        `SELECT
+           COUNT(*) FILTER (WHERE DATE(created_at) = CURRENT_DATE)::int AS messages_today,
+           COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days')::int AS messages_this_week,
+           COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '30 days')::int AS messages_this_month
+         FROM messages`
+      ),
+      query(
+        `SELECT
+           COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '30 days')::int AS troc_proposals_created,
+           COUNT(*) FILTER (WHERE status = 'accepted' AND updated_at >= NOW() - INTERVAL '30 days')::int AS troc_proposals_accepted
+         FROM troc_proposals`
+      ).catch(() => ({ rows: [{ troc_proposals_created: 0, troc_proposals_accepted: 0 }] })),
+      query(
+        `SELECT
+           COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '30 days')::int AS covoit_alerts_created,
+           COUNT(*) FILTER (WHERE last_notified_at >= NOW() - INTERVAL '30 days')::int AS covoit_alerts_triggered
+         FROM covoit_alerts`
+      ).catch(() => ({ rows: [{ covoit_alerts_created: 0, covoit_alerts_triggered: 0 }] })),
+      query(
+        `SELECT
+           COALESCE(SUM(COALESCE(click_count, 0)), 0)::int AS bon_plans_clicks_total,
+           CASE WHEN COALESCE(SUM(COALESCE(view_count, 0)), 0) = 0
+             THEN 0
+             ELSE ROUND(100.0 * SUM(COALESCE(click_count, 0)) / SUM(COALESCE(view_count, 0)), 2)
+           END AS bon_plans_avg_ctr
+         FROM bon_plans`
+      ).catch(() => ({ rows: [{ bon_plans_clicks_total: 0, bon_plans_avg_ctr: 0 }] })),
+      query(
+        `WITH days AS (
+           SELECT generate_series($1::date, $2::date, interval '1 day')::date AS day
+         )
+         SELECT days.day::text AS date, COUNT(m.id)::int AS count
+         FROM days
+         LEFT JOIN messages m ON DATE(m.created_at) = days.day
+         GROUP BY days.day
+         ORDER BY days.day ASC`,
+        [dateIso(startDate), dateIso(endDate)]
+      ),
+      query(
+        `WITH days AS (
+           SELECT generate_series($1::date, $2::date, interval '1 day')::date AS day
+         )
+         SELECT
+           days.day::text AS date,
+           COUNT(p.id)::int AS created,
+           COUNT(*) FILTER (WHERE p.status = 'accepted')::int AS accepted
+         FROM days
+         LEFT JOIN troc_proposals p ON DATE(p.created_at) = days.day
+         GROUP BY days.day
+         ORDER BY days.day ASC`
+        ,
+        [dateIso(startDate), dateIso(endDate)]
+      ).catch(() => ({ rows: [] })),
+    ])
+
+    return res.json({
+      data: {
+        messages_today: Number(messages.rows[0]?.messages_today ?? 0),
+        messages_this_week: Number(messages.rows[0]?.messages_this_week ?? 0),
+        messages_this_month: Number(messages.rows[0]?.messages_this_month ?? 0),
+        troc_proposals_created: Number(troc.rows[0]?.troc_proposals_created ?? 0),
+        troc_proposals_accepted: Number(troc.rows[0]?.troc_proposals_accepted ?? 0),
+        troc_acceptance_rate: Number(troc.rows[0]?.troc_proposals_created ?? 0)
+          ? Number(troc.rows[0]?.troc_proposals_accepted ?? 0) / Number(troc.rows[0]?.troc_proposals_created ?? 0)
+          : 0,
+        covoit_alerts_created: Number(covoit.rows[0]?.covoit_alerts_created ?? 0),
+        covoit_alerts_triggered: Number(covoit.rows[0]?.covoit_alerts_triggered ?? 0),
+        bon_plans_clicks_total: Number(bonPlans.rows[0]?.bon_plans_clicks_total ?? 0),
+        bon_plans_avg_ctr: Number(bonPlans.rows[0]?.bon_plans_avg_ctr ?? 0),
+        chart_messages: chartMessages.rows,
+        chart_troc: chartTroc.rows,
+      },
+    })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.get('/moderation/queue', async (_req, res, next) => {
+  try {
+    const [reports, businesses] = await Promise.all([
+      query(
+        `SELECT
+           s.id,
+           'listing' AS type,
+           s.annonce_id AS listing_id,
+           u_reporter.prenom || ' ' || u_reporter.nom AS reporter,
+           COALESCE(s.reason, s.raison) AS reason,
+           s.created_at,
+           json_build_object(
+             'id', a.id,
+             'title', a.titre,
+             'status', a.status,
+             'user_email', u_annonce.email,
+             'category', cat.name
+           ) AS listing_preview
+         FROM signalements s
+         JOIN users u_reporter ON u_reporter.id = COALESCE(s.reporter_id, s.user_id)
+         LEFT JOIN annonces a ON a.id = s.annonce_id
+         LEFT JOIN users u_annonce ON u_annonce.id = a.user_id
+         LEFT JOIN categories cat ON cat.id = a.category_id
+         WHERE s.resolved_at IS NULL
+         ORDER BY s.created_at DESC
+         LIMIT 200`
+      ).catch(() => ({ rows: [] })),
+      query(
+        `SELECT id, name AS business_name, badge, bon_plan_count
+         FROM businesses
+         WHERE badge = 'active'
+         ORDER BY bon_plan_count DESC, created_at DESC
+         LIMIT 100`
+      ).catch(() => ({ rows: [] })),
+    ])
+
+    return res.json({
+      data: {
+        reports: reports.rows,
+        pending_driver_verifications: [],
+        pending_business_verifications: businesses.rows,
+        total_pending: Number(reports.rows.length + businesses.rows.length),
+      },
+    })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.patch('/moderation/reports/:id/resolve', async (req, res, next) => {
+  try {
+    const { action } = req.body || {}
+    const resolveAction = action || 'dismiss'
+    const result = await query(
+      `UPDATE signalements
+       SET resolved_at = NOW(),
+           action_taken = $2,
+           resolved_by = $3
+       WHERE id = $1
+       RETURNING id`,
+      [req.params.id, resolveAction, req.user?.id ?? null]
+    )
+    if (!result.rows[0]) {
+      return res.status(404).json({ error: 'Signalement introuvable.' })
+    }
+
+    await logAdminAction(req, `moderation_${resolveAction}`, 'signalement', req.params.id, { action: resolveAction })
+    return res.json({ data: { action: resolveAction } })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.get('/users/:id/full', async (req, res, next) => {
+  try {
+    const userId = Number(req.params.id)
+    const [userRes, listingsRes, paymentsRes, reportsMadeRes, reportsReceivedRes, subscriptionsRes] = await Promise.all([
+      query(
+        `SELECT
+           u.*,
+           COALESCE(com.name, '') AS commune_name,
+           COALESCE(prov.name, '') AS province_name
+         FROM users u
+         LEFT JOIN communes com ON com.id = u.commune_id
+         LEFT JOIN provinces prov ON prov.id = com.province_id
+         WHERE u.id = $1`,
+        [userId]
+      ),
+      query(
+        `SELECT a.id, a.titre, a.status, a.prix, a.created_at, a.nb_vues AS view_count,
+                cat.name AS category_name, com.name AS commune_name
+         FROM annonces a
+         LEFT JOIN categories cat ON cat.id = a.category_id
+         LEFT JOIN communes com ON com.id = a.commune_id
+         WHERE a.user_id = $1
+         ORDER BY a.created_at DESC
+         LIMIT 100`,
+        [userId]
+      ).catch(() => ({ rows: [] })),
+      query(
+        `SELECT id, type, provider, amount_xpf, status, provider_ref, created_at, metadata
+         FROM payments
+         WHERE user_id = $1
+         ORDER BY created_at DESC
+         LIMIT 100`,
+        [userId]
+      ).catch(() => ({ rows: [] })),
+      query(
+        `SELECT id, annonce_id, reason, comment, status, created_at, resolved_at
+         FROM signalements
+         WHERE reporter_id = $1 OR user_id = $1
+         ORDER BY created_at DESC
+         LIMIT 100`,
+        [userId]
+      ).catch(() => ({ rows: [] })),
+      query(
+        `SELECT id, annonce_id, reason, comment, status, created_at, resolved_at
+         FROM signalements
+         WHERE annonce_id IN (SELECT id FROM annonces WHERE user_id = $1)
+         ORDER BY created_at DESC
+         LIMIT 100`,
+        [userId]
+      ).catch(() => ({ rows: [] })),
+      getLatestSubscriptionSnapshot(userId),
+    ])
+
+    if (!userRes.rows[0]) {
+      return res.status(404).json({ error: 'Utilisateur introuvable.' })
+    }
+
+    return res.json({
+      data: {
+        user: userRes.rows[0],
+        listings: listingsRes.rows,
+        subscriptions: subscriptionsRes,
+        payments: paymentsRes.rows,
+        reports_made: reportsMadeRes.rows,
+        reports_received: reportsReceivedRes.rows,
+        troc_proposals: [],
+        login_history: [],
+      },
+    })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.patch('/users/:id/suspend', async (req, res, next) => {
+  try {
+    const userId = Number(req.params.id)
+    const { reason = 'admin', duration_days = 30 } = req.body || {}
+    await query(
+      `UPDATE users
+       SET deleted_at = NOW(),
+           updated_at = NOW()
+       WHERE id = $1`,
+      [userId]
+    )
+    await logAdminAction(req, 'suspend_user', 'user', userId, { reason, duration_days })
+    return res.json({ data: { ok: true } })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.patch('/users/:id/unsuspend', async (req, res, next) => {
+  try {
+    const userId = Number(req.params.id)
+    await query(
+      `UPDATE users
+       SET deleted_at = NULL,
+           updated_at = NOW()
+       WHERE id = $1`,
+      [userId]
+    )
+    await logAdminAction(req, 'unsuspend_user', 'user', userId, {})
+    return res.json({ data: { ok: true } })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.patch('/users/:id/set-plan', async (req, res, next) => {
+  try {
+    const userId = Number(req.params.id)
+    const plan = String(req.body?.plan || 'free').toLowerCase() === 'pro' ? 'pro' : 'free'
+    await query(
+      `UPDATE users
+       SET is_pro = $2,
+           pro_plan = CASE WHEN $2 THEN 'pro' ELSE NULL END,
+           pro_expires_at = CASE WHEN $2 THEN COALESCE(pro_expires_at, NOW() + INTERVAL '30 days') ELSE NULL END,
+           updated_at = NOW()
+       WHERE id = $1`,
+      [userId, plan === 'pro']
+    )
+    await logAdminAction(req, 'set_plan', 'user', userId, { plan })
+    return res.json({ data: { ok: true, plan } })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.delete('/users/:id/force-delete', async (req, res, next) => {
+  try {
+    const userId = Number(req.params.id)
+    await query(
+      `UPDATE users SET deleted_at = NOW(), updated_at = NOW() WHERE id = $1`,
+      [userId]
+    )
+    await logAdminAction(req, 'force_delete_user', 'user', userId, {})
+    return res.json({ data: { ok: true } })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.get('/reports/monthly', async (req, res, next) => {
+  try {
+    const month = String(req.query.month || new Date().toISOString().slice(0, 7))
+    const [year, monthIndex] = month.split('-').map((part) => toInt(part, 0))
+    const monthStart = new Date(Date.UTC(year, Math.max(0, monthIndex - 1), 1))
+    const monthEnd = new Date(Date.UTC(year, monthIndex, 0, 23, 59, 59))
+
+    const [users, listings, revenue, troc, bonPlans] = await Promise.all([
+      query(
+        `SELECT
+           COUNT(*)::int AS total,
+           COUNT(*) FILTER (WHERE created_at BETWEEN $1 AND $2)::int AS new_users,
+           COUNT(*) FILTER (WHERE is_pro = TRUE)::int AS pro_users
+         FROM users WHERE deleted_at IS NULL`,
+        [monthStart, monthEnd]
+      ),
+      query(
+        `SELECT COUNT(*)::int AS listings_published
+         FROM annonces
+         WHERE created_at BETWEEN $1 AND $2 AND deleted_at IS NULL`,
+        [monthStart, monthEnd]
+      ),
+      query(
+        `SELECT COALESCE(SUM(amount_xpf), 0)::int AS revenue_xpf
+         FROM payments
+         WHERE status = 'succeeded' AND created_at BETWEEN $1 AND $2`,
+        [monthStart, monthEnd]
+      ),
+      query(
+        `SELECT COUNT(*)::int AS proposals, COUNT(*) FILTER (WHERE status = 'accepted')::int AS accepted
+         FROM troc_proposals
+         WHERE created_at BETWEEN $1 AND $2`,
+        [monthStart, monthEnd]
+      ).catch(() => ({ rows: [{ proposals: 0, accepted: 0 }] })),
+      query(
+        `SELECT COUNT(*)::int AS total, COALESCE(SUM(click_count), 0)::int AS clicks
+         FROM bon_plans
+         WHERE created_at BETWEEN $1 AND $2`,
+        [monthStart, monthEnd]
+      ).catch(() => ({ rows: [{ total: 0, clicks: 0 }] })),
+    ])
+
+    return res.json({
+      data: {
+        month,
+        new_users: Number(users.rows[0]?.new_users ?? 0),
+        total_users: Number(users.rows[0]?.total ?? 0),
+        pro_users: Number(users.rows[0]?.pro_users ?? 0),
+        listings_published: Number(listings.rows[0]?.listings_published ?? 0),
+        mrr_xpf: Number(revenue.rows[0]?.revenue_xpf ?? 0),
+        troc_proposals: Number(troc.rows[0]?.proposals ?? 0),
+        troc_accepted: Number(troc.rows[0]?.accepted ?? 0),
+        bon_plans: Number(bonPlans.rows[0]?.total ?? 0),
+        bon_plan_clicks: Number(bonPlans.rows[0]?.clicks ?? 0),
+      },
+    })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.get('/reports/monthly/export', async (req, res, next) => {
+  try {
+    const month = String(req.query.month || new Date().toISOString().slice(0, 7))
+    const format = String(req.query.format || 'pdf').toLowerCase()
+    const data = (await query(`SELECT $1::text AS month`, [month])).rows[0]
+    if (format === 'csv') {
+      res.setHeader('content-type', 'text/csv; charset=utf-8')
+      return res.send(`month,${data.month}\n`)
+    }
+    return res.json({ data: { month: data.month, exported: true } })
+  } catch (err) {
+    next(err)
+  }
+})
+
 // ── GET /admin/annonces ──────────────────────────────────
 
 router.get('/annonces', async (req, res, next) => {
@@ -126,8 +1028,49 @@ router.get('/annonces', async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
-// Rétro-compat : ancienne URL /listings redirige vers /annonces
-router.get('/listings', (req, res) => res.redirect(307, req.originalUrl.replace('/listings', '/annonces')))
+// Rétro-compat : /listings expose la même liste que /annonces
+router.get('/listings', async (req, res, next) => {
+  try {
+    const { q, status, page = 1, limit = 25 } = req.query
+    const offset = (Number(page) - 1) * Number(limit)
+    const params = []
+    const conds  = ['a.deleted_at IS NULL']
+
+    if (q) {
+      params.push(`%${q}%`)
+      conds.push(`(a.titre ILIKE $${params.length} OR u.email ILIKE $${params.length})`)
+    }
+    if (status) {
+      params.push(status)
+      conds.push(`a.status = $${params.length}`)
+    }
+
+    const where = 'WHERE ' + conds.join(' AND ')
+
+    const [rows, count] = await Promise.all([
+      query(`
+        SELECT a.id, a.titre, a.status, a.prix, a.condition,
+               a.nb_vues AS view_count, a.created_at, a.boost_expires_at AS boosted_until,
+               cat.name AS category_name,
+               co.name  AS commune_name,
+               u.id AS user_id, u.prenom, u.nom, u.email
+        FROM annonces a
+        JOIN users u       ON u.id  = a.user_id
+        JOIN categories cat ON cat.id = a.category_id
+        LEFT JOIN communes co ON co.id = a.commune_id
+        ${where}
+        ORDER BY a.created_at DESC
+        LIMIT $${params.push(Number(limit))} OFFSET $${params.push(offset)}
+      `, params),
+      query(`SELECT COUNT(*) FROM annonces a JOIN users u ON u.id = a.user_id ${where}`, params.slice(0, -2)),
+    ])
+
+    res.json({
+      data: rows.rows,
+      pagination: { total: parseInt(count.rows[0].count), page: Number(page), limit: Number(limit) },
+    })
+  } catch (err) { next(err) }
+})
 
 // ── POST /admin/annonces/bulk — Actions groupées ─────────
 
