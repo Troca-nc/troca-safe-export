@@ -8,11 +8,12 @@ const express     = require('express');
 const http        = require('http');
 const cors        = require('cors');
 const { checkConnection }   = require('./config/database');
-const { errorHandler }      = require('./middleware/errorHandler');
+const errorHandler          = require('./middleware/errorHandler');
 const { requestContext }    = require('./middleware/requestContext');
 const { requestLogger }     = require('./middleware/requestLogger');
 const { internalAuth }      = require('./middleware/internalAuth');
 const { apiLimiter }        = require('./middleware/rateLimit');
+const { csrfMiddleware }    = require('./middleware/csrf');
 const { initSocket, shutdownWebsocketBridge }        = require('./services/websocketServer');
 const { startAllJobs }      = require('./jobs/scheduler');
 const { logger }            = require('./utils/logger');
@@ -100,8 +101,25 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({ extended: true }));
 app.set('trust proxy', 1);
+app.use((req, res, next) => {
+  const csp = [
+    "default-src 'none'",
+    "base-uri 'none'",
+    "frame-ancestors 'none'",
+    "form-action 'none'",
+  ].join('; ');
+  res.setHeader('Content-Security-Policy', csp);
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  if (process.env.NODE_ENV === 'production' || req.secure) {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  }
+  next();
+});
 app.use(requestContext);
 app.use(requestLogger);
+app.use(csrfMiddleware);
 app.use('/api/', apiLimiter);
 
 // ── Health check ──────────────────────────────────────────────
@@ -139,6 +157,7 @@ app.get('/api/internal/observability', internalAuth, async (_req, res) => {
 
 app.use('/api/auth',       authRouter);
 app.use('/api/listings',   annoncesRouter);
+app.use('/api/users/notifications', notificationsRouter);
 app.use('/api/users',      usersRouter);
 app.use('/api/users',      pushTokenRouter);   // POST /api/users/push-token
 app.use('/api/messages',   messagesRouter);
@@ -153,7 +172,6 @@ app.use('/api/payment',    paymentRouter);
 app.use('/api/subscriptions', subscriptionsRouter);
 app.use('/api/phone',      phoneRouter);
 app.use('/api/alerts',     alertRouter);
-app.use('/api/users',      notificationsRouter);
 app.use('/api/stats',      statsRouter); // GET /api/users/notifications
 app.use('/api/messages',   offersRouter);          // POST /api/messages/offers
 app.use('/api/bon-plans',  bonPlansRouter);
@@ -184,17 +202,28 @@ app.use(errorHandler);
 // ── Démarrage ─────────────────────────────────────────────────
 
 async function start() {
+  let databaseReady = true;
   try {
     await checkConnection();
     logger.info('db_connection_ok');
   } catch (err) {
     logger.error('db_connection_failed', { error: err });
-    process.exit(1);
+    if (process.env.DEMO_MODE !== 'true') {
+      process.exit(1);
+    }
+    databaseReady = false;
+    logger.warn('db_connection_failed_demo_mode', {
+      message: 'Base de donnees indisponible, mode demo degrade active.',
+    });
   }
 
   initSocket(server);
-  if (process.env.RUN_JOBS !== 'false') {
+  if (process.env.RUN_JOBS !== 'false' && databaseReady) {
     startAllJobs();
+  } else if (process.env.RUN_JOBS !== 'false') {
+    logger.warn('jobs_skipped_demo_mode', {
+      message: 'Jobs ignores pendant le boot demo sans base locale.',
+    });
   } else {
     logger.info('cron_disabled_on_instance');
   }
