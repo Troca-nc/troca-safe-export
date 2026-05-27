@@ -230,17 +230,35 @@ CREATE INDEX IF NOT EXISTS idx_phone_ver_user ON phone_verifications (user_id, c
 
 -- ── ALERTES DE RECHERCHE ──────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS search_alerts (
-  id          SERIAL PRIMARY KEY,
-  user_id     INTEGER     NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  label       VARCHAR(200) NOT NULL,
-  filters     JSONB        NOT NULL DEFAULT '{}',
-  last_sent   TIMESTAMPTZ DEFAULT NULL,
-  active      BOOLEAN     NOT NULL DEFAULT TRUE,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id                 SERIAL PRIMARY KEY,
+  user_id            INTEGER      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  label              VARCHAR(200) NOT NULL,
+  filters            JSONB        NOT NULL DEFAULT '{}',
+  frequency          VARCHAR(20)  NOT NULL DEFAULT 'daily'
+                       CHECK (frequency IN ('immediate', 'daily', 'weekly')),
+  status             VARCHAR(20)  NOT NULL DEFAULT 'active'
+                       CHECK (status IN ('active', 'paused', 'deleted')),
+  nb_results         INTEGER      NOT NULL DEFAULT 0,
+  last_sent_at       TIMESTAMPTZ  DEFAULT NULL,
+  unsubscribe_token  VARCHAR(64)  NOT NULL UNIQUE,
+  created_at         TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  updated_at         TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_alerts_user   ON search_alerts (user_id);
-CREATE INDEX IF NOT EXISTS idx_alerts_active ON search_alerts (active, last_sent) WHERE active = TRUE;
+CREATE INDEX IF NOT EXISTS idx_alerts_status_frequency
+  ON search_alerts (status, frequency)
+  WHERE status = 'active';
+
+CREATE INDEX IF NOT EXISTS idx_alerts_user_id
+  ON search_alerts (user_id);
+
+CREATE INDEX IF NOT EXISTS idx_alerts_filters
+  ON search_alerts USING GIN (filters);
+
+DROP TRIGGER IF EXISTS trg_alerts_updated_at ON search_alerts;
+CREATE TRIGGER trg_alerts_updated_at
+  BEFORE UPDATE ON search_alerts
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ── MESSAGERIE (voir add_messaging.sql pour le détail complet) ────────────────
 CREATE TABLE IF NOT EXISTS conversations (
