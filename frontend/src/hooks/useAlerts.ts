@@ -32,8 +32,8 @@ export function useAlerts() {
 
     try {
       const response = await alertsApi.list()
-      const payload = response.data as AlertsResponse | { data?: SearchAlert[] }
-      setAlerts((payload as AlertsResponse).data ?? (payload as { data?: SearchAlert[] }).data ?? [])
+      const payload = response.data as AlertsResponse
+      setAlerts(payload.data ?? [])
     } catch (err) {
       setAlerts([])
       setError(getErrorMessage(err))
