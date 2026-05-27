@@ -19,11 +19,16 @@ const { matchImmediateAlerts } = require('../jobs/scheduler');
 const { rateLimitAnnonces, flagIfSuspicious } = require('../middleware/antiScam');
 const { buildListingSearchContext, encodeListingCursor } = require('../services/listingsQuery');
 const { deletePrefix, getJson, setJson } = require('../services/sharedCache');
+const { enqueueTrocMatching } = require('../services/trocQueueService');
 const {
   mapListingSearchRow,
   mapListingDetailResponse,
   mapUserListingRow,
 } = require('../services/listingsPresentation');
+const {
+  isDonCategory,
+  validateListingMetadata,
+} = require('../services/listingMetadata');
 
 
 const router = express.Router();
@@ -42,50 +47,14 @@ async function clearListCache() {
   await deletePrefix(LIST_CACHE_PREFIX);
 }
 
-// ── Schémas ─────────────────────────────────────────────────
-
-const baseListingSchema = Joi.object({
-  title:            Joi.string().min(3).max(200).optional(),
-  titre:            Joi.string().min(3).max(200).optional(),
-  description:      Joi.string().min(10).max(5000).optional(),
-  price:            Joi.number().min(0).max(100000000).allow(null).optional(),
-  category_id:      Joi.number().integer().required(),
-  commune_id:       Joi.number().integer().required(),
-  condition:        Joi.string().valid('new','like_new','good','fair','for_parts').required(),
-  is_free:          Joi.boolean().default(false),
-  price_negotiable: Joi.boolean().default(false),
-  is_negotiable:    Joi.boolean().default(false),
-  contre_quoi:      Joi.string().max(200).allow(null, '').optional(),
-  phone:            Joi.string().max(20).optional().allow(''),
-});
-
-const createSchema = baseListingSchema.fork(
-  ['description'],
-  (f) => f.required()
-);
-
-const updateSchema = baseListingSchema.fork(
-  ['category_id', 'commune_id', 'condition'],
-  (f) => f.optional()
-);
-const updateSchemaWithStatus = updateSchema.keys({
-  status: Joi.string().valid('active', 'inactive', 'sold').optional(),
-});
-
-const signalerSchema = Joi.object({
-  reason:  Joi.string().valid('spam','fake','prohibited','offensive','other').required(),
-  comment: Joi.string().max(500).optional().allow(''),
-});
-
-// ── GET /api/listings — Recherche ───────────────────────────
-
-router.get('/', optionalAuth, async (req, res, next) => {
+async function executeListingSearch(req, res, next, extraQuery = {}) {
   try {
-    const cacheKey = `list:${JSON.stringify(req.query || {})}`;
+    const mergedQuery = { ...(req.query || {}), ...(extraQuery || {}) };
+    const cacheKey = `list:${JSON.stringify(mergedQuery)}`;
     const cached = await readListCache(cacheKey);
     if (cached) return res.json(cached);
 
-    const { whereClause, params, orderBy, pageNum, pageSize, offset, geo, cursorWhere, cursorParams, sort, sortConfig } = buildListingSearchContext(req.query);
+    const { whereClause, params, orderBy, pageNum, pageSize, offset, geo, cursorWhere, cursorParams, sort, sortConfig } = buildListingSearchContext(mergedQuery);
     const cursorParamCount = cursorParams?.length || 0;
     const limitPlaceholder = params.length + cursorParamCount + 1;
     const offsetPlaceholder = params.length + cursorParamCount + 2;
@@ -120,7 +89,8 @@ router.get('/', optionalAuth, async (req, res, next) => {
           a.is_negotiable AS price_negotiable,
           (a.prix IS NULL) AS is_free,
           a.contre_quoi,
-       a.created_at AS published_at,
+          a.metadata,
+          a.created_at AS published_at,
           a.created_at AS created_at_sort,
           a.boost_expires_at AS boost_expires_at,
           a.nb_vues,
@@ -156,21 +126,21 @@ router.get('/', optionalAuth, async (req, res, next) => {
     );
 
     const total = parseInt(countRes.rows[0].total);
-    const lastRow = listRes.rows[listRes.rows.length - 1] || null
+    const lastRow = listRes.rows[listRes.rows.length - 1] || null;
     const nextCursor = lastRow && listRes.rows.length === pageSize
       ? encodeListingCursor({
           v: 1,
           sort,
           values: sortConfig.tupleFromRow(lastRow),
         })
-      : null
+      : null;
 
     const payload = {
       data: listRes.rows.map(mapListingSearchRow),
       nextCursor,
       pagination: {
         total,
-        page:  pageNum,
+        page: pageNum,
         pages: Math.ceil(total / pageSize),
         limit: pageSize,
       },
@@ -180,7 +150,125 @@ router.get('/', optionalAuth, async (req, res, next) => {
     return res.json(payload);
   } catch (err) {
     next(err);
+    return null;
   }
+}
+
+// ── Schémas ─────────────────────────────────────────────────
+
+const baseListingSchema = Joi.object({
+  title:            Joi.string().min(3).max(200).optional(),
+  titre:            Joi.string().min(3).max(200).optional(),
+  description:      Joi.string().min(10).max(5000).optional(),
+  price:            Joi.number().min(0).max(100000000).allow(null).optional(),
+  category_id:      Joi.number().integer().required(),
+  commune_id:       Joi.number().integer().required(),
+  condition:        Joi.string().valid('new','like_new','good','fair','for_parts').required(),
+  is_free:          Joi.boolean().default(false),
+  price_negotiable: Joi.boolean().default(false),
+  is_negotiable:    Joi.boolean().default(false),
+  contre_quoi:      Joi.string().max(200).allow(null, '').optional(),
+  phone:            Joi.string().max(20).optional().allow(''),
+  is_troc:          Joi.boolean().optional(),
+  troc_accepts_complement_xpf: Joi.boolean().optional(),
+  troc_complement_max_xpf: Joi.number().integer().min(0).optional(),
+  troc_wants:       Joi.alternatives().try(
+                      Joi.array().items(Joi.string().trim().min(1).max(80)),
+                      Joi.string().allow('')
+                    ).optional(),
+  troc_status:      Joi.string().valid('open', 'negotiating', 'completed', 'cancelled').optional(),
+  metadata:         Joi.object().unknown(true).optional(),
+});
+
+const createSchema = baseListingSchema.fork(
+  ['description'],
+  (f) => f.required()
+);
+
+const updateSchema = baseListingSchema.fork(
+  ['category_id', 'commune_id', 'condition'],
+  (f) => f.optional()
+);
+const updateSchemaWithStatus = updateSchema.keys({
+  status: Joi.string().valid('active', 'inactive', 'sold').optional(),
+});
+
+const signalerSchema = Joi.object({
+  reason:  Joi.string().valid('spam','fake','prohibited','offensive','other').required(),
+  comment: Joi.string().max(500).optional().allow(''),
+});
+
+function normalizeTrocWants(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item || '').trim()).filter(Boolean);
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(/[,\n|;/]+/g)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+async function getCategoryById(categoryId) {
+  if (!categoryId) return null;
+  const result = await query(
+    `SELECT id, slug, name
+     FROM categories
+     WHERE id = $1
+     LIMIT 1`,
+    [categoryId]
+  );
+  return result.rows[0] || null;
+}
+
+function resolveListingMetadata(categorySlug, value) {
+  return validateListingMetadata(categorySlug, value || {});
+}
+
+async function resolveListingCategoryMetadata(categoryId, rawMetadata) {
+  const category = await getCategoryById(categoryId);
+  if (!category) {
+    const error = new Error('Catégorie introuvable.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const metadata = resolveListingMetadata(category.slug, rawMetadata);
+  return { category, metadata };
+}
+
+// ── GET /api/listings — Recherche ───────────────────────────
+
+router.get('/', optionalAuth, async (req, res, next) => {
+  return executeListingSearch(req, res, next);
+});
+
+router.get('/location_courte_duree', optionalAuth, async (req, res, next) => {
+  return executeListingSearch(req, res, next, { category: 'location_courte_duree' });
+});
+
+router.get('/locations', optionalAuth, async (req, res, next) => {
+  return executeListingSearch(req, res, next, { category: 'location_courte_duree' });
+});
+
+router.get('/services', optionalAuth, async (req, res, next) => {
+  return executeListingSearch(req, res, next, { category: 'services' });
+});
+
+router.get('/don', optionalAuth, async (req, res, next) => {
+  return executeListingSearch(req, res, next, { category: 'don' });
+});
+
+router.get('/dons', optionalAuth, async (req, res, next) => {
+  return executeListingSearch(req, res, next, { category: 'don' });
+});
+
+router.get('/immobilier', optionalAuth, async (req, res, next) => {
+  return executeListingSearch(req, res, next, { category: 'immobilier' });
 });
 
 // ── GET /api/listings/:id — Détail ──────────────────────────
@@ -271,14 +359,30 @@ router.post('/', authenticate, rateLimitAnnonces, async (req, res, next) => {
     const title = (value.title || value.titre || '').trim();
     const description = value.description?.trim();
     const priceNegotiable = value.price_negotiable || value.is_negotiable || false;
-    const price = value.is_free ? null : value.price;
+    const isTroc = Boolean(value.is_troc);
+    const trocWants = normalizeTrocWants(value.troc_wants);
+    const trocAcceptsComplement = Boolean(value.troc_accepts_complement_xpf);
+    const trocComplementMax = Number(value.troc_complement_max_xpf || 0);
+    const trocStatus = value.troc_status || 'open';
+    const rawMetadata = Object.prototype.hasOwnProperty.call(value, 'metadata') ? value.metadata : {};
+    const { category, metadata } = await resolveListingCategoryMetadata(value.category_id, rawMetadata);
+    const isDonListing = isDonCategory(category.slug);
+    const price = isDonListing ? 0 : (value.is_free ? null : value.price);
 
     if (!title) {
       return res.status(400).json({ error: 'Le titre est requis.' });
     }
 
-    if (!value.is_free && (price === null || price === undefined)) {
+    if (!isDonListing && !value.is_free && (price === null || price === undefined)) {
       return res.status(400).json({ error: 'Le prix est requis pour une annonce payante.' });
+    }
+
+    if (isTroc && trocWants.length === 0) {
+      return res.status(400).json({ error: 'Merci de preciser ce que vous cherchez pour le troc.' });
+    }
+
+    if (isTroc && trocAcceptsComplement && trocComplementMax <= 0) {
+      return res.status(400).json({ error: 'Le complement XPF maximal doit etre superieur a 0.' });
     }
 
     // Limite d'annonces actives pour les non-pro
@@ -298,10 +402,28 @@ router.post('/', authenticate, rateLimitAnnonces, async (req, res, next) => {
     const result = await withTransaction(async (client) => {
       const ins = await client.query(
         `INSERT INTO annonces
-           (user_id, titre, description, prix, category_id, commune_id, condition, is_negotiable, phone, contre_quoi, status)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'active')
+           (user_id, titre, description, prix, category_id, commune_id, condition, is_negotiable, phone, contre_quoi,
+            is_troc, troc_accepts_complement_xpf, troc_complement_max_xpf, troc_wants, troc_status, metadata, status)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,'active')
          RETURNING *`,
-        [req.user.id, title, description, price, value.category_id, value.commune_id, value.condition, priceNegotiable, value.phone || null, value.contre_quoi || null]
+        [
+          req.user.id,
+          title,
+          description,
+          price,
+          value.category_id,
+          value.commune_id,
+          value.condition,
+          priceNegotiable,
+          value.phone || null,
+          value.contre_quoi || null,
+          isTroc,
+          isTroc ? trocAcceptsComplement : false,
+          isTroc ? trocComplementMax : 0,
+          isTroc ? trocWants : [],
+          isTroc ? trocStatus : 'open',
+          JSON.stringify(metadata),
+        ]
       );
 
       await client.query(
@@ -316,6 +438,11 @@ router.post('/', authenticate, rateLimitAnnonces, async (req, res, next) => {
     matchImmediateAlerts(result).catch((err) =>
       console.error('[alerts:immediate] Erreur post-publication:', err.message)
     );
+    if (isTroc) {
+      enqueueTrocMatching(result.id).catch((err) =>
+        console.error('[troc:matching] Enqueue erreur:', err.message)
+      );
+    }
     await flagIfSuspicious(result.id);
     void clearListCache();
 
@@ -332,7 +459,13 @@ router.put('/:id', authenticate, async (req, res, next) => {
     const { id } = req.params;
 
     const existing = await query(
-      `SELECT * FROM annonces WHERE id = $1 AND deleted_at IS NULL`,
+      `SELECT id, user_id, category_id, commune_id, titre, description, prix, condition, status,
+              is_boosted, boost_type, boost_expires_at, nb_vues, nb_favoris, slug,
+              expires_at, published_at, created_at, updated_at, metadata, is_troc,
+              troc_accepts_complement_xpf, troc_complement_max_xpf, troc_wants, troc_status,
+              boosted_until, delete_reason, phone, is_negotiable, contre_quoi, deleted_at, view_count
+       FROM annonces
+       WHERE id = $1 AND deleted_at IS NULL`,
       [id]
     );
     if (!existing.rows[0]) return res.status(404).json({ error: 'Annonce introuvable.' });
@@ -344,6 +477,15 @@ router.put('/:id', authenticate, async (req, res, next) => {
 
     const { error, value } = updateSchemaWithStatus.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
+
+    const nextCategoryId = Object.prototype.hasOwnProperty.call(value, 'category_id') && value.category_id !== undefined
+      ? value.category_id
+      : listing.category_id;
+    const rawMetadata = Object.prototype.hasOwnProperty.call(value, 'metadata')
+      ? value.metadata
+      : (listing.metadata || {});
+    const { category, metadata } = await resolveListingCategoryMetadata(nextCategoryId, rawMetadata);
+    const isDonListing = isDonCategory(category.slug);
 
     const fields = [];
     const params = [];
@@ -368,7 +510,7 @@ router.put('/:id', authenticate, async (req, res, next) => {
     }
 
     if (Object.prototype.hasOwnProperty.call(value, 'price') || Object.prototype.hasOwnProperty.call(value, 'is_free')) {
-      const price = value.is_free ? null : value.price;
+      const price = isDonListing ? 0 : (value.is_free ? null : value.price);
       fields.push(`prix = $${p}`);
       params.push(price);
       p++;
@@ -377,6 +519,12 @@ router.put('/:id', authenticate, async (req, res, next) => {
     if (Object.prototype.hasOwnProperty.call(value, 'category_id') && value.category_id !== undefined) {
       fields.push(`category_id = $${p}`);
       params.push(value.category_id);
+      p++;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(value, 'metadata') || Object.prototype.hasOwnProperty.call(value, 'category_id')) {
+      fields.push(`metadata = $${p}`);
+      params.push(JSON.stringify(metadata));
       p++;
     }
 
@@ -405,6 +553,66 @@ router.put('/:id', authenticate, async (req, res, next) => {
       p++;
     }
 
+    if (Object.prototype.hasOwnProperty.call(value, 'is_troc')) {
+      const nextIsTroc = Boolean(value.is_troc);
+      const trocWants = normalizeTrocWants(value.troc_wants);
+      const trocAcceptsComplement = Boolean(value.troc_accepts_complement_xpf);
+      const trocComplementMax = Number(value.troc_complement_max_xpf || 0);
+      const trocStatus = value.troc_status || (nextIsTroc ? listing.troc_status || 'open' : 'open');
+
+      if (nextIsTroc && trocWants.length === 0) {
+        return res.status(400).json({ error: 'Merci de preciser ce que vous cherchez pour le troc.' });
+      }
+
+      if (nextIsTroc && trocAcceptsComplement && trocComplementMax <= 0) {
+        return res.status(400).json({ error: 'Le complement XPF maximal doit etre superieur a 0.' });
+      }
+
+      fields.push(`is_troc = $${p}`);
+      params.push(nextIsTroc);
+      p++;
+
+      fields.push(`troc_accepts_complement_xpf = $${p}`);
+      params.push(nextIsTroc ? trocAcceptsComplement : false);
+      p++;
+
+      fields.push(`troc_complement_max_xpf = $${p}`);
+      params.push(nextIsTroc ? trocComplementMax : 0);
+      p++;
+
+      fields.push(`troc_wants = $${p}`);
+      params.push(nextIsTroc ? trocWants : []);
+      p++;
+
+      fields.push(`troc_status = $${p}`);
+      params.push(nextIsTroc ? trocStatus : 'open');
+      p++;
+    } else {
+      if (Object.prototype.hasOwnProperty.call(value, 'troc_wants')) {
+        fields.push(`troc_wants = $${p}`);
+        params.push(normalizeTrocWants(value.troc_wants));
+        p++;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(value, 'troc_accepts_complement_xpf')) {
+        fields.push(`troc_accepts_complement_xpf = $${p}`);
+        params.push(Boolean(value.troc_accepts_complement_xpf));
+        p++;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(value, 'troc_complement_max_xpf')) {
+        fields.push(`troc_complement_max_xpf = $${p}`);
+        params.push(Number(value.troc_complement_max_xpf || 0));
+        p++;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(value, 'troc_status')) {
+        fields.push(`troc_status = $${p}`);
+        params.push(value.troc_status || 'open');
+        p++;
+      }
+    }
+
     if (Object.prototype.hasOwnProperty.call(value, 'phone')) {
       fields.push(`phone = $${p}`);
       params.push(value.phone || null);
@@ -428,6 +636,11 @@ router.put('/:id', authenticate, async (req, res, next) => {
     flagIfSuspicious(id).catch((err) =>
       console.error('[antiScam] Erreur revalidation:', err.message)
     );
+    if (result.rows[0]?.is_troc) {
+      enqueueTrocMatching(result.rows[0].id).catch((err) =>
+        console.error('[troc:matching] Enqueue erreur:', err.message)
+      );
+    }
     void clearListCache();
 
     return res.json({ data: result.rows[0] });
@@ -546,6 +759,43 @@ router.post('/:id/signaler', authenticate, async (req, res, next) => {
 
 // ── GET /api/users/:userId/listings — Annonces d'un utilisateur
 
+// â”€â”€ PATCH /api/listings/:id/mark-given â€” Marquer un don comme complÃ©tÃ©
+
+router.patch('/:id/mark-given', authenticate, async (req, res, next) => {
+  try {
+    const listing = await query(
+      `SELECT a.id, a.user_id, a.status, a.metadata, cat.slug AS category_slug
+       FROM annonces a
+       LEFT JOIN categories cat ON cat.id = a.category_id
+       WHERE a.id = $1 AND a.deleted_at IS NULL`,
+      [req.params.id]
+    );
+
+    if (!listing.rows[0]) return res.status(404).json({ error: 'Annonce introuvable.' });
+    if (listing.rows[0].user_id !== req.user.id) {
+      return res.status(403).json({ error: 'Vous ne pouvez modifier que vos propres annonces.' });
+    }
+    if (!isDonCategory(listing.rows[0].category_slug)) {
+      return res.status(400).json({ error: 'Cette action est réservée aux annonces de don.' });
+    }
+
+    const result = await query(
+      `UPDATE annonces
+       SET status = 'completed',
+           metadata = COALESCE(metadata, '{}'::jsonb) || jsonb_build_object('given_at', NOW()),
+           updated_at = NOW()
+       WHERE id = $1
+       RETURNING *`,
+      [req.params.id]
+    );
+
+    void clearListCache();
+    return res.json({ data: result.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/user/:userId', optionalAuth, async (req, res, next) => {
   try {
     const { userId } = req.params;
@@ -555,7 +805,7 @@ router.get('/user/:userId', optionalAuth, async (req, res, next) => {
     const offset   = (pageNum - 1) * pageSize;
 
     const result = await query(
-      `SELECT a.id, a.titre, a.prix, a.condition, a.created_at, a.nb_vues AS view_count, a.status,
+      `SELECT a.id, a.titre, a.prix, a.condition, a.created_at, a.nb_vues AS view_count, a.status, a.metadata,
               cat.name AS category_name,
               com.name AS commune_name,
               (SELECT thumbnail_url FROM annonce_images WHERE annonce_id = a.id AND is_cover = TRUE LIMIT 1) AS cover_image,

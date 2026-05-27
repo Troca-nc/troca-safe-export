@@ -10,11 +10,17 @@
 const cron                = require('node-cron');
 const { query }           = require('../config/database');
 const { sendAlertEmail }  = require('../services/emailService');
+const { sendMail }        = require('../services/emailService');
 const { notifyListingExpiring } = require('../services/notificationService');
-const { withLock }        = require('../services/sharedCache');
+const { createNotification } = require('../services/notificationService');
+const { sendPushToUser, sendPushToUsers } = require('../services/pushService');
+const { getJson, setJson, withLock } = require('../services/sharedCache');
+const { drainTrocMatchingQueue, rememberTrocSignal } = require('../services/trocQueueService');
+const { detectTrocCycles, listingMatchesNeed } = require('../services/trocService');
 const { logger }          = require('../utils/logger');
 const { recordJob }       = require('../services/observability');
 const { flushBonPlanViews } = require('../services/bonPlansService');
+const { checkAdminAlerts } = require('../services/adminAlerts');
 
 async function runSingletonJob(lockName, ttlMs, task) {
   const started = await withLock(lockName, ttlMs, async () => {
@@ -25,6 +31,289 @@ async function runSingletonJob(lockName, ttlMs, task) {
     recordJob('skipped', { lock_name: lockName });
     logger.info('cron_skip_locked', { lock_name: lockName });
   }
+}
+
+function formatUserName(firstName, lastName) {
+  return `${firstName || ''} ${lastName || ''}`.trim() || 'Un utilisateur';
+}
+
+function formatXpf(amount) {
+  return `${Number(amount || 0).toLocaleString('fr-FR')} XPF`;
+}
+
+function getTrocBaseUrl() {
+  return process.env.BASE_URL || 'https://troca.nc';
+}
+
+async function loadOpenTrocListingsByIds(ids = []) {
+  const normalized = [...new Set(ids.map((value) => Number(value)).filter((value) => Number.isFinite(value) && value > 0))];
+  if (!normalized.length) return [];
+
+  const result = await query(`
+    SELECT
+      a.id,
+      a.user_id,
+      a.titre AS title,
+      a.description,
+      a.prix,
+      a.category_id,
+      cat.name AS category_name,
+      cat.slug AS category_slug,
+      a.troc_wants,
+      a.troc_accepts_complement_xpf,
+      a.troc_complement_max_xpf,
+      a.troc_status,
+      u.prenom,
+      u.nom,
+      u.email,
+      u.expo_push_token
+    FROM annonces a
+    JOIN users u ON u.id = a.user_id
+    LEFT JOIN categories cat ON cat.id = a.category_id
+    WHERE a.id = ANY($1::int[])
+      AND a.deleted_at IS NULL
+      AND a.status = 'active'
+      AND COALESCE(a.is_troc, FALSE) = TRUE
+      AND COALESCE(a.troc_status, 'open') = 'open'
+  `, [normalized]);
+
+  return result.rows;
+}
+
+async function loadAllOpenTrocListings() {
+  const result = await query(`
+    SELECT
+      a.id,
+      a.user_id,
+      a.titre AS title,
+      a.description,
+      a.prix,
+      a.category_id,
+      cat.name AS category_name,
+      cat.slug AS category_slug,
+      a.troc_wants,
+      a.troc_accepts_complement_xpf,
+      a.troc_complement_max_xpf,
+      a.troc_status,
+      u.prenom,
+      u.nom,
+      u.email,
+      u.expo_push_token
+    FROM annonces a
+    JOIN users u ON u.id = a.user_id
+    LEFT JOIN categories cat ON cat.id = a.category_id
+    WHERE a.deleted_at IS NULL
+      AND a.status = 'active'
+      AND COALESCE(a.is_troc, FALSE) = TRUE
+      AND COALESCE(a.troc_status, 'open') = 'open'
+    ORDER BY a.created_at DESC
+  `);
+
+  return result.rows;
+}
+
+function buildDirectMatchKey(anchorListing, candidateListing) {
+  const ids = [Number(anchorListing.id), Number(candidateListing.id)].sort((a, b) => a - b);
+  return `troc:direct:${ids.join(':')}`;
+}
+
+function buildCycleMatchKey(cycle) {
+  const listingIds = (cycle?.listing_ids || []).map((value) => Number(value)).filter((value) => Number.isFinite(value) && value > 0).sort((a, b) => a - b);
+  return `troc:cycle:${listingIds.join(':')}`;
+}
+
+async function notifyTrocDirectMatch(anchorListing, candidateListing) {
+  const baseUrl = getTrocBaseUrl();
+  const anchorOwner = {
+    id: Number(anchorListing.user_id),
+    prenom: anchorListing.prenom,
+    nom: anchorListing.nom,
+    email: anchorListing.email,
+    pushToken: anchorListing.expo_push_token,
+  };
+  const candidateOwner = {
+    id: Number(candidateListing.user_id),
+    prenom: candidateListing.prenom,
+    nom: candidateListing.nom,
+    email: candidateListing.email,
+    pushToken: candidateListing.expo_push_token,
+  };
+
+  const payloads = [
+    {
+      recipient: anchorOwner,
+      counterpart: candidateListing,
+      href: `/troc/${candidateListing.id}`,
+    },
+    {
+      recipient: candidateOwner,
+      counterpart: anchorListing,
+      href: `/troc/${anchorListing.id}`,
+    },
+  ];
+
+  for (const payload of payloads) {
+    const recipientName = formatUserName(payload.recipient.prenom, payload.recipient.nom);
+    const counterpartName = formatUserName(payload.counterpart.prenom, payload.counterpart.nom);
+    const title = '🔄 Troc compatible trouvé !';
+    const body = `${counterpartName} a une annonce qui correspond à votre troc.`;
+
+    await createNotification(payload.recipient.id, {
+      type: 'troc_match',
+      title,
+      body,
+      href: payload.href,
+    }).catch(() => {});
+
+    await sendPushToUser(payload.recipient.id, {
+      title,
+      body,
+      data: {
+        type: 'troc_match',
+        listing_id: payload.counterpart.id,
+        counterpart_listing_id: payload.counterpart.id,
+      },
+    }).catch(() => {});
+
+    if (payload.recipient.email) {
+      await sendMail({
+        to: payload.recipient.email,
+        subject: title,
+        html: `<p>Bonjour ${recipientName},</p>
+          <p><strong>${counterpartName}</strong> a une annonce compatible avec votre troc.</p>
+          <p><a href="${baseUrl}${payload.href}">Voir le match</a></p>`,
+      }).catch(() => {});
+    }
+  }
+}
+
+async function notifyTrocCycle(cycle, listingById) {
+  const baseUrl = getTrocBaseUrl();
+  const participants = (cycle.participant_ids || []).map((participantId) => {
+    const listing = (cycle.listing_ids || [])
+      .map((listingId) => listingById.get(Number(listingId)))
+      .find((item) => item && Number(item.user_id) === Number(participantId));
+
+    const profile = listing || {};
+    return {
+      participantId: Number(participantId),
+      prenom: profile.prenom,
+      nom: profile.nom,
+      email: profile.email,
+      pushToken: profile.expo_push_token,
+    };
+  });
+
+  for (const participant of participants) {
+    const recipientName = formatUserName(participant.prenom, participant.nom);
+    const title = '🔄 Troc en chaîne détecté !';
+    const body = "Vous, d'autres troceurs et leurs annonces pouvez tous y gagner.";
+
+    await createNotification(participant.participantId, {
+      type: 'troc_cycle',
+      title,
+      body,
+      href: `/troc/cycles/${cycle.id}`,
+    }).catch(() => {});
+
+    await sendPushToUser(participant.participantId, {
+      title,
+      body,
+      data: {
+        type: 'troc_cycle',
+        cycle_id: cycle.id,
+      },
+    }).catch(() => {});
+
+    if (participant.email) {
+      await sendMail({
+        to: participant.email,
+        subject: title,
+        html: `<p>Bonjour ${recipientName},</p>
+          <p>Un troc en chaîne a été détecté autour de vos annonces.</p>
+          <p><a href="${baseUrl}/troc/cycles/${cycle.id}">Voir le cycle</a></p>`,
+      }).catch(() => {});
+    }
+  }
+}
+
+async function processTrocMatchingQueue() {
+  if (String(process.env.TROC_MATCHING_ENABLED || 'true') === 'false') {
+    return { processed: 0, matches: 0, cycles: 0 };
+  }
+
+  const queuedIds = await drainTrocMatchingQueue(40);
+  if (!queuedIds.length) {
+    return { processed: 0, matches: 0, cycles: 0 };
+  }
+
+  const anchorIds = [...new Set(queuedIds.map((value) => Number(value)).filter((value) => Number.isFinite(value) && value > 0))];
+  if (!anchorIds.length) {
+    return { processed: 0, matches: 0, cycles: 0 };
+  }
+
+  const anchors = await loadOpenTrocListingsByIds(anchorIds);
+  if (!anchors.length) {
+    return { processed: anchorIds.length, matches: 0, cycles: 0 };
+  }
+
+  const openListings = await loadAllOpenTrocListings();
+  const listingById = new Map(openListings.map((listing) => [Number(listing.id), listing]));
+
+  let matchCount = 0;
+  let cycleCount = 0;
+
+  for (const anchorListing of anchors) {
+    const candidates = openListings.filter((candidate) =>
+      Number(candidate.id) !== Number(anchorListing.id)
+      && Number(candidate.user_id) !== Number(anchorListing.user_id)
+      && listingMatchesNeed(anchorListing, candidate)
+      && listingMatchesNeed(candidate, anchorListing)
+    );
+
+    for (const candidateListing of candidates) {
+      const key = buildDirectMatchKey(anchorListing, candidateListing);
+      if (!(await rememberTrocSignal(key, 24 * 60 * 60 * 1000))) {
+        continue;
+      }
+
+      await notifyTrocDirectMatch(anchorListing, candidateListing);
+      matchCount++;
+    }
+
+    const cycles = detectTrocCycles(anchorListing, openListings, {
+      expiryHours: Number(process.env.TROC_CYCLE_EXPIRY_HOURS || 48),
+      maxDepth: Number(process.env.TROC_CYCLE_MAX_DEPTH || 3),
+    });
+
+    for (const cycle of cycles) {
+      const key = buildCycleMatchKey(cycle);
+      if (!(await rememberTrocSignal(key, Number(process.env.TROC_CYCLE_EXPIRY_HOURS || 48) * 60 * 60 * 1000))) {
+        continue;
+      }
+
+      await query(
+        `INSERT INTO troc_cycles (
+           participant_ids, listing_ids, status, confirmations, detected_at, updated_at, expires_at
+         )
+         VALUES ($1::int[], $2::int[], 'proposed', '{}'::int[], NOW(), NOW(), NOW() + make_interval(hours => $3))`,
+        [
+          cycle.participant_ids,
+          cycle.listing_ids,
+          Number(process.env.TROC_CYCLE_EXPIRY_HOURS || 48),
+        ]
+      ).catch(() => {});
+
+      await notifyTrocCycle(cycle, listingById);
+      cycleCount++;
+    }
+  }
+
+  return {
+    processed: anchorIds.length,
+    matches: matchCount,
+    cycles: cycleCount,
+  };
 }
 
 // ── 1. Expiration des boosts ─────────────────────────────────
@@ -95,6 +384,126 @@ function startBonPlanMaintenanceJob() {
 
   logger.info('cron_job_started', { job: 'bon-plan-expiry' });
   logger.info('cron_job_started', { job: 'bon-plan-views-flush', interval_ms: flushIntervalMs });
+}
+
+async function expireTrocProposals() {
+  const expired = await query(`
+    WITH expired AS (
+      UPDATE troc_proposals
+      SET status = 'expired',
+          updated_at = NOW()
+      WHERE status = 'pending'
+        AND expires_at < NOW()
+      RETURNING id, proposer_id, listing_id
+    )
+    SELECT e.id, e.proposer_id, e.listing_id, u.email, u.prenom, a.titre
+    FROM expired e
+    JOIN users u ON u.id = e.proposer_id
+    JOIN annonces a ON a.id = e.listing_id
+  `);
+
+  for (const row of expired.rows) {
+    await createNotification(row.proposer_id, {
+      type: 'troc_expired',
+      title: '⏰ Proposition expirée',
+      body: "Votre proposition de troc n'a pas reçu de reponse.",
+      href: `/troc/${row.listing_id}`,
+    }).catch(() => {});
+
+    await sendPushToUser(row.proposer_id, {
+      title: '⏰ Proposition expirée',
+      body: "Votre proposition de troc n'a pas reçu de reponse.",
+      data: { type: 'troc_expired', proposal_id: row.id, listing_id: row.listing_id },
+    }).catch(() => {});
+  }
+
+  return expired.rowCount || expired.rows.length || 0;
+}
+
+async function expireTrocCycles() {
+  const expired = await query(`
+    WITH broken AS (
+      UPDATE troc_cycles
+      SET status = 'broken',
+          updated_at = NOW()
+      WHERE status = 'proposed'
+        AND expires_at < NOW()
+      RETURNING id, participant_ids
+    )
+    SELECT id, participant_ids
+    FROM broken
+  `);
+
+  for (const row of expired.rows) {
+    await sendPushToUsers(row.participant_ids || [], {
+      title: '🔄 Cycle Troc expiré',
+      body: "Le troc en chaîne n'a pas ete confirme a temps.",
+      data: { type: 'troc_cycle_expired', cycle_id: row.id },
+    }).catch(() => {});
+  }
+
+  return expired.rowCount || expired.rows.length || 0;
+}
+
+function startTrocMaintenanceJob() {
+  cron.schedule('*/5 * * * *', async () => {
+    recordJob('started', { job: 'troc-maintenance' });
+    await runSingletonJob('cron:troc-maintenance', 4 * 60 * 1000, async () => {
+      try {
+        const expiredProposals = await expireTrocProposals();
+        const brokenCycles = await expireTrocCycles();
+        if (expiredProposals || brokenCycles) {
+          logger.info('cron_troc_maintenance', {
+            expired_proposals: expiredProposals,
+            broken_cycles: brokenCycles,
+          });
+        }
+      } catch (err) {
+        recordJob('error', { job: 'troc-maintenance', message: err.message });
+        logger.error('cron_troc_maintenance_error', { error: err });
+      }
+    });
+  }, { timezone: 'Pacific/Noumea' });
+
+  logger.info('cron_job_started', { job: 'troc-maintenance' });
+}
+
+function startTrocMatchingJob() {
+  cron.schedule('*/30 * * * * *', async () => {
+    recordJob('started', { job: 'troc-matching' });
+    await runSingletonJob('cron:troc-matching', 25 * 1000, async () => {
+      try {
+        const result = await processTrocMatchingQueue();
+        if (result.processed || result.matches || result.cycles) {
+          logger.info('cron_troc_matching', result);
+        }
+      } catch (err) {
+        recordJob('error', { job: 'troc-matching', message: err.message });
+        logger.error('cron_troc_matching_error', { error: err });
+      }
+    });
+  }, { timezone: 'Pacific/Noumea' });
+
+  logger.info('cron_job_started', { job: 'troc-matching' });
+}
+
+function startAdminAlertsJob() {
+  cron.schedule('*/5 * * * *', async () => {
+    recordJob('started', { job: 'admin-alerts' });
+    await runSingletonJob('cron:admin-alerts', 4 * 60 * 1000, async () => {
+      try {
+        const alerts = await checkAdminAlerts();
+        if (alerts?.length) {
+          logger.info('cron_admin_alerts', { alerts: alerts.length });
+        }
+      } catch (err) {
+        recordJob('error', { job: 'admin-alerts', message: err.message });
+        logger.error('cron_admin_alerts_error', { error: err });
+      }
+    });
+  }, { timezone: 'Pacific/Noumea' });
+
+  logger.info('cron_job_started', { job: 'admin-alerts' });
 }
 
 // ── 2. Envoi des alertes daily ───────────────────────────────
@@ -433,6 +842,9 @@ function startReviewReminderJob() {
 function startAllJobs() {
   startBoostExpiryJob();
   startBonPlanMaintenanceJob();
+  startAdminAlertsJob();
+  startTrocMatchingJob();
+  startTrocMaintenanceJob();
   startExpiringListingsJob();
   startReviewReminderJob();
   startDailyAlertsJob();
@@ -440,4 +852,4 @@ function startAllJobs() {
   startAnalyticsPurgeJob();
 }
 
-module.exports = { startAllJobs, matchImmediateAlerts };
+module.exports = { startAllJobs, matchImmediateAlerts, expireTrocProposals, expireTrocCycles, processTrocMatchingQueue };

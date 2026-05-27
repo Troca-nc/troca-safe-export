@@ -5,6 +5,7 @@ const Joi = require('joi');
 const { query, withTransaction } = require('../config/database');
 const { authenticate, optionalAuth } = require('../middleware/auth');
 const { logger } = require('../utils/logger');
+const { triggerCovoiturageAlerts } = require('../services/covoitAlertService');
 
 const router = express.Router();
 
@@ -40,6 +41,28 @@ const reviewSchema = Joi.object({
   rating: Joi.number().integer().min(1).max(5).required(),
   comment: Joi.string().min(2).max(1000).allow('', null),
 });
+
+const alertSchema = Joi.object({
+  from_commune: Joi.string().max(100).allow('', null),
+  to_commune: Joi.string().max(100).allow('', null),
+  jour_semaine: Joi.number().integer().min(0).max(6).allow(null),
+  heure_min: Joi.string().pattern(/^\d{2}:\d{2}$/).allow('', null),
+  heure_max: Joi.string().pattern(/^\d{2}:\d{2}$/).allow('', null),
+  via_push: Joi.boolean().default(true),
+  via_email: Joi.boolean().default(false),
+  active: Joi.boolean().default(true),
+});
+
+const updateAlertSchema = Joi.object({
+  from_commune: Joi.string().max(100).allow('', null),
+  to_commune: Joi.string().max(100).allow('', null),
+  jour_semaine: Joi.number().integer().min(0).max(6).allow(null),
+  heure_min: Joi.string().pattern(/^\d{2}:\d{2}$/).allow('', null),
+  heure_max: Joi.string().pattern(/^\d{2}:\d{2}$/).allow('', null),
+  via_push: Joi.boolean(),
+  via_email: Joi.boolean(),
+  active: Joi.boolean(),
+}).min(1);
 
 function parseJson(value, fallback) {
   if (value == null) return fallback;
@@ -250,8 +273,133 @@ router.post('/', authenticate, async (req, res, next) => {
     });
 
     logger.info('covoiturage_created', { user_id: req.user.id, covoiturage_id: created.id });
+    void triggerCovoiturageAlerts(created).catch((error) => {
+      logger.warn('covoiturage_alert_trigger_failed', {
+        covoiturage_id: created.id,
+        error: error?.message || String(error),
+      });
+    });
 
     return res.status(201).json({ data: mapRide(created) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/alerts', authenticate, async (req, res, next) => {
+  try {
+    const result = await query(
+      `SELECT id, user_id, from_commune, to_commune, jour_semaine, heure_min, heure_max,
+              via_push, via_email, active, last_notified_at, created_at
+       FROM covoit_alerts
+       WHERE user_id = $1
+       ORDER BY created_at DESC`,
+      [req.user.id]
+    );
+
+    return res.json({ data: result.rows });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/alerts', authenticate, async (req, res, next) => {
+  try {
+    const { error, value } = alertSchema.validate(req.body, { stripUnknown: true, convert: true });
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
+    const countResult = await query(
+      `SELECT COUNT(*) AS total FROM covoit_alerts WHERE user_id = $1 AND active = true`,
+      [req.user.id]
+    );
+    const count = Number(countResult.rows[0]?.total || 0);
+    if (count >= 3) {
+      return res.status(429).json({ error: 'Vous pouvez créer jusqu’à 3 alertes trajet.' });
+    }
+
+    const inserted = await query(
+      `INSERT INTO covoit_alerts
+         (user_id, from_commune, to_commune, jour_semaine, heure_min, heure_max, via_push, via_email, active)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+       RETURNING id, user_id, from_commune, to_commune, jour_semaine, heure_min, heure_max,
+                 via_push, via_email, active, last_notified_at, created_at`,
+      [
+        req.user.id,
+        value.from_commune?.trim() || null,
+        value.to_commune?.trim() || null,
+        value.jour_semaine ?? null,
+        value.heure_min || null,
+        value.heure_max || null,
+        Boolean(value.via_push),
+        Boolean(value.via_email),
+        Boolean(value.active),
+      ]
+    );
+
+    return res.status(201).json({ data: inserted.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch('/alerts/:id', authenticate, async (req, res, next) => {
+  try {
+    const { error, value } = updateAlertSchema.validate(req.body, { stripUnknown: true, convert: true });
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
+    const fields = [];
+    const params = [];
+    let index = 1;
+
+    for (const key of ['from_commune', 'to_commune', 'jour_semaine', 'heure_min', 'heure_max', 'via_push', 'via_email', 'active']) {
+      if (!Object.prototype.hasOwnProperty.call(value, key)) continue;
+      fields.push(`${key} = $${index++}`);
+      const raw = value[key];
+      if (typeof raw === 'string') {
+        params.push(raw.trim() || null);
+      } else {
+        params.push(raw);
+      }
+    }
+
+    if (!fields.length) {
+      return res.status(400).json({ error: 'Aucune donnée à mettre à jour.' });
+    }
+
+    fields.push('updated_at = NOW()');
+    params.push(req.params.id, req.user.id);
+
+    const result = await query(
+      `UPDATE covoit_alerts
+       SET ${fields.join(', ')}
+       WHERE id = $${index++} AND user_id = $${index}
+       RETURNING id, user_id, from_commune, to_commune, jour_semaine, heure_min, heure_max,
+                 via_push, via_email, active, last_notified_at, created_at`,
+      params
+    );
+
+    if (!result.rows[0]) {
+      return res.status(404).json({ error: 'Alerte introuvable.' });
+    }
+
+    return res.json({ data: result.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/alerts/:id', authenticate, async (req, res, next) => {
+  try {
+    const result = await query(
+      `DELETE FROM covoit_alerts WHERE id = $1 AND user_id = $2 RETURNING id`,
+      [req.params.id, req.user.id]
+    );
+
+    if (!result.rows[0]) {
+      return res.status(404).json({ error: 'Alerte introuvable.' });
+    }
+
+    return res.json({ message: 'Alerte supprimée.' });
   } catch (err) {
     next(err);
   }
@@ -264,7 +412,12 @@ router.post('/:id/book', authenticate, async (req, res, next) => {
 
     const result = await withTransaction(async (client) => {
       const rideRes = await client.query(
-        `SELECT * FROM covoiturages WHERE id = $1 FOR UPDATE`,
+        `SELECT id, user_id, departure, destination, stops, ride_date, ride_time, seats_total, seats_reserved,
+                price_xpf, vehicle, comfort, luggage_allowed, music_allowed, no_smoking, animals_allowed,
+                description, status, departure_commune_id, destination_commune_id, trust_score,
+                is_verified_driver, expires_at, created_at, updated_at
+         FROM covoiturages
+         WHERE id = $1 FOR UPDATE`,
         [req.params.id]
       );
 
