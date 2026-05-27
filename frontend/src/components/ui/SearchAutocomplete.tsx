@@ -30,7 +30,8 @@ const MAX_HISTORY = 5
 
 function getHistory(): string[] {
   try {
-    return JSON.parse(sessionStorage.getItem(HISTORY_KEY) ?? '[]')
+    const raw = sessionStorage.getItem(HISTORY_KEY)
+    return raw ? JSON.parse(raw) : []
   } catch { return [] }
 }
 
