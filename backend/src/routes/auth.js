@@ -23,13 +23,15 @@ const {
 const { sendResetEmail, sendWelcomeEmail, sendVerificationEmail } = require('../services/emailService');
 const { verifyTurnstileToken } = require('../services/turnstile');
 const { query } = require('../config/database');
+const { verifyCsrf } = require('../middleware/csrf');
+const { setSecureCookie, clearSecureCookie, getCookieValue } = require('../config/cookies');
+const { getRefreshExpiresMs } = require('../config/jwt');
 const {
   normalizePhoneNumber,
   resendPhoneOtp,
 } = require('../services/phoneOtpService');
 const {
   confirmEmail,
-  blacklistAccessToken,
   deleteRefreshToken,
   findUserById,
   loginAccount,
@@ -39,8 +41,10 @@ const {
   requestPasswordReset,
   resetPasswordWithToken,
 } = require('../services/authAccountService');
+const { addToTokenBlacklist } = require('../services/tokenService');
 
 const router = express.Router();
+const REFRESH_COOKIE_NAME = 'troca_refresh_token';
 
 const registerSchema = Joi.object({
   email: Joi.string().email().max(255).required(),
@@ -77,6 +81,18 @@ const resendOtpSchema = Joi.object({
   channel: Joi.string().valid('sms', 'email').default('sms'),
 });
 
+function setRefreshCookie(res, refreshToken) {
+  setSecureCookie(res, REFRESH_COOKIE_NAME, refreshToken, {
+    maxAge: getRefreshExpiresMs(),
+  });
+}
+
+function readRefreshToken(req) {
+  const bodyToken = String(req.body?.refresh_token || '').trim();
+  if (bodyToken) return bodyToken;
+  return getCookieValue(req, REFRESH_COOKIE_NAME);
+}
+
 router.post('/register', registerLimiter, async (req, res, next) => {
   try {
     const { error, value } = registerSchema.validate(req.body);
@@ -84,6 +100,7 @@ router.post('/register', registerLimiter, async (req, res, next) => {
 
     await verifyTurnstileToken({ req, token: value.turnstile_token, ip: req.ip, action: 'register' });
     const { user, verificationToken, accessToken, refreshToken } = await registerAccount(value);
+    setRefreshCookie(res, refreshToken);
 
     sendVerificationEmail(user.email, user.prenom, verificationToken).catch((err) => {
       console.error('[AUTH] Erreur envoi email vérification:', err.message);
@@ -97,7 +114,6 @@ router.post('/register', registerLimiter, async (req, res, next) => {
       data: {
         user,
         access_token: accessToken,
-        refresh_token: refreshToken,
       },
     });
   } catch (err) {
@@ -112,12 +128,12 @@ router.post('/login', loginLimiter, async (req, res, next) => {
 
     await verifyTurnstileToken({ req, token: value.turnstile_token, ip: req.ip, action: 'login' });
     const { user, accessToken, refreshToken } = await loginAccount(value, { ip: req.ip });
+    setRefreshCookie(res, refreshToken);
 
     return res.json({
       data: {
         user,
         access_token: accessToken,
-        refresh_token: refreshToken,
       },
     });
   } catch (err) {
@@ -134,15 +150,17 @@ router.post('/login', loginLimiter, async (req, res, next) => {
 // TODO: test refresh rotation after deploy with Redis blacklist enabled.
 router.post('/refresh', refreshLimiter, async (req, res, next) => {
   try {
-    const { error, value } = refreshSchema.validate(req.body);
-    if (error) return res.status(400).json({ error: 'refresh_token manquant.' });
+    const { error, value = {} } = refreshSchema.validate(req.body);
+    const refreshToken = String(value.refresh_token || readRefreshToken(req) || '').trim();
+    if (error && !refreshToken) return res.status(400).json({ error: 'refresh_token manquant.' });
+    if (!refreshToken) return res.status(400).json({ error: 'refresh_token manquant.' });
 
-    const { accessToken, refreshToken: newRefresh } = await refreshSessionWithRotation(value.refresh_token);
+    const { accessToken, refreshToken: newRefresh } = await refreshSessionWithRotation(refreshToken);
+    setRefreshCookie(res, newRefresh);
 
     return res.json({
       data: {
         access_token: accessToken,
-        refresh_token: newRefresh,
       },
     });
   } catch (err) {
@@ -159,17 +177,18 @@ router.get('/me', authenticate, async (req, res, next) => {
   }
 });
 
-router.post('/logout', async (req, res, next) => {
+router.post('/logout', verifyCsrf, async (req, res, next) => {
   try {
     const header = req.headers.authorization;
     const accessToken = header && header.startsWith('Bearer ') ? header.split(' ')[1] : null;
-    const { refresh_token } = req.body;
+    const refresh_token = readRefreshToken(req);
     if (accessToken) {
-      await blacklistAccessToken(accessToken);
+      await addToTokenBlacklist(accessToken);
     }
     if (refresh_token) {
       await deleteRefreshToken(refresh_token);
     }
+    clearSecureCookie(res, REFRESH_COOKIE_NAME);
     return res.json({ message: 'Déconnecté avec succès.' });
   } catch (err) {
     next(err);

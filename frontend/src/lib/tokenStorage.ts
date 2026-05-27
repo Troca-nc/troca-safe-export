@@ -14,11 +14,15 @@ export function getStoredRefreshToken() {
   return getSessionStorage()?.getItem(REFRESH_TOKEN_KEY) ?? ''
 }
 
-export function saveStoredTokens(accessToken: string, refreshToken: string) {
+export function saveStoredTokens(accessToken: string, refreshToken?: string | null) {
   const storage = getSessionStorage()
   if (!storage) return
   storage.setItem(ACCESS_TOKEN_KEY, accessToken)
-  storage.setItem(REFRESH_TOKEN_KEY, refreshToken)
+  if (refreshToken) {
+    storage.setItem(REFRESH_TOKEN_KEY, refreshToken)
+  } else {
+    storage.removeItem(REFRESH_TOKEN_KEY)
+  }
 }
 
 export function clearStoredTokens() {

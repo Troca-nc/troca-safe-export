@@ -36,7 +36,19 @@ export const tokenStorage = {
     }
     return SecureStore.setItemAsync(KEY_ACCESS, value);
   },
-  setRefresh: async (value: string) => {
+  setRefresh: async (value?: string | null) => {
+    if (!value) {
+      if (Platform.OS === 'web') {
+        try {
+          window.localStorage.removeItem(KEY_REFRESH);
+        } catch {
+          return;
+        }
+        return;
+      }
+      await SecureStore.deleteItemAsync(KEY_REFRESH);
+      return;
+    }
     if (Platform.OS === 'web') {
       try {
         window.localStorage.setItem(KEY_REFRESH, value);

@@ -20,6 +20,7 @@ export const API_ORIGIN = API_URL
 export const api = axios.create({
   baseURL: API_URL,
   timeout: 15000,
+  withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 })
 
@@ -394,13 +395,16 @@ api.interceptors.response.use(
 
     try {
       const refresh = await tokenStorage.getRefresh()
-      if (!refresh) throw new Error('No refresh token')
 
-      const { data } = await axios.post(`${API_URL}/auth/refresh`, { refresh_token: refresh })
+      const { data } = await axios.post(
+        `${API_URL}/auth/refresh`,
+        refresh ? { refresh_token: refresh } : undefined,
+        { withCredentials: true }
+      )
       const newAccess: string = data.data.access_token
 
       await tokenStorage.setAccess(newAccess)
-      if (data.data.refresh_token) await tokenStorage.setRefresh(data.data.refresh_token)
+      await tokenStorage.setRefresh(data.data.refresh_token ?? null)
 
       queue.forEach((q) => q.resolve(newAccess))
       queue = []

@@ -7,11 +7,13 @@ const { OAuth2Client } = require('google-auth-library')
 const appleSignin   = require('apple-signin-auth')
 const { query }     = require('../config/database')
 const { isConfiguredValue } = require('../config/env')
-const { signAccessToken, signRefreshToken } = require('../config/jwt')
+const { signAccessToken, signRefreshToken, getRefreshExpiresMs } = require('../config/jwt')
+const { setSecureCookie } = require('../config/cookies')
 const { socialAuthLimiter } = require('../middleware/rateLimit')
 const { logger } = require('../utils/logger')
 
 const router       = express.Router()
+const REFRESH_COOKIE_NAME = 'troca_refresh_token'
 const googleClientId = isConfiguredValue(process.env.GOOGLE_CLIENT_ID) ? process.env.GOOGLE_CLIENT_ID.trim() : ''
 const appleClientId = isConfiguredValue(process.env.APPLE_CLIENT_ID) ? process.env.APPLE_CLIENT_ID.trim() : ''
 const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null
@@ -104,8 +106,15 @@ router.post('/google', socialAuthLimiter, async (req, res) => {
       provider:    'google',
       provider_id: payload.sub,
     })
+    const auth = buildAuthResponse(user)
+    setSecureCookie(res, REFRESH_COOKIE_NAME, auth.refresh_token, { maxAge: getRefreshExpiresMs() })
 
-    res.json({ data: buildAuthResponse(user) })
+    res.json({
+      data: {
+        access_token: auth.access_token,
+        user: auth.user,
+      },
+    })
   } catch (err) {
     logger.error('auth_google_error', { error: err })
     res.status(401).json({ error: 'Token Google invalide ou expiré' })
@@ -139,8 +148,15 @@ router.post('/apple', socialAuthLimiter, async (req, res) => {
       provider:    'apple',
       provider_id: payload.sub,
     })
+    const auth = buildAuthResponse(user)
+    setSecureCookie(res, REFRESH_COOKIE_NAME, auth.refresh_token, { maxAge: getRefreshExpiresMs() })
 
-    res.json({ data: buildAuthResponse(user) })
+    res.json({
+      data: {
+        access_token: auth.access_token,
+        user: auth.user,
+      },
+    })
   } catch (err) {
     logger.error('auth_apple_error', { error: err })
     res.status(401).json({ error: 'Token Apple invalide ou expiré' })

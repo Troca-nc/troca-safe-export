@@ -20,6 +20,7 @@ export const API_ORIGIN = API_URL.replace(/\/api$/, '')
 export const api = axios.create({
   baseURL: API_URL,
   timeout: 15000,
+  withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 })
 
@@ -192,15 +193,12 @@ api.interceptors.response.use(
       isRefreshing = true
       const refreshToken = getStoredRefreshToken()
 
-      if (!refreshToken) {
-        redirectToLoginAfterAuthFailure()
-        return Promise.reject(error)
-      }
-
       try {
-        const { data } = await axios.post(`${API_URL}/auth/refresh`, {
-          refresh_token: refreshToken,
-        })
+        const { data } = await axios.post(
+          `${API_URL}/auth/refresh`,
+          refreshToken ? { refresh_token: refreshToken } : undefined,
+          { withCredentials: true }
+        )
         const { access_token, refresh_token } = data.data
         saveTokens(access_token, refresh_token)
 
@@ -224,7 +222,7 @@ api.interceptors.response.use(
 )
 
 // Helpers tokens
-export const saveTokens = (access: string, refresh: string) => {
+export const saveTokens = (access: string, refresh?: string | null) => {
   saveStoredTokens(access, refresh)
 }
 
@@ -250,7 +248,8 @@ export const authApi = {
       ...data,
       ...(turnstileToken ? { turnstile_token: turnstileToken } : {}),
     }),
-  logout: (refreshToken: string) => api.post('/auth/logout', { refresh_token: refreshToken }),
+  logout: (refreshToken?: string) =>
+    refreshToken ? api.post('/auth/logout', { refresh_token: refreshToken }) : api.post('/auth/logout'),
   me: () => api.get('/auth/me'),
   verifyEmail: (token: string) => api.post('/auth/verify-email', { token }),
   forgotPassword: (email: string, turnstileToken?: string) =>

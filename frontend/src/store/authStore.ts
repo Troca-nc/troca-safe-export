@@ -31,7 +31,7 @@ const REAL_AUTH_BACKUP_KEY = 'auth-store-real-backup'
 const DEMO_USERS: Record<Exclude<DemoProfileKey, 'visitor'>, User> = {
   particulier: {
     id: 'demo-particulier',
-    email: 'particulier@demo.troca',
+    email: 'particulier@demo.troca.nc',
     first_name: 'Emma',
     last_name: 'Martin',
     avatar_url: null,
@@ -44,7 +44,7 @@ const DEMO_USERS: Record<Exclude<DemoProfileKey, 'visitor'>, User> = {
   },
   pro: {
     id: 'demo-pro',
-    email: 'pro@demo.troca',
+    email: 'pro@demo.troca.nc',
     first_name: 'Atelier',
     last_name: 'Kalo',
     avatar_url: null,
@@ -57,7 +57,7 @@ const DEMO_USERS: Record<Exclude<DemoProfileKey, 'visitor'>, User> = {
   },
   bon_plan: {
     id: 'demo-bon-plan',
-    email: 'bonplan@demo.troca',
+    email: 'bonplan@demo.troca.nc',
     first_name: 'Troca',
     last_name: 'Bon Plan',
     avatar_url: null,
@@ -75,6 +75,7 @@ interface AuthState {
   isLoading: boolean
   isAuthenticated: boolean
   demoProfile: DemoProfileKey | null
+  hasHydrated: boolean
 
   login:    (email: string, password: string, turnstileToken?: string) => Promise<void>
   register: (data: object, turnstileToken?: string) => Promise<void>
@@ -83,13 +84,13 @@ interface AuthState {
   refreshMe: () => Promise<void>
   setUser:  (user: User) => void
   setDemoProfile: (profile: DemoProfileKey | null) => void
+  setHasHydrated: (hydrated: boolean) => void
 }
 
 type RealAuthBackup = {
   user: User | null
   isAuthenticated: boolean
   access_token: string | null
-  refresh_token: string | null
 }
 
 function readRealAuthBackup(): RealAuthBackup | null {
@@ -119,6 +120,7 @@ export const useAuthStore = create<AuthState>()(
       isLoading:       false,
       isAuthenticated: false,
       demoProfile:     null,
+      hasHydrated:     false,
 
       setDemoProfile: (profile) => {
         const currentDemo = get().demoProfile
@@ -126,8 +128,8 @@ export const useAuthStore = create<AuthState>()(
         if (!profile) {
           const backup = readRealAuthBackup()
           if (backup) {
-            if (backup.access_token && backup.refresh_token) {
-              saveTokens(backup.access_token, backup.refresh_token)
+            if (backup.access_token) {
+              saveTokens(backup.access_token)
             }
             set({
               user: backup.user,
@@ -150,7 +152,6 @@ export const useAuthStore = create<AuthState>()(
             user: get().user,
             isAuthenticated: get().isAuthenticated,
             access_token: typeof window !== 'undefined' ? getStoredAccessToken() : null,
-            refresh_token: typeof window !== 'undefined' ? getStoredRefreshToken() : null,
           })
         }
 
@@ -233,6 +234,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       setUser: (user) => set({ user }),
+      setHasHydrated: (hasHydrated) => set({ hasHydrated }),
     }),
     {
       name: 'auth-store',
@@ -241,6 +243,9 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: state.isAuthenticated,
         demoProfile: state.demoProfile,
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true)
+      },
     }
   )
 )
