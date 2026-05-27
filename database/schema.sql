@@ -183,10 +183,13 @@ CREATE TABLE IF NOT EXISTS annonce_images (
   thumbnail_url  VARCHAR(500) NOT NULL,
   variants       JSONB        NOT NULL DEFAULT '{}'::jsonb,
   position       SMALLINT     NOT NULL DEFAULT 0,
+  sort_order     INTEGER      NOT NULL DEFAULT 0,
+  is_cover       BOOLEAN      NOT NULL DEFAULT FALSE,
   created_at     TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_images_annonce_id ON annonce_images (annonce_id, position);
+CREATE INDEX IF NOT EXISTS idx_images_annonce_cover_sort ON annonce_images (annonce_id, is_cover DESC, sort_order ASC);
 
 -- ── FAVORIS ───────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS favoris (
