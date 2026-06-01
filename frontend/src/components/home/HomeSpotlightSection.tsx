@@ -211,7 +211,7 @@ export function HomeSpotlightSection({
       {
         key: 'events',
         label: 'Événements',
-        href: '/bons-plans#événements',
+        href: '/bons-plans#evenements',
         items: eventItems,
         badge: 'Culture',
         intro: 'Concerts, marchés, animations et rendez-vous locaux.',
@@ -242,7 +242,7 @@ export function HomeSpotlightSection({
   const primaryListing = primary as ListingItem | undefined
   const primaryService = primary as ServiceItem | undefined
   const activeTone = getToneClasses((active as { tone?: SpotlightTone }).tone || 'lagon')
-  const hasAnyItems = tabs.some((tab) => tab.items.length > 0)
+  const totalItems = tabs.reduce((sum, tab) => sum + tab.items.length, 0)
   const emptyState =
     active.key === 'premium'
       ? {
@@ -279,24 +279,7 @@ export function HomeSpotlightSection({
                 href: '/covoiturage?mode=publish',
               }
 
-  if (!loading && !hasAnyItems) {
-    return (
-      <section className="mx-auto max-w-7xl px-4 pb-10">
-        <div className="overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.14))] p-6 text-white shadow-[0_24px_80px_rgba(8,32,50,0.08)]">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-lagon">
-            <Sparkles className="h-3.5 w-3.5" />
-            Rappels interactifs
-          </div>
-          <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
-            La plateforme ouvre bientôt — revenez vite !
-          </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
-            Les premiers contenus s&apos;afficheront ici au fil des annonces, promotions, événements et trajets publiés.
-          </p>
-        </div>
-      </section>
-    )
-  }
+  if (totalItems === 0) return null
 
   return (
     <section className="mx-auto max-w-7xl px-4 pb-10">
@@ -431,7 +414,7 @@ export function HomeSpotlightSection({
               <Link href="/bons-plans" className="badge-emeraude rounded-full px-3 py-1.5 text-xs font-semibold">
                 Bons plans
               </Link>
-              <Link href="/événements" className="badge-sable rounded-full px-3 py-1.5 text-xs font-semibold">
+              <Link href="/evenements" className="badge-sable rounded-full px-3 py-1.5 text-xs font-semibold">
                 Événements
               </Link>
               <Link href="/covoiturage" className="badge-corail rounded-full px-3 py-1.5 text-xs font-semibold">

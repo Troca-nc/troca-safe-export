@@ -12,7 +12,7 @@ import {
   BonPlanSection,
   FeaturedListingsSection,
   HomeHeroSection,
-  ExpandedCategoriesSection,
+  ExpandedCategoriesGridSection,
   SearchAlertsSection,
   HomeStatsSection,
 } from '@/components/home/HomeSections'
@@ -121,10 +121,6 @@ export default function HomePage() {
     else router.push('/annonces')
   }
 
-  const browseCategory = (slug: string) => {
-    router.push(`/annonces/categorie/${slug}`)
-  }
-
   return (
     <main className="min-h-screen bg-[var(--color-bg-page)] text-[var(--color-text-primary)]">
       <Header />
@@ -171,7 +167,7 @@ export default function HomePage() {
       />
       <FeaturedListingsSection loading={loading} listings={featuredListings} />
       <SearchAlertsSection />
-      <ExpandedCategoriesSection categories={visibleCategories} onBrowse={browseCategory} />
+      <ExpandedCategoriesGridSection categories={visibleCategories} />
     </main>
   )
 }

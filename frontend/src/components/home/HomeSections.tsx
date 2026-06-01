@@ -2,13 +2,33 @@
 
 import Link from 'next/link'
 import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowRight, ChevronRight, Search, Sparkles } from 'lucide-react'
+import {
+  Anchor,
+  Archive,
+  ArrowRight,
+  Baby,
+  Briefcase,
+  Car,
+  ChevronRight,
+  Gamepad2,
+  HardHat,
+  HeartHandshake,
+  Home,
+  Package,
+  PawPrint,
+  Search,
+  Shirt,
+  Smartphone,
+  Sofa,
+  Sparkles,
+  Wrench,
+} from 'lucide-react'
 
 import PlatformStats from '@/components/PlatformStats'
 import ListingCard from '@/components/listings/ListingCard'
 import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
 import type { CategoryNode } from '@/lib/categoryCatalog'
-import { SEARCH_ALERTS, getCategoryIcon } from '@/lib/categoryPresentation'
+import { SEARCH_ALERTS } from '@/lib/categoryPresentation'
 
 function formatNumber(value: number | null) {
   if (value === null || Number.isNaN(value)) return '...'
@@ -17,6 +37,25 @@ function formatNumber(value: number | null) {
 
 function getCategoryChildren(category: CategoryNode) {
   return category.children || category.subcategories || []
+}
+
+function getHomepageCategoryIcon(category: Pick<CategoryNode, 'slug' | 'name'>) {
+  const value = `${category.slug} ${category.name}`.toLowerCase()
+  if (value.includes('vehic')) return Car
+  if (value.includes('naut') || value.includes('bateau') || value.includes('marine')) return Anchor
+  if (value.includes('immobili') || value.includes('logement')) return Home
+  if (value.includes('emploi') || value.includes('job')) return Briefcase
+  if (value.includes('mode') || value.includes('vetement') || value.includes('vêtement')) return Shirt
+  if (value.includes('maison') || value.includes('jardin') || value.includes('mobilier')) return Sofa
+  if (value.includes('bricol') || value.includes('outillage') || value.includes('outil')) return Wrench
+  if (value.includes('famille') || value.includes('puer') || value.includes('puér')) return Baby
+  if (value.includes('electron') || value.includes('électron') || value.includes('multim')) return Smartphone
+  if (value.includes('loisir')) return Gamepad2
+  if (value.includes('collection') || value.includes('antiqu')) return Archive
+  if (value.includes('animal')) return PawPrint
+  if (value.includes('service')) return HeartHandshake
+  if (value.includes('materiel') || value.includes('matériel') || value.includes('profession')) return HardHat
+  return Package
 }
 
 type HomeHeroSectionProps = {
@@ -179,12 +218,12 @@ export function FeaturedListingsSection({
           </div>
         ) : (
           <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] py-14 text-center text-night/45">
-            <p className="text-sm font-semibold text-night">Soyez parmi les premiers !</p>
+            <p className="text-sm font-semibold text-night">Les meilleures annonces apparaîtront ici</p>
             <p className="mt-2 text-sm text-night/65">
-              Aucune annonce pour l&apos;instant — publiez la vôtre et lancez la communauté.
+              Boostez votre annonce pour apparaître en tête de page.
             </p>
             <Link href="/annonces/nouvelle" className="btn-primary mt-4 inline-block">
-              Publier une annonce
+              Déposer une annonce
             </Link>
           </div>
         )}
@@ -255,7 +294,7 @@ function CategoryTreeRow({
   depth: number
   onBrowse: (slug: string) => void
 }) {
-  const Visual = getCategoryIcon(category.slug, category.name, category.icon)
+  const Visual = getHomepageCategoryIcon(category)
   const children = getCategoryChildren(category)
 
   return (
@@ -269,7 +308,7 @@ function CategoryTreeRow({
             : 'border-[var(--color-border)] bg-[var(--color-background-secondary)]/80'
         }`}
       >
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-nc-lagonLight text-nc-lagonText">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
           <Visual className="h-5 w-5" />
         </span>
         <span className="min-w-0 flex-1">
@@ -285,7 +324,7 @@ function CategoryTreeRow({
         <div className={depth === 0 ? 'grid gap-2 md:grid-cols-2' : 'space-y-2'}>
           {children.map((child) => {
             const grandChildren = getCategoryChildren(child)
-            const ChildVisual = getCategoryIcon(child.slug, child.name, child.icon)
+            const ChildVisual = getHomepageCategoryIcon(child)
 
             return (
               <div
@@ -297,7 +336,7 @@ function CategoryTreeRow({
                   onClick={() => onBrowse(child.slug)}
                   className="flex w-full items-center gap-3 text-left transition hover:-translate-y-0.5"
                 >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-nc-lagonLight text-nc-lagonText">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
                     <ChildVisual className="h-4 w-4" />
                   </span>
                   <span className="min-w-0 flex-1">
@@ -312,7 +351,7 @@ function CategoryTreeRow({
                 {grandChildren.length > 0 ? (
                   <div className="mt-3 flex flex-wrap gap-2">
                     {grandChildren.map((grandChild) => {
-                      const GrandVisual = getCategoryIcon(grandChild.slug, grandChild.name, grandChild.icon)
+                      const GrandVisual = getHomepageCategoryIcon(grandChild)
                       return (
                         <button
                           key={grandChild.id}
@@ -343,12 +382,12 @@ function CategoryCard({
   category: CategoryNode
   onBrowse: (slug: string) => void
 }) {
-  const Visual = getCategoryIcon(category.slug, category.name, category.icon)
+  const Visual = getHomepageCategoryIcon(category)
 
   return (
     <div className="group overflow-hidden rounded-[1.75rem] border border-night/8 border-l-4 border-l-nc-lagon bg-white/95 p-5 shadow-card transition-all hover:-translate-y-1 hover:shadow-hover">
       <div className="mb-4 flex flex-col items-start gap-3">
-        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-nc-lagonLight text-nc-lagonText">
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
           <Visual className="h-7 w-7" />
         </span>
         <div>
@@ -359,7 +398,7 @@ function CategoryCard({
 
       <div className="flex flex-wrap gap-2">
         {(category.subcategories || []).map((sub) => {
-          const SubVisual = getCategoryIcon(sub.slug, sub.name, sub.icon)
+          const SubVisual = getHomepageCategoryIcon(sub)
           return (
             <Link
               key={sub.id}
@@ -444,9 +483,9 @@ export function ExpandedCategoriesSection({
               className="mb-3 flex w-full items-center gap-3 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-4 py-3 text-left transition hover:-translate-y-0.5 hover:shadow-sm"
             >
               <div className="flex min-w-0 flex-1 flex-col gap-2">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-nc-lagonLight text-nc-lagonText">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
                   {(() => {
-                    const Visual = getCategoryIcon(category.slug, category.name, category.icon)
+                    const Visual = getHomepageCategoryIcon(category)
                     return <Visual className="h-7 w-7" />
                   })()}
                 </span>
@@ -465,6 +504,105 @@ export function ExpandedCategoriesSection({
             </div>
           </article>
         ))}
+      </div>
+    </section>
+  )
+}
+
+function buildCategorySearchHref(categorySlug: string, subcategorySlug?: string) {
+  const params = new URLSearchParams()
+  params.set('categorie', categorySlug)
+  if (subcategorySlug) params.set('sous_categorie', subcategorySlug)
+  return `/annonces?${params.toString()}`
+}
+
+function ExpandedCategorySubtree({
+  rootSlug,
+  categories,
+  depth = 0,
+}: {
+  rootSlug: string
+  categories: CategoryNode[]
+  depth?: number
+}) {
+  if (!categories.length) return null
+
+  return (
+    <div className={depth === 0 ? 'mt-3 grid gap-x-3 gap-y-1 sm:grid-cols-2' : 'mt-2 space-y-1 border-l border-[var(--color-border)] pl-3'}>
+      {categories.map((category) => {
+        const children = getCategoryChildren(category)
+        return (
+          <div key={category.id} className="space-y-1">
+            <Link
+              href={buildCategorySearchHref(rootSlug, category.slug)}
+              className={`block transition-colors hover:text-[#0A7EA4] ${
+                depth === 0 ? 'text-sm font-medium text-night/70' : 'text-xs text-night/55'
+              }`}
+            >
+              {category.name}
+            </Link>
+            {children.length > 0 ? (
+              <ExpandedCategorySubtree rootSlug={rootSlug} categories={children} depth={depth + 1} />
+            ) : null}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+export function ExpandedCategoriesGridSection({
+  categories,
+}: {
+  categories: CategoryNode[]
+}) {
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-10">
+      <div className="mb-5 flex items-end justify-between gap-4">
+        <div className="section-lagon">
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Tous les rayons</p>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">L&apos;arbre complet des catégories, entièrement déplié</h2>
+        </div>
+        <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
+          Voir toutes les annonces <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        {categories.map((category) => {
+          const Visual = getHomepageCategoryIcon(category)
+          const children = getCategoryChildren(category)
+
+          return (
+            <article
+              key={category.id}
+              className="rounded-xl border border-night/10 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <div className="flex items-start gap-3">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
+                  <Visual className="h-7 w-7" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <Link
+                    href={buildCategorySearchHref(category.slug)}
+                    className="block text-base font-bold text-night transition-colors hover:text-[#0A7EA4]"
+                  >
+                    {category.name}
+                  </Link>
+                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-nc-lagon">
+                    Catégorie
+                  </p>
+                </div>
+              </div>
+
+              {children.length > 0 ? (
+                <ExpandedCategorySubtree rootSlug={category.slug} categories={children} />
+              ) : (
+                <p className="mt-3 text-sm text-night/45">Aucune sous-catégorie disponible.</p>
+              )}
+            </article>
+          )
+        })}
       </div>
     </section>
   )
