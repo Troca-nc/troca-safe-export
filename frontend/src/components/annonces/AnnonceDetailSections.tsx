@@ -187,7 +187,7 @@ export function ListingHeroCard({
           </Link>
           <span className="inline-flex items-center gap-1 rounded-full bg-night/5 px-3 py-1">
             <MapPin size={12} />
-            {listing.commune_name ?? 'Nouvelle-Caledonie'}
+            {listing.commune_name ?? 'Nouvelle-Cal?donie'}
           </span>
           {trustScore != null && (
             <span className="inline-flex items-center gap-1 rounded-full bg-jungle/10 px-3 py-1 text-jungle">
@@ -287,7 +287,7 @@ export function SellerSidebar({
             {(listing.user.seller_commune_name || listing.user.seller_province_name) && (
               <p className="mt-1 flex items-center gap-1 text-xs text-night/50">
                 <MapPin size={12} />
-                {listing.user.seller_commune_name ?? 'Nouvelle-Caledonie'}
+                {listing.user.seller_commune_name ?? 'Nouvelle-Cal?donie'}
                 {listing.user.seller_province_name && (
                   <span className="text-night/35">· {listing.user.seller_province_name}</span>
                 )}

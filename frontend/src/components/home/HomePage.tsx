@@ -143,6 +143,7 @@ export default function HomePage() {
         promoItems={promoBonPlans}
         eventItems={eventBonPlans}
         rideItems={covoiturages}
+        loading={loading || bonPlansLoading}
       />
 
       <section className="mx-auto max-w-7xl px-4 pb-10">

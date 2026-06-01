@@ -1,6 +1,5 @@
 import type { ComponentType } from 'react'
 import {
-  BadgeHelp,
   Baby,
   Banknote,
   Bike,
@@ -9,8 +8,11 @@ import {
   Building2,
   CalendarDays,
   Camera,
+  Car,
   CarFront,
+  Anchor,
   Cat,
+  Archive,
   Dog,
   Dumbbell,
   Factory,
@@ -20,7 +22,9 @@ import {
   Gift,
   Hammer,
   Handshake,
+  HeartHandshake,
   Headphones,
+  HardHat,
   Home,
   Laptop,
   Layers3,
@@ -253,21 +257,21 @@ function resolveLegacyIconKey(iconKey?: string | null) {
 }
 
 export const CATEGORY_VISUALS: Record<string, CategoryVisual> = {
-  vehicules: { icon: CarFront, label: 'Véhicules' },
-  nautisme: { icon: Ship, label: 'Nautisme' },
+  vehicules: { icon: Car, label: 'Véhicules' },
+  nautisme: { icon: Anchor, label: 'Nautisme' },
   immobilier: { icon: Home, label: 'Immobilier' },
   emploi: { icon: Briefcase, label: 'Emploi' },
   mode: { icon: Shirt, label: 'Mode' },
   'maison-jardin': { icon: Sofa, label: 'Maison & Jardin' },
   'bricolage-outillage': { icon: Wrench, label: 'Bricolage & Outillage' },
-  'famille-puericulture': { icon: UsersRound, label: 'Famille & Puériculture' },
+  'famille-puericulture': { icon: Baby, label: 'Famille & Puériculture' },
   'electronique-multimedia': { icon: Smartphone, label: 'Électronique & Multimédia' },
-  loisirs: { icon: Dumbbell, label: 'Loisirs' },
-  'collections-antiquites': { icon: Gift, label: 'Collections & Antiquités' },
+  loisirs: { icon: Gamepad2, label: 'Loisirs' },
+  'collections-antiquites': { icon: Archive, label: 'Collections & Antiquités' },
   animaux: { icon: PawPrint, label: 'Animaux' },
-  services: { icon: BadgeHelp, label: 'Services' },
-  'materiel-professionnel': { icon: Wrench, label: 'Matériel professionnel' },
-  divers: { icon: Layers3, label: 'Divers' },
+  services: { icon: HeartHandshake, label: 'Services' },
+  'materiel-professionnel': { icon: HardHat, label: 'Matériel professionnel' },
+  divers: { icon: Package, label: 'Divers' },
   // legacy aliases kept for backward compatibility
   location_courte_duree: { icon: Home, label: 'Locations courte durée' },
   don: { icon: Gift, label: 'Dons' },
@@ -278,9 +282,8 @@ export const CATEGORY_VISUALS: Record<string, CategoryVisual> = {
   mobilier: { icon: Sofa, label: 'Maison & Jardin' },
   'sports-loisirs': { icon: Dumbbell, label: 'Loisirs' },
   vetements: { icon: Shirt, label: 'Mode' },
-  autres: { icon: Layers3, label: 'Divers' },
+  autres: { icon: Package, label: 'Divers' },
 }
-
 function normalizeText(value: string) {
   return String(value || '')
     .normalize('NFD')

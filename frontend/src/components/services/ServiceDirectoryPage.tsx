@@ -121,7 +121,7 @@ function ServiceCard({
       <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-night/65">{item.description}</p>
 
       <div className="mt-4 grid gap-2 text-xs font-semibold text-night/65 sm:grid-cols-2">
-        <span className="rounded-full bg-sand px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-Caledonie'}</span>
+        <span className="rounded-full bg-sand px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-Calédonie'}</span>
         <span className="rounded-full bg-sand px-2.5 py-1">
           <CalendarDays className="mr-1 inline h-3.5 w-3.5 text-coral" />
           {formatDateLabel(item.event_date, isPromo ? 'Expiration libre' : 'Date libre')}
@@ -154,7 +154,7 @@ function ServiceCard({
           <>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Heure / lieu</p>
             <p className="mt-1 text-sm font-semibold text-night">
-              {formatDateLabel(item.event_date, 'Date a confirmer')}
+              {formatDateLabel(item.event_date, 'Date à confirmer')}
             </p>
             <p className="mt-1 text-sm text-night/60">{item.location_name || item.commune_name || 'Lieu local'}</p>
           </>
@@ -351,7 +351,7 @@ export function ServiceDirectoryPage({
                     }}
                     className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${timeFilter === 'upcoming' ? 'border-nc-sable bg-nc-sable text-white' : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'}`}
                   >
-                    A venir
+                    À venir
                   </button>
                   <button
                     type="button"
@@ -373,7 +373,7 @@ export function ServiceDirectoryPage({
       <section className="mx-auto max-w-7xl px-4 pb-10">
         <div className="mb-4 flex items-end justify-between gap-4">
           <div>
-              <p className={`text-sm font-semibold uppercase tracking-[0.22em] ${modeTone === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-sable'}`}>Contenus recents</p>
+              <p className={`text-sm font-semibold uppercase tracking-[0.22em] ${modeTone === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-sable'}`}>Contenus r?cents</p>
               <h2 className="mt-1 font-display text-2xl font-bold text-night">Les contenus les plus visibles maintenant</h2>
             </div>
           <Link href="/annonces/nouvelle" className={`hidden items-center gap-1 text-sm font-semibold ${modeTone === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-sable'} hover:underline md:inline-flex`} onClick={() => void trackEvent('service_directory_publish', { mode, kind, source: 'top' })}>
@@ -430,7 +430,7 @@ export function ServiceDirectoryPage({
                 {mode === 'promo' ? 'Promotions à la une' : 'Événements à venir'}
               </h3>
             </div>
-            <Link href={mode === 'promo' ? '/bons-plans' : '/evenements'} className={`inline-flex items-center gap-1 text-sm font-semibold ${modeTone === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-sable'} hover:underline`}>
+            <Link href={mode === 'promo' ? '/bons-plans' : '/événements'} className={`inline-flex items-center gap-1 text-sm font-semibold ${modeTone === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-sable'} hover:underline`}>
               Voir tout
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -456,9 +456,9 @@ export function ServiceDirectoryPage({
                 <p className="mt-2 text-sm text-night/65">
                   {mode === 'promo'
                     ? `${item.promo_price_xpf ? formatCurrency(item.promo_price_xpf) : formatCurrency(item.price_xpf)}${item.discount_pct ? ` · -${item.discount_pct}%` : ''}`
-                    : `${formatDateLabel(item.event_date, 'Date a venir')} · ${item.contact_name || 'Organisateur local'}`}
+                    : `${formatDateLabel(item.event_date, 'Date à venir')} · ${item.contact_name || 'Organisateur local'}`}
                 </p>
-            <Link href={mode === 'promo' ? '/bons-plans' : '/evenements'} className={`mt-4 inline-flex items-center gap-1 text-sm font-semibold ${modeTone === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-sable'}`}>
+            <Link href={mode === 'promo' ? '/bons-plans' : '/événements'} className={`mt-4 inline-flex items-center gap-1 text-sm font-semibold ${modeTone === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-sable'}`}>
                   Ouvrir
                   <ArrowRight className="h-4 w-4" />
                 </Link>

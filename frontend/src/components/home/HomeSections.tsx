@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
@@ -31,42 +31,54 @@ export function HomeHeroSection({
   onSubmit,
 }: HomeHeroSectionProps) {
   return (
-    <section className="bg-[var(--color-background-secondary)] px-4 py-8 text-[var(--color-text-primary)] md:py-10">
-      <div className="mx-auto max-w-7xl">
+    <section className="relative overflow-hidden px-4 py-10 text-white md:py-14">
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,_#0A7EA4_0%,_#065f7a_100%)]" />
+      <svg className="absolute inset-0 h-full w-full opacity-[0.07]" viewBox="0 0 1200 520" aria-hidden="true">
+        <defs>
+          <pattern id="hero-dots" width="56" height="56" patternUnits="userSpaceOnUse">
+            <circle cx="8" cy="8" r="2.5" fill="white" />
+          </pattern>
+        </defs>
+        <rect width="1200" height="520" fill="url(#hero-dots)" />
+      </svg>
+      <div className="relative mx-auto max-w-7xl">
         <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-          <div className="inline-flex items-center gap-2 rounded-full bg-nc-lagonLight px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-nc-lagonText">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/90 backdrop-blur-sm">
             <Sparkles className="h-3.5 w-3.5" />
-            Nouvelle-Calédonie
+            🇳🇨 Nouvelle-Calédonie
           </div>
 
-          <h1 className="mt-3 max-w-4xl font-display text-3xl font-bold leading-tight md:text-4xl">
-            Achetez, vendez, troquez <span className="text-coral">en NC</span>
+          <h1 className="mt-4 max-w-4xl font-display text-4xl font-bold leading-tight text-white md:text-6xl">
+            Achetez, vendez, troquez en NC
           </h1>
 
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-night/60 md:text-base">
-            Des milliers d&apos;annonces entre Calédoniens, partout sur le territoire.
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/80 md:text-base">
+            La première plateforme d&apos;annonces 100% calédonienne.
           </p>
 
           <form onSubmit={onSubmit} className="mt-5 flex w-full max-w-[460px] gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-night/35" />
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/45" />
               <input
                 value={q}
                 onChange={(e) => onQueryChange(e.target.value)}
                 placeholder="Que recherchez-vous ?"
-                className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 pl-11 text-sm text-[var(--color-text-primary)] shadow-sm outline-none ring-0 transition focus:border-coral focus:ring-4 focus:ring-coral/10"
+                className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 pl-11 text-sm text-white placeholder:text-white/50 shadow-sm outline-none ring-0 backdrop-blur-sm transition focus:border-white/30 focus:ring-4 focus:ring-white/10"
               />
             </div>
-            <button type="submit" className="btn-primary rounded-2xl px-4 py-2.5 text-sm">
+            <button
+              type="submit"
+              className="rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-nc-lagon shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/15"
+            >
               Rechercher
             </button>
           </form>
 
           <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
-            <Link href="/annonces/nouvelle" className="btn-primary rounded-2xl px-4 py-2.5 text-sm">
+            <Link href="/annonces/nouvelle" className="rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-nc-lagon shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/15">
               Publier une annonce
             </Link>
-            <Link href="/annonces" className="btn-secondary rounded-2xl px-4 py-2.5 text-sm">
+            <Link href="/annonces" className="rounded-2xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/15">
               Parcourir les annonces
             </Link>
           </div>
@@ -167,9 +179,12 @@ export function FeaturedListingsSection({
           </div>
         ) : (
           <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] py-14 text-center text-night/45">
-            <p className="text-sm">Pas encore d&apos;annonce en vedette.</p>
+            <p className="text-sm font-semibold text-night">Soyez parmi les premiers !</p>
+            <p className="mt-2 text-sm text-night/65">
+              Aucune annonce pour l&apos;instant — publiez la vôtre et lancez la communauté.
+            </p>
             <Link href="/annonces/nouvelle" className="btn-primary mt-4 inline-block">
-              Être le premier à publier
+              Publier une annonce
             </Link>
           </div>
         )}
@@ -183,7 +198,7 @@ export function SearchAlertsSection() {
     <section className="mx-auto max-w-7xl px-4 pb-10">
       <div className="grid gap-5 overflow-hidden rounded-[2rem] border border-[var(--color-border)] border-b-4 border-b-nc-corail bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.18))] px-6 py-8 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)] lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-lagon">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-lagon">
             <Sparkles className="h-3.5 w-3.5" />
             Coups de cœur
           </div>
@@ -210,19 +225,19 @@ export function SearchAlertsSection() {
           <div className="mt-4 space-y-3">
             <div className="rounded-2xl bg-white/10 p-4">
               <p className="text-sm font-semibold">"Toyota Hilux"</p>
-              <p className="mt-1 text-sm text-white/65">Noumea, prix max 3 500 000 XPF</p>
+              <p className="mt-1 text-sm text-white/65">Nouméa, prix max 3 500 000 XPF</p>
             </div>
             <div className="rounded-2xl bg-white/10 p-4">
               <p className="text-sm font-semibold">"Studio"</p>
-              <p className="mt-1 text-sm text-white/65">Dumbea / Noumea, location ou vente</p>
+              <p className="mt-1 text-sm text-white/65">Dumbéa / Nouméa, location ou vente</p>
             </div>
             <div className="rounded-2xl bg-white/10 p-4">
               <p className="text-sm font-semibold">"iPhone"</p>
-              <p className="mt-1 text-sm text-white/65">Etat bon ou comme neuf, en Nouvelle-Caledonie</p>
+              <p className="mt-1 text-sm text-white/65">État bon ou comme neuf, en Nouvelle-Calédonie</p>
             </div>
           </div>
           <Link href="/annonces" className="btn-primary mt-5 inline-flex w-full items-center justify-center gap-2">
-            Creer une alerte
+            Créer une alerte
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -332,14 +347,14 @@ function CategoryCard({
 
   return (
     <div className="group overflow-hidden rounded-[1.75rem] border border-night/8 border-l-4 border-l-nc-lagon bg-white/95 p-5 shadow-card transition-all hover:-translate-y-1 hover:shadow-hover">
-      <div className="mb-4 flex items-center justify-between gap-3">
+      <div className="mb-4 flex flex-col items-start gap-3">
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-nc-lagonLight text-nc-lagonText">
+          <Visual className="h-7 w-7" />
+        </span>
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Catégorie</p>
           <h3 className="mt-1 text-lg font-semibold text-night">{category.name}</h3>
         </div>
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-night/5 text-night">
-          <Visual className="h-5 w-5" />
-        </span>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -428,16 +443,18 @@ export function ExpandedCategoriesSection({
               onClick={() => onBrowse(category.slug)}
               className="mb-3 flex w-full items-center gap-3 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-4 py-3 text-left transition hover:-translate-y-0.5 hover:shadow-sm"
             >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-nc-lagonLight text-nc-lagonText">
-                {(() => {
-                  const Visual = getCategoryIcon(category.slug, category.name, category.icon)
-                  return <Visual className="h-5 w-5" />
-                })()}
-              </span>
-              <span className="min-w-0 flex-1">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-lagon">Catégorie</p>
-                <h3 className="mt-1 truncate font-display text-xl font-bold text-[var(--color-text-primary)]">{category.name}</h3>
-              </span>
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-nc-lagonLight text-nc-lagonText">
+                  {(() => {
+                    const Visual = getCategoryIcon(category.slug, category.name, category.icon)
+                    return <Visual className="h-7 w-7" />
+                  })()}
+                </span>
+                <span className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-lagon">Catégorie</p>
+                  <h3 className="mt-1 truncate font-display text-xl font-bold text-[var(--color-text-primary)]">{category.name}</h3>
+                </span>
+              </div>
               <ArrowRight className="h-4 w-4 shrink-0 text-nc-lagon" />
             </button>
 
@@ -561,7 +578,7 @@ function CovoiturageCard({
         </span>
         {seatsRemaining <= 1 ? (
           <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-700">
-            Derniere place
+            Dernière place
           </span>
         ) : null}
       </div>
@@ -581,7 +598,7 @@ function CovoiturageCard({
 
       <div className="mt-4 space-y-1 text-sm text-night/55">
         <p>{item.driver_prenom ? `Conducteur: ${item.driver_prenom}` : 'Conducteur local'}</p>
-        <p>{item.trust_score != null ? `Fiabilite: ${item.trust_score}/100` : 'Trajet verifie'}</p>
+        <p>{item.trust_score != null ? `Fiabilité: ${item.trust_score}/100` : 'Trajet vérifié'}</p>
       </div>
     </article>
   )
@@ -619,46 +636,19 @@ export function BonPlanSection({
   return (
     <section className="mx-auto max-w-7xl px-4 pb-10">
       <div className="grid gap-5 overflow-hidden rounded-[2rem] border border-night/8 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.12))] p-5 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)]">
-        <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
-            <div className="rounded-[1.5rem] border border-white/10 border-b-4 border-b-nc-emeraude bg-white/5 p-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-nc-emeraude">
-              <Sparkles className="h-3.5 w-3.5" />
-              Bons plans & promotions
-            </div>
-            <h3 className="mt-4 font-display text-3xl font-bold text-white">Promos, ventes flash et coupons locaux</h3>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70 md:text-base">
-              Une vitrine moderne pour entreprises, commerçants, artisans, associations et particuliers.
-              Chaque offre peut mettre en avant son prix initial, son prix promo et sa durée d&apos;expiration.
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="section-lagon">
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/80">Bons plans & événements</p>
+            <h3 className="mt-1 font-display text-2xl font-bold text-white md:text-3xl">
+              Promotions, culture et mobilité locale
+            </h3>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
+              Une seule vue claire pour les offres du moment, l’agenda culturel et les trajets à partager.
             </p>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Link href="/annonces/nouvelle" className="btn-primary rounded-2xl px-4 py-2.5">
-                Publier une promo
-              </Link>
-              <Link href="/annonces" className="btn-secondary rounded-2xl px-4 py-2.5">
-                Explorer les offres
-              </Link>
-            </div>
           </div>
-
-            <div className="rounded-[1.5rem] border border-white/10 border-b-4 border-b-nc-sable bg-white/5 p-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-nc-sable">
-              <Sparkles className="h-3.5 w-3.5" />
-              Événements & culture
-            </div>
-            <h3 className="mt-4 font-display text-3xl font-bold text-white">Concerts, festivals et sorties locales</h3>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70 md:text-base">
-              Une section dédiée aux spectacles, marchés, conférences et animations communautaires.
-              Les événements peuvent afficher leur date, lieu, billetterie et mise en avant sociale.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Link href="/annonces/nouvelle" className="btn-primary rounded-2xl px-4 py-2.5">
-                Publier un événement
-              </Link>
-              <Link href="/annonces" className="btn-secondary rounded-2xl px-4 py-2.5">
-                Voir le calendrier
-              </Link>
-            </div>
-          </div>
+          <Link href="/bons-plans" className="hidden items-center gap-1 text-sm font-semibold text-white hover:underline md:inline-flex">
+            Voir tout <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
@@ -688,7 +678,7 @@ export function BonPlanSection({
               <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5 text-white/80">
                 <p className="text-lg font-semibold text-white">Aucune promotion en ligne pour le moment</p>
                 <p className="mt-2 text-sm text-white/65">
-                  Soyez le premier à publier une promo, un coupon ou une vente flash visible par toute la communauté.
+                  Publiez une promo, un coupon ou une vente flash pour lancer la section.
                 </p>
               </div>
             )}
@@ -698,7 +688,7 @@ export function BonPlanSection({
             <div className="mb-3 flex items-end justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-sable">Culture</p>
-                <h4 className="mt-1 text-2xl font-bold text-white">Les rendez-vous a venir</h4>
+                <h4 className="mt-1 text-2xl font-bold text-white">Les rendez-vous à venir</h4>
               </div>
               <Link href="/annonces/nouvelle" className="text-sm font-semibold text-nc-sable hover:underline">
                 Créer un événement
@@ -718,9 +708,9 @@ export function BonPlanSection({
               </div>
             ) : (
               <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5 text-white/80">
-                <p className="text-lg font-semibold text-white">Aucun evenement en ligne pour le moment</p>
+                <p className="text-lg font-semibold text-white">Les rendez-vous à venir s&apos;afficheront ici</p>
                 <p className="mt-2 text-sm text-white/65">
-                Ajoutez un concert, une conférence ou un marché pour alimenter la section culturelle.
+                  Ajoutez un concert, une conférence ou un marché pour alimenter la section culturelle.
                 </p>
               </div>
             )}
@@ -730,7 +720,7 @@ export function BonPlanSection({
         <div className="rounded-[1.5rem] border border-white/10 border-b-4 border-b-nc-corail bg-white/5 p-5">
           <div className="mb-3 flex items-end justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-corail">Mobilite</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-corail">Mobilité</p>
               <h4 className="mt-1 text-2xl font-bold text-white">Covoiturage local et interurbain</h4>
             </div>
             <Link href="/covoiturage" className="text-sm font-semibold text-nc-corail hover:underline">
@@ -763,9 +753,9 @@ export function BonPlanSection({
             </div>
           ) : (
             <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/8 p-5 text-white/80">
-              <p className="text-lg font-semibold text-white">Aucun trajet en ligne pour le moment</p>
+              <p className="text-lg font-semibold text-white">La mobilité locale démarre ici</p>
               <p className="mt-2 text-sm text-white/65">
-                La section covoiturage affichera bientôt les trajets disponibles et les réservations en cours.
+                Proposez un trajet pour lancer les premiers échanges et réservations.
               </p>
             </div>
           )}

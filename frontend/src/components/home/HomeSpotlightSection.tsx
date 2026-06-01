@@ -169,12 +169,14 @@ export function HomeSpotlightSection({
   promoItems,
   eventItems,
   rideItems,
+  loading = false,
 }: {
   latestListings: ListingItem[]
   premiumListings: ListingItem[]
   promoItems: ServiceItem[]
   eventItems: ServiceItem[]
   rideItems: ServiceItem[]
+  loading?: boolean
 }) {
   const tabs = useMemo(() => {
     const premium = premiumListings.length > 0 ? premiumListings : latestListings.filter((item) => item.is_featured || Boolean(item.boosted_until))
@@ -209,7 +211,7 @@ export function HomeSpotlightSection({
       {
         key: 'events',
         label: 'Événements',
-        href: '/bons-plans#evenements',
+        href: '/bons-plans#événements',
         items: eventItems,
         badge: 'Culture',
         intro: 'Concerts, marchés, animations et rendez-vous locaux.',
@@ -240,6 +242,61 @@ export function HomeSpotlightSection({
   const primaryListing = primary as ListingItem | undefined
   const primaryService = primary as ServiceItem | undefined
   const activeTone = getToneClasses((active as { tone?: SpotlightTone }).tone || 'lagon')
+  const hasAnyItems = tabs.some((tab) => tab.items.length > 0)
+  const emptyState =
+    active.key === 'premium'
+      ? {
+          title: 'Les meilleures annonces apparaîtront ici',
+          subtitle: 'Boostez votre annonce pour apparaître en tête de page.',
+          cta: 'Déposer une annonce',
+          href: '/annonces/nouvelle',
+        }
+      : active.key === 'latest'
+        ? {
+            title: 'Soyez parmi les premiers !',
+            subtitle: 'Aucune annonce pour l&apos;instant — publiez la vôtre et lancez la communauté.',
+            cta: 'Publier une annonce',
+            href: '/annonces/nouvelle',
+          }
+        : active.key === 'promos'
+          ? {
+              title: 'Les meilleures promos apparaîtront ici',
+              subtitle: 'Publiez un bon plan pour le mettre en avant sur Troca.',
+              cta: 'Publier une promo',
+              href: '/annonces/nouvelle',
+            }
+          : active.key === 'events'
+            ? {
+                title: 'Les meilleurs rendez-vous apparaîtront ici',
+                subtitle: 'Ajoutez un événement pour faire vibrer la communauté locale.',
+                cta: 'Publier un événement',
+                href: '/annonces/nouvelle',
+              }
+            : {
+                title: 'La mobilité locale démarre ici',
+                subtitle: 'Proposez un trajet pour lancer les premiers échanges.',
+                cta: 'Proposer un trajet',
+                href: '/covoiturage?mode=publish',
+              }
+
+  if (!loading && !hasAnyItems) {
+    return (
+      <section className="mx-auto max-w-7xl px-4 pb-10">
+        <div className="overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.14))] p-6 text-white shadow-[0_24px_80px_rgba(8,32,50,0.08)]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-lagon">
+            <Sparkles className="h-3.5 w-3.5" />
+            Rappels interactifs
+          </div>
+          <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
+            La plateforme ouvre bientôt — revenez vite !
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
+            Les premiers contenus s&apos;afficheront ici au fil des annonces, promotions, événements et trajets publiés.
+          </p>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="mx-auto max-w-7xl px-4 pb-10">
@@ -331,14 +388,14 @@ export function HomeSpotlightSection({
                     ? `${getListingLabel(primaryListing || { id: 0, title: '', price: null })} · ${formatRelative(primaryListing?.published_at || primaryListing?.created_at)}`
                     : `${formatDateLabel(primaryService?.event_date)} · ${primaryService?.commune_name || primaryService?.location_name || 'Nouvelle-Calédonie'}`
                 }
-                primaryLabel={isListingTab ? 'Ouvrir' : 'Decouvrir'}
+                primaryLabel={isListingTab ? 'Ouvrir' : 'Découvrir'}
                 accent={active.key === 'premium' || active.key === 'promos' || active.key === 'events'}
                 tone={activeTone.card}
               />
             ) : (
             <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-[var(--color-text-secondary)]">
               <p className="text-sm font-semibold text-[var(--color-text-primary)]">Aucun rappel pour le moment</p>
-              <p className="mt-1 text-sm">Les contenus recents apparaitront ici des qu&apos;ils seront publies.</p>
+              <p className="mt-1 text-sm">Les contenus récents apparaîtront ici dès qu&apos;ils seront publiés.</p>
             </div>
             )}
 
@@ -374,7 +431,7 @@ export function HomeSpotlightSection({
               <Link href="/bons-plans" className="badge-emeraude rounded-full px-3 py-1.5 text-xs font-semibold">
                 Bons plans
               </Link>
-              <Link href="/evenements" className="badge-sable rounded-full px-3 py-1.5 text-xs font-semibold">
+              <Link href="/événements" className="badge-sable rounded-full px-3 py-1.5 text-xs font-semibold">
                 Événements
               </Link>
               <Link href="/covoiturage" className="badge-corail rounded-full px-3 py-1.5 text-xs font-semibold">
