@@ -16,7 +16,7 @@ import Header from '@/components/layout/Header'
 import SearchAlertModal from '@/components/SearchAlertModal'
 import ListingCard from '@/components/listings/ListingCard'
 import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
-import { metaApi } from '@/lib/api'
+import { API_ORIGIN, metaApi } from '@/lib/api'
 import { consumePendingAuthAction, peekPendingAuthAction } from '@/lib/authAction'
 import { FALLBACK_CATEGORIES, hasNestedCategoryTree } from '@/lib/categoryCatalog'
 import { getCategoryIcon } from '@/lib/categoryPresentation'
@@ -328,7 +328,7 @@ function ListingsPageContent() {
           params.set(key, String(value))
         })
         params.set('limit', String(listingFilters.limit ?? 24))
-        const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/+$/, '')
+        const baseUrl = API_ORIGIN
         const response = await fetch(`${baseUrl}/api/listings?${params.toString()}`, {
           credentials: 'include',
           signal: controller.signal,

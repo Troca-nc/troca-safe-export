@@ -16,6 +16,7 @@ import {
   HomeStatsSection,
 } from '@/components/home/HomeSections'
 import CategoryTreeSection from '@/components/home/CategoryTreeSection'
+import { API_ORIGIN } from '@/lib/api'
 
 export default function HomePage() {
   const router = useRouter()
@@ -41,7 +42,7 @@ export default function HomePage() {
 
     const fetchBonPlans = async () => {
       try {
-        const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/+$/, '')
+        const baseUrl = API_ORIGIN
         const [promoRes, eventRes, rideRes] = await Promise.all([
           fetch(`${baseUrl}/api/bon-plans?limit=3&kind=promo`, { credentials: 'include' }).then((res) => res.json()),
           fetch(`${baseUrl}/api/bon-plans?limit=3&kind=event,concert`, { credentials: 'include' }).then((res) => res.json()),
@@ -71,7 +72,7 @@ export default function HomePage() {
     let alive = true
     const run = async () => {
       try {
-        const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/+$/, '')
+        const baseUrl = API_ORIGIN
         const response = await fetch(`${baseUrl}/api/listings?limit=8&sort=date`, { credentials: 'include' })
         const json = await response.json()
         if (!alive) return

@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import Header from '@/components/layout/Header'
-import { covoiturageApi } from '@/lib/api'
+import { API_ORIGIN, covoiturageApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import { ArrowRight, Car, Search, Send, Star, Users } from 'lucide-react'
 import Link from 'next/link'
@@ -197,7 +197,7 @@ export default function CovoituragePage() {
       if (filters.departure) params.set('departure', filters.departure)
       if (filters.destination) params.set('destination', filters.destination)
 
-      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/+$/, '')
+      const baseUrl = API_ORIGIN
       const response = await fetch(`${baseUrl}/api/covoiturage?${params.toString()}`, { credentials: 'include' })
       const json = await response.json()
       setRides(Array.isArray(json?.data) ? json.data : [])
