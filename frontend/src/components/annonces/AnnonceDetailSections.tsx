@@ -48,6 +48,9 @@ type ListingUser = {
   email_verified?: boolean
   telephone_verifie?: boolean
   trust_score?: number | null
+  is_online?: boolean
+  last_seen_label?: string | null
+  avg_response_time_label?: string | null
 }
 
 type ListingDetail = {
@@ -310,6 +313,12 @@ export function SellerSidebar({
                   Pro
                 </span>
               )}
+              <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
+                listing.user.is_online ? 'border border-emerald-200 bg-emerald-50 text-emerald-700' : 'border border-night/10 bg-sand text-night/50'
+              }`}>
+                <span className={`h-2 w-2 rounded-full ${listing.user.is_online ? 'bg-emerald-500' : 'bg-night/25'}`} />
+                {listing.user.is_online ? 'En ligne' : (listing.user.last_seen_label ?? 'Hors ligne')}
+              </span>
             </div>
 
             <div className="mt-2 flex items-center gap-2">
@@ -319,6 +328,13 @@ export function SellerSidebar({
               </span>
               <span className="text-xs text-night/40">{listing.user.nb_avis ?? 0} avis</span>
             </div>
+
+            {listing.user.avg_response_time_label && (
+              <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-nc-lagonLight px-2.5 py-1 text-[11px] font-medium text-nc-lagonText">
+                <Clock size={12} />
+                Répond en moyenne en {listing.user.avg_response_time_label}
+              </div>
+            )}
 
             <div className="mt-3 flex flex-wrap gap-2">
               <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${trustState.className}`}>

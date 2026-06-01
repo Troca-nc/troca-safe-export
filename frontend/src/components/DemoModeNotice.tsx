@@ -8,7 +8,8 @@ type DemoModeNoticeProps = {
 }
 
 export default function DemoModeNotice({ className = '' }: DemoModeNoticeProps) {
-  if (!isDemoMode()) return null
+  const showDemoBar = process.env.NEXT_PUBLIC_SHOW_DEMO_BAR === 'true'
+  if (!isDemoMode() || !showDemoBar) return null
 
   return (
     // TODO: test E2E sur le bandeau mode démo avant confirmation paiement.

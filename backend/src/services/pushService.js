@@ -7,6 +7,7 @@
 
 const https = require('https');
 const { query } = require('../config/database');
+const { ensureNotificationPreferences } = require('./notificationPreferencesService');
 
 const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
 
@@ -16,6 +17,18 @@ const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
  */
 async function sendPushToUser(userId, { title, body, data = {} }) {
   try {
+    const kind = String(data.type || '').trim();
+    if (kind === 'new_message' || kind === 'search_alert' || kind === 'performance_report') {
+      const prefs = await ensureNotificationPreferences(userId);
+      if (prefs) {
+        const allowed =
+          (kind === 'new_message' && prefs.push_new_message) ||
+          (kind === 'search_alert' && prefs.push_search_alert) ||
+          (kind === 'performance_report' && prefs.push_performance_report);
+        if (!allowed) return;
+      }
+    }
+
     const result = await query(
       'SELECT token FROM push_tokens WHERE user_id = $1',
       [userId]

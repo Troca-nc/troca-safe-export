@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { ArrowRight, CalendarDays, Clock3, MapPin, Search, Sparkles, Users, X } from 'lucide-react'
 
 import { bonPlansApi } from '@/lib/api'
@@ -95,10 +95,10 @@ function ServiceCard({
   const primaryLabel = item.link_url ? (isPromo ? 'Voir l offre' : 'Reserver') : item.website_url ? 'Voir le site' : 'Contacter'
 
   return (
-    <article className={`rounded-[1.5rem] border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${featured ? 'border-coral/20 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(255,245,242,0.94))]' : 'border-night/8 bg-white'}`}>
+    <article className={`rounded-[1.5rem] border border-night/8 border-l-4 ${featured ? `border-nc-${isPromo ? 'emeraude' : 'sable'}/20 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(255,245,242,0.94))]` : 'border-night/8 bg-white'} p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md`}>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full border border-coral/15 bg-coral/5 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-coral">
-          {isPromo ? 'Promotion' : 'Evenement'}
+        <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${isPromo ? 'badge-emeraude' : 'badge-sable'}`}>
+          {isPromo ? 'Promotion' : 'Événement'}
         </span>
         {featured ? (
           <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-700">
@@ -201,6 +201,7 @@ export function ServiceDirectoryPage({
   searchPlaceholder: string
   introPoints: string[]
 }) {
+  const modeTone = mode === 'promo' ? 'emeraude' : 'sable'
   const [items, setItems] = useState<ServiceItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -209,35 +210,29 @@ export function ServiceDirectoryPage({
   const [audience, setAudience] = useState<'all' | 'particulier' | 'pro'>('all')
   const [timeFilter, setTimeFilter] = useState<'all' | 'upcoming' | 'past'>('all')
 
-  useEffect(() => {
-    let alive = true
-
-    const load = async () => {
-      setLoading(true)
-      setError('')
-      try {
-        const { data } = await bonPlansApi.list({
-          limit: 36,
-          kind,
-          q: searchQuery || undefined,
-          target_audience: audience === 'all' ? undefined : audience,
-        })
-        if (!alive) return
-        setItems(data?.data ?? [])
-      } catch (err: any) {
-        if (!alive) return
-        setItems([])
-        setError(err?.response?.data?.error || 'Impossible de charger les contenus pour le moment.')
-      } finally {
-        if (alive) setLoading(false)
-      }
-    }
-
-    load()
-    return () => {
-      alive = false
+  const loadDirectory = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const { data } = await bonPlansApi.list({
+        limit: 36,
+        kind,
+        q: searchQuery || undefined,
+        target_audience: audience === 'all' ? undefined : audience,
+      })
+      setItems(data?.data ?? [])
+    } catch (err: any) {
+      console.error('[service-directory] load:', err)
+      setItems([])
+      setError('network')
+    } finally {
+      setLoading(false)
     }
   }, [audience, kind, searchQuery])
+
+  useEffect(() => {
+    void loadDirectory()
+  }, [loadDirectory])
 
   useEffect(() => {
     void trackEvent('service_directory_view', {
@@ -273,8 +268,8 @@ export function ServiceDirectoryPage({
   return (
     <main className="min-h-screen bg-sand-light text-night">
       <section className="bg-night px-4 py-8 text-white md:py-12">
-        <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.2))] px-6 py-8 shadow-[0_24px_80px_rgba(8,32,50,0.24)] md:px-10">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-lagoon">
+        <div className={`mx-auto max-w-7xl rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.2))] px-6 py-8 shadow-[0_24px_80px_rgba(8,32,50,0.24)] md:px-10 border-b-4 ${modeTone === 'emeraude' ? 'border-b-nc-emeraude' : 'border-b-nc-sable'}`}>
+          <div className={`inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] ${modeTone === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-sable'}`}>
             <Sparkles className="h-3.5 w-3.5" />
             {eyebrow}
           </div>
@@ -312,7 +307,7 @@ export function ServiceDirectoryPage({
                   setAudience('all')
                   void trackEvent('service_directory_filter', { mode, kind, audience: 'all' })
                 }}
-                className={`rounded-full px-3 py-2 text-sm font-semibold transition ${audience === 'all' ? 'bg-lagoon text-night' : 'border border-white/10 bg-white/5 text-white/80'}`}
+            className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${audience === 'all' ? `border-nc-${modeTone} bg-nc-${modeTone} text-white` : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'}`}
               >
                 Tous
               </button>
@@ -322,7 +317,7 @@ export function ServiceDirectoryPage({
                   setAudience('particulier')
                   void trackEvent('service_directory_filter', { mode, kind, audience: 'particulier' })
                 }}
-                className={`rounded-full px-3 py-2 text-sm font-semibold transition ${audience === 'particulier' ? 'bg-lagoon text-night' : 'border border-white/10 bg-white/5 text-white/80'}`}
+                className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${audience === 'particulier' ? `border-nc-${modeTone} bg-nc-${modeTone} text-white` : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'}`}
               >
                 Particuliers
               </button>
@@ -332,7 +327,7 @@ export function ServiceDirectoryPage({
                   setAudience('pro')
                   void trackEvent('service_directory_filter', { mode, kind, audience: 'pro' })
                 }}
-                className={`rounded-full px-3 py-2 text-sm font-semibold transition ${audience === 'pro' ? 'bg-lagoon text-night' : 'border border-white/10 bg-white/5 text-white/80'}`}
+                className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${audience === 'pro' ? `border-nc-${modeTone} bg-nc-${modeTone} text-white` : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'}`}
               >
                 Pros
               </button>
@@ -344,9 +339,9 @@ export function ServiceDirectoryPage({
                       setTimeFilter('all')
                       void trackEvent('service_directory_filter', { mode, kind, time_filter: 'all' })
                     }}
-                    className={`rounded-full px-3 py-2 text-sm font-semibold transition ${timeFilter === 'all' ? 'bg-coral text-white' : 'border border-white/10 bg-white/5 text-white/80'}`}
+                    className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${timeFilter === 'all' ? 'border-nc-sable bg-nc-sable text-white' : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'}`}
                   >
-                    Tous
+                    Toutes les dates
                   </button>
                   <button
                     type="button"
@@ -354,7 +349,7 @@ export function ServiceDirectoryPage({
                       setTimeFilter('upcoming')
                       void trackEvent('service_directory_filter', { mode, kind, time_filter: 'upcoming' })
                     }}
-                    className={`rounded-full px-3 py-2 text-sm font-semibold transition ${timeFilter === 'upcoming' ? 'bg-coral text-white' : 'border border-white/10 bg-white/5 text-white/80'}`}
+                    className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${timeFilter === 'upcoming' ? 'border-nc-sable bg-nc-sable text-white' : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'}`}
                   >
                     A venir
                   </button>
@@ -364,7 +359,7 @@ export function ServiceDirectoryPage({
                       setTimeFilter('past')
                       void trackEvent('service_directory_filter', { mode, kind, time_filter: 'past' })
                     }}
-                    className={`rounded-full px-3 py-2 text-sm font-semibold transition ${timeFilter === 'past' ? 'bg-coral text-white' : 'border border-white/10 bg-white/5 text-white/80'}`}
+                    className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${timeFilter === 'past' ? 'border-nc-sable bg-nc-sable text-white' : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'}`}
                   >
                     Passes
                   </button>
@@ -378,10 +373,10 @@ export function ServiceDirectoryPage({
       <section className="mx-auto max-w-7xl px-4 pb-10">
         <div className="mb-4 flex items-end justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Contenus recents</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Les contenus les plus visibles maintenant</h2>
-          </div>
-          <Link href="/annonces/nouvelle" className="hidden items-center gap-1 text-sm font-semibold text-coral hover:underline md:inline-flex" onClick={() => void trackEvent('service_directory_publish', { mode, kind, source: 'top' })}>
+              <p className={`text-sm font-semibold uppercase tracking-[0.22em] ${modeTone === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-sable'}`}>Contenus recents</p>
+              <h2 className="mt-1 font-display text-2xl font-bold text-night">Les contenus les plus visibles maintenant</h2>
+            </div>
+          <Link href="/annonces/nouvelle" className={`hidden items-center gap-1 text-sm font-semibold ${modeTone === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-sable'} hover:underline md:inline-flex`} onClick={() => void trackEvent('service_directory_publish', { mode, kind, source: 'top' })}>
             Publier
             <ArrowRight className="h-4 w-4" />
           </Link>
@@ -393,11 +388,6 @@ export function ServiceDirectoryPage({
               <div key={index} className="h-64 animate-pulse rounded-[1.5rem] border border-night/8 bg-white" />
             ))}
           </div>
-        ) : error ? (
-          <div className="rounded-[1.75rem] border border-night/8 bg-white p-6 text-night/70">
-            <p className="text-lg font-semibold text-night">Impossible de charger la section pour le moment</p>
-            <p className="mt-2 text-sm">{error}</p>
-          </div>
         ) : visibleItems.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {visibleItems.map((item) => (
@@ -406,8 +396,25 @@ export function ServiceDirectoryPage({
           </div>
         ) : (
           <div className="rounded-[1.75rem] border border-night/8 bg-white p-6 text-night/70">
-            <p className="text-lg font-semibold text-night">Aucun contenu trouve</p>
-            <p className="mt-2 text-sm">Essayez une autre recherche ou publiez le premier contenu de cette categorie.</p>
+            <p className="text-lg font-semibold text-night">
+              {mode === 'event' ? 'Aucun événement à venir pour l’instant' : 'Aucun contenu disponible pour le moment'}
+            </p>
+            <p className="mt-2 text-sm">
+              {mode === 'event'
+                ? 'Partagez un concert, un marché ou une animation locale.'
+                : 'Essayez une autre recherche ou publiez le premier contenu de cette catégorie.'}
+            </p>
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+              <Link href="/annonces/nouvelle" className="btn-primary inline-flex items-center gap-2">
+                {mode === 'event' ? 'Créer un événement' : 'Publier'}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              {error ? (
+                <button type="button" onClick={() => void loadDirectory()} className="btn-ghost">
+                  Réessayer
+                </button>
+              ) : null}
+            </div>
           </div>
         )}
       </section>
@@ -416,14 +423,14 @@ export function ServiceDirectoryPage({
         <div className="rounded-[2rem] border border-night/8 bg-white px-6 py-6 shadow-[0_24px_80px_rgba(8,32,50,0.06)] md:px-8">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">
+            <p className={`text-sm font-semibold uppercase tracking-[0.22em] ${modeTone === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-sable'}`}>
                 {mode === 'promo' ? 'Apercu' : 'Selection'}
               </p>
               <h3 className="mt-1 font-display text-2xl font-bold text-night">
-                {mode === 'promo' ? 'Promotions a la une' : 'Evenements a venir'}
+                {mode === 'promo' ? 'Promotions à la une' : 'Événements à venir'}
               </h3>
             </div>
-            <Link href={mode === 'promo' ? '/bons-plans' : '/evenements'} className="inline-flex items-center gap-1 text-sm font-semibold text-coral hover:underline">
+            <Link href={mode === 'promo' ? '/bons-plans' : '/evenements'} className={`inline-flex items-center gap-1 text-sm font-semibold ${modeTone === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-sable'} hover:underline`}>
               Voir tout
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -431,10 +438,10 @@ export function ServiceDirectoryPage({
 
           <div className="mt-5 grid gap-4 md:grid-cols-3">
             {featured.slice(0, 3).map((item, index) => (
-              <div key={item.id} className={`rounded-[1.5rem] border p-4 ${index === 0 ? 'border-coral/20 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(255,245,242,0.94))]' : 'border-night/8 bg-sand-light'}`}>
+              <div key={item.id} className={`rounded-[1.5rem] border p-4 ${index === 0 ? `border-nc-${modeTone}/20 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(255,245,242,0.94))]` : 'border-night/8 bg-sand-light'}`}>
                 <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-coral/5 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-coral">
-                    {mode === 'promo' ? 'Promo' : 'Evenement'}
+                  <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${modeTone === 'emeraude' ? 'badge-emeraude' : 'badge-sable'}`}>
+                    {mode === 'promo' ? 'Promo' : 'Événement'}
                   </span>
                   {index === 0 ? (
                     <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-700">
@@ -451,7 +458,7 @@ export function ServiceDirectoryPage({
                     ? `${item.promo_price_xpf ? formatCurrency(item.promo_price_xpf) : formatCurrency(item.price_xpf)}${item.discount_pct ? ` · -${item.discount_pct}%` : ''}`
                     : `${formatDateLabel(item.event_date, 'Date a venir')} · ${item.contact_name || 'Organisateur local'}`}
                 </p>
-                <Link href={mode === 'promo' ? '/bons-plans' : '/evenements'} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-coral">
+            <Link href={mode === 'promo' ? '/bons-plans' : '/evenements'} className={`mt-4 inline-flex items-center gap-1 text-sm font-semibold ${modeTone === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-sable'}`}>
                   Ouvrir
                   <ArrowRight className="h-4 w-4" />
                 </Link>

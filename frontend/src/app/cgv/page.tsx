@@ -53,7 +53,7 @@ export default function CgvPage() {
 
         <h2>5. Rétractation</h2>
         <p>
-          Les services numériques étant activés immédiatement, le droit de rétractation peut ne pas s’appliquer selon la réglementation locale applicable. [À VALIDER JURISTE]
+          Les services numériques étant activés immédiatement, le droit de rétractation peut ne pas s’appliquer selon la réglementation locale applicable.
         </p>
       </LegalLayout>
     </>

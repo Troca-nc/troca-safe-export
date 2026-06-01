@@ -24,15 +24,21 @@ function SkeletonLine({
 export function ListingSkeleton({ className = '' }: ListingSkeletonProps) {
   return (
     <article className={`card overflow-hidden ${className}`}>
-      <div className="relative aspect-[4/3] overflow-hidden">
+      <div className="relative aspect-[16/9] overflow-hidden">
         <SkeletonLine className="absolute inset-0 rounded-none" />
       </div>
 
-      <div className="space-y-2 p-3">
+      <div className="space-y-3 p-4">
         <SkeletonLine className="h-4 w-11/12" />
-        <SkeletonLine className="h-4 w-7/12" />
+        <SkeletonLine className="h-7 w-32" />
         <div className="flex items-center justify-between gap-3 pt-1">
-          <SkeletonLine className="h-5 w-24" />
+          <div className="flex items-center gap-2">
+            <SkeletonLine className="h-9 w-9 rounded-full" />
+            <div className="space-y-2">
+              <SkeletonLine className="h-3.5 w-24" />
+              <SkeletonLine className="h-3 w-20" />
+            </div>
+          </div>
           <SkeletonLine className="h-3 w-16" />
         </div>
       </div>

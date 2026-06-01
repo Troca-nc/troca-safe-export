@@ -12,6 +12,9 @@ const bcrypt  = require('bcryptjs');
 const Joi     = require('joi');
 const { query } = require('../config/database');
 const { authenticate } = require('../middleware/auth');
+const { getUserTrocBadges } = require('../services/trocWorkflowService');
+const { getUserPresence, getPresenceLabel } = require('../services/presenceService');
+const { getSellerResponseTime } = require('../services/sellerInsightsService');
 
 const router = express.Router();
 
@@ -85,11 +88,8 @@ router.get('/:id', async (req, res, next) => {
             FROM annonces a
             WHERE a.user_id = u.id AND a.deleted_at IS NULL AND a.status = 'active'
               AND (
-                a.is_featured = TRUE
-                OR (
-                  a.is_boosted = TRUE
-                  AND (a.boost_expires_at IS NULL OR a.boost_expires_at > NOW())
-                )
+                a.is_boosted = TRUE
+                AND (a.boost_expires_at IS NULL OR a.boost_expires_at > NOW())
               )
           ), 0) AS annonces_boostees
        FROM users u
@@ -99,7 +99,25 @@ router.get('/:id', async (req, res, next) => {
       [req.params.id]
     );
     if (!result.rows[0]) return res.status(404).json({ error: 'Utilisateur introuvable.' });
-    return res.json({ data: result.rows[0] });
+
+    const profile = result.rows[0];
+    const [presence, responseTime] = await Promise.all([
+      Promise.resolve(getUserPresence(profile.id)),
+      getSellerResponseTime(query, profile.id).catch(() => ({
+        avg_response_time_minutes: null,
+        avg_response_time_label: null,
+      })),
+    ]);
+
+    return res.json({
+      data: {
+        ...profile,
+        is_online: presence.is_online,
+        last_seen_at: presence.last_seen_at,
+        last_seen_label: getPresenceLabel(presence),
+        ...responseTime,
+      },
+    });
   } catch (err) {
     next(err);
   }
@@ -199,6 +217,20 @@ router.get('/:id/reviews', async (req, res, next) => {
     ).catch(() => ({ rows: [] }));
 
     return res.json({ data: result.rows });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/:id/troc-badges', async (req, res, next) => {
+  try {
+    const userId = Number(req.params.id);
+    if (!Number.isFinite(userId) || userId <= 0) {
+      return res.status(400).json({ error: 'Utilisateur invalide.' });
+    }
+
+    const badges = await getUserTrocBadges(query, userId);
+    return res.json({ data: badges });
   } catch (err) {
     next(err);
   }

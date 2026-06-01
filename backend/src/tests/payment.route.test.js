@@ -104,7 +104,7 @@ async function run() {
     assert.strictEqual(result.body.error, 'PAYPLUG_WEBHOOK_SECRET manquant');
   });
 
-  await it('retourne 400 si signature PayPlug invalide', async () => {
+  await it('retourne 401 si signature PayPlug invalide', async () => {
     process.env.PAYPLUG_WEBHOOK_SECRET = 'ppwhsec_test';
     const router = loadPaymentRouter();
     const result = await invokeRouter(router, {
@@ -115,7 +115,7 @@ async function run() {
       headers: { 'x-payplug-signature': 'sha256=deadbeef' },
     });
 
-    assert.strictEqual(result.code, 400);
+    assert.strictEqual(result.code, 401);
     assert.strictEqual(result.body.error, 'Signature webhook PayPlug invalide');
   });
 }

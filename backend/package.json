@@ -8,6 +8,7 @@
     "worker": "node src/worker.js",
     "test": "node src/tests/run.js",
     "seed:demo": "node src/scripts/seedDemo.js",
+    "migrate": "node src/scripts/runMigrations.js",
     "demo:status": "node -e \"require('./src/services/demoSeedService').getDemoStatus().then((s)=>{console.log(JSON.stringify(s,null,2));}).catch((e)=>{console.error(e);process.exit(1);})\""
   },
   "dependencies": {

@@ -36,6 +36,28 @@ const CONDITIONS = [
   { value: 'for_parts', label: 'Pour pieces' },
 ] as const
 
+function snapTo10(value: string | number) {
+  const parsed = typeof value === 'number' ? value : Number(String(value || '').trim())
+  if (!Number.isFinite(parsed)) return 0
+  return Math.max(0, Math.round(parsed / 10) * 10)
+}
+
+function findCategoryNode(categories: PublishCategory[], id?: number | null): PublishCategory | null {
+  if (id == null) return null
+  const stack = [...categories]
+  while (stack.length > 0) {
+    const node = stack.shift()
+    if (!node) continue
+    if (node.id === id) return node
+    stack.unshift(...(node.children || node.subcategories || []))
+  }
+  return null
+}
+
+function isLeafCategory(category?: PublishCategory | null) {
+  return !category || ((category.children || category.subcategories || []).length === 0)
+}
+
 const schema = z.object({
   titre: z.string().min(5, 'Minimum 5 caracteres').max(150),
   description: z.string().min(20, 'Minimum 20 caracteres').max(3000),
@@ -55,6 +77,7 @@ type PublishDraft = {
 }
 
 export default function PublierScreen() {
+  const isDemoMode = process.env.EXPO_PUBLIC_DEMO_MODE === 'true'
   const [loading, setLoading] = useState(false)
   const [listingId, setListingId] = useState<string | number | null>(null)
   const [categories, setCategories] = useState<PublishCategory[]>([])
@@ -81,15 +104,21 @@ export default function PublierScreen() {
   const selectedCategory = watch('category_id')
   const selectedCommune = watch('commune_id')
   const selectedCondition = watch('condition')
-  const visibleCategories = categories.length > 0 ? categories : (MOBILE_FALLBACK_CATEGORIES as PublishCategory[])
-  const selectedCategorySlug = visibleCategories.find((category) => category.id === selectedCategory)?.slug ?? ''
+  const visibleCategories = isDemoMode
+    ? (MOBILE_FALLBACK_CATEGORIES as PublishCategory[])
+    : (categories.length > 0 ? categories : (MOBILE_FALLBACK_CATEGORIES as PublishCategory[]))
+  const selectedCategoryNode = useMemo(
+    () => findCategoryNode(visibleCategories, selectedCategory),
+    [selectedCategory, visibleCategories]
+  )
+  const selectedCategorySlug = selectedCategoryNode?.slug ?? ''
 
   useEffect(() => {
     metaApi
       .getCategories()
       .then(({ data }) => {
         const raw = Array.isArray(data.data) ? data.data : []
-        setCategories(raw)
+        setCategories(isDemoMode ? (MOBILE_FALLBACK_CATEGORIES as PublishCategory[]) : raw)
       })
       .catch(() => {
         setCategories(MOBILE_FALLBACK_CATEGORIES as PublishCategory[])
@@ -174,10 +203,12 @@ export default function PublierScreen() {
 
     setLoading(true)
     try {
+      const normalizedPrice = data.price ? String(snapTo10(data.price)) : data.price
       let currentListingId = listingId
       if (currentListingId == null) {
         const created = await createListing({
           ...data,
+          price: normalizedPrice,
           metadata: data.metadata ?? {},
         })
         currentListingId = created.id
@@ -259,11 +290,11 @@ export default function PublierScreen() {
       <CategoriesSection
         categories={visibleCategories}
         selectedCategory={selectedCategory}
-        onSelect={(categoryId) => setValue('category_id', categoryId, { shouldValidate: true })}
+        onSelect={(categoryId) => setValue('category_id', (categoryId ?? undefined) as any, { shouldValidate: true, shouldDirty: true })}
         error={errors.category_id?.message}
       />
 
-      {selectedCategorySlug ? (
+      {selectedCategorySlug && isLeafCategory(selectedCategoryNode) ? (
         <CategoryFieldsSection
           categorySlug={selectedCategorySlug}
           control={control}
@@ -319,6 +350,7 @@ export default function PublierScreen() {
         hint="Laisser vide = prix a debattre"
         placeholder="Laisser vide = prix a debattre"
         keyboardType="numeric"
+        normalizeToStep={10}
       />
 
       <ControlledInputSection

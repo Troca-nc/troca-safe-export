@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -20,6 +20,7 @@ import { useAuthStore } from '@/store/authStore';
 import { recordRecentlyViewedListing } from '@/lib/queryClient';
 import { useFavorite } from '@/hooks/useFavorite';
 import { Colors, Radius, Spacing } from '@/constants/theme';
+import { trackEvent } from '@/lib/analytics';
 import {
   buildMobileShareLinks,
   copyShareLink,
@@ -71,6 +72,7 @@ export default function AnnonceDetail() {
   const [sellerReviews, setSellerReviews] = useState<SellerReview[]>([]);
   const [relatedListings, setRelatedListings] = useState<RelatedListing[]>([]);
   const [sellerLoading, setSellerLoading] = useState(false);
+  const viewTrackedRef = useRef<string | null>(null);
   const reportMutation = useMutation({
     mutationFn: async ({ reason }: { reason: 'spam' | 'fake' | 'prohibited' | 'offensive' | 'other' }) => {
       if (!annonce) return;
@@ -116,6 +118,19 @@ export default function AnnonceDetail() {
       })
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (!annonce?.id) return;
+    const currentId = String(annonce.id);
+    if (viewTrackedRef.current === currentId) return;
+    viewTrackedRef.current = currentId;
+    void trackEvent('listing_view', {
+      listing_id: annonce.id,
+      listing_title: getListingTitle(annonce),
+      category_id: annonce.category_id ?? null,
+      seller_id: annonce.user?.id ?? null,
+    }, `/annonce/${annonce.id}`).catch(() => {});
+  }, [annonce, viewTrackedRef]);
 
   useEffect(() => {
     if (!annonce?.user?.id) return;
@@ -196,6 +211,11 @@ export default function AnnonceDetail() {
 
   const handleContact = async () => {
     if (!annonce) return;
+    void trackEvent('contact_seller_click', {
+      listing_id: annonce.id,
+      listing_title: getListingTitle(annonce),
+      seller_id: annonce.user?.id ?? null,
+    }, `/annonce/${annonce.id}`).catch(() => {});
     if (annonce.user?.id === Number(user?.id)) {
       Alert.alert('Info', "C'est votre propre annonce.");
       return;

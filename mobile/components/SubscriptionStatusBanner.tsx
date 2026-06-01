@@ -59,7 +59,7 @@ function getStatusTone(status?: SubscriptionStatus | null) {
     backgroundColor: '#ECFDF5',
     borderColor: '#86EFAC',
     icon: 'checkmark-circle' as const,
-    title: 'Actif',
+    title: 'Abonnement actif',
     message: 'Votre abonnement est actif et vos avantages Pro sont disponibles.',
     cta: null,
     ctaHref: null,

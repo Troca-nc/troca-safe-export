@@ -31,7 +31,14 @@ const SORTS = [
   { value: 'price_desc', label: 'Prix décroissant' },
 ];
 
+function snapTo10(value: string) {
+  const parsed = Number(String(value || '').trim());
+  if (!Number.isFinite(parsed)) return '';
+  return String(Math.max(0, Math.round(parsed / 10) * 10));
+}
+
 export default function AnnoncesTab() {
+  const isDemoMode = process.env.EXPO_PUBLIC_DEMO_MODE === 'true';
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -44,7 +51,7 @@ export default function AnnoncesTab() {
   const [communes, setCommunes] = useState<any[]>([]);
   const [commune, setCommune] = useState<number | null>(null);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const visibleCategories = categories.length > 0 ? categories : MOBILE_FALLBACK_CATEGORIES;
+  const visibleCategories = isDemoMode ? MOBILE_FALLBACK_CATEGORIES : (categories.length > 0 ? categories : MOBILE_FALLBACK_CATEGORIES);
   const queryFilters = useMemo(() => ({
     q: debouncedSearch,
     category_id: categoryId ?? '',
@@ -88,7 +95,7 @@ export default function AnnoncesTab() {
       .getCategories()
       .then(({ data }) => {
         const raw = Array.isArray(data.data) ? data.data : [];
-        setCategories(raw);
+        setCategories(isDemoMode ? (MOBILE_FALLBACK_CATEGORIES as any) : raw);
       })
       .catch(() => setCategories(MOBILE_FALLBACK_CATEGORIES as any));
 
@@ -276,6 +283,7 @@ export default function AnnoncesTab() {
                 keyboardType="numeric"
                 value={prixMin}
                 onChangeText={setPrixMin}
+                onEndEditing={() => setPrixMin((current) => snapTo10(current))}
               />
               <Text style={styles.priceSep}>—</Text>
               <TextInput
@@ -285,6 +293,7 @@ export default function AnnoncesTab() {
                 keyboardType="numeric"
                 value={prixMax}
                 onChangeText={setPrixMax}
+                onEndEditing={() => setPrixMax((current) => snapTo10(current))}
               />
             </View>
           </View>

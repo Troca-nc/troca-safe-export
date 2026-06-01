@@ -1,6 +1,6 @@
 // src/types/messaging.types.ts
 
-export type MessageType    = 'text' | 'offer' | 'photo' | 'system'
+export type MessageType    = 'text' | 'offer' | 'photo' | 'audio' | 'document' | 'system'
 export type OfferStatus    = 'pending' | 'accepted' | 'declined' | 'countered' | 'expired'
 export type ConvStatus     = 'active' | 'archived' | 'blocked'
 
@@ -31,6 +31,13 @@ export interface Conversation {
     telephone_verifie: boolean
     is_pro:     boolean
     last_seen?: string
+    is_online?: boolean
+    last_seen_at?: string | null
+    last_seen_label?: string | null
+    note_moyenne?: number | null
+    nb_avis?: number | null
+    avg_response_time_minutes?: number | null
+    avg_response_time_label?: string | null
   }
 }
 
@@ -42,7 +49,12 @@ export interface Message {
   sender_id:   number
   type:        MessageType
   content:     string | null       // texte pour type=text/system
-  photo_url?:  string | null       // pour type=photo
+  photo_url?:  string | null       // pour type=photo/audio
+  attachment_url?: string | null
+  attachment_download_url?: string | null
+  attachment_name?: string | null
+  attachment_mime_type?: string | null
+  attachment_size_bytes?: number | null
   offer?:      MessageOffer        // pour type=offer
   read_at?:    string | null
   created_at:  string
@@ -82,6 +94,10 @@ export interface SendMessagePayload {
   type:      MessageType
   content?:  string
   photo_url?: string
+  attachment_url?: string
+  attachment_name?: string
+  attachment_mime_type?: string
+  attachment_size_bytes?: number
   offer_amount?: number          // pour type=offer
 }
 

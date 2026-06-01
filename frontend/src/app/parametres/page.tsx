@@ -534,7 +534,7 @@ export default function ParametresPage() {
           <div className="card divide-y divide-night/8">
           {[
             { icon: Shield,   label: 'Sécurité et connexion',    href: '/profil?tab=securite' },
-            { icon: Bell,     label: 'Notifications',             href: '/profil?tab=notifications' },
+            { icon: Bell,     label: 'Notifications',             href: '/parametres/notifications' },
             { icon: Eye,      label: 'Confidentialité',           href: '#confidentialite' },
             { icon: Cookie,   label: 'Cookies',                   href: '#cookies' },
             { icon: Lock,     label: 'Mes données (RGPD)',        href: '#donnees' },

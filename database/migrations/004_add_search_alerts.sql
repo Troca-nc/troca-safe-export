@@ -16,6 +16,50 @@ CREATE TABLE IF NOT EXISTS search_alerts (
   updated_at         TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE search_alerts
+  ADD COLUMN IF NOT EXISTS frequency VARCHAR(20) NOT NULL DEFAULT 'daily';
+
+ALTER TABLE search_alerts
+  ADD COLUMN IF NOT EXISTS status VARCHAR(20) NOT NULL DEFAULT 'active';
+
+ALTER TABLE search_alerts
+  ADD COLUMN IF NOT EXISTS nb_results INTEGER NOT NULL DEFAULT 0;
+
+ALTER TABLE search_alerts
+  ADD COLUMN IF NOT EXISTS last_sent_at TIMESTAMPTZ DEFAULT NULL;
+
+ALTER TABLE search_alerts
+  ADD COLUMN IF NOT EXISTS unsubscribe_token VARCHAR(64);
+
+ALTER TABLE search_alerts
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+
+UPDATE search_alerts
+SET status = CASE WHEN active IS FALSE THEN 'paused' ELSE 'active' END
+WHERE status IS NULL OR status = '';
+
+UPDATE search_alerts
+SET last_sent_at = last_sent
+WHERE last_sent_at IS NULL AND last_sent IS NOT NULL;
+
+UPDATE search_alerts
+SET unsubscribe_token = COALESCE(unsubscribe_token, md5(id::text || user_id::text || created_at::text))
+WHERE unsubscribe_token IS NULL;
+
+ALTER TABLE search_alerts
+  ALTER COLUMN frequency SET DEFAULT 'daily',
+  ALTER COLUMN status SET DEFAULT 'active',
+  ALTER COLUMN nb_results SET DEFAULT 0,
+  ALTER COLUMN updated_at SET DEFAULT NOW();
+
+ALTER TABLE search_alerts
+  ADD CONSTRAINT search_alerts_status_check
+  CHECK (status IN ('active', 'paused', 'deleted'));
+
+ALTER TABLE search_alerts
+  ADD CONSTRAINT search_alerts_frequency_check
+  CHECK (frequency IN ('immediate', 'daily', 'weekly'));
+
 -- Index pour les jobs de matching
 CREATE INDEX IF NOT EXISTS idx_alerts_status_frequency
   ON search_alerts (status, frequency)

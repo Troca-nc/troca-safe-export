@@ -12,7 +12,11 @@ type ListingImageProps = {
   fill?: boolean
   sizes?: string
   priority?: boolean
+  loading?: 'eager' | 'lazy'
+  placeholder?: 'blur' | 'empty'
+  blurDataURL?: string
   onClick?: () => void
+  onLoadingComplete?: () => void
 }
 
 export default function ListingImage({
@@ -24,7 +28,11 @@ export default function ListingImage({
   fill = true,
   sizes = '(max-width: 640px) 100vw, 50vw',
   priority = false,
+  loading,
+  placeholder,
+  blurDataURL,
   onClick,
+  onLoadingComplete,
 }: ListingImageProps) {
   const [errored, setErrored] = useState(false)
 
@@ -43,7 +51,11 @@ export default function ListingImage({
       fill={fill}
       sizes={sizes}
       priority={priority}
+      loading={loading}
+      placeholder={placeholder}
+      blurDataURL={blurDataURL}
       onError={() => setErrored(true)}
+      onLoadingComplete={onLoadingComplete}
       className={`object-cover ${imgClassName}`}
       onClick={onClick}
     />

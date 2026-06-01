@@ -12,6 +12,13 @@ const { deletePrefix, getJson, setJson } = require('../services/sharedCache');
 
 const router = Router();
 const CACHE_PREFIX = 'cache:stats:';
+const PLATFORM_STATS_CACHE_KEY = 'platform';
+const PLATFORM_STATS_TTL = 5 * 60 * 1000;
+
+let platformStatsCache = {
+  data: null,
+  timestamp: 0,
+};
 
 async function invalidateCache(match) {
   if (!match) {
@@ -28,6 +35,50 @@ async function readCache(key) {
 async function writeCache(key, value, ttlMs) {
   return setJson(`${CACHE_PREFIX}${key}`, value, ttlMs);
 }
+
+router.get('/platform', async (_req, res) => {
+  const now = Date.now();
+  if (platformStatsCache.data && (now - platformStatsCache.timestamp) < PLATFORM_STATS_TTL) {
+    return res.json(platformStatsCache.data);
+  }
+
+  try {
+    const [listings, bonsPlans, rides] = await Promise.all([
+      query(`
+        SELECT COUNT(*)::int AS count
+        FROM annonces
+        WHERE status = 'active'
+      `),
+      query(`
+        SELECT COUNT(*)::int AS count
+        FROM bon_plans
+        WHERE status = 'active'
+          AND expires_at > NOW()
+      `),
+      query(`
+        SELECT COUNT(*)::int AS count
+        FROM covoiturages
+        WHERE status IN ('published', 'full')
+          AND expires_at > NOW()
+      `),
+    ]);
+
+    const data = {
+      listings_count: Number(listings.rows[0]?.count ?? 0),
+      bons_plans_count: Number(bonsPlans.rows[0]?.count ?? 0),
+      rides_count: Number(rides.rows[0]?.count ?? 0),
+    };
+
+    platformStatsCache = { data, timestamp: now };
+    return res.json(data);
+  } catch (error) {
+    console.error('Stats API error:', error);
+    if (platformStatsCache.data) {
+      return res.json(platformStatsCache.data);
+    }
+    return res.status(500).json({ error: 'Stats unavailable' });
+  }
+});
 
 router.get('/home', async (_req, res, next) => {
   try {

@@ -1,9 +1,10 @@
-'use client'
+﻿'use client'
 
 import { Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { ArrowRight, BadgeCheck, Megaphone, Store, UserRound, Sparkles, CheckCircle2 } from 'lucide-react'
+import { PRO_PLANS } from '@/types/monetisation.types'
 
 type Role = 'particulier' | 'pro'
 
@@ -27,11 +28,13 @@ const CONFIG: Record<Role, {
     title: 'Bienvenue dans l’espace professionnel',
     subtitle: 'Votre compte pro est prêt. Vous pouvez maintenant préparer votre vitrine et vos options de visibilité.',
     icon: Store,
-    cta: { label: 'Découvrir l’espace pro', href: '/parametres' },
-    items: ['Compléter les infos société', 'Choisir un plan pro', 'Mettre en avant vos annonces'],
-    badge: 'Compte pro en configuration',
+    cta: { label: 'Choisir ma formule Pro', href: '/abonnement' },
+    items: ['Comparer les prix', 'Choisir mensuel ou annuel', 'Activer les boosts moins chers'],
+    badge: 'Compte pro prêt à configurer',
   },
 }
+
+const PRO_PLAN = PRO_PLANS[0]
 
 function BienvenueContent() {
   const searchParams = useSearchParams()
@@ -104,6 +107,38 @@ function BienvenueContent() {
             </div>
           </div>
 
+          {role === 'pro' ? (
+            <div className="mt-6 rounded-[2rem] border border-coral/15 bg-gradient-to-br from-coral/10 via-white to-white p-5 shadow-sm md:p-6">
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Choisir la formule</p>
+                  <h2 className="mt-1 text-2xl font-bold text-night">Le prix devient l’élément principal</h2>
+                  <p className="mt-2 text-sm text-night/60">
+                    La création reste gratuite. Ensuite, vous choisissez votre rythme Pro selon le besoin réel de votre activité.
+                  </p>
+                </div>
+                <span className="rounded-full bg-night px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
+                  À partir de {PRO_PLAN.price_monthly.toLocaleString('fr-FR')} XPF / mois
+                </span>
+              </div>
+
+              <div className="mt-5 grid gap-3 md:grid-cols-2">
+                <div className="rounded-[1.75rem] border border-night/10 bg-white p-5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-night/45">Mensuel</p>
+                  <p className="mt-2 text-3xl font-bold text-night">{PRO_PLAN.price_monthly.toLocaleString('fr-FR')} XPF</p>
+                  <p className="mt-1 text-sm text-night/55">Idéal pour tester et garder de la souplesse.</p>
+                </div>
+                <div className="rounded-[1.75rem] border border-coral/25 bg-coral/5 p-5 shadow-[0_16px_40px_rgba(231,111,81,0.10)]">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-coral/80">Annuel</p>
+                    <span className="rounded-full bg-coral px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">Recommandé</span>
+                  </div>
+                  <p className="mt-2 text-3xl font-bold text-night">{PRO_PLAN.price_yearly.toLocaleString('fr-FR')} XPF</p>
+                  <p className="mt-1 text-sm text-night/55">Plus lisible pour un usage pro régulier.</p>
+                </div>
+              </div>
+            </div>
+          ) : null}
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link href={config.cta.href} className="btn-primary justify-center px-5 py-3">
               {config.cta.label}

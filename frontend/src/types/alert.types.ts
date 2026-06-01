@@ -84,7 +84,7 @@ export function buildAlertLabel(filters: AlertFilters): string {
       fair: 'Correct',
       for_parts: 'Pour pièces',
     }[filters.condition]
-    parts.push(conditionLabel ?? filters.condition)
+    parts.push(conditionLabel || filters.condition)
   }
   if (filters.troc === 'true' || filters.troc === '1') parts.push('Troc')
   if (filters.prix_max) parts.push(`< ${filters.prix_max.toLocaleString('fr-FR')} XPF`)

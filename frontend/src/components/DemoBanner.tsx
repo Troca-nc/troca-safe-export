@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { AlertTriangle, X } from 'lucide-react'
+import { DEMO_ACCOUNTS } from '@/lib/demoApi'
 import { DEMO_TOAST_EVENT, isDemoMode } from '@/lib/demoMode'
 
 type DemoToast = {
@@ -10,10 +11,16 @@ type DemoToast = {
 }
 
 export default function DemoBanner() {
+  const showDemoBar = process.env.NEXT_PUBLIC_SHOW_DEMO_BAR === 'true'
   const [toasts, setToasts] = useState<DemoToast[]>([])
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (!isDemoMode()) return
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted || !isDemoMode() || !showDemoBar) return
 
     const handleToast = (event: Event) => {
       const detail = (event as CustomEvent<{ message?: string }>).detail
@@ -30,21 +37,38 @@ export default function DemoBanner() {
 
     window.addEventListener(DEMO_TOAST_EVENT, handleToast as EventListener)
     return () => window.removeEventListener(DEMO_TOAST_EVENT, handleToast as EventListener)
-  }, [])
+  }, [mounted, showDemoBar])
 
-  if (!isDemoMode()) return null
+  if (!mounted || !isDemoMode() || !showDemoBar) return null
 
   return (
     <>
-      <div className="fixed inset-x-0 top-0 z-[120] border-b border-amber-300/80 bg-amber-300 px-4 py-3 text-sm text-amber-950 shadow-[0_10px_30px_rgba(245,158,11,0.22)]">
-        <div className="mx-auto flex max-w-7xl items-center gap-3">
-          <AlertTriangle className="h-4 w-4 shrink-0 text-amber-700" />
-          <p className="flex-1 font-medium">
-            ⚠️ Mode démonstration — Aucun paiement réel ne sera effectué
-          </p>
-          <span className="rounded-full bg-black/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-950">
-            Démo
-          </span>
+      <div className="fixed inset-x-0 top-0 z-[120] border-b border-amber-300/80 bg-amber-300 px-4 py-2 text-sm text-amber-950 shadow-[0_10px_30px_rgba(245,158,11,0.22)]">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
+            <div className="min-w-0">
+              <p className="font-medium leading-5">Mode démo - aucun paiement réel ne sera débité</p>
+              <p className="text-[11px] leading-4 text-amber-900/85">
+                Code SMS <strong>123456</strong> - Compte de départ{' '}
+                <strong>{DEMO_ACCOUNTS.particulier.email}</strong> / <strong>{DEMO_ACCOUNTS.particulier.password}</strong>
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2 sm:ml-auto">
+            <span className="rounded-full bg-black/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-950">
+              Demo
+            </span>
+            <span className="rounded-full border border-amber-400/60 bg-white/40 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-950">
+              Buyer
+            </span>
+            <span className="rounded-full border border-amber-400/60 bg-white/40 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-950">
+              Pro
+            </span>
+            <span className="rounded-full border border-amber-400/60 bg-white/40 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-950">
+              Admin
+            </span>
+          </div>
         </div>
       </div>
 

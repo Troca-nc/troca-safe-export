@@ -20,12 +20,13 @@ const {
   phoneLimiter,
   refreshLimiter,
 } = require('../middleware/rateLimit');
-const { sendResetEmail, sendWelcomeEmail, sendVerificationEmail } = require('../services/emailService');
+const { sendWelcomeEmail, sendVerificationEmail } = require('../services/emailService');
 const { verifyTurnstileToken } = require('../services/turnstile');
 const { query } = require('../config/database');
 const { verifyCsrf } = require('../middleware/csrf');
 const { setSecureCookie, clearSecureCookie, getCookieValue } = require('../config/cookies');
 const { getRefreshExpiresMs } = require('../config/jwt');
+const { deliverPasswordReset } = require('../services/passwordResetDeliveryService');
 const {
   normalizePhoneNumber,
   resendPhoneOtp,
@@ -33,12 +34,13 @@ const {
 const {
   confirmEmail,
   deleteRefreshToken,
+  findUserByIdentifier,
   findUserById,
   loginAccount,
   refreshSessionWithRotation,
   registerAccount,
   resendVerification,
-  requestPasswordReset,
+  requestPasswordResetForUser,
   resetPasswordWithToken,
 } = require('../services/authAccountService');
 const { addToTokenBlacklist } = require('../services/tokenService');
@@ -52,6 +54,7 @@ const registerSchema = Joi.object({
   prenom: Joi.string().min(1).max(100).required(),
   nom: Joi.string().min(1).max(100).required(),
   commune_id: Joi.number().integer().optional(),
+  telephone: Joi.string().pattern(/^(\+687|0)[0-9]{6}$/).required(),
   account_type: Joi.string().valid('personal', 'professional', 'particulier', 'pro').default('personal'),
   turnstile_token: Joi.string().allow('').optional(),
 });
@@ -67,7 +70,7 @@ const refreshSchema = Joi.object({
 });
 
 const forgotSchema = Joi.object({
-  email: Joi.string().email().required(),
+  identifier: Joi.string().trim().min(3).max(255).required(),
   turnstile_token: Joi.string().allow('').optional(),
 });
 
@@ -100,6 +103,8 @@ router.post('/register', registerLimiter, async (req, res, next) => {
 
     await verifyTurnstileToken({ req, token: value.turnstile_token, ip: req.ip, action: 'register' });
     const { user, verificationToken, accessToken, refreshToken } = await registerAccount(value);
+    const normalizedPhone = normalizePhoneNumber(value.telephone);
+    await query('UPDATE users SET telephone = $1, phone_verified = FALSE, updated_at = NOW() WHERE id = $2', [normalizedPhone, user.id]);
     setRefreshCookie(res, refreshToken);
 
     sendVerificationEmail(user.email, user.prenom, verificationToken).catch((err) => {
@@ -190,6 +195,33 @@ router.post('/logout', verifyCsrf, async (req, res, next) => {
     }
     clearSecureCookie(res, REFRESH_COOKIE_NAME);
     return res.json({ message: 'Déconnecté avec succès.' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/forgot-password', forgotPasswordLimiter, async (req, res, next) => {
+  try {
+    const { error, value } = forgotSchema.validate(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
+    await verifyTurnstileToken({ req, token: value.turnstile_token, ip: req.ip, action: 'forgot_password' });
+    const recipient = await findUserByIdentifier(value.identifier);
+    const user = recipient.rows[0];
+    const neutralMessage = 'Si ce compte existe, vous recevrez un lien de réinitialisation par email ou SMS selon vos coordonnées vérifiées.';
+
+    if (!user) {
+      return res.json({ message: neutralMessage });
+    }
+
+    const reset = await requestPasswordResetForUser(user);
+    if (!reset) {
+      return res.json({ message: neutralMessage });
+    }
+
+    await deliverPasswordReset({ user, token: reset.token });
+
+    return res.json({ message: neutralMessage });
   } catch (err) {
     next(err);
   }

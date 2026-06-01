@@ -106,7 +106,7 @@ export function useImageUpload(initialUris: string[] = []) {
       syncItems((current) => updateStatus(current, index, { status: 'done', progress: 100, error: undefined }))
       return true
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Ã‰chec de l'envoi"
+      const message = error instanceof Error ? error.message : "Échec de l'envoi"
       syncItems((current) => updateStatus(current, index, { status: 'error', progress: 0, error: message }))
       return false
     }

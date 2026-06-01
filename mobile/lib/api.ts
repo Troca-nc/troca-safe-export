@@ -24,6 +24,20 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
+export const uploadApi = {
+  uploadChatDocument: (documentBase64: string, mimeType: string, fileName?: string) =>
+    api.post('/upload/chat/document-base64', {
+      document_base64: documentBase64,
+      mime_type: mimeType,
+      file_name: fileName,
+    }),
+  uploadChatAudio: (audioBase64: string, mimeType: string) =>
+    api.post('/upload/chat/audio', {
+      audio_base64: audioBase64,
+      mime_type: mimeType,
+    }),
+}
+
 type CacheMatcher = string | RegExp | ((key: string) => boolean)
 
 type CacheEntry<T> = {
@@ -194,11 +208,21 @@ export const messagesApi = {
   startConversation: (data: object) => api.post('/messages/conversations', data),
   sendMessage: (convId: string, content: string) => api.post(`/messages/conversations/${convId}`, { content }),
   sendPhoto: (convId: string, photo_url: string) => api.post(`/messages/conversations/${convId}`, { type: 'photo', photo_url }),
+  sendDocument: (convId: string, attachment_url: string, attachment_name: string, attachment_mime_type: string, attachment_size_bytes?: number | null) =>
+    api.post(`/messages/conversations/${convId}`, {
+      type: 'document',
+      attachment_url,
+      attachment_name,
+      attachment_mime_type,
+      attachment_size_bytes,
+    }),
+  sendAudio: (convId: string, audio_url: string) => api.post(`/messages/conversations/${convId}`, { type: 'audio', audio_url }),
   markConversationRead: (convId: string | number) => api.patch(`/messages/conversations/${convId}/read`),
 }
 
 export const statsApi = {
   getSeller: () => cachedGet('stats.getSeller', '/stats/seller', () => api.get('/stats/seller'), undefined, CACHE_TTL.short),
+  getPlatform: () => cachedGet('stats.getPlatform', '/stats/platform', () => api.get('/stats/platform'), undefined, CACHE_TTL.short),
 }
 
 export const bonPlansApi = {
@@ -277,6 +301,14 @@ export const notificationsApi = {
     { limit },
     CACHE_TTL.short,
   ),
+  getPreferences: () => cachedGet(
+    'notifications.preferences.get',
+    '/users/notifications/preferences',
+    () => api.get('/users/notifications/preferences'),
+    undefined,
+    CACHE_TTL.short,
+  ),
+  savePreferences: (data: object) => api.put('/users/notifications/preferences', data).finally(() => invalidateApiCache('notifications.preferences.')),
   markAllRead: () => api.post('/users/notifications/read-all').finally(() => invalidateApiCache('notifications.')),
   markRead: (id: number) => api.post(`/users/notifications/${id}/read`).finally(() => invalidateApiCache('notifications.')),
 }

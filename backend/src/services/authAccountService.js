@@ -5,6 +5,8 @@ const crypto = require('crypto');
 const { query, withTransaction } = require('../config/database');
 const { getRedisClient } = require('../config/redis');
 const { generateTokens, getRefreshExpiresMs, verifyAccessToken, verifyRefreshToken } = require('../config/jwt');
+const { ensureNotificationPreferences } = require('./notificationPreferencesService');
+const { normalizePhoneNumber } = require('./phoneOtpService');
 
 function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
@@ -294,6 +296,29 @@ async function findUserById(userId) {
   );
 }
 
+async function findUserByIdentifier(identifier) {
+  const email = normalizeEmail(identifier);
+  const telephone = normalizePhoneNumber(identifier);
+
+  return query(
+    `SELECT id, email, prenom, nom, telephone, phone_verified, email_verified,
+            avatar_url, commune_id, bio, is_admin, account_type,
+            CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
+            CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN pro_plan ELSE NULL END AS pro_plan,
+            pro_expires_at, last_bon_plan_offer_at, onboarding_step, deleted_at
+     FROM users
+     WHERE deleted_at IS NULL
+       AND (email = $1 OR telephone = $2)
+     ORDER BY CASE
+       WHEN email = $1 THEN 0
+       WHEN telephone = $2 THEN 1
+       ELSE 2
+     END
+     LIMIT 1`,
+    [email, telephone]
+  );
+}
+
 async function registerAccount({ email, password, prenom, nom, commune_id, account_type }) {
   const normalizedEmail = normalizeEmail(email);
   const normalizedAccountType = normalizeAccountType(account_type);
@@ -318,6 +343,7 @@ async function registerAccount({ email, password, prenom, nom, commune_id, accou
 
   const { accessToken, refreshToken, refreshExpiresAt } = generateTokens(user.id);
   await persistRefreshToken(user.id, refreshToken, refreshExpiresAt);
+  await ensureNotificationPreferences(user.id).catch(() => {});
 
   return {
     user,
@@ -387,11 +413,11 @@ async function refreshSessionWithRotation(refreshToken) {
   try {
     payload = verifyRefreshToken(refreshToken);
   } catch {
-    throw createHttpError(401, 'Token de rafraÃ®chissement invalide ou expirÃ©.');
+    throw createHttpError(401, 'Token de rafra?chissement invalide ou expir?.');
   }
 
   if (await isRefreshTokenBlacklisted(refreshToken)) {
-    throw createHttpError(401, 'Token de rafraÃ®chissement invalide ou expirÃ©.');
+    throw createHttpError(401, 'Token de rafra?chissement invalide ou expir?.');
   }
 
   const tokenRow = await query(
@@ -399,7 +425,7 @@ async function refreshSessionWithRotation(refreshToken) {
     [refreshToken, payload.sub]
   ).catch(() => ({ rows: [] }));
   if (!tokenRow.rows[0]) {
-    throw createHttpError(401, 'Token de rafraÃ®chissement invalide ou expirÃ©.');
+    throw createHttpError(401, 'Token de rafra?chissement invalide ou expir?.');
   }
 
   const user = await query(
@@ -418,20 +444,25 @@ async function refreshSessionWithRotation(refreshToken) {
 }
 
 async function requestPasswordReset(email) {
-  const result = await query(
-    `SELECT id, email, prenom, account_type, pro_plan, pro_expires_at, last_bon_plan_offer_at, email_verified FROM users WHERE email = $1 AND deleted_at IS NULL`,
-    [normalizeEmail(email)]
-  );
+  const result = await findUserByIdentifier(email);
+  const user = result.rows[0];
+  if (!user) {
+    return null;
+  }
 
-  if (result.rows.length === 0) {
+  return requestPasswordResetForUser(user);
+}
+
+async function requestPasswordResetForUser(user) {
+  if (!user?.id) {
     return null;
   }
 
   const token = createPasswordResetToken();
-  await upsertPasswordResetToken(result.rows[0].id, token.token, token.expiresAt);
+  await upsertPasswordResetToken(user.id, token.token, token.expiresAt);
 
   return {
-    user: result.rows[0],
+    user,
     token: token.token,
   };
 }
@@ -511,6 +542,7 @@ module.exports = {
   createVerificationToken,
   deleteRefreshToken,
   findUserByEmail,
+  findUserByIdentifier,
   findUserById,
   loginAccount,
   normalizeEmail,
@@ -519,6 +551,7 @@ module.exports = {
   registerAccount,
   resendVerification,
   requestPasswordReset,
+  requestPasswordResetForUser,
   resetPasswordWithToken,
   isAccessTokenBlacklisted,
   revokeRefreshToken,

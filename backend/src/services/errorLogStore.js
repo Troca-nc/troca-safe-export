@@ -3,21 +3,40 @@
 const { getRedisClient } = require('../config/redis');
 
 const ERROR_LOG_KEY = 'error_logs';
+const PII_KEYS = [
+  'password',
+  'password_hash',
+  'token',
+  'access_token',
+  'refresh_token',
+  'current_password',
+  'new_password',
+  'email',
+  'telephone',
+  'phone',
+  'address',
+  'ip',
+  'secret',
+  'api_key',
+  'credit_card',
+  'cvv',
+  'ssn',
+];
 
-function sanitizeBody(body) {
-  if (!body || typeof body !== 'object') return body ?? null;
-  const clone = Array.isArray(body) ? [...body] : { ...body };
-  for (const key of ['password', 'password_hash', 'token', 'access_token', 'refresh_token', 'current_password', 'new_password', 'email', 'telephone', 'phone']) {
-    if (key in clone) {
-      clone[key] = '[redacted]';
-    }
+function maskEmail(value) {
+  const email = String(value || '').trim();
+  if (!email || !email.includes('@')) return '[redacted]';
+  const [local, domain] = email.split('@');
+  if (!local || !domain) return '[redacted]';
+  if (local.length <= 2) {
+    return `${local[0] || '*'}***@${domain}`;
   }
-  return clone;
+  return `${local[0]}${'*'.repeat(Math.max(2, local.length - 2))}${local.slice(-1)}@${domain}`;
 }
 
 function maskIp(ip) {
   const value = String(ip || '').trim();
-  if (!value) return null;
+  if (!value) return '[redacted]';
   if (value.includes(':')) {
     const parts = value.split(':');
     return `${parts.slice(0, 3).join(':')}:*`;
@@ -27,6 +46,45 @@ function maskIp(ip) {
     return `${parts[0]}.${parts[1]}.${parts[2]}.0`;
   }
   return '[redacted]';
+}
+
+function maskPII(value, seen = new WeakSet()) {
+  if (value == null) return value;
+  if (typeof value !== 'object') return value;
+  if (seen.has(value)) return '[redacted]';
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    return value.map((item) => maskPII(item, seen));
+  }
+
+  const masked = {};
+  for (const [rawKey, rawValue] of Object.entries(value)) {
+    const key = String(rawKey).toLowerCase();
+
+    if (key.includes('email')) {
+      masked[rawKey] = maskEmail(rawValue);
+      continue;
+    }
+
+    if (key === 'ip' || key.endsWith('_ip')) {
+      masked[rawKey] = maskIp(rawValue);
+      continue;
+    }
+
+    if (PII_KEYS.some((piiKey) => key === piiKey || key.includes(piiKey))) {
+      masked[rawKey] = '[redacted]';
+      continue;
+    }
+
+    masked[rawKey] = maskPII(rawValue, seen);
+  }
+
+  return masked;
+}
+
+function sanitizeBody(body) {
+  return maskPII(body);
 }
 
 async function recordErrorLog(entry) {
@@ -65,6 +123,9 @@ async function recordErrorLog(entry) {
 }
 
 module.exports = {
+  maskEmail,
+  maskIp,
+  maskPII,
   recordErrorLog,
   sanitizeBody,
-}
+};

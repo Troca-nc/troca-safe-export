@@ -6,15 +6,15 @@
 // ============================================================
 
 const { Router } = require('express');
-const crypto = require('crypto');
 const Stripe = require('stripe');
 const { authenticate } = require('../middleware/auth');
 const { paymentLimiter } = require('../middleware/rateLimit');
 const { query, withTransaction } = require('../config/database');
 const { isConfiguredValue } = require('../config/env');
 const { validate, Joi } = require('../middleware/validate');
-const { sendMail } = require('../services/emailService');
+const { sendMail, sendBoostActivatedEmail } = require('../services/emailService');
 const payplug = require('../services/payplugService');
+const { verifyPayPlugWebhook } = payplug;
 const {
   findBoost,
   getWebPlan,
@@ -86,18 +86,6 @@ function getPayplugSignature(req) {
   const raw = req.headers['x-payplug-signature'] ?? req.headers['payplug-signature'];
   if (Array.isArray(raw)) return raw[0] || '';
   return typeof raw === 'string' ? raw.trim() : '';
-}
-
-function verifyPayplugSignature(rawBody, signature) {
-  if (!payplugWebhookSecret || !rawBody || !signature) return false;
-  const expected = crypto.createHmac('sha256', payplugWebhookSecret).update(rawBody).digest('hex');
-  const provided = signature.replace(/^sha256=/i, '').trim().toLowerCase();
-  if (!expected || !provided || expected.length !== provided.length) return false;
-  try {
-    return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(provided, 'hex'));
-  } catch {
-    return false;
-  }
 }
 
 function safePaymentError(provider, fallback) {
@@ -977,6 +965,7 @@ router.post('/webhooks/stripe', async (req, res) => {
       query,
       withTransaction,
       sendMail,
+      sendBoostActivatedEmail,
       getWebPlan,
       markPaymentSucceeded,
       formatXpfEur,
@@ -1272,8 +1261,8 @@ router.post('/webhooks/payplug', async (req, res) => {
   if (!resourceId) {
     return res.status(400).json({ error: 'Payload IPN invalide' });
   }
-  if (!verifyPayplugSignature(req.rawBody, signature)) {
-    return res.status(400).json({ error: 'Signature webhook PayPlug invalide' });
+  if (!verifyPayPlugWebhook(req.rawBody, signature)) {
+    return res.status(401).json({ error: 'Signature webhook PayPlug invalide' });
   }
 
   try {
@@ -1296,6 +1285,7 @@ router.post('/webhooks/payplug', async (req, res) => {
       query,
       withTransaction,
       sendMail,
+      sendBoostActivatedEmail,
       baseUrl,
     });
     if (resourceType === 'payment' && resource.is_paid) {

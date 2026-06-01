@@ -17,6 +17,9 @@ export type SellerProfile = {
   created_at?: string | null;
   commune_name?: string | null;
   province_name?: string | null;
+  is_online?: boolean;
+  last_seen_label?: string | null;
+  avg_response_time_label?: string | null;
   total_vues?: number | null;
   total_favoris?: number | null;
   active_listings_count?: number | null;
@@ -90,6 +93,24 @@ export function PublicSellerProfileHero({ sellerLabel, initials, profile, locati
             <View style={styles.smallBadge}>
               <Ionicons name="call" size={11} color={Colors.white} />
               <Text style={styles.smallBadgeText}>Telephone verifie</Text>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.metaRow}>
+          <View style={[styles.metaBadge, profile.is_online ? styles.metaBadgeOnline : styles.metaBadgeOffline]}>
+            <View style={[styles.metaDot, profile.is_online ? styles.metaDotOnline : styles.metaDotOffline]} />
+            <Text style={[styles.metaText, profile.is_online ? styles.metaTextOnline : styles.metaTextOffline]}>
+              {profile.is_online ? 'En ligne' : (profile.last_seen_label ?? 'Hors ligne')}
+            </Text>
+          </View>
+
+          {profile.avg_response_time_label && (
+            <View style={[styles.metaBadge, styles.metaBadgeInfo]}>
+              <Ionicons name="time-outline" size={11} color={Colors.primaryDark} />
+              <Text style={[styles.metaText, styles.metaTextInfo]}>
+                Répond en moyenne en {profile.avg_response_time_label}
+              </Text>
             </View>
           )}
         </View>
@@ -316,6 +337,25 @@ const styles = StyleSheet.create({
   proText: { color: Colors.primary, fontWeight: FontWeight.bold, fontSize: FontSize.xs },
   location: { marginTop: 6, fontSize: FontSize.sm, color: Colors.textSecondary },
   badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: Spacing.sm },
+  metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
+  metaBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderRadius: Radius.full,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  metaBadgeOnline: { backgroundColor: 'rgba(34, 197, 94, 0.12)' },
+  metaBadgeOffline: { backgroundColor: Colors.surfaceRaised },
+  metaBadgeInfo: { backgroundColor: 'rgba(13, 121, 193, 0.10)' },
+  metaDot: { width: 7, height: 7, borderRadius: 999 },
+  metaDotOnline: { backgroundColor: '#22c55e' },
+  metaDotOffline: { backgroundColor: Colors.gray300 },
+  metaText: { fontSize: FontSize.xs, fontWeight: FontWeight.semibold },
+  metaTextOnline: { color: '#15803d' },
+  metaTextOffline: { color: Colors.textSecondary },
+  metaTextInfo: { color: Colors.primaryDark },
   smallBadge: {
     flexDirection: 'row',
     alignItems: 'center',

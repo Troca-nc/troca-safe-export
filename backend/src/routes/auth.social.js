@@ -23,7 +23,7 @@ const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null
 async function upsertSocialUser({ email, prenom, nom, avatar_url, provider, provider_id }) {
   // 1. Chercher par provider_id (le plus fiable)
   const byProvider = await query(
-    `SELECT id, email, prenom, nom, is_admin, is_pro, email_verified
+    `SELECT id, email, prenom, nom, telephone, phone_verified, is_admin, is_pro, email_verified
      FROM users WHERE ${provider}_id = $1 AND deleted_at IS NULL`,
     [provider_id]
   )
@@ -31,7 +31,7 @@ async function upsertSocialUser({ email, prenom, nom, avatar_url, provider, prov
 
   // 2. Chercher par email (compte déjà existant sans social)
   const byEmail = await query(
-    `SELECT id, email, prenom, nom, is_admin, is_pro, email_verified
+    `SELECT id, email, prenom, nom, telephone, phone_verified, is_admin, is_pro, email_verified
      FROM users WHERE email = $1 AND deleted_at IS NULL`,
     [email]
   )
@@ -51,7 +51,7 @@ async function upsertSocialUser({ email, prenom, nom, avatar_url, provider, prov
     `INSERT INTO users (email, prenom, nom, avatar_url, ${provider}_id,
        phone_verified, email_verified, created_at, updated_at)
      VALUES ($1, $2, $3, $4, $5, false, true, NOW(), NOW())
-     RETURNING id, email, prenom, nom, is_admin, is_pro, email_verified`,
+     RETURNING id, email, prenom, nom, telephone, phone_verified, is_admin, is_pro, email_verified`,
     [email, prenom, nom, avatar_url, provider_id]
   )
   return result.rows[0]
@@ -71,6 +71,8 @@ function buildAuthResponse(user) {
       email:      user.email,
       first_name: user.prenom,
       last_name:  user.nom,
+      telephone:  user.telephone ?? null,
+      phone_verified: Boolean(user.phone_verified),
       is_admin:   user.is_admin,
       is_pro:     user.is_pro,
       email_verified: user.email_verified,

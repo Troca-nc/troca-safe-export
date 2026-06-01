@@ -7,7 +7,7 @@ import Header from '@/components/layout/Header'
 import ListingCard from '@/components/listings/ListingCard'
 import SearchAlertModal from '@/components/SearchAlertModal'
 import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
-import { FALLBACK_CATEGORIES } from '@/lib/categoryCatalog'
+import { FALLBACK_CATEGORIES, hasNestedCategoryTree } from '@/lib/categoryCatalog'
 import { metaApi } from '@/lib/api'
 import { useInfiniteListings } from '@/hooks/useInfiniteListings'
 import { useListingFilters } from '@/hooks/useListingFilters'
@@ -30,6 +30,13 @@ const CONDITION_OPTIONS = [
 ]
 
 const RADIUS_OPTIONS = [5, 10, 20, 50, 100]
+
+function snapTo10(value: string) {
+  if (!value.trim()) return ''
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return value
+  return String(Math.max(0, Math.round(parsed / 10) * 10))
+}
 
 const FALLBACK_PROVINCES = [
   {
@@ -76,6 +83,7 @@ type CategoryFeedPageProps = {
 }
 
 export default function CategoryFeedPage({ title, subtitle, categorySlug, accentLabel }: CategoryFeedPageProps) {
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
   const [categories, setCategories] = useState<any[]>([])
   const [communes, setCommunes] = useState<any[]>([])
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -92,7 +100,9 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
     activeFilterCount,
   } = useListingFilters()
 
-  const visibleCategories = categories.length > 0 ? categories : FALLBACK_CATEGORIES
+  const visibleCategories = hasNestedCategoryTree(isDemoMode ? FALLBACK_CATEGORIES : categories)
+    ? (isDemoMode ? FALLBACK_CATEGORIES : categories)
+    : FALLBACK_CATEGORIES
   const listingFilters = useMemo(() => ({
     q: filters.q,
     category: categorySlug || filters.category,
@@ -131,7 +141,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
   useEffect(() => {
     Promise.all([metaApi.getCategories(), metaApi.getCommunes()])
       .then(([catRes, comRes]) => {
-        setCategories(catRes.data?.data?.length ? catRes.data.data : FALLBACK_CATEGORIES)
+        setCategories(isDemoMode ? FALLBACK_CATEGORIES : (catRes.data?.data?.length ? catRes.data.data : FALLBACK_CATEGORIES))
         setCommunes(comRes.data?.data?.length ? comRes.data.data : FALLBACK_PROVINCES)
       })
       .catch(() => {
@@ -295,7 +305,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
                         updateFilter('commune_id', '')
                       }}
                       className={`rounded-full border px-4 py-2 text-sm transition-colors ${
-                        !filters.province_id ? 'bg-night text-white border-night' : 'bg-white text-night/65 border-night/12 hover:bg-sand'
+                        !filters.province_id ? 'bg-coral text-white border-coral' : 'bg-white text-night/65 border-night/12 hover:bg-sand'
                       }`}
                     >
                       Toute la NC
@@ -323,9 +333,9 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
                           type="button"
                           onClick={() => updateFilter('commune_id', '')}
                           className={`rounded-full border px-3 py-2 text-sm transition-colors ${
-                            !filters.commune_id
-                              ? 'bg-night text-white border-night'
-                              : 'bg-white text-night/65 border-night/12 hover:bg-sand'
+                              !filters.commune_id
+                                ? 'bg-coral text-white border-coral'
+                                : 'bg-white text-night/65 border-night/12 hover:bg-sand'
                           }`}
                         >
                           Toutes les communes
@@ -408,7 +418,10 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
                     type="number"
                     placeholder="Min"
                     value={filters.price_min}
+                    step={10}
+                    min={0}
                     onChange={(event) => updateFilter('price_min', event.target.value)}
+                    onBlur={(event) => updateFilter('price_min', snapTo10(event.target.value))}
                     className="input text-sm w-full"
                   />
                   <span className="text-night/30 text-sm">-</span>
@@ -416,7 +429,10 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
                     type="number"
                     placeholder="Max"
                     value={filters.price_max}
+                    step={10}
+                    min={0}
                     onChange={(event) => updateFilter('price_max', event.target.value)}
+                    onBlur={(event) => updateFilter('price_max', snapTo10(event.target.value))}
                     className="input text-sm w-full"
                   />
                 </div>
@@ -461,33 +477,26 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
               )}
             </div>
 
-            {loadError ? (
-              <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                <p className="font-semibold">Impossible de charger les annonces</p>
-                <p className="mt-1">{loadError}</p>
-                <button type="button" onClick={() => void refetch()} className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-semibold text-night shadow-sm">
-                  Réessayer
-                </button>
-              </div>
-            ) : null}
-
             {isInitialLoading ? (
               <ListingSkeletonGrid count={6} className="grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4" />
             ) : listings.length === 0 ? (
-              <div className="text-center py-20">
-                <h3 className="font-display text-xl font-bold text-night mb-2">
-                  Aucune annonce trouvée
+                            <div className="text-center py-20">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-coral/10 text-coral" aria-hidden="true">
+                  <Search className="h-7 w-7" />
+                </div>
+                <h3 className="mt-4 font-display text-xl font-bold text-night mb-2">
+                  Aucune annonce trouv?e pour ces crit?res
                 </h3>
                 <p className="text-night/50 text-sm mb-6">
-                  Essayez d'élargir votre recherche ou de modifier les filtres.
+                  Essayez d??largir votre recherche ou de changer de cat?gorie.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <button onClick={clearFilters} className="btn-secondary">
                     Effacer les filtres
                   </button>
-                  {loadError ? (
-                    <button onClick={() => void refetch()} className="btn-primary">
-                      Réessayer
+                  {isError ? (
+                    <button onClick={() => void refetch()} className="btn-ghost">
+                      R?essayer
                     </button>
                   ) : null}
                 </div>

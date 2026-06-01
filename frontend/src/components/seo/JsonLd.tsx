@@ -85,7 +85,7 @@ export function buildProductSchema(annonce: {
         price:         annonce.prix,
         priceCurrency: 'XPF',
         availability:  'https://schema.org/InStock',
-        areaServed:    annonce.commune ?? 'Nouvelle-Calédonie',
+        areaServed:    annonce.commune ? 'Nouvelle-Calédonie' : undefined,
         seller: {
           '@type': 'Person',
           name:    annonce.user.prenom,

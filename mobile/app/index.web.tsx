@@ -5,7 +5,7 @@ import { Colors, FontSize, FontWeight, Radius, Spacing } from '@/constants/theme
 const cards = [
   { href: '/auth/login' as const, title: 'Connexion', text: 'Accéder à votre espace, vos favoris et vos messages.' },
   { href: '/auth/register' as const, title: 'Inscription', text: 'Créer un compte particulier ou professionnel.' },
-  { href: '/tabs/annonces' as const, title: 'Explorer', text: 'Voir les annonces, filtres et catégories.' },
+  { href: '/tabs/troc' as const, title: 'Explorer', text: 'Découvrir le mode Troc et les échanges compatibles.' },
 ];
 
 export default function WebLanding() {

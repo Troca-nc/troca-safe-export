@@ -41,7 +41,7 @@ function getStatusCopy(status: SubscriptionStatusResponse['data']) {
       title: 'Votre abonnement a expiré',
       description: 'Réactivez votre abonnement pour retrouver vos avantages Pro.',
       cta: {
-        href: '/profil/abonnement',
+        href: '/abonnement',
         label: 'Réactiver mon abonnement',
       },
     }
@@ -54,7 +54,7 @@ function getStatusCopy(status: SubscriptionStatusResponse['data']) {
       title: `Votre abonnement expire dans ${status.days_remaining} jour${status.days_remaining > 1 ? 's' : ''}`,
       description: 'Renouvelez maintenant pour garder vos annonces et vos boosts actifs sans interruption.',
       cta: {
-        href: '/profil/abonnement',
+        href: '/abonnement',
         label: 'Renouveler maintenant',
       },
     }

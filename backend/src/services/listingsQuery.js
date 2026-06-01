@@ -32,6 +32,21 @@ function decodeListingCursor(token) {
   }
 }
 
+function buildCategoryDescendantClause(column, placeholder) {
+  return `${column} IN (
+    WITH RECURSIVE category_tree AS (
+      SELECT id, parent_id
+      FROM categories
+      WHERE ${placeholder.kind === 'slug' ? 'slug' : 'id'} = ${placeholder.token}
+      UNION ALL
+      SELECT c.id, c.parent_id
+      FROM categories c
+      INNER JOIN category_tree ct ON c.parent_id = ct.id
+    )
+    SELECT id FROM category_tree
+  )`;
+}
+
 function getSortConfig(sort) {
   switch (sort) {
     case 'price_asc':
@@ -89,6 +104,10 @@ function buildListingSearchContext(rawQuery = {}) {
     province_id,
     condition,
     troc,
+    transaction,
+    type_bien,
+    type_service,
+    etat,
     lat,
     lng,
     radius,
@@ -122,11 +141,11 @@ function buildListingSearchContext(rawQuery = {}) {
   }
 
   if (category_id) {
-    conditions.push(`a.category_id = $${p}`)
+    conditions.push(buildCategoryDescendantClause('a.category_id', { kind: 'id', token: `$${p}` }))
     params.push(parseInt(category_id, 10))
     p += 1
   } else if (category) {
-    conditions.push(`(cat.slug = $${p} OR parent.slug = $${p})`)
+    conditions.push(buildCategoryDescendantClause('a.category_id', { kind: 'slug', token: `$${p}` }))
     params.push(category)
     p += 1
   }
@@ -162,7 +181,32 @@ function buildListingSearchContext(rawQuery = {}) {
   }
 
   if (String(troc) === 'true') {
-    conditions.push(`a.contre_quoi IS NOT NULL AND a.contre_quoi <> ''`)
+    conditions.push(`COALESCE(a.is_troc, FALSE) = TRUE`)
+    conditions.push(`COALESCE(a.troc_status, 'open') = 'open'`)
+  }
+
+  if (transaction) {
+    conditions.push(`COALESCE(a.metadata->>'transaction', '') = $${p}`)
+    params.push(String(transaction))
+    p += 1
+  }
+
+  if (type_bien) {
+    conditions.push(`COALESCE(a.metadata->>'type_bien', '') = $${p}`)
+    params.push(String(type_bien))
+    p += 1
+  }
+
+  if (type_service) {
+    conditions.push(`COALESCE(a.metadata->>'type_service', '') = $${p}`)
+    params.push(String(type_service))
+    p += 1
+  }
+
+  if (etat) {
+    conditions.push(`COALESCE(a.metadata->>'etat', '') = $${p}`)
+    params.push(String(etat))
+    p += 1
   }
 
   if (hasGeo) {

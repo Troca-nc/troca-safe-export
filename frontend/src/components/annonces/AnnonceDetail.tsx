@@ -11,6 +11,7 @@ import { useAuthStore } from '@/store/authStore'
 import { consumePendingAuthAction, peekPendingAuthAction } from '@/lib/authAction'
 import { useAuthActionStore } from '@/store/authActionStore'
 import { useFavorite } from '@/hooks/useFavorite'
+import { trackEvent } from '@/lib/analytics'
 import ShareButton from '@/components/annonces/ShareButton'
 import {
   ListingHeroCard,
@@ -46,6 +47,9 @@ type ListingUser = {
   telephone_verifie?: boolean
   trust_score?: number | null
   trust_level?: string | null
+  is_online?: boolean
+  last_seen_label?: string | null
+  avg_response_time_label?: string | null
 }
 
 export type ListingDetail = {
@@ -103,9 +107,9 @@ interface Props {
 const CONDITION_LABELS: Record<string, string> = {
   new: 'Neuf',
   like_new: 'Comme neuf',
-  good: 'Bon etat',
+  good: 'Bon état',
   fair: 'Correct',
-  for_parts: 'Pour pieces',
+  for_parts: 'Pour pièces',
 }
 
 const TRUST_LABELS: Record<string, { label: string; className: string }> = {
@@ -113,7 +117,7 @@ const TRUST_LABELS: Record<string, { label: string; className: string }> = {
   bon: { label: 'Vendeur fiable', className: 'bg-teal-50 text-teal-700 border-teal-100' },
   moyen: { label: 'Profil en cours', className: 'bg-amber-50 text-amber-700 border-amber-100' },
   faible: { label: 'Profil sensible', className: 'bg-red-50 text-red-600 border-red-100' },
-  inconnu: { label: 'Non evalue', className: 'bg-sand text-night/60 border-night/10' },
+  inconnu: { label: 'Non évalué', className: 'bg-sand text-night/60 border-night/10' },
 }
 
 const STOP_WORDS = new Set([
@@ -195,6 +199,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
   const [reviewFeedback, setReviewFeedback] = useState<string | null>(null)
   const [reviewError, setReviewError] = useState<string | null>(null)
   const replayedMessageRef = useRef(false)
+  const trackedViewRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (initialData) {
@@ -226,6 +231,18 @@ export default function AnnonceDetail({ id, initialData }: Props) {
   useEffect(() => {
     setActiveImage(0)
   }, [listing?.id])
+
+  useEffect(() => {
+    if (!listing?.id) return
+    if (trackedViewRef.current === String(listing.id)) return
+    trackedViewRef.current = String(listing.id)
+    void trackEvent('listing_view', {
+      listing_id: listing.id,
+      listing_title: listing.title,
+      category_id: listing.category_id ?? null,
+      seller_id: listing.user?.id ?? null,
+    }).catch(() => {})
+  }, [listing])
 
   useEffect(() => {
     replayedMessageRef.current = false
@@ -342,6 +359,11 @@ export default function AnnonceDetail({ id, initialData }: Props) {
 
   const handleMessageSeller = async () => {
     if (!listing) return
+    void trackEvent('contact_seller_click', {
+      listing_id: listing.id,
+      listing_title: listing.title,
+      seller_id: listing.user?.id ?? null,
+    }).catch(() => {})
     if (!isAuthenticated) {
       openAuthModal({
         type: 'message_seller',
@@ -360,7 +382,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
       const convId = res.data?.conversation_id ?? res.data?.data?.conversation_id ?? res.data?.id
       if (convId) router.push(`/messages/${convId}`)
     } catch {
-      setError('Impossible douvrir la conversation.')
+      setError("Impossible d'ouvrir la conversation.")
     } finally {
       setSendingMessage(false)
     }
@@ -379,7 +401,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
         refreshListing().catch(() => undefined),
         refreshSellerContext().catch(() => undefined),
       ])
-      setReviewFeedback('Merci, votre avis a bien ete publie.')
+      setReviewFeedback('Merci, votre avis a bien été publié.')
       setReviewComment('')
       setReviewNote(5)
     } catch {
@@ -456,20 +478,20 @@ export default function AnnonceDetail({ id, initialData }: Props) {
             canReview={Boolean(!isOwner && user)}
             submitting={reviewSubmitting}
             feedback={reviewFeedback}
-          error={reviewError}
-          reviewNote={reviewNote}
-          reviewComment={reviewComment}
-          onNoteChange={setReviewNote}
-          onCommentChange={setReviewComment}
-          onSubmit={handleSubmitReview}
-          onRequireAuth={() =>
-            openAuthModal({
-              type: 'review_seller',
-              listingId: String(listing.id),
-              redirectTo: `/annonces/${listing.id}`,
-            })
-          }
-        />
+            error={reviewError}
+            reviewNote={reviewNote}
+            reviewComment={reviewComment}
+            onNoteChange={setReviewNote}
+            onCommentChange={setReviewComment}
+            onSubmit={handleSubmitReview}
+            onRequireAuth={() =>
+              openAuthModal({
+                type: 'review_seller',
+                listingId: String(listing.id),
+                redirectTo: `/annonces/${listing.id}`,
+              })
+            }
+          />
 
           <SecurityTipsCard />
         </div>

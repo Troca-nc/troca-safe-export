@@ -159,6 +159,7 @@ async function removeImageFiles(row) {
 
 module.exports = {
   buildUploadPublicUrl,
+  normalizeImageVariants,
   processImageVariants,
   removeImageFiles,
   resolveImageLocalPath,

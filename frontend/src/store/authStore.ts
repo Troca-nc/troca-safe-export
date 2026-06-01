@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware'
 import { authApi, saveTokens, clearTokens } from '@/lib/api'
 import { useFavorisStore } from '@/store/favorisStore'
 import { getStoredAccessToken, getStoredRefreshToken } from '@/lib/tokenStorage'
+import { DEMO_ACCOUNTS, inferDemoAccount, isDemoEmail } from '@/lib/demoApi'
 
 interface User {
   id: string
@@ -12,6 +13,8 @@ interface User {
   last_name: string
   prenom?: string
   nom?: string
+  telephone?: string | null
+  phone_verified?: boolean
   avatar_url: string | null
   is_verified: boolean
   is_pro: boolean
@@ -27,6 +30,7 @@ interface User {
 export type DemoProfileKey = 'visitor' | 'particulier' | 'pro' | 'bon_plan'
 
 const REAL_AUTH_BACKUP_KEY = 'auth-store-real-backup'
+const REDIRECT_AFTER_LOGIN_KEY = 'redirect_after_login'
 
 const DEMO_USERS: Record<Exclude<DemoProfileKey, 'visitor'>, User> = {
   particulier: {
@@ -125,6 +129,10 @@ export const useAuthStore = create<AuthState>()(
       setDemoProfile: (profile) => {
         const currentDemo = get().demoProfile
 
+        if (typeof window !== 'undefined') {
+          window.sessionStorage.removeItem(REDIRECT_AFTER_LOGIN_KEY)
+        }
+
         if (!profile) {
           const backup = readRealAuthBackup()
           if (backup) {
@@ -165,6 +173,7 @@ export const useAuthStore = create<AuthState>()(
         const demoUser = DEMO_USERS[profile]
         clearTokens()
         useFavorisStore.getState().clear()
+        clearRealAuthBackup()
         set({
           user: demoUser,
           isAuthenticated: true,
@@ -175,6 +184,18 @@ export const useAuthStore = create<AuthState>()(
       login: async (email, password, turnstileToken) => {
         set({ isLoading: true })
         try {
+          const inferredDemo = inferDemoAccount(email)
+          const demoProfile =
+            inferredDemo === 'particulier' || inferredDemo === 'pro' || inferredDemo === 'bon_plan'
+              ? inferredDemo
+              : null
+          const expectedPassword = demoProfile ? DEMO_ACCOUNTS[demoProfile].password : null
+
+          if (demoProfile && isDemoEmail(email) && password === expectedPassword) {
+            get().setDemoProfile(demoProfile)
+            return
+          }
+
           const { data } = await authApi.login({ email, password }, turnstileToken)
           const { user, access_token, refresh_token } = data.data
           saveTokens(access_token, refresh_token)
@@ -204,7 +225,7 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
           const refreshToken = getStoredRefreshToken()
         if (refreshToken) {
-          await authApi.logout(refreshToken).catch(() => {})
+          await authApi.logout().catch(() => {})
         }
         clearTokens()
         clearRealAuthBackup()

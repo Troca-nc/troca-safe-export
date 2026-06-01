@@ -179,7 +179,7 @@ export default function SearchAlertModal({
                 <p className="mt-2 text-sm leading-6 text-night/65">
                   {preview.loading
                     ? 'Calcul des résultats en cours...'
-                    : preview.error ?? `${resultCount.toLocaleString('fr-FR')} annonces correspondent actuellement à ces critères.`}
+                    : preview.error || `${resultCount.toLocaleString('fr-FR')} annonces correspondent actuellement à ces critères.`}
                 </p>
               </div>
 
@@ -296,4 +296,3 @@ export default function SearchAlertModal({
     </div>
   )
 }
-

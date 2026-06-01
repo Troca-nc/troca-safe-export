@@ -18,6 +18,7 @@ export type BonPlanCardModel = {
   id: string | number
   title: string
   description: string
+  kind?: string | null
   image_url?: string | null
   promo_label?: string | null
   original_price_xpf?: number | null
@@ -53,6 +54,18 @@ function daysLeftLabel(value?: string | null) {
   return days <= 0 ? 'Terminé' : `Plus que ${days} jour${days > 1 ? 's' : ''}`
 }
 
+function getCategoryTone(bonPlan: BonPlanCardModel) {
+  const kind = String(bonPlan.kind || '').toLowerCase().trim()
+  if (kind === 'event' || kind === 'concert') return 'badge-sable'
+  return 'badge-emeraude'
+}
+
+function getFrameTone(bonPlan: BonPlanCardModel) {
+  const kind = String(bonPlan.kind || '').toLowerCase().trim()
+  if (kind === 'event' || kind === 'concert') return 'border-l-nc-sable'
+  return 'border-l-nc-emeraude'
+}
+
 export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness }: Props) {
   const business = bonPlan.business || {
     name: bonPlan.business_name,
@@ -69,7 +82,7 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
   const targetHref = bonPlan.cta_url || `/bons-plans/${bonPlan.id}`
 
   return (
-    <article className={`overflow-hidden rounded-[1.5rem] border border-night/8 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${compact ? 'h-full' : ''}`}>
+    <article className={`overflow-hidden rounded-[1.5rem] border border-night/8 border-l-4 ${getFrameTone(bonPlan)} bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${compact ? 'h-full' : ''}`}>
       <div className="relative aspect-[16/9] overflow-hidden bg-sand">
         {bonPlan.image_url ? (
           <Image src={bonPlan.image_url} alt={bonPlan.title} fill className="object-cover" sizes="(max-width: 640px) 90vw, 33vw" />
@@ -79,11 +92,11 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
 
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
           {bonPlan.category ? (
-            <span className="rounded-full bg-night/85 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
+            <span className={`badge text-[11px] uppercase tracking-[0.18em] ${getCategoryTone(bonPlan)}`}>
               {bonPlan.category.replace('_', ' ')}
             </span>
           ) : null}
-          <span className="rounded-full bg-coral px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
+          <span className="badge badge-corail text-[11px] uppercase tracking-[0.18em]">
             {isEndedSoon}
           </span>
         </div>
@@ -95,12 +108,12 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
             </div>
           ) : null}
           {business?.badge === 'verified' ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-coral shadow-sm">
+            <span className="badge badge-emeraude inline-flex items-center gap-1 text-[11px] shadow-sm">
               <Check className="h-3 w-3" />
               Vérifié Troca
             </span>
           ) : business?.badge === 'active' ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-ocean/15 bg-ocean/10 px-2.5 py-1 text-[11px] font-semibold text-ocean shadow-sm">
+            <span className="badge badge-emeraude inline-flex items-center gap-1 text-[11px] shadow-sm">
               🔵 Actif
             </span>
           ) : null}

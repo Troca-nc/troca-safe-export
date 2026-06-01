@@ -353,6 +353,12 @@ export function getCategoryFields(categorySlug: string): CategoryField[] {
   return CATEGORY_FIELDS[categorySlug?.toLowerCase()] ?? []
 }
 
+function snapTo10(value: string | number) {
+  const parsed = typeof value === 'number' ? value : Number(String(value || '').trim())
+  if (!Number.isFinite(parsed)) return 0
+  return Math.max(0, Math.round(parsed / 10) * 10)
+}
+
 function getFieldError(errors: FieldErrors<any>, path: string): string | undefined {
   const segments = path.split('.')
   let current: unknown = errors
@@ -388,6 +394,11 @@ export default function CategoryFields({ categorySlug, register, errors }: Props
           const errorMessage = getFieldError(errors, field.name)
           const isNumber = field.type === 'number'
           const isTextLike = field.type === 'text' || field.type === 'number'
+          const isMoneyField = field.type === 'number' && (field.unit?.toUpperCase() === 'XPF' || /_xpf$/i.test(field.name))
+          const fieldRegister = register(field.name, {
+            ...(field.required ? { required: `${field.label} est requis.` } : undefined),
+            valueAsNumber: isNumber,
+          })
           const registerOptions = field.required
             ? { required: `${field.label} est requis.` }
             : undefined
@@ -465,12 +476,19 @@ export default function CategoryFields({ categorySlug, register, errors }: Props
               {isTextLike && (
                 <div className="relative">
                   <input
-                    {...register(field.name, {
-                      ...registerOptions,
-                      valueAsNumber: isNumber,
-                    })}
+                    {...fieldRegister}
                     type={field.type}
+                    step={isMoneyField ? 10 : undefined}
                     placeholder={field.placeholder}
+                    onBlur={(event) => {
+                      fieldRegister.onBlur(event)
+                      if (!isMoneyField) return
+                      const snapped = snapTo10((event.target as HTMLInputElement).value)
+                      fieldRegister.onChange({
+                        ...event,
+                        target: { ...event.target, value: String(snapped), name: field.name },
+                      } as any)
+                    }}
                     className={`input w-full ${field.unit ? 'pr-12' : ''} ${errorMessage ? 'border-red-400' : ''}`}
                   />
                   {field.unit && (

@@ -7,6 +7,7 @@
 
 const nodemailer = require('nodemailer');
 const { isConfiguredValue } = require('../config/env');
+const { ensureNotificationPreferences } = require('./notificationPreferencesService');
 
 // ── Transporter SMTP ─────────────────────────────────────────
 
@@ -54,6 +55,66 @@ async function sendMail({ to, subject, html, text }) {
 // ── Templates ────────────────────────────────────────────────
 
 const BASE_URL = () => process.env.BASE_URL || 'https://troca.nc';
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function buildNotificationFooter({ manageUrl, unsubscribeUrl, unsubscribeLabel = 'Se désabonner' }) {
+  const manageLink = manageUrl
+    ? `<a href="${manageUrl}" style="color:#9ca3af;">Gérer mes notifications</a>`
+    : '';
+  const unsubscribeLink = unsubscribeUrl
+    ? `<a href="${unsubscribeUrl}" style="color:#9ca3af;">${escapeHtml(unsubscribeLabel)}</a>`
+    : '';
+
+  const separator = manageLink && unsubscribeLink ? ' · ' : '';
+  return `
+    <p style="color:#9ca3af;font-size:12px;margin-top:24px;line-height:1.6;">
+      ${manageLink}${separator}${unsubscribeLink}
+    </p>
+  `;
+}
+
+function buildListingEmail({
+  prenom,
+  subject,
+  headline,
+  intro,
+  listingTitle,
+  listingMeta = '',
+  ctaLabel,
+  ctaUrl,
+  footerManageUrl = `${BASE_URL()}/parametres/notifications`,
+  unsubscribeUrl = null,
+  unsubscribeLabel = 'Se désabonner',
+  extraHtml = '',
+}) {
+  return {
+    subject,
+    html: baseTemplate(`
+      <p>Bonjour ${escapeHtml(prenom)},</p>
+      <p>${intro}</p>
+      <div style="border:1px solid #e5e7eb;border-radius:14px;padding:16px 18px;margin:18px 0;background:#f8fafc;">
+        <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;">${escapeHtml(headline)}</p>
+        <p style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">${escapeHtml(listingTitle)}</p>
+        ${listingMeta ? `<p style="margin:6px 0 0;color:#475569;font-size:14px;">${listingMeta}</p>` : ''}
+      </div>
+      ${extraHtml}
+      <a class="btn" href="${ctaUrl}">${escapeHtml(ctaLabel)}</a>
+      ${buildNotificationFooter({
+        manageUrl: footerManageUrl,
+        unsubscribeUrl,
+        unsubscribeLabel,
+      })}
+    `),
+  };
+}
 
 function baseTemplate(content) {
   return `<!DOCTYPE html>
@@ -147,6 +208,8 @@ async function sendVerificationEmail(to, prenom, token) {
  */
 async function sendAlertEmail(to, prenom, alert, annonces) {
   if (!annonces.length) return null;
+  const prefs = alert?.user_id ? await ensureNotificationPreferences(alert.user_id) : null;
+  if (prefs && prefs.email_search_alert === false) return null;
 
   const unsubLink = `${BASE_URL()}/api/alerts/unsubscribe/${alert.unsubscribe_token}`;
   const annonceCards = annonces.slice(0, 5).map((a) => `
@@ -164,9 +227,10 @@ async function sendAlertEmail(to, prenom, alert, annonces) {
       <p>De nouvelles annonces correspondent à votre alerte <strong>"${alert.label}"</strong> :</p>
       ${annonceCards}
       ${annonces.length > 5 ? `<p><a href="${BASE_URL()}/annonces?q=${encodeURIComponent(alert.label)}">Voir toutes les annonces →</a></p>` : ''}
-      <p style="color:#9ca3af;font-size:12px;margin-top:24px;">
-        <a href="${unsubLink}" style="color:#9ca3af;">Se désabonner de cette alerte</a>
-      </p>
+      ${buildNotificationFooter({
+        manageUrl: `${BASE_URL()}/parametres/notifications`,
+        unsubscribeUrl: unsubLink,
+      })}
     `),
   });
 }
@@ -174,18 +238,206 @@ async function sendAlertEmail(to, prenom, alert, annonces) {
 /**
  * Email notification nouveau message
  */
-async function sendNewMessageEmail(to, prenom, senderName, annonceTitle, convId) {
+async function sendNewMessageEmail(to, prenom, senderName, annonceTitle, convId, recipientUserId = null) {
+  const prefs = recipientUserId ? await ensureNotificationPreferences(recipientUserId) : null;
+  if (prefs && prefs.email_new_message === false) return null;
+
   const link = `${BASE_URL()}/messages/${convId}`;
+  const unsubLink = prefs?.new_message_unsubscribe_token
+    ? `${BASE_URL()}/api/users/notifications/unsubscribe/${prefs.new_message_unsubscribe_token}`
+    : null;
   return sendMail({
     to,
-    subject: `${senderName} vous a envoyé un message sur Troca`,
+    subject: `${escapeHtml(senderName)} vous a envoyé un message sur Troca`,
     html: baseTemplate(`
       <p>Bonjour ${prenom},</p>
-      <p><strong>${senderName}</strong> vous a envoyé un message concernant l'annonce <strong>"${annonceTitle}"</strong>.</p>
+      <p><strong>${escapeHtml(senderName)}</strong> vous a envoyé un message concernant l'annonce <strong>"${escapeHtml(annonceTitle)}"</strong>.</p>
       <a class="btn" href="${link}">Lire le message</a>
       <p style="color:#6b7280;font-size:13px;">Vous recevez cet email car vous avez une conversation active sur Troca.</p>
+      ${buildNotificationFooter({
+        manageUrl: `${BASE_URL()}/parametres/notifications`,
+        unsubscribeUrl: unsubLink,
+        unsubscribeLabel: 'Ne plus recevoir les messages par email',
+      })}
     `),
   });
+}
+
+async function sendPerformanceReportEmail({ to, prenom, report, recipientUserId }) {
+  const prefs = recipientUserId ? await ensureNotificationPreferences(recipientUserId) : null;
+  if (prefs && (prefs.email_performance_report === false || prefs.performance_report_frequency === 'never')) {
+    return null;
+  }
+
+  const isPro = Boolean(report?.is_pro);
+  const title = isPro
+    ? 'Votre rapport business Troca'
+    : 'Votre rapport d’activité Troca';
+  const sections = (report?.listings || []).slice(0, isPro ? 5 : 3).map((item) => `
+    <tr>
+      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;">${escapeHtml(item.title || 'Annonce')}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;text-align:right;">${Number(item.views || 0).toLocaleString('fr-FR')}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;text-align:right;">${Number(item.clicks || 0).toLocaleString('fr-FR')}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;text-align:right;">${Number(item.favorites || 0).toLocaleString('fr-FR')}</td>
+    </tr>
+  `).join('');
+
+  const unsubLink = prefs?.performance_report_unsubscribe_token
+    ? `${BASE_URL()}/api/users/notifications/unsubscribe/${prefs.performance_report_unsubscribe_token}`
+    : null;
+
+  const summaryCards = `
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin:22px 0;">
+      <div style="flex:1;min-width:140px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;">
+        <div style="font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:.08em;">Vues</div>
+        <div style="font-size:26px;font-weight:700;color:#0f172a;margin-top:6px;">${Number(report?.totals?.views || 0).toLocaleString('fr-FR')}</div>
+      </div>
+      <div style="flex:1;min-width:140px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;">
+        <div style="font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:.08em;">Clics</div>
+        <div style="font-size:26px;font-weight:700;color:#0f172a;margin-top:6px;">${Number(report?.totals?.clicks || 0).toLocaleString('fr-FR')}</div>
+      </div>
+      <div style="flex:1;min-width:140px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;">
+        <div style="font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:.08em;">Favoris</div>
+        <div style="font-size:26px;font-weight:700;color:#0f172a;margin-top:6px;">${Number(report?.totals?.favorites || 0).toLocaleString('fr-FR')}</div>
+      </div>
+    </div>
+  `;
+
+  return sendMail({
+    to,
+    subject: isPro ? '📈 Votre rapport business Troca' : '📊 Votre rapport Troca',
+    html: baseTemplate(`
+      <p>Bonjour ${escapeHtml(prenom)},</p>
+      <p>${isPro
+        ? 'Voici le suivi de vos annonces pour cette période. Vous pouvez adapter la récurrence dans votre dashboard.'
+        : 'Voici un aperçu simple de la performance de vos annonces publiées sur Troca.'}
+      </p>
+      ${summaryCards}
+      <div style="margin-top:22px;">
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          <thead>
+            <tr style="background:#f8fafc;">
+              <th style="text-align:left;padding:10px 12px;border-bottom:1px solid #e5e7eb;">Annonce</th>
+              <th style="text-align:right;padding:10px 12px;border-bottom:1px solid #e5e7eb;">Vues</th>
+              <th style="text-align:right;padding:10px 12px;border-bottom:1px solid #e5e7eb;">Clics</th>
+              <th style="text-align:right;padding:10px 12px;border-bottom:1px solid #e5e7eb;">Favoris</th>
+            </tr>
+          </thead>
+          <tbody>${sections || '<tr><td colspan="4" style="padding:16px 12px;color:#64748b;">Aucune annonce active sur cette période.</td></tr>'}</tbody>
+        </table>
+      </div>
+      <p style="color:#6b7280;font-size:13px;margin-top:18px;">Période de suivi : ${escapeHtml(report?.period_label || 'derniers jours')}</p>
+      ${buildNotificationFooter({
+        manageUrl: `${BASE_URL()}/parametres/notifications`,
+        unsubscribeUrl: unsubLink,
+        unsubscribeLabel: 'Ne plus recevoir ce rapport par email',
+      })}
+    `),
+  });
+}
+
+async function sendBoostActivatedEmail(to, prenom, details = {}, recipientUserId) {
+  const prefs = recipientUserId ? await ensureNotificationPreferences(recipientUserId) : null;
+  if (prefs && prefs.email_boost_activated === false) return null;
+
+  const boostDays = Number(details.boostDays || 0);
+  const unsubscribeUrl = prefs?.boost_activated_unsubscribe_token
+    ? `${BASE_URL()}/api/users/notifications/unsubscribe/${prefs.boost_activated_unsubscribe_token}`
+    : null;
+
+  const payload = buildListingEmail({
+    prenom,
+    subject: '[Troca] Votre boost est activé',
+    headline: 'Boost activé',
+    intro: `Votre boost <strong>${escapeHtml(details.boostLabel || 'Boost')}</strong> est maintenant actif sur Troca.`,
+    listingTitle: details.annonceTitle || 'Votre annonce',
+    listingMeta: 'Votre annonce gagne en visibilité et commence à remonter dans les classements.',
+    ctaLabel: 'Gérer mon annonce boostée',
+    ctaUrl: details.annonceId ? `${BASE_URL()}/annonces/${details.annonceId}/edit` : `${BASE_URL()}/parametres/notifications`,
+    unsubscribeUrl,
+    unsubscribeLabel: 'Ne plus recevoir les emails de boost',
+    extraHtml: boostDays
+      ? `<p style="margin:0;color:#374151;font-size:14px;">Durée active : <strong>${boostDays} jour${boostDays > 1 ? 's' : ''}</strong>.</p>`
+      : '',
+  });
+
+  return sendMail({ to, subject: payload.subject, html: payload.html });
+}
+
+async function sendOfferReceivedEmail(to, prenom, details = {}, recipientUserId) {
+  const prefs = recipientUserId ? await ensureNotificationPreferences(recipientUserId) : null;
+  if (prefs && prefs.email_offer_received === false) return null;
+
+  const amountXpf = Number(details.amountXpf || 0);
+  const unsubscribeUrl = prefs?.offer_received_unsubscribe_token
+    ? `${BASE_URL()}/api/users/notifications/unsubscribe/${prefs.offer_received_unsubscribe_token}`
+    : null;
+
+  const payload = buildListingEmail({
+    prenom,
+    subject: `[Troca] Nouvelle offre reçue pour "${details.annonceTitle || 'votre annonce'}"`,
+    headline: 'Offre de prix reçue',
+    intro: `<strong>${escapeHtml(details.buyerName || 'Un acheteur')}</strong> vous a envoyé une offre sur la messagerie Troca.`,
+    listingTitle: details.annonceTitle || 'Annonce',
+    listingMeta: amountXpf
+      ? `Montant proposé : <strong>${amountXpf.toLocaleString('fr-FR')} XPF</strong>`
+      : 'Nouvelle offre disponible dans la conversation.',
+    ctaLabel: 'Voir la conversation',
+    ctaUrl: `${BASE_URL()}/messages/${details.convId}`,
+    unsubscribeUrl,
+    unsubscribeLabel: 'Ne plus recevoir les offres par email',
+  });
+
+  return sendMail({ to, subject: payload.subject, html: payload.html });
+}
+
+async function sendListingExpiringEmail(to, prenom, details = {}, recipientUserId) {
+  const prefs = recipientUserId ? await ensureNotificationPreferences(recipientUserId) : null;
+  if (prefs && prefs.email_listing_expiring === false) return null;
+
+  const daysLeft = Number(details.daysLeft || 3);
+  const unsubscribeUrl = prefs?.listing_expiring_unsubscribe_token
+    ? `${BASE_URL()}/api/users/notifications/unsubscribe/${prefs.listing_expiring_unsubscribe_token}`
+    : null;
+
+  const payload = buildListingEmail({
+    prenom,
+    subject: `[Troca] Votre annonce expire dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''}`,
+    headline: 'Annonce bientôt expirée',
+    intro: `Votre annonce <strong>${escapeHtml(details.annonceTitle || 'Troca')}</strong> arrive à échéance prochainement.`,
+    listingTitle: details.annonceTitle || 'Annonce',
+    listingMeta: `Il vous reste environ <strong>${daysLeft} jour${daysLeft > 1 ? 's' : ''}</strong> avant l'expiration.`,
+    ctaLabel: 'Republier ou prolonger',
+    ctaUrl: details.annonceId ? `${BASE_URL()}/annonces/${details.annonceId}/edit` : `${BASE_URL()}/parametres/notifications`,
+    unsubscribeUrl,
+    unsubscribeLabel: 'Ne plus recevoir les rappels d’expiration',
+  });
+
+  return sendMail({ to, subject: payload.subject, html: payload.html });
+}
+
+async function sendListingExpiredEmail(to, prenom, details = {}, recipientUserId) {
+  const prefs = recipientUserId ? await ensureNotificationPreferences(recipientUserId) : null;
+  if (prefs && prefs.email_listing_expired === false) return null;
+
+  const unsubscribeUrl = prefs?.listing_expired_unsubscribe_token
+    ? `${BASE_URL()}/api/users/notifications/unsubscribe/${prefs.listing_expired_unsubscribe_token}`
+    : null;
+
+  const payload = buildListingEmail({
+    prenom,
+    subject: '[Troca] Votre annonce est expirée',
+    headline: 'Annonce expirée',
+    intro: `Votre annonce <strong>${escapeHtml(details.annonceTitle || 'Troca')}</strong> vient d’arriver à expiration.`,
+    listingTitle: details.annonceTitle || 'Annonce',
+    listingMeta: 'Vous pouvez la republier ou la réactiver depuis votre espace annonces.',
+    ctaLabel: 'Réactiver mon annonce',
+    ctaUrl: details.annonceId ? `${BASE_URL()}/annonces/${details.annonceId}/edit` : `${BASE_URL()}/parametres/notifications`,
+    unsubscribeUrl,
+    unsubscribeLabel: 'Ne plus recevoir les emails d’expiration',
+  });
+
+  return sendMail({ to, subject: payload.subject, html: payload.html });
 }
 
 module.exports = {
@@ -195,4 +447,9 @@ module.exports = {
   sendVerificationEmail,
   sendAlertEmail,
   sendNewMessageEmail,
+  sendBoostActivatedEmail,
+  sendOfferReceivedEmail,
+  sendListingExpiringEmail,
+  sendListingExpiredEmail,
+  sendPerformanceReportEmail,
 };

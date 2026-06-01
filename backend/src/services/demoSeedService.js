@@ -2,9 +2,14 @@
 
 const bcrypt = require('bcryptjs');
 const { withTransaction } = require('../config/database');
+const { buildCategoryTreeFromFlatRows } = require('../../../shared/categoryTaxonomy');
 
-const DEMO_DOMAIN = '@demo.troca';
+const DEMO_DOMAIN = '@demo.troca.nc';
 const DEMO_PASSWORD = 'Demo1234!';
+
+function normalizeDemoEmail(email) {
+  return String(email).replace('@demo.troca', '@demo.troca.nc');
+}
 
 function isDemoRuntimeEnabled() {
   return process.env.DEMO_MODE === 'true' || process.env.NODE_ENV !== 'production';
@@ -250,31 +255,322 @@ const DEMO_PAYMENTS = [
   },
 ];
 
-function buildSvgDataUri({ title, accent, secondary }) {
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
-      <defs>
-        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="${accent}" />
-          <stop offset="100%" stop-color="${secondary}" />
-        </linearGradient>
-      </defs>
-      <rect width="1200" height="900" fill="url(#g)" rx="48"/>
-      <circle cx="960" cy="130" r="180" fill="white" fill-opacity="0.16"/>
-      <circle cx="220" cy="760" r="220" fill="white" fill-opacity="0.12"/>
-      <text x="80" y="170" fill="white" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="700" opacity="0.88">Troca Démo</text>
-      <text x="80" y="270" fill="white" font-family="Inter, Arial, sans-serif" font-size="64" font-weight="800">${title}</text>
-      <text x="80" y="360" fill="white" font-family="Inter, Arial, sans-serif" font-size="28" opacity="0.92">Données locales générées automatiquement</text>
-      <rect x="80" y="610" width="360" height="88" rx="22" fill="rgba(255,255,255,0.18)"/>
-      <text x="115" y="666" fill="white" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="700">QA visuel local</text>
-    </svg>
-  `.trim().replace(/\s+/g, ' ');
-
-  return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
+function buildSvgDataUri({ seed, size = '1200/900' }) {
+  return `https://picsum.photos/seed/${encodeURIComponent(seed)}/${size}`;
 }
 
 function lookupBySlug(rows, slug) {
   return rows.find((row) => row.slug === slug);
+}
+
+function collectLeafCategoryContexts(nodes = [], path = [], acc = []) {
+  for (const node of nodes || []) {
+    const currentPath = [...path, node];
+    const children = node.children || node.subcategories || [];
+    if (children.length > 0) {
+      collectLeafCategoryContexts(children, currentPath, acc);
+    } else {
+      acc.push({ leaf: node, path: currentPath });
+    }
+  }
+
+  return acc;
+}
+
+function snapTo10(value) {
+  return Math.max(0, Math.round(Number(value || 0) / 10) * 10);
+}
+
+function stableIndexFromText(text) {
+  const source = String(text || '');
+  let hash = 0;
+  for (let i = 0; i < source.length; i += 1) {
+    hash = (hash * 31 + source.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
+function getRootSlug(path = []) {
+  return String(path[0]?.slug || '').toLowerCase();
+}
+
+function getCategoryPathLabel(path = []) {
+  return path.map((node) => node?.name).filter(Boolean).join(' · ');
+}
+
+function getListingPriceRange(rootSlug) {
+  switch (rootSlug) {
+    case 'vehicules':
+      return [18000, 4200000];
+    case 'nautisme':
+      return [12000, 1800000];
+    case 'immobilier':
+      return [80000, 48000000];
+    case 'emploi':
+      return [null, null];
+    case 'mode':
+      return [1000, 35000];
+    case 'maison-jardin':
+      return [1500, 160000];
+    case 'bricolage-outillage':
+      return [1200, 120000];
+    case 'famille-puericulture':
+      return [800, 40000];
+    case 'electronique-multimedia':
+      return [3000, 280000];
+    case 'loisirs':
+      return [1000, 80000];
+    case 'collections-antiquites':
+      return [1200, 120000];
+    case 'animaux':
+      return [1000, 90000];
+    case 'services':
+      return [2000, 70000];
+    case 'materiel-professionnel':
+      return [8000, 600000];
+    case 'divers':
+    default:
+      return [1000, 60000];
+  }
+}
+
+function buildListingPrice(path, variantKey, index) {
+  const [min, max] = getListingPriceRange(getRootSlug(path));
+  if (min == null || max == null) return null;
+
+  const anchor = min + Math.floor((max - min) * ((stableIndexFromText(getCategoryPathLabel(path)) + index) % 7 + 1) / 8);
+  const multiplier = variantKey === 'boosted' ? 1.12 : variantKey === 'pro' ? 1.04 : 0.92;
+  return snapTo10(anchor * multiplier);
+}
+
+function buildListingTitle(path, variantLabel, communeName) {
+  const pathLabel = getCategoryPathLabel(path);
+  return `${variantLabel} ${pathLabel}${communeName ? ` — ${communeName}` : ''}`;
+}
+
+function buildListingDescription(path, variantLabel, communeName) {
+  const pathLabel = getCategoryPathLabel(path);
+  return `Annonce démo ${variantLabel.toLowerCase()} pour la branche ${pathLabel}${communeName ? ` à ${communeName}` : ''}. Idéale pour comparer les filtres, les favoris et les boosts dans la démo locale.`;
+}
+
+function buildListingTags(path, variantKey) {
+  return [
+    getRootSlug(path),
+    String(path[path.length - 1]?.slug || '').toLowerCase(),
+    variantKey,
+    'demo',
+  ].filter(Boolean);
+}
+
+function buildDemoListingSeeds(categoryTree, communes) {
+  const leaves = collectLeafCategoryContexts(categoryTree);
+  const particularSellers = ['particulier@demo.troca', 'loueur@demo.troca', 'marine@demo.troca'];
+  const proSellers = ['pro@demo.troca', 'bonplan@demo.troca'];
+  const boostSellers = ['pro@demo.troca', 'particulier@demo.troca', 'bonplan@demo.troca'];
+  const boostTypes = ['une', 'photos', 'urgent', 'remonte'];
+  const boostDurations = [3, 7, 14, 30];
+
+  const generated = [];
+
+  leaves.forEach((context, leafIndex) => {
+    const commune = communes.length > 0 ? communes[leafIndex % communes.length] : null;
+    const communeName = commune?.name ?? 'Nouvelle-Calédonie';
+    const path = context.path;
+    const rootSlug = getRootSlug(path);
+    const sellerParticulier = particularSellers[leafIndex % particularSellers.length];
+    const sellerPro = proSellers[leafIndex % proSellers.length];
+    const sellerBoosted = boostSellers[leafIndex % boostSellers.length];
+    const pathLabel = getCategoryPathLabel(path);
+
+    const variants = [
+      { key: 'particulier', label: 'Particulier', seller: sellerParticulier, condition: 'good', is_boosted: false, boost_type: null, boost_days: null },
+      { key: 'pro', label: 'Pro', seller: sellerPro, condition: 'like_new', is_boosted: false, boost_type: null, boost_days: null },
+      {
+        key: 'boosted',
+        label: 'Boosté',
+        seller: sellerBoosted,
+        condition: 'new',
+        is_boosted: true,
+        boost_type: boostTypes[leafIndex % boostTypes.length],
+        boost_days: boostDurations[leafIndex % boostDurations.length],
+      },
+    ];
+
+    for (const variant of variants) {
+      const title = buildListingTitle(path, variant.label, communeName);
+      generated.push({
+        seller: variant.seller,
+        category_slug: path[path.length - 1]?.slug || rootSlug,
+        commune_slug: commune?.slug || 'noumea',
+        titre: title,
+        description: buildListingDescription(path, variant.label, communeName),
+        prix: buildListingPrice(path, variant.key, leafIndex),
+        condition: variant.condition,
+        is_boosted: variant.is_boosted,
+        boost_type: variant.boost_type,
+        boost_days: variant.boost_days,
+        tags: buildListingTags(path, variant.key),
+        cover_seed: `${rootSlug}-${path[path.length - 1]?.slug || 'leaf'}-${variant.key}-cover`,
+        thumbnail_seed: `${rootSlug}-${path[path.length - 1]?.slug || 'leaf'}-${variant.key}-thumb`,
+      });
+    }
+  });
+
+  return generated;
+}
+
+function buildDemoBonPlanSeeds(communes) {
+  const categoryLabels = {
+    alimentation: 'Alimentation',
+    mode: 'Mode',
+    beaute: 'Beauté',
+    high_tech: 'High-tech',
+    auto_moto: 'Auto / Moto',
+    maison: 'Maison',
+    restauration: 'Restauration',
+    services: 'Services',
+    sport: 'Sport',
+    voyages: 'Voyages',
+    autre: 'Autre',
+  };
+
+  const kindCycle = ['promo', 'event', 'concert'];
+  const proSellers = ['pro@demo.troca', 'bonplan@demo.troca'];
+  const particulierSellers = ['particulier@demo.troca', 'loueur@demo.troca', 'marine@demo.troca'];
+  const communeCycle = communes.length > 0 ? communes : [{ slug: 'noumea', name: 'Nouméa' }];
+
+  const seeds = [];
+
+  Object.entries(categoryLabels).forEach(([category, label], index) => {
+    const commune = communeCycle[index % communeCycle.length];
+    const basePrice = 1500 + index * 250;
+    const normalPrice = category === 'voyages' ? 0 : snapTo10(basePrice * 1.3);
+    const promoPrice = category === 'voyages' ? 0 : snapTo10(basePrice * 0.8);
+    const eventDate = new Date(Date.now() + (index + 2) * 86400_000).toISOString().slice(0, 10);
+
+    seeds.push({
+      seller: proSellers[index % proSellers.length],
+      title: `Promo pro ${label} — ${commune.name}`,
+      description: `Offre démo professionnelle pour ${label.toLowerCase()} à ${commune.name}. Pensée pour les cartes mises en avant, les clics et le suivi business.`,
+      kind: kindCycle[index % kindCycle.length],
+      target_audience: 'pro',
+      category,
+      commune_slug: commune.slug,
+      location_name: commune.name,
+      event_date: kindCycle[index % kindCycle.length] === 'promo' ? null : eventDate,
+      duration_days: index % 2 === 0 ? 7 : 30,
+      price_xpf: category === 'voyages' ? 0 : promoPrice,
+      is_free_included: category === 'voyages',
+      normal_price_xpf: category === 'voyages' ? 0 : normalPrice,
+      promo_price_xpf: category === 'voyages' ? 0 : promoPrice,
+      discount_pct: category === 'voyages' ? null : 20 + (index % 3) * 5,
+      conditions: 'Offre démo, conditions indicatives.',
+      contact_name: 'Equipe Pro Démo',
+      contact_phone: '+687990000',
+      contact_email: 'pro@demo.troca.nc',
+      website_url: 'https://demo.troca.local',
+      opening_hours: 'Lun - Sam : 08h - 18h',
+      photos: JSON.stringify([
+        buildSvgDataUri({ seed: `${category}-pro-${index}-1`, size: '1200/900' }),
+        buildSvgDataUri({ seed: `${category}-pro-${index}-2`, size: '1200/900' }),
+      ]),
+      social_links: JSON.stringify({ facebook: 'https://facebook.com/demo', instagram: 'https://instagram.com/demo' }),
+      view_count: 120 + index * 14,
+      share_count: 12 + index * 2,
+      status: 'active',
+      published_from: new Date(Date.now() - (index + 3) * 86400_000),
+      published_until: new Date(Date.now() + (index + 11) * 86400_000),
+      amount_xpf: category === 'voyages' ? 0 : promoPrice,
+      amount_eur: category === 'voyages' ? 0 : Math.round(promoPrice / 119.3317),
+    });
+
+    seeds.push({
+      seller: particulierSellers[index % particulierSellers.length],
+      title: `Particulier ${label} — ${commune.name}`,
+      description: `Annonce démo particulière pour ${label.toLowerCase()} à ${commune.name}. Pensée pour montrer le rendu des cartes personnelles et des favoris.`,
+      kind: kindCycle[(index + 1) % kindCycle.length],
+      target_audience: 'particulier',
+      category,
+      commune_slug: commune.slug,
+      location_name: commune.name,
+      event_date: kindCycle[(index + 1) % kindCycle.length] === 'promo' ? null : eventDate,
+      duration_days: index % 2 === 0 ? 30 : 7,
+      price_xpf: category === 'voyages' ? 0 : snapTo10(basePrice * 0.6),
+      is_free_included: category === 'voyages',
+      normal_price_xpf: category === 'voyages' ? 0 : snapTo10(basePrice * 0.75),
+      promo_price_xpf: category === 'voyages' ? 0 : snapTo10(basePrice * 0.6),
+      discount_pct: category === 'voyages' ? null : 15 + (index % 4) * 5,
+      conditions: 'Annonce démo sous réserve de disponibilité.',
+      contact_name: 'Particulier Démo',
+      contact_phone: '+687980000',
+      contact_email: 'particulier@demo.troca.nc',
+      website_url: null,
+      opening_hours: 'Sur rendez-vous',
+      photos: JSON.stringify([
+        buildSvgDataUri({ seed: `${category}-particulier-${index}-1`, size: '1200/900' }),
+      ]),
+      social_links: JSON.stringify({}),
+      view_count: 80 + index * 10,
+      share_count: 6 + index,
+      status: 'active',
+      published_from: new Date(Date.now() - (index + 1) * 86400_000),
+      published_until: new Date(Date.now() + (index + 8) * 86400_000),
+      amount_xpf: category === 'voyages' ? 0 : snapTo10(basePrice * 0.6),
+      amount_eur: category === 'voyages' ? 0 : Math.round(snapTo10(basePrice * 0.6) / 119.3317),
+    });
+  });
+
+  return seeds;
+}
+
+function buildDemoRideSeeds(communes) {
+  const communeBySlug = new Map(communes.map((commune) => [commune.slug, commune]));
+  const fallbackCommune = communes.find(Boolean) || null;
+  const pairs = [
+    { driver: 'pro@demo.troca', departure: 'noumea', destination: 'bourail', boosted: true, trust: 97, seats_total: 3, price_xpf: 1800, vehicle: 'SUV climatisé', comfort: 'Bagages acceptés, arrêt photo possible', description: 'Trajet interurbain confortable, départ centre-ville avec retour en fin de journée.' },
+    { driver: 'particulier@demo.troca', departure: 'dumbea', destination: 'noumea', boosted: true, trust: 91, seats_total: 4, price_xpf: 700, vehicle: 'Citadine propre', comfort: 'Non-fumeur, petit bagage, échange facile', description: 'Covoiturage quotidien pour les trajets domicile-travail avec profil de confiance.' },
+    { driver: 'bonplan@demo.troca', departure: 'paita', destination: 'noumea', boosted: true, trust: 89, seats_total: 2, price_xpf: 900, vehicle: 'Berline', comfort: 'Animaux de petite taille acceptés', description: 'Trajet de retour avec conducteur vérifié, idéal pour tester la réservation rapide.' },
+    { driver: 'pro@demo.troca', departure: 'noumea', destination: 'kone', boosted: true, trust: 94, seats_total: 3, price_xpf: 2200, vehicle: 'SUV premium', comfort: 'Boissons, musique douce, sièges spacieux', description: 'Long trajet vers le Nord avec conducteur expérimenté et annonces boostées.' },
+    { driver: 'particulier@demo.troca', departure: 'voh', destination: 'dumbea', boosted: true, trust: 86, seats_total: 3, price_xpf: 1600, vehicle: 'Break familial', comfort: 'Climatisation, pause café possible', description: 'Trajet régulier pour visualiser les cartes de covoiturage boostées.' },
+    { driver: 'loueur@demo.troca', departure: 'bourail', destination: 'noumea', boosted: false, trust: 74, seats_total: 4, price_xpf: 1200, vehicle: 'Compacte', comfort: 'Petit bagage, musique au choix', description: 'Trajet simple pour illustrer une annonce normale et un tarif doux.' },
+    { driver: 'marine@demo.troca', departure: 'paita', destination: 'dumbea', boosted: false, trust: 70, seats_total: 3, price_xpf: 500, vehicle: 'Citadine', comfort: 'Non-fumeur', description: 'Trajet de proximité, utile pour comparer les offres normales de la démo.' },
+    { driver: 'particulier@demo.troca', departure: 'noumea', destination: 'voh', boosted: false, trust: 68, seats_total: 4, price_xpf: 2100, vehicle: 'SUV', comfort: 'Arrêts sur la route possibles', description: 'Trajet normal pour compléter les listes du module covoiturage.' },
+  ];
+
+  return pairs.map((pair, index) => {
+    const departureCommune = communeBySlug.get(pair.departure) || fallbackCommune;
+    const destinationCommune = communeBySlug.get(pair.destination) || fallbackCommune;
+    const departureName = departureCommune?.name || pair.departure;
+    const destinationName = destinationCommune?.name || pair.destination;
+    const rideDate = new Date(Date.now() + (index + 1) * 86400_000).toISOString().slice(0, 10);
+
+    return {
+      driver: pair.driver,
+      departure: departureName,
+      destination: destinationName,
+      ride_date: rideDate,
+      ride_time: `${String(7 + (index % 5)).padStart(2, '0')}:3${index % 6}`,
+      seats_total: pair.seats_total,
+      price_xpf: pair.price_xpf,
+      vehicle: pair.vehicle,
+      comfort: pair.comfort,
+      description: pair.description,
+      is_verified_driver: pair.boosted,
+      trust_score: pair.trust,
+      departure_commune_id: null,
+      destination_commune_id: null,
+      seats_reserved: pair.boosted ? 1 : 0,
+      seed_key: `${pair.driver}-${index}`,
+      reviews: pair.boosted
+        ? [
+            { reviewer: 'particulier@demo.troca', rating: 5, comment: 'Trajet parfait, très fluide et rassurant.' },
+            { reviewer: 'loueur@demo.troca', rating: 4, comment: 'Ponctuel et très pro.' },
+          ]
+        : [
+            { reviewer: 'marine@demo.troca', rating: 4, comment: 'Trajet simple et agréable.' },
+          ],
+    };
+  });
 }
 
 async function ensureDemoTables(client) {
@@ -337,12 +633,16 @@ async function seedDemoDataset() {
     await clearExistingDemoData(client);
 
     const [categoriesRes, communesRes] = await Promise.all([
-      client.query(`SELECT id, slug FROM categories`),
+      client.query(`SELECT id, parent_id, name, slug, position FROM categories ORDER BY COALESCE(position, 0), id`),
       client.query(`SELECT id, slug FROM communes`),
     ]);
 
     const categories = categoriesRes.rows;
     const communes = communesRes.rows;
+    const categoryTree = buildCategoryTreeFromFlatRows(categories);
+    const listingSeeds = [...DEMO_LISTINGS, ...buildDemoListingSeeds(categoryTree, communes)];
+    const bonPlanSeeds = buildDemoBonPlanSeeds(communes);
+    const rideSeeds = buildDemoRideSeeds(communes);
     const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
 
     const usersByEmail = new Map();
@@ -387,7 +687,7 @@ async function seedDemoDataset() {
           updated_at = NOW()
         RETURNING id, email`,
         [
-          seedUser.email,
+          normalizeDemoEmail(seedUser.email),
           passwordHash,
           seedUser.prenom,
           seedUser.nom,
@@ -410,22 +710,19 @@ async function seedDemoDataset() {
       );
 
       usersByEmail.set(seedUser.email, result.rows[0]);
+      usersByEmail.set(normalizeDemoEmail(seedUser.email), result.rows[0]);
     }
 
     const listingRows = [];
 
-    for (const seedListing of DEMO_LISTINGS) {
+    for (const seedListing of listingSeeds) {
       const seller = usersByEmail.get(seedListing.seller);
       const category = lookupBySlug(categories, seedListing.category_slug);
       const commune = lookupBySlug(communes, seedListing.commune_slug);
       const accent = seedListing.is_boosted ? '#0A7EA4' : '#FF7A59';
       const secondary = seedListing.category_slug === 'immobilier' ? '#48CAE4' : '#1D3557';
-      const cover = buildSvgDataUri({ title: seedListing.titre, accent, secondary });
-      const thumbnail = buildSvgDataUri({
-        title: seedListing.titre.slice(0, 16),
-        accent: secondary,
-        secondary: accent,
-      });
+      const cover = buildSvgDataUri({ seed: seedListing.cover_seed || `${seedListing.titre}-cover`, size: '1200/900' });
+      const thumbnail = buildSvgDataUri({ seed: seedListing.thumbnail_seed || `${seedListing.titre}-thumb`, size: '400/300' });
       const listing = await client.query(
         `INSERT INTO annonces (
           user_id, category_id, commune_id, titre, description, prix,
@@ -477,6 +774,81 @@ async function seedDemoDataset() {
     const listingIdByTitle = new Map();
     for (const item of listingRows) {
       listingIdByTitle.set(item.titre, item.id);
+    }
+
+    const bonPlanRows = [];
+    for (const [index, seedBonPlan] of bonPlanSeeds.entries()) {
+      const user = usersByEmail.get(seedBonPlan.seller);
+      const commune = lookupBySlug(communes, seedBonPlan.commune_slug);
+      if (!user) continue;
+
+      const publishedFrom = new Date(Date.now() - (index + 2) * 86400_000);
+      const publishedUntil = new Date(Date.now() + (index + 8) * 86400_000);
+      const priceXpf = Number(seedBonPlan.price_xpf || 0);
+      const amountEur = Math.round(priceXpf / 119.3317);
+
+      const inserted = await client.query(
+        `INSERT INTO bon_plans (
+          user_id, business_name, business_logo_url, title, description, image_url, promo_label, original_price_xpf, promo_price_xpf, cta_label, cta_url,
+          category, promo_valid_from, promo_valid_until, commune_id, location_name, event_date, duration_days, payment_provider, contact_name, contact_phone,
+          contact_email, website_url, conditions, opening_hours, photos, social_links, status, published_from, published_until, amount_xpf, amount_eur,
+          kind, target_audience, price_xpf, is_free_included, normal_price_xpf, discount_pct, view_count, share_count, expires_at, click_count, created_at, updated_at
+        ) VALUES (
+          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,
+          $12,$13,$14,$15,$16,$17,$18,$19,$20,$21,
+          $22,$23,$24,$25,$26::jsonb,$27::jsonb,$28,$29,$30,$31,$32,
+          $33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44
+        )
+        RETURNING id, title`,
+        [
+          user.id,
+          seedBonPlan.business_name || seedBonPlan.title,
+          seedBonPlan.business_logo_url || null,
+          seedBonPlan.title,
+          seedBonPlan.description,
+          seedBonPlan.image_url || buildSvgDataUri({ seed: `${seedBonPlan.title}-image`, size: '1200/900' }),
+          seedBonPlan.promo_label || null,
+          seedBonPlan.normal_price_xpf ?? null,
+          seedBonPlan.promo_price_xpf ?? priceXpf,
+          'En profiter',
+          seedBonPlan.cta_url || 'https://demo.troca.local',
+          seedBonPlan.category,
+          null,
+          null,
+          commune?.id ?? null,
+          seedBonPlan.location_name || commune?.name || null,
+          seedBonPlan.event_date || null,
+          seedBonPlan.duration_days,
+          'stripe',
+          seedBonPlan.contact_name || null,
+          seedBonPlan.contact_phone || null,
+          seedBonPlan.contact_email || null,
+          seedBonPlan.website_url || null,
+          seedBonPlan.conditions || null,
+          seedBonPlan.opening_hours || null,
+          seedBonPlan.photos || JSON.stringify([]),
+          seedBonPlan.social_links || JSON.stringify({}),
+          seedBonPlan.status,
+          publishedFrom,
+          publishedUntil,
+          amountEur > 0 ? priceXpf : 0,
+          amountEur,
+          seedBonPlan.kind,
+          seedBonPlan.target_audience,
+          seedBonPlan.price_xpf,
+          seedBonPlan.is_free_included,
+          seedBonPlan.normal_price_xpf ?? null,
+          seedBonPlan.discount_pct ?? null,
+          seedBonPlan.view_count ?? 0,
+          seedBonPlan.share_count ?? 0,
+          publishedUntil,
+          Math.floor((seedBonPlan.view_count ?? 0) / 8),
+          publishedFrom,
+          publishedFrom,
+        ]
+      );
+
+      bonPlanRows.push(inserted.rows[0]);
     }
 
     const favorites = [
@@ -668,47 +1040,7 @@ async function seedDemoDataset() {
         [conversationId]
       );
     }
-
-    const rideSeeds = [
-      {
-        driver: 'pro@demo.troca',
-        departure: 'Noumea',
-        destination: 'Bourail',
-        ride_date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toISOString().slice(0, 10),
-        ride_time: '07:30',
-        seats_total: 3,
-        price_xpf: 1800,
-        vehicle: 'SUV climatisé',
-        comfort: 'Bagages acceptés, musique douce, arrêt photo possible',
-        description: 'Trajet interurbain confortable, départ centre-ville avec retour en fin de journée.',
-      },
-      {
-        driver: 'particulier@demo.troca',
-        departure: 'Dumbea',
-        destination: 'Noumea',
-        ride_date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1).toISOString().slice(0, 10),
-        ride_time: '08:10',
-        seats_total: 4,
-        price_xpf: 700,
-        vehicle: 'Citadine propre',
-        comfort: 'Non-fumeur, petit bagage, échange facile',
-        description: 'Covoiturage quotidien pour les trajets domicile-travail avec profil de confiance.',
-      },
-      {
-        driver: 'bonplan@demo.troca',
-        departure: 'Païta',
-        destination: 'Noumea',
-        ride_date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 4).toISOString().slice(0, 10),
-        ride_time: '16:45',
-        seats_total: 2,
-        price_xpf: 900,
-        vehicle: 'Berline',
-        comfort: 'Animaux de petite taille acceptés',
-        description: 'Trajet de retour avec conducteur vérifié, idéal pour tester la réservation rapide.',
-      },
-    ];
-
-    const rideIdsByDriver = new Map();
+    const rideIdsByKey = new Map();
     for (const rideSeed of rideSeeds) {
       const driver = usersByEmail.get(rideSeed.driver);
       if (!driver) continue;
@@ -721,8 +1053,8 @@ async function seedDemoDataset() {
         ) VALUES (
           $1, $2, $3, $4::jsonb, $5, $6, $7, 1,
           $8, $9, $10, $11, TRUE, TRUE, FALSE,
-          $12, 'published', NULL, NULL, $13,
-          TRUE, $14, NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day'
+          $12, 'published', $13, $14, $15,
+          TRUE, $16, NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day'
         )
         RETURNING id, departure, destination`,
         [
@@ -738,20 +1070,25 @@ async function seedDemoDataset() {
           rideSeed.comfort,
           'Petit bagage',
           rideSeed.description,
+          rideSeed.departure_commune_id ?? null,
+          rideSeed.destination_commune_id ?? null,
           driver.trust_score ?? 80,
           new Date(Date.now() + 1000 * 60 * 60 * 24 * 5),
         ]
       );
-      rideIdsByDriver.set(rideSeed.driver, inserted.rows[0].id);
+      rideIdsByKey.set(rideSeed.seed_key, inserted.rows[0].id);
     }
 
     const rideBookings = [
-      { ride_driver: 'pro@demo.troca', passenger: 'particulier@demo.troca', seats: 1 },
-      { ride_driver: 'particulier@demo.troca', passenger: 'loueur@demo.troca', seats: 2 },
+      { ride_key: 'pro@demo.troca-0', passenger: 'particulier@demo.troca', seats: 1 },
+      { ride_key: 'particulier@demo.troca-1', passenger: 'loueur@demo.troca', seats: 2 },
+      { ride_key: 'bonplan@demo.troca-2', passenger: 'marine@demo.troca', seats: 1 },
+      { ride_key: 'pro@demo.troca-3', passenger: 'marine@demo.troca', seats: 1 },
+      { ride_key: 'particulier@demo.troca-4', passenger: 'pro@demo.troca', seats: 1 },
     ];
 
     for (const bookingSeed of rideBookings) {
-      const rideId = rideIdsByDriver.get(bookingSeed.ride_driver);
+      const rideId = rideIdsByKey.get(bookingSeed.ride_key);
       const passenger = usersByEmail.get(bookingSeed.passenger);
       if (!rideId || !passenger) continue;
       await client.query(
@@ -759,6 +1096,36 @@ async function seedDemoDataset() {
          VALUES ($1, $2, $3, 'confirmed', NOW() - INTERVAL '12 hours')`,
         [rideId, passenger.id, bookingSeed.seats]
       );
+    }
+
+    for (const rideSeed of rideSeeds) {
+      if (!rideSeed.reviews || rideSeed.reviews.length === 0) continue;
+      const rideId = rideIdsByKey.get(rideSeed.seed_key);
+      if (!rideId) continue;
+      const bookingRes = await client.query(
+        `SELECT id, user_id FROM covoiturage_bookings WHERE covoiturage_id = $1 ORDER BY created_at ASC LIMIT 1`,
+        [rideId]
+      );
+      const booking = bookingRes.rows[0] || null;
+
+      for (const reviewSeed of rideSeed.reviews) {
+        const reviewer = usersByEmail.get(reviewSeed.reviewer);
+        const target = usersByEmail.get(rideSeed.driver);
+        if (!reviewer || !target) continue;
+        await client.query(
+          `INSERT INTO covoiturage_reviews (covoiturage_id, booking_id, reviewer_id, target_user_id, rating, comment)
+           VALUES ($1, $2, $3, $4, $5, $6)
+           ON CONFLICT DO NOTHING`,
+          [
+            rideId,
+            booking?.id ?? null,
+            reviewer.id,
+            target.id,
+            reviewSeed.rating,
+            reviewSeed.comment,
+          ]
+        );
+      }
     }
 
     for (const user of usersByEmail.values()) {
@@ -817,7 +1184,7 @@ async function seedDemoDataset() {
         default: DEMO_PASSWORD,
       },
       users: DEMO_USERS.map((user) => ({
-        email: user.email,
+        email: normalizeDemoEmail(user.email),
         role: user.email === 'admin@demo.troca'
           ? 'admin'
           : user.email === 'pro@demo.troca'
@@ -828,7 +1195,8 @@ async function seedDemoDataset() {
       })),
       counts: {
         users: DEMO_USERS.length,
-        listings: DEMO_LISTINGS.length,
+        listings: listingSeeds.length,
+        bon_plans: bonPlanRows.length,
         covoiturages: rideSeeds.length,
       },
     };
@@ -877,7 +1245,7 @@ async function getDemoStatus() {
     enabled: true,
     domain: DEMO_DOMAIN,
     counts: userCount,
-    credentials: DEMO_USERS.map((user) => ({ email: user.email, password: DEMO_PASSWORD })),
+    credentials: DEMO_USERS.map((user) => ({ email: normalizeDemoEmail(user.email), password: DEMO_PASSWORD })),
   };
 }
 

@@ -39,6 +39,12 @@ function formatDate(value?: string) {
   return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short' }).format(date);
 }
 
+function snapTo10(value: string | number) {
+  const parsed = typeof value === 'number' ? value : Number(String(value || '').trim());
+  if (!Number.isFinite(parsed)) return 0;
+  return Math.max(0, Math.round(parsed / 10) * 10);
+}
+
 export default function CovoiturageScreen() {
   const { user } = useAuthStore();
   const [rides, setRides] = useState<Ride[]>([]);
@@ -102,7 +108,7 @@ export default function CovoiturageScreen() {
         ride_date: form.ride_date,
         ride_time: form.ride_time,
         seats_total: Number(form.seats_total || 3),
-        price_xpf: Number(form.price_xpf || 0),
+        price_xpf: snapTo10(form.price_xpf),
         description: form.description,
       });
       setForm({
@@ -175,7 +181,14 @@ export default function CovoiturageScreen() {
           <TextInput style={styles.input} placeholder="Date (YYYY-MM-DD)" value={form.ride_date} onChangeText={(ride_date) => setForm((prev) => ({ ...prev, ride_date }))} />
           <TextInput style={styles.input} placeholder="Heure (HH:MM)" value={form.ride_time} onChangeText={(ride_time) => setForm((prev) => ({ ...prev, ride_time }))} />
           <TextInput style={styles.input} placeholder="Places" keyboardType="numeric" value={form.seats_total} onChangeText={(seats_total) => setForm((prev) => ({ ...prev, seats_total }))} />
-          <TextInput style={styles.input} placeholder="Prix / place" keyboardType="numeric" value={form.price_xpf} onChangeText={(price_xpf) => setForm((prev) => ({ ...prev, price_xpf }))} />
+          <TextInput
+            style={styles.input}
+            placeholder="Prix / place"
+            keyboardType="numeric"
+            value={form.price_xpf}
+            onChangeText={(price_xpf) => setForm((prev) => ({ ...prev, price_xpf }))}
+            onEndEditing={() => setForm((prev) => ({ ...prev, price_xpf: String(snapTo10(prev.price_xpf)) }))}
+          />
         </View>
         <TextInput
           style={[styles.input, styles.textarea]}

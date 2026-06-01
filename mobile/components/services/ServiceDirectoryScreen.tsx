@@ -53,6 +53,12 @@ function formatMoney(value?: number | null) {
   return `${Number(value).toLocaleString('fr-NC')} XPF`;
 }
 
+function snapTo10(value: string | number) {
+  const parsed = typeof value === 'number' ? value : Number(String(value || '').trim());
+  if (!Number.isFinite(parsed)) return 0;
+  return Math.max(0, Math.round(parsed / 10) * 10);
+}
+
 function ServiceCard({
   item,
   mode,
@@ -84,7 +90,7 @@ function ServiceCard({
     <View style={styles.card}>
       <View style={styles.badgeRow}>
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>{isPromo ? 'Promotion' : 'Evenement'}</Text>
+          <Text style={styles.badgeText}>{isPromo ? 'Promotion' : 'Événement'}</Text>
         </View>
         {item.target_audience ? (
           <View style={[styles.badge, styles.badgeSoft]}>
@@ -112,7 +118,7 @@ function ServiceCard({
       </View>
 
       <View style={styles.priceBox}>
-        <Text style={styles.priceLabel}>{isPromo ? 'Tarif promo' : 'Date / reservation'}</Text>
+        <Text style={styles.priceLabel}>{isPromo ? 'Tarif promo' : 'Date / réservation'}</Text>
         {isPromo ? (
           <>
             <Text style={styles.priceText}>{formatMoney(item.promo_price_xpf ?? item.price_xpf)}</Text>
@@ -219,8 +225,8 @@ export function ServiceDirectoryScreen({
         duration_days: mode === 'promo' ? 7 : 3,
         location_name: form.location_name || null,
         event_date: form.event_date || null,
-        normal_price_xpf: form.normal_price_xpf ? Number(form.normal_price_xpf) : null,
-        promo_price_xpf: form.promo_price_xpf ? Number(form.promo_price_xpf) : null,
+        normal_price_xpf: form.normal_price_xpf ? snapTo10(form.normal_price_xpf) : null,
+        promo_price_xpf: form.promo_price_xpf ? snapTo10(form.promo_price_xpf) : null,
         discount_pct: form.discount_pct ? Number(form.discount_pct) : null,
         contact_name: form.contact_name || null,
         contact_phone: form.contact_phone || null,
@@ -306,8 +312,32 @@ export function ServiceDirectoryScreen({
           <TextInput style={styles.input} placeholder={mode === 'promo' ? 'Lieu / boutique' : 'Lieu / salle'} value={form.location_name} onChangeText={(location_name) => setForm((prev) => ({ ...prev, location_name }))} />
           <TextInput style={styles.input} placeholder="Date (YYYY-MM-DD)" value={form.event_date} onChangeText={(event_date) => setForm((prev) => ({ ...prev, event_date }))} />
           <TextInput style={styles.input} placeholder="Contact" value={form.contact_name} onChangeText={(contact_name) => setForm((prev) => ({ ...prev, contact_name }))} />
-          <TextInput style={styles.input} placeholder="Prix normal" keyboardType="numeric" value={form.normal_price_xpf} onChangeText={(normal_price_xpf) => setForm((prev) => ({ ...prev, normal_price_xpf }))} />
-          <TextInput style={styles.input} placeholder="Prix promo" keyboardType="numeric" value={form.promo_price_xpf} onChangeText={(promo_price_xpf) => setForm((prev) => ({ ...prev, promo_price_xpf }))} />
+          <TextInput
+            style={styles.input}
+            placeholder="Prix normal"
+            keyboardType="numeric"
+            value={form.normal_price_xpf}
+            onChangeText={(normal_price_xpf) => setForm((prev) => ({ ...prev, normal_price_xpf }))}
+            onEndEditing={() =>
+              setForm((prev) => ({
+                ...prev,
+                normal_price_xpf: prev.normal_price_xpf.trim() === '' ? '' : String(snapTo10(prev.normal_price_xpf)),
+              }))
+            }
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Prix promo"
+            keyboardType="numeric"
+            value={form.promo_price_xpf}
+            onChangeText={(promo_price_xpf) => setForm((prev) => ({ ...prev, promo_price_xpf }))}
+            onEndEditing={() =>
+              setForm((prev) => ({
+                ...prev,
+                promo_price_xpf: prev.promo_price_xpf.trim() === '' ? '' : String(snapTo10(prev.promo_price_xpf)),
+              }))
+            }
+          />
           <TextInput style={styles.input} placeholder="% reduction" keyboardType="numeric" value={form.discount_pct} onChangeText={(discount_pct) => setForm((prev) => ({ ...prev, discount_pct }))} />
           <TextInput style={styles.input} placeholder="Site web" value={form.website_url} onChangeText={(website_url) => setForm((prev) => ({ ...prev, website_url }))} />
         </View>
@@ -351,7 +381,7 @@ export function ServiceDirectoryScreen({
           renderItem={({ item }) => <ServiceCard item={item} mode={mode} />}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Text style={styles.emptyTitle}>Aucun contenu trouve</Text>
+              <Text style={styles.emptyTitle}>Aucun contenu trouvé</Text>
               <Text style={styles.emptyText}>Modifiez la recherche ou publiez le premier contenu de cette section.</Text>
             </View>
           }
@@ -366,7 +396,7 @@ export function ServiceDirectoryScreen({
           </TouchableOpacity>
         <TouchableOpacity style={styles.footerBtn} onPress={() => router.push((mode === 'promo' ? '/evenements' : '/bons-plans') as any)}>
           <Ionicons name="swap-horizontal" size={16} color={Colors.primary} />
-          <Text style={styles.footerBtnText}>{mode === 'promo' ? 'Evenements' : 'Bons plans'}</Text>
+          <Text style={styles.footerBtnText}>{mode === 'promo' ? 'Événements' : 'Bons plans'}</Text>
         </TouchableOpacity>
       </View>
       </View>

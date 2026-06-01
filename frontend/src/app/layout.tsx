@@ -37,9 +37,16 @@ export const viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr">
+    <html lang="fr" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var k='theme';var legacy='troca-theme';var saved=localStorage.getItem(k)||localStorage.getItem(legacy);var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var theme=(saved==='dark'||saved==='light')?saved:(prefersDark?'dark':'light');var root=document.documentElement;root.classList.toggle('dark',theme==='dark');root.dataset.theme=theme;root.style.colorScheme=theme;}catch(e){}})();`,
+          }}
+        />
+      </head>
       {/* pb-16 : compense la barre de nav fixe en bas sur mobile */}
-      <body className="bg-sand-light dark:bg-night text-night dark:text-white font-body antialiased pb-16 pt-14 md:pb-0 md:pt-14">
+      <body className="bg-[var(--color-bg-page)] text-[var(--color-text-primary)] font-body antialiased pb-16 pt-14 md:pb-0 md:pt-14">
         <ThemeProvider>
           <ReactQueryProvider>
             <JsonLd data={buildOrganizationSchema()} />

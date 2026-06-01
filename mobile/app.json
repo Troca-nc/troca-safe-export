@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#2563eb"
+      "backgroundColor": "#0A7EA4"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -25,6 +25,7 @@
       "infoPlist": {
         "NSCameraUsageDescription": "Troca utilise votre caméra pour prendre des photos de vos annonces.",
         "NSPhotoLibraryUsageDescription": "Troca accède à vos photos pour illustrer vos annonces.",
+        "NSMicrophoneUsageDescription": "Troca utilise votre micro pour envoyer des messages vocaux.",
         "NSLocationWhenInUseUsageDescription": "Troca utilise votre position pour afficher les annonces proches.",
         "NSUserNotificationsUsageDescription": "Troca vous envoie des notifications pour vos messages et annonces.",
         "UIBackgroundModes": [
@@ -35,7 +36,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#2563eb"
+        "backgroundColor": "#0A7EA4"
       },
       "package": "nc.troca.app",
       "versionCode": 1,
@@ -58,6 +59,7 @@
       ],
       "permissions": [
         "CAMERA",
+        "RECORD_AUDIO",
         "READ_MEDIA_IMAGES",
         "WRITE_EXTERNAL_STORAGE",
         "ACCESS_FINE_LOCATION",
@@ -76,7 +78,7 @@
         "expo-notifications",
         {
           "icon": "./assets/images/notification-icon.png",
-          "color": "#2563eb",
+          "color": "#0A7EA4",
           "sounds": []
         }
       ],

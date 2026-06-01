@@ -1,8 +1,12 @@
 'use client'
 
-export type AuthActionType = 'favorite_listing' | 'message_seller' | 'publish_listing' | 'review_seller' | 'search_alert'
+export type AuthActionType = 'favorite_listing' | 'message_seller' | 'publish_listing' | 'review_seller' | 'search_alert' | 'troc_swipe' | 'troc_proposal' | 'login'
 
 export type PendingAuthAction =
+  | {
+      type: 'login'
+      redirectTo: string
+    }
   | {
       type: 'favorite_listing'
       listingId: string
@@ -26,6 +30,16 @@ export type PendingAuthAction =
       type: 'search_alert'
       redirectTo: string
     }
+  | {
+      type: 'troc_swipe'
+      listingId: string
+      redirectTo: string
+    }
+  | {
+      type: 'troc_proposal'
+      listingId: string
+      redirectTo: string
+    }
 
 const PENDING_AUTH_ACTION_KEY = 'pending_auth_action'
 
@@ -34,6 +48,7 @@ function isPendingAuthAction(value: unknown): value is PendingAuthAction {
   const action = value as Record<string, unknown>
   if (typeof action.type !== 'string' || typeof action.redirectTo !== 'string') return false
   if (action.type === 'publish_listing' || action.type === 'search_alert') return true
+  if (action.type === 'login') return true
   return typeof action.listingId === 'string'
 }
 

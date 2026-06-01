@@ -50,6 +50,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentWithDemo: {
-    paddingTop: 48,
+    paddingTop: 56,
   },
 });

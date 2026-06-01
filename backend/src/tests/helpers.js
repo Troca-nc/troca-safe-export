@@ -40,10 +40,16 @@ function makeRes() {
     _code:    200,
     _payload: null,
     _headers: {},
+    _cookies: {},
+    locals:   {},
     status(code)  { this._code = code; return this; },
     json(body)    { this._payload = body; return this; },
     send(body)    { this._payload = body; return this; },
     set(k, v)     { this._headers[k] = v; return this; },
+    cookie(name, value, options) {
+      this._cookies[name] = { value, options };
+      return this;
+    },
     end()         { return this; },
     redirect(url) { this._redirect = url; return this; },
   };

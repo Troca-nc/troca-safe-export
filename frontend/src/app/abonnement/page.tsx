@@ -114,8 +114,8 @@ export default function AbonnementPage() {
             </p>
             <h2 className="mt-1 text-2xl font-bold text-night">Mensuel ou annuel</h2>
             <p className="mt-1 max-w-2xl text-sm text-night/60">
-              L&apos;option annuelle affiche directement la reduction sur 12 mois. Pas de calcul,
-              juste un prix clair.
+              L&apos;option annuelle affiche directement la reduction sur 12 mois. Le calcul reste
+              local dans l&apos;interface, juste un prix clair.
             </p>
           </div>
 

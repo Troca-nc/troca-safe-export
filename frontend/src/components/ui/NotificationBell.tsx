@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { notificationsApi } from '@/lib/api'
+import { useAuthStore } from '@/store/authStore'
 
 interface Notif {
   id: number
@@ -28,27 +29,35 @@ const TYPE_ICON: Record<string, React.ReactNode> = {
 }
 
 export default function NotificationBell() {
+  const hasHydrated = useAuthStore((state) => state.hasHydrated)
+  const demoProfile = useAuthStore((state) => state.demoProfile)
   const [notifs, setNotifs] = useState<Notif[]>([])
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const panelId = 'notification-panel'
+
+  if (!hasHydrated || demoProfile) return null
 
   const unread = notifs.filter((n) => !n.read).length
 
   const fetchNotifs = useCallback(async () => {
     setLoading(true)
+    setError(null)
     try {
       const { data } = await notificationsApi.getNotifications(20)
       setNotifs(data.data ?? [])
     } catch {
-      // fallback silencieux si la route n'existe pas encore
+      setError('Notifications temporairement indisponibles.')
     } finally {
       setLoading(false)
     }
   }, [])
 
   useEffect(() => {
+    if (!hasHydrated || demoProfile) return
+
     fetchNotifs()
 
     const onVisibility = () => {
@@ -64,7 +73,7 @@ export default function NotificationBell() {
       clearInterval(interval)
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [fetchNotifs])
+  }, [demoProfile, fetchNotifs, hasHydrated])
 
   useEffect(() => {
     function handle(e: MouseEvent) {
@@ -95,7 +104,7 @@ export default function NotificationBell() {
           setOpen((v) => !v)
           if (!open) fetchNotifs()
         }}
-        className="relative p-2 rounded-xl text-night/50 hover:text-night hover:bg-night/5 transition-colors"
+        className="relative rounded-xl p-2 text-night/50 transition-colors hover:bg-night/5 hover:text-night"
         aria-label={`Notifications${unread ? ` (${unread} non lues)` : ''}`}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -117,14 +126,14 @@ export default function NotificationBell() {
           onKeyDown={(e) => {
             if (e.key === 'Escape') setOpen(false)
           }}
-          className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-night/8 z-50 overflow-hidden"
+          className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl"
         >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-night/6">
-            <span className="font-semibold text-sm text-night">Notifications</span>
+          <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
+            <span className="text-sm font-semibold text-night">Notifications</span>
             <div className="flex items-center gap-2">
               {unread > 0 && (
                 <button type="button" onClick={markAllRead} className="text-[11px] text-coral hover:underline">
-                  Tout marquer lu
+                  Tout marquer comme lu
                 </button>
               )}
               <button type="button" onClick={() => setOpen(false)} className="text-night/30 hover:text-night" aria-label="Fermer les notifications">
@@ -137,6 +146,20 @@ export default function NotificationBell() {
             {loading && notifs.length === 0 && (
               <div className="px-4 py-8 text-center">
                 <div className="w-5 h-5 border-2 border-coral/30 border-t-coral rounded-full animate-spin mx-auto" />
+              </div>
+            )}
+
+            {error && notifs.length > 0 && (
+              <div className="mx-4 mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                {error} Les notifications déjà chargées restent visibles.
+              </div>
+            )}
+
+            {error && notifs.length === 0 && !loading && (
+              <div className="px-4 py-10 text-center" aria-live="polite">
+                <Bell size={32} className="text-night/15 mx-auto mb-3" />
+                <p className="text-sm font-semibold text-night/75">Notifications indisponibles</p>
+                <p className="mt-1 text-sm text-night/55">{error}</p>
               </div>
             )}
 
@@ -156,7 +179,7 @@ export default function NotificationBell() {
                   markRead(n.id)
                   setOpen(false)
                 }}
-                className={`flex items-start gap-3 px-4 py-3 hover:bg-sand transition-colors border-b border-night/4 last:border-0 ${
+                className={`flex items-start gap-3 border-b border-[var(--color-border)] px-4 py-3 transition-colors hover:bg-sand last:border-0 ${
                   !n.read ? 'bg-coral/3' : ''
                 }`}
               >
@@ -182,9 +205,9 @@ export default function NotificationBell() {
           </div>
 
           <Link
-            href="/parametres#notifications"
+          href="/parametres/notifications"
             onClick={() => setOpen(false)}
-            className="block text-center py-3 text-xs text-night/40 hover:text-coral border-t border-night/6 transition-colors"
+            className="block border-t border-[var(--color-border)] py-3 text-center text-xs text-night/40 transition-colors hover:text-coral"
             role="menuitem"
           >
             Gérer les notifications

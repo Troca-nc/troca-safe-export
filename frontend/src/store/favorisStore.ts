@@ -132,7 +132,7 @@ export const useFavorisStore = create<FavorisState>()(
             ...parsed,
             state: {
               ...parsed.state,
-              ids:     new Set(parsed.state.ids     ?? []),
+              ids: new Set(parsed.state.ids ?? []),
               loading: new Set(parsed.state.loading ?? []),
             },
           }

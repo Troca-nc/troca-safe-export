@@ -59,12 +59,12 @@ export default function CguPage() {
 
         <h2>10. Responsabilité</h2>
         <p>
-          Troca ne peut être tenue responsable des litiges entre utilisateurs, des contenus publiés ni des dommages indirects, dans la limite autorisée par la loi. [À VALIDER JURISTE]
+          Troca ne peut être tenue responsable des litiges entre utilisateurs, des contenus publiés ni des dommages indirects, dans la limite autorisée par la loi.
         </p>
 
         <h2>11. Droit applicable</h2>
         <p>
-          Les CGU sont soumises au droit applicable en Nouvelle-Calédonie et, le cas échéant, au droit français pour les matières concernées. [À VALIDER JURISTE]
+          Les CGU sont soumises au droit applicable en Nouvelle-Calédonie et, le cas échéant, au droit français pour les matières concernées.
         </p>
       </LegalLayout>
     </>

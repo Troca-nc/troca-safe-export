@@ -9,6 +9,7 @@
 //  Complémentaire à Stripe pour les clients sans carte internationale
 // ============================================================
 
+const crypto = require('crypto');
 const https = require('https');
 const { isConfiguredValue } = require('../config/env');
 const {
@@ -178,6 +179,35 @@ async function getSubscription(subscriptionId) {
   return payplugRequest('GET', `/subscriptions/${subscriptionId}`);
 }
 
+function normalizeWebhookSignature(signature) {
+  if (Array.isArray(signature)) return normalizeWebhookSignature(signature[0]);
+  if (typeof signature !== 'string') return '';
+  return signature.replace(/^sha256=/i, '').trim().toLowerCase();
+}
+
+function verifyPayPlugWebhook(payload, signature) {
+  const webhookSecret = String(process.env.PAYPLUG_WEBHOOK_SECRET || process.env.PAYPLUG_SECRET_KEY || '').trim();
+  if (!webhookSecret) return false;
+
+  const rawPayload = Buffer.isBuffer(payload) ? payload.toString('utf8') : String(payload || '');
+  if (!rawPayload) return false;
+
+  const provided = normalizeWebhookSignature(signature);
+  if (!provided) return false;
+
+  const expected = crypto
+    .createHmac('sha256', webhookSecret)
+    .update(rawPayload, 'utf8')
+    .digest('hex');
+
+  if (expected.length !== provided.length) return false;
+  try {
+    return crypto.timingSafeEqual(Buffer.from(provided, 'hex'), Buffer.from(expected, 'hex'));
+  } catch {
+    return false;
+  }
+}
+
 async function verifyIPN(resourceId, resourceType = 'payment') {
   if (resourceType === 'subscription') {
     return getSubscription(resourceId);
@@ -198,6 +228,7 @@ module.exports = {
   cancelSubscription,
   getSubscription,
   verifyIPN,
+  verifyPayPlugWebhook,
   isPayPlugConfigured,
   xpfToEurCents,
   formatXpfEur,

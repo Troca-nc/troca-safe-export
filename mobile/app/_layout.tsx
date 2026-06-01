@@ -38,6 +38,8 @@ export default function RootLayout() {
       <Stack.Screen name="bons-plans" options={{ animation: 'fade' }} />
       <Stack.Screen name="evenements" options={{ animation: 'fade' }} />
       <Stack.Screen name="covoiturage" options={{ animation: 'fade' }} />
+      <Stack.Screen name="troc/cycles/[id]" options={{ presentation: 'card' }} />
+      <Stack.Screen name="troc/[id]" options={{ presentation: 'card' }} />
       <Stack.Screen name="annonce/[id]" options={{ presentation: 'card' }} />
       <Stack.Screen name="messages/[id]" options={{ presentation: 'card' }} />
     </Stack>

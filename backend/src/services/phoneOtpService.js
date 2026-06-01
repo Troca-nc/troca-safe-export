@@ -10,6 +10,7 @@ const { sendMail } = require('./emailService');
 const OTP_TTL_MS = 10 * 60 * 1000;
 const RESEND_WINDOW_MS = 10 * 60 * 1000;
 const RESEND_MAX = 3;
+const DEMO_OTP_CODE = '123456';
 
 const fallbackOtpStore = new Map();
 const fallbackResendStore = new Map();
@@ -56,6 +57,9 @@ function buildResendKey(telephone) {
 }
 
 function buildTwilioClient() {
+  if (process.env.DEMO_MODE === 'true' || process.env.NODE_ENV !== 'production') {
+    return null;
+  }
   if (!isConfiguredValue(process.env.TWILIO_ACCOUNT_SID) || !isConfiguredValue(process.env.TWILIO_AUTH_TOKEN)) {
     return null;
   }
@@ -273,6 +277,26 @@ async function sendPhoneOtp({ user, telephone, preferChannel = 'sms', reason = '
     return sendFallbackEmailOtp({ user, telephone: normalized, code, reason: reason || 'send' });
   }
 
+  if (process.env.DEMO_MODE === 'true' || process.env.NODE_ENV !== 'production') {
+    const expiresAt = new Date(Date.now() + OTP_TTL_MS);
+    await storeOtpRecord({
+      telephone: normalized,
+      code: DEMO_OTP_CODE,
+      userId: user.id,
+      channel: 'sms',
+      expiresAt,
+    });
+
+    return {
+      success: true,
+      channel: 'sms',
+      masked: maskPhoneNumber(normalized),
+      expires_at: expiresAt.toISOString(),
+      cooldown: 60,
+      message: 'Code SMS envoye',
+    };
+  }
+
   try {
     return await sendSmsOtp(normalized);
   } catch (err) {
@@ -327,6 +351,22 @@ async function verifyPhoneOtp({ user, telephone, code }) {
       verified: true,
       message: 'Téléphone vérifié avec succès',
       channel: stored.channel || 'email',
+    };
+  }
+
+  if ((process.env.DEMO_MODE === 'true' || process.env.NODE_ENV !== 'production') && String(code) === DEMO_OTP_CODE) {
+    await clearOtpRecord(normalized);
+    await query(
+      `UPDATE users
+       SET telephone = $1, phone_verified = TRUE, updated_at = NOW()
+       WHERE id = $2`,
+      [normalized, user.id]
+    );
+
+    return {
+      verified: true,
+      message: 'Telephone verifie avec succes',
+      channel: 'sms',
     };
   }
 

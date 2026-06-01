@@ -8,9 +8,11 @@ import {
   CalendarDays,
   AlertTriangle,
   Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   ImagePlus,
+  Layers3,
   Sparkles,
   Trash2,
 } from 'lucide-react'
@@ -19,6 +21,9 @@ import { listingsApi, metaApi, uploadApi } from '@/lib/api'
 import { useAutosave, useBeforeUnload } from '@/hooks/useAutosave'
 import { useAuthStore } from '@/store/authStore'
 import CategoryFields from '@/components/annonces/CategoryFields'
+import { FALLBACK_CATEGORIES } from '@/lib/categoryCatalog'
+import { getCategoryIcon } from '@/lib/categoryPresentation'
+import { findCategoryNodeById, findCategoryPathById } from '../../../../shared/categoryTaxonomy'
 
 type CommuneOption = {
   id: number
@@ -30,6 +35,9 @@ type CategoryOption = {
   id: number
   name: string
   slug: string
+  icon?: string
+  children?: CategoryOption[]
+  subcategories?: CategoryOption[]
 }
 
 type WizardDraft = {
@@ -80,6 +88,20 @@ function moveItem<T>(items: T[], from: number, to: number) {
   const [moved] = next.splice(from, 1)
   next.splice(to, 0, moved)
   return next
+}
+
+function getCategoryChildren(category?: CategoryOption | null) {
+  return category?.children || category?.subcategories || []
+}
+
+function isLeafCategory(category?: CategoryOption | null) {
+  return getCategoryChildren(category).length === 0
+}
+
+function snapTo10(value: string | number) {
+  const parsed = typeof value === 'number' ? value : Number(String(value || '').trim())
+  if (!Number.isFinite(parsed)) return 0
+  return Math.max(0, Math.round(parsed / 10) * 10)
 }
 
 function StepBadge({ index, active, done }: { index: number; active: boolean; done: boolean }) {
@@ -232,12 +254,14 @@ function PhotoGrid({
 
 export default function PublishWizard() {
   const router = useRouter()
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
   const userId = useAuthStore((state) => state.user?.id ?? 'guest')
   const [draft, setDraft] = useState<WizardDraft>(INITIAL_DRAFT)
   const [photos, setPhotos] = useState<PhotoItem[]>([])
   const [loadingMeta, setLoadingMeta] = useState(true)
   const [communces, setCommunces] = useState<CommuneOption[]>([])
   const [categories, setCategories] = useState<CategoryOption[]>([])
+  const [categoryTrailIds, setCategoryTrailIds] = useState<number[]>([])
   const [error, setError] = useState('')
   const [success, setSuccess] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -267,12 +291,16 @@ export default function PublishWizard() {
         if (!alive) return
         setCommunces(communesRes.data?.data ?? [])
         const rawCategories = categoriesRes.data?.data ?? []
-        setCategories(Array.isArray(rawCategories) ? rawCategories : [])
+        setCategories(
+          isDemoMode
+            ? (FALLBACK_CATEGORIES as unknown as CategoryOption[])
+            : (Array.isArray(rawCategories) ? rawCategories : [])
+        )
       })
       .catch(() => {
         if (!alive) return
         setCommunces([])
-        setCategories([])
+        setCategories(FALLBACK_CATEGORIES as unknown as CategoryOption[])
       })
       .finally(() => {
         if (alive) setLoadingMeta(false)
@@ -307,6 +335,24 @@ export default function PublishWizard() {
   }, [metadataSignature, metadataPayload])
 
   useEffect(() => {
+    if (!categories.length) return
+    if (!draft.category_id) return
+
+    const path = findCategoryPathById(categories as any, draft.category_id)
+    if (!path.length) return
+
+    setCategoryTrailIds(path.map((node) => Number(node.id)))
+
+    const last = path[path.length - 1]
+    if (last && !isLeafCategory(last)) {
+      setDraft((current) => ({
+        ...current,
+        category_id: '',
+      }))
+    }
+  }, [categories, draft.category_id])
+
+  useEffect(() => {
     return () => {
       for (const photo of photos) {
         if (photo.preview.startsWith('blob:')) {
@@ -322,19 +368,47 @@ export default function PublishWizard() {
   )
 
   const selectedCategory = useMemo(
-    () => categories.find((item) => String(item.id) === draft.category_id),
-    [categories, draft.category_id]
+    () => findCategoryNodeById((isDemoMode ? FALLBACK_CATEGORIES : categories) as any, draft.category_id),
+    [categories, draft.category_id, isDemoMode]
   )
+
+  const activeCategoryNode = useMemo(() => {
+    if (!categoryTrailIds.length) return null
+    return findCategoryNodeById(categories as any, categoryTrailIds[categoryTrailIds.length - 1])
+  }, [categories, categoryTrailIds])
+
+  const activeCategoryChildren = useMemo(() => {
+    if (!activeCategoryNode) return isDemoMode ? FALLBACK_CATEGORIES : categories
+    return getCategoryChildren(activeCategoryNode)
+  }, [activeCategoryNode, categories, isDemoMode])
+
+  const categoryTrail = useMemo(() => {
+    if (!categoryTrailIds.length) return []
+    return categoryTrailIds
+      .map((id) => findCategoryNodeById((isDemoMode ? FALLBACK_CATEGORIES : categories) as any, id))
+      .filter(Boolean) as CategoryOption[]
+  }, [categories, categoryTrailIds, isDemoMode])
+
+  const selectedCategoryPath = useMemo(() => {
+    if (!draft.category_id) return []
+    return findCategoryPathById((isDemoMode ? FALLBACK_CATEGORIES : categories) as any, draft.category_id) as CategoryOption[]
+  }, [categories, draft.category_id, isDemoMode])
 
   const canGoNext = useMemo(() => {
     if (draft.step === 1) {
-      return Boolean(draft.title.trim() && draft.category_id && draft.description.trim())
+      return Boolean(
+        draft.title.trim() &&
+        draft.category_id &&
+        draft.description.trim() &&
+        selectedCategory &&
+        isLeafCategory(selectedCategory)
+      )
     }
     if (draft.step === 2) {
       return photos.length >= 1 && photos.length <= 8
     }
     return Boolean(draft.price.trim() && draft.commune_id && draft.duration_days)
-  }, [draft, photos.length])
+  }, [draft, photos.length, selectedCategory])
 
   const restoreDraft = () => {
     const pending = pendingDraft
@@ -353,6 +427,56 @@ export default function PublishWizard() {
   const ignoreDraft = () => {
     discardDraft()
     metadataForm.reset({ metadata: {} })
+  }
+
+  const openCategoryNode = (category: CategoryOption) => {
+    const nextPath = [...categoryTrailIds]
+    const existingIndex = nextPath.indexOf(category.id)
+    if (existingIndex >= 0) {
+      setCategoryTrailIds(nextPath.slice(0, existingIndex + 1))
+    } else {
+      setCategoryTrailIds([...nextPath, category.id])
+    }
+
+    const children = getCategoryChildren(category)
+    if (children.length === 0) {
+      setDraft((current) => ({
+        ...current,
+        category_id: String(category.id),
+      }))
+      return
+    }
+
+    setDraft((current) => ({
+      ...current,
+      category_id: '',
+    }))
+  }
+
+  const selectCategoryLeaf = (category: CategoryOption) => {
+    const path = findCategoryPathById(categories as any, category.id)
+    setCategoryTrailIds(path.map((node) => Number(node.id)))
+    setDraft((current) => ({
+      ...current,
+      category_id: String(category.id),
+    }))
+  }
+
+  const goToCategoryLevel = (index: number) => {
+    setCategoryTrailIds((current) => current.slice(0, index + 1))
+    const targetId = categoryTrailIds[index]
+    const targetNode = targetId ? findCategoryNodeById(categories as any, targetId) : null
+    if (targetNode && isLeafCategory(targetNode)) {
+      setDraft((current) => ({
+        ...current,
+        category_id: String(targetNode.id),
+      }))
+    } else {
+      setDraft((current) => ({
+        ...current,
+        category_id: '',
+      }))
+    }
   }
 
   const addPhotos = (files: FileList | File[]) => {
@@ -395,7 +519,7 @@ export default function PublishWizard() {
       return
     }
 
-    if (selectedCategory?.slug && !(await metadataForm.trigger())) {
+    if (selectedCategory?.slug && isLeafCategory(selectedCategory) && !(await metadataForm.trigger())) {
       setError('Merci de compléter les caractéristiques spécifiques.')
       return
     }
@@ -433,6 +557,7 @@ export default function PublishWizard() {
     if (draft.step === 1) {
       if (!draft.title.trim()) return 'Le titre est requis.'
       if (!draft.category_id) return 'La catégorie est requise.'
+      if (!selectedCategory || !isLeafCategory(selectedCategory)) return 'Choisissez la sous-catégorie finale.'
       if (!draft.description.trim()) return 'La description est requise.'
     }
     if (draft.step === 2) {
@@ -453,7 +578,7 @@ export default function PublishWizard() {
       setError(validation)
       return
     }
-    if (draft.step === 1 && selectedCategory?.slug && !(await metadataForm.trigger())) {
+    if (draft.step === 1 && selectedCategory?.slug && isLeafCategory(selectedCategory) && !(await metadataForm.trigger())) {
       setError('Merci de compléter les caractéristiques spécifiques.')
       return
     }
@@ -473,7 +598,7 @@ export default function PublishWizard() {
       return
     }
 
-    if (selectedCategory?.slug && !(await metadataForm.trigger())) {
+    if (selectedCategory?.slug && isLeafCategory(selectedCategory) && !(await metadataForm.trigger())) {
       setError('Merci de compléter les caractéristiques spécifiques.')
       return
     }
@@ -482,18 +607,27 @@ export default function PublishWizard() {
     setError('')
 
     try {
+      const normalizedMetadata = Object.fromEntries(
+        Object.entries(metadataPayload).map(([key, value]) => {
+          if (!(/_xpf$|price|tarif/i.test(key))) return [key, value]
+          if (value == null || value === '') return [key, value]
+          const parsed = Number(value)
+          return Number.isFinite(parsed) ? [key, snapTo10(parsed)] : [key, value]
+        }),
+      )
+
       const payload = {
         title: draft.title.trim(),
         description: draft.description.trim(),
         category_id: Number(draft.category_id),
         commune_id: Number(draft.commune_id),
         condition: draft.condition,
-        price: draft.is_free ? null : Number(draft.price),
+        price: draft.is_free ? null : snapTo10(draft.price),
         is_free: draft.is_free,
         price_negotiable: draft.price_negotiable,
         is_negotiable: draft.price_negotiable,
         duration_days: Number(draft.duration_days),
-        metadata: metadataPayload,
+        metadata: normalizedMetadata,
       }
 
       const response = await listingsApi.create(payload)
@@ -599,22 +733,109 @@ export default function PublishWizard() {
                   />
                 </label>
 
-                <label className="block space-y-2">
+                <div className="space-y-2">
                   <span className="text-sm font-semibold text-night">Catégorie *</span>
-                  <select
-                    value={draft.category_id}
-                    onChange={(event) => setDraft((current) => ({ ...current, category_id: event.target.value }))}
-                    disabled={loadingMeta}
-                    className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/20 disabled:opacity-60"
-                  >
-                    <option value="">{loadingMeta ? 'Chargement...' : 'Choisir une catégorie'}</option>
-                    {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                  <div className="rounded-[1.5rem] border border-night/10 bg-sand/30 p-4">
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
+                      <Layers3 className="h-3.5 w-3.5 text-lagoon" />
+                      {categoryTrail.length > 0 ? (
+                        categoryTrail.map((node, index) => (
+                          <button
+                            key={node.id}
+                            type="button"
+                            onClick={() => goToCategoryLevel(index)}
+                            className="rounded-full bg-white px-2.5 py-1 text-night/70 transition hover:bg-sand hover:text-night"
+                          >
+                            {(() => {
+                              const TrailIcon = getCategoryIcon(node.slug, node.name, node.icon)
+                              return <TrailIcon className="mr-1 inline-block h-3.5 w-3.5 align-[-2px] text-nc-lagon" />
+                            })()}
+                            {node.name}
+                          </button>
+                        ))
+                      ) : (
+                        <span>Choisissez une famille puis la sous-catégorie finale</span>
+                      )}
+                    </div>
+
+                    {loadingMeta ? (
+                      <div className="mt-4 rounded-2xl border border-dashed border-night/10 bg-white/70 px-4 py-6 text-center text-sm text-night/45">
+                        Chargement des catégories...
+                      </div>
+                    ) : (
+                      <div className="mt-4 space-y-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-semibold text-night">
+                              {activeCategoryNode ? activeCategoryNode.name : 'Catégories principales'}
+                            </p>
+                            <p className="mt-1 text-xs text-night/45">
+                              {activeCategoryNode
+                                ? 'Choisissez une sous-catégorie finale.'
+                                : 'Commencez par une famille.'}
+                            </p>
+                          </div>
+                          {categoryTrail.length > 0 ? (
+                            <button
+                              type="button"
+                              onClick={() => goToCategoryLevel(Math.max(0, categoryTrail.length - 2))}
+                              className="rounded-full border border-night/10 bg-white px-3 py-2 text-xs font-semibold text-night/70 transition hover:bg-sand"
+                            >
+                              {categoryTrail.length > 1 ? 'Retour' : 'Racine'}
+                            </button>
+                          ) : null}
+                        </div>
+
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          {activeCategoryChildren.map((category) => {
+                            const children = getCategoryChildren(category)
+                            const selected = draft.category_id === String(category.id)
+                            const parentActive = categoryTrail.some((node) => node.id === category.id)
+                            const CategoryIcon = getCategoryIcon(category.slug, category.name, category.icon)
+
+                            return (
+                              <button
+                                key={category.id}
+                                type="button"
+                                onClick={() => (children.length > 0 ? openCategoryNode(category) : selectCategoryLeaf(category))}
+                                className={`group flex min-h-[88px] items-start gap-3 rounded-2xl border p-4 text-left transition ${
+                                  selected
+                                    ? 'border-nc-lagon bg-nc-lagon text-white shadow-[0_18px_35px_rgba(30,144,255,0.18)]'
+                                    : parentActive
+                                      ? 'border-lagoon/40 bg-lagoon/8 text-night'
+                                      : 'border-night/10 bg-white hover:border-lagoon/25 hover:bg-sand'
+                                }`}
+                              >
+                                <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
+                                  selected ? 'bg-white/15 text-white' : 'bg-sand text-lagoon'
+                                }`}>
+                                  <CategoryIcon className="h-5 w-5" />
+                                </span>
+                                <span className="min-w-0 flex-1">
+                                  <span className="block font-semibold">{category.name}</span>
+                                  <span className={`mt-1 block text-xs ${selected ? 'text-white/70' : 'text-night/45'}`}>
+                                    {children.length > 0
+                                      ? `${children.length} sous-catégorie${children.length > 1 ? 's' : ''}`
+                                      : 'Catégorie finale'}
+                                  </span>
+                                </span>
+                              </button>
+                            )
+                          })}
+                        </div>
+
+                        {selectedCategoryPath.length > 0 ? (
+                          <div className="rounded-2xl border border-nc-lagon/20 bg-nc-lagon/8 px-4 py-3 text-sm text-night">
+                            <p className="font-semibold text-night">Catégorie finale sélectionnée</p>
+                            <p className="mt-1 text-night/65">
+                              {selectedCategoryPath.map((node) => node.name).join(' / ')}
+                            </p>
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 <label className="block space-y-2">
                   <span className="text-sm font-semibold text-night">Description *</span>
@@ -652,8 +873,12 @@ export default function PublishWizard() {
                   <label className="block space-y-2">
                     <span className="text-sm font-semibold text-night">Prix *</span>
                     <input
+                      type="number"
+                      min={0}
+                      step={10}
                       value={draft.price}
                       onChange={(event) => setDraft((current) => ({ ...current, price: event.target.value }))}
+                      onBlur={(event) => setDraft((current) => ({ ...current, price: String(snapTo10(event.target.value || 0)) }))}
                       inputMode="numeric"
                       placeholder="Ex. 15000"
                       className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/20"

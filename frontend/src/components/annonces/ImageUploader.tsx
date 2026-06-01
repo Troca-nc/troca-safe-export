@@ -18,7 +18,6 @@ interface ImageUploaderProps {
   onChange?: (images: UploadedImage[]) => void
   className?: string
 }
-
 function ImageCard({
   preview,
   index,
@@ -99,7 +98,7 @@ function ImageCard({
         <div className="absolute inset-0 bg-night/65 flex flex-col items-center justify-center gap-2 p-3 text-center">
           <AlertCircle size={18} className="text-red-300" />
           <p className="text-[11px] text-white font-medium">Échec de l’envoi</p>
-          <p className="text-[10px] text-white/75 line-clamp-2">{error ?? 'Réessayez pour relancer cette image.'}</p>
+          <p className="text-[10px] text-white/75 line-clamp-2">{error ?? 'Ressayez pour relancer cette image.'}</p>
           <button
             type="button"
             onClick={onRetry}
@@ -134,7 +133,6 @@ function ImageCard({
     </div>
   )
 }
-
 function ProgressBar({ pct, label }: { pct: number; label: string }) {
   return (
     <div className="w-full">
@@ -148,7 +146,6 @@ function ProgressBar({ pct, label }: { pct: number; label: string }) {
     </div>
   )
 }
-
 export default function ImageUploader({ annonce_id, initial = [], onChange, className = '' }: ImageUploaderProps) {
   const {
     items,

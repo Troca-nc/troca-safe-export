@@ -8,16 +8,18 @@ import { Ionicons }   from '@expo/vector-icons';
 import { Colors, FontSize, TAB_BAR_HEIGHT } from '@/constants/theme';
 
 function TabIcon({
-  name, focused, badge,
+  name, focused, badge, outlineName,
 }: {
   name: keyof typeof Ionicons.glyphMap;
   focused: boolean;
   badge?: number;
+  outlineName?: keyof typeof Ionicons.glyphMap;
 }) {
+  const iconName = focused ? name : (outlineName ?? `${name}-outline` as any)
   return (
     <View style={styles.iconWrap}>
       <Ionicons
-        name={focused ? name : `${name}-outline` as any}
+        name={iconName}
         size={24}
         color={focused ? Colors.primary : Colors.gray400}
       />
@@ -51,10 +53,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="annonces"
+        name="troc"
         options={{
-          title: 'Annonces',
-          tabBarIcon: ({ focused }) => <TabIcon name="grid" focused={focused} />,
+          title: 'Troc',
+          tabBarIcon: ({ focused }) => <TabIcon name="swap-horizontal" outlineName="swap-horizontal" focused={focused} />,
         }}
       />
       <Tabs.Screen

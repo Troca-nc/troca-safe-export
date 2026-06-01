@@ -1,11 +1,5 @@
 'use client'
 
-// ============================================================
-//  Troca — Hook messagerie (socket.io + API REST)
-//  useConversations  — liste des conversations de l'utilisateur
-//  useConversation   — messages d'une conversation + WS temps réel
-// ============================================================
-
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { isAxiosError } from 'axios'
 import { useMutation } from '@tanstack/react-query'
@@ -35,10 +29,6 @@ function getErrorMessage(err: unknown, fallback: string) {
   return fallback
 }
 
-// ————————————————————————————————————————————————————————————
-//  Hook pro_activated (propagation web→mobile via WS)
-// ————————————————————————————————————————————————————————————
-// TODO: test E2E sur le flux pro_activated et la reprise de session.
 export function useProActivatedListener() {
   useEffect(() => {
     const socket = getMessagingSocket()
@@ -57,10 +47,6 @@ export function useProActivatedListener() {
     }
   }, [])
 }
-
-// ————————————————————————————————————————————————————————————
-//  useConversations
-// ————————————————————————————————————————————————————————————
 
 export function useConversations() {
   const [convs, setConvs] = useState<Conversation[]>([])
@@ -100,10 +86,6 @@ export function useConversations() {
   return { convs, loading, error, unreadTotal, refetch: fetchConvs }
 }
 
-// ————————————————————————————————————————————————————————————
-//  useConversation
-// ————————————————————————————————————————————————————————————
-
 export function useConversation(convId: number | null) {
   const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
@@ -122,6 +104,11 @@ export function useConversation(convId: number | null) {
   const cursorRef = useRef<string | null>(null)
   const pageRef = useRef(1)
 
+  const pushOptimisticMessage = useCallback((next: Message) => {
+    setMessages((prev) => [...prev, next])
+    return next
+  }, [])
+
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
       if (!convId) return
@@ -138,13 +125,13 @@ export function useConversation(convId: number | null) {
         created_at: new Date().toISOString(),
         pending: true,
       }
-      setMessages((prev) => [...prev, optimistic])
+      pushOptimisticMessage(optimistic)
       return { optimistic }
     },
     onError: (_err, _content, context) => {
       if (!context?.optimistic) return
       setMessages((prev) =>
-        prev.map((m) => m.id === context.optimistic.id ? { ...m, pending: false, failed: true } : m)
+        prev.map((m) => (m.id === context.optimistic.id ? { ...m, pending: false, failed: true } : m))
       )
     },
   })
@@ -166,13 +153,83 @@ export function useConversation(convId: number | null) {
         created_at: new Date().toISOString(),
         pending: true,
       }
-      setMessages((prev) => [...prev, optimistic])
+      pushOptimisticMessage(optimistic)
       return { optimistic }
     },
     onError: (_err, _url, context) => {
       if (!context?.optimistic) return
       setMessages((prev) =>
-        prev.map((m) => m.id === context.optimistic.id ? { ...m, pending: false, failed: true } : m)
+        prev.map((m) => (m.id === context.optimistic.id ? { ...m, pending: false, failed: true } : m))
+      )
+    },
+  })
+
+  const sendDocumentMutation = useMutation({
+    mutationFn: async (payload: {
+      url: string
+      name: string
+      mimeType: string
+      sizeBytes?: number | null
+    }) => {
+      if (!convId) return
+      await api.post(`/messages/conversations/${convId}`, {
+        type: 'document',
+        attachment_url: payload.url,
+        attachment_name: payload.name,
+        attachment_mime_type: payload.mimeType,
+        attachment_size_bytes: payload.sizeBytes ?? null,
+      })
+    },
+    onMutate: async (payload) => {
+      if (!convId) return null
+      const optimistic: Message = {
+        id: Date.now(),
+        conv_id: convId,
+        sender_id: Number(currentUserId.current ?? 0),
+        type: 'document',
+        content: null,
+        attachment_url: payload.url,
+        attachment_name: payload.name,
+        attachment_mime_type: payload.mimeType,
+        attachment_size_bytes: payload.sizeBytes ?? null,
+        created_at: new Date().toISOString(),
+        pending: true,
+      }
+      pushOptimisticMessage(optimistic)
+      return { optimistic }
+    },
+    onError: (_err, _payload, context) => {
+      if (!context?.optimistic) return
+      setMessages((prev) =>
+        prev.map((m) => (m.id === context.optimistic.id ? { ...m, pending: false, failed: true } : m))
+      )
+    },
+  })
+
+  const sendAudioMutation = useMutation({
+    mutationFn: async (url: string) => {
+      if (!convId) return
+      await api.post(`/messages/conversations/${convId}`, { type: 'audio', audio_url: url })
+    },
+    onMutate: async (url) => {
+      if (!convId) return null
+      const optimistic: Message = {
+        id: Date.now(),
+        conv_id: convId,
+        sender_id: Number(currentUserId.current ?? 0),
+        type: 'audio',
+        content: null,
+        photo_url: url,
+        created_at: new Date().toISOString(),
+        pending: true,
+      }
+      pushOptimisticMessage(optimistic)
+      return { optimistic }
+    },
+    onError: (_err, _url, context) => {
+      if (!context?.optimistic) return
+      setMessages((prev) =>
+        prev.map((m) => (m.id === context.optimistic.id ? { ...m, pending: false, failed: true } : m))
       )
     },
   })
@@ -197,7 +254,7 @@ export function useConversation(convId: number | null) {
       const before = reset ? null : cursorRef.current
       const { data } = await messagesApi.getMessages(convId, pageToLoad, 30, before)
       const msgs: Message[] = data.data?.messages ?? []
-      setMessages(prev => reset ? msgs : [...msgs, ...prev])
+      setMessages((prev) => (reset ? msgs : [...msgs, ...prev]))
       setHasMore(Boolean(data.pagination?.has_more ?? msgs.length === 30))
       setPage(pageToLoad)
       pageRef.current = pageToLoad
@@ -218,13 +275,19 @@ export function useConversation(convId: number | null) {
     fetchMessages({ reset: true })
 
     const socket = socketRef.current
-    // TODO: test E2E sur la reconnexion WS, la file pending et le join/leave conversation.
     socket.emit('join_conversation', convId)
     void messagesApi.markConversationRead(convId)
 
     const onNewMessage = (msg: Message) => {
-      setMessages(prev => {
-        const filtered = prev.filter(m => !(m.pending && m.content === msg.content))
+      setMessages((prev) => {
+        const filtered = prev.filter((m) => {
+          if (!m.pending) return true
+          if (m.type !== msg.type) return true
+          if (m.type === 'text') return m.content !== msg.content
+          if (m.type === 'photo' || m.type === 'audio') return m.photo_url !== msg.photo_url
+          if (m.type === 'document') return m.attachment_url !== msg.attachment_url
+          return true
+        })
         return [...filtered, msg]
       })
     }
@@ -235,7 +298,7 @@ export function useConversation(convId: number | null) {
 
     const onMessagesRead = ({ byUserId }: { byUserId: number }) => {
       if (Number(byUserId) !== Number(currentUserId.current)) {
-        setMessages(prev => prev.map((m) => (
+        setMessages((prev) => prev.map((m) => (
           Number(m.sender_id) === Number(currentUserId.current)
             ? { ...m, read_at: m.read_at ?? new Date().toISOString() }
             : m
@@ -278,6 +341,26 @@ export function useConversation(convId: number | null) {
     await sendPhotoMutation.mutateAsync(url)
   }, [convId, sendPhotoMutation])
 
+  const sendDocument = useCallback(async (
+    payload: { url: string; name: string; mimeType: string; sizeBytes?: number | null }
+  ): Promise<void> => {
+    if (!convId) return
+    if (isDemoMode()) {
+      showDemoToast('DÃ©sactivÃ© en mode dÃ©mo')
+      return
+    }
+    await sendDocumentMutation.mutateAsync(payload)
+  }, [convId, sendDocumentMutation])
+
+  const sendAudio = useCallback(async (url: string): Promise<void> => {
+    if (!convId) return
+    if (isDemoMode()) {
+      showDemoToast('Désactivé en mode démo')
+      return
+    }
+    await sendAudioMutation.mutateAsync(url)
+  }, [convId, sendAudioMutation])
+
   const makeOffer = useCallback(async (amount_xpf: number): Promise<void> => {
     if (!convId) return
 
@@ -296,7 +379,7 @@ export function useConversation(convId: number | null) {
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       },
     }
-    setMessages(prev => [...prev, optimistic])
+    setMessages((prev) => [...prev, optimistic])
 
     try {
       const { data } = await api.post('/messages/offers', {
@@ -306,7 +389,7 @@ export function useConversation(convId: number | null) {
       const created = data?.data?.message
       const offer = data?.data?.offer
       if (created) {
-        setMessages(prev => prev.map(m => m.id === optimistic.id ? {
+        setMessages((prev) => prev.map((m) => m.id === optimistic.id ? {
           ...created,
           offer: offer ? {
             id: offer.id,
@@ -317,8 +400,8 @@ export function useConversation(convId: number | null) {
         } : m))
       }
     } catch {
-      setMessages(prev =>
-        prev.map(m => m.id === optimistic.id ? { ...m, failed: true, pending: false } : m)
+      setMessages((prev) =>
+        prev.map((m) => (m.id === optimistic.id ? { ...m, failed: true, pending: false } : m))
       )
     }
   }, [convId])
@@ -360,9 +443,11 @@ export function useConversation(convId: number | null) {
     hasMore,
     sendMessage,
     sendPhoto,
+    sendDocument,
+    sendAudio,
     makeOffer,
     respondOffer,
     onTyping,
     loadMore,
-  }), [messages, loading, typing, connectionState, reconnectInMs, hasMore, sendMessage, sendPhoto, makeOffer, respondOffer, onTyping, loadMore])
+  }), [messages, loading, typing, connectionState, reconnectInMs, hasMore, sendMessage, sendPhoto, sendDocument, sendAudio, makeOffer, respondOffer, onTyping, loadMore])
 }

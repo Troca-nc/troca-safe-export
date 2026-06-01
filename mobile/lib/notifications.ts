@@ -110,14 +110,14 @@ export async function registerPushToken(options: RegisterPushTokenOptions = {}):
       name: 'Troca',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#2563eb',
+      lightColor: '#0A7EA4',
     })
 
     await Notifications.setNotificationChannelAsync('messages', {
       name: 'Messages',
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 100],
-      lightColor: '#2563eb',
+      lightColor: '#0A7EA4',
     })
   }
 

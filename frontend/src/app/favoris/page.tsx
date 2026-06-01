@@ -117,6 +117,7 @@ function EmptyFavoris({ filtered }: { filtered: boolean }) {
 export default function FavorisPage() {
   const router = useRouter()
   const { isAuthenticated } = useAuthStore()
+  const hasHydrated = useAuthStore((state) => state.hasHydrated)
   const { items } = useFavorisStore()
   const { toggleFavorite } = useFavorite()
 
@@ -162,7 +163,7 @@ export default function FavorisPage() {
         case 'savedAt_desc': return new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime()
         case 'savedAt_asc':  return new Date(a.savedAt).getTime() - new Date(b.savedAt).getTime()
         case 'prix_asc':     return (a.prix ?? Infinity) - (b.prix ?? Infinity)
-        case 'prix_desc':    return (b.prix ?? 0) - (a.prix ?? 0)
+        case 'prix_desc':    return (b.prix ?? -Infinity) - (a.prix ?? -Infinity)
         default: return 0
       }
     })
@@ -197,6 +198,22 @@ export default function FavorisPage() {
         category: item.category,
       })
     }
+  }
+
+  if (!hasHydrated) {
+    return (
+      <>
+        <Header />
+        <div className="max-w-6xl mx-auto px-4 py-8 animate-pulse">
+          <div className="skeleton h-10 w-48 rounded-full" />
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="skeleton h-44 rounded-[1.5rem]" />
+            ))}
+          </div>
+        </div>
+      </>
+    )
   }
 
   return (

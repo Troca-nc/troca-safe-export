@@ -42,9 +42,95 @@ const upload = multer({
 
 // ── Utilitaires ─────────────────────────────────────────────
 
+const chatDocumentUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: (parseInt(process.env.MAX_CHAT_FILE_SIZE_MB) || 20) * 1024 * 1024, files: 1 },
+  fileFilter: (req, file, cb) => {
+    const allowed = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'image/heic',
+    ];
+    if (!allowed.includes(file.mimetype)) {
+      return cb(new Error('Format de document non supporté.'));
+    }
+    cb(null, true);
+  },
+});
+
 const getUploadDir = () => {
   return path.resolve(process.env.STORAGE_LOCAL_PATH || './uploads');
 };
+
+const AUDIO_MIME_EXTENSIONS = {
+  'audio/webm': 'webm',
+  'audio/ogg': 'ogg',
+  'audio/mpeg': 'mp3',
+  'audio/mp4': 'm4a',
+  'audio/x-m4a': 'm4a',
+};
+
+const DOCUMENT_MIME_EXTENSIONS = {
+  'application/pdf': 'pdf',
+  'application/msword': 'doc',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+  'application/vnd.ms-excel': 'xls',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+  'application/vnd.ms-powerpoint': 'ppt',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx',
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/heic': 'heic',
+};
+
+function normalizeAudioMimeType(input) {
+  return String(input || '').trim().toLowerCase().split(';')[0];
+}
+
+function parseBase64Audio(payload) {
+  const raw = String(payload || '').trim();
+  if (!raw) return null;
+
+  const match = raw.match(/^data:([^;]+);base64,(.+)$/i);
+  if (match) {
+    return {
+      mimeType: normalizeAudioMimeType(match[1]),
+      base64: match[2],
+    };
+  }
+
+  return {
+    mimeType: null,
+    base64: raw.replace(/\s+/g, ''),
+  };
+}
+
+function parseBase64File(payload) {
+  const raw = String(payload || '').trim();
+  if (!raw) return null;
+
+  const match = raw.match(/^data:([^;]+);base64,(.+)$/i);
+  if (match) {
+    return {
+      mimeType: normalizeAudioMimeType(match[1]),
+      base64: match[2],
+    };
+  }
+
+  return {
+    mimeType: null,
+    base64: raw.replace(/\s+/g, ''),
+  };
+}
 
 const ensureDir = async (dir) => {
   try {
@@ -181,6 +267,136 @@ router.post('/chat', uploadLimiter, upload.single('image'), async (req, res, nex
       data: {
         url: processed.url,
         thumbnail_url: processed.thumbnail_url,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/chat/audio', uploadLimiter, async (req, res, next) => {
+  try {
+    const parsed = parseBase64Audio(req.body?.audio_base64);
+    const fallbackMime = normalizeAudioMimeType(req.body?.mime_type);
+    const mimeType = parsed?.mimeType || fallbackMime;
+
+    if (!parsed?.base64) {
+      return res.status(400).json({ error: 'Aucun audio reçu' });
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(AUDIO_MIME_EXTENSIONS, mimeType)) {
+      return res.status(400).json({ error: 'Format audio non supporté' });
+    }
+
+    const buffer = Buffer.from(parsed.base64, 'base64');
+    const maxBytes = (parseInt(process.env.MAX_AUDIO_FILE_SIZE_MB) || 12) * 1024 * 1024;
+    if (!buffer.length) {
+      return res.status(400).json({ error: 'Audio vide' });
+    }
+    if (buffer.length > maxBytes) {
+      return res.status(413).json({ error: 'Audio trop volumineux' });
+    }
+
+    const relativeFolder = path.join('chat', String(req.user.id));
+    const uploadDir = path.join(getUploadDir(), relativeFolder);
+    await ensureDir(uploadDir);
+
+    const extension = AUDIO_MIME_EXTENSIONS[mimeType];
+    const filename = uuidv4();
+    const fullPath = path.join(uploadDir, `${filename}.${extension}`);
+    await fs.writeFile(fullPath, buffer);
+
+    const baseUrl = (process.env.BASE_URL || 'http://localhost:3001').replace(/\/$/, '');
+    res.status(201).json({
+      data: {
+        url: `${baseUrl}/uploads/${relativeFolder}/${filename}.${extension}`,
+        mime_type: mimeType,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/chat/document', uploadLimiter, chatDocumentUpload.single('file'), async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Aucun document reçu' });
+    }
+
+    const mimeType = normalizeAudioMimeType(req.file.mimetype);
+    if (!Object.prototype.hasOwnProperty.call(DOCUMENT_MIME_EXTENSIONS, mimeType)) {
+      return res.status(400).json({ error: 'Format de document non supporté' });
+    }
+
+    const maxBytes = (parseInt(process.env.MAX_CHAT_FILE_SIZE_MB) || 20) * 1024 * 1024;
+    if (req.file.size > maxBytes) {
+      return res.status(413).json({ error: 'Document trop volumineux' });
+    }
+
+    const relativeFolder = path.join('chat', String(req.user.id));
+    const uploadDir = path.join(getUploadDir(), relativeFolder);
+    await ensureDir(uploadDir);
+
+    const extension = DOCUMENT_MIME_EXTENSIONS[mimeType];
+    const filename = uuidv4();
+    const fullPath = path.join(uploadDir, `${filename}.${extension}`);
+    await fs.writeFile(fullPath, req.file.buffer);
+
+    const baseUrl = (process.env.BASE_URL || 'http://localhost:3001').replace(/\/$/, '');
+    res.status(201).json({
+      data: {
+        url: `${baseUrl}/uploads/${relativeFolder}/${filename}.${extension}`,
+        filename: req.file.originalname || `${filename}.${extension}`,
+        mime_type: mimeType,
+        size_bytes: req.file.size,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/chat/document-base64', uploadLimiter, async (req, res, next) => {
+  try {
+    const parsed = parseBase64File(req.body?.document_base64);
+    const fallbackMime = normalizeAudioMimeType(req.body?.mime_type);
+    const mimeType = parsed?.mimeType || fallbackMime;
+    const fileName = String(req.body?.file_name || '').trim();
+
+    if (!parsed?.base64) {
+      return res.status(400).json({ error: 'Aucun document reçu' });
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(DOCUMENT_MIME_EXTENSIONS, mimeType)) {
+      return res.status(400).json({ error: 'Format de document non supporté' });
+    }
+
+    const buffer = Buffer.from(parsed.base64, 'base64');
+    const maxBytes = (parseInt(process.env.MAX_CHAT_FILE_SIZE_MB) || 20) * 1024 * 1024;
+    if (!buffer.length) {
+      return res.status(400).json({ error: 'Document vide' });
+    }
+    if (buffer.length > maxBytes) {
+      return res.status(413).json({ error: 'Document trop volumineux' });
+    }
+
+    const relativeFolder = path.join('chat', String(req.user.id));
+    const uploadDir = path.join(getUploadDir(), relativeFolder);
+    await ensureDir(uploadDir);
+
+    const extension = DOCUMENT_MIME_EXTENSIONS[mimeType];
+    const filename = uuidv4();
+    const fullPath = path.join(uploadDir, `${filename}.${extension}`);
+    await fs.writeFile(fullPath, buffer);
+
+    const baseUrl = (process.env.BASE_URL || 'http://localhost:3001').replace(/\/$/, '');
+    res.status(201).json({
+      data: {
+        url: `${baseUrl}/uploads/${relativeFolder}/${filename}.${extension}`,
+        filename: fileName || `${filename}.${extension}`,
+        mime_type: mimeType,
+        size_bytes: buffer.length,
       },
     });
   } catch (err) {

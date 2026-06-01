@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const { query } = require('../config/database');
 const { authenticate } = require('../middleware/auth');
+const { verifyCsrf } = require('../middleware/csrf');
 const { sendMail } = require('../services/emailService');
 
 const router = express.Router();
@@ -50,6 +51,8 @@ router.get('/users/me/export', authenticate, async (req, res, next) => {
       messages,
       payments,
       alerts,
+      notifications,
+      notificationPreferences,
       rgpdLogs,
       subscriptions,
       boosts,
@@ -87,7 +90,7 @@ router.get('/users/me/export', authenticate, async (req, res, next) => {
         [userId]
       ),
       queryOptional(
-        `SELECT id, conv_id, sender_id, type, content, photo_url, read_at, created_at
+        `SELECT id, conv_id, sender_id, type, content, photo_url, attachment_url, attachment_name, attachment_mime_type, attachment_size_bytes, read_at, created_at
          FROM messages
          WHERE sender_id = $1
          ORDER BY created_at DESC
@@ -106,6 +109,19 @@ router.get('/users/me/export', authenticate, async (req, res, next) => {
          FROM search_alerts
          WHERE user_id = $1
          ORDER BY created_at DESC`,
+        [userId]
+      ),
+      queryOptional(
+        `SELECT id, user_id, type, title, body, href, is_read, created_at
+         FROM notifications
+         WHERE user_id = $1
+         ORDER BY created_at DESC`,
+        [userId]
+      ),
+      queryOptional(
+        `SELECT *
+         FROM notification_preferences
+         WHERE user_id = $1`,
         [userId]
       ),
       queryOptional(
@@ -177,6 +193,8 @@ router.get('/users/me/export', authenticate, async (req, res, next) => {
       messages: messages.rows,
       payments: payments.rows,
       alerts: alerts.rows,
+      notifications: notifications.rows,
+      notification_preferences: notificationPreferences.rows,
       rgpd_logs: rgpdLogs.rows,
       subscriptions: subscriptions.rows,
       boosts: boosts.rows,
@@ -195,7 +213,7 @@ router.get('/users/me/export', authenticate, async (req, res, next) => {
   }
 });
 
-router.delete('/users/me', authenticate, async (req, res, next) => {
+router.delete('/users/me', authenticate, verifyCsrf, async (req, res, next) => {
   try {
     const confirmationEmail = String(req.body?.confirmation_email || '').trim().toLowerCase();
     const currentEmail = String(req.user.email || '').trim().toLowerCase();
@@ -215,8 +233,10 @@ router.delete('/users/me', authenticate, async (req, res, next) => {
     const cleanupStatements = [
       'DELETE FROM rgpd_consentements WHERE user_id = $1',
       'DELETE FROM rgpd_logs WHERE user_id = $1',
+      'DELETE FROM notifications WHERE user_id = $1',
       'DELETE FROM push_tokens WHERE user_id = $1',
       'DELETE FROM search_alerts WHERE user_id = $1',
+      'DELETE FROM notification_preferences WHERE user_id = $1',
       'DELETE FROM covoit_alerts WHERE user_id = $1',
       'DELETE FROM favoris WHERE user_id = $1',
       'DELETE FROM payments WHERE user_id = $1',

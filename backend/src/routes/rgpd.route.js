@@ -1,42 +1,43 @@
-// backend/src/routes/rgpd.route.js
-// ── Routes RGPD — Droits des utilisateurs ────────────────────────────────────
+'use strict';
+
+// ── Routes RGPD — Droits des utilisateurs ─────────────────────────────
 // Art. 17 : droit à l'effacement (suppression compte)
 // Art. 20 : droit à la portabilité (export données)
 // Art. 15 : droit d'accès (log des accès aux données)
 
-const express   = require('express')
-const { query, withTransaction } = require('../config/database')
-const { authenticate } = require('../middleware/auth')
-const archiver  = require('archiver')   // npm i archiver
+const express = require('express');
+const { query, withTransaction } = require('../config/database');
+const { authenticate } = require('../middleware/auth');
+const { verifyCsrf } = require('../middleware/csrf');
+const archiver = require('archiver');
+const bcrypt = require('bcryptjs');
 
-const router = express.Router()
-router.use(authenticate)
+const router = express.Router();
+router.use(authenticate);
 
-// ── POST /api/rgpd/supprimer-compte ──────────────────────────────────────────
+// ── POST /api/rgpd/supprimer-compte ───────────────────────────────
 // Art. 17 — Droit à l'effacement
 // Soft delete + anonymisation des données personnelles sous 30 jours
 
-router.post('/supprimer-compte', async (req, res) => {
-  const { confirmation, password } = req.body
-  const userId = req.user.id
+router.post('/supprimer-compte', verifyCsrf, async (req, res) => {
+  const { confirmation, password } = req.body;
+  const userId = req.user.id;
 
   if (confirmation !== 'SUPPRIMER MON COMPTE') {
     return res.status(400).json({
-      error: 'Confirmation incorrecte. Tapez exactement : SUPPRIMER MON COMPTE'
-    })
+      error: 'Confirmation incorrecte. Tapez exactement : SUPPRIMER MON COMPTE',
+    });
   }
 
   try {
     await withTransaction(async (client) => {
-
       // 1. Vérifier le mot de passe si compte email (pas social)
       if (password) {
         const userRes = await client.query(
           `SELECT password_hash FROM users WHERE id = $1`, [userId]
-        )
-const bcrypt = require('bcryptjs')
-        const valid = await bcrypt.compare(password, userRes.rows[0]?.password_hash ?? '')
-        if (!valid) throw new Error('Mot de passe incorrect')
+        );
+        const valid = await bcrypt.compare(password, userRes.rows[0]?.password_hash ?? '');
+        if (!valid) throw new Error('Mot de passe incorrect');
       }
 
       // 2. Anonymiser toutes les données personnelles (RGPD : pseudonymisation)
@@ -57,60 +58,64 @@ const bcrypt = require('bcryptjs')
           deleted_at     = NOW(),
           updated_at     = NOW()
         WHERE id = $1`, [userId]
-      )
+      );
 
       // 3. Dépublier toutes les annonces actives
       await client.query(`
         UPDATE annonces SET status = 'deleted', updated_at = NOW()
         WHERE user_id = $1 AND status NOT IN ('deleted', 'sold')`, [userId]
-      )
+      );
 
       // 4. Supprimer les tokens push (ne plus notifier)
-      await client.query(`DELETE FROM push_tokens WHERE user_id = $1`, [userId])
+      await client.query(`DELETE FROM push_tokens WHERE user_id = $1`, [userId]);
 
       // 5. Supprimer les alertes de recherche
-      await client.query(`DELETE FROM search_alerts WHERE user_id = $1`, [userId])
+      await client.query(`DELETE FROM search_alerts WHERE user_id = $1`, [userId]);
 
-      // 5bis. Supprimer les événements analytics first-party associés
-      await client.query(`DELETE FROM analytics_events WHERE user_id = $1`, [userId])
+      // 5bis. Supprimer les notifications in-app et préférences de notification
+      await client.query(`DELETE FROM notifications WHERE user_id = $1`, [userId]);
+      await client.query(`DELETE FROM notification_preferences WHERE user_id = $1`, [userId]);
+
+      // 5ter. Supprimer les événements analytics first-party associés
+      await client.query(`DELETE FROM analytics_events WHERE user_id = $1`, [userId]);
 
       // 6. Archiver les messages (garder pour l'autre partie, anonymiser l'expéditeur)
       await client.query(`
         UPDATE messages SET content = '[Message supprimé]', photo_url = NULL
         WHERE sender_id = $1 AND created_at > NOW() - INTERVAL '30 days'`, [userId]
-      )
+      );
 
       // 7. Logger la suppression pour la traçabilité
       await client.query(`
         INSERT INTO rgpd_logs (user_id, action, ip_address, created_at)
         VALUES ($1, 'account_deleted', $2, NOW())`,
         [userId, req.ip]
-      )
-    })
+      );
+    });
 
     res.json({
       success: true,
-      message: 'Votre compte a été supprimé. Vos données personnelles seront effacées définitivement sous 30 jours.'
-    })
-
+      message: 'Votre compte a été supprimé. Vos données personnelles seront effacées définitivement sous 30 jours.',
+    });
   } catch (err) {
-    if (err.message === 'Mot de passe incorrect')
-      return res.status(401).json({ error: 'Mot de passe incorrect' })
-    console.error('[rgpd] Erreur suppression:', err)
-    res.status(500).json({ error: 'Erreur lors de la suppression du compte' })
+    if (err.message === 'Mot de passe incorrect') {
+      return res.status(401).json({ error: 'Mot de passe incorrect' });
+    }
+    console.error('[rgpd] Erreur suppression:', err);
+    res.status(500).json({ error: 'Erreur lors de la suppression du compte' });
   }
-})
+});
 
-// ── GET /api/rgpd/exporter-donnees ───────────────────────────────────────────
+// ── GET /api/rgpd/exporter-donnees ───────────────────────────────
 // Art. 20 — Droit à la portabilité
 // Génère un ZIP contenant toutes les données de l'utilisateur
 
 router.get('/exporter-donnees', async (req, res) => {
-  const userId = req.user.id
+  const userId = req.user.id;
 
   try {
     // Collecter toutes les données
-    const [userRes, annoncesRes, messagesRes, favorisRes, paymentsRes, alertsRes] =
+    const [userRes, annoncesRes, messagesRes, favorisRes, paymentsRes, alertsRes, notificationsRes, notificationPrefsRes] =
       await Promise.all([
         query(`SELECT id, email, prenom, nom, telephone, bio, commune_id,
                       is_pro, created_at, updated_at
@@ -130,7 +135,11 @@ router.get('/exporter-donnees', async (req, res) => {
                FROM payments WHERE user_id = $1 ORDER BY created_at DESC`, [userId]),
         query(`SELECT label, filters, created_at
                FROM search_alerts WHERE user_id = $1`, [userId]),
-      ])
+        query(`SELECT id, type, title, body, href, is_read, created_at
+               FROM notifications WHERE user_id = $1 ORDER BY created_at DESC`, [userId]),
+        query(`SELECT *
+               FROM notification_preferences WHERE user_id = $1`, [userId]),
+      ]);
 
     const exportData = {
       export_date:  new Date().toISOString(),
@@ -141,24 +150,26 @@ router.get('/exporter-donnees', async (req, res) => {
       favoris:      favorisRes.rows,
       paiements:    paymentsRes.rows,
       alertes:      alertsRes.rows,
-    }
+      notifications: notificationsRes.rows,
+      notification_preferences: notificationPrefsRes.rows,
+    };
 
     // Logger l'export
     await query(
       `INSERT INTO rgpd_logs (user_id, action, ip_address, created_at)
        VALUES ($1, 'data_exported', $2, NOW())`,
       [userId, req.ip]
-    )
+    );
 
     // Envoyer en ZIP avec un JSON lisible
-    res.setHeader('Content-Type', 'application/zip')
-    res.setHeader('Content-Disposition', `attachment; filename="troca-donnees-${userId}-${Date.now()}.zip"`)
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="troca-donnees-${userId}-${Date.now()}.zip"`);
 
-    const archive = archiver('zip', { zlib: { level: 9 } })
-    archive.pipe(res)
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    archive.pipe(res);
 
     // Fichier JSON principal
-    archive.append(JSON.stringify(exportData, null, 2), { name: 'mes-donnees.json' })
+    archive.append(JSON.stringify(exportData, null, 2), { name: 'mes-donnees.json' });
 
     // README lisible
     archive.append(`# Export de vos données Troca
@@ -174,6 +185,7 @@ Date d'export : ${new Date().toLocaleDateString('fr-FR')}
   - favoris : vos ${exportData.favoris.length} favori(s) sauvegardés
   - paiements : votre historique de paiements
   - alertes : vos alertes de recherche
+  - notifications : vos notifications in-app
 
 ## Vos droits
 
@@ -185,17 +197,16 @@ Conformément au RGPD, vous pouvez :
 ## Contact
 
 Troca — privacy@troca.nc
-`, { name: 'README.txt' })
+`, { name: 'README.txt' });
 
-    archive.finalize()
-
+    archive.finalize();
   } catch (err) {
-    console.error('[rgpd] Erreur export:', err)
-    res.status(500).json({ error: 'Erreur lors de la génération de l\'export' })
+    console.error('[rgpd] Erreur export:', err);
+    res.status(500).json({ error: 'Erreur lors de la génération de l\'export' });
   }
-})
+});
 
-// ── GET /api/rgpd/mes-logs ────────────────────────────────────────────────────
+// ── GET /api/rgpd/mes-logs ───────────────────────────────────────
 // Art. 15 — Droit d'accès : historique des traitements de données
 
 router.get('/mes-logs', async (req, res) => {
@@ -204,23 +215,23 @@ router.get('/mes-logs', async (req, res) => {
      FROM rgpd_logs WHERE user_id = $1
      ORDER BY created_at DESC LIMIT 50`,
     [req.user.id]
-  )
-  res.json({ data: rows })
-})
+  );
+  res.json({ data: rows });
+});
 
-// ── POST /api/rgpd/consentement ───────────────────────────────────────────────
+// ── POST /api/rgpd/consentement ─────────────────────────────────
 // Enregistrement du consentement cookies
 
-router.post('/consentement', async (req, res) => {
-  const { analytics, marketing } = req.body
+router.post('/consentement', verifyCsrf, async (req, res) => {
+  const { analytics, marketing } = req.body;
   await query(
     `INSERT INTO rgpd_consentements (user_id, analytics, marketing, ip_address, created_at)
      VALUES ($1, $2, $3, $4, NOW())
      ON CONFLICT (user_id)
      DO UPDATE SET analytics = $2, marketing = $3, ip_address = $4, created_at = NOW()`,
     [req.user?.id ?? null, !!analytics, !!marketing, req.ip]
-  ).catch(() => {})
-  res.json({ success: true })
-})
+  ).catch(() => {});
+  res.json({ success: true });
+});
 
-module.exports = router
+module.exports = router;

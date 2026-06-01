@@ -1,6 +1,7 @@
 'use strict';
 
 const { activateBonPlanFromPayment } = require('./bonPlansService');
+const { sendBoostActivatedEmail } = require('./emailService');
 
 async function setSubscriptionPaymentStatus(query, providerSubId, paymentStatus) {
   if (!providerSubId) return;
@@ -20,6 +21,7 @@ async function processStripeWebhookEvent({
   query,
   withTransaction,
   sendMail,
+  sendBoostActivatedEmail,
   getWebPlan,
   markPaymentSucceeded,
   formatXpfEur,
@@ -131,6 +133,7 @@ async function processStripeWebhookEvent({
 
     const payment = paymentRows[0];
     if (!payment) return;
+    const shouldSendBoostEmail = payment.status !== 'succeeded';
 
     if (payment.status !== 'succeeded') {
       await query(
@@ -173,6 +176,28 @@ async function processStripeWebhookEvent({
            ON CONFLICT DO NOTHING`,
           [annonceId, boostType, expiresAt, payment.id]
         ).catch(() => {});
+
+        const { rows: ownerRows } = await query(
+          `SELECT u.email, u.prenom, a.titre
+           FROM annonces a
+           JOIN users u ON u.id = a.user_id
+           WHERE a.id = $1
+           LIMIT 1`,
+          [annonceId]
+        );
+        if (shouldSendBoostEmail && ownerRows[0]?.email) {
+          await sendBoostActivatedEmail(
+            ownerRows[0].email,
+            ownerRows[0].prenom || 'Bonjour',
+            {
+              annonceId,
+              annonceTitle: ownerRows[0].titre,
+              boostLabel: boostType,
+              boostDays: duration,
+            },
+            payment.user_id
+          ).catch(() => {});
+        }
       }
     }
 
@@ -227,6 +252,7 @@ async function processStripeWebhookEvent({
     );
     const payment = paymentRows[0];
     if (!payment || payment.user_id !== userId) return;
+    const shouldSendBoostEmail = payment.status !== 'succeeded';
 
     if (payment.metadata?.payment_type && payment.metadata.payment_type !== paymentType) {
       return;
@@ -527,6 +553,7 @@ async function processPayplugWebhook({
   query,
   withTransaction,
   sendMail,
+  sendBoostActivatedEmail,
   baseUrl,
 }) {
   const resource = await payplug.verifyIPN(resourceId, resourceType);
@@ -582,6 +609,28 @@ async function processPayplugWebhook({
          VALUES ($1, $2, $3, $4, 'payplug') ON CONFLICT DO NOTHING`,
         [annonceId, boostType, expiresAt, payment.id]
       ).catch(() => {});
+
+      const { rows: ownerRows } = await query(
+        `SELECT u.email, u.prenom, a.titre
+         FROM annonces a
+         JOIN users u ON u.id = a.user_id
+         WHERE a.id = $1
+         LIMIT 1`,
+        [annonceId]
+      );
+        if (shouldSendBoostEmail && ownerRows[0]?.email) {
+          await sendBoostActivatedEmail(
+            ownerRows[0].email,
+            ownerRows[0].prenom || 'Bonjour',
+          {
+            annonceId,
+            annonceTitle: ownerRows[0].titre,
+            boostLabel: boostType,
+            boostDays: duration,
+          },
+          payment.user_id
+        ).catch(() => {});
+      }
     }
 
     if (meta.payment_type === 'bon_plan') {

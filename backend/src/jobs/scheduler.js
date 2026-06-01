@@ -9,9 +9,19 @@
 
 const cron                = require('node-cron');
 const { query }           = require('../config/database');
-const { sendAlertEmail }  = require('../services/emailService');
+const {
+  sendAlertEmail,
+  sendPerformanceReportEmail,
+  sendListingExpiringEmail,
+  sendListingExpiredEmail,
+} = require('../services/emailService');
 const { sendMail }        = require('../services/emailService');
-const { notifyListingExpiring } = require('../services/notificationService');
+const {
+  notifyListingExpiring,
+  notifyListingExpired,
+  notifySearchAlert,
+  notifyPerformanceReport,
+} = require('../services/notificationService');
 const { createNotification } = require('../services/notificationService');
 const { sendPushToUser, sendPushToUsers } = require('../services/pushService');
 const { getJson, setJson, withLock } = require('../services/sharedCache');
@@ -21,6 +31,7 @@ const { logger }          = require('../utils/logger');
 const { recordJob }       = require('../services/observability');
 const { flushBonPlanViews } = require('../services/bonPlansService');
 const { checkAdminAlerts } = require('../services/adminAlerts');
+const { ensureNotificationPreferences } = require('../services/notificationPreferencesService');
 
 async function runSingletonJob(lockName, ttlMs, task) {
   const started = await withLock(lockName, ttlMs, async () => {
@@ -39,6 +50,29 @@ function formatUserName(firstName, lastName) {
 
 function formatXpf(amount) {
   return `${Number(amount || 0).toLocaleString('fr-FR')} XPF`;
+}
+
+function getPerformanceWindowDays(frequency) {
+  switch (String(frequency || '').toLowerCase()) {
+    case 'daily':
+      return 1;
+    case 'monthly':
+      return 30;
+    case 'weekly':
+    default:
+      return 7;
+  }
+}
+
+function getPerformancePeriodLabel(frequency, startDate) {
+  const labelMap = {
+    daily: 'les dernières 24 heures',
+    weekly: 'les 7 derniers jours',
+    monthly: 'les 30 derniers jours',
+  };
+  const label = labelMap[String(frequency || '').toLowerCase()] || 'les 7 derniers jours';
+  if (!startDate) return label;
+  return `${label} (depuis le ${new Date(startDate).toLocaleDateString('fr-FR')})`;
 }
 
 function getTrocBaseUrl() {
@@ -343,6 +377,53 @@ function startBoostExpiryJob() {
   logger.info('cron_job_started', { job: 'boost-expiry' });
 }
 
+function startListingExpiryJob() {
+  cron.schedule('10 * * * *', async () => {
+    recordJob('started', { job: 'listing-expiry' });
+    await runSingletonJob('cron:listing-expiry', 50 * 60 * 1000, async () => {
+      try {
+        const result = await query(`
+          WITH expired AS (
+            UPDATE annonces a
+            SET status = 'expired',
+                updated_at = NOW()
+            WHERE a.status = 'active'
+              AND a.expires_at < NOW()
+              AND a.deleted_at IS NULL
+            RETURNING a.id, a.titre, a.user_id
+          )
+          SELECT e.id, e.titre, e.user_id, u.email, u.prenom
+          FROM expired e
+          JOIN users u ON u.id = e.user_id
+          WHERE u.deleted_at IS NULL
+        `);
+
+        for (const row of result.rows) {
+          await notifyListingExpired(row.user_id, row.id, row.titre).catch(() => {});
+          await sendListingExpiredEmail(
+            row.email,
+            row.prenom,
+            {
+              annonceId: row.id,
+              annonceTitle: row.titre,
+            },
+            row.user_id
+          ).catch(() => {});
+        }
+
+        if (result.rowCount > 0) {
+          logger.info('cron_listing_expired_notified', { count: result.rowCount });
+        }
+      } catch (err) {
+        recordJob('error', { job: 'listing-expiry', message: err.message });
+        logger.error('cron_listing_expiry_error', { error: err });
+      }
+    });
+  }, { timezone: 'Pacific/Noumea' });
+
+  logger.info('cron_job_started', { job: 'listing-expiry' });
+}
+
 function startBonPlanMaintenanceJob() {
   const flushIntervalMs = Math.max(15 * 60 * 1000, Number(process.env.BON_PLAN_VIEWS_FLUSH_INTERVAL_MS || 3600000));
 
@@ -533,18 +614,16 @@ function startExpiringListingsJob() {
           // Notification in-app
           await notifyListingExpiring(row.user_id, row.id, row.titre, 3).catch(() => {});
 
-          // Email de relance
-          const emailService = require('../services/emailService');
-          const baseUrl = process.env.BASE_URL || 'https://troca.nc';
-          await emailService.sendMail({
-            to:      row.email,
-            subject: '[Troca] Votre annonce expire dans 3 jours',
-            html: '<p>Bonjour ' + row.prenom + ',</p>'
-                + '<p>Votre annonce <strong>' + row.titre + '</strong> expire dans 3 jours.</p>'
-                + '<p><a href="' + baseUrl + '/annonces/' + row.id + '/edit" '
-                + 'style="background:#2563eb;color:#fff;padding:12px 24px;border-radius:8px;'
-                + 'text-decoration:none;font-weight:bold;display:inline-block;">Republier mon annonce</a></p>',
-          }).catch(() => {});
+          await sendListingExpiringEmail(
+            row.email,
+            row.prenom,
+            {
+              annonceId: row.id,
+              annonceTitle: row.titre,
+              daysLeft: 3,
+            },
+            row.user_id
+          ).catch(() => {});
         }
 
         if (result.rowCount > 0) {
@@ -573,6 +652,17 @@ function startWeeklyAlertsJob() {
   cron.schedule('0 8 * * 1', () => runSingletonJob('cron:alerts-weekly', 30 * 60 * 1000, () => runAlertJob('weekly')), { timezone: 'Pacific/Noumea' });
   recordJob('started', { job: 'alerts-weekly' });
   logger.info('cron_job_started', { job: 'alerts-weekly' });
+}
+
+function startPerformanceReportsJob() {
+  cron.schedule('30 7 * * *', async () => {
+    recordJob('started', { job: 'performance-reports' });
+    await runSingletonJob('cron:performance-reports', 45 * 60 * 1000, async () => {
+      await runPerformanceReportsJob();
+    });
+  }, { timezone: 'Pacific/Noumea' });
+
+  logger.info('cron_job_started', { job: 'performance-reports' });
 }
 
 function startAnalyticsPurgeJob() {
@@ -621,7 +711,28 @@ async function runAlertJob(frequency) {
         const annonces = await matchAlerteAnnonces(alert);
         if (!annonces.length) continue;
 
+        const prefs = await ensureNotificationPreferences(alert.user_id).catch(() => null);
+
         await sendAlertEmail(alert.email, alert.prenom, alert, annonces);
+
+        await notifySearchAlert(
+          alert.user_id,
+          alert.label,
+          annonces.length,
+          alert.filters || {}
+        ).catch(() => {});
+
+        if (prefs?.push_search_alert) {
+          await sendPushToUser(alert.user_id, {
+            title: `🔔 ${annonces.length} nouvelle${annonces.length > 1 ? 's' : ''} annonce${annonces.length > 1 ? 's' : ''} pour "${alert.label}"`,
+            body: 'Cliquez pour voir les résultats',
+            data: {
+              type: 'search_alert',
+              alert_id: alert.id,
+              label: alert.label,
+            },
+          }).catch(() => {});
+        }
 
         // Logger les annonces envoyées pour éviter les doublons
         for (const a of annonces) {
@@ -755,7 +866,26 @@ async function matchImmediateAlerts(annonce) {
 
       if (!matches) continue;
 
+      const prefs = await ensureNotificationPreferences(alert.user_id).catch(() => null);
+
       await sendAlertEmail(alert.email, alert.prenom, alert, [annonce]).catch(() => {});
+      await notifySearchAlert(
+        alert.user_id,
+        alert.label,
+        1,
+        alert.filters || {}
+      ).catch(() => {});
+      if (prefs?.push_search_alert) {
+        await sendPushToUser(alert.user_id, {
+          title: `🔔 1 nouvelle annonce pour "${alert.label}"`,
+          body: 'Cliquez pour voir le résultat',
+          data: {
+            type: 'search_alert',
+            alert_id: alert.id,
+            label: alert.label,
+          },
+        }).catch(() => {});
+      }
       await query(`
         INSERT INTO alert_sent_log (alert_id, annonce_id) VALUES ($1, $2)
         ON CONFLICT DO NOTHING
@@ -774,6 +904,148 @@ async function matchImmediateAlerts(annonce) {
 
 // ── 5. Email post-transaction pour inciter les avis ─────────
 // Tous les jours à 10h00 : envoyer un email 48h après le premier message
+
+async function buildPerformanceReportForUser(userRow, prefs) {
+  const frequency = prefs.performance_report_frequency || 'weekly';
+  const days = getPerformanceWindowDays(frequency);
+  const lastSentAt = prefs.last_performance_report_at ? new Date(prefs.last_performance_report_at) : null;
+  const periodStart = lastSentAt && !Number.isNaN(lastSentAt.getTime())
+    ? lastSentAt
+    : new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+  const result = await query(`
+    SELECT
+      a.id,
+      a.titre AS title,
+      a.prix,
+      a.nb_vues AS total_views,
+      a.nb_favoris AS total_favorites,
+      a.is_boosted,
+      COALESCE(ev.views, 0) AS views,
+      COALESCE(ev.clicks, 0) AS clicks,
+      COALESCE(ev.favorites, 0) AS favorites
+    FROM annonces a
+    LEFT JOIN (
+      SELECT
+        ae.metadata ->> 'listing_id' AS listing_id,
+        COUNT(*) FILTER (WHERE ae.event_name = 'listing_view') AS views,
+        COUNT(*) FILTER (WHERE ae.event_name = 'contact_seller_click') AS clicks,
+        COUNT(*) FILTER (WHERE ae.event_name = 'favorite_add') AS favorites
+      FROM analytics_events ae
+      WHERE ae.created_at >= $2
+        AND ae.event_name IN ('listing_view', 'contact_seller_click', 'favorite_add')
+      GROUP BY ae.metadata ->> 'listing_id'
+    ) ev ON ev.listing_id = a.id::text
+    WHERE a.user_id = $1
+      AND a.status = 'active'
+    ORDER BY COALESCE(ev.views, 0) DESC,
+             COALESCE(ev.clicks, 0) DESC,
+             COALESCE(ev.favorites, 0) DESC,
+             a.created_at DESC
+  `, [userRow.user_id, periodStart.toISOString()]);
+
+  const rows = result.rows || [];
+  if (!rows.length) return null;
+
+  const totals = rows.reduce((acc, item) => ({
+    views: acc.views + Number(item.views || 0),
+    clicks: acc.clicks + Number(item.clicks || 0),
+    favorites: acc.favorites + Number(item.favorites || 0),
+  }), { views: 0, clicks: 0, favorites: 0 });
+
+  return {
+    user_id: userRow.user_id,
+    email: userRow.email,
+    prenom: userRow.prenom,
+    is_pro: Boolean(userRow.is_pro),
+    frequency,
+    period_label: getPerformancePeriodLabel(frequency, periodStart),
+    period_start: periodStart,
+    totals,
+    listings: rows,
+  };
+}
+
+async function runPerformanceReportsJob() {
+  logger.info('cron_performance_reports_start');
+  let sent = 0;
+  let skipped = 0;
+  let errors = 0;
+
+  try {
+    const recipients = await query(`
+      SELECT
+        p.user_id,
+        u.email,
+        u.prenom,
+        u.is_pro,
+        p.email_performance_report,
+        p.push_performance_report,
+        p.performance_report_frequency,
+        p.last_performance_report_at
+      FROM notification_preferences p
+      JOIN users u ON u.id = p.user_id
+      WHERE u.deleted_at IS NULL
+        AND p.performance_report_frequency <> 'never'
+        AND (p.email_performance_report = TRUE OR p.push_performance_report = TRUE)
+    `);
+
+    for (const recipient of recipients.rows) {
+      try {
+        const report = await buildPerformanceReportForUser(recipient, recipient);
+        if (!report) {
+          skipped++;
+          continue;
+        }
+
+        if (recipient.email_performance_report) {
+          await sendPerformanceReportEmail({
+            to: recipient.email,
+            prenom: recipient.prenom,
+            report,
+            recipientUserId: recipient.user_id,
+          }).catch(() => {});
+        }
+
+        if (recipient.push_performance_report) {
+          await sendPushToUser(recipient.user_id, {
+            title: '📊 Votre rapport de performance est prêt',
+            body: `${report.totals.views.toLocaleString('fr-FR')} vues · ${report.totals.clicks.toLocaleString('fr-FR')} clics`,
+            data: {
+              type: 'performance_report',
+              period: report.frequency,
+            },
+          }).catch(() => {});
+        }
+
+        await notifyPerformanceReport(
+          recipient.user_id,
+          report.period_label,
+          '/parametres/notifications'
+        ).catch(() => {});
+
+        await query(
+          `UPDATE notification_preferences
+           SET last_performance_report_at = NOW(),
+               updated_at = NOW()
+           WHERE user_id = $1`,
+          [recipient.user_id]
+        ).catch(() => {});
+
+        sent++;
+      } catch (error) {
+        errors++;
+        recordJob('error', { job: 'performance-reports', message: error.message });
+        logger.error('cron_performance_reports_error', { user_id: recipient.user_id, error });
+      }
+    }
+  } catch (error) {
+    recordJob('error', { job: 'performance-reports', message: error.message });
+    logger.error('cron_performance_reports_general_error', { error });
+  }
+
+  logger.info('cron_performance_reports_done', { sent, skipped, errors });
+}
 
 function startReviewReminderJob() {
   cron.schedule('0 10 * * *', async () => {
@@ -845,10 +1117,12 @@ function startAllJobs() {
   startAdminAlertsJob();
   startTrocMatchingJob();
   startTrocMaintenanceJob();
+  startListingExpiryJob();
   startExpiringListingsJob();
   startReviewReminderJob();
   startDailyAlertsJob();
   startWeeklyAlertsJob();
+  startPerformanceReportsJob();
   startAnalyticsPurgeJob();
 }
 

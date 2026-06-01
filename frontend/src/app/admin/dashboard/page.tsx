@@ -426,9 +426,9 @@ function ObservabilitySection({
               <tbody className="divide-y divide-night/8">
                 {(recentShares.length
                   ? recentShares
-                  : [{ ts: 'â€”', channel: 'unknown', contentType: 'unknown', requestId: null }]).map((item, index) => (
+                  : [{ ts: '—', channel: 'unknown', contentType: 'unknown', requestId: null }]).map((item, index) => (
                   <tr key={`${item.ts}-${index}`}>
-                    <td className="px-3 py-2 text-night/60">{item.ts !== 'â€”' ? format(new Date(item.ts), 'HH:mm:ss') : 'â€”'}</td>
+                    <td className="px-3 py-2 text-night/60">{item.ts !== '—' ? format(new Date(item.ts), 'HH:mm:ss') : '—'}</td>
                     <td className="px-3 py-2 text-night">{formatShareChannelLabel(String(item.channel ?? 'unknown'))}</td>
                     <td className="px-3 py-2 text-night/60">{formatShareContentTypeLabel(String(item.contentType ?? 'unknown'))}</td>
                     <td className="px-3 py-2 font-mono text-night/50">{formatRequestId(item.requestId ?? null)}</td>

@@ -17,7 +17,6 @@ export default function AuthRequiredModal() {
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end justify-center bg-night/55 px-4 py-6 backdrop-blur-sm sm:items-center">
-      {/* TODO: test E2E sur la modale d'authentification et la reprise d'action après connexion. */}
       <div className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-night/10 bg-white shadow-[0_24px_80px_rgba(8,32,50,0.2)]">
         <button
           type="button"
@@ -30,13 +29,13 @@ export default function AuthRequiredModal() {
 
         <div className="p-6 sm:p-7">
           <div className="inline-flex rounded-full bg-coral/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-coral">
-            Connectez-vous pour continuer
+            Connexion rapide
           </div>
           <h2 className="mt-4 text-2xl font-bold text-night">
-            Votre action est bien gardée en mémoire.
+            On vous remet au bon endroit.
           </h2>
           <p className="mt-2 text-sm leading-6 text-night/60">
-            Une fois connecté, vous retrouverez exactement le même contexte et l’action sera rejouée automatiquement quand c’est nécessaire.
+            Connectez-vous en quelques secondes. Votre action reprend automatiquement après la connexion si besoin.
           </p>
 
           <div className="mt-5 space-y-3">
@@ -45,7 +44,7 @@ export default function AuthRequiredModal() {
               className="inline-flex w-full items-center justify-center rounded-2xl bg-night px-4 py-3 text-sm font-semibold text-white transition hover:bg-night/90"
               onClick={() => closeAuthModal()}
             >
-              Se connecter avec email
+              Continuer avec email
             </Link>
             <SocialAuthButtons redirectTo={redirectTo} mode="connexion" />
           </div>
@@ -54,4 +53,3 @@ export default function AuthRequiredModal() {
     </div>
   )
 }
-

@@ -14,8 +14,9 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
-import { statsApi } from '@/lib/api';
+import { statsApi, trocApi } from '@/lib/api';
 import { disconnectSocket } from '@/lib/socket';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '@/constants/theme';
 import { DEMO_ACCOUNTS, isDemoModeEnabled } from '@/lib/demo';
@@ -29,10 +30,36 @@ interface MenuItem {
   danger?: boolean;
 }
 
+function formatTrocBadgeLabel(badge: string) {
+  switch (badge) {
+    case 'first_troc':
+      return '1er troc'
+    case 'regular_trader':
+      return 'Troc régulier'
+    case 'master_trader':
+      return 'Maître troc'
+    case 'cycle_master':
+      return 'Cycle maîtrisé'
+    default:
+      return badge.replaceAll('_', ' ')
+  }
+}
+
 export default function ProfilTab() {
   const { user, logout, login } = useAuthStore();
   const [sellerStats, setSellerStats] = useState<any>(null);
   const demoModeEnabled = isDemoModeEnabled();
+  const trocBadgesQuery = useQuery({
+    queryKey: ['troc', 'badges', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [] as Array<{ badge: string }>
+      const response = await trocApi.getUserBadges(user.id)
+      return Array.isArray(response.data?.data) ? response.data.data : []
+    },
+    enabled: Boolean(user?.id),
+    staleTime: 60_000,
+    retry: 0,
+  });
 
   useEffect(() => {
     if (!user?.is_pro) return;
@@ -100,7 +127,9 @@ export default function ProfilTab() {
       title: 'Notifications',
       items: [
         { icon: 'notifications-outline', label: 'Mes alertes de recherche', onPress: () => router.push('/profil/alertes') },
+        { icon: 'car-sport-outline', label: 'Alertes trajet', onPress: () => router.push('/profil/alertes-trajet') },
         { icon: 'pricetag-outline', label: 'Bons Plans', onPress: () => router.push('/profil/bons-plans') },
+        { icon: 'settings-outline', label: 'Paramètres de notification', onPress: () => router.push('/profil/notifications') },
       ],
     },
     {
@@ -166,6 +195,37 @@ export default function ProfilTab() {
       </TouchableOpacity>
 
       <SubscriptionStatusBanner />
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Mes Trocs</Text>
+        <View style={styles.trocCard}>
+          <View style={styles.trocHeader}>
+            <View style={styles.trocIcon}>
+              <Ionicons name="swap-horizontal" size={18} color={Colors.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.trocTitle}>Échanges intelligents</Text>
+              <Text style={styles.trocText}>
+                Swipez, proposez un objet structuré et découvrez des cycles de troc possibles.
+              </Text>
+            </View>
+          </View>
+
+          <TouchableOpacity style={styles.trocCta} onPress={() => router.push('/tabs/troc')} activeOpacity={0.86}>
+            <Text style={styles.trocCtaText}>Découvrir le Troc</Text>
+          </TouchableOpacity>
+
+          {Array.isArray(trocBadgesQuery.data) && trocBadgesQuery.data.length > 0 ? (
+            <View style={styles.trocBadgesRow}>
+              {trocBadgesQuery.data.map((badge) => (
+                <View key={badge.badge} style={styles.trocBadge}>
+                  <Text style={styles.trocBadgeText}>{formatTrocBadgeLabel(badge.badge)}</Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
+        </View>
+      </View>
 
       {demoModeEnabled && (
         <View style={styles.section}>
@@ -341,6 +401,66 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   card: { backgroundColor: Colors.white, borderRadius: Radius.lg, ...Shadow.sm, overflow: 'hidden' },
+  trocCard: {
+    backgroundColor: Colors.white,
+    borderRadius: Radius.lg,
+    padding: Spacing.lg,
+    ...Shadow.sm,
+    gap: 12,
+  },
+  trocHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  trocIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  trocTitle: {
+    fontSize: FontSize.md,
+    fontWeight: FontWeight.bold,
+    color: Colors.text,
+  },
+  trocText: {
+    marginTop: 4,
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+    lineHeight: 20,
+  },
+  trocCta: {
+    minHeight: 46,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.lg,
+  },
+  trocCtaText: {
+    color: Colors.white,
+    fontSize: FontSize.sm,
+    fontWeight: FontWeight.bold,
+  },
+  trocBadgesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  trocBadge: {
+    borderRadius: 999,
+    backgroundColor: Colors.gray100,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  trocBadgeText: {
+    fontSize: 11,
+    color: Colors.textSecondary,
+    fontWeight: FontWeight.semibold,
+  },
   statsGrid: { flexDirection: 'row', gap: 10 },
   statCard: {
     flex: 1,

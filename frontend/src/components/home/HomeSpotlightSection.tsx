@@ -48,6 +48,48 @@ type ServiceItem = {
 }
 
 type SpotlightTabKey = 'latest' | 'premium' | 'promos' | 'events' | 'rides'
+type SpotlightTone = 'lagon' | 'emeraude' | 'corail' | 'sable'
+
+function getToneClasses(tone: SpotlightTone) {
+  switch (tone) {
+    case 'emeraude':
+      return {
+        tabActive: 'bg-nc-emeraude text-white border-nc-emeraude',
+        accentText: 'text-nc-emeraude',
+        pill: 'badge-emeraude',
+        cta: 'text-nc-emeraude',
+        subtle: 'text-nc-emeraude/90',
+        card: 'border-nc-emeraude/20 bg-nc-emeraudeLight text-night',
+      }
+    case 'corail':
+      return {
+        tabActive: 'bg-nc-corail text-white border-nc-corail',
+        accentText: 'text-nc-corail',
+        pill: 'badge-corail',
+        cta: 'text-nc-corail',
+        subtle: 'text-nc-corail/90',
+        card: 'border-nc-corail/20 bg-nc-corailLight text-night',
+      }
+    case 'sable':
+      return {
+        tabActive: 'bg-nc-sable text-white border-nc-sable',
+        accentText: 'text-nc-sable',
+        pill: 'badge-sable',
+        cta: 'text-nc-sable',
+        subtle: 'text-nc-sable/90',
+        card: 'border-nc-sable/20 bg-nc-sableLight text-night',
+      }
+    default:
+      return {
+        tabActive: 'bg-nc-lagon text-white border-nc-lagon',
+        accentText: 'text-nc-lagon',
+        pill: 'badge-lagon',
+        cta: 'text-nc-lagon',
+        subtle: 'text-nc-lagon/90',
+        card: 'border-nc-lagon/20 bg-nc-lagonLight text-night',
+      }
+  }
+}
 
 function formatDateLabel(value?: string | null) {
   if (!value) return 'Date libre'
@@ -57,9 +99,9 @@ function formatDateLabel(value?: string | null) {
 }
 
 function formatRelative(value?: string | null) {
-  if (!value) return 'Recemment'
+  if (!value) return 'Récemment'
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'Recemment'
+  if (Number.isNaN(date.getTime())) return 'Récemment'
   return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(date)
 }
 
@@ -67,13 +109,13 @@ function getListingLabel(listing: ListingItem) {
   if (listing.is_featured || (listing.boosted_until && new Date(listing.boosted_until) > new Date())) return 'Mise en avant'
   if (listing.is_urgent) return 'Urgent'
   if (listing.is_pro) return 'Pro'
-  return 'Annonce recente'
+  return 'Annonce récente'
 }
 
 function getListingTone(listing: ListingItem) {
-  if (listing.is_featured || (listing.boosted_until && new Date(listing.boosted_until) > new Date())) return 'border-coral/20 bg-coral/5 text-coral'
+  if (listing.is_featured || (listing.boosted_until && new Date(listing.boosted_until) > new Date())) return 'border-nc-lagon/20 bg-nc-lagonLight text-nc-lagonText'
   if (listing.is_urgent) return 'border-amber-200 bg-amber-50 text-amber-700'
-  if (listing.is_pro) return 'border-ocean/20 bg-ocean/8 text-ocean'
+  if (listing.is_pro) return 'border-nc-emeraude/20 bg-nc-emeraudeLight text-nc-emeraudeText'
   return 'border-night/10 bg-night/5 text-night/60'
 }
 
@@ -83,7 +125,9 @@ function SpotlightCard({
   meta,
   href,
   badge,
-  tone = 'border-night/10 bg-white text-night',
+  badgeClassName = '',
+  accentClassName = 'text-nc-lagon',
+      tone = 'border-night/10 bg-[var(--color-surface)] text-[var(--color-text-primary)]',
   primaryLabel = 'Voir',
   accent = false,
 }: {
@@ -92,6 +136,8 @@ function SpotlightCard({
   meta?: string
   href: string
   badge?: string
+  badgeClassName?: string
+  accentClassName?: string
   tone?: string
   primaryLabel?: string
   accent?: boolean
@@ -99,17 +145,17 @@ function SpotlightCard({
   return (
     <Link
       href={href}
-      className={`group block rounded-[1.5rem] border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${tone} ${accent ? 'bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(255,245,242,0.96))]' : ''}`}
-    >
+      className={`group block rounded-[1.5rem] border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${tone} ${accent ? 'bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(255,245,242,0.96))] dark:bg-[linear-gradient(180deg,_rgba(8,32,50,0.98),_rgba(4,18,30,0.96))]' : ''}`}
+      >
       {badge ? (
-        <span className="inline-flex rounded-full border border-current/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] opacity-85">
+        <span className={`inline-flex rounded-full border border-current/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] opacity-85 ${badgeClassName}`}>
           {badge}
         </span>
       ) : null}
-      <h3 className="mt-3 text-lg font-semibold leading-tight group-hover:text-coral">{title}</h3>
+      <h3 className={`mt-3 text-lg font-semibold leading-tight ${accentClassName} group-hover:opacity-90`}>{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-current/65">{subtitle}</p>
       {meta ? <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-current/45">{meta}</p> : null}
-      <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-coral">
+      <span className={`mt-4 inline-flex items-center gap-1 text-sm font-semibold ${accentClassName}`}>
         {primaryLabel}
         <ArrowRight className="h-4 w-4" />
       </span>
@@ -135,11 +181,12 @@ export function HomeSpotlightSection({
     return [
       {
         key: 'latest',
-        label: 'Dernieres annonces',
+        label: 'Dernières annonces',
         href: '/annonces',
         items: latestListings,
         badge: 'Flux chaud',
-        intro: 'Les nouvelles annonces a ne pas manquer.',
+        intro: 'Les nouvelles annonces à ne pas manquer.',
+        tone: 'lagon',
       },
       {
         key: 'premium',
@@ -147,31 +194,35 @@ export function HomeSpotlightSection({
         href: '/annonces?sort=date',
         items: premium.length > 0 ? premium : latestListings,
         badge: 'Premium',
-        intro: 'Les annonces boostees et les produits qui remontent en tete.',
+        intro: 'Les annonces boostées et les produits qui remontent en tête.',
+        tone: 'lagon',
       },
       {
         key: 'promos',
         label: 'Promotions',
-        href: '/bons-plans',
+        href: '/bons-plans#promos',
         items: promoItems,
         badge: 'Bons plans',
         intro: 'Promos, ventes flash et coupons locaux.',
+        tone: 'emeraude',
       },
       {
         key: 'events',
-        label: 'Evenements',
-        href: '/evenements',
+        label: 'Événements',
+        href: '/bons-plans#evenements',
         items: eventItems,
         badge: 'Culture',
-        intro: 'Concerts, marches, animations et rendez-vous locaux.',
+        intro: 'Concerts, marchés, animations et rendez-vous locaux.',
+        tone: 'sable',
       },
       {
         key: 'rides',
         label: 'Covoiturage',
         href: '/covoiturage',
         items: rideItems,
-        badge: 'Mobilite',
-        intro: 'Les trajets recents et les places encore ouvertes.',
+        badge: 'Mobilité',
+        intro: 'Les trajets récents et les places encore ouvertes.',
+        tone: 'corail',
       },
     ] as const
   }, [eventItems, latestListings, premiumListings, promoItems, rideItems])
@@ -188,13 +239,14 @@ export function HomeSpotlightSection({
   const isListingTab = active.key === 'latest' || active.key === 'premium'
   const primaryListing = primary as ListingItem | undefined
   const primaryService = primary as ServiceItem | undefined
+  const activeTone = getToneClasses((active as { tone?: SpotlightTone }).tone || 'lagon')
 
   return (
     <section className="mx-auto max-w-7xl px-4 pb-10">
-      <div className="overflow-hidden rounded-[2rem] border border-night/8 bg-white shadow-[0_24px_80px_rgba(8,32,50,0.08)]">
+    <div className="overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_24px_80px_rgba(8,32,50,0.08)] dark:bg-[var(--color-surface)]">
         <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.12))] px-6 py-7 text-white md:px-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-lagoon">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-lagon">
               <Sparkles className="h-3.5 w-3.5" />
               Rappels interactifs
             </div>
@@ -202,12 +254,13 @@ export function HomeSpotlightSection({
               Le meilleur de Troca, en direct, sans rien manquer.
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
-              Suivez les dernires annonces, les contenus premium, les promotions, les evenements et le covoiturage depuis un seul espace rapide et cliquable.
+              Suivez les dernières annonces, les contenus premium, les promotions, les événements et le covoiturage depuis un seul espace rapide et cliquable.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
               {tabs.map((tab) => {
                 const isActive = tab.key === activeTab
+                const tabTone = getToneClasses((tab as { tone?: SpotlightTone }).tone || 'lagon')
                 return (
                   <button
                     key={tab.key}
@@ -218,7 +271,7 @@ export function HomeSpotlightSection({
                     }}
                     className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${
                       isActive
-                        ? 'border-lagoon bg-lagoon text-night'
+                        ? tabTone.tabActive
                         : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
                     }`}
                   >
@@ -232,7 +285,7 @@ export function HomeSpotlightSection({
             </div>
 
             <div className="mt-6 rounded-[1.5rem] border border-white/10 bg-white/8 p-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-lagoon/90">{active.badge}</p>
+              <p className={`text-[11px] font-semibold uppercase tracking-[0.2em] ${activeTone.subtle}`}>{active.badge}</p>
               <h3 className="mt-2 text-2xl font-bold text-white">{active.label}</h3>
               <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/70">{active.intro}</p>
               <div className="mt-4 flex flex-wrap gap-3">
@@ -246,15 +299,15 @@ export function HomeSpotlightSection({
                 <a
                   href="#featured-listings"
                   onClick={() => void trackEvent('home_spotlight_cta_click', { cta: 'featured_jump', tab: active.key })}
-                  className="btn-secondary rounded-2xl px-4 py-2.5"
+                  className={`btn-secondary rounded-2xl px-4 py-2.5 ${activeTone.cta}`}
                 >
-                  Voir les annonces a la une
+                  Voir les annonces à la une
                 </a>
               </div>
             </div>
           </div>
 
-          <div className="bg-sand-light px-5 py-6 md:px-6">
+        <div className="bg-[var(--color-background-secondary)] px-5 py-6 md:px-6">
             {primary ? (
               <SpotlightCard
                 href={
@@ -263,28 +316,30 @@ export function HomeSpotlightSection({
                     : active.href
                 }
                 badge={active.badge}
+                badgeClassName={activeTone.pill}
+                accentClassName={activeTone.accentText}
                 title={
                   primary?.title || 'Contenu'
                 }
                 subtitle={
                   isListingTab
-                    ? `${primaryListing?.category_name || 'Annonce locale'} · ${primaryListing?.commune_name || 'Nouvelle-Caledonie'}`
+                    ? `${primaryListing?.category_name || 'Annonce locale'} · ${primaryListing?.commune_name || 'Nouvelle-Calédonie'}`
                     : `${(primaryService?.description || '').slice(0, 120)}${(primaryService?.description?.length || 0) > 120 ? '...' : ''}`
                 }
                 meta={
                   isListingTab
                     ? `${getListingLabel(primaryListing || { id: 0, title: '', price: null })} · ${formatRelative(primaryListing?.published_at || primaryListing?.created_at)}`
-                    : `${formatDateLabel(primaryService?.event_date)} · ${primaryService?.commune_name || primaryService?.location_name || 'Nouvelle-Caledonie'}`
+                    : `${formatDateLabel(primaryService?.event_date)} · ${primaryService?.commune_name || primaryService?.location_name || 'Nouvelle-Calédonie'}`
                 }
                 primaryLabel={isListingTab ? 'Ouvrir' : 'Decouvrir'}
                 accent={active.key === 'premium' || active.key === 'promos' || active.key === 'events'}
-                tone={active.key === 'premium' ? 'border-coral/20 bg-white text-night' : 'border-night/10 bg-white text-night'}
+                tone={activeTone.card}
               />
             ) : (
-              <div className="rounded-[1.5rem] border border-night/10 bg-white p-5 text-night/60">
-                <p className="text-sm font-semibold text-night">Aucun rappel pour le moment</p>
-                <p className="mt-1 text-sm">Les contenus recents apparaitront ici des qu&apos;ils seront publies.</p>
-              </div>
+            <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-[var(--color-text-secondary)]">
+              <p className="text-sm font-semibold text-[var(--color-text-primary)]">Aucun rappel pour le moment</p>
+              <p className="mt-1 text-sm">Les contenus recents apparaitront ici des qu&apos;ils seront publies.</p>
+            </div>
             )}
 
             <div className="mt-4 grid gap-3">
@@ -295,20 +350,20 @@ export function HomeSpotlightSection({
                     key={item.id}
                     href={isListing ? `/annonces/${item.id}` : active.href}
                     onClick={() => void trackEvent('home_spotlight_item_open', { tab: active.key, item_id: item.id, kind: isListing ? 'listing' : 'service' })}
-                    className="rounded-[1.25rem] border border-night/8 bg-white px-4 py-3 transition hover:-translate-y-0.5 hover:shadow-md"
-                  >
+                  className="rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 transition hover:-translate-y-0.5 hover:shadow-md"
+                >
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-night">
+                      <p className="truncate text-sm font-semibold text-[var(--color-text-primary)]">
                           {isListing ? item.title : item.title}
                         </p>
-                        <p className="mt-1 text-xs text-night/55">
+                      <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
                           {isListing
-                            ? `${item.category_name || 'Annonce'} · ${item.commune_name || 'Nouvelle-Caledonie'}`
+                    ? `${item.category_name || 'Annonce'} · ${item.commune_name || 'Nouvelle-Calédonie'}`
                             : `${formatDateLabel(item.event_date)} · ${item.commune_name || item.location_name || 'Local'}`}
                         </p>
                       </div>
-                      <ChevronRight className="h-4 w-4 shrink-0 text-coral" />
+                      <ChevronRight className={`h-4 w-4 shrink-0 ${activeTone.accentText}`} />
                     </div>
                   </Link>
                 )
@@ -316,13 +371,13 @@ export function HomeSpotlightSection({
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              <Link href="/bons-plans" className="rounded-full border border-coral/15 bg-coral/5 px-3 py-1.5 text-xs font-semibold text-coral">
+              <Link href="/bons-plans" className="badge-emeraude rounded-full px-3 py-1.5 text-xs font-semibold">
                 Bons plans
               </Link>
-              <Link href="/evenements" className="rounded-full border border-coral/15 bg-coral/5 px-3 py-1.5 text-xs font-semibold text-coral">
-                Evenements
+              <Link href="/evenements" className="badge-sable rounded-full px-3 py-1.5 text-xs font-semibold">
+                Événements
               </Link>
-              <Link href="/covoiturage" className="rounded-full border border-coral/15 bg-coral/5 px-3 py-1.5 text-xs font-semibold text-coral">
+              <Link href="/covoiturage" className="badge-corail rounded-full px-3 py-1.5 text-xs font-semibold">
                 Covoiturage
               </Link>
             </div>

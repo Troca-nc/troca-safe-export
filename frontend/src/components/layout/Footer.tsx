@@ -20,12 +20,12 @@ export default function Footer() {
   }, [])
 
   return (
-    <footer className="border-t border-night/10 bg-white/80 backdrop-blur-sm">
+    <footer className="border-t border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-sm">
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="grid gap-8 md:grid-cols-[1.6fr_1fr]">
           <div>
             <div className="mb-3 flex items-center gap-3">
-              <span className="relative h-12 w-12 overflow-hidden rounded-full border border-night/10 bg-white shadow-[0_8px_24px_rgba(8,32,50,0.12)]">
+              <span className="relative h-12 w-12 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_8px_24px_rgba(8,32,50,0.12)]">
                 <Image
                   src="/brand/troca-logo.png"
                   alt="Troca"
@@ -78,7 +78,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col gap-2 border-t border-night/10 pt-4 text-xs text-night/40 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-8 flex flex-col gap-2 border-t border-[var(--color-border)] pt-4 text-xs text-night/40 sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 Troca. Tous droits réservés.</p>
           <p>Nouvelle-Calédonie.</p>
         </div>

@@ -16,8 +16,9 @@ const rows = [
   ['Messages', 'Messagerie et support', 'Contrat', '2 ans après le dernier échange'],
   ['Paiements', 'Abonnements Pro, boosts, bons plans, badge conducteur', 'Contrat / obligation légale', 'Selon les obligations comptables'],
   ['IP et logs techniques', 'Sécurité et prévention des abus', 'Intérêt légitime', '30 jours à 7 jours selon le log'],
-  ['Tokens push', 'Notifications mobiles', 'Contrat / consentement', 'Jusqu’à retrait ou suppression du compte'],
+  ['Tokens push', 'Notifications mobiles', 'Contrat / consentement', 'Jusqu’au retrait ou suppression du compte'],
   ['Avis et alertes', 'Favoris, avis, alertes de recherche et alertes trajet', 'Contrat / consentement', 'Durée du compte'],
+  ['Préférences de notification', 'Emails, notifications push et rapports de performance', 'Contrat / consentement', 'Durée du compte'],
 ]
 
 function DataRow({ label, purpose, basis, retention }: { label: string; purpose: string; basis: string; retention: string }) {
@@ -42,7 +43,7 @@ export default function PolitiqueConfidentialitePage() {
 
         <h2>1. Responsable de traitement</h2>
         <p>
-          Troca ([À COMPLÉTER — forme juridique], RIDET [À COMPLÉTER]) est responsable du traitement de vos données personnelles.
+          Troca (forme juridique et RIDET à renseigner avant publication) est responsable du traitement de vos données personnelles.
         </p>
         <p>
           Contact vie privée : <a href="mailto:privacy@troca.nc">privacy@troca.nc</a>
@@ -97,6 +98,23 @@ export default function PolitiqueConfidentialitePage() {
         <h2>7. Cookies</h2>
         <p>
           Voir la <a href="/politique-cookies">politique cookies</a> et les préférences enregistrables à tout moment.
+        </p>
+
+        <h2>8. Notifications, emails et push</h2>
+        <p>
+          Troca envoie des notifications transactionnelles lorsque cela est nécessaire au fonctionnement du service
+          (nouveau message, réponse à une annonce, sécurité du compte). Ces messages relèvent de l’exécution du contrat.
+        </p>
+        <p>
+          Les alertes de recherche, les rapports de performance et certains messages promotionnels sont gérés via vos préférences.
+          Vous pouvez les activer ou les retirer à tout moment depuis la page
+          <a href="/parametres/notifications"> Paramètres de notification</a>.
+        </p>
+
+        <h2>9. Désabonnement</h2>
+        <p>
+          Chaque email contient un lien de désabonnement unique qui désactive uniquement la catégorie concernée, sans exiger de connexion.
+          Les notifications push peuvent également être désactivées depuis les paramètres du compte ou les réglages du terminal mobile.
         </p>
       </LegalLayout>
     </>

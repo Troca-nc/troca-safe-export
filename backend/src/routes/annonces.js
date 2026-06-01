@@ -25,6 +25,8 @@ const {
   mapListingDetailResponse,
   mapUserListingRow,
 } = require('../services/listingsPresentation');
+const { getUserPresence, getPresenceLabel } = require('../services/presenceService');
+const { getSellerResponseTime } = require('../services/sellerInsightsService');
 const {
   isDonCategory,
   validateListingMetadata,
@@ -106,6 +108,8 @@ async function executeListingSearch(req, res, next, extraQuery = {}) {
           u.phone_verified AS seller_phone_verified,
           u.trust_score AS seller_trust_score,
           u.trust_level AS seller_trust_level,
+          u.note_moyenne AS seller_note_moyenne,
+          u.nb_avis AS seller_nb_avis,
           u.note_moyenne AS user_rating,
           (SELECT thumbnail_url FROM annonce_images
            WHERE annonce_id = a.id AND is_cover = TRUE
@@ -127,6 +131,28 @@ async function executeListingSearch(req, res, next, extraQuery = {}) {
 
     const total = parseInt(countRes.rows[0].total);
     const lastRow = listRes.rows[listRes.rows.length - 1] || null;
+    const sellerIds = [...new Set(
+      listRes.rows
+        .map((row) => Number(row.seller_id))
+        .filter((value) => Number.isFinite(value) && value > 0)
+    )];
+    const sellerInsights = new Map();
+    await Promise.all(sellerIds.map(async (sellerId) => {
+      const [presence, response] = await Promise.all([
+        Promise.resolve(getUserPresence(sellerId)),
+        getSellerResponseTime(query, sellerId).catch(() => ({
+          avg_response_time_minutes: null,
+          avg_response_time_label: null,
+        })),
+      ]);
+      sellerInsights.set(sellerId, {
+        seller_is_online: presence.is_online,
+        seller_last_seen_at: presence.last_seen_at,
+        seller_last_seen_label: getPresenceLabel(presence),
+        seller_avg_response_time_minutes: response.avg_response_time_minutes,
+        seller_avg_response_time_label: response.avg_response_time_label,
+      });
+    }));
     const nextCursor = lastRow && listRes.rows.length === pageSize
       ? encodeListingCursor({
           v: 1,
@@ -136,7 +162,10 @@ async function executeListingSearch(req, res, next, extraQuery = {}) {
       : null;
 
     const payload = {
-      data: listRes.rows.map(mapListingSearchRow),
+      data: listRes.rows.map((row) => ({
+        ...mapListingSearchRow(row),
+        ...(sellerInsights.get(Number(row.seller_id)) || {}),
+      })),
       nextCursor,
       pagination: {
         total,
@@ -326,6 +355,16 @@ router.get('/:id', optionalAuth, async (req, res, next) => {
     }
 
     const listing = result.rows[0];
+    const sellerPresence = getUserPresence(listing.seller_id);
+    const sellerResponse = await getSellerResponseTime(query, listing.seller_id).catch(() => ({
+      avg_response_time_minutes: null,
+      avg_response_time_label: null,
+    }));
+    listing.seller_is_online = sellerPresence.is_online;
+    listing.seller_last_seen_at = sellerPresence.last_seen_at;
+    listing.seller_last_seen_label = getPresenceLabel(sellerPresence);
+    listing.seller_avg_response_time_minutes = sellerResponse.avg_response_time_minutes;
+    listing.seller_avg_response_time_label = sellerResponse.avg_response_time_label;
 
     // Incrémenter les vues (async, non bloquant)
     query(
@@ -757,9 +796,9 @@ router.post('/:id/signaler', authenticate, async (req, res, next) => {
   }
 });
 
-// ── GET /api/users/:userId/listings — Annonces d'un utilisateur
+// ?? GET /api/users/:userId/listings ? Annonces d'un utilisateur
 
-// â”€â”€ PATCH /api/listings/:id/mark-given â€” Marquer un don comme complÃ©tÃ©
+// ?? PATCH /api/listings/:id/mark-given ? Marquer un don comme compl?t?
 
 router.patch('/:id/mark-given', authenticate, async (req, res, next) => {
   try {
@@ -776,7 +815,7 @@ router.patch('/:id/mark-given', authenticate, async (req, res, next) => {
       return res.status(403).json({ error: 'Vous ne pouvez modifier que vos propres annonces.' });
     }
     if (!isDonCategory(listing.rows[0].category_slug)) {
-      return res.status(400).json({ error: 'Cette action est réservée aux annonces de don.' });
+      return res.status(400).json({ error: 'Cette action est r?serv?e aux annonces de don.' });
     }
 
     const result = await query(

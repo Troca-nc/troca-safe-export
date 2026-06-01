@@ -41,7 +41,7 @@ function AlertCard({
     setToggling(false)
   }
 
-  const freqLabel = FREQUENCY_OPTIONS.find(f => f.value === alert.frequency)?.label ?? alert.frequency
+  const freqLabel = FREQUENCY_OPTIONS.find((f) => f.value === alert.frequency)?.label ?? alert.frequency
 
   // Reconstruit les filtres en URL params pour le lien "Voir les annonces"
   const searchParams = new URLSearchParams(

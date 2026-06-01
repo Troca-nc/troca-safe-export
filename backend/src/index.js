@@ -6,6 +6,7 @@
 
 const express     = require('express');
 const http        = require('http');
+const path        = require('path');
 const cors        = require('cors');
 const { checkConnection }   = require('./config/database');
 const errorHandler          = require('./middleware/errorHandler');
@@ -164,6 +165,7 @@ app.use('/api/messages',   messagesRouter);
 app.use('/api/categories', categoriesRouter);
 app.use('/api/communes',   communesRouter);
 app.use('/api/upload',     uploadRouter);
+app.use('/uploads',        express.static(path.resolve(process.env.STORAGE_LOCAL_PATH || './uploads')));
 app.use('/uploads',        uploadsRouter);
 app.use('/api/admin',      adminRouter);
 app.use('/api/rgpd',       rgpdRouter);

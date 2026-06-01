@@ -1,55 +1,79 @@
 'use client'
 // ============================================================
-//  Troca — Gestion du thème (clair / sombre / système)
+//  Troca — Gestion du thème (clair / sombre)
 // ============================================================
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 
-type Theme = 'light' | 'dark' | 'system'
+type Theme = 'light' | 'dark'
 
 interface ThemeCtx {
-  theme:     Theme
-  resolved:  'light' | 'dark'
-  setTheme:  (t: Theme) => void
+  theme: Theme
+  resolved: 'light' | 'dark'
+  setTheme: (t: Theme) => void
 }
 
+const THEME_KEY = 'theme'
+const LEGACY_THEME_KEY = 'troca-theme'
+
 const ThemeContext = createContext<ThemeCtx>({
-  theme:    'system',
+  theme: 'light',
   resolved: 'light',
   setTheme: () => {},
 })
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme,    setThemeState] = useState<Theme>('system')
-  const [resolved, setResolved]   = useState<'light' | 'dark'>('light')
+function applyThemeToDocument(nextTheme: Theme) {
+  if (typeof document === 'undefined') return
 
-  // Lire le thème sauvegardé
+  const root = document.documentElement
+  root.classList.toggle('dark', nextTheme === 'dark')
+  root.dataset.theme = nextTheme
+  root.style.colorScheme = nextTheme
+}
+
+function getPreferredTheme(): Theme {
+  if (typeof window === 'undefined') return 'light'
+
+  const saved = localStorage.getItem(THEME_KEY) || localStorage.getItem(LEGACY_THEME_KEY)
+  if (saved === 'dark' || saved === 'light') {
+    return saved
+  }
+
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setThemeState] = useState<Theme>('light')
+  const [resolved, setResolved] = useState<'light' | 'dark'>('light')
+
   useEffect(() => {
-    const saved = localStorage.getItem('troca-theme') as Theme | null
-    if (saved && ['light', 'dark', 'system'].includes(saved)) {
-      setThemeState(saved)
+    const initialTheme = getPreferredTheme()
+    setThemeState(initialTheme)
+    setResolved(initialTheme)
+    applyThemeToDocument(initialTheme)
+
+    const media = window.matchMedia('(prefers-color-scheme: dark)')
+    const handleSystemTheme = () => {
+      const saved = localStorage.getItem(THEME_KEY) || localStorage.getItem(LEGACY_THEME_KEY)
+      if (saved === 'dark' || saved === 'light') return
+
+      const systemTheme: Theme = media.matches ? 'dark' : 'light'
+      setThemeState(systemTheme)
+      setResolved(systemTheme)
+      applyThemeToDocument(systemTheme)
     }
+
+    media.addEventListener('change', handleSystemTheme)
+
+    return () => media.removeEventListener('change', handleSystemTheme)
   }, [])
 
-  // Appliquer la classe sur <html>
-  useEffect(() => {
-    const root = document.documentElement
-    const mq   = window.matchMedia('(prefers-color-scheme: dark)')
-
-    const apply = () => {
-      const isDark = theme === 'dark' || (theme === 'system' && mq.matches)
-      root.classList.toggle('dark', isDark)
-      setResolved(isDark ? 'dark' : 'light')
-    }
-
-    apply()
-    mq.addEventListener('change', apply)
-    return () => mq.removeEventListener('change', apply)
-  }, [theme])
-
-  const setTheme = (t: Theme) => {
-    setThemeState(t)
-    localStorage.setItem('troca-theme', t)
+  const setTheme = (nextTheme: Theme) => {
+    setThemeState(nextTheme)
+    setResolved(nextTheme)
+    applyThemeToDocument(nextTheme)
+    localStorage.setItem(THEME_KEY, nextTheme)
+    localStorage.setItem(LEGACY_THEME_KEY, nextTheme)
   }
 
   return (
@@ -61,31 +85,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
 export function useTheme() {
   return useContext(ThemeContext)
-}
-
-// ── Bouton toggle compact ─────────────────────────────────────
-
-export function ThemeToggle({ className = '' }: { className?: string }) {
-  const { theme, setTheme, resolved } = useTheme()
-
-  const cycles: Theme[] = ['light', 'dark', 'system']
-  const next = () => {
-    const idx = cycles.indexOf(theme)
-    setTheme(cycles[(idx + 1) % cycles.length])
-  }
-
-  const icons: Record<Theme, string> = { light: '☀️', dark: '🌙', system: '💻' }
-  const labels: Record<Theme, string> = { light: 'Clair', dark: 'Sombre', system: 'Système' }
-
-  return (
-    <button
-      onClick={next}
-      className={`flex items-center gap-1.5 text-sm text-night/60 hover:text-night dark:text-white/60 dark:hover:text-white transition-colors ${className}`}
-      title={`Thème : ${labels[theme]} — Cliquer pour changer`}
-      aria-label={`Thème actuel : ${labels[theme]}`}
-    >
-      <span className="text-base">{icons[theme]}</span>
-      <span className="text-xs hidden sm:inline">{labels[theme]}</span>
-    </button>
-  )
 }

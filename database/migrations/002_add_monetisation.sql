@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS annonce_boosts (
 CREATE INDEX IF NOT EXISTS idx_boosts_annonce_id ON annonce_boosts (annonce_id);
 CREATE INDEX IF NOT EXISTS idx_boosts_active
   ON annonce_boosts (type, expires_at)
-  WHERE expires_at > NOW();
+  ;
 
 -- ── Colonnes sur la table users ───────────────────────────────────────────────
 ALTER TABLE users
@@ -82,7 +82,7 @@ ALTER TABLE annonces
 -- Index pour le tri des annonces (boostées en premier)
 CREATE INDEX IF NOT EXISTS idx_annonces_boost_sort
   ON annonces (is_boosted DESC, boost_expires_at DESC NULLS LAST, created_at DESC)
-  WHERE statut = 'active';
+  WHERE status = 'active';
 
 -- ── Triggers updated_at ───────────────────────────────────────────────────────
 CREATE OR REPLACE FUNCTION update_updated_at()

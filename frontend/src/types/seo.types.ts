@@ -34,6 +34,7 @@ export interface SitemapEntry {
 export const CATEGORIES_SEO: Record<string, { label: string; description: string; emoji: string }> = {
   'vehicules':      { label: 'Véhicules',       description: 'Voitures, motos, bateaux et engins en Nouvelle-Calédonie', emoji: '🚗' },
   'immobilier':     { label: 'Immobilier',       description: 'Vente et location de biens immobiliers en NC',            emoji: '🏠' },
+  'location_courte_duree': { label: 'Locations courte durée', description: 'Locations saisonnières, bungalows et séjours courts en NC', emoji: '🏡' },
   'electronique':   { label: 'Électronique',     description: 'Téléphones, ordinateurs, TV et appareils électroniques',  emoji: '📱' },
   'emploi':         { label: 'Emploi',            description: 'Offres et demandes d\'emploi en Nouvelle-Calédonie',     emoji: '💼' },
   'mobilier':       { label: 'Mobilier & Déco',  description: 'Meubles, décoration et objets de maison',                emoji: '🛋️' },
@@ -41,6 +42,7 @@ export const CATEGORIES_SEO: Record<string, { label: string; description: string
   'animaux':        { label: 'Animaux',           description: 'Animaux de compagnie et accessoires',                   emoji: '🐾' },
   'vetements':      { label: 'Vêtements & Mode', description: 'Habits, chaussures et accessoires de mode',              emoji: '👗' },
   'services':       { label: 'Services',          description: 'Prestations de services en Nouvelle-Calédonie',         emoji: '🔧' },
+  'don':            { label: 'Dons',              description: 'Objets gratuits donnés par des particuliers en NC',      emoji: '🎁' },
   'autres':         { label: 'Autres',            description: 'Toutes les autres annonces en NC',                      emoji: '📦' },
 }
 

@@ -25,6 +25,7 @@ const CATEGORIES = [
 
 export default function PublishBonPlanPage() {
   const { isAuthenticated } = useAuthStore()
+  const hasHydrated = useAuthStore((state) => state.hasHydrated)
   const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
   const [paymentProvider, setPaymentProvider] = useState<'stripe' | 'payplug'>('stripe')
   const [durationDays, setDurationDays] = useState<7 | 30>(7)
@@ -49,18 +50,48 @@ export default function PublishBonPlanPage() {
   const baseAmount = durationDays === 7 ? 2900 : 7900
   const proAmount = durationDays === 7 ? 2320 : 6320
   const discountText = durationDays === 7 ? '2 320 XPF si vous êtes Pro' : '6 320 XPF si vous êtes Pro'
+  const snapTo10 = (value: string) => {
+    if (!value.trim()) return ''
+    const parsed = Number(value)
+    if (!Number.isFinite(parsed)) return value
+    return String(Math.max(0, Math.round(parsed / 10) * 10))
+  }
+
   const preview = useMemo(() => ({
     title: form.title || 'Titre de la promo',
     description: form.description || 'La description de votre bon plan apparaîtra ici.',
     business_name: form.business_name || 'Votre enseigne',
     image_url: form.image_url || null,
     promo_label: form.promo_label || null,
-    original_price_xpf: form.original_price_xpf ? Number(form.original_price_xpf) : null,
-    promo_price_xpf: form.promo_price_xpf ? Number(form.promo_price_xpf) : null,
+    original_price_xpf: form.original_price_xpf ? Number(snapTo10(form.original_price_xpf)) : null,
+    promo_price_xpf: form.promo_price_xpf ? Number(snapTo10(form.promo_price_xpf)) : null,
     cta_label: form.cta_label || 'En profiter',
     cta_url: form.cta_url || null,
     category: form.category,
   }), [form])
+
+  if (!hasHydrated) {
+    return (
+      <main className="min-h-screen bg-sand-light text-night">
+        <Header />
+        <section className="mx-auto max-w-7xl px-4 py-8">
+          <div className="rounded-[2rem] border border-night/8 bg-white p-6 shadow-sm animate-pulse md:p-8">
+            <div className="skeleton h-8 w-72 rounded-full" />
+            <div className="mt-4 grid gap-6 md:grid-cols-[1.08fr_0.92fr]">
+              <div className="space-y-4">
+                <div className="skeleton h-48 rounded-[1.5rem]" />
+                <div className="skeleton h-64 rounded-[1.5rem]" />
+              </div>
+              <div className="space-y-4">
+                <div className="skeleton h-64 rounded-[1.5rem]" />
+                <div className="skeleton h-40 rounded-[1.5rem]" />
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    )
+  }
 
   const handleChange = (key: string, value: string) => {
     setForm((current) => ({ ...current, [key]: value }))
@@ -178,11 +209,29 @@ export default function PublishBonPlanPage() {
                     </label>
                     <label className="space-y-1">
                       <span className="text-sm font-semibold">Prix barré XPF</span>
-                      <input value={form.original_price_xpf} onChange={(e) => handleChange('original_price_xpf', e.target.value)} inputMode="numeric" className="input w-full" />
+                      <input
+                        value={form.original_price_xpf}
+                        onChange={(e) => handleChange('original_price_xpf', e.target.value)}
+                        onBlur={(e) => handleChange('original_price_xpf', snapTo10(e.target.value))}
+                        inputMode="numeric"
+                        type="number"
+                        min={0}
+                        step={10}
+                        className="input w-full"
+                      />
                     </label>
                     <label className="space-y-1">
                       <span className="text-sm font-semibold">Prix promo XPF</span>
-                      <input value={form.promo_price_xpf} onChange={(e) => handleChange('promo_price_xpf', e.target.value)} inputMode="numeric" className="input w-full" />
+                      <input
+                        value={form.promo_price_xpf}
+                        onChange={(e) => handleChange('promo_price_xpf', e.target.value)}
+                        onBlur={(e) => handleChange('promo_price_xpf', snapTo10(e.target.value))}
+                        inputMode="numeric"
+                        type="number"
+                        min={0}
+                        step={10}
+                        className="input w-full"
+                      />
                     </label>
                     <label className="space-y-1">
                       <span className="text-sm font-semibold">Bouton CTA</span>

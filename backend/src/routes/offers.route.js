@@ -15,6 +15,7 @@ const { query, withTransaction } = require('../config/database');
 const { emitNewMessage }  = require('../services/websocketServer');
 const { sendPushToUser }  = require('../services/pushService');
 const { notifyOfferReceived } = require('../services/notificationService');
+const { sendOfferReceivedEmail } = require('../services/emailService');
 
 const router = Router();
 router.use(authenticate);
@@ -46,9 +47,10 @@ router.post('/', validate(createSchema), async (req, res, next) => {
     const result = await withTransaction(async (client) => {
       // Vérifier que l'utilisateur est bien l'acheteur de la conversation
       const conv = await client.query(
-        `SELECT c.id, c.buyer_id, c.seller_id, a.titre
+        `SELECT c.id, c.buyer_id, c.seller_id, a.titre, u.email AS seller_email, u.prenom AS seller_prenom
          FROM conversations c
          JOIN annonces a ON a.id = c.annonce_id
+         JOIN users u ON u.id = c.seller_id
          WHERE c.id = $1`,
         [conv_id]
       );
@@ -57,7 +59,7 @@ router.post('/', validate(createSchema), async (req, res, next) => {
         throw Object.assign(new Error('Seul l\'acheteur peut faire une offre'), { status: 403 });
       }
 
-      const { seller_id, titre } = conv.rows[0];
+      const { seller_id, titre, seller_email, seller_prenom } = conv.rows[0];
 
       // Créer le message système
       const msg = await client.query(
@@ -86,6 +88,18 @@ router.post('/', validate(createSchema), async (req, res, next) => {
         data:  { type: 'offer_received', convId: conv_id },
       }).catch(() => {});
       notifyOfferReceived(seller_id, buyerName, amount_xpf, conv.rows[0].annonce_id).catch(() => {});
+      sendOfferReceivedEmail(
+        seller_email,
+        seller_prenom || req.user.prenom || 'Bonjour',
+        {
+          buyerName,
+          amountXpf: amount_xpf,
+          annonceTitle: titre,
+          convId: conv_id,
+          annonceId: conv.rows[0].annonce_id,
+        },
+        seller_id
+      ).catch(() => {});
 
       return { message: msg.rows[0], offer: offer.rows[0] };
     });
@@ -108,10 +122,15 @@ router.post('/:id/respond', validate(respondSchema), async (req, res, next) => {
     const result = await withTransaction(async (client) => {
       // Récupérer l'offre + vérifier que c'est bien le vendeur qui répond
       const offerRes = await client.query(
-        `SELECT o.*, c.seller_id, c.buyer_id, a.titre
+        `SELECT o.*, c.seller_id, c.buyer_id, c.annonce_id,
+                a.titre,
+                us.email AS seller_email, us.prenom AS seller_prenom,
+                ub.email AS buyer_email, ub.prenom AS buyer_prenom
          FROM message_offers o
          JOIN conversations c ON c.id = o.conv_id
          JOIN annonces a ON a.id = c.annonce_id
+         JOIN users us ON us.id = c.seller_id
+         JOIN users ub ON ub.id = c.buyer_id
          WHERE o.id = $1`,
         [id]
       );
@@ -177,6 +196,21 @@ router.post('/:id/respond', validate(respondSchema), async (req, res, next) => {
         body:  `Pour l'annonce "${offer.titre}"`,
         data:  { type: `offer_${response}`, convId: offer.conv_id },
       }).catch(() => {});
+
+      if (response === 'countered' && counter_amount) {
+        sendOfferReceivedEmail(
+          offer.buyer_email,
+          offer.buyer_prenom || 'Bonjour',
+          {
+            buyerName: sellerName,
+            amountXpf: counter_amount,
+            annonceTitle: offer.titre,
+            convId: offer.conv_id,
+            annonceId: offer.annonce_id || null,
+          },
+          offer.buyer_id
+        ).catch(() => {});
+      }
 
       return { message: replyMsg.rows[0], offer: { ...offer, status: newStatus }, counterOffer };
     });

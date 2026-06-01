@@ -281,9 +281,13 @@ CREATE TABLE IF NOT EXISTS messages (
   conv_id     INTEGER     NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
   sender_id   INTEGER     NOT NULL REFERENCES users(id)         ON DELETE CASCADE,
   type        VARCHAR(20) NOT NULL DEFAULT 'text'
-                CHECK (type IN ('text','offer','photo','system')),
+                CHECK (type IN ('text','offer','photo','audio','document','system')),
   content     TEXT        DEFAULT NULL,
   photo_url   VARCHAR(500) DEFAULT NULL,
+  attachment_url VARCHAR(500) DEFAULT NULL,
+  attachment_name VARCHAR(255) DEFAULT NULL,
+  attachment_mime_type VARCHAR(120) DEFAULT NULL,
+  attachment_size_bytes INTEGER DEFAULT NULL,
   read_at     TIMESTAMPTZ DEFAULT NULL,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -315,7 +319,58 @@ CREATE INDEX IF NOT EXISTS idx_payments_user   ON payments (user_id);
 CREATE INDEX IF NOT EXISTS idx_payments_status ON payments (status);
 
 -- ── PUSH TOKENS ───────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS notifications (
+  id         SERIAL PRIMARY KEY,
+  user_id    INTEGER      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type       VARCHAR(50)  NOT NULL,
+  title      VARCHAR(200) NOT NULL,
+  body       TEXT         DEFAULT '',
+  href       VARCHAR(500) DEFAULT '/',
+  is_read    BOOLEAN      NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user_created
+  ON notifications (user_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user_unread
+  ON notifications (user_id, is_read)
+  WHERE is_read = FALSE;
+
+CREATE TABLE IF NOT EXISTS notification_preferences (
+  user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  email_new_message BOOLEAN NOT NULL DEFAULT TRUE,
+  push_new_message BOOLEAN NOT NULL DEFAULT TRUE,
+  email_search_alert BOOLEAN NOT NULL DEFAULT TRUE,
+  push_search_alert BOOLEAN NOT NULL DEFAULT FALSE,
+  email_boost_activated BOOLEAN NOT NULL DEFAULT TRUE,
+  email_offer_received BOOLEAN NOT NULL DEFAULT TRUE,
+  email_listing_expiring BOOLEAN NOT NULL DEFAULT TRUE,
+  email_listing_expired BOOLEAN NOT NULL DEFAULT TRUE,
+  email_performance_report BOOLEAN NOT NULL DEFAULT TRUE,
+  push_performance_report BOOLEAN NOT NULL DEFAULT FALSE,
+  performance_report_frequency VARCHAR(20) NOT NULL DEFAULT 'weekly'
+    CHECK (performance_report_frequency IN ('daily', 'weekly', 'monthly', 'never')),
+  new_message_unsubscribe_token VARCHAR(64) NOT NULL UNIQUE,
+  boost_activated_unsubscribe_token VARCHAR(64) NOT NULL UNIQUE,
+  offer_received_unsubscribe_token VARCHAR(64) NOT NULL UNIQUE,
+  listing_expiring_unsubscribe_token VARCHAR(64) NOT NULL UNIQUE,
+  listing_expired_unsubscribe_token VARCHAR(64) NOT NULL UNIQUE,
+  performance_report_unsubscribe_token VARCHAR(64) NOT NULL UNIQUE,
+  last_performance_report_at TIMESTAMPTZ DEFAULT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_notification_preferences_user
+  ON notification_preferences (user_id);
+
 -- ── DOCUMENTS DE FACTURATION ────────────────────────────────────────────────
+DROP TRIGGER IF EXISTS trg_notification_preferences_updated_at ON notification_preferences;
+CREATE TRIGGER trg_notification_preferences_updated_at
+  BEFORE UPDATE ON notification_preferences
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
 CREATE TABLE IF NOT EXISTS billing_documents (
   id               SERIAL PRIMARY KEY,
   user_id          INTEGER      NOT NULL REFERENCES users(id) ON DELETE CASCADE,

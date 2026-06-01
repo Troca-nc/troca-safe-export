@@ -8,6 +8,7 @@ export type PublishListingInput = {
   commune_id: number
   condition: 'new' | 'like_new' | 'good' | 'fair' | 'for_parts'
   contre_quoi?: string
+  metadata?: Record<string, unknown>
 }
 
 export type UploadedListingImage = {
@@ -53,6 +54,7 @@ export async function createListing(data: PublishListingInput): Promise<CreatedL
     commune_id: data.commune_id,
     condition: data.condition,
     contre_quoi: data.contre_quoi || null,
+    metadata: data.metadata ?? {},
   }
 
   const { data: response } = await api.post('/listings', payload)

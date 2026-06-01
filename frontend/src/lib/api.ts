@@ -251,9 +251,9 @@ export const authApi = {
   logout: () => api.post('/auth/logout'),
   me: () => api.get('/auth/me'),
   verifyEmail: (token: string) => api.post('/auth/verify-email', { token }),
-  forgotPassword: (email: string, turnstileToken?: string) =>
+  forgotPassword: (identifier: string, turnstileToken?: string) =>
     api.post('/auth/forgot-password', {
-      email,
+      identifier,
       ...(turnstileToken ? { turnstile_token: turnstileToken } : {}),
     }),
   resendVerification: (email: string, turnstileToken?: string) => api.post('/auth/resend-verification', { email, turnstile_token: turnstileToken }),
@@ -348,6 +348,18 @@ export const uploadApi = {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
+  uploadChatDocument: (file: File) => {
+    const form = new FormData()
+    form.append('file', file)
+    return api.post('/upload/chat/document', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+  uploadChatAudio: (audioBase64: string, mimeType: string) =>
+    api.post('/upload/chat/audio', {
+      audio_base64: audioBase64,
+      mime_type: mimeType,
+    }),
   deleteImage: (imageId: string) => api.delete(`/upload/image/${imageId}`),
   setCover: (imageId: string) => api.put(`/upload/image/${imageId}/cover`),
 }
@@ -402,6 +414,47 @@ export const messagesApi = {
     }
     return api.post(`/messages/conversations/${convId}`, { type: 'photo', photo_url })
   },
+  sendDocument: (convId: string, attachment_url: string, attachment_name: string, attachment_mime_type: string, attachment_size_bytes?: number | null) => {
+    if (isDemoMode()) {
+      showDemoToast('DÃ©sactivÃ© en mode dÃ©mo')
+      return Promise.resolve(createDemoResponse({
+        data: {
+          id: `demo-doc-${Date.now()}`,
+          conv_id: convId,
+          type: 'document',
+          attachment_url,
+          attachment_name,
+          attachment_mime_type,
+          attachment_size_bytes: attachment_size_bytes ?? null,
+          created_at: new Date().toISOString(),
+          sender_id: 0,
+        },
+      }))
+    }
+    return api.post(`/messages/conversations/${convId}`, {
+      type: 'document',
+      attachment_url,
+      attachment_name,
+      attachment_mime_type,
+      attachment_size_bytes,
+    })
+  },
+  sendAudio: (convId: string, audio_url: string) => {
+    if (isDemoMode()) {
+      showDemoToast('DÃ©sactivÃ© en mode dÃ©mo')
+      return Promise.resolve(createDemoResponse({
+        data: {
+          id: `demo-audio-${Date.now()}`,
+          conv_id: convId,
+          type: 'audio',
+          photo_url: audio_url,
+          created_at: new Date().toISOString(),
+          sender_id: 0,
+        },
+      }))
+    }
+    return api.post(`/messages/conversations/${convId}`, { type: 'audio', audio_url })
+  },
   markConversationRead: (convId: string | number) =>
     api.patch(`/messages/conversations/${convId}/read`),
 }
@@ -424,6 +477,11 @@ export const statsApi = {
   getHome: () => cachedGet(
     buildCacheKey('stats.getHome', '/stats/home'),
     () => api.get('/stats/home'),
+    CACHE_TTL.long,
+  ),
+  getPlatform: () => cachedGet(
+    buildCacheKey('stats.getPlatform', '/stats/platform'),
+    () => api.get('/stats/platform'),
     CACHE_TTL.long,
   ),
   getSeller: () => cachedGet(
@@ -541,6 +599,12 @@ export const notificationsApi = {
     () => api.get('/users/notifications', { params: { limit } }),
     CACHE_TTL.short,
   ),
+  getPreferences: () => cachedGet(
+    buildCacheKey('notifications.preferences.get', '/users/notifications/preferences'),
+    () => api.get('/users/notifications/preferences'),
+    CACHE_TTL.short,
+  ),
+  savePreferences: (data: object) => api.put('/users/notifications/preferences', data).finally(() => invalidateApiCache('notifications.preferences.')),
   markAllRead: () => api.post('/users/notifications/read-all').finally(() => invalidateApiCache('notifications.')),
   markRead: (id: number) => api.post(`/users/notifications/${id}/read`).finally(() => invalidateApiCache('notifications.')),
 }

@@ -81,7 +81,7 @@ export async function shareViaAppOrFallback(appUrl: string, fallbackUrl: string,
 export async function copyShareLink(content: MobileShareContent) {
   Clipboard.setString(normalizeShareUrl(content.url));
   if (Platform.OS !== 'web') {
-    Alert.alert('Lien copiÃ©', 'Le lien de partage a Ã©tÃ© copiÃ© dans le presse-papiers.');
+    Alert.alert('Lien copié', 'Le lien de partage a été copié dans le presse-papiers.');
   }
 }
 

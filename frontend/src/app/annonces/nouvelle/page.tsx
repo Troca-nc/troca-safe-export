@@ -121,6 +121,13 @@ const INITIAL_FORM: FormState = {
   opening_hours: '',
 }
 
+function snapTo10(value: string) {
+  if (!value.trim()) return ''
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return value
+  return String(Math.max(0, Math.round(parsed / 10) * 10))
+}
+
 function computePrice(targetAudience: FormState['target_audience'], durationDays: FormState['duration_days']) {
   if (targetAudience === 'particulier') {
     return durationDays === 7 ? 590 : 290
@@ -213,8 +220,8 @@ function SimpleBonPlanPage() {
         location_name: form.location_name.trim() || null,
         event_date: form.event_date ? new Date(form.event_date).toISOString() : null,
         link_url: form.link_url.trim() || null,
-        normal_price_xpf: form.normal_price_xpf ? Number(form.normal_price_xpf) : null,
-        promo_price_xpf: form.promo_price_xpf ? Number(form.promo_price_xpf) : null,
+        normal_price_xpf: form.normal_price_xpf ? Number(snapTo10(form.normal_price_xpf)) : null,
+        promo_price_xpf: form.promo_price_xpf ? Number(snapTo10(form.promo_price_xpf)) : null,
         discount_pct: form.discount_pct ? Number(form.discount_pct) : null,
         conditions: form.conditions.trim() || null,
         contact_name: form.contact_name.trim() || null,
@@ -378,8 +385,12 @@ function SimpleBonPlanPage() {
                 <label className="space-y-2">
                   <span className="text-sm font-semibold text-night">Prix normal</span>
                   <input
+                    type="number"
+                    min={0}
+                    step={10}
                     value={form.normal_price_xpf}
                     onChange={(e) => handleChange('normal_price_xpf', e.target.value)}
+                    onBlur={(e) => handleChange('normal_price_xpf', snapTo10(e.target.value))}
                     inputMode="numeric"
                     placeholder="Ex. 5000"
                     className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm outline-none"
@@ -388,8 +399,12 @@ function SimpleBonPlanPage() {
                 <label className="space-y-2">
                   <span className="text-sm font-semibold text-night">Prix promo</span>
                   <input
+                    type="number"
+                    min={0}
+                    step={10}
                     value={form.promo_price_xpf}
                     onChange={(e) => handleChange('promo_price_xpf', e.target.value)}
+                    onBlur={(e) => handleChange('promo_price_xpf', snapTo10(e.target.value))}
                     inputMode="numeric"
                     placeholder="Ex. 3000"
                     className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm outline-none"

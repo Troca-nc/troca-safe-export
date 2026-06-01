@@ -65,6 +65,18 @@ async function notifyListingExpiring(userId, annonceId, annonceTitre, daysLeft) 
 }
 
 /**
+ * Crée une notification "annonce expirée"
+ */
+async function notifyListingExpired(userId, annonceId, annonceTitre) {
+  return createNotification(userId, {
+    type:  'listing_expired',
+    title: '⏰ Votre annonce est expirée',
+    body:  annonceTitre,
+    href:  `/annonces/${annonceId}/edit`,
+  });
+}
+
+/**
  * Crée une notification "offre reçue"
  */
 async function notifyOfferReceived(sellerId, buyerName, amount, annonceId) {
@@ -76,10 +88,24 @@ async function notifyOfferReceived(sellerId, buyerName, amount, annonceId) {
   });
 }
 
+/**
+ * Crée une notification "rapport de performance"
+ */
+async function notifyPerformanceReport(userId, periodLabel, href = '/parametres/notifications') {
+  return createNotification(userId, {
+    type:  'performance_report',
+    title: '📊 Votre rapport de performance est prêt',
+    body:  `Période: ${periodLabel}`,
+    href,
+  });
+}
+
 module.exports = {
   createNotification,
   notifyNewMessage,
   notifySearchAlert,
   notifyListingExpiring,
+  notifyListingExpired,
   notifyOfferReceived,
+  notifyPerformanceReport,
 };

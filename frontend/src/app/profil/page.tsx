@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // src/app/profil/page.tsx  (mon profil)
 // src/app/profil/[id]/page.tsx  (profil public)
 
@@ -14,7 +14,7 @@ import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import Header from '@/components/layout/Header'
 import ListingCard from '@/components/listings/ListingCard'
-import { bonPlansApi, subscriptionsApi, usersApi } from '@/lib/api'
+import { subscriptionsApi, usersApi } from '@/lib/api'
 import { inferDemoAccount } from '@/lib/demoApi'
 import { useAuthStore } from '@/store/authStore'
 import ProfileDemoPreview from '@/components/ui/ProfileDemoPreview'
@@ -52,7 +52,7 @@ function getSubscriptionStatusMeta(status?: SubscriptionStatus | null) {
       tone: 'danger' as const,
       label: 'Abonnement expiré',
       description: 'Votre abonnement a expiré. Réactivez-le pour retrouver vos avantages Pro.',
-      cta: { href: '/profil/abonnement', label: 'Réactiver mon abonnement' },
+      cta: { href: '/abonnement', label: 'Réactiver mon abonnement' },
       icon: AlertTriangle,
     }
   }
@@ -62,14 +62,14 @@ function getSubscriptionStatusMeta(status?: SubscriptionStatus | null) {
       tone: 'warning' as const,
       label: `Expire dans ${status.days_remaining} jour${status.days_remaining > 1 ? 's' : ''}`,
       description: 'Votre abonnement arrive à échéance. Renouvelez pour éviter une interruption.',
-      cta: { href: '/profil/abonnement', label: 'Renouveler maintenant' },
+      cta: { href: '/abonnement', label: 'Renouveler maintenant' },
       icon: Clock3,
     }
   }
 
   return {
     tone: 'success' as const,
-    label: 'Actif',
+    label: 'Abonnement actif',
     description: 'Votre abonnement est actif et vos avantages Pro sont disponibles.',
     cta: null,
     icon: CheckCircle2,
@@ -80,12 +80,19 @@ function ProfilePageContent() {
   const params   = useParams<{ id?: string }>()
   const searchParams = useSearchParams()
   const router   = useRouter()
-  const { user: me, demoProfile } = useAuthStore()
+  const { user: me, demoProfile, hasHydrated } = useAuthStore()
 
-  // Si pas d'id dans l'URL → mon profil
+  // Si pas d'id dans l'URL â†’ mon profil
   const profileId = params?.id || me?.id
   const isOwn     = !params?.id || params.id === me?.id
   const demoActive = Boolean(demoProfile || me?.demo_role || inferDemoAccount(me?.email))
+  const demoKey = (demoProfile || me?.demo_role || inferDemoAccount(me?.email) || 'particulier') as 'particulier' | 'pro' | 'bon_plan'
+  const demoProfileEmail =
+    demoKey === 'particulier'
+      ? 'particulier@demo.troca.nc'
+      : demoKey === 'pro'
+        ? 'pro@demo.troca.nc'
+        : 'bonplan@demo.troca.nc'
   const activeTab = searchParams.get('tab')
 
   const [profile,   setProfile]   = useState<any>(null)
@@ -95,17 +102,6 @@ function ProfilePageContent() {
   const [editing,   setEditing]   = useState(false)
   const [loading,   setLoading]   = useState(true)
   const [saving,    setSaving]    = useState(false)
-  const [bonPlanPrefs, setBonPlanPrefs] = useState({
-    notify_all: false,
-    notify_categories: [] as string[],
-    notify_businesses: [] as string[],
-    via_push: true,
-    via_email: false,
-  })
-  const [bonPlanBusinesses, setBonPlanBusinesses] = useState<Array<{ name: string }>>([])
-  const [bonPlanBusinessInput, setBonPlanBusinessInput] = useState('')
-  const [savingBonPlanPrefs, setSavingBonPlanPrefs] = useState(false)
-
   const { data: subscriptionStatusData } = useQuery({
     queryKey: ['subscriptions', 'status'],
     queryFn: async () => {
@@ -123,44 +119,14 @@ function ProfilePageContent() {
   const { register, handleSubmit, reset } = useForm()
 
   useEffect(() => {
+    if (!hasHydrated) return
     if (!profileId) { router.push('/connexion'); return }
     if (demoActive) {
       setLoading(false)
       return
     }
     loadProfile()
-  }, [profileId, demoActive])
-
-  useEffect(() => {
-    if (activeTab !== 'notifications' || !isOwn || demoActive) return
-
-    let alive = true
-    const loadBonPlanPrefs = async () => {
-      try {
-        const [prefsRes, businessesRes] = await Promise.all([
-          bonPlansApi.getPrefs(),
-          bonPlansApi.businesses(),
-        ])
-        if (!alive) return
-        const prefs = prefsRes.data?.data ?? {}
-        setBonPlanPrefs({
-          notify_all: Boolean(prefs.notify_all),
-          notify_categories: Array.isArray(prefs.notify_categories) ? prefs.notify_categories : [],
-          notify_businesses: Array.isArray(prefs.notify_businesses) ? prefs.notify_businesses : [],
-          via_push: prefs.via_push !== false,
-          via_email: Boolean(prefs.via_email),
-        })
-        setBonPlanBusinesses(Array.isArray(businessesRes.data?.data) ? businessesRes.data.data : [])
-      } catch {
-        if (!alive) return
-      }
-    }
-
-    void loadBonPlanPrefs()
-    return () => {
-      alive = false
-    }
-  }, [activeTab, demoActive, isOwn])
+  }, [hasHydrated, profileId, demoActive, router])
 
   const loadProfile = async () => {
     try {
@@ -201,6 +167,23 @@ function ProfilePageContent() {
       ))}
     </div>
   )
+
+  if (!hasHydrated) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <div className="mx-auto max-w-5xl px-4 py-8 animate-pulse">
+          <div className="card p-6 flex gap-5">
+            <div className="skeleton w-20 h-20 rounded-full" />
+            <div className="space-y-2 flex-1">
+              <div className="skeleton h-6 w-48" />
+              <div className="skeleton h-4 w-32" />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (loading) return (
     <div className="min-h-screen">
@@ -258,7 +241,7 @@ function ProfilePageContent() {
           { value: '24', label: 'favoris' },
         ],
         tabs: ['Annonces', 'Avis reçus', 'Favoris', 'Messages', 'Paramètres'],
-        hint: 'Tu vois l’espace classique d’un utilisateur qui dépose une annonce.',
+        hint: "Tu vois l'espace classique d'un utilisateur qui dépose une annonce.",
       },
       pro: {
         title: 'Espace professionnel',
@@ -319,93 +302,8 @@ function ProfilePageContent() {
             </div>
           </div>
 
-          <ProfileDemoPreview mode="account" />
+          <ProfileDemoPreview mode="account" profile={demoKey} />
 
-          <div className="card p-6">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-              <div className="max-w-2xl">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Aperçu du compte</p>
-                <h1 className="mt-2 font-display text-3xl font-bold text-night">{demoCards.title}</h1>
-                <p className="mt-2 text-night/60">{demoCards.subtitle}</p>
-                <p className="mt-3 text-sm text-night/55">{demoCards.hint}</p>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                {demoCards.stats.map((stat) => (
-                  <div key={stat.label} className="rounded-2xl border border-night/10 bg-sand px-4 py-3 text-center">
-                    <p className="text-lg font-bold text-night">{stat.value}</p>
-                    <p className="text-xs text-night/55">{stat.label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-wrap gap-2">
-              {demoCards.tabs.map((label, index) => (
-                <span
-                  key={label}
-                  className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
-                    index === 0 ? 'bg-coral text-white' : 'bg-night/5 text-night/65'
-                  }`}
-                >
-                  {label}
-                </span>
-              ))}
-            </div>
-
-            <div className="mt-6 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-              <div className="rounded-2xl border border-night/10 bg-white p-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-night">
-                  <Package className="h-4 w-4 text-coral" />
-                  Dernières annonces
-                </div>
-                <div className="mt-4 space-y-3">
-                  {[
-                    'iPhone 15 Pro - Noumea',
-                    'Canapé 3 places - Très bon état',
-                    'Vélo VTT - prêt à partir',
-                  ].map((item, idx) => (
-                    <div key={item} className="flex items-center justify-between rounded-xl border border-night/10 bg-sand px-3 py-2">
-                      <span className="text-sm text-night/80">{item}</span>
-                      <span className="text-xs text-night/45">{idx === 0 ? 'Boosté' : 'Actif'}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-night/10 bg-white p-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-night">
-                  <MessageCircle className="h-4 w-4 text-coral" />
-                  Résumé de l&apos;espace
-                </div>
-                <div className="mt-4 space-y-3">
-                  <div className="rounded-xl bg-coral/5 p-3">
-                    <p className="text-sm font-semibold text-night">Navigation du compte</p>
-                    <p className="text-sm text-night/60">Annonces, avis, messages et paramètres au même endroit.</p>
-                  </div>
-                  <div className="rounded-xl bg-night/5 p-3">
-                    <p className="text-sm font-semibold text-night">Visibilité</p>
-                    <p className="text-sm text-night/60">
-                      {demoKey === 'bon_plan'
-                        ? 'Vos promotions sont identifiées comme sponsorisées.'
-                        : demoKey === 'pro'
-                          ? 'Vos indicateurs sont visibles et les boosts apparaissent ici.'
-                          : 'Vos annonces restent simples et faciles à gérer.'}
-                    </p>
-                  </div>
-                  <div className="rounded-xl bg-lagoon/10 p-3">
-                    <p className="text-sm font-semibold text-night">Action principale</p>
-                    <p className="text-sm text-night/60">
-                      {demoKey === 'bon_plan'
-                        ? 'Créer une nouvelle campagne locale'
-                        : demoKey === 'pro'
-                          ? 'Publier ou booster une annonce'
-                          : 'Déposer une annonce rapidement'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     )
@@ -434,11 +332,11 @@ function ProfilePageContent() {
       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Notifications</p>
       <h2 className="mt-2 text-xl font-bold text-night">Les notifications sont gérées depuis le compte</h2>
       <p className="mt-2 text-sm text-night/60">
-        Les alertes de recherche, les messages et les réponses d’annonces restent visibles dans votre espace. Les réglages détaillés sont accessibles depuis Paramètres.
+        Les alertes de recherche, les messages et les réponses d’annonces restent visibles dans votre espace. Les réglages détaillés sont accessibles depuis Paramètres de notification.
       </p>
       <div className="mt-4 flex flex-wrap gap-3">
-        <Link href="/parametres#cookies" className="btn-primary px-4 py-2 text-sm">
-          Préférences de suivi
+        <Link href="/parametres/notifications" className="btn-primary px-4 py-2 text-sm">
+          Ouvrir les paramètres
         </Link>
         <Link href="/messages" className="btn-ghost px-4 py-2 text-sm">
           Ouvrir mes messages
@@ -450,153 +348,17 @@ function ProfilePageContent() {
 
       {!demoActive && isOwn && (
         <div className="mt-6 rounded-[1.5rem] border border-night/8 bg-white p-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Bons Plans</p>
-              <h3 className="mt-1 text-lg font-bold text-night">Recevoir les promos des enseignes</h3>
+              <h3 className="mt-1 text-lg font-bold text-night">Tout est regroupé dans le centre de préférences</h3>
               <p className="mt-1 text-sm text-night/60">
-                Choisissez vos catégories ou enseignes favorites. Vous pouvez tout recevoir ou filtrer finement selon vos intérêts.
+                Les promos, catégories, enseignes et canaux sont maintenant gérés dans Paramètres de notification pour éviter les doublons.
               </p>
             </div>
-            <Link href="/bons-plans" className="btn-ghost px-4 py-2 text-sm">
-              Voir les bons plans
+            <Link href="/parametres/notifications#bons-plans" className="btn-primary px-4 py-2 text-sm">
+              Ouvrir les préférences
             </Link>
-          </div>
-
-          <div className="mt-4 grid gap-4 lg:grid-cols-2">
-            <label className="flex items-center gap-3 rounded-2xl border border-night/10 bg-sand/30 p-3">
-              <input
-                type="checkbox"
-                checked={bonPlanPrefs.notify_all}
-                onChange={(event) => setBonPlanPrefs((current) => ({ ...current, notify_all: event.target.checked }))}
-                className="h-4 w-4 rounded border-night/20 text-coral focus:ring-coral"
-              />
-              <span>
-                <span className="block text-sm font-semibold text-night">Toutes les nouvelles promos</span>
-                <span className="block text-xs text-night/50">Recevoir chaque bon plan publié sur Troca.</span>
-              </span>
-            </label>
-
-            <div className="rounded-2xl border border-night/10 bg-sand/30 p-3">
-              <span className="block text-sm font-semibold text-night">Canaux</span>
-              <label className="mt-2 flex items-center gap-3 text-sm text-night/70">
-                <input
-                  type="checkbox"
-                  checked={bonPlanPrefs.via_push}
-                  onChange={(event) => setBonPlanPrefs((current) => ({ ...current, via_push: event.target.checked }))}
-                  className="h-4 w-4 rounded border-night/20 text-coral focus:ring-coral"
-                />
-                Notifications push
-              </label>
-              <label className="mt-2 flex items-center gap-3 text-sm text-night/70">
-                <input
-                  type="checkbox"
-                  checked={bonPlanPrefs.via_email}
-                  onChange={(event) => setBonPlanPrefs((current) => ({ ...current, via_email: event.target.checked }))}
-                  className="h-4 w-4 rounded border-night/20 text-coral focus:ring-coral"
-                />
-                Par email
-              </label>
-            </div>
-          </div>
-
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-night">Catégories favorites</label>
-              <div className="flex flex-wrap gap-2">
-                {['alimentation', 'mode', 'beaute', 'high_tech', 'auto_moto', 'maison', 'restauration', 'services', 'sport', 'voyages'].map((category) => {
-                  const active = bonPlanPrefs.notify_categories.includes(category)
-                  return (
-                    <button
-                      key={category}
-                      type="button"
-                      onClick={() => setBonPlanPrefs((current) => ({
-                        ...current,
-                        notify_categories: active
-                          ? current.notify_categories.filter((item) => item !== category)
-                          : [...current.notify_categories, category],
-                      }))}
-                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-                        active
-                          ? 'border-coral bg-coral text-white'
-                          : 'border-night/10 bg-white text-night/65 hover:border-coral/30 hover:text-coral'
-                      }`}
-                    >
-                      {category.replace('_', ' ')}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-night">Enseignes favorites</label>
-              <div className="flex flex-wrap gap-2">
-                {bonPlanPrefs.notify_businesses.map((business) => (
-                  <span key={business} className="inline-flex items-center gap-2 rounded-full border border-night/10 bg-white px-3 py-1.5 text-xs font-medium text-night/70">
-                    {business}
-                    <button
-                      type="button"
-                      onClick={() => setBonPlanPrefs((current) => ({
-                        ...current,
-                        notify_businesses: current.notify_businesses.filter((item) => item !== business),
-                      }))}
-                      className="text-night/30 hover:text-coral"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <div className="mt-3 flex gap-2">
-                <input
-                  list="bon-plans-businesses"
-                  value={bonPlanBusinessInput}
-                  onChange={(event) => setBonPlanBusinessInput(event.target.value)}
-                  placeholder="Ajouter une enseigne"
-                  className="flex-1 rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm outline-none focus:border-coral/35 focus:ring-4 focus:ring-coral/10"
-                />
-                <button
-                  type="button"
-                  className="btn-primary rounded-2xl px-4 py-3 text-sm"
-                  onClick={() => {
-                    const nextName = bonPlanBusinessInput.trim()
-                    if (!nextName) return
-                    setBonPlanPrefs((current) => ({
-                      ...current,
-                      notify_businesses: Array.from(new Set([...current.notify_businesses, nextName])),
-                    }))
-                    setBonPlanBusinessInput('')
-                  }}
-                >
-                  Ajouter
-                </button>
-              </div>
-              <datalist id="bon-plans-businesses">
-                {bonPlanBusinesses.map((business) => (
-                  <option key={business.name} value={business.name} />
-                ))}
-              </datalist>
-            </div>
-          </div>
-
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              className="btn-primary px-4 py-2 text-sm disabled:opacity-60"
-              disabled={savingBonPlanPrefs}
-              onClick={async () => {
-                setSavingBonPlanPrefs(true)
-                try {
-                  await bonPlansApi.savePrefs(bonPlanPrefs)
-                } finally {
-                  setSavingBonPlanPrefs(false)
-                }
-              }}
-            >
-              {savingBonPlanPrefs ? 'Enregistrement…' : 'Enregistrer les préférences Bons Plans'}
-            </button>
-            <p className="text-xs text-night/50">Les notifications Bons Plans sont indépendantes des alertes de recherche.</p>
           </div>
         </div>
       )}
@@ -694,9 +456,9 @@ function ProfilePageContent() {
           </div>
         )}
 
-        <ProfileDemoPreview mode="account" />
+        <ProfileDemoPreview mode="account" profile={demoKey} />
 
-        {/* ── Carte profil ─────────────────────────── */}
+        {/* â”€â”€ Carte profil â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div className="card p-6">
           <div className="flex flex-col sm:flex-row gap-5">
 
@@ -812,7 +574,7 @@ function ProfilePageContent() {
           </div>
         </div>
 
-        {/* ── Onglets ───────────────────────────────── */}
+        {/* â”€â”€ Onglets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div className="flex gap-1 bg-sand rounded-2xl p-1 w-fit">
           {TABS.map((t) => (
             <button
@@ -832,7 +594,7 @@ function ProfilePageContent() {
           )}
         </div>
 
-        {/* ── Contenu onglets ───────────────────────── */}
+        {/* â”€â”€ Contenu onglets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {tab === 'listings' && (
           <div>
             {listings.length === 0 ? (

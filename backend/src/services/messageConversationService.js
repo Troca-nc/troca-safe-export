@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('path');
 const { query, withTransaction } = require('../config/database');
 const {
   filterMessage,
@@ -7,6 +8,7 @@ const {
   mapConversationRow,
   mapMessageRow,
 } = require('./messagePresentation');
+const { getSellerResponseTime } = require('./sellerInsightsService');
 
 function createHttpError(status, message) {
   const err = new Error(message);
@@ -33,10 +35,57 @@ function decodeCursor(cursor) {
   }
 }
 
+function getUploadRoot() {
+  return path.resolve(process.env.STORAGE_LOCAL_PATH || './uploads');
+}
+
+function resolveAttachmentFilePath(attachmentUrl) {
+  const raw = String(attachmentUrl || '').trim();
+  if (!raw) return null;
+
+  try {
+    const base = (process.env.BASE_URL || 'http://localhost:3001').replace(/\/$/, '');
+    const parsed = raw.startsWith('http://') || raw.startsWith('https://')
+      ? new URL(raw)
+      : new URL(raw, base);
+    const marker = '/uploads/';
+    const index = parsed.pathname.indexOf(marker);
+    if (index < 0) return null;
+
+    const relativePath = parsed.pathname.slice(index + marker.length).replace(/^\/+/, '');
+    if (!relativePath) return null;
+
+    const filePath = path.resolve(getUploadRoot(), relativePath);
+    const root = `${getUploadRoot()}${path.sep}`;
+    if (!filePath.startsWith(root) && filePath !== getUploadRoot()) return null;
+    return filePath;
+  } catch {
+    return null;
+  }
+}
+
+function buildConversationAccessClause(userParam = '$1') {
+  return `(
+    (COALESCE(c.conversation_type, 'listing_chat') = 'listing_chat' AND (c.buyer_id = ${userParam} OR c.seller_id = ${userParam}))
+    OR (
+      COALESCE(c.conversation_type, 'listing_chat') <> 'listing_chat'
+      AND (
+        c.buyer_id = ${userParam}
+        OR c.seller_id = ${userParam}
+        OR EXISTS (
+          SELECT 1
+          FROM jsonb_array_elements_text(COALESCE(c.metadata->'participant_ids', '[]'::jsonb)) AS participant_id(value)
+          WHERE participant_id.value::int = ${userParam}
+        )
+      )
+    )
+  )`;
+}
+
 async function listConversationsForUser(userId) {
   const result = await query(`
     SELECT
-      c.id, c.annonce_id, c.buyer_id, c.seller_id, c.status, c.created_at, c.updated_at,
+      c.id, c.annonce_id, c.buyer_id, c.seller_id, c.status, c.conversation_type, c.metadata, c.created_at, c.updated_at,
       l.id AS listing_id,
       l.titre AS listing_title,
       l.prix AS listing_price,
@@ -49,6 +98,8 @@ async function listConversationsForUser(userId) {
       CASE WHEN buyer.is_pro = TRUE AND (buyer.pro_expires_at IS NULL OR buyer.pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS buyer_is_pro,
       buyer.trust_score AS buyer_trust_score,
       buyer.trust_level AS buyer_trust_level,
+      buyer.note_moyenne AS buyer_note_moyenne,
+      buyer.nb_avis AS buyer_nb_avis,
       seller.prenom AS seller_first_name,
       seller.nom AS seller_last_name,
       seller.avatar_url AS seller_avatar,
@@ -56,6 +107,8 @@ async function listConversationsForUser(userId) {
       CASE WHEN seller.is_pro = TRUE AND (seller.pro_expires_at IS NULL OR seller.pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS seller_is_pro,
       seller.trust_score AS seller_trust_score,
       seller.trust_level AS seller_trust_level,
+      seller.note_moyenne AS seller_note_moyenne,
+      seller.nb_avis AS seller_nb_avis,
       last_msg.content AS last_message,
       last_msg.created_at AS last_message_at,
       last_msg.type AS last_message_type,
@@ -74,24 +127,51 @@ async function listConversationsForUser(userId) {
        LIMIT 1
     ) img ON TRUE
     LEFT JOIN LATERAL (
-      SELECT content, created_at, sender_id, type
+      SELECT id AS last_message_id, content, created_at, sender_id, type, attachment_name AS last_message_attachment_name
       FROM messages
       WHERE conv_id = c.id
       ORDER BY created_at DESC
       LIMIT 1
     ) last_msg ON TRUE
-    WHERE (c.buyer_id = $1 OR c.seller_id = $1)
-      AND CASE WHEN c.buyer_id = $1 THEN c.is_archived_buyer = FALSE
-               ELSE c.is_archived_seller = FALSE END
+    WHERE ${buildConversationAccessClause('$1')}
+      AND CASE
+            WHEN COALESCE(c.conversation_type, 'listing_chat') = 'listing_chat'
+              THEN CASE WHEN c.buyer_id = $1 THEN c.is_archived_buyer = FALSE
+                        ELSE c.is_archived_seller = FALSE END
+            ELSE TRUE
+          END
     ORDER BY COALESCE(last_msg.created_at, c.created_at) DESC
   `, [userId]);
 
-  return result.rows.map((row) => mapConversationRow(row, userId));
+  const sellerIds = [...new Set(
+    result.rows
+      .map((row) => Number(row.seller_id))
+      .filter((value) => Number.isFinite(value) && value > 0)
+  )];
+  const sellerInsights = new Map();
+  await Promise.all(sellerIds.map(async (sellerId) => {
+    const response = await getSellerResponseTime(query, sellerId).catch(() => ({
+      avg_response_time_minutes: null,
+      avg_response_time_label: null,
+    }));
+    sellerInsights.set(sellerId, response);
+  }));
+
+  return result.rows.map((row) => {
+    const insight = sellerInsights.get(Number(row.seller_id)) || {};
+    return mapConversationRow({
+      ...row,
+      seller_avg_response_time_minutes: insight.avg_response_time_minutes ?? null,
+      seller_avg_response_time_label: insight.avg_response_time_label ?? null,
+      buyer_avg_response_time_minutes: null,
+      buyer_avg_response_time_label: null,
+    }, userId);
+  });
 }
 
 async function loadConversationThread(userId, conversationId, page = 1, limit = 30, before = null) {
   const convResult = await query(
-    `SELECT c.id, c.annonce_id, c.buyer_id, c.seller_id, c.status, c.created_at, c.updated_at,
+    `SELECT c.id, c.annonce_id, c.buyer_id, c.seller_id, c.status, c.conversation_type, c.metadata, c.created_at, c.updated_at,
             a.titre AS listing_title, a.prix AS listing_price, a.status AS listing_status,
             img.thumbnail_url AS listing_image
      FROM conversations c
@@ -101,7 +181,7 @@ async function loadConversationThread(userId, conversationId, page = 1, limit = 
        WHERE annonce_id = c.annonce_id AND is_cover = TRUE
        LIMIT 1
      ) img ON TRUE
-     WHERE c.id = $1 AND (c.buyer_id = $2 OR c.seller_id = $2)`,
+     WHERE c.id = $1 AND ${buildConversationAccessClause('$2')}`,
     [conversationId, userId]
   );
 
@@ -116,7 +196,7 @@ async function loadConversationThread(userId, conversationId, page = 1, limit = 
   if (cursor) {
     messages = await query(`
       SELECT
-        m.id, m.content, m.photo_url, m.type, m.read_at, m.created_at, m.sender_id,
+        m.id, m.content, m.photo_url, m.attachment_url, m.attachment_name, m.attachment_mime_type, m.attachment_size_bytes, m.type, m.read_at, m.created_at, m.sender_id,
         o.id AS offer_id,
         o.amount_xpf AS offer_amount_xpf,
         o.status AS offer_status,
@@ -136,7 +216,7 @@ async function loadConversationThread(userId, conversationId, page = 1, limit = 
     const offset = (page - 1) * safeLimit;
     messages = await query(`
       SELECT
-        m.id, m.content, m.photo_url, m.type, m.read_at, m.created_at, m.sender_id,
+        m.id, m.content, m.photo_url, m.attachment_url, m.attachment_name, m.attachment_mime_type, m.attachment_size_bytes, m.type, m.read_at, m.created_at, m.sender_id,
         o.id AS offer_id,
         o.amount_xpf AS offer_amount_xpf,
         o.status AS offer_status,
@@ -162,6 +242,8 @@ async function loadConversationThread(userId, conversationId, page = 1, limit = 
       buyer_id: conversation.buyer_id,
       seller_id: conversation.seller_id,
       status: conversation.status,
+      conversation_type: conversation.conversation_type || 'listing_chat',
+      metadata: conversation.metadata || {},
       created_at: conversation.created_at,
       updated_at: conversation.updated_at,
       annonce: {
@@ -172,7 +254,7 @@ async function loadConversationThread(userId, conversationId, page = 1, limit = 
         statut: conversation.listing_status,
       },
     },
-    messages: orderedMessages.map((msg) => mapMessageRow(msg, conversationId)),
+    messages: orderedMessages.map((msg) => mapMessageRow(msg, conversationId, userId)),
     pagination: {
       page,
       limit: safeLimit,
@@ -268,7 +350,9 @@ async function startConversation(userId, listingId, message) {
 
 async function appendConversationMessage(userId, conversationId, payload) {
   const conv = await query(
-    'SELECT id, buyer_id, seller_id FROM conversations WHERE id = $1 AND (buyer_id = $2 OR seller_id = $2)',
+    `SELECT id, buyer_id, seller_id, conversation_type, metadata
+     FROM conversations
+     WHERE id = $1 AND ${buildConversationAccessClause('$2')}`,
     [conversationId, userId]
   );
   if (!conv.rows[0]) {
@@ -277,7 +361,13 @@ async function appendConversationMessage(userId, conversationId, payload) {
 
   const type = payload.type || 'text';
   let content = payload.content || '';
-  const photoUrl = payload.photo_url || null;
+  const photoUrl = payload.photo_url || payload.audio_url || null;
+  const attachmentUrl = payload.attachment_url || null;
+  const attachmentName = payload.attachment_name || null;
+  const attachmentMimeType = payload.attachment_mime_type || null;
+  const attachmentSizeBytes = Number.isFinite(Number(payload.attachment_size_bytes))
+    ? Number(payload.attachment_size_bytes)
+    : null;
 
   if (type === 'text') {
     const { blocked, reason } = filterMessage(content);
@@ -292,12 +382,38 @@ async function appendConversationMessage(userId, conversationId, payload) {
     content = maskPhoneNumbers(content);
   }
 
+  if ((type === 'photo' || type === 'audio') && !photoUrl) {
+    throw createHttpError(400, 'Fichier joint manquant');
+  }
+
+  if (type === 'document') {
+    if (!attachmentUrl) {
+      throw createHttpError(400, 'Document joint manquant');
+    }
+    if (!attachmentName) {
+      throw createHttpError(400, 'Nom du document manquant');
+    }
+  }
+
   const result = await withTransaction(async (client) => {
     const msg = await client.query(`
-      INSERT INTO messages (conv_id, sender_id, type, content, photo_url)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING id, content, photo_url, sender_id, type, read_at, created_at
-    `, [conversationId, userId, type, type === 'photo' ? null : content, type === 'photo' ? photoUrl : null]);
+      INSERT INTO messages (
+        conv_id, sender_id, type, content, photo_url,
+        attachment_url, attachment_name, attachment_mime_type, attachment_size_bytes
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING id, content, photo_url, attachment_url, attachment_name, attachment_mime_type, attachment_size_bytes, sender_id, type, read_at, created_at
+    `, [
+      conversationId,
+      userId,
+      type,
+      type === 'text' ? content : null,
+      type === 'photo' || type === 'audio' ? photoUrl : null,
+      type === 'document' ? attachmentUrl : null,
+      type === 'document' ? attachmentName : null,
+      type === 'document' ? attachmentMimeType : null,
+      type === 'document' ? attachmentSizeBytes : null,
+    ]);
 
     await client.query(
       'UPDATE conversations SET updated_at = NOW() WHERE id = $1',
@@ -312,9 +428,55 @@ async function appendConversationMessage(userId, conversationId, payload) {
     : conv.rows[0].buyer_id;
 
   return {
-    message: result,
+    message: mapMessageRow(result, conversationId, userId),
     recipientId,
     conversationId,
+  };
+}
+
+async function loadConversationAttachmentForUser(userId, messageId) {
+  const result = await query(`
+    SELECT
+      m.id,
+      m.conv_id,
+      m.sender_id,
+      m.type,
+      m.attachment_url,
+      m.attachment_name,
+      m.attachment_mime_type,
+      m.attachment_size_bytes,
+      c.buyer_id,
+      c.seller_id,
+      c.conversation_type,
+      c.metadata
+    FROM messages m
+    JOIN conversations c ON c.id = m.conv_id
+    WHERE m.id = $1
+      AND ${buildConversationAccessClause('$2')}
+  `, [messageId, userId]);
+
+  const row = result.rows[0];
+  if (!row) {
+    throw createHttpError(404, 'Pièce jointe introuvable');
+  }
+
+  if (!row.attachment_url || !row.attachment_name) {
+    throw createHttpError(404, 'Pièce jointe introuvable');
+  }
+
+  const filePath = resolveAttachmentFilePath(row.attachment_url);
+  if (!filePath) {
+    throw createHttpError(404, 'Pièce jointe introuvable');
+  }
+
+  return {
+    messageId: row.id,
+    conv_id: row.conv_id,
+    attachment_url: row.attachment_url,
+    attachment_name: row.attachment_name,
+    attachment_mime_type: row.attachment_mime_type,
+    attachment_size_bytes: row.attachment_size_bytes,
+    filePath,
   };
 }
 
@@ -332,8 +494,10 @@ async function loadMessageNotificationTarget(conversationId, recipientId) {
 
 async function archiveConversation(userId, conversationId) {
   const conv = await query(
-    'SELECT id, buyer_id, seller_id FROM conversations WHERE id = $1',
-    [conversationId]
+    `SELECT id, buyer_id, seller_id, conversation_type, metadata
+     FROM conversations
+     WHERE id = $1 AND ${buildConversationAccessClause('$2')}`,
+    [conversationId, userId]
   );
   if (!conv.rows[0]) {
     throw createHttpError(404, 'Conversation introuvable');
@@ -355,6 +519,7 @@ module.exports = {
   listConversationsForUser,
   loadConversationThread,
   loadMessageNotificationTarget,
+  loadConversationAttachmentForUser,
   markConversationMessagesRead,
   startConversation,
 };

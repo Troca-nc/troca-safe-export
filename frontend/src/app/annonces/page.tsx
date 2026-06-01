@@ -18,12 +18,13 @@ import ListingCard from '@/components/listings/ListingCard'
 import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
 import { metaApi } from '@/lib/api'
 import { consumePendingAuthAction, peekPendingAuthAction } from '@/lib/authAction'
-import { FALLBACK_CATEGORIES } from '@/lib/categoryCatalog'
+import { FALLBACK_CATEGORIES, hasNestedCategoryTree } from '@/lib/categoryCatalog'
 import { getCategoryIcon } from '@/lib/categoryPresentation'
 import { useInfiniteListings } from '@/hooks/useInfiniteListings'
 import { useListingFilters, type ListingFilters } from '@/hooks/useListingFilters'
 import { useAuthActionStore } from '@/store/authActionStore'
 import { useAuthStore } from '@/store/authStore'
+import { findCategoryPathById } from '../../../../shared/categoryTaxonomy'
 
 const AnnoncesMap = dynamic(() => import('@/components/annonces/AnnoncesMap'), { ssr: false })
 
@@ -42,6 +43,140 @@ const CONDITION_OPTIONS = [
 ]
 
 const RADIUS_OPTIONS = [5, 10, 20, 50, 100]
+
+function getCategoryChildren(category: any) {
+  return category?.children || category?.subcategories || []
+}
+
+function findCategoryPathBySlug(categories: any[], slug: string): any[] {
+  const visit = (nodes: any[], trail: any[] = []) => {
+    for (const node of nodes || []) {
+      const currentTrail = [...trail, node]
+      if (node.slug === slug) {
+        return currentTrail
+      }
+      const found = visit(getCategoryChildren(node), currentTrail)
+      if (found.length) return found
+    }
+    return []
+  }
+
+  return visit(categories, [])
+}
+
+function isLeafCategory(category: any) {
+  return getCategoryChildren(category).length === 0
+}
+
+function CategoryTreeNode({
+  category,
+  selectedSlug,
+  onSelect,
+  depth = 0,
+}: {
+  category: any
+  selectedSlug: string
+  onSelect: (slug: string) => void
+  depth?: number
+}) {
+  const children = getCategoryChildren(category)
+  const Icon = getCategoryIcon(category.slug, category.name, category.icon)
+  const isSelected = selectedSlug === category.slug
+
+  return (
+    <div className={depth === 0 ? 'space-y-2' : 'space-y-2 border-l border-night/8 pl-3'}>
+      <button
+        type="button"
+        onClick={() => onSelect(category.slug)}
+        className={`flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-colors ${
+          isSelected
+            ? 'border-nc-lagon bg-nc-lagon text-white shadow-sm'
+            : 'border-night/8 bg-white hover:bg-sand text-night/75'
+        }`}
+      >
+        <span className={`flex h-10 w-10 items-center justify-center rounded-2xl ${
+          isSelected ? 'bg-white/10' : 'bg-sand text-night'
+        }`}>
+          <Icon className="h-5 w-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-semibold">{category.name}</span>
+          {children.length > 0 ? (
+            <span className={`block text-[11px] ${isSelected ? 'text-white/65' : 'text-night/45'}`}>
+              Niveaux visibles
+            </span>
+          ) : null}
+        </span>
+        <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${children.length > 0 ? '' : 'opacity-0'}`} />
+      </button>
+
+      {children.length > 0 ? (
+        <div className="space-y-2">
+          {children.map((child: any) => (
+            <CategoryTreeNode
+              key={child.id}
+              category={child}
+              selectedSlug={selectedSlug}
+              onSelect={onSelect}
+              depth={depth + 1}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function findCategoryBySlug(categories: any[], slug: string): any | null {
+  const stack = [...categories]
+  while (stack.length > 0) {
+    const node = stack.shift()
+    if (!node) continue
+    if (node.slug === slug) return node
+    stack.unshift(...getCategoryChildren(node))
+  }
+  return null
+}
+
+function snapTo10(value: string) {
+  if (!value.trim()) return ''
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return value
+  return String(Math.max(0, Math.round(parsed / 10) * 10))
+}
+
+function extractListingPrice(listing: Record<string, any>) {
+  const candidates = [listing.prix, listing.price, listing.prix_xpf, listing.price_xpf]
+  for (const candidate of candidates) {
+    const parsed = Number(candidate)
+    if (Number.isFinite(parsed) && parsed >= 0) return parsed
+  }
+  return null
+}
+
+function parsePriceFilterValue(value: string) {
+  if (!value.trim()) return null
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed) || parsed < 0) return null
+  return parsed
+}
+
+function buildPriceHistogram(values: number[], bins = 12) {
+  if (!values.length) return { bins: [] as number[], max: 0 }
+  const max = Math.max(...values)
+  if (!Number.isFinite(max) || max <= 0) {
+    return { bins: Array.from({ length: bins }, () => 0), max: 0 }
+  }
+
+  const counts = Array.from({ length: bins }, () => 0)
+  const size = max / bins
+  for (const value of values) {
+    const index = Math.min(bins - 1, Math.floor(value / size))
+    counts[index] += 1
+  }
+
+  return { bins: counts, max }
+}
 
 const FALLBACK_PROVINCES = [
   {
@@ -85,9 +220,12 @@ function ListingsPageContent() {
   const [communes,    setCommunes]    = useState<any[]>([])
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [viewMode,    setViewMode]    = useState<'list' | 'map'>('list')
-  const [openFamilySlug, setOpenFamilySlug] = useState<string | null>(null)
   const [geoLoading, setGeoLoading] = useState(false)
   const [searchAlertOpen, setSearchAlertOpen] = useState(false)
+  const [collapsedSections, setCollapsedSections] = useState({ radius: false, condition: false })
+  const [fallbackListings, setFallbackListings] = useState<any[]>([])
+  const [fallbackTotal, setFallbackTotal] = useState(0)
+  const [fallbackLoading, setFallbackLoading] = useState(true)
   const sentinelRef = useRef<HTMLDivElement | null>(null)
   const { user } = useAuthStore()
   const { openAuthModal } = useAuthActionStore()
@@ -99,7 +237,7 @@ function ListingsPageContent() {
     resetFilters,
     activeFilterCount,
   } = useListingFilters()
-  const visibleCategories = categories.length > 0 ? categories : FALLBACK_CATEGORIES
+  const visibleCategories = hasNestedCategoryTree(categories) ? categories : FALLBACK_CATEGORIES
   const listingFilters = useMemo(() => ({
     q: filters.q,
     category: filters.category,
@@ -127,8 +265,43 @@ function ListingsPageContent() {
     error,
     isError,
   } = useInfiniteListings(listingFilters)
-  const isInitialLoading = isLoading && listings.length === 0
+  const displayedListings = listings.length > 0 ? listings : fallbackListings
+  const displayedTotal = total > 0 ? total : fallbackTotal
+  const isInitialLoading = isLoading && displayedListings.length === 0 && fallbackLoading
   const isLoadingMore = isFetchingNextPage && listings.length > 0
+  const priceHistogram = useMemo(() => {
+    const prices = displayedListings
+      .map((listing: Record<string, any>) => extractListingPrice(listing))
+      .filter((value): value is number => typeof value === 'number')
+    return buildPriceHistogram(prices, 12)
+  }, [displayedListings])
+  const priceHistogramView = useMemo(() => {
+    const prices = displayedListings
+      .map((listing: Record<string, any>) => extractListingPrice(listing))
+      .filter((value): value is number => typeof value === 'number')
+
+    const datasetMax = prices.length > 0 ? Math.max(...prices) : 0
+    const rawMin = parsePriceFilterValue(filters.price_min)
+    const rawMax = parsePriceFilterValue(filters.price_max)
+    const selectedMin = Math.max(0, rawMin ?? 0)
+    const selectedMaxBase = rawMax ?? datasetMax
+    const selectedMax = Math.max(selectedMin, selectedMaxBase)
+    const safeRange = Math.max(datasetMax, selectedMax, 1)
+    const normalizedMin = Math.max(0, Math.min(100, (selectedMin / safeRange) * 100))
+    const normalizedMax = Math.max(normalizedMin, Math.min(100, (selectedMax / safeRange) * 100))
+
+    return {
+      ...priceHistogram,
+      datasetMax,
+      selectedMin,
+      selectedMax,
+      selectedStart: normalizedMin,
+      selectedEnd: normalizedMax,
+      selectedWidth: Math.max(3, normalizedMax - normalizedMin),
+      rangeLabel: datasetMax > 0 ? `0 - ${Math.round(datasetMax).toLocaleString('fr-FR')} XPF` : 'Distribution des prix',
+      selectionLabel: `${Math.round(selectedMin).toLocaleString('fr-FR')} - ${Math.round(selectedMax).toLocaleString('fr-FR')} XPF`,
+    }
+  }, [displayedListings, filters.price_max, filters.price_min, priceHistogram])
   const loadError = useMemo(() => {
     if (!isError) return ''
     if (error instanceof Error && error.message === 'timeout') {
@@ -136,6 +309,74 @@ function ListingsPageContent() {
     }
     return 'Les annonces sont temporairement indisponibles.'
   }, [error, isError])
+
+  useEffect(() => {
+    if (!isError || !error) return
+    console.error('[annonces] load:', error)
+  }, [error, isError])
+
+  useEffect(() => {
+    let alive = true
+    const controller = new AbortController()
+
+    const run = async () => {
+      setFallbackLoading(true)
+      try {
+        const params = new URLSearchParams()
+        Object.entries(listingFilters).forEach(([key, value]) => {
+          if (key === 'page' || value == null || value === '') return
+          params.set(key, String(value))
+        })
+        params.set('limit', String(listingFilters.limit ?? 24))
+        const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/+$/, '')
+        const response = await fetch(`${baseUrl}/api/listings?${params.toString()}`, {
+          credentials: 'include',
+          signal: controller.signal,
+        })
+        const json = await response.json()
+        if (!alive) return
+        setFallbackListings(Array.isArray(json?.data) ? json.data : [])
+        setFallbackTotal(Number(json?.pagination?.total ?? (Array.isArray(json?.data) ? json.data.length : 0)))
+      } catch {
+        if (!alive) return
+        setFallbackListings([])
+        setFallbackTotal(0)
+      } finally {
+        if (alive) setFallbackLoading(false)
+      }
+    }
+
+    void run()
+    return () => {
+      alive = false
+      controller.abort()
+    }
+  }, [listingFilters])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const raw = window.localStorage.getItem('troca-listings-filters-sections')
+      if (!raw) return
+      const parsed = JSON.parse(raw)
+      setCollapsedSections({
+        radius: Boolean(parsed?.radius),
+        condition: Boolean(parsed?.condition),
+      })
+    } catch {
+      // Ignore persisted UI state errors.
+    }
+  }, [])
+
+  const toggleSidebarSection = (key: 'radius' | 'condition') => {
+    setCollapsedSections((current) => {
+      const next = { ...current, [key]: !current[key] }
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('troca-listings-filters-sections', JSON.stringify(next))
+      }
+      return next
+    })
+  }
 
   // Charger categories et communes une seule fois
   useEffect(() => {
@@ -157,22 +398,6 @@ function ListingsPageContent() {
       consumePendingAuthAction()
     }
   }, [])
-
-  useEffect(() => {
-    if (!filters.category) {
-      setOpenFamilySlug(null)
-      return
-    }
-
-    const family = visibleCategories.find((cat: any) =>
-      cat.slug === filters.category ||
-      (cat.subcategories || []).some((sub: any) => sub.slug === filters.category)
-    )
-
-    if (family) {
-      setOpenFamilySlug(family.slug)
-    }
-  }, [filters.category, visibleCategories])
 
   useEffect(() => {
     if (!filters.commune_id || communes.length === 0) return
@@ -207,15 +432,10 @@ function ListingsPageContent() {
   }, [fetchNextPage, hasNextPage, isFetchingNextPage, viewMode])
 
   const updateFilter = (key: keyof ListingFilters, value: string | number) => {
-    if (key === 'category' && value === '') {
-      setOpenFamilySlug(null)
-    }
-
     setFilter(key, value as never)
   }
 
   const clearFilters = () => {
-    setOpenFamilySlug(null)
     resetFilters()
   }
 
@@ -253,20 +473,13 @@ function ListingsPageContent() {
     )
   }, [setLocation])
 
-  const isCategoryActive = (slug: string) => filters.category === slug
-  const isParentCategoryActive = (cat: any) =>
-    filters.category === cat.slug || (cat.subcategories || []).some((sub: any) => sub.slug === filters.category)
   const selectedProvince = communes.find((province: any) => String(province.id) === String(filters.province_id))
   const selectedProvinceCommunes = selectedProvince?.communes || []
   const selectedCategoryLabel = useMemo(() => {
     if (!filters.category) return null
-    const family = visibleCategories.find((cat: any) =>
-      cat.slug === filters.category ||
-      (cat.subcategories || []).some((sub: any) => sub.slug === filters.category)
-    )
-    if (!family) return filters.category
-    const directMatch = family.subcategories?.find((sub: any) => sub.slug === filters.category)
-    return directMatch?.name ?? family.name
+    const path = findCategoryPathBySlug(visibleCategories, filters.category)
+    if (!path.length) return filters.category
+    return path[path.length - 1]?.name ?? filters.category
   }, [filters.category, visibleCategories])
   const selectedCommuneLabel = useMemo(() => {
     if (!filters.commune_id) return null
@@ -288,17 +501,6 @@ function ListingsPageContent() {
     return order(a) - order(b)
   })
 
-  const handleFamilyToggle = (cat: any) => {
-    if (filters.category === cat.slug) {
-      setOpenFamilySlug(null)
-      updateFilter('category', '')
-      return
-    }
-
-    setOpenFamilySlug(cat.slug)
-    updateFilter('category', cat.slug)
-  }
-
   const handleCreateSearchAlert = () => {
     if (typeof window === 'undefined') return
     const redirectTo = `${window.location.pathname}${window.location.search}`
@@ -315,91 +517,44 @@ function ListingsPageContent() {
 
   // Sidebar filtres
   const FilterSidebar = () => (
-    <div className="space-y-6">
+      <div className="space-y-6">
       {/* Catégories */}
       <div>
         <h3 className="font-semibold text-night text-sm mb-3">Catégorie</h3>
-        <div className="space-y-1 max-h-[32rem] overflow-y-auto pr-1">
+        <div className="space-y-3 rounded-2xl border border-night/8 bg-white/80 p-3 shadow-sm">
           <button
             type="button"
-            onClick={() => {
-              setOpenFamilySlug(null)
-              updateFilter('category', '')
-            }}
-            className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${
-              !filters.category ? 'bg-coral text-white' : 'hover:bg-sand text-night/70'
+            onClick={() => updateFilter('category', '')}
+            className={`w-full rounded-2xl px-3 py-2 text-left text-sm transition-colors ${
+              !filters.category
+                ? 'bg-nc-lagon text-white shadow-sm'
+                : 'hover:bg-sand text-night/70'
             }`}
           >
             Toutes les catégories
           </button>
-          {visibleCategories.map((cat: any) => {
-            const isOpen = openFamilySlug === cat.slug
-            return (
-              <div key={cat.id} className="rounded-2xl border border-night/8 bg-white/80 p-2 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleFamilyToggle(cat)}
-                    className={`flex flex-1 items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm transition-colors ${
-                      isParentCategoryActive(cat) ? 'bg-night text-white shadow-sm' : 'hover:bg-sand text-night/70'
-                    }`}
-                  >
-                    <span className={`flex h-10 w-10 items-center justify-center rounded-2xl ${
-                      isParentCategoryActive(cat) ? 'bg-white/10' : 'bg-sand text-night'
-                    }`}>
-                      {(() => {
-                        const Icon = getCategoryIcon(cat.slug)
-                        return <Icon className="h-5 w-5" />
-                      })()}
-                    </span>
-                    <span className="flex-1">
-                      <span className="block font-semibold">{cat.name}</span>
-                      <span className={`block text-[11px] ${isParentCategoryActive(cat) ? 'text-white/65' : 'text-night/45'}`}>
-                        {cat.subcategories?.length || 0} sous-catégorie{(cat.subcategories?.length || 0) > 1 ? 's' : ''}
-                      </span>
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={isOpen ? `Fermer ${cat.name}` : `Ouvrir ${cat.name}`}
-                    onClick={() => setOpenFamilySlug((current) => (current === cat.slug ? null : cat.slug))}
-                    className="rounded-full p-2 text-current hover:bg-black/5"
-                  >
-                    <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                {(cat.subcategories || []).length > 0 && isOpen && (
-                  <div className="mt-3 flex flex-wrap gap-2 px-1 pb-1">
-                    <button
-                      type="button"
-                      onClick={() => updateFilter('category', cat.slug)}
-                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                        filters.category === cat.slug
-                          ? 'border-night bg-night text-white'
-                          : 'border-night/10 bg-white text-night/65 hover:border-night/20 hover:bg-sand hover:text-night'
-                      }`}
-                    >
-                      Toute la famille
-                    </button>
-                    {cat.subcategories.map((sub: any) => (
-                      <button
-                        key={sub.id}
-                        type="button"
-                        onClick={() => updateFilter('category', sub.slug)}
-                        className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
-                          isCategoryActive(sub.slug)
-                            ? 'border-night bg-night text-white'
-                            : 'border-night/10 bg-white text-night/65 hover:border-night/20 hover:bg-sand hover:text-night'
-                        }`}
-                      >
-                        {sub.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )
-          })}
+
+          {selectedCategoryLabel ? (
+            <div className="rounded-2xl border border-nc-lagon/20 bg-nc-lagon/8 px-3 py-3 text-sm text-night">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-nc-lagon">Catégorie active</p>
+              <p className="mt-1 font-semibold">{selectedCategoryLabel}</p>
+            </div>
+          ) : null}
+
+          <div className="max-h-[38rem] space-y-2 overflow-y-auto pr-1">
+            {visibleCategories.map((cat: any) => (
+              <CategoryTreeNode
+                key={cat.id}
+                category={cat}
+                selectedSlug={filters.category}
+                onSelect={(slug) => updateFilter('category', slug)}
+              />
+            ))}
+          </div>
+
+          <p className="text-[11px] text-night/40">
+            Toute la taxonomie est visible en permanence, même sans annonces dans une sous-catégorie.
+          </p>
         </div>
       </div>
 
@@ -426,7 +581,7 @@ function ListingsPageContent() {
                 }}
                 className={`rounded-full border px-4 py-2 text-sm transition-colors ${
                   !filters.province_id
-                    ? 'bg-night text-white border-night'
+                  ? 'bg-nc-lagon text-white border-nc-lagon'
                     : 'bg-white text-night/65 border-night/12 hover:bg-sand'
                 }`}
               >
@@ -441,7 +596,7 @@ function ListingsPageContent() {
                     onClick={() => updateFilter('province_id', String(province.id))}
                     className={`rounded-full border px-4 py-2 text-sm transition-colors ${
                       isActiveProvince
-                        ? 'bg-coral text-white border-coral'
+                        ? 'bg-nc-lagon text-white border-nc-lagon'
                         : 'bg-white text-night/65 border-night/12 hover:bg-sand'
                     }`}
                   >
@@ -467,8 +622,8 @@ function ListingsPageContent() {
                     type="button"
                     onClick={() => updateFilter('commune_id', '')}
                     className={`rounded-full border px-3 py-2 text-sm transition-colors ${
-                      !filters.commune_id
-                        ? 'bg-night text-white border-night'
+                        !filters.commune_id
+                          ? 'bg-nc-lagon text-white border-nc-lagon'
                         : 'bg-white text-night/65 border-night/12 hover:bg-sand'
                     }`}
                   >
@@ -481,7 +636,7 @@ function ListingsPageContent() {
                       onClick={() => updateFilter('commune_id', String(c.id))}
                       className={`rounded-full border px-3 py-2 text-sm transition-colors ${
                         String(filters.commune_id) === String(c.id)
-                          ? 'bg-coral text-white border-coral'
+                          ? 'bg-nc-lagon text-white border-nc-lagon'
                           : 'bg-white text-night/65 border-night/12 hover:bg-sand'
                       }`}
                     >
@@ -496,109 +651,218 @@ function ListingsPageContent() {
       </div>
 
       <div className="space-y-2 rounded-2xl border border-night/8 bg-sand/20 p-3">
-        <div className="flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => toggleSidebarSection('radius')}
+          className="flex w-full items-center justify-between gap-3 text-left"
+          aria-expanded={!collapsedSections.radius}
+        >
           <div>
             <label className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-night/40">
               Rayon de recherche
             </label>
             <p className="mt-1 text-xs text-night/45">
-              Distance max autour de votre position partagée.
+            Distance max autour de votre position partagée.
             </p>
           </div>
-          <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-night shadow-sm">
-            {filters.radius} km
+          <div className="flex items-center gap-2">
+            <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-night shadow-sm">
+              {filters.radius} km
+            </div>
+            <ChevronDown className={`h-4 w-4 text-night/35 transition-transform ${collapsedSections.radius ? '' : 'rotate-180'}`} />
           </div>
-        </div>
-        <input
-          type="range"
-          min={RADIUS_OPTIONS[0]}
-          max={RADIUS_OPTIONS[RADIUS_OPTIONS.length - 1]}
-          step={1}
-          value={filters.radius}
-          onChange={(e) => updateFilter('radius', snapRadius(Number(e.target.value)))}
-          className="w-full accent-coral"
-          aria-label="Rayon de recherche en kilomètres"
-        />
-        <div className="flex justify-between text-[10px] text-night/35">
-          {RADIUS_OPTIONS.map((value) => (
-            <span key={value}>{value} km</span>
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-2 pt-1">
-          <button
-            type="button"
-            onClick={handleUseLocation}
-            disabled={geoLoading}
-            className="rounded-full bg-night px-3 py-2 text-xs font-medium text-white disabled:opacity-60"
-          >
-            {geoLoading ? 'Localisation…' : 'Utiliser ma position'}
-          </button>
-          {filters.lat && filters.lng && (
-            <button
-              type="button"
-              onClick={clearLocation}
-              className="rounded-full border border-night/10 bg-white px-3 py-2 text-xs font-medium text-night/60 hover:bg-sand"
-            >
-              Effacer la position
-            </button>
-          )}
-        </div>
-        {filters.lat && filters.lng ? (
-          <p className="text-[11px] text-jungle">
-            Position partagée activée.
-          </p>
-        ) : (
-          <p className="text-[11px] text-night/40">
-            Aucune demande de permission n’est envoyée tant que vous ne cliquez pas sur le bouton.
-          </p>
-        )}
+        </button>
+        {!collapsedSections.radius ? (
+          <>
+            <input
+              type="range"
+              min={RADIUS_OPTIONS[0]}
+              max={RADIUS_OPTIONS[RADIUS_OPTIONS.length - 1]}
+              step={1}
+              value={filters.radius}
+              onChange={(e) => updateFilter('radius', snapRadius(Number(e.target.value)))}
+              className="w-full accent-coral"
+              aria-label="Rayon de recherche en kilomètres"
+            />
+            <div className="flex justify-between text-[10px] text-night/35">
+              {RADIUS_OPTIONS.map((value) => (
+                <span key={value}>{value} km</span>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <button
+                type="button"
+                onClick={handleUseLocation}
+                disabled={geoLoading}
+                className="rounded-full bg-night px-3 py-2 text-xs font-medium text-white disabled:opacity-60"
+              >
+                {geoLoading ? 'Localisation…' : 'Utiliser ma position'}
+              </button>
+              {filters.lat && filters.lng && (
+                <button
+                  type="button"
+                  onClick={clearLocation}
+                  className="rounded-full border border-night/10 bg-white px-3 py-2 text-xs font-medium text-night/60 hover:bg-sand"
+                >
+                  Effacer la position
+                </button>
+              )}
+            </div>
+            {filters.lat && filters.lng ? (
+              <p className="text-[11px] text-jungle">
+                Position partagée activée.
+              </p>
+            ) : (
+              <p className="text-[11px] text-night/40">
+                Aucune demande de permission n’est envoyée tant que vous ne cliquez pas sur le bouton.
+              </p>
+            )}
+          </>
+        ) : null}
       </div>
 
       {/* Prix */}
-      <div>
-        <h3 className="font-semibold text-night text-sm mb-3">Prix (XPF)</h3>
-        <div className="flex gap-2 items-center">
-          <input
-            type="number"
-            placeholder="Min"
-            value={filters.price_min}
-            onChange={(e) => updateFilter('price_min', e.target.value)}
-            className="input text-sm w-full"
-          />
-          <span className="text-night/30 text-sm">-</span>
-          <input
-            type="number"
-            placeholder="Max"
-            value={filters.price_max}
-            onChange={(e) => updateFilter('price_max', e.target.value)}
-            className="input text-sm w-full"
-          />
+      <div className="relative overflow-hidden rounded-2xl border border-night/8 bg-sand/20 p-3">
+        <div className="pointer-events-none absolute inset-x-3 bottom-3 top-10 overflow-hidden rounded-xl">
+          <div className="absolute inset-0 flex items-end gap-1">
+            {(priceHistogramView.bins.length > 0 ? priceHistogramView.bins : Array.from({ length: 12 }, () => 0)).map((count, index) => {
+              const maxCount = Math.max(1, ...(priceHistogramView.bins.length > 0 ? priceHistogramView.bins : [1]))
+              const heightPct = priceHistogramView.bins.length > 0 ? Math.max(8, Math.round((count / maxCount) * 100)) : 18
+              const faded = priceHistogramView.bins.length === 0
+              const barCenter = ((index + 0.5) / Math.max(1, priceHistogramView.bins.length || 12)) * 100
+              const highlighted = barCenter >= priceHistogramView.selectedStart && barCenter <= priceHistogramView.selectedEnd
+              return (
+                <div
+                  key={`price-bin-${index}`}
+                  className={`flex-1 rounded-t-lg transition-all duration-200 ${
+                    faded
+                      ? 'bg-night/6'
+                      : highlighted
+                        ? 'bg-nc-lagon/60 shadow-[0_-8px_24px_rgba(30,144,255,0.18)]'
+                        : 'bg-nc-lagon/25'
+                  }`}
+                  style={{
+                    height: `${heightPct}%`,
+                    opacity: faded ? 0.6 : highlighted ? 1 : 0.72,
+                  }}
+                  aria-hidden="true"
+                />
+              )
+            })}
+          </div>
+
+          {priceHistogramView.datasetMax > 0 ? (
+            <>
+              <div
+                className="absolute inset-y-0 rounded-xl border border-nc-lagon/20 bg-gradient-to-r from-nc-lagon/5 via-nc-lagon/10 to-nc-lagon/5"
+                style={{
+                  left: `${priceHistogramView.selectedStart}%`,
+                  width: `${Math.min(100 - priceHistogramView.selectedStart, priceHistogramView.selectedWidth)}%`,
+                }}
+                aria-hidden="true"
+              />
+              <div
+                className="absolute inset-y-1 w-px bg-nc-lagon/50"
+                style={{ left: `${priceHistogramView.selectedStart}%` }}
+                aria-hidden="true"
+              />
+              <div
+                className="absolute inset-y-1 w-px bg-nc-lagon/50"
+                style={{ left: `${priceHistogramView.selectedEnd}%` }}
+                aria-hidden="true"
+              />
+              <div className="absolute inset-x-0 bottom-0 h-px bg-night/10" aria-hidden="true" />
+            </>
+          ) : null}
+        </div>
+
+        <div className="relative z-10">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <h3 className="font-semibold text-night text-sm">Prix (XPF)</h3>
+            <span className="text-[11px] text-night/40">
+              {priceHistogramView.rangeLabel}
+            </span>
+          </div>
+
+          <div className="rounded-2xl border border-night/8 bg-white/80 p-3 backdrop-blur-sm">
+            <div className="mb-2 flex items-center justify-between gap-3 text-[10px] text-night/40">
+              <span>0 XPF</span>
+              <span className="rounded-full bg-white/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-night/50 shadow-sm">
+                {priceHistogramView.selectionLabel}
+              </span>
+              <span>{priceHistogramView.datasetMax > 0 ? `${Math.round(priceHistogramView.datasetMax).toLocaleString('fr-FR')} XPF` : '—'}</span>
+            </div>
+            <div className="flex gap-2 items-center">
+              <input
+                type="number"
+                placeholder="Min"
+                value={filters.price_min}
+                step={10}
+                min={0}
+                onChange={(e) => updateFilter('price_min', e.target.value)}
+                onBlur={(e) => updateFilter('price_min', snapTo10(e.target.value))}
+                className="input text-sm w-full bg-white/90"
+              />
+              <span className="text-night/30 text-sm">-</span>
+              <input
+                type="number"
+                placeholder="Max"
+                value={filters.price_max}
+                step={10}
+                min={0}
+                onChange={(e) => updateFilter('price_max', e.target.value)}
+                onBlur={(e) => updateFilter('price_max', snapTo10(e.target.value))}
+                className="input text-sm w-full bg-white/90"
+              />
+            </div>
+            <div className="mt-2 flex items-center justify-between gap-3 text-[10px] text-night/35">
+              <span>La courbe reflète les annonces chargées pour cette recherche.</span>
+              <span className="rounded-full bg-nc-lagon/10 px-2 py-1 font-medium text-nc-lagonText">
+                {priceHistogramView.bins.length > 0 ? `${displayedListings.length} résultats` : 'Aucune donnée'}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Etat */}
-      <div>
-        <h3 className="font-semibold text-night text-sm mb-3">Etat</h3>
-        <div className="space-y-1">
-          {CONDITION_OPTIONS.map((opt) => (
-            <label key={opt.value} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-sand cursor-pointer">
-              <input
-                type="radio"
-                name="condition"
-                value={opt.value}
-                checked={filters.condition === opt.value}
-                onChange={() => updateFilter('condition', opt.value)}
-                className="accent-coral"
-              />
-              <span className="text-sm text-night/70">{opt.label}</span>
-            </label>
-          ))}
-          {filters.condition && (
-            <button onClick={() => updateFilter('condition', '')} className="text-xs text-coral hover:underline pl-3">
-              Effacer
-            </button>
-          )}
-        </div>
+      <div className="space-y-2 rounded-2xl border border-night/8 bg-sand/20 p-3">
+        <button
+          type="button"
+          onClick={() => toggleSidebarSection('condition')}
+          className="flex w-full items-center justify-between gap-3 text-left"
+          aria-expanded={!collapsedSections.condition}
+        >
+          <div>
+            <h3 className="font-semibold text-night text-sm">État</h3>
+            <p className="mt-1 text-xs text-night/45">
+              Affinez selon l’état du produit.
+            </p>
+          </div>
+          <ChevronDown className={`h-4 w-4 text-night/35 transition-transform ${collapsedSections.condition ? '' : 'rotate-180'}`} />
+        </button>
+        {!collapsedSections.condition ? (
+          <div className="space-y-1">
+            {CONDITION_OPTIONS.map((opt) => (
+              <label key={opt.value} className="flex items-center gap-2 rounded-xl px-3 py-2 hover:bg-sand cursor-pointer">
+                <input
+                  type="radio"
+                  name="condition"
+                  value={opt.value}
+                  checked={filters.condition === opt.value}
+                  onChange={() => updateFilter('condition', opt.value)}
+                  className="accent-coral"
+                />
+                <span className="text-sm text-night/70">{opt.label}</span>
+              </label>
+            ))}
+            {filters.condition && (
+              <button onClick={() => updateFilter('condition', '')} className="pl-3 text-xs text-coral hover:underline">
+                Effacer
+              </button>
+            )}
+          </div>
+        ) : null}
       </div>
 
       {/* Effacer tous les filtres */}
@@ -617,7 +881,7 @@ function ListingsPageContent() {
       <div className="max-w-7xl mx-auto px-4 py-6">
 
         {/* Barre superieure */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="mb-6 flex items-center gap-3 rounded-[2rem] border border-night/8 border-l-4 border-l-nc-lagon bg-white/90 p-4 shadow-sm">
           {/* Recherche */}
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-night/35 w-4 h-4" />
@@ -631,20 +895,35 @@ function ListingsPageContent() {
             />
           </div>
 
-          {/* Filtre Troc */}
-          <button
-            onClick={() => updateFilter('troc', filters.troc === 'true' ? '' : 'true')}
-            className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-xl border transition-colors shrink-0 ${
-              filters.troc === 'true'
-                ? 'bg-night text-white border-night'
-                : 'bg-white text-night/60 border-night/12 hover:text-night'
-            }`}
-            aria-pressed={filters.troc === 'true'}
-            aria-label="Filtrer uniquement les annonces avec troc"
-          >
-            <span aria-hidden="true">↻</span>
-            <span className="hidden sm:inline">Troc uniquement</span>
-          </button>
+          {/* Toggle Annonces / Troc */}
+          <div className="flex shrink-0 items-center rounded-2xl border border-night/12 bg-[var(--color-surface)] p-1 shadow-sm">
+            <button
+              type="button"
+              onClick={() => updateFilter('troc', '')}
+              className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
+                filters.troc === 'true'
+                  ? 'text-night/60 hover:bg-[var(--color-surface-raised)] hover:text-night'
+                  : 'bg-nc-lagon text-white shadow-sm shadow-nc-lagon/25'
+              }`}
+              aria-pressed={filters.troc !== 'true'}
+              aria-label="Afficher les annonces classiques"
+            >
+              Annonces
+            </button>
+            <button
+              type="button"
+              onClick={() => updateFilter('troc', 'true')}
+              className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
+                filters.troc === 'true'
+                  ? 'bg-nc-corail text-white shadow-sm shadow-nc-corail/25'
+                  : 'text-night/60 hover:bg-[var(--color-surface-raised)] hover:text-night'
+              }`}
+              aria-pressed={filters.troc === 'true'}
+              aria-label="Afficher uniquement les annonces avec troc"
+            >
+              Troc
+            </button>
+          </div>
 
           {/* Tri */}
           <div className="relative">
@@ -717,7 +996,7 @@ function ListingsPageContent() {
 
           {/* Sidebar desktop */}
           <aside className="hidden lg:block w-64 shrink-0">
-            <div className="card p-5 sticky top-20">
+            <div className="card p-5 sticky top-20 border-l-4 border-l-nc-lagon">
               <FilterSidebar />
             </div>
           </aside>
@@ -726,7 +1005,7 @@ function ListingsPageContent() {
           {filtersOpen && (
             <div className="lg:hidden fixed inset-0 z-50 flex">
               <div className="absolute inset-0 bg-black/40" onClick={() => setFiltersOpen(false)} />
-              <div id="mobile-filters-drawer" role="dialog" aria-modal="true" aria-label="Filtres de recherche" className="relative ml-auto w-80 bg-white h-full overflow-y-auto p-6 shadow-modal animate-slide-up">
+              <div id="mobile-filters-drawer" role="dialog" aria-modal="true" aria-label="Filtres de recherche" className="relative ml-auto w-80 border-l-4 border-l-nc-lagon bg-white h-full overflow-y-auto p-6 shadow-modal animate-slide-up">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="font-display font-bold text-lg">Filtres</h2>
                   <button type="button" onClick={() => setFiltersOpen(false)} aria-label="Fermer les filtres">
@@ -742,7 +1021,7 @@ function ListingsPageContent() {
         {viewMode === 'map' && (
           <div className="mb-6">
             <AnnoncesMap
-              listings={listings.map((a: any) => ({
+              listings={displayedListings.map((a: any) => ({
                 id:        a.id,
                 titre:     a.titre,
                 prix:      a.prix ?? a.prix_xpf,
@@ -766,8 +1045,8 @@ function ListingsPageContent() {
             {/* Resultats */}
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-night/50">
-                {isLoading ? 'Chargement...' : (
-                  <><span className="font-semibold text-night">{total}</span> annonce{total > 1 ? 's' : ''}</>
+                {isInitialLoading ? 'Chargement...' : (
+                  <><span className="font-semibold text-night">{displayedTotal}</span> annonce{displayedTotal > 1 ? 's' : ''}</>
                 )}
               </p>
               {filters.q && (
@@ -777,41 +1056,27 @@ function ListingsPageContent() {
               )}
             </div>
 
-            {loadError ? (
-              <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                <p className="font-semibold">Impossible de charger les annonces</p>
-                <p className="mt-1">{loadError}</p>
-                <button
-                  type="button"
-                  onClick={() => void refetch()}
-                  className="mt-3 rounded-xl bg-white px-3 py-2 text-xs font-semibold text-night shadow-sm"
-                >
-                  Réessayer
-                </button>
-              </div>
-            ) : null}
-
             {/* TODO: test E2E sur le chargement initial et la pagination sans perte de contexte. */}
             {isInitialLoading ? (
               <ListingSkeletonGrid count={6} className="grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4" />
-            ) : listings.length === 0 ? (
-              <div className="text-center py-20">
-                <span className="text-6xl mb-4 block" aria-hidden="true">🔍</span>
-                <h3 className="font-display text-xl font-bold text-night mb-2">
-                  {loadError ? 'Flux d’annonces indisponible' : 'Aucune annonce trouvee'}
+            ) : displayedListings.length === 0 ? (
+                            <div className="text-center py-20">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-nc-lagonLight text-nc-lagonText" aria-hidden="true">
+                  <Search className="h-7 w-7" />
+                </div>
+                <h3 className="mt-4 font-display text-xl font-bold text-night mb-2">
+                  Aucune annonce trouv?e pour ces crit?res
                 </h3>
                 <p className="text-night/50 text-sm mb-6">
-                  {loadError
-                    ? 'Le service des annonces ne répond pas pour le moment. Vous pouvez réessayer ou revenir plus tard.'
-                    : "Essayez d'elargir votre recherche ou de modifier les filtres."}
+                  Essayez d??largir votre recherche ou de changer de cat?gorie.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <button onClick={clearFilters} className="btn-secondary">
                     Effacer les filtres
                   </button>
-                  {loadError ? (
-                    <button onClick={() => void refetch()} className="btn-primary">
-                      Réessayer
+                  {isError ? (
+                    <button onClick={() => void refetch()} className="btn-ghost">
+                      R?essayer
                     </button>
                   ) : null}
                 </div>
@@ -819,7 +1084,7 @@ function ListingsPageContent() {
             ) : (
               <>
                 <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {listings.map((listing) => (
+                  {displayedListings.map((listing) => (
                     <ListingCard
                       key={String((listing as { id?: string | number }).id ?? '')}
                       listing={listing as unknown as Parameters<typeof ListingCard>[0]['listing']}

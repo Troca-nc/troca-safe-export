@@ -128,7 +128,7 @@ router.get('/status', authenticate, async (req, res) => {
       },
     });
   } catch (err) {
-    return res.status(500).json({ error: 'Erreur rÃ©cupÃ©ration statut abonnement' });
+    return res.status(500).json({ error: 'Erreur r?cup?ration statut abonnement' });
   }
 });
 

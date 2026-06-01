@@ -1,113 +1,138 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
-import { type FormEvent } from 'react'
-import { ArrowRight, Search, Sparkles } from 'lucide-react'
+import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { ArrowRight, ChevronRight, Search, Sparkles } from 'lucide-react'
 
+import PlatformStats from '@/components/PlatformStats'
 import ListingCard from '@/components/listings/ListingCard'
 import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
 import type { CategoryNode } from '@/lib/categoryCatalog'
-import { FEATURED_SEARCHES, SEARCH_ALERTS, getCategoryIcon } from '@/lib/categoryPresentation'
+import { SEARCH_ALERTS, getCategoryIcon } from '@/lib/categoryPresentation'
 
 function formatNumber(value: number | null) {
   if (value === null || Number.isNaN(value)) return '...'
   return new Intl.NumberFormat('fr-FR').format(value)
 }
 
+function getCategoryChildren(category: CategoryNode) {
+  return category.children || category.subcategories || []
+}
+
 type HomeHeroSectionProps = {
   q: string
   onQueryChange: (value: string) => void
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
-  onBrowse: (slug: string) => void
-  activeCount: number | null
-  bonPlansCount: number | null
-  rideCount?: number | null
-  statsLoading: boolean
 }
 
 export function HomeHeroSection({
   q,
   onQueryChange,
   onSubmit,
-  onBrowse,
-  activeCount,
-  bonPlansCount,
-  rideCount,
-  statsLoading,
 }: HomeHeroSectionProps) {
   return (
-    <section className="bg-night px-4 py-8 text-white md:py-12">
-      <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(72,202,228,0.26),_transparent_34%),radial-gradient(circle_at_top_right,_rgba(10,126,164,0.24),_transparent_30%),linear-gradient(180deg,_rgba(8,32,50,0.98),_rgba(8,32,50,0.92))] px-6 py-7 shadow-[0_24px_80px_rgba(8,32,50,0.26)] md:px-10 md:py-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-lagoon">
+    <section className="bg-[var(--color-background-secondary)] px-4 py-8 text-[var(--color-text-primary)] md:py-10">
+      <div className="mx-auto max-w-7xl">
+        <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
+          <div className="inline-flex items-center gap-2 rounded-full bg-nc-lagonLight px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-nc-lagonText">
             <Sparkles className="h-3.5 w-3.5" />
-            Petites annonces Nouvelle-Caledonie
+            Nouvelle-Calédonie
           </div>
 
-          <h1 className="max-w-2xl font-display text-4xl font-bold leading-tight md:text-5xl">
-            Achetez mieux.
-            <br />
-            Vendez plus vite.
+          <h1 className="mt-3 max-w-4xl font-display text-3xl font-bold leading-tight md:text-4xl">
+            Achetez, vendez, troquez <span className="text-coral">en NC</span>
           </h1>
 
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/70 md:text-lg">
-            La place de marche locale pour trouver les bonnes affaires pres de chez vous, publier en quelques minutes
-            et vendre en confiance.
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-night/60 md:text-base">
+            Des milliers d&apos;annonces entre Calédoniens, partout sur le territoire.
           </p>
 
-          <form onSubmit={onSubmit} className="mt-6 flex max-w-2xl gap-2">
+          <form onSubmit={onSubmit} className="mt-5 flex w-full max-w-[460px] gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-night/40" />
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-night/35" />
               <input
                 value={q}
                 onChange={(e) => onQueryChange(e.target.value)}
-                placeholder="Rechercher un telephone, une voiture, un appartement..."
-                className="w-full rounded-2xl border border-white/10 bg-white px-4 py-3 pl-11 text-sm text-night shadow-lg outline-none ring-0 transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/20"
+                placeholder="Que recherchez-vous ?"
+                className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 pl-11 text-sm text-[var(--color-text-primary)] shadow-sm outline-none ring-0 transition focus:border-coral focus:ring-4 focus:ring-coral/10"
               />
             </div>
-            <button type="submit" className="btn-primary rounded-2xl px-5 py-3">
-              Chercher
+            <button type="submit" className="btn-primary rounded-2xl px-4 py-2.5 text-sm">
+              Rechercher
             </button>
           </form>
 
-          <div className="mt-3 flex gap-3 overflow-x-auto pb-1">
-            {FEATURED_SEARCHES.map((item) => {
-              const Visual = getCategoryIcon(item.slug)
-              return (
-                <button
-                  key={item.slug}
-                  type="button"
-                  onClick={() => onBrowse(item.slug)}
-                  className="flex min-w-[88px] shrink-0 flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/95 px-3 py-3 text-center text-night shadow-sm transition hover:-translate-y-0.5 hover:border-night/15 hover:shadow-md"
-                >
-                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sand text-night">
-                    <Visual className="h-5 w-5" />
-                  </span>
-                  <span className="text-[11px] font-semibold leading-tight text-night/70">{item.label}</span>
-                </button>
-              )
-            })}
-          </div>
-
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-white/10 bg-white/6 p-3.5">
-              <p className="text-2xl font-bold text-white">{statsLoading ? '...' : formatNumber(activeCount)}</p>
-              <p className="mt-1 text-sm text-white/65">annonces en ligne</p>
-              <p className="mt-2 text-[11px] text-white/35">mis a jour toutes les heures</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/6 p-3.5">
-              <p className="text-2xl font-bold text-white">{statsLoading ? '...' : formatNumber(bonPlansCount)}</p>
-              <p className="mt-1 text-sm text-white/65">bons plans actifs</p>
-              <p className="mt-2 text-[11px] text-white/35">mis a jour toutes les heures</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/6 p-3.5">
-              <p className="text-2xl font-bold text-white">{statsLoading ? '...' : formatNumber(rideCount ?? 0)}</p>
-              <p className="mt-1 text-sm text-white/65">covoiturages actifs</p>
-              <p className="mt-2 text-[11px] text-white/35">trajets, reseau local, places partagees</p>
-            </div>
+          <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
+            <Link href="/annonces/nouvelle" className="btn-primary rounded-2xl px-4 py-2.5 text-sm">
+              Publier une annonce
+            </Link>
+            <Link href="/annonces" className="btn-secondary rounded-2xl px-4 py-2.5 text-sm">
+              Parcourir les annonces
+            </Link>
           </div>
         </div>
       </div>
+    </section>
+  )
+}
+
+
+function AnimatedStat({ value, label, loading }: { value: number | null; label: string; loading: boolean }) {
+  const ref = useRef<HTMLDivElement | null>(null)
+  const [displayValue, setDisplayValue] = useState(0)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const element = ref.current
+    if (!element) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.3 },
+    )
+
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!visible || loading || value == null) return
+    let raf = 0
+    const start = performance.now()
+    const duration = 1500
+
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - start) / duration)
+      const eased = 1 - Math.pow(1 - progress, 4)
+      setDisplayValue(Math.round(value * eased))
+      if (progress < 1) {
+        raf = requestAnimationFrame(tick)
+      }
+    }
+
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [loading, value, visible])
+
+  const formatted = loading ? '...' : new Intl.NumberFormat('fr-FR').format(displayValue)
+
+  return (
+    <div ref={ref} className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center shadow-sm">
+      <p className="text-4xl font-bold text-coral md:text-[2.5rem]">{formatted}</p>
+      <p className="mt-2 text-sm font-medium text-night/65">{label}</p>
+    </div>
+  )
+}
+
+export function HomeStatsSection() {
+  return (
+    <section className="mx-auto max-w-7xl px-4 pb-10">
+      <PlatformStats variant="light" />
     </section>
   )
 }
@@ -122,31 +147,33 @@ export function FeaturedListingsSection({
   return (
     <section id="featured-listings" className="mx-auto max-w-7xl px-4 pb-10">
       <div className="mb-5 flex items-end justify-between gap-4">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Annonces en vedette</p>
+        <div className="section-lagon">
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Annonces en vedette</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">Les annonces les plus visibles en ce moment</h2>
         </div>
-        <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-coral hover:underline md:inline-flex">
+        <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
           Tout voir <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
 
-      {loading ? (
-        <ListingSkeletonGrid count={8} className="grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" />
-      ) : listings.length > 0 ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {listings.map((listing) => (
-            <ListingCard key={listing.id} listing={listing} />
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-[2rem] border border-night/8 bg-white/90 py-14 text-center text-night/45">
-          <p className="text-sm">Pas encore d&apos;annonce en vedette.</p>
-          <Link href="/annonces/nouvelle" className="btn-primary mt-4 inline-block">
-            Etre le premier a publier
-          </Link>
-        </div>
-      )}
+      <div className="rounded-[2rem] border border-[var(--color-border)] border-l-4 border-l-nc-lagon bg-[var(--color-surface)] p-4 shadow-sm md:p-5">
+        {loading ? (
+          <ListingSkeletonGrid count={8} className="grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" />
+        ) : listings.length > 0 ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {listings.map((listing) => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] py-14 text-center text-night/45">
+            <p className="text-sm">Pas encore d&apos;annonce en vedette.</p>
+            <Link href="/annonces/nouvelle" className="btn-primary mt-4 inline-block">
+              Être le premier à publier
+            </Link>
+          </div>
+        )}
+      </div>
     </section>
   )
 }
@@ -154,17 +181,17 @@ export function FeaturedListingsSection({
 export function SearchAlertsSection() {
   return (
     <section className="mx-auto max-w-7xl px-4 pb-10">
-      <div className="grid gap-5 overflow-hidden rounded-[2rem] border border-night/8 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.18))] px-6 py-8 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)] lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+      <div className="grid gap-5 overflow-hidden rounded-[2rem] border border-[var(--color-border)] border-b-4 border-b-nc-corail bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.18))] px-6 py-8 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)] lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-lagoon">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-lagon">
             <Sparkles className="h-3.5 w-3.5" />
-            Coups de coeur
+            Coups de cœur
           </div>
           <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
-            Gardez vos recherches en memoire et recevez une alerte quand une offre correspond.
+            Gardez vos recherches en mémoire et recevez une alerte quand une offre correspond.
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
-            Les utilisateurs peuvent enregistrer des mots-cles pour suivre ce qui compte vraiment: un modele precis, une commune, une gamme de prix ou une categorie.
+            Les utilisateurs peuvent enregistrer des mots-clés pour suivre ce qui compte vraiment: un modèle précis, une commune, une gamme de prix ou une catégorie.
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
             {SEARCH_ALERTS.map((term) => (
@@ -179,7 +206,7 @@ export function SearchAlertsSection() {
         </div>
 
         <div className="rounded-[1.75rem] border border-white/10 bg-white/8 p-5">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-lagoon">Exemple d&apos;alerte</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Exemple d&apos;alerte</p>
           <div className="mt-4 space-y-3">
             <div className="rounded-2xl bg-white/10 p-4">
               <p className="text-sm font-semibold">"Toyota Hilux"</p>
@@ -204,6 +231,96 @@ export function SearchAlertsSection() {
   )
 }
 
+function CategoryTreeRow({
+  category,
+  depth,
+  onBrowse,
+}: {
+  category: CategoryNode
+  depth: number
+  onBrowse: (slug: string) => void
+}) {
+  const Visual = getCategoryIcon(category.slug, category.name, category.icon)
+  const children = getCategoryChildren(category)
+
+  return (
+    <div className={depth === 0 ? 'space-y-3' : 'space-y-3 border-l border-[var(--color-border)] pl-3'}>
+      <button
+        type="button"
+        onClick={() => onBrowse(category.slug)}
+        className={`flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-all hover:-translate-y-0.5 hover:shadow-sm ${
+          depth === 0
+            ? 'border-[var(--color-border)] bg-[var(--color-surface)]'
+            : 'border-[var(--color-border)] bg-[var(--color-background-secondary)]/80'
+        }`}
+      >
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-nc-lagonLight text-nc-lagonText">
+          <Visual className="h-5 w-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-semibold text-[var(--color-text-primary)]">{category.name}</span>
+          <span className="block text-xs text-[var(--color-text-secondary)]">
+            {depth === 0 ? 'Famille ouverte' : 'Sous-catégorie ouverte'}
+          </span>
+        </span>
+        <ChevronRight className="h-4 w-4 shrink-0 text-nc-lagon" />
+      </button>
+
+      {children.length > 0 ? (
+        <div className={depth === 0 ? 'grid gap-2 md:grid-cols-2' : 'space-y-2'}>
+          {children.map((child) => {
+            const grandChildren = getCategoryChildren(child)
+            const ChildVisual = getCategoryIcon(child.slug, child.name, child.icon)
+
+            return (
+              <div
+                key={child.id}
+                className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-sm"
+              >
+                <button
+                  type="button"
+                  onClick={() => onBrowse(child.slug)}
+                  className="flex w-full items-center gap-3 text-left transition hover:-translate-y-0.5"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-nc-lagonLight text-nc-lagonText">
+                    <ChildVisual className="h-4 w-4" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-semibold text-[var(--color-text-primary)]">{child.name}</span>
+                    <span className="block text-xs text-[var(--color-text-secondary)]">
+                      {grandChildren.length > 0 ? `${grandChildren.length} sous-catégorie${grandChildren.length > 1 ? 's' : ''}` : 'Dernier niveau'}
+                    </span>
+                  </span>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-nc-lagon" />
+                </button>
+
+                {grandChildren.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {grandChildren.map((grandChild) => {
+                      const GrandVisual = getCategoryIcon(grandChild.slug, grandChild.name, grandChild.icon)
+                      return (
+                        <button
+                          key={grandChild.id}
+                          type="button"
+                          onClick={() => onBrowse(grandChild.slug)}
+                          className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-3 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] transition hover:border-nc-lagon/30 hover:bg-nc-lagonLight hover:text-nc-lagonText"
+                        >
+                          <GrandVisual className="h-3.5 w-3.5" />
+                          <span>{grandChild.name}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                ) : null}
+              </div>
+            )
+          })}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 function CategoryCard({
   category,
   onBrowse,
@@ -211,13 +328,13 @@ function CategoryCard({
   category: CategoryNode
   onBrowse: (slug: string) => void
 }) {
-  const Visual = getCategoryIcon(category.slug)
+  const Visual = getCategoryIcon(category.slug, category.name, category.icon)
 
   return (
-    <div className="group overflow-hidden rounded-[1.75rem] border border-night/8 bg-white/95 p-5 shadow-card transition-all hover:-translate-y-1 hover:shadow-hover">
+    <div className="group overflow-hidden rounded-[1.75rem] border border-night/8 border-l-4 border-l-nc-lagon bg-white/95 p-5 shadow-card transition-all hover:-translate-y-1 hover:shadow-hover">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Categorie</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Catégorie</p>
           <h3 className="mt-1 text-lg font-semibold text-night">{category.name}</h3>
         </div>
         <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-night/5 text-night">
@@ -226,21 +343,25 @@ function CategoryCard({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {(category.subcategories || []).slice(0, 4).map((sub) => (
-          <Link
-            key={sub.id}
-            href={`/annonces?category=${encodeURIComponent(sub.slug)}`}
-            className="rounded-full border border-night/10 bg-sand px-3 py-1.5 text-xs font-medium text-night/70 transition-colors hover:border-coral/30 hover:bg-coral/5 hover:text-coral"
-          >
-            {sub.name}
-          </Link>
-        ))}
+        {(category.subcategories || []).map((sub) => {
+          const SubVisual = getCategoryIcon(sub.slug, sub.name, sub.icon)
+          return (
+            <Link
+              key={sub.id}
+              href={`/annonces?category=${encodeURIComponent(sub.slug)}`}
+              className="rounded-full border border-night/10 bg-sand px-3 py-1.5 text-xs font-medium text-night/70 transition-colors hover:border-nc-lagon/30 hover:bg-nc-lagonLight hover:text-nc-lagonText"
+            >
+              <SubVisual className="mr-1 inline-block h-3.5 w-3.5 align-[-2px]" />
+              {sub.name}
+            </Link>
+          )
+        })}
       </div>
 
       <button
         type="button"
         onClick={() => onBrowse(category.slug)}
-        className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-coral transition-transform group-hover:translate-x-0.5"
+        className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-nc-lagon transition-transform group-hover:translate-x-0.5"
       >
         Voir tous les rayons
         <ArrowRight className="h-4 w-4" />
@@ -259,18 +380,73 @@ export function PopularCategoriesSection({
   return (
     <section className="mx-auto max-w-7xl px-4 py-10">
       <div className="mb-5 flex items-end justify-between gap-4">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Rayons populaires</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les categories que les gens cherchent vraiment</h2>
+        <div className="section-lagon">
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Rayons populaires</p>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les catégories que les gens cherchent vraiment</h2>
         </div>
-        <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-coral hover:underline md:inline-flex">
+        <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
           Voir toutes les annonces <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 rounded-[2rem] border border-night/8 border-l-4 border-l-nc-lagon bg-white/90 p-4 shadow-sm md:grid-cols-2 xl:grid-cols-4">
         {categories.slice(0, 8).map((cat) => (
           <CategoryCard key={cat.id} category={cat} onBrowse={onBrowse} />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+export function ExpandedCategoriesSection({
+  categories,
+  onBrowse,
+}: {
+  categories: CategoryNode[]
+  onBrowse: (slug: string) => void
+}) {
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-10">
+      <div className="mb-5 flex items-end justify-between gap-4">
+        <div className="section-lagon">
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Tous les rayons</p>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">L&apos;arbre complet des catégories, entièrement déplié</h2>
+        </div>
+        <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
+          Voir toutes les annonces <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+        {categories.map((category) => (
+          <article
+            key={category.id}
+            className="overflow-hidden rounded-[2rem] border border-[var(--color-border)] border-t-4 border-t-nc-lagon bg-[var(--color-surface)] p-4 shadow-sm"
+          >
+            <button
+              type="button"
+              onClick={() => onBrowse(category.slug)}
+              className="mb-3 flex w-full items-center gap-3 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-4 py-3 text-left transition hover:-translate-y-0.5 hover:shadow-sm"
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-nc-lagonLight text-nc-lagonText">
+                {(() => {
+                  const Visual = getCategoryIcon(category.slug, category.name, category.icon)
+                  return <Visual className="h-5 w-5" />
+                })()}
+              </span>
+              <span className="min-w-0 flex-1">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-lagon">Catégorie</p>
+                <h3 className="mt-1 truncate font-display text-xl font-bold text-[var(--color-text-primary)]">{category.name}</h3>
+              </span>
+              <ArrowRight className="h-4 w-4 shrink-0 text-nc-lagon" />
+            </button>
+
+            <div className="space-y-2">
+              {(category.children || category.subcategories || []).map((child) => (
+                <CategoryTreeRow key={child.id} category={child} depth={1} onBrowse={onBrowse} />
+              ))}
+            </div>
+          </article>
         ))}
       </div>
     </section>
@@ -316,9 +492,9 @@ function BonPlanCard({ item }: { item: BonPlanItem }) {
   }[item.kind || 'other']
 
   return (
-    <article className="rounded-[1.5rem] border border-white/10 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <article className="rounded-[1.5rem] border border-white/10 border-l-4 border-l-nc-corail bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full border border-coral/15 bg-coral/5 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-coral">
+        <span className="badge-emeraude rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">
           {kindLabel}
         </span>
         {item.is_free_included ? (
@@ -342,7 +518,7 @@ function BonPlanCard({ item }: { item: BonPlanItem }) {
         {item.discount_pct ? (
           <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">-{item.discount_pct}%</span>
         ) : null}
-        <span className="rounded-full bg-sand px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-Caledonie'}</span>
+      <span className="rounded-full bg-sand px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-Calédonie'}</span>
       </div>
 
       <div className="mt-4 space-y-1 text-sm text-night/55">
@@ -380,7 +556,7 @@ function CovoiturageCard({
   return (
     <article className="rounded-[1.5rem] border border-white/10 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full border border-coral/15 bg-coral/5 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-coral">
+        <span className="badge-corail rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">
           Covoiturage
         </span>
         {seatsRemaining <= 1 ? (
@@ -394,7 +570,7 @@ function CovoiturageCard({
         {item.departure} - {item.destination}
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-night/60">
-        {dateLabel} a {timeLabel} · {item.vehicle || 'Vehicule detaille'} · {item.price_xpf.toLocaleString('fr-FR')} XPF / place
+        {dateLabel} à {timeLabel} · {item.vehicle || 'Véhicule détaillé'} · {item.price_xpf.toLocaleString('fr-FR')} XPF / place
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-night/65">
@@ -444,8 +620,8 @@ export function BonPlanSection({
     <section className="mx-auto max-w-7xl px-4 pb-10">
       <div className="grid gap-5 overflow-hidden rounded-[2rem] border border-night/8 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.12))] p-5 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)]">
         <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-lagoon">
+            <div className="rounded-[1.5rem] border border-white/10 border-b-4 border-b-nc-emeraude bg-white/5 p-5">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-nc-emeraude">
               <Sparkles className="h-3.5 w-3.5" />
               Bons plans & promotions
             </div>
@@ -464,10 +640,10 @@ export function BonPlanSection({
             </div>
           </div>
 
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-lagoon">
+            <div className="rounded-[1.5rem] border border-white/10 border-b-4 border-b-nc-sable bg-white/5 p-5">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-nc-sable">
               <Sparkles className="h-3.5 w-3.5" />
-              Evenements & culture
+              Événements & culture
             </div>
             <h3 className="mt-4 font-display text-3xl font-bold text-white">Concerts, festivals et sorties locales</h3>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70 md:text-base">
@@ -489,17 +665,17 @@ export function BonPlanSection({
           <div>
             <div className="mb-3 flex items-end justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-lagoon/90">Promotions</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Promotions</p>
                 <h4 className="mt-1 text-2xl font-bold text-white">Les offres qui marchent maintenant</h4>
               </div>
-              <Link href="/annonces/nouvelle" className="text-sm font-semibold text-lagoon hover:underline">
-                Ajouter la votre
+              <Link href="/annonces/nouvelle" className="text-sm font-semibold text-nc-emeraude hover:underline">
+                Ajouter la vôtre
               </Link>
             </div>
             {loading ? (
               <div className="grid gap-3 md:grid-cols-3">
                 {Array.from({ length: 3 }).map((_, index) => (
-                  <div key={index} className="h-44 animate-pulse rounded-[1.5rem] border border-white/10 bg-white/8" />
+              <div key={index} className="h-44 animate-pulse rounded-[1.5rem] border border-white/10 bg-white/8" />
                 ))}
               </div>
             ) : promoHasItems ? (
@@ -512,7 +688,7 @@ export function BonPlanSection({
               <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5 text-white/80">
                 <p className="text-lg font-semibold text-white">Aucune promotion en ligne pour le moment</p>
                 <p className="mt-2 text-sm text-white/65">
-                  Soyez le premier a publier une promo, un coupon ou une vente flash visible par toute la communaute.
+                  Soyez le premier à publier une promo, un coupon ou une vente flash visible par toute la communauté.
                 </p>
               </div>
             )}
@@ -521,11 +697,11 @@ export function BonPlanSection({
           <div>
             <div className="mb-3 flex items-end justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-lagoon/90">Culture</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-sable">Culture</p>
                 <h4 className="mt-1 text-2xl font-bold text-white">Les rendez-vous a venir</h4>
               </div>
-              <Link href="/annonces/nouvelle" className="text-sm font-semibold text-lagoon hover:underline">
-                Creer un evenement
+              <Link href="/annonces/nouvelle" className="text-sm font-semibold text-nc-sable hover:underline">
+                Créer un événement
               </Link>
             </div>
             {loading ? (
@@ -544,20 +720,20 @@ export function BonPlanSection({
               <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5 text-white/80">
                 <p className="text-lg font-semibold text-white">Aucun evenement en ligne pour le moment</p>
                 <p className="mt-2 text-sm text-white/65">
-                  Ajoutez un concert, une conference ou un marche pour alimenter la section culturelle.
+                Ajoutez un concert, une conférence ou un marché pour alimenter la section culturelle.
                 </p>
               </div>
             )}
           </div>
         </div>
 
-        <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
+        <div className="rounded-[1.5rem] border border-white/10 border-b-4 border-b-nc-corail bg-white/5 p-5">
           <div className="mb-3 flex items-end justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-lagoon/90">Mobilite</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-corail">Mobilite</p>
               <h4 className="mt-1 text-2xl font-bold text-white">Covoiturage local et interurbain</h4>
             </div>
-            <Link href="/covoiturage" className="text-sm font-semibold text-lagoon hover:underline">
+            <Link href="/covoiturage" className="text-sm font-semibold text-nc-corail hover:underline">
               Voir les trajets
             </Link>
           </div>

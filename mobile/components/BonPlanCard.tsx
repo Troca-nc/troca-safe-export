@@ -1,45 +1,54 @@
-import { useMemo } from 'react';
-import { Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { useMemo } from 'react'
+import { Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
+
+import { Colors } from '@/constants/theme'
 
 type BonPlan = {
-  id: string | number;
-  title: string;
-  description: string;
-  image_url?: string | null;
-  promo_label?: string | null;
-  original_price_xpf?: number | null;
-  promo_price_xpf?: number | null;
-  cta_label?: string | null;
-  cta_url?: string | null;
-  category?: string | null;
-  published_until?: string | null;
-  business_name?: string | null;
-  business_logo_url?: string | null;
-  business_badge?: string | null;
-  business_review_avg?: number | null;
-  business_review_count?: number | null;
-};
+  id: string | number
+  title: string
+  description: string
+  image_url?: string | null
+  promo_label?: string | null
+  original_price_xpf?: number | null
+  promo_price_xpf?: number | null
+  cta_label?: string | null
+  cta_url?: string | null
+  category?: string | null
+  kind?: string | null
+  published_until?: string | null
+  business_name?: string | null
+  business_logo_url?: string | null
+  business_badge?: string | null
+  business_review_avg?: number | null
+  business_review_count?: number | null
+}
 
 export default function BonPlanCard({
   bonPlan,
   onFollowBusiness,
 }: {
-  bonPlan: BonPlan;
-  onFollowBusiness?: (businessName: string) => void;
+  bonPlan: BonPlan
+  onFollowBusiness?: (businessName: string) => void
 }) {
   const daysLeft = useMemo(() => {
-    if (!bonPlan.published_until) return null;
-    const diff = Math.ceil((new Date(bonPlan.published_until).getTime() - Date.now()) / 86_400_000);
-    return Math.max(0, diff);
-  }, [bonPlan.published_until]);
+    if (!bonPlan.published_until) return null
+    const diff = Math.ceil((new Date(bonPlan.published_until).getTime() - Date.now()) / 86_400_000)
+    return Math.max(0, diff)
+  }, [bonPlan.published_until])
+
+  const accent = bonPlan.kind === 'promo'
+    ? Colors.emerald
+    : bonPlan.kind === 'event' || bonPlan.kind === 'concert'
+      ? Colors.sable
+      : Colors.lagoon
 
   const openTarget = async () => {
-    const target = bonPlan.cta_url || `https://troca.nc/bons-plans/${bonPlan.id}`;
+    const target = bonPlan.cta_url || `https://troca.nc/bons-plans/${bonPlan.id}`
     try {
-      await Linking.openURL(target);
+      await Linking.openURL(target)
     } catch {}
-  };
+  }
 
   return (
     <View style={styles.card}>
@@ -52,13 +61,21 @@ export default function BonPlanCard({
           </View>
         )}
         <View style={styles.badgesRow}>
-          {bonPlan.category ? <Text style={styles.badge}>{bonPlan.category.replace('_', ' ')}</Text> : null}
-          {daysLeft != null ? <Text style={styles.badgeAccent}>{daysLeft <= 0 ? 'Terminé' : `Plus que ${daysLeft} j`}</Text> : null}
+          {bonPlan.category ? (
+            <Text style={[styles.badge, { backgroundColor: `${accent}18`, color: accent, borderColor: `${accent}40` }]}>
+              {bonPlan.category.replace('_', ' ')}
+            </Text>
+          ) : null}
+          {daysLeft != null ? (
+            <Text style={[styles.badgeAccent, { backgroundColor: `${accent}18`, color: accent, borderColor: `${accent}40` }]}>
+              {daysLeft <= 0 ? 'Terminé' : `Plus que ${daysLeft} j`}
+            </Text>
+          ) : null}
         </View>
         {bonPlan.business_badge === 'verified' ? (
-          <Text style={styles.businessBadge}>✅ Vérifié Troca</Text>
+          <Text style={styles.businessBadge}>Vérifié Troca</Text>
         ) : bonPlan.business_badge === 'active' ? (
-          <Text style={styles.businessBadgeSoft}>🔵 Actif</Text>
+          <Text style={styles.businessBadgeSoft}>Actif</Text>
         ) : null}
       </Pressable>
 
@@ -76,27 +93,27 @@ export default function BonPlanCard({
           </Pressable>
           {onFollowBusiness && bonPlan.business_name ? (
             <Pressable onPress={() => onFollowBusiness(bonPlan.business_name || '')} style={styles.followBtn}>
-              <Ionicons name="heart-outline" size={16} color="#0A7EA4" />
+              <Ionicons name="heart-outline" size={16} color={Colors.primary} />
             </Pressable>
           ) : null}
         </View>
       </View>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFF',
+    backgroundColor: Colors.surface,
     borderRadius: 24,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(8,32,50,0.08)',
+    borderColor: Colors.border,
     marginBottom: 14,
   },
   media: {
     aspectRatio: 16 / 9,
-    backgroundColor: '#F5ECD7',
+    backgroundColor: Colors.surfaceRaised,
     position: 'relative',
   },
   mediaImage: { width: '100%', height: '100%' },
@@ -111,31 +128,29 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   badge: {
-    backgroundColor: 'rgba(8,32,50,0.9)',
-    color: '#FFF',
     fontSize: 10,
     fontWeight: '700',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 999,
     overflow: 'hidden',
+    borderWidth: 1,
   },
   badgeAccent: {
-    backgroundColor: '#D24C2A',
-    color: '#FFF',
     fontSize: 10,
     fontWeight: '700',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 999,
     overflow: 'hidden',
+    borderWidth: 1,
   },
   businessBadge: {
     position: 'absolute',
     left: 12,
     bottom: 12,
     backgroundColor: 'rgba(255,255,255,0.95)',
-    color: '#D24C2A',
+    color: Colors.primary,
     fontSize: 10,
     fontWeight: '700',
     paddingHorizontal: 8,
@@ -147,8 +162,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 12,
     bottom: 12,
-    backgroundColor: 'rgba(10,126,164,0.12)',
-    color: '#0A7EA4',
+    backgroundColor: Colors.primaryLight,
+    color: Colors.primaryDark,
     fontSize: 10,
     fontWeight: '700',
     paddingHorizontal: 8,
@@ -157,18 +172,18 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   content: { padding: 14, gap: 8 },
-  businessName: { fontSize: 12, fontWeight: '700', color: '#4B5563' },
-  title: { fontSize: 16, fontWeight: '800', color: '#082032' },
-  description: { fontSize: 13, lineHeight: 19, color: '#4B5563' },
+  businessName: { fontSize: 12, fontWeight: '700', color: Colors.textSecondary },
+  title: { fontSize: 16, fontWeight: '800', color: Colors.text },
+  description: { fontSize: 13, lineHeight: 19, color: Colors.textSecondary },
   priceRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  oldPrice: { fontSize: 12, color: '#9CA3AF', textDecorationLine: 'line-through' },
-  price: { fontSize: 16, fontWeight: '800', color: '#082032' },
+  oldPrice: { fontSize: 12, color: Colors.gray400, textDecorationLine: 'line-through' },
+  price: { fontSize: 16, fontWeight: '800', color: Colors.text },
   actions: { flexDirection: 'row', gap: 8, marginTop: 4 },
   cta: {
     flex: 1,
     minHeight: 44,
     borderRadius: 16,
-    backgroundColor: '#D24C2A',
+    backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 14,
@@ -179,8 +194,8 @@ const styles = StyleSheet.create({
     minHeight: 44,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(10,126,164,0.2)',
+    borderColor: Colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
-});
+})

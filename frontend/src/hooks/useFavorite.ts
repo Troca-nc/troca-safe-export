@@ -3,6 +3,7 @@
 import { useCallback } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api, invalidateApiCache } from '@/lib/api'
+import { trackEvent } from '@/lib/analytics'
 import { useFavorisStore } from '@/store/favorisStore'
 
 export type FavoriteListing = {
@@ -32,7 +33,7 @@ export function useFavorite() {
   const loading = useFavorisStore((state) => state.loading)
 
   // TODO: test E2E sur le toggle favori optimiste et le rollback en cas d'échec réseau.
-  const mutation = useMutation({
+  const mutation = useMutation<FavoriteListing, unknown, FavoriteListing, { snapshot: FavoriteSnapshot; wasSaved: boolean; listing: FavoriteListing }>({
     mutationFn: async (listing: FavoriteListing) => {
       await api.post(`/listings/${listing.id}/favoris`)
       return listing
@@ -86,6 +87,14 @@ export function useFavorite() {
       queryClient.invalidateQueries({ queryKey: ['listings'] })
       invalidateApiCache('favorites.')
       invalidateApiCache('listings.')
+    },
+    onSuccess: async (_data, _listing, context) => {
+      if (context && !context.wasSaved) {
+        await trackEvent('favorite_add', {
+          listing_id: context.listing.id,
+          listing_title: context.listing.titre,
+        }).catch(() => {})
+      }
     },
   })
 

@@ -3,6 +3,7 @@ import { Alert } from 'react-native'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { favoritesApi, invalidateApiCache } from '@/lib/api'
+import { trackEvent } from '@/lib/analytics'
 
 export type FavoriteListing = {
   id: string
@@ -15,6 +16,12 @@ export type FavoriteListing = {
 
 type FavoritesQueryPayload = {
   data?: Array<Record<string, unknown>>
+}
+
+type FavoriteMutationContext = {
+  previous?: FavoritesQueryPayload | undefined
+  wasSaved: boolean
+  listing: FavoriteListing
 }
 
 function toNullableString(value: unknown) {
@@ -42,16 +49,17 @@ export function useFavorite() {
   const queryClient = useQueryClient()
 
   // TODO: test E2E sur le toggle favori optimiste et le rollback en cas d'échec réseau.
-  const mutation = useMutation({
+  const mutation = useMutation<FavoriteListing, unknown, FavoriteListing, FavoriteMutationContext>({
     mutationFn: async (listing: FavoriteListing) => {
       await favoritesApi.toggleFavorite(listing.id)
       return listing
     },
-    onMutate: async (listing) => {
+    onMutate: async (listing): Promise<FavoriteMutationContext> => {
       await queryClient.cancelQueries({ queryKey: ['favorites'] })
       const previous = queryClient.getQueryData<FavoritesQueryPayload>(['favorites'])
       const current = previous?.data ?? []
       const normalized = normalizeFavorite(listing)
+      const wasSaved = current.some((item) => String(item.id) === listing.id)
       const next = current.some((item) => String(item.id) === listing.id)
         ? current.filter((item) => String(item.id) !== listing.id)
         : [normalized, ...current]
@@ -61,7 +69,7 @@ export function useFavorite() {
         data: next,
       })
 
-      return { previous }
+      return { previous, wasSaved, listing }
     },
     onError: (_error, _listing, context) => {
       if (context?.previous) {
@@ -74,6 +82,14 @@ export function useFavorite() {
       queryClient.invalidateQueries({ queryKey: ['listings'] })
       invalidateApiCache('favorites.')
       invalidateApiCache('listings.')
+    },
+    onSuccess: async (_data, _listing, context) => {
+      if (context && !context.wasSaved) {
+        await trackEvent('favorite_add', {
+          listing_id: context.listing.id,
+          listing_title: context.listing.titre,
+        }).catch(() => {})
+      }
     },
   })
 

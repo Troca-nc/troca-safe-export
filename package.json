@@ -1,0 +1,11 @@
+{
+  "name": "troca-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "seed": "node database/seeds/demo-seed.js",
+    "seed:reset": "npm run seed",
+    "dev": "node scripts/dev.js",
+    "migrate": "node scripts/migrate.js"
+  }
+}

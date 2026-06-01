@@ -3,11 +3,11 @@
 const express = require('express');
 
 const { query } = require('../config/database');
-const { authenticate, requireAdmin } = require('../middleware/auth');
+const { requireAdminToken, adminRateLimit } = require('../middleware/adminApiToken');
 
 const router = express.Router();
 
-router.use(authenticate, requireAdmin);
+router.use(adminRateLimit, requireAdminToken);
 
 function mapBusinessRow(row) {
   return {

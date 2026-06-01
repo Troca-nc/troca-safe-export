@@ -10,6 +10,7 @@ const { query }             = require('../config/database');
 const { logger }            = require('../utils/logger');
 const { recordWebsocket }    = require('./observability');
 const { markConversationMessagesRead } = require('./messageConversationService');
+const { markUserOffline, markUserOnline } = require('./presenceService');
 const {
   initWebsocketBridge,
   publishConversationEvent,
@@ -72,6 +73,7 @@ function initSocket(httpServer) {
 
     socket.userId   = result.rows[0].id;
     socket.userName = `${result.rows[0].prenom} ${result.rows[0].nom}`;
+    markUserOnline(socket.userId);
     next();
     } catch {
       recordWebsocket('auth_error');
@@ -141,6 +143,7 @@ function initSocket(httpServer) {
     });
 
     socket.on('disconnect', () => {
+      markUserOffline(userId);
       recordWebsocket('disconnect', { user_id: userId, socket_id: socket.id });
       logger.info('ws_disconnect', { user_id: userId, socket_id: socket.id });
     });

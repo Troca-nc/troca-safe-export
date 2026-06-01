@@ -6,25 +6,25 @@ export type DemoAccountKey = 'particulier' | 'pro' | 'bon_plan' | 'admin'
 
 export const DEMO_ACCOUNTS: Record<DemoAccountKey, { email: string; password: string; label: string; description: string }> = {
   particulier: {
-    email: 'particulier@demo.troca',
+    email: 'particulier@demo.troca.nc',
     password: 'Demo1234!',
     label: 'Particulier',
     description: 'Publier, discuter et gérer ses favoris.',
   },
   pro: {
-    email: 'pro@demo.troca',
+    email: 'pro@demo.troca.nc',
     password: 'Demo1234!',
     label: 'Compte Pro',
     description: 'Vues, boosts, abonnement et tableaux de bord.',
   },
   bon_plan: {
-    email: 'bonplan@demo.troca',
+    email: 'bonplan@demo.troca.nc',
     password: 'Demo1234!',
     label: 'Bon plan',
     description: 'Promos, événements et campagnes sponsorisées.',
   },
   admin: {
-    email: 'admin@demo.troca',
+    email: 'admin@demo.troca.nc',
     password: 'Demo1234!',
     label: 'Administrateur',
     description: 'Modération, dashboards et parcours de supervision.',
@@ -47,7 +47,7 @@ export async function getDemoStatus() {
 }
 
 export function isDemoEmail(email?: string | null) {
-  return Boolean(email && email.endsWith('@demo.troca'))
+  return Boolean(email && email.endsWith('@demo.troca.nc'))
 }
 
 export function inferDemoAccount(email?: string | null): DemoAccountKey | null {

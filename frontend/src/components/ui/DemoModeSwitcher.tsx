@@ -13,7 +13,7 @@ const DEMO_OPTIONS: Array<{
 }> = [
   { key: 'visitor', label: 'Visiteur', description: 'Voir le site sans être connecté', icon: UserRound },
   { key: 'particulier', label: 'Particulier', description: 'Déposer une annonce classique', icon: UserCheck },
-  { key: 'pro', label: 'Compte Pro', description: 'Voir l’espace vendeur professionnel', icon: Store },
+  { key: 'pro', label: 'Compte Pro', description: "Voir l'espace vendeur professionnel", icon: Store },
   { key: 'bon_plan', label: 'Bon plan', description: 'Simuler un annonceur sponsorisé', icon: Megaphone },
 ]
 
@@ -28,17 +28,23 @@ const PROFILE_TONE: Record<Exclude<DemoProfileKey, 'visitor'> | 'visitor', {
 }
 
 export default function DemoModeSwitcher() {
+  const showDemoBar = process.env.NEXT_PUBLIC_SHOW_DEMO_BAR === 'true'
   const [open, setOpen] = useState(false)
   const { demoProfile, setDemoProfile, user } = useAuthStore()
   const inferredProfile = inferDemoAccount(user?.email)
+  const activeProfile = demoProfile ?? inferredProfile ?? 'visitor'
 
   const activeOption = useMemo(() => {
-    return DEMO_OPTIONS.find((option) => option.key === (demoProfile ?? inferredProfile)) ?? null
-  }, [demoProfile, inferredProfile])
+    return DEMO_OPTIONS.find((option) => option.key === activeProfile) ?? null
+  }, [activeProfile])
+
+  if (!showDemoBar) return null
 
   const currentLabel = activeOption?.label ?? 'Mode réel'
-  const currentDescription = activeOption?.description ?? (user ? `${user.first_name} ${user.last_name}`.trim() : 'Aucun profil démo actif')
-  const tone = PROFILE_TONE[(demoProfile ?? inferredProfile ?? 'visitor') as keyof typeof PROFILE_TONE]
+  const currentDescription = activeOption
+    ? (user ? `${user.first_name} ${user.last_name}`.trim() : 'Aucun profil démo actif')
+    : 'Aucun profil démo actif'
+  const tone = PROFILE_TONE[activeProfile as keyof typeof PROFILE_TONE] ?? PROFILE_TONE.visitor
 
   return (
     <div className="relative w-full">
@@ -76,7 +82,13 @@ export default function DemoModeSwitcher() {
             className="fixed inset-0 z-30 cursor-default"
             onClick={() => setOpen(false)}
           />
-          <div id="demo-mode-menu" role="menu" aria-label="Sélecteur de mode démo" onKeyDown={(e) => { if (e.key === 'Escape') setOpen(false) }} className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-2xl border border-night/10 bg-white shadow-[0_18px_60px_rgba(8,32,50,0.14)]">
+          <div
+            id="demo-mode-menu"
+            role="menu"
+            aria-label="Sélecteur de mode démo"
+            onKeyDown={(e) => { if (e.key === 'Escape') setOpen(false) }}
+            className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-2xl border border-night/10 bg-white shadow-[0_18px_60px_rgba(8,32,50,0.14)]"
+          >
             <button
               type="button"
               onClick={() => {

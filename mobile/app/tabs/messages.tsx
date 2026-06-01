@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile — Onglet Messages (liste des conversations)
+//  Troca Mobile - Onglet Messages (liste des conversations)
 // ============================================================
 
 import {
@@ -18,20 +18,87 @@ import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 interface Conversation {
-  id:          string;
-  listing_id:  string;
-  buyer_id:    number;
-  seller_id:   number;
+  id: string;
+  listing_id: string;
+  buyer_id: number;
+  seller_id: number;
   unread_count: number;
-  updated_at:  string;
+  updated_at: string;
   annonce: { titre?: string; image?: string | null; image_url?: string | null };
-  other_user:  { prenom?: string; nom?: string; avatar_url: string | null; trust_score?: number | null; trust_level?: string | null };
-  last_message?: { content: string };
+  other_user: {
+    prenom?: string;
+    nom?: string;
+    avatar_url: string | null;
+    trust_score?: number | null;
+    trust_level?: string | null;
+    is_online?: boolean;
+    last_seen_label?: string | null;
+    note_moyenne?: number | null;
+    nb_avis?: number | null;
+    avg_response_time_label?: string | null;
+  };
+  last_message?: {
+    content?: string | null;
+    attachment_name?: string | null;
+    attachment_url?: string | null;
+    attachment_download_url?: string | null;
+    attachment_mime_type?: string | null;
+    type?: 'text' | 'photo' | 'audio' | 'document' | 'offer' | 'system';
+  };
+}
+
+function getPreview(message?: Conversation['last_message']) {
+  if (!message) return 'Nouvelle conversation';
+  if (message.type === 'audio') return 'Message vocal';
+  if (message.type === 'photo') return 'Photo partagée';
+  if (message.type === 'document') return 'Document partagé';
+  if (message.type === 'offer') return 'Offre de prix';
+  return message.content ?? 'Message';
+}
+
+function isImageMime(mime?: string | null) {
+  return !!mime && mime.startsWith('image/');
+}
+
+function getAttachmentPreview(message?: Conversation['last_message']) {
+  if (!message) return null;
+
+  if (message.type === 'photo') {
+    const url = message.attachment_download_url || message.attachment_url;
+    if (!url) return null;
+    return {
+      kind: 'image' as const,
+      url,
+      label: 'Photo partagée',
+    };
+  }
+
+  if (message.type === 'document') {
+    const url = message.attachment_download_url || message.attachment_url;
+    if (!url) return null;
+
+    if (isImageMime(message.attachment_mime_type)) {
+      return {
+        kind: 'image' as const,
+        url,
+        label: message.attachment_name || 'Image partagée',
+      };
+    }
+
+    return {
+      kind: 'document' as const,
+      url,
+      label: message.attachment_name || 'Document partagé',
+      mime: message.attachment_mime_type || '',
+    };
+  }
+
+  return null;
 }
 
 export default function MessagesTab() {
-  const [convs, setConvs]           = useState<Conversation[]>([]);
-  const [loading, setLoading]       = useState(true);
+  const [convs, setConvs] = useState<Conversation[]>([]);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [connectionState, setConnectionState] = useState(messagingSocket.getSnapshot().state);
   const [reconnectInMs, setReconnectInMs] = useState<number | null>(messagingSocket.getSnapshot().reconnectInMs);
@@ -81,6 +148,7 @@ export default function MessagesTab() {
     const timeAgo = formatDistanceToNow(new Date(item.updated_at), {
       addSuffix: true, locale: fr,
     });
+    const attachment = getAttachmentPreview(item.last_message);
 
     return (
       <TouchableOpacity
@@ -88,7 +156,6 @@ export default function MessagesTab() {
         onPress={() => router.push(`/messages/${item.id}`)}
         activeOpacity={0.75}
       >
-        {/* Avatar */}
         {otherUser.avatar_url
           ? <Image source={{ uri: otherUser.avatar_url }} style={styles.avatar} />
           : <View style={styles.avatarFallback}>
@@ -111,6 +178,30 @@ export default function MessagesTab() {
               </Text>
             </View>
           )}
+          <View style={styles.metaRow}>
+            <View style={[styles.metaBadge, otherUser.is_online ? styles.metaBadgeOnline : styles.metaBadgeOffline]}>
+              <View style={[styles.metaDot, otherUser.is_online ? styles.metaDotOnline : styles.metaDotOffline]} />
+              <Text style={[styles.metaText, otherUser.is_online ? styles.metaTextOnline : styles.metaTextOffline]}>
+                {otherUser.is_online ? 'En ligne' : (otherUser.last_seen_label ?? 'Hors ligne')}
+              </Text>
+            </View>
+            {otherUser.avg_response_time_label && (
+              <View style={[styles.metaBadge, styles.metaBadgeInfo]}>
+                <Ionicons name="time-outline" size={10} color={Colors.primaryDark} />
+                <Text style={[styles.metaText, styles.metaTextInfo]}>
+                  Répond en {otherUser.avg_response_time_label}
+                </Text>
+              </View>
+            )}
+            {otherUser.note_moyenne != null && (
+              <View style={[styles.metaBadge, styles.metaBadgeGood]}>
+                <Ionicons name="star" size={10} color={Colors.warning} />
+                <Text style={[styles.metaText, styles.metaTextGood]}>
+                  {otherUser.note_moyenne.toFixed(1)}/5{otherUser.nb_avis != null ? ` (${otherUser.nb_avis})` : ''}
+                </Text>
+              </View>
+            )}
+          </View>
           <Text style={styles.itemAnnonce} numberOfLines={1}>
             {item.annonce.titre ?? 'Annonce'}
           </Text>
@@ -118,8 +209,25 @@ export default function MessagesTab() {
             style={[styles.itemLast, isUnread && styles.itemLastBold]}
             numberOfLines={1}
           >
-            {item.last_message?.content ?? 'Nouvelle conversation'}
+            {getPreview(item.last_message)}
           </Text>
+
+          {attachment && (
+            <View style={styles.attachmentRow}>
+              {attachment.kind === 'image' ? (
+                <Image source={{ uri: attachment.url }} style={styles.attachmentThumb} />
+              ) : (
+                <View style={[styles.attachmentThumb, styles.attachmentDoc]}>
+                  <Ionicons name="document-text" size={14} color={Colors.primaryDark} />
+                </View>
+              )}
+              <Text style={styles.attachmentText} numberOfLines={1}>
+                {attachment.kind === 'document' && attachment.mime
+                  ? `${attachment.label} · ${attachment.mime.split('/').pop()?.toUpperCase() ?? 'DOC'}`
+                  : attachment.label}
+              </Text>
+            </View>
+          )}
         </View>
 
         {isUnread && (
@@ -206,16 +314,41 @@ const styles = StyleSheet.create({
   avatar:     { width: 52, height: 52, borderRadius: 26, marginRight: Spacing.md },
   avatarFallback: { width: 52, height: 52, borderRadius: 26, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
   avatarText: { color: Colors.white, fontSize: FontSize.lg, fontWeight: FontWeight.bold },
-  itemBody:   { flex: 1 },
+  itemBody:   { flex: 1, minWidth: 0 },
   itemHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  itemName:   { fontSize: FontSize.md, fontWeight: FontWeight.medium, color: Colors.text },
+  itemName:   { fontSize: FontSize.md, fontWeight: FontWeight.medium, color: Colors.text, flexShrink: 1 },
   itemNameBold: { fontWeight: FontWeight.bold },
-  itemTime:   { fontSize: FontSize.xs, color: Colors.textTertiary },
+  itemTime:   { fontSize: FontSize.xs, color: Colors.textTertiary, marginLeft: 8 },
   trustRow:   { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
   trustText:  { fontSize: FontSize.xs, color: Colors.textSecondary },
+  metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 },
+  metaBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    borderRadius: Radius.full,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  metaBadgeOnline: { backgroundColor: 'rgba(34, 197, 94, 0.12)' },
+  metaBadgeOffline: { backgroundColor: Colors.gray100 },
+  metaBadgeInfo: { backgroundColor: 'rgba(13, 121, 193, 0.10)' },
+  metaBadgeGood: { backgroundColor: 'rgba(46, 139, 87, 0.10)' },
+  metaDot: { width: 6, height: 6, borderRadius: 999 },
+  metaDotOnline: { backgroundColor: '#22c55e' },
+  metaDotOffline: { backgroundColor: Colors.gray300 },
+  metaText: { fontSize: 10, fontWeight: FontWeight.semibold },
+  metaTextOnline: { color: '#15803d' },
+  metaTextOffline: { color: Colors.textSecondary },
+  metaTextInfo: { color: Colors.primaryDark },
+  metaTextGood: { color: Colors.emeraldText },
   itemAnnonce:{ fontSize: FontSize.xs, color: Colors.primary, marginTop: 1 },
   itemLast:   { fontSize: FontSize.sm, color: Colors.textSecondary, marginTop: 2 },
   itemLastBold:{ color: Colors.text, fontWeight: FontWeight.semibold },
+  attachmentRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
+  attachmentThumb: { width: 26, height: 26, borderRadius: 8, overflow: 'hidden' },
+  attachmentDoc: { alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.primaryLight },
+  attachmentText: { flex: 1, minWidth: 0, fontSize: FontSize.xs, color: Colors.textSecondary },
   unreadBadge:{ backgroundColor: Colors.primary, borderRadius: 12, minWidth: 22, height: 22, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6, marginLeft: Spacing.sm },
   unreadText: { color: Colors.white, fontSize: FontSize.xs, fontWeight: FontWeight.bold },
   separator:  { height: 1, backgroundColor: Colors.border, marginLeft: 52 + Spacing.lg + Spacing.md },

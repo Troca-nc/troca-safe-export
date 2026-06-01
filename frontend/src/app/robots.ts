@@ -15,7 +15,7 @@ export default function robots(): MetadataRoute.Robots {
           '/admin/',
           '/api/',
           '/profil/',
-          '/mes-annonces/',
+          '/profil/',
           '/messages/',
           '/favoris/',
           '/connexion',
