@@ -6,6 +6,10 @@
 const isProd = process.env.NODE_ENV === 'production'
 
 const nextConfig = {
+  generateBuildId: async () => {
+    return `build-${Date.now()}`
+  },
+
   // Standalone uniquement quand on le demande explicitement (Docker)
   output: process.env.NEXT_STANDALONE === '1' ? 'standalone' : undefined,
 
