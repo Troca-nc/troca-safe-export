@@ -43,6 +43,7 @@ function getCategoryChildren(category: CategoryNode) {
 function getHomepageCategoryIcon(category: Pick<CategoryNode, 'slug' | 'name'>) {
   const value = `${category.slug} ${category.name}`.toLowerCase()
   if (value.includes('vehic')) return Car
+  if (value.includes('pieces') || value.includes('equipement')) return Wrench
   if (value.includes('naut') || value.includes('bateau') || value.includes('marine')) return Anchor
   if (value.includes('immobili') || value.includes('logement')) return Home
   if (value.includes('emploi') || value.includes('job')) return Briefcase

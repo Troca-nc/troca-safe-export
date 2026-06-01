@@ -78,6 +78,7 @@ const ICON_COMPONENTS: Record<string, IconComponent> = {
   IconLayoutGrid: Package,
   IconBuildingFactory2: HardHat,
   IconBuildingFactory: HardHat,
+  'pieces-equipement': Wrench,
 }
 
 const ROOT_ICON_BY_SLUG: Record<string, IconComponent> = {
@@ -88,6 +89,7 @@ const ROOT_ICON_BY_SLUG: Record<string, IconComponent> = {
   mode: Shirt,
   'maison-jardin': Sofa,
   'bricolage-outillage': Wrench,
+  'pieces-equipement': Wrench,
   'famille-puericulture': Baby,
   'electronique-multimedia': Smartphone,
   loisirs: Gamepad2,

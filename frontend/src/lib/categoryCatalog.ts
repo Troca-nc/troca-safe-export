@@ -31,6 +31,7 @@ const ROOT_ICON_MAP: Record<string, string> = {
   mode: 'shirt',
   'maison-jardin': 'sofa',
   'bricolage-outillage': 'hammer',
+  'pieces-equipement': 'wrench',
   'famille-puericulture': 'users',
   'electronique-multimedia': 'smartphone',
   loisirs: 'dumbbell',

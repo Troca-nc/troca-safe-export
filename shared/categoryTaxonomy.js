@@ -160,7 +160,7 @@ const TAXONOMY_TREE = [
     n('Voitures', [
       n('Citadines'),
       n('Berlines'),
-      n('SUV/4×4'),
+      n('SUV/4x4'),
       n('Breaks'),
       n('Monospaces & Vans'),
       n('Cabriolets'),
@@ -183,8 +183,8 @@ const TAXONOMY_TREE = [
       n('Trails/Enduro/Cross'),
       n('Collection'),
       n('125cc et moins'),
-      n('Scooters -125cm³'),
-      n('Scooters +125cm³'),
+      n('Scooters -125cm²'),
+      n('Scooters +125cm²'),
       n('Scooters 3 roues'),
       n('Quads enfant & adulte'),
     ]),
@@ -197,7 +197,9 @@ const TAXONOMY_TREE = [
       n('Vélo free-style'),
       n('Trottinettes'),
     ]),
-    n('Pièces & Équipement auto', [
+  ]),
+  n('Pièces & Équipement', [
+    n('Pièces auto', [
       n('Jantes'),
       n('Pneus'),
       n('Moteurs complets'),
@@ -207,27 +209,31 @@ const TAXONOMY_TREE = [
       n('Freinage'),
       n('Suspensions'),
       n('Échappement'),
-      n('Carrosseries'),
-      n('Parechocs'),
+      n('Carrosserie & Pare-chocs'),
       n('Éclairages'),
-      n('Vitres/Hayons'),
+      n('Vitres & Optiques'),
       n('Électronique auto'),
-      n('Attelages'),
-      n('Barres & Protections'),
-      n('Tuning'),
-      n('Sonorisation'),
+      n('Attelages & Barres'),
+      n('Tuning & Sonorisation'),
+      n('Entretien & Consommables'),
       n('Épaves'),
-      n('Outillage mécanique'),
-      n('Entretien'),
     ]),
-    n('Équipement deux roues', [
+    n('Pièces & Équipement moto', [
       n('Équipement motard'),
       n('Casques'),
-      n('Équipement cycliste'),
       n('Pièces moto'),
       n('Pièces scooter'),
+    ]),
+    n('Pièces & Équipement vélo', [
+      n('Équipement cycliste'),
       n('Pièces vélo'),
       n('Pièces trottinette'),
+    ]),
+    n('Accessoires véhicules', [
+      n('GPS & Électronique'),
+      n('Sécurité & Antivol'),
+      n('Coffres de toit'),
+      n('Divers'),
     ]),
   ]),
   n('Nautisme', [
@@ -272,7 +278,7 @@ const TAXONOMY_TREE = [
       n('Colocations'),
     ]),
   ]),
-  n("Emploi", [
+  n('Emploi', [
     n("Offres d'emploi", [
       n('Agriculture'),
       n('Automobile'),
@@ -562,7 +568,6 @@ const TAXONOMY_TREE = [
   ]),
   n('Divers'),
 ];
-
 function assignIds(nodes, parentId = null, startId = 1, rows = [], path = []) {
   let nextId = startId;
 
