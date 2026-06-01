@@ -1,8 +1,8 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowRight, CalendarDays, Car, ChevronRight, Clock3, Sparkles } from 'lucide-react'
+import { ArrowRight, ChevronRight, Sparkles } from 'lucide-react'
 
 import { trackEvent } from '@/lib/analytics'
 
@@ -112,13 +112,6 @@ function getListingLabel(listing: ListingItem) {
   return 'Annonce récente'
 }
 
-function getListingTone(listing: ListingItem) {
-  if (listing.is_featured || (listing.boosted_until && new Date(listing.boosted_until) > new Date())) return 'border-nc-lagon/20 bg-nc-lagonLight text-nc-lagonText'
-  if (listing.is_urgent) return 'border-amber-200 bg-amber-50 text-amber-700'
-  if (listing.is_pro) return 'border-nc-emeraude/20 bg-nc-emeraudeLight text-nc-emeraudeText'
-  return 'border-night/10 bg-night/5 text-night/60'
-}
-
 function SpotlightCard({
   title,
   subtitle,
@@ -127,7 +120,7 @@ function SpotlightCard({
   badge,
   badgeClassName = '',
   accentClassName = 'text-nc-lagon',
-      tone = 'border-night/10 bg-[var(--color-surface)] text-[var(--color-text-primary)]',
+  tone = 'border-night/10 bg-[var(--color-surface)] text-[var(--color-text-primary)]',
   primaryLabel = 'Voir',
   accent = false,
 }: {
@@ -146,7 +139,7 @@ function SpotlightCard({
     <Link
       href={href}
       className={`group block rounded-[1.5rem] border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${tone} ${accent ? 'bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(255,245,242,0.96))] dark:bg-[linear-gradient(180deg,_rgba(8,32,50,0.98),_rgba(4,18,30,0.96))]' : ''}`}
-      >
+    >
       {badge ? (
         <span className={`inline-flex rounded-full border border-current/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] opacity-85 ${badgeClassName}`}>
           {badge}
@@ -243,6 +236,9 @@ export function HomeSpotlightSection({
   const primaryService = primary as ServiceItem | undefined
   const activeTone = getToneClasses((active as { tone?: SpotlightTone }).tone || 'lagon')
   const totalItems = tabs.reduce((sum, tab) => sum + tab.items.length, 0)
+  const allEmpty = totalItems === 0
+  if (allEmpty) return null
+
   const emptyState =
     active.key === 'premium'
       ? {
@@ -279,11 +275,9 @@ export function HomeSpotlightSection({
                 href: '/covoiturage?mode=publish',
               }
 
-  if (totalItems === 0) return null
-
   return (
     <section className="mx-auto max-w-7xl px-4 pb-10">
-    <div className="overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_24px_80px_rgba(8,32,50,0.08)] dark:bg-[var(--color-surface)]">
+      <div className="overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_24px_80px_rgba(8,32,50,0.08)] dark:bg-[var(--color-surface)]">
         <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.12))] px-6 py-7 text-white md:px-8">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-lagon">
@@ -347,20 +341,14 @@ export function HomeSpotlightSection({
             </div>
           </div>
 
-        <div className="bg-[var(--color-background-secondary)] px-5 py-6 md:px-6">
+          <div className="bg-[var(--color-background-secondary)] px-5 py-6 md:px-6">
             {primary ? (
               <SpotlightCard
-                href={
-                  isListingTab
-                    ? `/annonces/${primaryListing?.id}`
-                    : active.href
-                }
+                href={isListingTab ? `/annonces/${primaryListing?.id}` : active.href}
                 badge={active.badge}
                 badgeClassName={activeTone.pill}
                 accentClassName={activeTone.accentText}
-                title={
-                  primary?.title || 'Contenu'
-                }
+                title={primary?.title || 'Contenu'}
                 subtitle={
                   isListingTab
                     ? `${primaryListing?.category_name || 'Annonce locale'} · ${primaryListing?.commune_name || 'Nouvelle-Calédonie'}`
@@ -376,10 +364,10 @@ export function HomeSpotlightSection({
                 tone={activeTone.card}
               />
             ) : (
-            <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-[var(--color-text-secondary)]">
-              <p className="text-sm font-semibold text-[var(--color-text-primary)]">Aucun rappel pour le moment</p>
-              <p className="mt-1 text-sm">Les contenus récents apparaîtront ici dès qu&apos;ils seront publiés.</p>
-            </div>
+              <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-[var(--color-text-secondary)]">
+                <p className="text-sm font-semibold text-[var(--color-text-primary)]">Aucun rappel pour le moment</p>
+                <p className="mt-1 text-sm">Les contenus récents apparaîtront ici dès qu&apos;ils seront publiés.</p>
+              </div>
             )}
 
             <div className="mt-4 grid gap-3">
@@ -390,16 +378,14 @@ export function HomeSpotlightSection({
                     key={item.id}
                     href={isListing ? `/annonces/${item.id}` : active.href}
                     onClick={() => void trackEvent('home_spotlight_item_open', { tab: active.key, item_id: item.id, kind: isListing ? 'listing' : 'service' })}
-                  className="rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 transition hover:-translate-y-0.5 hover:shadow-md"
-                >
+                    className="rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 transition hover:-translate-y-0.5 hover:shadow-md"
+                  >
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-[var(--color-text-primary)]">
-                          {isListing ? item.title : item.title}
-                        </p>
-                      <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
+                        <p className="truncate text-sm font-semibold text-[var(--color-text-primary)]">{item.title}</p>
+                        <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
                           {isListing
-                    ? `${item.category_name || 'Annonce'} · ${item.commune_name || 'Nouvelle-Calédonie'}`
+                            ? `${item.category_name || 'Annonce'} · ${item.commune_name || 'Nouvelle-Calédonie'}`
                             : `${formatDateLabel(item.event_date)} · ${item.commune_name || item.location_name || 'Local'}`}
                         </p>
                       </div>
