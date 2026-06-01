@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 
 import PlatformStats from '@/components/PlatformStats'
+import CategoryTreeSection from '@/components/home/CategoryTreeSection'
 import ListingCard from '@/components/listings/ListingCard'
 import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
 import type { CategoryNode } from '@/lib/categoryCatalog'
@@ -459,54 +460,7 @@ export function ExpandedCategoriesSection({
   categories: CategoryNode[]
   onBrowse: (slug: string) => void
 }) {
-  return (
-    <section className="mx-auto max-w-7xl px-4 py-10">
-      <div className="mb-5 flex items-end justify-between gap-4">
-        <div className="section-lagon">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Tous les rayons</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">L&apos;arbre complet des catégories, entièrement déplié</h2>
-        </div>
-        <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
-          Voir toutes les annonces <ArrowRight className="h-4 w-4" />
-        </Link>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
-        {categories.map((category) => (
-          <article
-            key={category.id}
-            className="overflow-hidden rounded-[2rem] border border-[var(--color-border)] border-t-4 border-t-nc-lagon bg-[var(--color-surface)] p-4 shadow-sm"
-          >
-            <button
-              type="button"
-              onClick={() => onBrowse(category.slug)}
-              className="mb-3 flex w-full items-center gap-3 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-4 py-3 text-left transition hover:-translate-y-0.5 hover:shadow-sm"
-            >
-              <div className="flex min-w-0 flex-1 flex-col gap-2">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
-                  {(() => {
-                    const Visual = getHomepageCategoryIcon(category)
-                    return <Visual className="h-7 w-7" />
-                  })()}
-                </span>
-                <span className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-lagon">Catégorie</p>
-                  <h3 className="mt-1 truncate font-display text-xl font-bold text-[var(--color-text-primary)]">{category.name}</h3>
-                </span>
-              </div>
-              <ArrowRight className="h-4 w-4 shrink-0 text-nc-lagon" />
-            </button>
-
-            <div className="space-y-2">
-              {(category.children || category.subcategories || []).map((child) => (
-                <CategoryTreeRow key={child.id} category={child} depth={1} onBrowse={onBrowse} />
-              ))}
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
-  )
+  return <CategoryTreeSection />
 }
 
 function buildCategorySearchHref(categorySlug: string, subcategorySlug?: string) {
@@ -556,56 +510,7 @@ export function ExpandedCategoriesGridSection({
 }: {
   categories: CategoryNode[]
 }) {
-  return (
-    <section className="mx-auto max-w-7xl px-4 py-10">
-      <div className="mb-5 flex items-end justify-between gap-4">
-        <div className="section-lagon">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Tous les rayons</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">L&apos;arbre complet des catégories, entièrement déplié</h2>
-        </div>
-        <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
-          Voir toutes les annonces <ArrowRight className="h-4 w-4" />
-        </Link>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-        {categories.map((category) => {
-          const Visual = getHomepageCategoryIcon(category)
-          const children = getCategoryChildren(category)
-
-          return (
-            <article
-              key={category.id}
-              className="rounded-xl border border-night/10 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <div className="flex items-start gap-3">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
-                  <Visual className="h-7 w-7" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <Link
-                    href={buildCategorySearchHref(category.slug)}
-                    className="block text-base font-bold text-night transition-colors hover:text-[#0A7EA4]"
-                  >
-                    {category.name}
-                  </Link>
-                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-nc-lagon">
-                    Catégorie
-                  </p>
-                </div>
-              </div>
-
-              {children.length > 0 ? (
-                <ExpandedCategorySubtree rootSlug={category.slug} categories={children} />
-              ) : (
-                <p className="mt-3 text-sm text-night/45">Aucune sous-catégorie disponible.</p>
-              )}
-            </article>
-          )
-        })}
-      </div>
-    </section>
-  )
+  return <CategoryTreeSection />
 }
 
 type BonPlanItem = {
