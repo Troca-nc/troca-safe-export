@@ -572,7 +572,7 @@ function assignIds(nodes, parentId = null, startId = 1, rows = [], path = []) {
     nextId += 1;
     const currentPath = [...path, node.name];
 
-    const row = {
+    rows.push({
       id,
       parent_id: parentId,
       name: node.name,
@@ -580,14 +580,10 @@ function assignIds(nodes, parentId = null, startId = 1, rows = [], path = []) {
       position,
       icon: inferCategoryIconKey(node.name, slugifyCategoryName(node.name), currentPath),
       children: [],
-    };
-
-    rows.push(row);
+    });
 
     if (Array.isArray(node.children) && node.children.length > 0) {
-      const childRows = [];
-      nextId = assignIds(node.children, id, nextId, childRows, currentPath);
-      row.children = childRows;
+      nextId = assignIds(node.children, id, nextId, rows, currentPath);
     }
   }
 
