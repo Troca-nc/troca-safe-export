@@ -12,33 +12,20 @@ import {
   BonPlanSection,
   FeaturedListingsSection,
   HomeHeroSection,
-  ExpandedCategoriesGridSection,
   SearchAlertsSection,
   HomeStatsSection,
 } from '@/components/home/HomeSections'
-import { FALLBACK_CATEGORIES, hasNestedCategoryTree, type CategoryNode } from '@/lib/categoryCatalog'
-import { mergeCategories } from '@/lib/categoryPresentation'
-import { metaApi } from '@/lib/api'
+import CategoryTreeSection from '@/components/home/CategoryTreeSection'
 
 export default function HomePage() {
   const router = useRouter()
-  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
   const [q, setQ] = useState('')
   const [listings, setListings] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [categories, setCategories] = useState<CategoryNode[]>([])
   const [promoBonPlans, setPromoBonPlans] = useState<any[]>([])
   const [eventBonPlans, setEventBonPlans] = useState<any[]>([])
   const [covoiturages, setCovoiturages] = useState<any[]>([])
   const [bonPlansLoading, setBonPlansLoading] = useState(true)
-
-  const visibleCategories = useMemo(
-    () => {
-      const merged = isDemoMode ? FALLBACK_CATEGORIES : mergeCategories(FALLBACK_CATEGORIES, categories)
-      return hasNestedCategoryTree(merged) ? merged : FALLBACK_CATEGORIES
-    },
-    [categories, isDemoMode]
-  )
 
   const featuredListings = useMemo(() => listings.slice(0, 8), [listings])
   const premiumListings = useMemo(
@@ -51,17 +38,6 @@ export default function HomePage() {
 
   useEffect(() => {
     let alive = true
-
-    const fetchCategories = async () => {
-      try {
-        const res = await metaApi.getCategories()
-        if (!alive) return
-        setCategories(res.data?.data?.length ? res.data.data : FALLBACK_CATEGORIES)
-      } catch {
-        if (!alive) return
-        setCategories(FALLBACK_CATEGORIES)
-      }
-    }
 
     const fetchBonPlans = async () => {
       try {
@@ -85,7 +61,6 @@ export default function HomePage() {
       }
     }
 
-    fetchCategories()
     fetchBonPlans()
     return () => {
       alive = false
@@ -167,7 +142,7 @@ export default function HomePage() {
       />
       <FeaturedListingsSection loading={loading} listings={featuredListings} />
       <SearchAlertsSection />
-      <ExpandedCategoriesGridSection categories={visibleCategories} />
+      <CategoryTreeSection />
     </main>
   )
 }
