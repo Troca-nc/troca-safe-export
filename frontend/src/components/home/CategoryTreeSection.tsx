@@ -124,23 +124,26 @@ function CategorySubtree({
   nodes: CategoryNode[]
   depth?: number
 }) {
-  if (!nodes.length) return null
+  const validNodes = (nodes || []).filter(Boolean)
+  if (!validNodes.length) return null
 
   return (
-    <ul className={depth === 0 ? 'mt-3 space-y-1' : 'mt-2 space-y-1 border-l border-[var(--color-border)] pl-3'}>
-      {nodes.map((node) => {
-        const children = getCategoryChildren(node)
+    <ul className={depth === 0 ? 'mt-2 space-y-1' : 'mt-1 space-y-1 pl-3 border-l border-[var(--color-border)]'}>
+      {validNodes.slice(0, 8).map((node) => {
+        const children = (node.children || node.subcategories || []).filter(Boolean)
         return (
-          <li key={node.id} className="space-y-1">
+          <li key={String(node.id)}>
             <Link
-              href={buildCategoryHref(rootSlug, node.slug)}
+              href={`/annonces?categorie=${rootSlug}&sous_categorie=${node.slug}`}
               className={`block line-clamp-1 transition-colors hover:text-[#0A7EA4] ${
-                depth === 0 ? 'text-sm font-medium text-night/70' : 'text-xs text-night/55'
+                depth === 0 ? 'text-sm text-night/70 hover:text-[#0A7EA4]' : 'text-xs text-night/50'
               }`}
             >
               {node.name}
             </Link>
-            {children.length > 0 ? <CategorySubtree rootSlug={rootSlug} nodes={children} depth={depth + 1} /> : null}
+            {depth === 0 && children.length > 0 ? (
+              <CategorySubtree rootSlug={rootSlug} nodes={children} depth={depth + 1} />
+            ) : null}
           </li>
         )
       })}
@@ -171,7 +174,10 @@ export default function CategoryTreeSection() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {FALLBACK_CATEGORIES.map((cat) => {
           const Icon = resolveCategoryIcon(cat)
-          const subcats = getCategoryChildren(cat)
+          const subcats = (cat.children || cat.subcategories || []).filter(Boolean)
+          if (typeof window !== 'undefined') {
+            console.log('CAT:', cat.name, 'subcats:', subcats.length)
+          }
 
           return (
             <article
