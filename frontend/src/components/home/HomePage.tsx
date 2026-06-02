@@ -16,6 +16,7 @@ import {
   HomeStatsSection,
 } from '@/components/home/HomeSections'
 import CategoryTreeSection from '@/components/home/CategoryTreeSection'
+import ProCarousel from '@/components/pro/ProCarousel'
 import Trocometer from '@/components/trocometer/Trocometer'
 import { API_ORIGIN } from '@/lib/api'
 
@@ -110,6 +111,20 @@ export default function HomePage() {
 
       <HomeStatsSection />
 
+      <section className="mx-auto max-w-7xl px-4 pb-10">
+        <div className="mb-5 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Pros locaux</p>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Nos professionnels recommandés</h2>
+            <p className="mt-1 text-sm text-night/55">Des pros calédoniens vérifiés, à portée de message.</p>
+          </div>
+          <Link href="/pro" className="hidden items-center gap-1 text-sm font-semibold text-nc-emeraude hover:underline md:inline-flex">
+            Devenir Pro <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <ProCarousel />
+      </section>
+
       <HomeSpotlightSection
         latestListings={featuredListings}
         premiumListings={premiumListings}
@@ -143,7 +158,9 @@ export default function HomePage() {
         loading={bonPlansLoading}
       />
       <FeaturedListingsSection loading={loading} listings={featuredListings} />
+
       <SearchAlertsSection />
+
       <section className="mx-auto max-w-7xl px-4 pb-10">
         <div className="mb-5">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Nouveau</p>
@@ -156,6 +173,7 @@ export default function HomePage() {
         </div>
         <Trocometer />
       </section>
+
       <CategoryTreeSection />
     </main>
   )

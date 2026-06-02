@@ -40,6 +40,18 @@ CREATE TABLE IF NOT EXISTS users (
   pro_plan            VARCHAR(20)   DEFAULT NULL,
   pro_expires_at      TIMESTAMPTZ   DEFAULT NULL,
   last_bon_plan_offer_at TIMESTAMPTZ DEFAULT NULL,
+  pro_verified        BOOLEAN       NOT NULL DEFAULT FALSE,
+  pro_verified_at     TIMESTAMPTZ   DEFAULT NULL,
+  pro_company_name    TEXT          DEFAULT NULL,
+  pro_category        TEXT          DEFAULT NULL,
+  pro_description     TEXT          DEFAULT NULL,
+  pro_logo_url        TEXT          DEFAULT NULL,
+  pro_banner_url      TEXT          DEFAULT NULL,
+  pro_website         TEXT          DEFAULT NULL,
+  pro_phone           TEXT          DEFAULT NULL,
+  pro_hours           TEXT          DEFAULT NULL,
+  pro_commune         TEXT          DEFAULT NULL,
+  pro_siret           TEXT          DEFAULT NULL,
   stripe_customer_id  VARCHAR(255)  DEFAULT NULL,
   nb_annonces         INTEGER       NOT NULL DEFAULT 0,
   note_moyenne        NUMERIC(3,2)  DEFAULT NULL,
@@ -763,6 +775,21 @@ CREATE INDEX IF NOT EXISTS idx_covoiturage_reviews_ride
   ON covoiturage_reviews (covoiturage_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_user_reviews_reviewed
   ON user_reviews (reviewed_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS pro_reviews (
+  id                SERIAL PRIMARY KEY,
+  pro_id            INTEGER      REFERENCES users(id) ON DELETE CASCADE,
+  reviewer_id       INTEGER      REFERENCES users(id),
+  rating            INTEGER      CHECK (rating BETWEEN 1 AND 5),
+  comment           TEXT,
+  verified_purchase BOOLEAN      DEFAULT FALSE,
+  created_at        TIMESTAMPTZ  DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_pro_reviews_pro
+  ON pro_reviews (pro_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_pro_reviews_reviewer
+  ON pro_reviews (reviewer_id, created_at DESC);
 
 -- ── INDEX supplémentaires pour les performances ───────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_annonces_boosted  ON annonces (boosted_until) WHERE boosted_until IS NOT NULL;

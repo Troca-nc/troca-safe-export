@@ -23,6 +23,17 @@ const DEMO_USERS = [
     is_admin: true,
     is_pro: true,
     pro_plan: 'pro',
+    pro_verified: true,
+    pro_company_name: 'Troca Demo Admin',
+    pro_category: 'Plateforme',
+    pro_description: 'Compte d’administration utilisé pour les démonstrations, la modération et le QA.',
+    pro_logo_url: null,
+    pro_banner_url: null,
+    pro_website: 'https://troca.nc',
+    pro_phone: '+687999000',
+    pro_hours: 'Lun - Ven : 08h - 17h',
+    pro_commune: 'Nouméa',
+    pro_siret: 'RIDET-ADMIN-DEMO',
     commune_slug: 'noumea',
     bio: 'Administratrice locale pour les démonstrations et le QA.',
     rating: 5,
@@ -50,6 +61,17 @@ const DEMO_USERS = [
     nom: 'Kalo',
     is_pro: true,
     pro_plan: 'pro',
+    pro_verified: true,
+    pro_company_name: 'Atelier Kalo',
+    pro_category: 'Artisan BTP',
+    pro_description: 'Atelier polyvalent pour la maintenance, le bricolage et les chantiers locaux.',
+    pro_logo_url: null,
+    pro_banner_url: null,
+    pro_website: 'https://atelier-kalo.demo.troca.nc',
+    pro_phone: '+687990123',
+    pro_hours: 'Lun - Sam : 07h30 - 18h',
+    pro_commune: 'Dumbéa',
+    pro_siret: 'RIDET-KALO-DEMO',
     commune_slug: 'dumbea',
     bio: 'Vendeur professionnel avec statistiques, boosts et gestion du catalogue.',
     rating: 4.9,
@@ -64,6 +86,17 @@ const DEMO_USERS = [
     nom: 'BonPlan',
     is_pro: true,
     pro_plan: 'pro',
+    pro_verified: true,
+    pro_company_name: 'Troca Bon Plans',
+    pro_category: 'Bon plans & événements',
+    pro_description: 'Promos locales, événements culturels et offres temporaires mises en avant sur Troca.',
+    pro_logo_url: null,
+    pro_banner_url: null,
+    pro_website: 'https://troca.nc/bons-plans',
+    pro_phone: '+687990456',
+    pro_hours: 'Lun - Sam : 09h - 18h',
+    pro_commune: 'Nouméa',
+    pro_siret: 'RIDET-BONPLAN-DEMO',
     commune_slug: 'noumea',
     bio: 'Annonceur de promos, événements et offres locales mises en avant.',
     rating: 5,
@@ -654,14 +687,19 @@ async function seedDemoDataset() {
           email, password_hash, prenom, nom, telephone,
           phone_verified, email_verified, avatar_url, commune_id,
           bio, is_admin, is_pro, pro_plan, pro_expires_at,
-          last_bon_plan_offer_at, nb_annonces, note_moyenne, nb_avis,
+          last_bon_plan_offer_at, pro_verified, pro_verified_at,
+          pro_company_name, pro_category, pro_description, pro_logo_url,
+          pro_banner_url, pro_website, pro_phone, pro_hours, pro_commune, pro_siret,
+          nb_annonces, note_moyenne, nb_avis,
           trust_score, trust_level, pro_since, created_at, updated_at
         ) VALUES (
           $1, $2, $3, $4, $5,
           TRUE, TRUE, $6, $7,
           $8, $9, $10, $11, $12,
-          $13, $14, $15, $16,
-          $17, $18, $19, NOW(), NOW()
+          $13, $14, $15, $16, $17, $18, $19,
+          $20, $21, $22, $23, $24, $25, $26,
+          $27, $28, $29,
+          $30, $31, $32, NOW(), NOW()
         )
         ON CONFLICT (email) DO UPDATE SET
           password_hash = EXCLUDED.password_hash,
@@ -678,6 +716,18 @@ async function seedDemoDataset() {
           pro_plan = EXCLUDED.pro_plan,
           pro_expires_at = EXCLUDED.pro_expires_at,
           last_bon_plan_offer_at = EXCLUDED.last_bon_plan_offer_at,
+          pro_verified = EXCLUDED.pro_verified,
+          pro_verified_at = EXCLUDED.pro_verified_at,
+          pro_company_name = EXCLUDED.pro_company_name,
+          pro_category = EXCLUDED.pro_category,
+          pro_description = EXCLUDED.pro_description,
+          pro_logo_url = EXCLUDED.pro_logo_url,
+          pro_banner_url = EXCLUDED.pro_banner_url,
+          pro_website = EXCLUDED.pro_website,
+          pro_phone = EXCLUDED.pro_phone,
+          pro_hours = EXCLUDED.pro_hours,
+          pro_commune = EXCLUDED.pro_commune,
+          pro_siret = EXCLUDED.pro_siret,
           nb_annonces = EXCLUDED.nb_annonces,
           note_moyenne = EXCLUDED.note_moyenne,
           nb_avis = EXCLUDED.nb_avis,
@@ -700,6 +750,18 @@ async function seedDemoDataset() {
           seedUser.pro_plan ?? null,
           seedUser.is_pro ? new Date(Date.now() + 1000 * 60 * 60 * 24 * 45) : null,
           seedUser.email === 'bonplan@demo.troca' ? new Date() : null,
+          seedUser.pro_verified ?? seedUser.is_pro ?? false,
+          seedUser.is_pro ? new Date(Date.now() - 1000 * 60 * 60 * 24 * 7) : null,
+          seedUser.pro_company_name ?? null,
+          seedUser.pro_category ?? null,
+          seedUser.pro_description ?? null,
+          seedUser.pro_logo_url ?? null,
+          seedUser.pro_banner_url ?? null,
+          seedUser.pro_website ?? null,
+          seedUser.pro_phone ?? null,
+          seedUser.pro_hours ?? null,
+          seedUser.pro_commune ?? commune?.name ?? null,
+          seedUser.pro_siret ?? null,
           seedUser.nb_annonces ?? 0,
           seedUser.rating ?? 0,
           seedUser.nb_avis ?? 0,
@@ -711,6 +773,47 @@ async function seedDemoDataset() {
 
       usersByEmail.set(seedUser.email, result.rows[0]);
       usersByEmail.set(normalizeDemoEmail(seedUser.email), result.rows[0]);
+    }
+
+    const proReviewSeeds = [
+      { pro: 'pro@demo.troca', reviewer: 'particulier@demo.troca', rating: 5, comment: 'Service rapide et très pro, réponses claires.' },
+      { pro: 'pro@demo.troca', reviewer: 'loueur@demo.troca', rating: 4, comment: 'Très bon suivi et annonces bien présentées.' },
+      { pro: 'bonplan@demo.troca', reviewer: 'marine@demo.troca', rating: 5, comment: 'Les promos locales sont toujours bien mises en avant.' },
+      { pro: 'bonplan@demo.troca', reviewer: 'particulier@demo.troca', rating: 5, comment: 'Parfait pour découvrir des événements du coin.' },
+    ];
+
+    for (const reviewSeed of proReviewSeeds) {
+      const pro = usersByEmail.get(reviewSeed.pro);
+      const reviewer = usersByEmail.get(reviewSeed.reviewer);
+      if (!pro || !reviewer) continue;
+      await client.query(
+        `INSERT INTO pro_reviews (pro_id, reviewer_id, rating, comment, verified_purchase, created_at)
+         VALUES ($1, $2, $3, $4, TRUE, NOW() - INTERVAL '2 days')
+         ON CONFLICT DO NOTHING`,
+        [pro.id, reviewer.id, reviewSeed.rating, reviewSeed.comment]
+      ).catch(() => {});
+    }
+
+    for (const proEmail of ['admin@demo.troca', 'pro@demo.troca', 'bonplan@demo.troca']) {
+      const pro = usersByEmail.get(proEmail);
+      if (!pro) continue;
+      const stats = await client.query(
+        `SELECT
+           COALESCE(ROUND(AVG(rating)::numeric, 1), 0) AS avg_rating,
+           COUNT(*)::int AS review_count
+         FROM pro_reviews
+         WHERE pro_id = $1`,
+        [pro.id]
+      ).catch(() => ({ rows: [{ avg_rating: 0, review_count: 0 }] }));
+
+      await client.query(
+        `UPDATE users
+         SET note_moyenne = $2,
+             nb_avis = $3,
+             updated_at = NOW()
+         WHERE id = $1`,
+        [pro.id, Number(stats.rows[0]?.avg_rating ?? 0), Number(stats.rows[0]?.review_count ?? 0)]
+      ).catch(() => {});
     }
 
     const listingRows = [];

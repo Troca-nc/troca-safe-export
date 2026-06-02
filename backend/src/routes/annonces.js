@@ -103,7 +103,9 @@ async function executeListingSearch(req, res, next, extraQuery = {}) {
           cat.name AS category_name, cat.slug AS category_slug, cat.icon AS category_icon,
           com.name AS commune_name,
           u.id AS seller_id, u.prenom AS seller_prenom, u.nom AS seller_nom,
+          u.avatar_url AS seller_avatar,
           CASE WHEN u.is_pro = TRUE AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
+          u.pro_verified AS seller_pro_verified,
           u.email_verified AS seller_email_verified,
           u.phone_verified AS seller_phone_verified,
           u.trust_score AS seller_trust_score,
@@ -316,6 +318,7 @@ router.get('/:id', optionalAuth, async (req, res, next) => {
           u.id AS seller_id, u.prenom AS seller_prenom, u.nom AS seller_nom,
           u.avatar_url AS seller_avatar,
           CASE WHEN u.is_pro = TRUE AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS seller_is_pro,
+          u.pro_verified AS seller_pro_verified,
           u.trust_score AS seller_trust_score, u.trust_level AS seller_trust_level,
           u.note_moyenne AS seller_note, u.nb_avis AS seller_nb_avis,
           u.created_at AS seller_since, u.nb_annonces AS seller_nb_annonces,
@@ -847,11 +850,20 @@ router.get('/user/:userId', optionalAuth, async (req, res, next) => {
       `SELECT a.id, a.titre, a.prix, a.condition, a.created_at, a.nb_vues AS view_count, a.status, a.metadata,
               cat.name AS category_name,
               com.name AS commune_name,
+              u.id AS seller_id, u.prenom AS seller_prenom, u.nom AS seller_nom,
+              u.avatar_url AS seller_avatar,
+              CASE WHEN u.is_pro = TRUE AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
+              u.pro_verified AS seller_pro_verified,
+              u.email_verified AS seller_email_verified,
+              u.phone_verified AS seller_phone_verified,
+              u.trust_score AS seller_trust_score,
+              u.trust_level AS seller_trust_level,
               (SELECT thumbnail_url FROM annonce_images WHERE annonce_id = a.id AND is_cover = TRUE LIMIT 1) AS cover_image,
               (SELECT id FROM annonce_images WHERE annonce_id = a.id AND is_cover = TRUE LIMIT 1) AS cover_image_id
        FROM annonces a
        LEFT JOIN categories cat ON cat.id = a.category_id
        LEFT JOIN communes com   ON com.id = a.commune_id
+       LEFT JOIN users u        ON u.id = a.user_id
        WHERE a.user_id = $1 AND a.deleted_at IS NULL AND a.status = 'active'
        ORDER BY a.created_at DESC
        LIMIT $2 OFFSET $3`,

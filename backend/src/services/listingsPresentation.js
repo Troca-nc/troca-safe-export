@@ -41,7 +41,9 @@ function mapListingSearchRow(row) {
     seller_id: row.seller_id ?? null,
     seller_prenom: row.seller_prenom ?? null,
     seller_nom: row.seller_nom ?? null,
+    seller_avatar: row.seller_avatar ?? null,
     is_pro: toBoolean(row.is_pro),
+    seller_pro_verified: toBoolean(row.seller_pro_verified),
     seller_email_verified: toBoolean(row.seller_email_verified),
     seller_phone_verified: toBoolean(row.seller_phone_verified),
     seller_trust_score: toNumber(row.seller_trust_score, null),
@@ -49,6 +51,14 @@ function mapListingSearchRow(row) {
     seller_note_moyenne: toNumber(row.seller_note_moyenne ?? row.user_rating, null),
     seller_nb_avis: toNumber(row.seller_nb_avis, null),
     user_rating: toNumber(row.user_rating, null),
+    author: {
+      id: row.seller_id ?? null,
+      prenom: row.seller_prenom ?? null,
+      nom: row.seller_nom ?? null,
+      avatar_url: row.seller_avatar ?? null,
+      is_pro: toBoolean(row.is_pro),
+      pro_verified: toBoolean(row.seller_pro_verified),
+    },
     cover_image: coverImage && /^data:|^https?:\/\//i.test(String(coverImage))
       ? coverImage
       : row.cover_image_id
@@ -64,6 +74,7 @@ function buildSellerPayload(listing) {
     nom: listing.seller_nom,
     avatar_url: listing.seller_avatar,
     is_pro: listing.seller_is_pro,
+    pro_verified: listing.seller_pro_verified,
     trust_score: listing.seller_trust_score,
     trust_level: listing.seller_trust_level,
     note_moyenne: listing.seller_note,
@@ -160,6 +171,7 @@ function mapListingDetailResponse(listing, isFavorited = false) {
       images,
       user: buildSellerPayload(listing),
       is_favorited: isFavorited,
+      author: buildSellerPayload(listing),
     },
   }
 }
@@ -183,6 +195,24 @@ function mapUserListingRow(row) {
     category_name: row.category_name ?? null,
     commune_name: row.commune_name ?? null,
     cover_image: row.cover_image ?? null,
+    seller_id: row.seller_id ?? null,
+    seller_prenom: row.seller_prenom ?? null,
+    seller_nom: row.seller_nom ?? null,
+    seller_avatar: row.seller_avatar ?? null,
+    is_pro: toBoolean(row.is_pro),
+    seller_pro_verified: toBoolean(row.seller_pro_verified),
+    seller_email_verified: toBoolean(row.seller_email_verified),
+    seller_phone_verified: toBoolean(row.seller_phone_verified),
+    seller_trust_score: toNumber(row.seller_trust_score, null),
+    seller_trust_level: row.seller_trust_level ?? null,
+    author: {
+      id: row.seller_id ?? null,
+      prenom: row.seller_prenom ?? null,
+      nom: row.seller_nom ?? null,
+      avatar_url: row.seller_avatar ?? null,
+      is_pro: toBoolean(row.is_pro),
+      pro_verified: toBoolean(row.seller_pro_verified),
+    },
   }
 }
 

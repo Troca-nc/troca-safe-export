@@ -517,6 +517,34 @@ export const bonPlansApi = {
   },
 }
 
+export const proApi = {
+  list: (params: object = {}) => cachedGet(
+    buildCacheKey('pro.list', '/pros', params),
+    () => api.get('/pros', { params }),
+    CACHE_TTL.short,
+  ),
+  getById: (id: string | number) => cachedGet(
+    buildCacheKey('pro.getById', `/pros/${id}`),
+    () => api.get(`/pros/${id}`),
+    CACHE_TTL.short,
+  ),
+  getReviews: (id: string | number, params: object = {}) => cachedGet(
+    buildCacheKey('pro.getReviews', `/pros/${id}/reviews`, params),
+    () => api.get(`/pros/${id}/reviews`, { params }),
+    CACHE_TTL.short,
+  ),
+  apply: async (data: object) => {
+    const res = await api.post('/pros/apply', data)
+    invalidateApiCache('pro.')
+    return res
+  },
+  addReview: async (id: string | number, data: object) => {
+    const res = await api.post(`/pros/${id}/reviews`, data)
+    invalidateApiCache('pro.')
+    return res
+  },
+}
+
 export const businessesApi = {
   list: (params: object = {}) => cachedGet(
     buildCacheKey('businesses.list', '/businesses', params),

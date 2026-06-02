@@ -108,6 +108,7 @@ export default function Header() {
     { href: '/troc', label: 'Troc' },
     { href: '/covoiturage', label: 'Covoiturage' },
     { href: '/bons-plans', label: 'Bons plans & Événements' },
+    { href: '/pro', label: 'Pros' },
   ]
 
   const isActiveLink = (href: string) => {
@@ -331,6 +332,9 @@ export default function Header() {
                 <Link href="/bons-plans" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
                   Bons plans
                 </Link>
+                <Link href="/pro" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
+                  Pros
+                </Link>
                 <Link href="/troc" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
                   Troc
                 </Link>
@@ -360,6 +364,9 @@ export default function Header() {
               </>
             ) : (
               <>
+                <Link href="/pro" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
+                  Pros
+                </Link>
                 <Link href="/troc" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
                   Troc
                 </Link>

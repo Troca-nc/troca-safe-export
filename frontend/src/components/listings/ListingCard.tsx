@@ -3,13 +3,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
-import { Clock, Heart, MailCheck, MapPin, Phone, ShieldCheck, Star } from 'lucide-react'
+import { BadgeCheck, Clock, Heart, MailCheck, MapPin, Phone, ShieldCheck, Star } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useAuthStore } from '@/store/authStore'
 import { useFavorite } from '@/hooks/useFavorite'
 import ListingImage from '@/components/ListingImage'
-import PlanBadge from '@/components/PlanBadge'
 import { consumePendingAuthAction, peekPendingAuthAction } from '@/lib/authAction'
 import { useAuthActionStore } from '@/store/authActionStore'
 
@@ -42,9 +41,15 @@ interface Listing {
   seller_email_verified?: boolean
   seller_phone_verified?: boolean
   is_pro?: boolean
+  seller_is_pro?: boolean
+  seller_pro_verified?: boolean
   seller_prenom?: string | null
   seller_nom?: string | null
   seller_avatar?: string | null
+  author?: {
+    is_pro?: boolean
+    pro_verified?: boolean
+  } | null
   seller_is_online?: boolean
   seller_last_seen_label?: string | null
   seller_avg_response_time_label?: string | null
@@ -294,6 +299,11 @@ export default function ListingCard({ listing, className = '' }: Props) {
 
   const isConditionVisible = Boolean(listing.condition && CONDITION_LABELS[listing.condition])
   const locationText = listing.commune_name || 'Nouvelle-Calédonie'
+  const isProVerified = Boolean(
+    (listing.author?.is_pro && listing.author?.pro_verified)
+    || (listing.is_pro && listing.seller_pro_verified)
+    || (listing.seller_is_pro && listing.seller_pro_verified)
+  )
 
   return (
     <Link
@@ -336,7 +346,12 @@ export default function ListingCard({ listing, className = '' }: Props) {
             <div className="min-w-0">
               <div className="flex min-w-0 items-center gap-2">
                 <p className="truncate text-sm font-semibold text-night">{sellerName}</p>
-                {listing.is_pro ? <PlanBadge className="shrink-0" /> : null}
+                {isProVerified ? (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                    <BadgeCheck className="h-3 w-3" />
+                    Pro
+                  </span>
+                ) : null}
               </div>
               <div className="flex flex-wrap items-center gap-2 text-[11px] text-night/50">
                 {listing.seller_email_verified ? (
