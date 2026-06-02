@@ -6,7 +6,8 @@ import { ArrowRight, Car, Search, Star, Users } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
 import BookingButton from '@/components/covoiturage/BookingButton'
-import { API_ORIGIN, covoiturageApi } from '@/lib/api'
+import TransporterCard from '@/components/transport/TransporterCard'
+import { API_ORIGIN, covoiturageApi, proTransportApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 
 type Ride = {
@@ -37,6 +38,27 @@ type Ride = {
   music_allowed?: boolean
   no_smoking?: boolean
   animals_allowed?: boolean
+}
+
+type Transporter = {
+  id: number | string
+  company_name: string
+  display_name?: string | null
+  pro_logo_url?: string | null
+  vehicle_photo_url?: string | null
+  transport_type: string[]
+  transport_type_labels?: string[]
+  vehicle_description?: string | null
+  vehicle_capacity?: number | null
+  service_zones?: string[]
+  base_price_xpf?: number | null
+  price_per_km_xpf?: number | null
+  avg_rating?: number | null
+  total_rides?: number | null
+  rides_completed?: number | null
+  is_verified?: boolean
+  is_available?: boolean
+  pro_commune?: string | null
 }
 
 function formatDateLabel(value?: string | null) {
@@ -150,11 +172,21 @@ function RideCard({
 
 export default function CovoituragePage() {
   const { user } = useAuthStore()
-  const [activeTab, setActiveTab] = useState<'search' | 'publish'>('search')
+  const [activeTab, setActiveTab] = useState<'search' | 'publish' | 'transport'>('search')
   const [rides, setRides] = useState<Ride[]>([])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({ departure: '', destination: '', ride_date: '' })
   const [sortBy, setSortBy] = useState<'time' | 'city' | 'rating' | 'price_asc' | 'price_desc'>('time')
+  const [transporters, setTransporters] = useState<Transporter[]>([])
+  const [transportLoading, setTransportLoading] = useState(false)
+  const [transportFilters, setTransportFilters] = useState({
+    type: '',
+    departure: '',
+    destination: '',
+    ride_date: '',
+    ride_time: '',
+    passengers: 1,
+  })
   const [form, setForm] = useState({
     departure: '',
     destination: '',
@@ -170,7 +202,8 @@ export default function CovoituragePage() {
 
   useEffect(() => {
     const mode = new URLSearchParams(window.location.search).get('mode')
-    setActiveTab(mode === 'publish' ? 'publish' : 'search')
+    const tab = new URLSearchParams(window.location.search).get('tab')
+    setActiveTab(tab === 'transport' ? 'transport' : mode === 'publish' ? 'publish' : 'search')
   }, [])
 
   const hasFilters = useMemo(
@@ -222,10 +255,39 @@ export default function CovoituragePage() {
     }
   }
 
+  const refreshTransporters = async () => {
+    setTransportLoading(true)
+    try {
+      const params = new URLSearchParams()
+      params.set('limit', '12')
+      if (transportFilters.type) params.set('type', transportFilters.type)
+      if (transportFilters.departure) params.set('zone', transportFilters.departure)
+      if (transportFilters.passengers) params.set('passengers', String(transportFilters.passengers))
+      if (transportFilters.ride_date) params.set('date', transportFilters.ride_date)
+      if (transportFilters.ride_time) params.set('time', transportFilters.ride_time)
+
+      const response = await proTransportApi.list(Object.fromEntries(params.entries()))
+      const data = Array.isArray(response.data?.data) ? response.data.data : []
+      setTransporters(data)
+    } catch (err) {
+      console.error('[covoiturage] loadTransporters:', err)
+      setTransporters([])
+    } finally {
+      setTransportLoading(false)
+    }
+  }
+
   useEffect(() => {
     void refreshRides()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.departure, filters.destination])
+
+  useEffect(() => {
+    if (activeTab === 'transport') {
+      void refreshTransporters()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab])
 
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
@@ -290,11 +352,12 @@ export default function CovoituragePage() {
           {[
             { id: 'search', label: 'Rechercher un trajet' },
             { id: 'publish', label: 'Proposer un trajet' },
+            { id: 'transport', label: 'Transport Pro' },
           ].map((tab) => (
             <button
               key={tab.id}
               type="button"
-              onClick={() => setActiveTab(tab.id as 'search' | 'publish')}
+              onClick={() => setActiveTab(tab.id as 'search' | 'publish' | 'transport')}
               className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                 activeTab === tab.id
                   ? 'bg-[#0A7EA4] text-white shadow-sm'
@@ -421,7 +484,7 @@ export default function CovoituragePage() {
                   </div>
                 </div>
               </section>
-            ) : (
+            ) : activeTab === 'publish' ? (
               <section className="relative rounded-[2rem] border border-night/8 bg-white p-5 shadow-card">
                 <form
                   onSubmit={handleCreate}
@@ -603,6 +666,132 @@ export default function CovoituragePage() {
                     </div>
                   </div>
                 ) : null}
+              </section>
+            ) : (
+              <section className="rounded-[2rem] border border-night/8 bg-white p-5 shadow-card">
+                <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Transport Pro</p>
+                    <h2 className="mt-1 text-2xl font-bold text-night">Trouver un transporteur local</h2>
+                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-night/60">
+                      Comparez les transporteurs professionnels, leurs zones d&apos;intervention et leurs tarifs.
+                    </p>
+                  </div>
+                  <Link href="/pro/transport/inscription" className="text-sm font-semibold text-[#0A7EA4] hover:underline">
+                    Devenir transporteur pro
+                  </Link>
+                </div>
+
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault()
+                    void refreshTransporters()
+                  }}
+                  className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+                >
+                  <label className="block">
+                    <span className="mb-1 block text-sm font-semibold text-night">Type de transport</span>
+                    <select
+                      value={transportFilters.type}
+                      onChange={(e) => setTransportFilters((prev) => ({ ...prev, type: e.target.value }))}
+                      className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none"
+                    >
+                      <option value="">Tous les types</option>
+                      <option value="taxi">Taxi / VTC</option>
+                      <option value="navette">Navette</option>
+                      <option value="aeroport">Transfert aéroport</option>
+                      <option value="excursion">Excursion</option>
+                      <option value="scolaire">Transport scolaire</option>
+                      <option value="chauffeur">Location avec chauffeur</option>
+                      <option value="location">Location avec chauffeur</option>
+                    </select>
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-sm font-semibold text-night">Commune / zone</span>
+                    <input
+                      value={transportFilters.departure}
+                      onChange={(e) => setTransportFilters((prev) => ({ ...prev, departure: e.target.value }))}
+                      placeholder="Nouméa, Dumbéa..."
+                      className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-sm font-semibold text-night">Destination</span>
+                    <input
+                      value={transportFilters.destination}
+                      onChange={(e) => setTransportFilters((prev) => ({ ...prev, destination: e.target.value }))}
+                      placeholder="Aéroport, Bourail..."
+                      className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-sm font-semibold text-night">Date</span>
+                    <input
+                      type="date"
+                      value={transportFilters.ride_date}
+                      onChange={(e) => setTransportFilters((prev) => ({ ...prev, ride_date: e.target.value }))}
+                      className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-sm font-semibold text-night">Heure</span>
+                    <input
+                      type="time"
+                      value={transportFilters.ride_time}
+                      onChange={(e) => setTransportFilters((prev) => ({ ...prev, ride_time: e.target.value }))}
+                      className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-sm font-semibold text-night">Passagers</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={8}
+                      value={transportFilters.passengers}
+                      onChange={(e) => setTransportFilters((prev) => ({ ...prev, passengers: Number(e.target.value) }))}
+                      className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none"
+                    />
+                  </label>
+                  <div className="md:col-span-2 xl:col-span-3">
+                    <button
+                      type="submit"
+                      className="btn-primary inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5"
+                    >
+                      <Users className="h-4 w-4" />
+                      Rechercher des transporteurs
+                    </button>
+                  </div>
+                </form>
+
+                <div className="mt-6 border-t border-[var(--color-border)] pt-5">
+                  {transportLoading ? (
+                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                      {Array.from({ length: 3 }).map((_, index) => (
+                        <div key={index} className="h-80 animate-pulse rounded-[1.75rem] bg-sand/60" />
+                      ))}
+                    </div>
+                  ) : transporters.length > 0 ? (
+                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                      {transporters.map((transporter) => (
+                        <TransporterCard
+                          key={transporter.id}
+                          transporter={transporter}
+                          detailHref={`/covoiturage/transport/${transporter.id}`}
+                          quoteHref={`/covoiturage/transport/${transporter.id}#devis`}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="rounded-[1.75rem] border border-dashed border-night/10 bg-sand/30 p-8 text-center text-night/55">
+                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#0A7EA4]/10 text-[#0A7EA4]">
+                        <Users className="h-6 w-6" />
+                      </div>
+                      <p className="mt-4 text-lg font-semibold text-night">Aucun transporteur trouvé</p>
+                      <p className="mt-2 text-sm">Essayez de changer la zone, le type ou la date de recherche.</p>
+                    </div>
+                  )}
+                </div>
               </section>
             )}
           </div>

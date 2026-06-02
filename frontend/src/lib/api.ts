@@ -576,6 +576,60 @@ export const proApi = {
   downloadInvoicePdf: (id: string | number) => api.get(`/pro/invoices/${id}/pdf`, { responseType: 'blob' }),
 }
 
+export const proTransportApi = {
+  list: (params: object = {}) => cachedGet(
+    buildCacheKey('proTransport.list', '/pro-transport', params),
+    () => api.get('/pro-transport', { params }),
+    CACHE_TTL.short,
+  ),
+  getById: (id: string | number) => cachedGet(
+    buildCacheKey('proTransport.getById', `/pro-transport/${id}`),
+    () => api.get(`/pro-transport/${id}`),
+    CACHE_TTL.short,
+  ),
+  getAvailability: (id: string | number, params: object = {}) => cachedGet(
+    buildCacheKey('proTransport.getAvailability', `/pro-transport/${id}/availability`, params),
+    () => api.get(`/pro-transport/${id}/availability`, { params }),
+    CACHE_TTL.short,
+  ),
+  quote: (id: string | number, data: object) => api.post(`/pro-transport/${id}/quote`, data),
+  apply: async (data: object) => {
+    const res = await api.post('/pro-transport/apply', data)
+    invalidateApiCache('proTransport.')
+    return res
+  },
+  createRide: async (data: object) => {
+    const res = await api.post('/pro-transport/rides', data)
+    invalidateApiCache('proTransport.')
+    return res
+  },
+  confirmRide: async (id: string | number) => {
+    const res = await api.post(`/pro-transport/rides/${id}/confirm`)
+    invalidateApiCache('proTransport.')
+    return res
+  },
+  completeRide: async (id: string | number) => {
+    const res = await api.post(`/pro-transport/rides/${id}/complete`)
+    invalidateApiCache('proTransport.')
+    return res
+  },
+  reviewRide: async (id: string | number, data: object) => {
+    const res = await api.post(`/pro-transport/rides/${id}/review`, data)
+    invalidateApiCache('proTransport.')
+    return res
+  },
+  getMyRides: () => cachedGet(
+    buildCacheKey('proTransport.myRides', '/pro-transport/rides/mine'),
+    () => api.get('/pro-transport/rides/mine'),
+    CACHE_TTL.short,
+  ),
+  getDashboard: () => cachedGet(
+    buildCacheKey('proTransport.dashboard', '/pro-transport/dashboard'),
+    () => api.get('/pro-transport/dashboard'),
+    CACHE_TTL.short,
+  ),
+}
+
 export const businessesApi = {
   list: (params: object = {}) => cachedGet(
     buildCacheKey('businesses.list', '/businesses', params),

@@ -41,6 +41,15 @@ async function processStripeWebhookEvent({
          WHERE id = $1 AND status = 'pending'`,
         [paymentRows[0].id]
       );
+      if (paymentRows[0].type === 'pro_transport_ride' || paymentRows[0].metadata?.payment_type === 'pro_transport_ride') {
+        await query(
+          `UPDATE pro_rides
+           SET payment_status = 'failed',
+               updated_at = NOW()
+           WHERE stripe_payment_id = $1 OR id = $2::int`,
+          [paymentRef, Number(paymentRows[0].metadata?.ride_id ?? 0)]
+        ).catch(() => {});
+      }
       if (paymentRows[0].type === 'subscription') {
         await setSubscriptionPaymentStatus(
           query,
@@ -65,6 +74,15 @@ async function processStripeWebhookEvent({
          WHERE id = $1 AND status IN ('pending', 'succeeded')`,
         [paymentRows[0].id]
       );
+      if (paymentRows[0].type === 'pro_transport_ride' || paymentRows[0].metadata?.payment_type === 'pro_transport_ride') {
+        await query(
+          `UPDATE pro_rides
+           SET payment_status = 'failed',
+               updated_at = NOW()
+           WHERE stripe_payment_id = $1 OR id = $2::int`,
+          [paymentRef, Number(paymentRows[0].metadata?.ride_id ?? 0)]
+        ).catch(() => {});
+      }
       if (paymentRows[0].type === 'subscription') {
         await setSubscriptionPaymentStatus(
           query,
@@ -115,6 +133,17 @@ async function processStripeWebhookEvent({
       await query(
         `DELETE FROM annonce_boosts WHERE payment_id = $1`,
         [payment.id]
+      ).catch(() => {});
+    }
+
+    if (meta.payment_type === 'pro_transport_ride') {
+      await query(
+        `UPDATE pro_rides
+         SET payment_status = 'refunded',
+             status = 'refunded',
+             updated_at = NOW()
+         WHERE stripe_payment_id = $1 OR id = $2::int`,
+        [paymentRef, Number(meta.ride_id ?? 0)]
       ).catch(() => {});
     }
     return;
@@ -208,6 +237,60 @@ async function processStripeWebhookEvent({
             },
             payment.user_id
           ).catch(() => {});
+        }
+      }
+    }
+
+    if (meta.payment_type === 'pro_transport_ride') {
+      const rideId = Number(meta.ride_id ?? 0);
+      if (rideId) {
+        await query(
+          `UPDATE pro_rides
+           SET payment_status = 'paid',
+               updated_at = NOW()
+           WHERE id = $1 OR stripe_payment_id = $2`,
+          [rideId, paymentRef]
+        ).catch(() => {});
+
+        await upsertInvoiceRecord(query, {
+          userId: payment.user_id,
+          amountXpf: Number(meta.amount_xpf ?? payment.metadata?.amount_xpf ?? 0) || 0,
+          description: `Transport pro — ${meta.departure || 'course'}`,
+          stripePaymentId: paymentRef,
+          invoiceNumber: buildInvoiceNumber('TR', paymentRef),
+          paidAt: new Date(),
+        }).catch(() => {});
+
+        const { rows: rideRows } = await query(
+          `SELECT r.*, pt.user_id AS transporter_user_id, u.prenom AS transporter_prenom, u.email AS transporter_email,
+                  c.prenom AS client_prenom, c.email AS client_email
+           FROM pro_rides r
+           JOIN pro_transporters pt ON pt.id = r.transporter_id
+           JOIN users u ON u.id = pt.user_id
+           JOIN users c ON c.id = r.client_id
+           WHERE r.id = $1
+           LIMIT 1`,
+          [rideId]
+        );
+        const ride = rideRows[0];
+        if (ride) {
+          await sendMail({
+            to: ride.client_email,
+            subject: `✅ Place réservée — ${ride.departure} → ${ride.destination}`,
+            html: `<p>Bonjour ${ride.client_prenom || 'Client'},</p>
+                   <p>Votre réservation transport pro est bien réglée.</p>
+                   <p><strong>${ride.departure}</strong> → <strong>${ride.destination}</strong><br>
+                   Date : ${new Date(ride.ride_date).toLocaleDateString('fr-FR')} à ${String(ride.ride_time).slice(0, 5)}<br>
+                   Prix : ${Number(meta.amount_xpf ?? ride.price_xpf ?? 0).toLocaleString('fr-FR')} XPF</p>
+                   <p>Vous retrouverez le suivi de la course dans votre espace.</p>`,
+          }).catch(() => {});
+          await sendMail({
+            to: ride.transporter_email,
+            subject: `💼 Paiement reçu pour ${ride.departure} → ${ride.destination}`,
+            html: `<p>Bonjour ${ride.transporter_prenom || 'Transporteur'},</p>
+                   <p>Le paiement de la course transport pro a été confirmé.</p>
+                   <p>Course : <strong>${ride.departure}</strong> → <strong>${ride.destination}</strong></p>`,
+          }).catch(() => {});
         }
       }
     }

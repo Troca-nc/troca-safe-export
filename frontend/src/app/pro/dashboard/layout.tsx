@@ -22,6 +22,7 @@ const NAV_ITEMS = [
   { href: '/pro/dashboard/annonces', label: 'Mes annonces', icon: Store },
   { href: '/pro/dashboard/boosts', label: 'Boosts', icon: Bell },
   { href: '/pro/dashboard/factures', label: 'Factures', icon: FileText },
+  { href: '/pro/dashboard/transport', label: 'Transport', icon: Building2 },
   { href: '/pro/[id]', label: 'Ma vitrine', icon: Building2 },
   { href: '/pro/dashboard/parametres', label: 'Paramètres Pro', icon: Settings2 },
 ] as const
