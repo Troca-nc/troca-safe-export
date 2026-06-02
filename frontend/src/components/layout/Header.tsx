@@ -3,8 +3,9 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { Search, MessageCircle, Plus, User, Menu, X, ChevronDown, LogOut, Heart, Home, Car, Settings2 } from 'lucide-react'
+import { useRef, useState } from 'react'
+import type { TouchEvent } from 'react'
+import { Search, MessageCircle, Plus, User, Menu, X, ChevronDown, LogOut, Heart, Home, Settings2, PlusCircle, Tag, Trophy, Car, PhoneCall, ArrowLeftRight } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useAuthActionStore } from '@/store/authActionStore'
 import NotificationBell from '@/components/ui/NotificationBell'
@@ -13,8 +14,11 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 export function MobileBottomNav() {
   const pathname = usePathname()
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, user } = useAuthStore()
   const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
+  const [moreOpen, setMoreOpen] = useState(false)
+  const [dragOffset, setDragOffset] = useState(0)
+  const dragStartY = useRef<number | null>(null)
 
   if (pathname.startsWith('/pro/dashboard')) return null
 
@@ -23,11 +27,45 @@ export function MobileBottomNav() {
   const items = [
     { href: '/', icon: Home, label: 'Accueil' },
     { href: '/annonces', icon: Search, label: 'Annonces' },
-    { href: '/covoiturage', icon: Car, label: 'Covoit' },
-    { href: '/annonces/nouvelle', icon: Plus, label: 'Déposer', isCta: true },
+    { href: '/annonces/nouvelle', icon: PlusCircle, label: 'Déposer', isCta: true },
     { href: '/messages', icon: MessageCircle, label: 'Messages' },
-    { href: isAuthenticated ? '/profil' : '/connexion', icon: User, label: isAuthenticated ? 'Profil' : 'Connexion' },
+    { href: '#more', icon: Menu, label: 'Plus', isDrawer: true },
   ]
+
+  const drawerItems = [
+    { href: '/troc', icon: ArrowLeftRight, label: 'Troc' },
+    { href: '/pro', icon: Trophy, label: 'Pros' },
+    { href: '/covoiturage', icon: Car, label: 'Covoit' },
+    { href: '/bons-plans', icon: Tag, label: 'Bons plans' },
+    { href: '/contact', icon: PhoneCall, label: 'Contact' },
+    { href: isAuthenticated && user?.id ? `/profil/${user.id}` : '/connexion', icon: User, label: isAuthenticated && user?.id ? 'Mon profil' : 'Connexion' },
+  ]
+
+  const closeDrawer = () => {
+    setMoreOpen(false)
+    setDragOffset(0)
+    dragStartY.current = null
+  }
+
+  const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    dragStartY.current = event.touches[0]?.clientY ?? null
+  }
+
+  const handleTouchMove = (event: TouchEvent<HTMLDivElement>) => {
+    if (dragStartY.current == null) return
+    const currentY = event.touches[0]?.clientY ?? dragStartY.current
+    const offset = Math.max(0, currentY - dragStartY.current)
+    setDragOffset(offset)
+  }
+
+  const handleTouchEnd = () => {
+    if (dragOffset > 80) {
+      closeDrawer()
+      return
+    }
+    setDragOffset(0)
+    dragStartY.current = null
+  }
 
   return (
     <nav
@@ -35,7 +73,7 @@ export function MobileBottomNav() {
       aria-label="Navigation principale"
     >
       <div className="flex items-center justify-around px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)]">
-        {items.map(({ href, icon: Icon, label, isCta }) =>
+        {items.map(({ href, icon: Icon, label, isCta, isDrawer }) =>
           isCta ? (
             isAuthenticated ? (
               <Link key={href} href={href} className="mt-[-1.25rem] flex flex-col items-center gap-0.5">
@@ -62,6 +100,18 @@ export function MobileBottomNav() {
                 <span className="text-[10px] font-semibold text-coral">{label}</span>
               </button>
             )
+          ) : isDrawer ? (
+            <button
+              key={href}
+              type="button"
+              onClick={() => setMoreOpen((value) => !value)}
+              className={`flex flex-col items-center gap-0.5 rounded-xl px-3 py-1 transition-colors ${
+                moreOpen ? 'bg-sand/70 text-night' : 'text-night/70 hover:bg-sand/60 hover:text-night'
+              }`}
+            >
+              <Icon className="h-5 w-5 text-current" strokeWidth={moreOpen ? 2.5 : 2} />
+              <span className={`text-[10px] font-medium ${moreOpen ? 'font-semibold text-night' : ''}`}>{label}</span>
+            </button>
           ) : (
             <Link
               key={href}
@@ -78,6 +128,38 @@ export function MobileBottomNav() {
           )
         )}
       </div>
+
+      {moreOpen ? (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/40" onClick={closeDrawer} />
+          <div
+            className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl bg-[var(--color-surface)] p-5 shadow-[0_-18px_60px_rgba(8,32,50,0.18)]"
+            style={{
+              transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : 'translateY(0)',
+              transition: dragOffset > 0 ? 'none' : 'transform 250ms ease',
+            }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-night/10" />
+            <p className="mb-3 text-xs uppercase tracking-wide text-night/40">Navigation</p>
+            <div className="grid grid-cols-3 gap-3">
+              {drawerItems.map(({ href, icon: Icon, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={closeDrawer}
+                  className="flex flex-col items-center justify-center rounded-2xl border border-[var(--color-border)] p-3 text-center transition hover:bg-sand/60"
+                >
+                  <Icon className="h-6 w-6 text-[#0A7EA4]" />
+                  <span className="mt-2 text-xs font-medium text-night">{label}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </>
+      ) : null}
     </nav>
   )
 }

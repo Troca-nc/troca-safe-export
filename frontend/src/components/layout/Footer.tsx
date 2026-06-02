@@ -1,10 +1,10 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Mail, Shield, FileText, Lock, MessageCircle } from 'lucide-react'
+import { Loader2, Mail, Shield, FileText, Lock, MessageCircle } from 'lucide-react'
 
 import { newsletterApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
@@ -18,35 +18,51 @@ const links = [
   { href: '/contact', label: 'Contact', icon: MessageCircle },
 ]
 
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
+}
+
 export default function Footer() {
   const router = useRouter()
   const { user, isAuthenticated } = useAuthStore()
   const [newsletterEmail, setNewsletterEmail] = useState('')
   const [newsletterLoading, setNewsletterLoading] = useState(false)
-  const [newsletterMessage, setNewsletterMessage] = useState('')
+  const [newsletterError, setNewsletterError] = useState('')
+  const [newsletterToast, setNewsletterToast] = useState('')
 
   const openCookieBanner = useCallback(() => {
     window.dispatchEvent(new Event('troca-cookie-banner-open'))
   }, [])
 
-  const handleNewsletterSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  useEffect(() => {
+    if (!newsletterToast) return
+    const timeout = window.setTimeout(() => setNewsletterToast(''), 3000)
+    return () => window.clearTimeout(timeout)
+  }, [newsletterToast])
+
+  const handleNewsletterSubmit = async () => {
     if (!isAuthenticated) {
       router.push(`/inscription?next=${encodeURIComponent('/newsletter/preferences')}`)
       return
     }
 
+    if (!isValidEmail(newsletterEmail)) {
+      setNewsletterError('Email invalide')
+      return
+    }
+
     setNewsletterLoading(true)
-    setNewsletterMessage('')
+    setNewsletterError('')
     try {
       await newsletterApi.subscribe({
-        communes: user?.commune_name ? [user.commune_name] : [],
-        categories: [],
+        email: newsletterEmail.trim(),
+        communes: [],
         frequency: 'weekly',
       })
-      setNewsletterMessage('✅ Abonnement enregistré')
+      setNewsletterEmail('')
+      setNewsletterToast('✅ Vous êtes abonné à la newsletter !')
     } catch {
-      setNewsletterMessage('Impossible de vous abonner pour le moment.')
+      setNewsletterError('Impossible de vous abonner pour le moment.')
     } finally {
       setNewsletterLoading(false)
     }
@@ -121,22 +137,43 @@ export default function Footer() {
               </p>
             </div>
 
-            <form onSubmit={handleNewsletterSubmit} className="space-y-3">
-              <input
-                value={newsletterEmail}
-                onChange={(event) => setNewsletterEmail(event.target.value)}
-                type="email"
-                required
-                placeholder="Votre email"
-                className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm outline-none transition focus:border-[#0A7EA4] focus:ring-4 focus:ring-[#0A7EA4]/10"
-              />
-              <button type="submit" disabled={newsletterLoading} className="btn-primary w-full rounded-2xl px-4 py-3 text-sm">
-                {isAuthenticated ? 'S’abonner' : 'Créer mon compte'}
-              </button>
-              {newsletterMessage ? <p className="text-sm text-night/55">{newsletterMessage}</p> : null}
-            </form>
+            <div>
+              <div className="mt-3 flex gap-2">
+                <input
+                  value={newsletterEmail}
+                  onChange={(event) => {
+                    setNewsletterEmail(event.target.value)
+                    if (newsletterError) setNewsletterError('')
+                  }}
+                  type="email"
+                  placeholder="votre@email.com"
+                  aria-invalid={Boolean(newsletterError)}
+                  className={`flex-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] px-4 py-2.5 text-sm text-[var(--color-text-primary)] placeholder:text-night/40 outline-none focus:border-[#0A7EA4] focus:ring-2 focus:ring-[#0A7EA4]/20 transition ${
+                    newsletterError ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={handleNewsletterSubmit}
+                  disabled={newsletterLoading}
+                  className="rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {newsletterLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "S'abonner"}
+                </button>
+              </div>
+              <p className="mt-2 text-xs text-night/40">
+                Pas de spam. Désinscription en un clic.
+              </p>
+              {newsletterError ? <p className="mt-2 text-xs font-medium text-red-600">{newsletterError}</p> : null}
+            </div>
           </div>
         </section>
+
+        {newsletterToast ? (
+          <div className="fixed bottom-5 right-5 z-50 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 shadow-lg">
+            {newsletterToast}
+          </div>
+        ) : null}
 
         <div className="mt-8 flex flex-col gap-2 border-t border-[var(--color-border)] pt-4 text-xs text-night/40 sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 Troca. Tous droits réservés.</p>
