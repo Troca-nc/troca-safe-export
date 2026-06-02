@@ -31,6 +31,10 @@ CREATE TABLE IF NOT EXISTS users (
   avatar_url          VARCHAR(500)  DEFAULT NULL,
   commune_id          INTEGER       DEFAULT NULL REFERENCES communes(id) ON DELETE SET NULL,
   bio                 TEXT          DEFAULT NULL,
+  member_since        TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+  rides_as_driver     INTEGER       NOT NULL DEFAULT 0,
+  rides_as_passenger   INTEGER      NOT NULL DEFAULT 0,
+  trust_score         INTEGER       NOT NULL DEFAULT 100,
   is_admin            BOOLEAN       NOT NULL DEFAULT FALSE,
   is_pro              BOOLEAN       NOT NULL DEFAULT FALSE,
   pro_plan            VARCHAR(20)   DEFAULT NULL,
@@ -485,6 +489,10 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS trust_score  INTEGER     DEFAULT 0;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS trust_level  VARCHAR(20) DEFAULT 'inconnu';
 ALTER TABLE users ADD COLUMN IF NOT EXISTS identity_verified BOOLEAN   NOT NULL DEFAULT FALSE;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS photo_verified    BOOLEAN   NOT NULL DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS member_since TIMESTAMPTZ NOT NULL DEFAULT NOW();
+ALTER TABLE users ADD COLUMN IF NOT EXISTS rides_as_driver INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS rides_as_passenger INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE users ALTER COLUMN trust_score SET DEFAULT 100;
 
 CREATE INDEX IF NOT EXISTS idx_users_trust_level ON users (trust_level);
 
@@ -665,6 +673,9 @@ CREATE TABLE IF NOT EXISTS covoiturages (
   ride_time          TIME         NOT NULL,
   seats_total        INTEGER      NOT NULL DEFAULT 1 CHECK (seats_total BETWEEN 1 AND 8),
   seats_reserved     INTEGER      NOT NULL DEFAULT 0 CHECK (seats_reserved >= 0),
+  seats_remaining    INTEGER      NOT NULL DEFAULT 3 CHECK (seats_remaining >= 0),
+  booking_mode       VARCHAR(20)  NOT NULL DEFAULT 'auto'
+                          CHECK (booking_mode IN ('auto','manual')),
   price_xpf          INTEGER      NOT NULL DEFAULT 0 CHECK (price_xpf >= 0),
   vehicle            VARCHAR(120) DEFAULT NULL,
   comfort            VARCHAR(120) DEFAULT NULL,
@@ -682,6 +693,22 @@ CREATE TABLE IF NOT EXISTS covoiturages (
   expires_at         TIMESTAMPTZ  NOT NULL,
   created_at         TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
   updated_at         TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS ride_bookings (
+  id               SERIAL PRIMARY KEY,
+  ride_id          INTEGER      NOT NULL REFERENCES covoiturages(id) ON DELETE CASCADE,
+  passenger_id     INTEGER      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  status           VARCHAR(20)  NOT NULL DEFAULT 'pending'
+                          CHECK (status IN ('pending','auto_confirmed','accepted','refused','cancelled')),
+  booking_mode     VARCHAR(20)  NOT NULL
+                          CHECK (booking_mode IN ('auto','manual')),
+  message          TEXT         DEFAULT NULL,
+  seats            INTEGER      NOT NULL DEFAULT 1 CHECK (seats BETWEEN 1 AND 8),
+  created_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  responded_at     TIMESTAMPTZ  DEFAULT NULL,
+  expires_at       TIMESTAMPTZ  NOT NULL DEFAULT (NOW() + INTERVAL '24 hours'),
+  UNIQUE (ride_id, passenger_id)
 );
 
 CREATE TABLE IF NOT EXISTS covoiturage_bookings (
@@ -706,6 +733,17 @@ CREATE TABLE IF NOT EXISTS covoiturage_reviews (
   created_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS user_reviews (
+  id               SERIAL PRIMARY KEY,
+  reviewer_id      INTEGER      REFERENCES users(id),
+  reviewed_id      INTEGER      REFERENCES users(id),
+  ride_id          INTEGER,
+  rating           INTEGER      CHECK (rating BETWEEN 1 AND 5),
+  comment          TEXT,
+  role             TEXT         CHECK (role IN ('driver','passenger')),
+  created_at       TIMESTAMPTZ  DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS idx_covoiturages_status_date
   ON covoiturages (status, ride_date, ride_time);
 CREATE INDEX IF NOT EXISTS idx_covoiturages_user_created
@@ -714,8 +752,17 @@ CREATE INDEX IF NOT EXISTS idx_covoiturages_depart_dest
   ON covoiturages (departure_commune_id, destination_commune_id);
 CREATE INDEX IF NOT EXISTS idx_covoiturage_bookings_ride
   ON covoiturage_bookings (covoiturage_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ride_bookings_ride
+  ON ride_bookings (ride_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ride_bookings_passenger
+  ON ride_bookings (passenger_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ride_bookings_status
+  ON ride_bookings (status, expires_at)
+  WHERE status IN ('pending','auto_confirmed','accepted');
 CREATE INDEX IF NOT EXISTS idx_covoiturage_reviews_ride
   ON covoiturage_reviews (covoiturage_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_user_reviews_reviewed
+  ON user_reviews (reviewed_id, created_at DESC);
 
 -- ── INDEX supplémentaires pour les performances ───────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_annonces_boosted  ON annonces (boosted_until) WHERE boosted_until IS NOT NULL;

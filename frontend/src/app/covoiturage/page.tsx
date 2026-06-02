@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { ArrowRight, Car, Search, Send, Star, Users } from 'lucide-react'
+import { ArrowRight, Car, Search, Star, Users } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
+import BookingButton from '@/components/covoiturage/BookingButton'
 import { API_ORIGIN, covoiturageApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 
@@ -17,6 +18,7 @@ type Ride = {
   seats_total: number
   seats_reserved: number
   seats_remaining?: number
+  booking_mode?: 'auto' | 'manual'
   price_xpf: number
   vehicle?: string | null
   description: string
@@ -25,6 +27,7 @@ type Ride = {
   avg_rating?: number | null
   is_verified_driver?: boolean
   is_featured?: boolean
+  user_id?: number | string
   driver_prenom?: string | null
   driver_nom?: string | null
   departure_commune_name?: string | null
@@ -81,10 +84,12 @@ function sortRides(rides: Ride[], sortBy: string) {
 
 function RideCard({
   ride,
-  onBook,
+  currentUserId,
+  onBooked,
 }: {
   ride: Ride
-  onBook: (id: number | string) => void
+  currentUserId?: number | string | null
+  onBooked?: () => void | Promise<void>
 }) {
   const rating = ride.avg_rating ?? ride.trust_score ?? 0
 
@@ -130,14 +135,14 @@ function RideCard({
           <p className="font-semibold text-[var(--color-text-primary)]">{ride.driver_prenom || 'Conducteur local'}</p>
           <p>{ride.trust_score != null ? `Confiance ${ride.trust_score}/100` : 'Profil rassurant'}</p>
         </div>
-        <button
-          type="button"
-          onClick={() => onBook(ride.id)}
-          className="inline-flex items-center gap-2 rounded-2xl bg-coral px-4 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5"
-        >
-          Réserver
-          <Send className="h-4 w-4" />
-        </button>
+        <BookingButton
+          rideId={ride.id}
+          bookingMode={ride.booking_mode}
+          seatsRemaining={ride.seats_remaining ?? ride.seats_total}
+          driverId={ride.user_id ?? null}
+          currentUserId={currentUserId ?? null}
+          onBooked={onBooked}
+        />
       </div>
     </article>
   )
@@ -148,7 +153,6 @@ export default function CovoituragePage() {
   const [activeTab, setActiveTab] = useState<'search' | 'publish'>('search')
   const [rides, setRides] = useState<Ride[]>([])
   const [loading, setLoading] = useState(true)
-  const [bookingId, setBookingId] = useState<string | number | null>(null)
   const [filters, setFilters] = useState({ departure: '', destination: '', ride_date: '' })
   const [sortBy, setSortBy] = useState<'time' | 'city' | 'rating' | 'price_asc' | 'price_desc'>('time')
   const [form, setForm] = useState({
@@ -160,6 +164,7 @@ export default function CovoituragePage() {
     price_xpf: 0,
     vehicle: '',
     description: '',
+    booking_mode: 'auto' as 'auto' | 'manual',
   })
   const [saving, setSaving] = useState(false)
 
@@ -222,17 +227,6 @@ export default function CovoituragePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.departure, filters.destination])
 
-  const handleBook = async (id: number | string) => {
-    setBookingId(id)
-    try {
-      await covoiturageApi.book(id, { seats: 1 })
-      await refreshRides()
-    } catch (err) {
-      console.error('[covoiturage] handleBook:', err)
-    } finally {
-      setBookingId(null)
-    }
-  }
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -258,6 +252,7 @@ export default function CovoituragePage() {
         price_xpf: 0,
         vehicle: '',
         description: '',
+        booking_mode: 'auto',
       })
       await refreshRides()
       setActiveTab('search')
@@ -398,7 +393,12 @@ export default function CovoituragePage() {
                     ) : visibleRides.length > 0 ? (
                       <div className="grid gap-4 md:grid-cols-2">
                         {visibleRides.map((ride) => (
-                          <RideCard key={ride.id} ride={ride} onBook={handleBook} />
+                          <RideCard
+                            key={ride.id}
+                            ride={ride}
+                            currentUserId={user?.id ?? null}
+                            onBooked={refreshRides}
+                          />
                         ))}
                       </div>
                     ) : (
@@ -509,6 +509,43 @@ export default function CovoituragePage() {
                       className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none"
                     />
                   </label>
+                  <div className="md:col-span-2">
+                    <span className="mb-2 block text-sm font-semibold text-night">Mode de réservation</span>
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {[
+                        {
+                          value: 'auto',
+                          title: 'R?servation automatique',
+                          description: 'La place est bloquée instantanément',
+                        },
+                        {
+                          value: 'manual',
+                          title: 'Sur acceptation',
+                          description: "Je vois le profil et j'accepte/refuse dans les 24h",
+                        },
+                      ].map((option) => (
+                        <label
+                          key={option.value}
+                          className={`cursor-pointer rounded-2xl border p-4 transition ${
+                            form.booking_mode === option.value
+                              ? 'border-[#0A7EA4] bg-nc-lagonLight'
+                              : 'border-night/10 bg-sand/40 hover:bg-white'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="booking_mode"
+                            value={option.value}
+                            checked={form.booking_mode === option.value}
+                            onChange={() => setForm((prev) => ({ ...prev, booking_mode: option.value as 'auto' | 'manual' }))}
+                            className="sr-only"
+                          />
+                          <p className="font-semibold text-night">{option.title}</p>
+                          <p className="mt-1 text-sm text-night/60">{option.description}</p>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
                   <label className="block md:col-span-2">
                     <span className="mb-1 block text-sm font-semibold text-night">Description du trajet</span>
                     <textarea
@@ -541,6 +578,7 @@ export default function CovoituragePage() {
                           price_xpf: 0,
                           vehicle: '',
                           description: '',
+                          booking_mode: 'auto',
                         })
                       }
                       className="btn-secondary inline-flex items-center gap-2 rounded-2xl px-5 py-3"
@@ -653,11 +691,6 @@ export default function CovoituragePage() {
           </aside>
         </div>
 
-        {bookingId ? (
-          <div className="fixed bottom-4 right-4 rounded-2xl border border-night/8 bg-white px-4 py-3 text-sm shadow-card">
-            Réservation en cours...
-          </div>
-        ) : null}
       </main>
     </div>
   )

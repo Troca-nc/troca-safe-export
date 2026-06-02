@@ -245,6 +245,10 @@ export default function Header() {
                           <Plus className="h-4 w-4 text-night/50" />
                           Mes annonces
                         </Link>
+                        <Link href="/covoiturage/reservations" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-sand" role="menuitem">
+                          <Car className="h-4 w-4 text-night/50" />
+                          Mes réservations
+                        </Link>
                         <Link href="/parametres" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-sand" role="menuitem">
                           <Settings2 className="h-4 w-4 text-night/50" />
                           Paramètres

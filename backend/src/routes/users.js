@@ -18,6 +18,100 @@ const { getSellerResponseTime } = require('../services/sellerInsightsService');
 
 const router = express.Router();
 
+async function fetchUserDetailedProfile(userId) {
+  const result = await query(
+    `SELECT
+        u.id,
+        u.prenom,
+        u.nom,
+        u.avatar_url,
+        u.bio,
+        u.member_since,
+        COALESCE(u.rides_as_driver, 0) AS rides_as_driver,
+        COALESCE(u.rides_as_passenger, 0) AS rides_as_passenger,
+        COALESCE(u.trust_score, 100) AS trust_score,
+        CASE WHEN u.is_pro = TRUE AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
+        u.nb_annonces,
+        u.note_moyenne,
+        u.nb_avis,
+        u.created_at,
+        u.phone_verified,
+        u.email_verified,
+        u.commune_id,
+        com.name AS commune_name,
+        com.id AS commune_id_lookup,
+        prov.id AS province_id,
+        prov.name AS province_name,
+        COALESCE((
+          SELECT SUM(a.nb_vues)::int
+          FROM annonces a
+          WHERE a.user_id = u.id AND a.deleted_at IS NULL
+        ), 0) AS total_vues,
+        COALESCE((
+          SELECT SUM(a.nb_favoris)::int
+          FROM annonces a
+          WHERE a.user_id = u.id AND a.deleted_at IS NULL
+        ), 0) AS total_favoris,
+        COALESCE((
+          SELECT COUNT(*)
+          FROM annonces a
+          WHERE a.user_id = u.id AND a.deleted_at IS NULL AND a.status = 'active'
+        ), 0) AS active_listings_count,
+        COALESCE((
+          SELECT COUNT(*)
+          FROM annonces a
+          WHERE a.user_id = u.id AND a.deleted_at IS NULL AND a.status = 'active'
+            AND (
+              a.is_boosted = TRUE
+              AND (a.boost_expires_at IS NULL OR a.boost_expires_at > NOW())
+            )
+        ), 0) AS annonces_boostees,
+        COALESCE((
+          SELECT json_agg(
+            json_build_object(
+              'rating', r.rating,
+              'comment', r.comment,
+              'role', r.role,
+              'reviewer_prenom', rev.prenom,
+              'created_at', r.created_at
+            ) ORDER BY r.created_at DESC
+          )
+          FROM user_reviews r
+          LEFT JOIN users rev ON rev.id = r.reviewer_id
+          WHERE r.reviewed_id = u.id
+        ), '[]'::json) AS reviews
+     FROM users u
+     LEFT JOIN communes com ON com.id = u.commune_id
+     LEFT JOIN provinces prov ON prov.id = com.province_id
+     WHERE u.id = $1 AND u.deleted_at IS NULL
+     GROUP BY u.id, com.id, com.name, prov.id, prov.name`,
+    [userId]
+  );
+
+  return result.rows[0] || null;
+}
+
+async function getPublicProfilePayload(userId) {
+  const profile = await fetchUserDetailedProfile(userId);
+  if (!profile) return null;
+
+  const [presence, responseTime] = await Promise.all([
+    Promise.resolve(getUserPresence(profile.id)),
+    getSellerResponseTime(query, profile.id).catch(() => ({
+      avg_response_time_minutes: null,
+      avg_response_time_label: null,
+    })),
+  ]);
+
+  return {
+    ...profile,
+    is_online: presence.is_online,
+    last_seen_at: presence.last_seen_at,
+    last_seen_label: getPresenceLabel(presence),
+    ...responseTime,
+  };
+}
+
 // ── GET /api/users/me/favoris — Mes favoris ─────────────────
 
 router.get('/me/favoris', authenticate, async (req, res, next) => {
@@ -53,71 +147,29 @@ router.get('/me/favoris', authenticate, async (req, res, next) => {
   }
 });
 
+// ── GET /api/users/:id/profile — Profil public détaillé ──────
+
+router.get('/:id/profile', async (req, res, next) => {
+  try {
+    const profile = await getPublicProfilePayload(req.params.id);
+    if (!profile) return res.status(404).json({ error: 'Utilisateur introuvable.' });
+
+    return res.json({
+      data: profile,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // ── GET /api/users/:id — Profil public ──────────────────────
 
 router.get('/:id', async (req, res, next) => {
   try {
-    const result = await query(
-      `SELECT
-          u.id, u.prenom, u.nom, u.avatar_url, u.bio,
-          CASE WHEN u.is_pro = TRUE AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
-          u.nb_annonces, u.note_moyenne, u.nb_avis, u.created_at,
-          u.phone_verified, u.email_verified,
-          u.commune_id,
-          com.name AS commune_name,
-          com.id AS commune_id_lookup,
-          prov.id AS province_id,
-          prov.name AS province_name,
-          COALESCE((
-            SELECT SUM(a.nb_vues)::int
-            FROM annonces a
-            WHERE a.user_id = u.id AND a.deleted_at IS NULL
-          ), 0) AS total_vues,
-          COALESCE((
-            SELECT SUM(a.nb_favoris)::int
-            FROM annonces a
-            WHERE a.user_id = u.id AND a.deleted_at IS NULL
-          ), 0) AS total_favoris,
-          COALESCE((
-            SELECT COUNT(*)
-            FROM annonces a
-            WHERE a.user_id = u.id AND a.deleted_at IS NULL AND a.status = 'active'
-          ), 0) AS active_listings_count,
-          COALESCE((
-            SELECT COUNT(*)
-            FROM annonces a
-            WHERE a.user_id = u.id AND a.deleted_at IS NULL AND a.status = 'active'
-              AND (
-                a.is_boosted = TRUE
-                AND (a.boost_expires_at IS NULL OR a.boost_expires_at > NOW())
-              )
-          ), 0) AS annonces_boostees
-       FROM users u
-       LEFT JOIN communes com ON com.id = u.commune_id
-       LEFT JOIN provinces prov ON prov.id = com.province_id
-       WHERE u.id = $1 AND u.deleted_at IS NULL`,
-      [req.params.id]
-    );
-    if (!result.rows[0]) return res.status(404).json({ error: 'Utilisateur introuvable.' });
+    const profile = await getPublicProfilePayload(req.params.id);
+    if (!profile) return res.status(404).json({ error: 'Utilisateur introuvable.' });
 
-    const profile = result.rows[0];
-    const [presence, responseTime] = await Promise.all([
-      Promise.resolve(getUserPresence(profile.id)),
-      getSellerResponseTime(query, profile.id).catch(() => ({
-        avg_response_time_minutes: null,
-        avg_response_time_label: null,
-      })),
-    ]);
-
-    return res.json({
-      data: {
-        ...profile,
-        is_online: presence.is_online,
-        last_seen_at: presence.last_seen_at,
-        last_seen_label: getPresenceLabel(presence),
-        ...responseTime,
-      },
-    });
+    return res.json({ data: profile });
   } catch (err) {
     next(err);
   }

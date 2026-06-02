@@ -567,6 +567,11 @@ export const covoiturageApi = {
     () => api.get('/covoiturage/mine'),
     CACHE_TTL.short,
   ),
+  myReservations: () => cachedGet(
+    buildCacheKey('covoiturage.myReservations', '/covoiturage/reservations/mine'),
+    () => api.get('/covoiturage/reservations/mine'),
+    CACHE_TTL.short,
+  ),
   create: async (data: object) => {
     const res = await api.post('/covoiturage', data)
     invalidateApiCache('covoiturage.')
@@ -575,6 +580,24 @@ export const covoiturageApi = {
   },
   book: async (id: string | number, data: object = {}) => {
     const res = await api.post(`/covoiturage/${id}/book`, data)
+    invalidateApiCache('covoiturage.')
+    invalidateApiCache('stats.')
+    return res
+  },
+  acceptBooking: async (bookingId: string | number) => {
+    const res = await api.post(`/covoiturage/bookings/${bookingId}/accept`)
+    invalidateApiCache('covoiturage.')
+    invalidateApiCache('stats.')
+    return res
+  },
+  refuseBooking: async (bookingId: string | number) => {
+    const res = await api.post(`/covoiturage/bookings/${bookingId}/refuse`)
+    invalidateApiCache('covoiturage.')
+    invalidateApiCache('stats.')
+    return res
+  },
+  cancelBooking: async (bookingId: string | number) => {
+    const res = await api.post(`/covoiturage/bookings/${bookingId}/cancel`)
     invalidateApiCache('covoiturage.')
     invalidateApiCache('stats.')
     return res
@@ -671,8 +694,8 @@ export const covoitAlertsApi = {
 // Users
 export const usersApi = {
   getProfile: (id: string) => cachedGet(
-    buildCacheKey('users.getProfile', `/users/${id}`),
-    () => api.get(`/users/${id}`),
+    buildCacheKey('users.getProfile', `/users/${id}/profile`),
+    () => api.get(`/users/${id}/profile`),
     CACHE_TTL.short,
   ),
   updateProfile: async (data: object) => {

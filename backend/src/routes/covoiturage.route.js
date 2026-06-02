@@ -6,6 +6,15 @@ const { query, withTransaction } = require('../config/database');
 const { authenticate, optionalAuth } = require('../middleware/auth');
 const { logger } = require('../utils/logger');
 const { triggerCovoiturageAlerts } = require('../services/covoitAlertService');
+const { createNotification } = require('../services/notificationService');
+const { sendPushToUser } = require('../services/pushService');
+const {
+  sendRideAutoBookingPassengerEmail,
+  sendRideAutoBookingDriverEmail,
+  sendRideManualRequestEmail,
+  sendRideBookingAcceptedPassengerEmail,
+  sendRideBookingAcceptedDriverEmail,
+} = require('../services/emailService');
 
 const router = express.Router();
 
@@ -16,6 +25,7 @@ const createSchema = Joi.object({
   ride_date: Joi.string().isoDate().required(),
   ride_time: Joi.string().pattern(/^\d{2}:\d{2}(:\d{2})?$/).required(),
   seats_total: Joi.number().integer().min(1).max(8).required(),
+  booking_mode: Joi.string().valid('auto', 'manual').default('auto'),
   price_xpf: Joi.number().integer().min(0).required(),
   vehicle: Joi.string().max(120).allow('', null),
   comfort: Joi.string().max(120).allow('', null),
@@ -33,6 +43,7 @@ const createSchema = Joi.object({
 
 const bookingSchema = Joi.object({
   seats: Joi.number().integer().min(1).max(8).default(1),
+  message: Joi.string().max(1000).allow('', null),
 });
 
 const reviewSchema = Joi.object({
@@ -84,7 +95,66 @@ function mapRide(item) {
   return {
     ...item,
     stops: parseJson(item.stops, []),
-    seats_remaining: Math.max(0, Number(item.seats_total || 0) - Number(item.seats_reserved || 0)),
+    booking_mode: item.booking_mode || 'auto',
+    seats_remaining: Number.isFinite(Number(item.seats_remaining))
+      ? Math.max(0, Number(item.seats_remaining))
+      : Math.max(0, Number(item.seats_total || 0) - Number(item.seats_reserved || 0)),
+  };
+}
+
+function buildRideLabel(ride) {
+  return `${ride.departure} → ${ride.destination}`;
+}
+
+function mapBookingRow(row, currentUserId) {
+  if (!row) return null;
+  const isDriver = Number(row.driver_id) === Number(currentUserId);
+  const otherUser = isDriver
+    ? {
+        id: row.passenger_id,
+        prenom: row.passenger_prenom,
+        nom: row.passenger_nom,
+        avatar_url: row.passenger_avatar_url,
+        trust_score: row.passenger_trust_score,
+      }
+    : {
+        id: row.driver_id,
+        prenom: row.driver_prenom,
+        nom: row.driver_nom,
+        avatar_url: row.driver_avatar_url,
+        trust_score: row.driver_trust_score,
+      };
+
+  return {
+    id: row.booking_id,
+    ride_id: row.ride_id,
+    role: isDriver ? 'driver' : 'passenger',
+    status: row.booking_status,
+    booking_mode: row.booking_mode,
+    message: row.booking_message,
+    seats: Number(row.booking_seats || 1),
+    created_at: row.booking_created_at,
+    responded_at: row.booking_responded_at,
+    expires_at: row.booking_expires_at,
+    is_expired: row.booking_status === 'pending' && row.booking_expires_at ? new Date(row.booking_expires_at).getTime() < Date.now() : false,
+    ride: {
+      id: row.ride_id,
+      departure: row.departure,
+      destination: row.destination,
+      ride_date: row.ride_date,
+      ride_time: row.ride_time,
+      price_xpf: row.price_xpf,
+      seats_total: row.seats_total,
+      seats_remaining: row.seats_remaining,
+      booking_mode: row.ride_booking_mode || row.booking_mode || 'auto',
+      status: row.ride_status,
+      driver_id: row.driver_id,
+      driver_prenom: row.driver_prenom,
+      driver_nom: row.driver_nom,
+      driver_avatar_url: row.driver_avatar_url,
+      driver_trust_score: row.driver_trust_score,
+    },
+    other_user: otherUser,
   };
 }
 
@@ -136,6 +206,8 @@ router.get('/', optionalAuth, async (req, res, next) => {
          c.ride_time,
          c.seats_total,
          c.seats_reserved,
+         c.seats_remaining,
+         c.booking_mode,
          c.price_xpf,
          c.vehicle,
          c.comfort,
@@ -170,8 +242,8 @@ router.get('/', optionalAuth, async (req, res, next) => {
        LEFT JOIN communes co_dest ON co_dest.id = c.destination_commune_id
        LEFT JOIN LATERAL (
          SELECT COUNT(*) AS total_bookings
-         FROM covoiturage_bookings b
-         WHERE b.covoiturage_id = c.id AND b.status != 'cancelled'
+         FROM ride_bookings b
+         WHERE b.ride_id = c.id AND b.status IN ('auto_confirmed','accepted','pending')
        ) bookings ON TRUE
        LEFT JOIN LATERAL (
          SELECT COUNT(*) AS total_reviews, ROUND(AVG(r.rating)::numeric, 1) AS avg_rating
@@ -195,6 +267,8 @@ router.get('/mine', authenticate, async (req, res, next) => {
     const result = await query(
       `SELECT
          c.*,
+         c.seats_remaining,
+         c.booking_mode,
          COALESCE(bookings.total_bookings, 0) AS bookings_count,
          COALESCE(reviews.total_reviews, 0) AS reviews_count,
          COALESCE(reviews.avg_rating, 0) AS avg_rating,
@@ -205,8 +279,8 @@ router.get('/mine', authenticate, async (req, res, next) => {
        LEFT JOIN communes co_dest ON co_dest.id = c.destination_commune_id
        LEFT JOIN LATERAL (
          SELECT COUNT(*) AS total_bookings
-         FROM covoiturage_bookings b
-         WHERE b.covoiturage_id = c.id AND b.status != 'cancelled'
+         FROM ride_bookings b
+         WHERE b.ride_id = c.id AND b.status IN ('auto_confirmed','accepted','pending')
        ) bookings ON TRUE
        LEFT JOIN LATERAL (
          SELECT COUNT(*) AS total_reviews, ROUND(AVG(r.rating)::numeric, 1) AS avg_rating
@@ -240,10 +314,11 @@ router.post('/', authenticate, async (req, res, next) => {
       const inserted = await client.query(
         `INSERT INTO covoiturages
            (user_id, departure, destination, stops, ride_date, ride_time, seats_total, seats_reserved,
+            seats_remaining, booking_mode,
             price_xpf, vehicle, comfort, luggage_allowed, music_allowed, no_smoking, animals_allowed,
             description, status, departure_commune_id, destination_commune_id, trust_score,
             is_verified_driver, expires_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,0,$8,$9,$10,$11,$12,$13,$14,$15,'published',$16,$17,$18,$19,$20)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,0,$7,$8,$9,$10,$11,$12,$13,$14,$15,'published',$16,$17,$18,$19,$20,$21)
          RETURNING *`,
         [
           req.user.id,
@@ -253,6 +328,7 @@ router.post('/', authenticate, async (req, res, next) => {
           value.ride_date,
           value.ride_time,
           value.seats_total,
+          value.booking_mode,
           value.price_xpf,
           value.vehicle?.trim() || null,
           value.comfort?.trim() || null,
@@ -273,6 +349,12 @@ router.post('/', authenticate, async (req, res, next) => {
     });
 
     logger.info('covoiturage_created', { user_id: req.user.id, covoiturage_id: created.id });
+    await query(
+      `UPDATE users
+       SET rides_as_driver = COALESCE(rides_as_driver, 0) + 1
+       WHERE id = $1`,
+      [req.user.id]
+    ).catch(() => {});
     void triggerCovoiturageAlerts(created).catch((error) => {
       logger.warn('covoiturage_alert_trigger_failed', {
         covoiturage_id: created.id,
@@ -410,69 +492,659 @@ router.post('/:id/book', authenticate, async (req, res, next) => {
     const { error, value } = bookingSchema.validate(req.body, { stripUnknown: true, convert: true });
     if (error) return res.status(400).json({ error: error.details[0].message });
 
+    const rideId = Number(req.params.id);
+    if (!Number.isFinite(rideId) || rideId <= 0) {
+      return res.status(400).json({ error: 'Trajet invalide.' });
+    }
+
     const result = await withTransaction(async (client) => {
       const rideRes = await client.query(
-        `SELECT id, user_id, departure, destination, stops, ride_date, ride_time, seats_total, seats_reserved,
-                price_xpf, vehicle, comfort, luggage_allowed, music_allowed, no_smoking, animals_allowed,
-                description, status, departure_commune_id, destination_commune_id, trust_score,
-                is_verified_driver, expires_at, created_at, updated_at
-         FROM covoiturages
-         WHERE id = $1 FOR UPDATE`,
-        [req.params.id]
+        `SELECT
+           c.id,
+           c.user_id,
+           c.departure,
+           c.destination,
+           c.stops,
+           c.ride_date,
+           c.ride_time,
+           c.seats_total,
+           c.seats_reserved,
+           c.seats_remaining,
+           c.booking_mode,
+           c.price_xpf,
+           c.vehicle,
+           c.comfort,
+           c.luggage_allowed,
+           c.music_allowed,
+           c.no_smoking,
+           c.animals_allowed,
+           c.description,
+           c.status,
+           c.departure_commune_id,
+           c.destination_commune_id,
+           c.trust_score,
+           c.is_verified_driver,
+           c.expires_at,
+           c.created_at,
+           c.updated_at,
+           u.prenom AS driver_prenom,
+           u.nom AS driver_nom,
+           u.email AS driver_email,
+           u.avatar_url AS driver_avatar_url,
+           u.trust_score AS driver_trust_score
+         FROM covoiturages c
+         JOIN users u ON u.id = c.user_id
+         WHERE c.id = $1
+         FOR UPDATE`,
+        [rideId]
       );
 
       const ride = rideRes.rows[0];
       if (!ride) {
         throw Object.assign(new Error('Trajet introuvable.'), { statusCode: 404 });
       }
-      if (ride.user_id === req.user.id) {
-        throw Object.assign(new Error('Vous ne pouvez pas reserver votre propre trajet.'), { statusCode: 400 });
+      if (Number(ride.user_id) === Number(req.user.id)) {
+        throw Object.assign(new Error('Vous ne pouvez pas réserver votre propre trajet.'), { statusCode: 400 });
       }
-      if (ride.status !== 'published') {
-        throw Object.assign(new Error('Ce trajet ne peut plus etre reserve.'), { statusCode: 400 });
+      if (!['published', 'full'].includes(ride.status)) {
+        throw Object.assign(new Error('Ce trajet ne peut plus être réservé.'), { statusCode: 400 });
       }
 
-      const seatsRemaining = Math.max(0, Number(ride.seats_total || 0) - Number(ride.seats_reserved || 0));
+      const seatsRemaining = Number.isFinite(Number(ride.seats_remaining))
+        ? Math.max(0, Number(ride.seats_remaining))
+        : Math.max(0, Number(ride.seats_total || 0) - Number(ride.seats_reserved || 0));
       if (seatsRemaining < value.seats) {
         throw Object.assign(new Error('Plus assez de places disponibles.'), { statusCode: 400 });
       }
 
       const existing = await client.query(
-        `SELECT id FROM covoiturage_bookings WHERE covoiturage_id = $1 AND user_id = $2 AND status != 'cancelled'`,
-        [req.params.id, req.user.id]
+        `SELECT id FROM ride_bookings WHERE ride_id = $1 AND passenger_id = $2`,
+        [rideId, req.user.id]
       );
       if (existing.rows.length > 0) {
-        throw Object.assign(new Error('Vous avez deja reserve ce trajet.'), { statusCode: 400 });
+        throw Object.assign(new Error('Vous avez déjà réservé ce trajet.'), { statusCode: 400 });
       }
 
-      const booking = await client.query(
-        `INSERT INTO covoiturage_bookings (covoiturage_id, user_id, seats, status)
-         VALUES ($1, $2, $3, 'confirmed')
-         RETURNING *`,
-        [req.params.id, req.user.id, value.seats]
-      );
-
-      const newReserved = Number(ride.seats_reserved || 0) + value.seats;
-      await client.query(
-        `UPDATE covoiturages
-         SET seats_reserved = $2,
-             status = CASE WHEN $2 >= seats_total THEN 'full' ELSE status END,
-             updated_at = NOW()
+      const passengerRes = await client.query(
+        `SELECT id, prenom, nom, email, avatar_url, trust_score
+         FROM users
          WHERE id = $1`,
-        [req.params.id, newReserved]
+        [req.user.id]
+      );
+      const passenger = passengerRes.rows[0];
+      if (!passenger) {
+        throw Object.assign(new Error('Utilisateur introuvable.'), { statusCode: 404 });
+      }
+
+      const bookingMode = String(ride.booking_mode || 'auto').toLowerCase() === 'manual' ? 'manual' : 'auto';
+      const bookingStatus = bookingMode === 'manual' ? 'pending' : 'auto_confirmed';
+
+      const bookingRes = await client.query(
+        `INSERT INTO ride_bookings
+           (ride_id, passenger_id, status, booking_mode, message, seats, responded_at)
+         VALUES ($1, $2, $3, $4, $5, $6, CASE WHEN $7 THEN NOW() ELSE NULL END)
+         RETURNING *`,
+        [
+          rideId,
+          req.user.id,
+          bookingStatus,
+          bookingMode,
+          value.message?.trim() || null,
+          value.seats,
+          bookingMode === 'auto',
+        ]
       );
 
-      return { booking: booking.rows[0], seatsRemaining: Math.max(0, Number(ride.seats_total || 0) - newReserved) };
+      let updatedRide = ride;
+      if (bookingMode === 'auto') {
+        const autoUpdated = await client.query(
+          `UPDATE covoiturages
+           SET seats_reserved = seats_reserved + $2,
+               seats_remaining = GREATEST(COALESCE(seats_remaining, seats_total) - $2, 0),
+               status = CASE
+                 WHEN GREATEST(COALESCE(seats_remaining, seats_total) - $2, 0) = 0 THEN 'full'
+                 ELSE status
+               END,
+               updated_at = NOW()
+           WHERE id = $1
+           RETURNING *`,
+          [rideId, value.seats]
+        );
+        updatedRide = autoUpdated.rows[0] || ride;
+
+        await client.query(
+          `UPDATE users
+           SET rides_as_passenger = COALESCE(rides_as_passenger, 0) + 1
+           WHERE id = $1`,
+          [req.user.id]
+        );
+      }
+
+      return {
+        booking: bookingRes.rows[0],
+        ride: updatedRide,
+        passenger,
+        driver: {
+          id: ride.user_id,
+          prenom: ride.driver_prenom,
+          nom: ride.driver_nom,
+          email: ride.driver_email,
+          avatar_url: ride.driver_avatar_url,
+          trust_score: ride.driver_trust_score,
+        },
+        seatsRemaining: bookingMode === 'auto'
+          ? Math.max(0, Number(updatedRide.seats_remaining ?? (updatedRide.seats_total - updatedRide.seats_reserved)))
+          : seatsRemaining,
+        bookingMode,
+      };
     });
 
-    logger.info('covoiturage_booked', { user_id: req.user.id, covoiturage_id: Number(req.params.id) });
+    const rideLabel = buildRideLabel(result.ride);
+    const rideDetails = {
+      departure: result.ride.departure,
+      destination: result.ride.destination,
+      ride_date: result.ride.ride_date,
+      ride_time: result.ride.ride_time,
+      seats: result.booking.seats,
+      price_xpf: result.ride.price_xpf,
+      driverPrenom: result.driver.prenom,
+      passengerPrenom: result.passenger.prenom,
+    };
+
+    if (result.bookingMode === 'auto') {
+      await createNotification(result.ride.user_id, {
+        type: 'ride_booking_auto',
+        title: 'Nouvelle réservation !',
+        body: `${result.passenger.prenom || 'Un passager'} a réservé une place pour ${rideLabel}`,
+        href: '/covoiturage/reservations',
+      }).catch(() => {});
+      await createNotification(req.user.id, {
+        type: 'ride_booking_auto_confirmed',
+        title: '✅ Place réservée',
+        body: `Votre place est confirmée sur ${rideLabel}`,
+        href: '/covoiturage/reservations',
+      }).catch(() => {});
+
+      await sendPushToUser(result.ride.user_id, {
+        title: 'Nouvelle réservation !',
+        body: `${result.passenger.prenom || 'Un passager'} a réservé une place pour ${rideLabel}`,
+        data: { type: 'ride_booking_auto', booking_id: result.booking.id, ride_id: result.ride.id },
+      }).catch(() => {});
+      await sendPushToUser(req.user.id, {
+        title: '✅ Place réservée',
+        body: `Votre place est confirmée sur ${rideLabel}`,
+        data: { type: 'ride_booking_auto_confirmed', booking_id: result.booking.id, ride_id: result.ride.id },
+      }).catch(() => {});
+
+      await sendRideAutoBookingPassengerEmail(
+        result.passenger.email,
+        result.passenger.prenom || 'Bonjour',
+        rideDetails,
+        result.passenger.id
+      ).catch(() => {});
+      await sendRideAutoBookingDriverEmail(
+        result.driver.email,
+        result.driver.prenom || 'Bonjour',
+        rideDetails,
+        result.driver.id
+      ).catch(() => {});
+    } else {
+      await createNotification(result.ride.user_id, {
+        type: 'ride_booking_requested',
+        title: 'Demande de réservation !',
+        body: `${result.passenger.prenom || 'Un passager'} demande une place — vous avez 24h pour accepter.`,
+        href: '/covoiturage/reservations',
+      }).catch(() => {});
+
+      await sendPushToUser(result.ride.user_id, {
+        title: 'Demande de réservation !',
+        body: `${result.passenger.prenom || 'Un passager'} demande une place — vous avez 24h pour accepter.`,
+        data: { type: 'ride_booking_requested', booking_id: result.booking.id, ride_id: result.ride.id },
+      }).catch(() => {});
+
+      await sendRideManualRequestEmail(
+        result.driver.email,
+        result.driver.prenom || 'Bonjour',
+        rideDetails,
+        result.driver.id
+      ).catch(() => {});
+    }
+
+    logger.info('covoiturage_booked', {
+      user_id: req.user.id,
+      covoiturage_id: rideId,
+      booking_mode: result.bookingMode,
+      booking_id: result.booking.id,
+    });
 
     return res.status(201).json({
       data: {
-        ...result.booking,
+        id: result.booking.id,
+        ride_id: rideId,
+        status: result.booking.status,
+        booking_mode: result.booking.booking_mode,
+        seats: result.booking.seats,
+        message: result.booking.message,
+        expires_at: result.booking.expires_at,
+        responded_at: result.booking.responded_at,
         seats_remaining: result.seatsRemaining,
       },
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/reservations/mine', authenticate, async (req, res, next) => {
+  try {
+    const result = await query(
+      `SELECT
+         b.id AS booking_id,
+         b.ride_id,
+         b.status AS booking_status,
+         b.booking_mode,
+         b.message AS booking_message,
+         b.seats AS booking_seats,
+         b.created_at AS booking_created_at,
+         b.responded_at AS booking_responded_at,
+         b.expires_at AS booking_expires_at,
+         c.user_id AS driver_id,
+         c.departure,
+         c.destination,
+         c.ride_date,
+         c.ride_time,
+         c.price_xpf,
+         c.seats_total,
+         c.seats_reserved,
+         COALESCE(c.seats_remaining, GREATEST(c.seats_total - c.seats_reserved, 0)) AS seats_remaining,
+         c.booking_mode AS ride_booking_mode,
+         c.status AS ride_status,
+         d.prenom AS driver_prenom,
+         d.nom AS driver_nom,
+         d.avatar_url AS driver_avatar_url,
+         d.trust_score AS driver_trust_score,
+         p.id AS passenger_id,
+         p.prenom AS passenger_prenom,
+         p.nom AS passenger_nom,
+         p.avatar_url AS passenger_avatar_url,
+         p.trust_score AS passenger_trust_score,
+         CASE WHEN c.user_id = $1 THEN 'driver' ELSE 'passenger' END AS role,
+         CASE WHEN c.user_id = $1 THEN p.id ELSE d.id END AS other_user_id,
+         CASE WHEN c.user_id = $1 THEN p.prenom ELSE d.prenom END AS other_user_prenom,
+         CASE WHEN c.user_id = $1 THEN p.nom ELSE d.nom END AS other_user_nom,
+         CASE WHEN c.user_id = $1 THEN p.avatar_url ELSE d.avatar_url END AS other_user_avatar_url,
+         CASE WHEN c.user_id = $1 THEN p.trust_score ELSE d.trust_score END AS other_user_trust_score
+       FROM ride_bookings b
+       JOIN covoiturages c ON c.id = b.ride_id
+       JOIN users d ON d.id = c.user_id
+       JOIN users p ON p.id = b.passenger_id
+       WHERE b.passenger_id = $1 OR c.user_id = $1
+       ORDER BY b.created_at DESC`,
+      [req.user.id]
+    );
+
+    return res.json({ data: result.rows.map((row) => mapBookingRow(row, req.user.id)) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/bookings/:bookingId/accept', authenticate, async (req, res, next) => {
+  try {
+    const bookingId = Number(req.params.bookingId);
+    if (!Number.isFinite(bookingId) || bookingId <= 0) {
+      return res.status(400).json({ error: 'Réservation invalide.' });
+    }
+
+    const result = await withTransaction(async (client) => {
+      const bookingRes = await client.query(
+        `SELECT
+           b.id AS booking_id,
+           b.ride_id,
+           b.passenger_id,
+           b.status AS booking_status,
+           b.booking_mode,
+           b.message AS booking_message,
+           b.seats AS booking_seats,
+           b.created_at AS booking_created_at,
+           b.responded_at AS booking_responded_at,
+           b.expires_at AS booking_expires_at,
+           c.id AS ride_id,
+           c.user_id AS driver_id,
+           c.departure,
+           c.destination,
+           c.ride_date,
+           c.ride_time,
+           c.price_xpf,
+           c.seats_total,
+           c.seats_reserved,
+           c.seats_remaining,
+           c.booking_mode AS ride_booking_mode,
+           c.status AS ride_status,
+           d.prenom AS driver_prenom,
+           d.nom AS driver_nom,
+           d.email AS driver_email,
+           d.avatar_url AS driver_avatar_url,
+           d.trust_score AS driver_trust_score,
+           p.prenom AS passenger_prenom,
+           p.nom AS passenger_nom,
+           p.email AS passenger_email,
+           p.avatar_url AS passenger_avatar_url,
+           p.trust_score AS passenger_trust_score
+         FROM ride_bookings b
+         JOIN covoiturages c ON c.id = b.ride_id
+         JOIN users d ON d.id = c.user_id
+         JOIN users p ON p.id = b.passenger_id
+         WHERE b.id = $1
+         FOR UPDATE`,
+        [bookingId]
+      );
+
+      const booking = bookingRes.rows[0];
+      if (!booking) {
+        throw Object.assign(new Error('Réservation introuvable.'), { statusCode: 404 });
+      }
+
+      if (Number(booking.driver_id) !== Number(req.user.id) && !req.user.is_admin) {
+        throw Object.assign(new Error('Action non autorisée.'), { statusCode: 403 });
+      }
+
+      if (booking.booking_status !== 'pending') {
+        throw Object.assign(new Error('Cette demande ne peut plus être acceptée.'), { statusCode: 400 });
+      }
+
+      if (booking.booking_mode !== 'manual') {
+        throw Object.assign(new Error('Seules les demandes manuelles peuvent être validées.'), { statusCode: 400 });
+      }
+
+      if (booking.booking_expires_at && new Date(booking.booking_expires_at).getTime() < Date.now()) {
+        throw Object.assign(new Error('Cette demande a expiré.'), { statusCode: 400 });
+      }
+
+      const newSeatsReserved = Number(booking.seats_reserved || 0) + Number(booking.booking_seats || 1);
+      const updatedRideRes = await client.query(
+        `UPDATE covoiturages
+         SET seats_reserved = $2,
+             seats_remaining = GREATEST(COALESCE(seats_remaining, seats_total) - $3, 0),
+             status = CASE
+               WHEN GREATEST(COALESCE(seats_remaining, seats_total) - $3, 0) = 0 THEN 'full'
+               ELSE status
+             END,
+             updated_at = NOW()
+         WHERE id = $1
+         RETURNING *`,
+        [booking.ride_id, newSeatsReserved, Number(booking.booking_seats || 1)]
+      );
+
+      await client.query(
+        `UPDATE ride_bookings
+         SET status = 'accepted',
+             responded_at = NOW()
+         WHERE id = $1`,
+        [bookingId]
+      );
+
+      await client.query(
+        `UPDATE users
+         SET rides_as_passenger = COALESCE(rides_as_passenger, 0) + 1
+         WHERE id = $1`,
+        [booking.passenger_id]
+      );
+
+      return {
+        booking,
+        ride: updatedRideRes.rows[0] || booking,
+        driver: {
+          id: booking.driver_id,
+          prenom: booking.driver_prenom,
+          nom: booking.driver_nom,
+          email: booking.driver_email,
+          avatar_url: booking.driver_avatar_url,
+          trust_score: booking.driver_trust_score,
+        },
+        passenger: {
+          id: booking.passenger_id,
+          prenom: booking.passenger_prenom,
+          nom: booking.passenger_nom,
+          email: booking.passenger_email,
+          avatar_url: booking.passenger_avatar_url,
+          trust_score: booking.passenger_trust_score,
+        },
+      };
+    });
+
+    const rideLabel = buildRideLabel(result.ride);
+    const details = {
+      departure: result.ride.departure,
+      destination: result.ride.destination,
+      ride_date: result.ride.ride_date,
+      ride_time: result.ride.ride_time,
+      seats: result.booking.booking_seats,
+      price_xpf: result.ride.price_xpf,
+      driverPrenom: result.driver.prenom,
+      passengerPrenom: result.passenger.prenom,
+    };
+
+    await createNotification(result.passenger.id, {
+      type: 'ride_booking_accepted',
+      title: '✅ Réservation acceptée !',
+      body: `${result.driver.prenom || 'Le conducteur'} vous attend sur ${rideLabel}`,
+      href: '/covoiturage/reservations',
+    }).catch(() => {});
+    await createNotification(result.driver.id, {
+      type: 'ride_booking_accepted_driver',
+      title: '✅ Réservation confirmée',
+      body: `Vous avez accepté la réservation de ${result.passenger.prenom || 'ce passager'} sur ${rideLabel}`,
+      href: '/covoiturage/reservations',
+    }).catch(() => {});
+
+    await sendPushToUser(result.passenger.id, {
+      title: '✅ Réservation acceptée !',
+      body: `${result.driver.prenom || 'Le conducteur'} vous attend.`,
+      data: { type: 'ride_booking_accepted', booking_id: result.booking.booking_id, ride_id: result.booking.ride_id },
+    }).catch(() => {});
+    await sendPushToUser(result.driver.id, {
+      title: '✅ Réservation confirmée',
+      body: `Vous avez accepté la réservation de ${result.passenger.prenom || 'ce passager'}.`,
+      data: { type: 'ride_booking_accepted_driver', booking_id: result.booking.booking_id, ride_id: result.booking.ride_id },
+    }).catch(() => {});
+
+    await sendRideBookingAcceptedPassengerEmail(
+      result.passenger.email,
+      result.passenger.prenom || 'Bonjour',
+      details,
+      result.passenger.id
+    ).catch(() => {});
+    await sendRideBookingAcceptedDriverEmail(
+      result.driver.email,
+      result.driver.prenom || 'Bonjour',
+      details,
+      result.driver.id
+    ).catch(() => {});
+
+    return res.json({ data: { booking_id: bookingId, status: 'accepted' } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/bookings/:bookingId/refuse', authenticate, async (req, res, next) => {
+  try {
+    const bookingId = Number(req.params.bookingId);
+    if (!Number.isFinite(bookingId) || bookingId <= 0) {
+      return res.status(400).json({ error: 'Réservation invalide.' });
+    }
+
+    const result = await withTransaction(async (client) => {
+      const bookingRes = await client.query(
+        `SELECT
+           b.id AS booking_id,
+           b.ride_id,
+           b.passenger_id,
+           b.status AS booking_status,
+           b.booking_mode,
+           b.message AS booking_message,
+           b.seats AS booking_seats,
+           b.expires_at AS booking_expires_at,
+           c.id AS ride_id,
+           c.user_id AS driver_id,
+           c.departure,
+           c.destination,
+           c.ride_date,
+           c.ride_time,
+           c.price_xpf,
+           d.prenom AS driver_prenom,
+           d.email AS driver_email,
+           p.prenom AS passenger_prenom,
+           p.email AS passenger_email
+         FROM ride_bookings b
+         JOIN covoiturages c ON c.id = b.ride_id
+         JOIN users d ON d.id = c.user_id
+         JOIN users p ON p.id = b.passenger_id
+         WHERE b.id = $1
+         FOR UPDATE`,
+        [bookingId]
+      );
+
+      const booking = bookingRes.rows[0];
+      if (!booking) {
+        throw Object.assign(new Error('Réservation introuvable.'), { statusCode: 404 });
+      }
+
+      if (Number(booking.driver_id) !== Number(req.user.id) && !req.user.is_admin) {
+        throw Object.assign(new Error('Action non autorisée.'), { statusCode: 403 });
+      }
+
+      if (booking.booking_status !== 'pending') {
+        throw Object.assign(new Error('Cette demande ne peut plus être refusée.'), { statusCode: 400 });
+      }
+
+      await client.query(
+        `UPDATE ride_bookings
+         SET status = 'refused',
+             responded_at = NOW()
+         WHERE id = $1`,
+        [bookingId]
+      );
+
+      return booking;
+    });
+
+    await createNotification(result.passenger_id, {
+      type: 'ride_booking_refused',
+      title: '❌ Proposition refusée',
+      body: `${result.driver_prenom || 'Le conducteur'} n'a pas pu accepter votre demande.`,
+      href: '/covoiturage/reservations',
+    }).catch(() => {});
+
+    await sendPushToUser(result.passenger_id, {
+      title: '❌ Proposition refusée',
+      body: `${result.driver_prenom || 'Le conducteur'} n'a pas pu accepter votre demande.`,
+      data: { type: 'ride_booking_refused', booking_id: result.booking_id, ride_id: result.ride_id },
+    }).catch(() => {});
+
+    return res.json({ data: { booking_id: bookingId, status: 'refused' } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/bookings/:bookingId/cancel', authenticate, async (req, res, next) => {
+  try {
+    const bookingId = Number(req.params.bookingId);
+    if (!Number.isFinite(bookingId) || bookingId <= 0) {
+      return res.status(400).json({ error: 'Réservation invalide.' });
+    }
+
+    const result = await withTransaction(async (client) => {
+      const bookingRes = await client.query(
+        `SELECT
+           b.id AS booking_id,
+           b.ride_id,
+           b.passenger_id,
+           b.status AS booking_status,
+           b.booking_mode,
+           b.seats AS booking_seats,
+           c.user_id AS driver_id,
+           c.departure,
+           c.destination,
+           c.ride_date,
+           c.ride_time,
+           c.price_xpf,
+           c.seats_total,
+           c.seats_reserved,
+           c.seats_remaining,
+           d.prenom AS driver_prenom,
+           d.email AS driver_email,
+           p.prenom AS passenger_prenom,
+           p.email AS passenger_email
+         FROM ride_bookings b
+         JOIN covoiturages c ON c.id = b.ride_id
+         JOIN users d ON d.id = c.user_id
+         JOIN users p ON p.id = b.passenger_id
+         WHERE b.id = $1
+         FOR UPDATE`,
+        [bookingId]
+      );
+
+      const booking = bookingRes.rows[0];
+      if (!booking) {
+        throw Object.assign(new Error('Réservation introuvable.'), { statusCode: 404 });
+      }
+
+      const isParticipant = Number(booking.driver_id) === Number(req.user.id) || Number(booking.passenger_id) === Number(req.user.id);
+      if (!isParticipant && !req.user.is_admin) {
+        throw Object.assign(new Error('Action non autorisée.'), { statusCode: 403 });
+      }
+
+      if (booking.booking_status === 'cancelled') {
+        throw Object.assign(new Error('Cette réservation est déjà annulée.'), { statusCode: 400 });
+      }
+
+      const shouldRestoreSeats = ['auto_confirmed', 'accepted'].includes(booking.booking_status);
+      if (shouldRestoreSeats) {
+        const restoredSeats = Number(booking.booking_seats || 1);
+        await client.query(
+          `UPDATE covoiturages
+           SET seats_reserved = GREATEST(COALESCE(seats_reserved, 0) - $2, 0),
+               seats_remaining = LEAST(COALESCE(seats_remaining, seats_total) + $2, seats_total),
+               status = 'published',
+               updated_at = NOW()
+           WHERE id = $1`,
+          [booking.ride_id, restoredSeats]
+        );
+      }
+
+      await client.query(
+        `UPDATE ride_bookings
+         SET status = 'cancelled',
+             responded_at = COALESCE(responded_at, NOW())
+         WHERE id = $1`,
+        [bookingId]
+      );
+
+      return booking;
+    });
+
+    const otherUserId = Number(result.driver_id) === Number(req.user.id) ? result.passenger_id : result.driver_id;
+    const otherUserName = Number(result.driver_id) === Number(req.user.id)
+      ? result.passenger_prenom
+      : result.driver_prenom;
+
+    await createNotification(otherUserId, {
+      type: 'ride_booking_cancelled',
+      title: 'Réservation annulée',
+      body: `${otherUserName || 'Votre interlocuteur'} a annulé la réservation.`,
+      href: '/covoiturage/reservations',
+    }).catch(() => {});
+
+    await sendPushToUser(otherUserId, {
+      title: 'Réservation annulée',
+      body: `${otherUserName || 'Votre interlocuteur'} a annulé la réservation.`,
+      data: { type: 'ride_booking_cancelled', booking_id: result.booking_id, ride_id: result.ride_id },
+    }).catch(() => {});
+
+    return res.json({ data: { booking_id: bookingId, status: 'cancelled' } });
   } catch (err) {
     next(err);
   }
@@ -490,16 +1162,19 @@ router.patch('/:id/cancel', authenticate, async (req, res, next) => {
 
     const updated = await query(
       `UPDATE covoiturages
-       SET status = 'cancelled', updated_at = NOW()
+       SET status = 'cancelled',
+           seats_reserved = 0,
+           seats_remaining = seats_total,
+           updated_at = NOW()
        WHERE id = $1
        RETURNING *`,
       [req.params.id]
     );
 
     await query(
-      `UPDATE covoiturage_bookings
-       SET status = 'cancelled', cancelled_at = NOW()
-       WHERE covoiturage_id = $1 AND status = 'confirmed'`,
+      `UPDATE ride_bookings
+       SET status = 'cancelled', responded_at = COALESCE(responded_at, NOW())
+       WHERE ride_id = $1 AND status IN ('pending', 'auto_confirmed', 'accepted')`,
       [req.params.id]
     );
 
@@ -521,11 +1196,11 @@ router.post('/:id/reviews', authenticate, async (req, res, next) => {
     if (!ride) return res.status(404).json({ error: 'Trajet introuvable.' });
 
     const bookingRes = await query(
-      `SELECT id, user_id FROM covoiturage_bookings WHERE id = $1 AND covoiturage_id = $2`,
+      `SELECT id, passenger_id FROM ride_bookings WHERE id = $1 AND ride_id = $2`,
       [value.booking_id || 0, req.params.id]
     );
     const booking = bookingRes.rows[0] || null;
-    const canReview = ride.user_id === req.user.id || (booking && booking.user_id === req.user.id);
+    const canReview = Number(ride.user_id) === Number(req.user.id) || (booking && Number(booking.passenger_id) === Number(req.user.id));
     if (!canReview) {
       return res.status(403).json({ error: 'Seuls les participants au trajet peuvent laisser un avis.' });
     }

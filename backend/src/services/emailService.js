@@ -440,6 +440,98 @@ async function sendListingExpiredEmail(to, prenom, details = {}, recipientUserId
   return sendMail({ to, subject: payload.subject, html: payload.html });
 }
 
+function buildRideSummary(details = {}) {
+  const departure = escapeHtml(details.departure || 'Départ');
+  const destination = escapeHtml(details.destination || 'Destination');
+  const date = escapeHtml(details.rideDate || details.ride_date || 'Date libre');
+  const time = escapeHtml(String(details.rideTime || details.ride_time || '').slice(0, 5) || 'Heure libre');
+  const driver = escapeHtml(details.driverPrenom || details.driver_prenom || 'Conducteur local');
+  const seats = Number(details.seats || 1);
+  const priceXpf = Number(details.priceXpf || details.price_xpf || 0);
+
+  return `
+    <div style="border:1px solid #e5e7eb;border-radius:14px;padding:16px 18px;margin:18px 0;background:#f8fafc;">
+      <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;">Trajet</p>
+      <p style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">${departure} → ${destination}</p>
+      <p style="margin:6px 0 0;color:#475569;font-size:14px;">${date} · ${time} · ${driver}</p>
+      <p style="margin:6px 0 0;color:#475569;font-size:14px;">${seats} place${seats > 1 ? 's' : ''} · ${priceXpf.toLocaleString('fr-FR')} XPF / place</p>
+    </div>
+  `;
+}
+
+async function sendRideAutoBookingPassengerEmail(to, prenom, details = {}, recipientUserId) {
+  const link = `${BASE_URL()}/covoiturage/reservations`;
+  return sendMail({
+    to,
+    subject: `✅ Place réservée — ${details.departure || 'Trajet'} → ${details.destination || 'Destination'}`,
+    html: baseTemplate(`
+      <p>Bonjour ${escapeHtml(prenom)},</p>
+      <p>Votre place est confirmée !</p>
+      ${buildRideSummary(details)}
+      <a class="btn" href="${link}">Voir mes réservations</a>
+      <p>Retrouvez les détails de ce trajet sur Troca.</p>
+    `),
+  });
+}
+
+async function sendRideAutoBookingDriverEmail(to, prenom, details = {}, recipientUserId) {
+  const link = `${BASE_URL()}/covoiturage/reservations`;
+  return sendMail({
+    to,
+    subject: `🚗 Nouvelle réservation — ${details.departure || 'Trajet'} → ${details.destination || 'Destination'}`,
+    html: baseTemplate(`
+      <p>Bonjour ${escapeHtml(prenom)},</p>
+      <p>Une place vient d’être réservée automatiquement sur votre trajet.</p>
+      ${buildRideSummary(details)}
+      <a class="btn" href="${link}">Voir mes réservations</a>
+      <p>Le passager a reçu sa confirmation immédiatement.</p>
+    `),
+  });
+}
+
+async function sendRideManualRequestEmail(to, prenom, details = {}, recipientUserId) {
+  const link = `${BASE_URL()}/covoiturage/reservations`;
+  return sendMail({
+    to,
+    subject: '🔔 Nouvelle demande de réservation',
+    html: baseTemplate(`
+      <p>Bonjour ${escapeHtml(prenom)},</p>
+      <p>${escapeHtml(details.passengerPrenom || 'Un passager')} souhaite rejoindre votre trajet.</p>
+      ${buildRideSummary(details)}
+      <p>Vous avez 24h pour accepter ou refuser.</p>
+      <a class="btn" href="${link}">Voir la demande</a>
+    `),
+  });
+}
+
+async function sendRideBookingAcceptedPassengerEmail(to, prenom, details = {}, recipientUserId) {
+  const link = `${BASE_URL()}/covoiturage/reservations`;
+  return sendMail({
+    to,
+    subject: '🎉 Réservation acceptée !',
+    html: baseTemplate(`
+      <p>Bonjour ${escapeHtml(prenom)},</p>
+      <p>${escapeHtml(details.driverPrenom || 'Le conducteur')} a accepté votre demande !</p>
+      ${buildRideSummary(details)}
+      <a class="btn" href="${link}">Voir les détails</a>
+    `),
+  });
+}
+
+async function sendRideBookingAcceptedDriverEmail(to, prenom, details = {}, recipientUserId) {
+  const link = `${BASE_URL()}/covoiturage/reservations`;
+  return sendMail({
+    to,
+    subject: '✅ Réservation confirmée',
+    html: baseTemplate(`
+      <p>Bonjour ${escapeHtml(prenom)},</p>
+      <p>Vous avez accepté la réservation de ${escapeHtml(details.passengerPrenom || 'ce passager')}.</p>
+      ${buildRideSummary(details)}
+      <a class="btn" href="${link}">Voir mes réservations</a>
+    `),
+  });
+}
+
 module.exports = {
   sendMail,
   sendResetEmail,
@@ -451,5 +543,10 @@ module.exports = {
   sendOfferReceivedEmail,
   sendListingExpiringEmail,
   sendListingExpiredEmail,
+  sendRideAutoBookingPassengerEmail,
+  sendRideAutoBookingDriverEmail,
+  sendRideManualRequestEmail,
+  sendRideBookingAcceptedPassengerEmail,
+  sendRideBookingAcceptedDriverEmail,
   sendPerformanceReportEmail,
 };
