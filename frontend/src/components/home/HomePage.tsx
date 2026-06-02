@@ -16,6 +16,7 @@ import {
   HomeStatsSection,
 } from '@/components/home/HomeSections'
 import CategoryTreeSection from '@/components/home/CategoryTreeSection'
+import Trocometer from '@/components/trocometer/Trocometer'
 import { API_ORIGIN } from '@/lib/api'
 
 export default function HomePage() {
@@ -143,6 +144,18 @@ export default function HomePage() {
       />
       <FeaturedListingsSection loading={loading} listings={featuredListings} />
       <SearchAlertsSection />
+      <section className="mx-auto max-w-7xl px-4 pb-10">
+        <div className="mb-5">
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Nouveau</p>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">
+            Le Trocômètre
+          </h2>
+          <p className="mt-1 text-sm text-night/55">
+            Trouvez des objets de même valeur prêts à être échangés.
+          </p>
+        </div>
+        <Trocometer />
+      </section>
       <CategoryTreeSection />
     </main>
   )

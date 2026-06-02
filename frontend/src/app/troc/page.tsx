@@ -1,313 +1,99 @@
-'use client'
-
-import { useEffect, useMemo, useRef, useState, type ComponentProps } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useQuery } from '@tanstack/react-query'
-import { ArrowRight, Grid2x2, RotateCw, Sparkles, SwatchBook } from 'lucide-react'
+import { Handshake, Scale, Target } from 'lucide-react'
+
 import Header from '@/components/layout/Header'
-import TrocCard from '@/components/troc/TrocCard'
-import TrocCompatibilityMeter from '@/components/troc/TrocCompatibilityMeter'
-import TrocProposalsPanel from '@/components/troc/TrocProposalsPanel'
-import { ListingSkeletonGrid, ListingSkeletonRail } from '@/components/ListingSkeleton'
-import { trocApi } from '@/lib/api'
-import { useAuthActionStore } from '@/store/authActionStore'
-import { useAuthStore } from '@/store/authStore'
-import { useInfiniteTrocListings } from '@/hooks/useInfiniteTrocListings'
+import Trocometer from '@/components/trocometer/Trocometer'
 
-type TrocCycleItem = {
-  id: string
-  participant_ids: number[]
-  listing_ids: number[]
-  status: string
-  confirmations: number[]
-  detected_at: string
-  expires_at: string
-}
-
-type TrocCardListing = ComponentProps<typeof TrocCard>['listing']
-
-function TrocSwipeDeck() {
-  const router = useRouter()
-  const { isAuthenticated } = useAuthStore()
-  const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
-  const [index, setIndex] = useState(0)
-  const {
-    listings,
-    isLoading,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-  } = useInfiniteTrocListings({ limit: 25 }, 'swipe')
-
-  const current = listings[index] as TrocCardListing | undefined
-
-  useEffect(() => {
-    if (hasNextPage && listings.length - index < 5 && !isFetchingNextPage) {
-      void fetchNextPage()
-    }
-  }, [fetchNextPage, hasNextPage, index, isFetchingNextPage, listings.length])
-
-  const goNext = () => setIndex((value) => value + 1)
-  const handlePass = async () => {
-    if (!current) return
-    if (!isAuthenticated) {
-      openAuthModal({
-        type: 'troc_swipe',
-        listingId: String(current.id),
-        redirectTo: '/troc?mode=swipe',
-      })
-      return
-    }
-    await trocApi.swipe({ listing_id: current.id, direction: 'left' }).catch(() => {})
-    goNext()
-  }
-  const handlePropose = () => {
-    if (!current) return
-    if (!isAuthenticated) {
-      openAuthModal({
-        type: 'troc_proposal',
-        listingId: String(current.id),
-        redirectTo: `/troc/${current.id}`,
-      })
-      return
-    }
-    router.push(`/troc/${current.id}`)
-  }
-
-  if (isLoading && listings.length === 0) {
-    return <ListingSkeletonRail count={1} className="mx-auto max-w-2xl" />
-  }
-
-  if (!current) {
-    return (
-      <div className="rounded-[2rem] border border-night/8 bg-white p-8 text-center shadow-card">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/70">Swipe</p>
-        <h2 className="mt-3 text-2xl font-bold text-night">Vous avez tout vu !</h2>
-        <p className="mt-2 text-sm leading-6 text-night/60">
-          Revenez demain ou publiez votre propre annonce troc pour remettre la boucle en mouvement.
-        </p>
-        <Link href="/annonces/nouvelle?mode=troc" className="btn-primary mt-6 inline-flex px-4 py-2.5 text-sm">
-          Publier une annonce troc
-        </Link>
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-sm text-night/55">{index + 1} / {Math.max(listings.length, 1)}</p>
-        <button
-          type="button"
-          onClick={() => setIndex(0)}
-          className="inline-flex items-center gap-2 rounded-full border border-night/10 bg-white px-3 py-2 text-xs font-semibold text-night/70 transition hover:border-coral/30 hover:text-coral"
-        >
-          <RotateCw className="h-3.5 w-3.5" />
-          Recommencer
-        </button>
-      </div>
-
-      <TrocCard listing={current} mode="swipe" />
-
-      <div className="grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          onClick={handlePass}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-semibold text-night/65 transition hover:border-night/20 hover:text-night"
-        >
-          ✗ Passer
-        </button>
-        <button
-          type="button"
-          onClick={handlePropose}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-coral px-4 py-3 text-sm font-semibold text-white transition hover:bg-coral/90"
-        >
-          ♥ Proposer
-        </button>
-      </div>
-    </div>
-  )
-}
-
-function TrocPageContent() {
-  // TODO: test E2E sur le feed Troc, le toggle liste/swipe et les notifications de cycle.
-  const [mode, setMode] = useState<'list' | 'swipe'>('list')
-  const sentinelRef = useRef<HTMLDivElement | null>(null)
-  const { isAuthenticated } = useAuthStore()
-  const [cycles, setCycles] = useState<TrocCycleItem[]>([])
-
-  const listingFilters = useMemo(() => ({
-    limit: mode === 'swipe' ? 25 : 24,
-    troc: true,
-  }), [mode])
-
-  const {
-    listings,
-    total,
-    isLoading,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-  } = useInfiniteTrocListings(listingFilters, mode)
-
-  const { data: cyclesData } = useQuery({
-    queryKey: ['troc', 'cycles'],
-    queryFn: async () => {
-      const response = await trocApi.getCycles()
-      return response.data as { data?: TrocCycleItem[] }
-    },
-    enabled: Boolean(isAuthenticated),
-    staleTime: 30_000,
-    retry: 0,
-  })
-
-  useEffect(() => {
-    if (Array.isArray(cyclesData?.data)) {
-      setCycles(cyclesData.data)
-    }
-  }, [cyclesData])
-
-  useEffect(() => {
-    if (mode !== 'list') return
-    if (!hasNextPage || isFetchingNextPage) return
-    const element = sentinelRef.current
-    if (!element || typeof IntersectionObserver === 'undefined') return
-
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0]?.isIntersecting) {
-        void fetchNextPage()
-      }
-    }, { rootMargin: '350px 0px' })
-
-    observer.observe(element)
-    return () => observer.disconnect()
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage, mode])
-
-  const isInitialLoading = isLoading && listings.length === 0
-
-  return (
-    <div className="min-h-screen bg-cream">
-      <Header />
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <section className="overflow-hidden rounded-[2rem] border border-night/8 bg-night px-6 py-8 text-white shadow-[0_18px_70px_rgba(8,32,50,0.18)]">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/90">
-                <Sparkles className="h-3.5 w-3.5" />
-                Troc
-              </div>
-              <h1 className="mt-4 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-                Échangez vos objets, sans dépenser
-              </h1>
-              <p className="mt-3 max-w-xl text-sm leading-7 text-white/70 sm:text-base">
-                Explorez les annonces compatibles, comparez votre Troc-o-mètre et démarrez une proposition structurée avant le chat.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setMode('swipe')}
-                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  mode === 'swipe'
-                    ? 'bg-white text-night'
-                    : 'border border-white/20 bg-white/5 text-white/80 hover:bg-white/10'
-                }`}
-              >
-                <SwatchBook className="h-4 w-4" />
-                Swipe
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode('list')}
-                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  mode === 'list'
-                    ? 'bg-white text-night'
-                    : 'border border-white/20 bg-white/5 text-white/80 hover:bg-white/10'
-                }`}
-              >
-                <Grid2x2 className="h-4 w-4" />
-                Liste
-              </button>
-              <Link href="/annonces/nouvelle?mode=troc" className="inline-flex items-center gap-2 rounded-full bg-coral px-4 py-2 text-sm font-semibold text-white transition hover:bg-coral/90">
-                Publier une annonce troc
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {isAuthenticated && cycles.length > 0 ? (
-          <section className="mt-6 rounded-[1.75rem] border border-ocean/15 bg-ocean/8 p-4 text-ocean shadow-sm">
-            <p className="text-sm font-semibold">
-              🔄 Un troc en 3 est possible ! Vous avez des cycles détectés en attente de confirmation.
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {cycles.slice(0, 3).map((cycle) => (
-                <Link
-                  key={cycle.id}
-                  href={`/troc/cycles/${cycle.id}`}
-                  className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-semibold text-night transition hover:text-coral"
-                >
-                  Voir le cycle
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        <div className="mt-6">
-          <TrocProposalsPanel />
-        </div>
-
-        <section className="mt-8">
-          {mode === 'list' ? (
-            <>
-              {isInitialLoading ? (
-                <ListingSkeletonGrid count={6} />
-              ) : listings.length === 0 ? (
-                <div className="rounded-[2rem] border border-night/8 bg-white p-8 text-center shadow-card">
-                  <h2 className="text-2xl font-bold text-night">Aucune annonce troc pour le moment</h2>
-                  <p className="mt-2 text-sm leading-6 text-night/60">
-                    Publiez une annonce troc pour lancer les premiers échanges.
-                  </p>
-                  <Link href="/annonces/nouvelle?mode=troc" className="btn-primary mt-6 inline-flex px-4 py-2.5 text-sm">
-                    Publier une annonce troc
-                  </Link>
-                </div>
-              ) : (
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {listings.map((listing) => (
-                    <TrocCard key={String(listing.id)} listing={listing as TrocCardListing} mode="grid" />
-                  ))}
-                </div>
-              )}
-
-              {isFetchingNextPage ? (
-                <div className="mt-6">
-                  <ListingSkeletonRail count={2} />
-                </div>
-              ) : null}
-
-              <div ref={sentinelRef} className="h-8" aria-hidden="true" />
-
-              {total > 0 ? (
-                <p className="mt-4 text-center text-xs text-night/45">
-                  {total.toLocaleString('fr-FR')} annonce{total > 1 ? 's' : ''} troc trouvée{total > 1 ? 's' : ''}
-                </p>
-              ) : null}
-            </>
-          ) : (
-            <TrocSwipeDeck />
-          )}
-        </section>
-      </main>
-    </div>
-  )
-}
+const steps = [
+  {
+    icon: Target,
+    title: 'Choisissez votre annonce',
+    description: 'Sélectionnez l’objet que vous voulez troquer parmi vos propres annonces actives.',
+  },
+  {
+    icon: Scale,
+    title: 'On trouve les équivalents',
+    description: 'Le Trocômètre recherche 3 annonces de valeur comparable dans une fourchette de ±30%.',
+  },
+  {
+    icon: Handshake,
+    title: 'Contactez et troquez',
+    description: 'Ouvrez l’annonce qui vous plaît et démarrez la discussion directement avec le vendeur.',
+  },
+]
 
 export default function TrocPage() {
-  return <TrocPageContent />
+  return (
+    <main className="min-h-screen bg-[var(--color-bg-page)] text-[var(--color-text-primary)]">
+      <Header />
+
+      <section className="relative overflow-hidden px-4 py-10 text-white md:py-14">
+        <div className="absolute inset-0 bg-[linear-gradient(135deg,_#0A7EA4_0%,_#065f7a_100%)]" />
+        <svg className="absolute inset-0 h-full w-full opacity-[0.07]" viewBox="0 0 1200 520" aria-hidden="true">
+          <defs>
+            <pattern id="troc-dots" width="56" height="56" patternUnits="userSpaceOnUse">
+              <circle cx="8" cy="8" r="2.5" fill="white" />
+            </pattern>
+          </defs>
+          <rect width="1200" height="520" fill="url(#troc-dots)" />
+        </svg>
+
+        <div className="relative mx-auto flex max-w-4xl flex-col items-center text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/90 backdrop-blur-sm">
+            🔄 Troc entre Calédoniens
+          </div>
+
+          <h1 className="mt-4 max-w-3xl font-display text-4xl font-bold leading-tight text-white md:text-6xl">
+            Trocômètre
+          </h1>
+
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/80 md:text-base">
+            Échangez malin — trouvez des objets de même valeur prêts à être troqués.
+          </p>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-4xl px-4 pb-12">
+        <Trocometer />
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pb-16">
+        <div className="mb-6">
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Comment ça marche</p>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">Trois étapes simples pour trouver un échange</h2>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          {steps.map((step, index) => {
+            const Icon = step.icon
+            return (
+              <article
+                key={step.title}
+                className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
+                  <Icon className="h-6 w-6" />
+                </div>
+                <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-coral/80">
+                  Étape {index + 1}
+                </p>
+                <h3 className="mt-2 text-lg font-semibold text-night">{step.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-night/60">{step.description}</p>
+              </article>
+            )
+          })}
+        </div>
+
+        <div className="mt-8 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center shadow-sm">
+          <p className="text-sm text-night/60">
+            Besoin d’un point de départ ?{' '}
+            <Link href="/annonces/nouvelle" className="font-semibold text-coral hover:underline">
+              Publiez votre première annonce
+            </Link>
+            .
+          </p>
+        </div>
+      </section>
+    </main>
+  )
 }

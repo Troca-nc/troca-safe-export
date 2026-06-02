@@ -105,6 +105,7 @@ export default function Header() {
   const navLinks = [
     { href: '/', label: 'Accueil' },
     { href: '/annonces', label: 'Annonces' },
+    { href: '/troc', label: 'Troc' },
     { href: '/covoiturage', label: 'Covoiturage' },
     { href: '/bons-plans', label: 'Bons plans & Événements' },
   ]

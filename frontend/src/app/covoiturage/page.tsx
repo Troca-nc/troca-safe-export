@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { ArrowRight, Car, Search, Send, Star, Users } from 'lucide-react'
 
@@ -146,8 +145,7 @@ function RideCard({
 
 export default function CovoituragePage() {
   const { user } = useAuthStore()
-  const searchParams = useSearchParams()
-  const [activeTab, setActiveTab] = useState<'search' | 'publish'>(searchParams.get('mode') === 'publish' ? 'publish' : 'search')
+  const [activeTab, setActiveTab] = useState<'search' | 'publish'>('search')
   const [rides, setRides] = useState<Ride[]>([])
   const [loading, setLoading] = useState(true)
   const [bookingId, setBookingId] = useState<string | number | null>(null)
@@ -166,8 +164,9 @@ export default function CovoituragePage() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    setActiveTab(searchParams.get('mode') === 'publish' ? 'publish' : 'search')
-  }, [searchParams])
+    const mode = new URLSearchParams(window.location.search).get('mode')
+    setActiveTab(mode === 'publish' ? 'publish' : 'search')
+  }, [])
 
   const hasFilters = useMemo(
     () => Boolean(filters.departure || filters.destination || filters.ride_date),
