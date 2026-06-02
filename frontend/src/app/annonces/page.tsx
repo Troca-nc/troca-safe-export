@@ -71,23 +71,34 @@ function isLeafCategory(category: any) {
 function CategoryTreeNode({
   category,
   selectedSlug,
+  expandedSlugs,
   onSelect,
+  onToggleExpand,
   depth = 0,
 }: {
   category: any
   selectedSlug: string
+  expandedSlugs: Set<string>
   onSelect: (slug: string) => void
+  onToggleExpand: (slug: string) => void
   depth?: number
 }) {
   const children = getCategoryChildren(category)
   const Icon = getCategoryIcon(category.slug, category.name, category.icon)
   const isSelected = selectedSlug === category.slug
+  const isExpanded = children.length > 0 && expandedSlugs.has(category.slug)
 
   return (
     <div className={depth === 0 ? 'space-y-2' : 'space-y-2 border-l border-night/8 pl-3'}>
       <button
         type="button"
-        onClick={() => onSelect(category.slug)}
+        onClick={() => {
+          if (children.length > 0) {
+            onToggleExpand(category.slug)
+          } else {
+            onSelect(category.slug)
+          }
+        }}
         className={`flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-colors ${
           isSelected
             ? 'border-nc-lagon bg-nc-lagon text-white shadow-sm'
@@ -103,21 +114,41 @@ function CategoryTreeNode({
           <span className="block font-semibold">{category.name}</span>
           {children.length > 0 ? (
             <span className={`block text-[11px] ${isSelected ? 'text-white/65' : 'text-night/45'}`}>
-              Niveaux visibles
+              {isExpanded ? 'Sous-catégories ouvertes' : `${children.length} sous-catégorie${children.length > 1 ? 's' : ''}`}
             </span>
           ) : null}
         </span>
-        <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${children.length > 0 ? '' : 'opacity-0'}`} />
+        {children.length > 0 ? (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation()
+                onSelect(category.slug)
+              }}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${
+                isSelected
+                  ? 'bg-white/15 text-white'
+                  : 'border border-night/10 bg-white text-night/60 hover:border-nc-lagon/30 hover:text-nc-lagon'
+              }`}
+            >
+              Tout
+            </button>
+            <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+          </div>
+        ) : null}
       </button>
 
-      {children.length > 0 ? (
-        <div className="space-y-2">
+      {children.length > 0 && isExpanded ? (
+        <div className="space-y-2 pt-1">
           {children.map((child: any) => (
             <CategoryTreeNode
               key={child.id}
               category={child}
               selectedSlug={selectedSlug}
+              expandedSlugs={expandedSlugs}
               onSelect={onSelect}
+              onToggleExpand={onToggleExpand}
               depth={depth + 1}
             />
           ))}
@@ -223,6 +254,7 @@ function ListingsPageContent() {
   const [geoLoading, setGeoLoading] = useState(false)
   const [searchAlertOpen, setSearchAlertOpen] = useState(false)
   const [collapsedSections, setCollapsedSections] = useState({ radius: false, condition: false })
+  const [expandedCategorySlugs, setExpandedCategorySlugs] = useState<string[]>([])
   const [fallbackListings, setFallbackListings] = useState<any[]>([])
   const [fallbackTotal, setFallbackTotal] = useState(0)
   const [fallbackLoading, setFallbackLoading] = useState(true)
@@ -238,6 +270,7 @@ function ListingsPageContent() {
     activeFilterCount,
   } = useListingFilters()
   const visibleCategories = hasNestedCategoryTree(categories) ? categories : FALLBACK_CATEGORIES
+  const expandedCategorySet = useMemo(() => new Set(expandedCategorySlugs), [expandedCategorySlugs])
   const listingFilters = useMemo(() => ({
     q: filters.q,
     category: filters.category,
@@ -378,6 +411,14 @@ function ListingsPageContent() {
     })
   }
 
+  const toggleCategoryNode = useCallback((slug: string) => {
+    setExpandedCategorySlugs((current) => (
+      current.includes(slug)
+        ? current.filter((item) => item !== slug)
+        : [...current, slug]
+    ))
+  }, [])
+
   // Charger categories et communes une seule fois
   useEffect(() => {
     Promise.all([metaApi.getCategories(), metaApi.getCommunes()])
@@ -410,6 +451,23 @@ function ListingsPageContent() {
       setFilter('province_id', String(matchingProvince.id))
     }
   }, [filters.commune_id, filters.province_id, communes, setFilter])
+
+  useEffect(() => {
+    if (!filters.category || visibleCategories.length === 0) return
+
+    const path = findCategoryPathBySlug(visibleCategories, filters.category)
+    if (!path.length) return
+
+    setExpandedCategorySlugs((current) => {
+      const next = new Set(current)
+      path.forEach((node: any) => {
+        if (getCategoryChildren(node).length > 0) {
+          next.add(node.slug)
+        }
+      })
+      return Array.from(next)
+    })
+  }, [filters.category, visibleCategories])
 
   useEffect(() => {
     if (viewMode !== 'list') return
@@ -541,19 +599,21 @@ function ListingsPageContent() {
             </div>
           ) : null}
 
-          <div className="max-h-[38rem] space-y-2 overflow-y-auto pr-1">
+          <div className="max-h-[42rem] space-y-2 overflow-y-auto pr-1">
             {visibleCategories.map((cat: any) => (
               <CategoryTreeNode
                 key={cat.id}
                 category={cat}
                 selectedSlug={filters.category}
+                expandedSlugs={expandedCategorySet}
                 onSelect={(slug) => updateFilter('category', slug)}
+                onToggleExpand={toggleCategoryNode}
               />
             ))}
           </div>
 
           <p className="text-[11px] text-night/40">
-            Toute la taxonomie est visible en permanence, même sans annonces dans une sous-catégorie.
+            Cliquez sur une catégorie pour ouvrir ses sous-catégories. Le filtre actif reste mis en avant.
           </p>
         </div>
       </div>
@@ -995,7 +1055,7 @@ function ListingsPageContent() {
         <div className="flex gap-6">
 
           {/* Sidebar desktop */}
-          <aside className="hidden lg:block w-64 shrink-0">
+          <aside className="hidden lg:block w-80 xl:w-96 shrink-0">
             <div className="card p-5 sticky top-20 border-l-4 border-l-nc-lagon">
               <FilterSidebar />
             </div>
@@ -1123,4 +1183,3 @@ export default function ListingsPage() {
     </Suspense>
   )
 }
-
