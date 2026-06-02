@@ -106,7 +106,7 @@ export default function Header() {
     { href: '/', label: 'Accueil' },
     { href: '/annonces', label: 'Annonces' },
     { href: '/covoiturage', label: 'Covoiturage' },
-    { href: '/bons-plans', label: 'Bon plan / Événements' },
+    { href: '/bons-plans', label: 'Bons plans & Événements' },
   ]
 
   const isActiveLink = (href: string) => {

@@ -28,6 +28,8 @@ const CATEGORY_TABS = [
 const EVENT_TABS = [
   { value: 'all', label: 'Tout' },
   { value: 'upcoming', label: 'À venir' },
+  { value: 'weekend', label: 'Ce week-end' },
+  { value: 'free', label: 'Gratuits' },
   { value: 'past', label: 'Passés' },
 ] as const
 
@@ -70,15 +72,18 @@ function formatDateLabel(value?: string | null, fallback = 'Date libre') {
   return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(date)
 }
 
-function formatCurrency(value?: number | null) {
-  if (value == null) return 'Sur devis'
-  return `${Number(value).toLocaleString('fr-FR')} XPF`
-}
-
 function isPastEvent(value?: string | null) {
   if (!value) return false
   const date = new Date(value)
   return !Number.isNaN(date.getTime()) && date.getTime() < Date.now()
+}
+
+function isWeekendEvent(value?: string | null) {
+  if (!value) return false
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return false
+  const day = date.getDay()
+  return day === 5 || day === 6 || day === 0
 }
 
 function EventCard({ item }: { item: DirectoryItem }) {
@@ -162,7 +167,8 @@ export default function BonsPlansPage() {
   const [promoBusiness, setPromoBusiness] = useState('')
 
   const [eventQuery, setEventQuery] = useState('')
-  const [eventTimeFilter, setEventTimeFilter] = useState<'all' | 'upcoming' | 'past'>('all')
+  const [eventTimeFilter, setEventTimeFilter] = useState<'all' | 'upcoming' | 'weekend' | 'free' | 'past'>('all')
+  const [activeTab, setActiveTab] = useState<'promos' | 'evenements'>('promos')
 
   const [promoLoading, setPromoLoading] = useState(true)
   const [eventLoading, setEventLoading] = useState(true)
@@ -240,16 +246,29 @@ export default function BonsPlansPage() {
     }
   }, [eventQuery])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const hash = window.location.hash
+    if (hash === '#evenements') setActiveTab('evenements')
+    if (hash === '#promos') setActiveTab('promos')
+  }, [])
+
   const activeBusinessSuggestions = useMemo(
     () => businesses.filter((item) => item.name.toLowerCase().includes(promoBusiness.toLowerCase().trim())).slice(0, 6),
     [businesses, promoBusiness]
   )
 
+  const visiblePromos = useMemo(() => promoItems, [promoItems])
+
   const visibleEvents = useMemo(() => {
     return eventItems.filter((item) => {
       if (eventTimeFilter === 'all') return true
       const past = isPastEvent(item.event_date)
-      return eventTimeFilter === 'past' ? past : !past
+      if (eventTimeFilter === 'past') return past
+      if (eventTimeFilter === 'upcoming') return !past
+      if (eventTimeFilter === 'weekend') return !past && isWeekendEvent(item.event_date)
+      if (eventTimeFilter === 'free') return Boolean(item.is_free_included || Number(item.price_xpf || 0) === 0 || Number(item.promo_price_xpf || 0) === 0)
+      return true
     })
   }, [eventItems, eventTimeFilter])
 
@@ -289,85 +308,47 @@ export default function BonsPlansPage() {
         <div className="overflow-hidden rounded-[2rem] border border-night/8 border-b-4 border-b-nc-emeraude bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.16))] px-6 py-8 text-white shadow-[0_24px_80px_rgba(8,32,50,0.14)] md:px-8 md:py-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-emeraude">
             <Sparkles className="h-3.5 w-3.5" />
-            Bon plans & événements
+            Bons plans & Événements
           </div>
           <h1 className="mt-4 max-w-3xl font-display text-4xl font-bold leading-tight md:text-5xl">
-            Les promos à gauche, les sorties à droite, dans une seule page locale.
+            Promos locales et agenda culturel de Nouvelle-Calédonie, au même endroit.
           </h1>
           <p className="mt-4 max-w-3xl text-sm leading-relaxed text-white/72 md:text-base">
             Retrouvez les bons plans du moment et l’agenda culturel de la Nouvelle-Calédonie sans changer de navigation.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <a href="#promos" className="btn-primary rounded-2xl px-4 py-3">
-              Voir les promos
-              <ArrowRight className="h-4 w-4" />
-            </a>
-            <a href="#evenements" className="btn-secondary rounded-2xl px-4 py-3">
-              Voir les événements
-            </a>
-          </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 pb-8">
-        <div className="grid gap-5 lg:grid-cols-2">
-          <div className="overflow-hidden rounded-[2rem] border border-night/8 border-b-4 border-b-nc-emeraude bg-[linear-gradient(180deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.16))] px-6 py-7 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)]">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-emeraude">
-              <Sparkles className="h-3.5 w-3.5" />
-              Bons plans & promotions
-            </div>
-            <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
-              Promos, ventes flash et coupons locaux
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/72 md:text-base">
-              Une vitrine moderne pour enseignes, commerçants, artisans, associations et particuliers. Chaque offre peut mettre en avant son prix initial, son prix promo et sa durée d’expiration.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Link href="/bons-plans/publier" className="btn-primary rounded-2xl px-4 py-3">
-                Publier une promo
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <a href="#evenements" className="btn-secondary rounded-2xl px-4 py-3">
-                Explorer les événements
-              </a>
-            </div>
-          </div>
-
-          <div className="overflow-hidden rounded-[2rem] border border-night/8 border-b-4 border-b-nc-sable bg-[linear-gradient(180deg,_rgba(8,32,50,0.98),_rgba(245,166,35,0.14))] px-6 py-7 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)]">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-sable">
-              <Sparkles className="h-3.5 w-3.5" />
-              Événements & culture
-            </div>
-            <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
-              Concerts, festivals et sorties locales
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/72 md:text-base">
-              Les rendez-vous à venir, les sorties culturelles et les événements communautaires visibles dans une seule section claire.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <a href="#evenements" className="btn-primary rounded-2xl px-4 py-3">
-                Voir les événements
-                <ArrowRight className="h-4 w-4" />
-              </a>
-              <a href="#promos" className="btn-secondary rounded-2xl px-4 py-3">
-                Voir les promos
-              </a>
-            </div>
-          </div>
+      <div className="mx-auto max-w-7xl px-4 pb-8">
+        <div className="flex flex-wrap gap-2">
+          {[
+            { id: 'promos', label: '🏷️ Promotions' },
+            { id: 'evenements', label: '🎭 Événements' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id as 'promos' | 'evenements')}
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                activeTab === tab.id
+                  ? 'bg-[#0A7EA4] text-white shadow-sm'
+                  : 'border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-background-secondary)]'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
-      </section>
+      </div>
 
       <section className="mx-auto max-w-7xl px-4 pb-12">
-        <div className="grid gap-6 lg:grid-cols-2">
+        {activeTab === 'promos' ? (
           <section id="promos" className="rounded-[2rem] border border-night/8 bg-[var(--color-surface)] p-4 shadow-sm md:p-5">
             <div className="mb-4 flex items-end justify-between gap-4">
               <div className="section-emeraude">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Promotions</p>
                 <h2 className="mt-1 font-display text-2xl font-bold text-night">Les offres qui marchent maintenant</h2>
               </div>
-              <a href="#evenements" className="hidden items-center gap-1 text-sm font-semibold text-nc-sable hover:underline md:inline-flex">
-                Voir la culture <ArrowRight className="h-4 w-4" />
-              </a>
             </div>
 
             <div className="rounded-[1.75rem] border border-night/8 border-l-4 border-l-nc-emeraude bg-[var(--color-surface)] p-4 shadow-sm">
@@ -397,7 +378,7 @@ export default function BonsPlansPage() {
                 </div>
               </div>
 
-              <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+              <div className="mt-4 flex gap-2 overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] whitespace-nowrap">
                 {CATEGORY_TABS.map((tab) => {
                   const active = tab.value === promoCategory
                   return (
@@ -425,9 +406,9 @@ export default function BonsPlansPage() {
                     <div key={index} className="h-[420px] animate-pulse rounded-[1.5rem] border border-night/8 bg-white/70" />
                   ))}
                 </div>
-              ) : promoItems.length > 0 ? (
+              ) : visiblePromos.length > 0 ? (
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
-                  {promoItems.map((bonPlan) => (
+                  {visiblePromos.map((bonPlan) => (
                     <BonPlanCard
                       key={bonPlan.id}
                       bonPlan={bonPlan}
@@ -438,22 +419,25 @@ export default function BonsPlansPage() {
                 </div>
               ) : (
                 <div className="rounded-[2rem] border border-night/8 bg-white px-6 py-14 text-center text-night/55">
-                  <p className="text-lg font-semibold text-night">Aucun bon plan actif pour le moment</p>
-                  <p className="mt-2 text-sm">Essayez une autre catégorie ou une autre enseigne.</p>
+                  <p className="text-lg font-semibold text-night">Les premières promos arrivent bientôt</p>
+                  <p className="mt-2 text-sm">
+                    Commerçants, artisans, associations — publiez votre offre et touchez des milliers de Calédoniens.
+                  </p>
+                  <Link href="/bons-plans/publier" className="btn-primary mt-5 inline-flex items-center gap-2">
+                    Publier une promo
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </div>
               )}
             </div>
           </section>
-
+        ) : (
           <section id="evenements" className="rounded-[2rem] border border-night/8 bg-[var(--color-surface)] p-4 shadow-sm md:p-5">
             <div className="mb-4 flex items-end justify-between gap-4">
               <div className="section-sable">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-sable">Culture</p>
                 <h2 className="mt-1 font-display text-2xl font-bold text-night">Les rendez-vous à venir</h2>
               </div>
-              <a href="#promos" className="hidden items-center gap-1 text-sm font-semibold text-nc-emeraude hover:underline md:inline-flex">
-                Voir les promos <ArrowRight className="h-4 w-4" />
-              </a>
             </div>
 
             <div className="rounded-[1.75rem] border border-night/8 border-l-4 border-l-nc-sable bg-[var(--color-surface)] p-4 shadow-sm">
@@ -467,7 +451,7 @@ export default function BonsPlansPage() {
                     className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 pl-11 text-sm outline-none transition focus:border-nc-sable/35 focus:ring-4 focus:ring-nc-sable/10"
                   />
                 </div>
-                <div className="flex gap-2 overflow-x-auto pb-1">
+                <div className="flex gap-2 overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] whitespace-nowrap">
                   {EVENT_TABS.map((tab) => {
                     const active = tab.value === eventTimeFilter
                     return (
@@ -504,13 +488,19 @@ export default function BonsPlansPage() {
                 </div>
               ) : (
                 <div className="rounded-[2rem] border border-night/8 bg-white px-6 py-14 text-center text-night/55">
-                  <p className="text-lg font-semibold text-night">Aucun événement à venir pour l’instant</p>
-                  <p className="mt-2 text-sm">Essayez une autre période ou laissez la section se remplir avec les prochaines sorties locales.</p>
+                  <p className="text-lg font-semibold text-night">Aucun événement à venir pour le moment</p>
+                  <p className="mt-2 text-sm">
+                    Concerts, marchés, expos, conférences — ajoutez votre événement pour le faire connaître.
+                  </p>
+                  <Link href="/bons-plans/publier" className="btn-primary mt-5 inline-flex items-center gap-2">
+                    Créer un événement
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </div>
               )}
             </div>
           </section>
-        </div>
+        )}
       </section>
 
       {savingFollow ? (
