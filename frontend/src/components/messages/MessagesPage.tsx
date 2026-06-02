@@ -9,7 +9,7 @@ import { useConversations, useConversation } from '@/hooks/useMessaging'
 import ConversationList from '@/components/messages/ConversationList'
 import MessageBubble from '@/components/messages/MessageBubble'
 import ChatInput from '@/components/messages/ChatInput'
-import { usersApi } from '@/lib/api'
+import { trocApi, usersApi } from '@/lib/api'
 import type { Conversation, Message } from '@/types/messaging.types'
 
 type MobilePanel = 'chat' | 'media' | 'listing'
@@ -391,6 +391,7 @@ export default function MessagesPage() {
     respondOffer,
     onTyping,
     loadMore,
+    refetchMessages,
     hasMore,
   } = useConversation(activeConvId)
 
@@ -466,6 +467,16 @@ export default function MessagesPage() {
     await respondOffer(offerId, response, counter)
     setCounterOffer(null)
     refetchConversations()
+  }
+
+  const handleAcceptTrocProposal = async (proposalId: number) => {
+    await trocApi.acceptProposal(proposalId)
+    await Promise.all([refetchMessages(), refetchConversations()])
+  }
+
+  const handleDeclineTrocProposal = async (proposalId: number) => {
+    await trocApi.declineProposal(proposalId)
+    await Promise.all([refetchMessages(), refetchConversations()])
   }
 
   if (!hasHydrated || !isAuthenticated) {
@@ -602,6 +613,8 @@ export default function MessagesPage() {
                     const offer = messages.find((message) => message.offer?.id === id)?.offer
                     if (offer) setCounterOffer({ offer_id: id, amount: offer.amount_xpf })
                   }}
+                  onAcceptTrocProposal={handleAcceptTrocProposal}
+                  onDeclineTrocProposal={handleDeclineTrocProposal}
                 />
               ))
             )}

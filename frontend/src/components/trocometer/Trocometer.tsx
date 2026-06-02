@@ -6,6 +6,7 @@ import { ChevronDown, Loader2, RefreshCw, Scale } from 'lucide-react'
 
 import ListingImage from '@/components/ListingImage'
 import TrocometerCard, { type TrocometerListing } from '@/components/trocometer/TrocometerCard'
+import TrocProposalModal from '@/components/trocometer/TrocProposalModal'
 import { listingsApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 
@@ -64,6 +65,7 @@ export default function Trocometer() {
   const [transitioning, setTransitioning] = useState(false)
   const [spin, setSpin] = useState(0)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
+  const [proposalTarget, setProposalTarget] = useState<TrocometerListing | null>(null)
 
   const clearRotationTimer = useCallback(() => {
     if (rotationRef.current) {
@@ -106,6 +108,7 @@ export default function Trocometer() {
       setStatusMessage(null)
       setLoadingOwnListings(false)
       setDropdownOpen(false)
+      setProposalTarget(null)
       return
     }
 
@@ -128,6 +131,7 @@ export default function Trocometer() {
         setPageIndex(0)
         setRenderSeed((value) => value + 1)
         setStatusMessage(null)
+        setProposalTarget(null)
       } catch {
         if (cancelled) return
         setOwnListings([])
@@ -135,6 +139,7 @@ export default function Trocometer() {
         setMatches([])
         setPageIndex(0)
         setStatusMessage(null)
+        setProposalTarget(null)
       } finally {
         if (!cancelled) setLoadingOwnListings(false)
       }
@@ -160,6 +165,7 @@ export default function Trocometer() {
     setStatusMessage(null)
     setRenderSeed((value) => value + 1)
     setTransitioning(false)
+    setProposalTarget(null)
   }, [clearRotationTimer, selectedListingId])
 
   const selectedListing = useMemo(
@@ -177,6 +183,14 @@ export default function Trocometer() {
   const handleChooseListing = useCallback((listingId: string) => {
     setSelectedListingId(listingId)
     setDropdownOpen(false)
+  }, [])
+
+  const handleOpenProposal = useCallback((listing: TrocometerListing) => {
+    setProposalTarget(listing)
+  }, [])
+
+  const handleCloseProposal = useCallback(() => {
+    setProposalTarget(null)
   }, [])
 
   const handleSearch = useCallback(async () => {
@@ -422,6 +436,7 @@ export default function Trocometer() {
                 listing={listing}
                 delayMs={index * 80}
                 fadeOut={transitioning}
+                onPropose={handleOpenProposal}
               />
             ))}
           </div>
@@ -456,6 +471,13 @@ export default function Trocometer() {
         ) : null}
 
       </div>
+
+      <TrocProposalModal
+        open={Boolean(proposalTarget)}
+        selectedListing={selectedListing}
+        targetListing={proposalTarget}
+        onClose={handleCloseProposal}
+      />
     </div>
   )
 }

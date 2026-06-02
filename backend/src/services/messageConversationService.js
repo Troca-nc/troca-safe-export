@@ -4,6 +4,7 @@ const path = require('path');
 const { query, withTransaction } = require('../config/database');
 const {
   filterMessage,
+  decodeStructuredMessage,
   maskPhoneNumbers,
   mapConversationRow,
   mapMessageRow,
@@ -231,7 +232,33 @@ async function loadConversationThread(userId, conversationId, page = 1, limit = 
   }
 
   const conversation = convResult.rows[0];
-  const orderedMessages = messages.rows.reverse();
+  const proposalIds = [...new Set(
+    messages.rows
+      .map((row) => decodeStructuredMessage(row.content))
+      .map((decoded) => Number(decoded.metadata?.proposal_id || decoded.metadata?.troc_proposal_id || 0))
+      .filter((value) => Number.isFinite(value) && value > 0)
+  )];
+
+  let proposalStatusMap = new Map();
+  if (proposalIds.length > 0) {
+    const proposalStatusResult = await query(
+      `SELECT id, status FROM troc_proposals WHERE id = ANY($1::int[])`,
+      [proposalIds]
+    );
+    proposalStatusMap = new Map(proposalStatusResult.rows.map((row) => [Number(row.id), row.status]));
+  }
+
+  const orderedMessages = messages.rows.reverse().map((row) => {
+    const decoded = decodeStructuredMessage(row.content);
+    const proposalId = Number(decoded.metadata?.proposal_id || decoded.metadata?.troc_proposal_id || 0);
+    if (proposalId && proposalStatusMap.has(proposalId)) {
+      return {
+        ...row,
+        proposal_status: proposalStatusMap.get(proposalId),
+      };
+    }
+    return row;
+  });
   const nextCursor = orderedMessages[0]
     ? encodeCursor(orderedMessages[0].created_at, orderedMessages[0].id)
     : null;
@@ -342,7 +369,7 @@ async function startConversation(userId, listingId, message) {
 
     return {
       conversationId,
-      message: msg.rows[0],
+      message: mapMessageRow(msg.rows[0], conversationId, userId),
       sellerId: listing.user_id,
     };
   });

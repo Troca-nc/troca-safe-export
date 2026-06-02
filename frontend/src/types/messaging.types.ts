@@ -1,8 +1,25 @@
 // src/types/messaging.types.ts
 
-export type MessageType    = 'text' | 'offer' | 'photo' | 'audio' | 'document' | 'system'
+export type MessageType    = 'text' | 'offer' | 'troc_proposal' | 'photo' | 'audio' | 'document' | 'system'
 export type OfferStatus    = 'pending' | 'accepted' | 'declined' | 'countered' | 'expired'
 export type ConvStatus     = 'active' | 'archived' | 'blocked'
+
+export interface MessageMetadata {
+  [key: string]: unknown
+  proposal_id?: number
+  troc_proposal_id?: number
+  proposer_listing_id?: number
+  target_listing_id?: number
+  proposer_listing_title?: string
+  target_listing_title?: string
+  proposer_listing_price?: number
+  target_listing_price?: number
+  proposer_listing_image?: string | null
+  target_listing_image?: string | null
+  proposer_prenom?: string | null
+  target_prenom?: string | null
+  status?: string
+}
 
 // ── Conversation ──────────────────────────────────────────────────────────────
 
@@ -49,6 +66,7 @@ export interface Message {
   sender_id:   number
   type:        MessageType
   content:     string | null       // texte pour type=text/system
+  metadata?:   MessageMetadata | null
   photo_url?:  string | null       // pour type=photo/audio
   attachment_url?: string | null
   attachment_download_url?: string | null

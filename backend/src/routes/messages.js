@@ -173,25 +173,31 @@ router.post('/conversations/:id', messageLimiter, validate({ body: sendMessageSc
 
     emitNewMessage(id, { ...result.message, conversation_id: id }, result.recipientId);
 
-    loadMessageNotificationTarget(id, result.recipientId).then((target) => {
-      if (!target) return;
+    const isTrocProposalMessage = result.message?.type === 'troc_proposal'
+      || Boolean(result.message?.metadata?.proposal_id)
+      || Boolean(result.message?.metadata?.troc_proposal_id);
 
-      sendNewMessageEmail(target.email, target.prenom, sender, target.titre, id, result.recipientId).catch(() => {});
-      const notificationBody = result.message.type === 'audio'
-        ? 'Nouveau message vocal'
-        : result.message.type === 'photo'
-          ? 'Nouvelle photo partagée'
-          : result.message.type === 'document'
-            ? 'Nouveau document partagé'
-            : result.message.content?.slice(0, 100) ?? 'Nouveau message';
+    if (!isTrocProposalMessage) {
+      loadMessageNotificationTarget(id, result.recipientId).then((target) => {
+        if (!target) return;
 
-      sendPushToUser(result.recipientId, {
-        title: `💬 ${sender}`,
-        body: notificationBody,
-        data: { type: 'new_message', convId: id },
+        sendNewMessageEmail(target.email, target.prenom, sender, target.titre, id, result.recipientId).catch(() => {});
+        const notificationBody = result.message.type === 'audio'
+          ? 'Nouveau message vocal'
+          : result.message.type === 'photo'
+            ? 'Nouvelle photo partagée'
+            : result.message.type === 'document'
+              ? 'Nouveau document partagé'
+              : result.message.content?.slice(0, 100) ?? 'Nouveau message';
+
+        sendPushToUser(result.recipientId, {
+          title: `💬 ${sender}`,
+          body: notificationBody,
+          data: { type: 'new_message', convId: id },
+        }).catch(() => {});
+        notifyNewMessage(result.recipientId, sender, target.titre ?? '', id).catch(() => {});
       }).catch(() => {});
-      notifyNewMessage(result.recipientId, sender, target.titre ?? '', id).catch(() => {});
-    }).catch(() => {});
+    }
 
     res.status(201).json({ data: result.message });
   } catch (err) {

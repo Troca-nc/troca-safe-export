@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { HeartHandshake, MapPin } from 'lucide-react'
+import { ArrowLeftRight, HeartHandshake, MapPin } from 'lucide-react'
 
 import ListingImage from '@/components/ListingImage'
 
 export type TrocometerListing = {
   id: string | number
   title: string
+  titre?: string | null
   price?: number | string | null
   price_xpf?: number | string | null
   commune_name?: string | null
@@ -16,12 +17,15 @@ export type TrocometerListing = {
   cover_image?: string | null
   photos?: string[] | null
   troc_status?: string | null
+  seller_prenom?: string | null
+  seller_nom?: string | null
 }
 
 type TrocometerCardProps = {
   listing: TrocometerListing
   delayMs?: number
   fadeOut?: boolean
+  onPropose?: (listing: TrocometerListing) => void
 }
 
 function getListingPrice(listing: TrocometerListing) {
@@ -34,7 +38,7 @@ function formatPrice(price: number) {
   return `${new Intl.NumberFormat('fr-FR').format(price)} XPF`
 }
 
-export default function TrocometerCard({ listing, delayMs = 0, fadeOut = false }: TrocometerCardProps) {
+export default function TrocometerCard({ listing, delayMs = 0, fadeOut = false, onPropose }: TrocometerCardProps) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -88,13 +92,24 @@ export default function TrocometerCard({ listing, delayMs = 0, fadeOut = false }
           <span className="line-clamp-1">{locationLabel}</span>
         </div>
 
-        <Link
-          href={`/annonces/${listing.id}`}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-coral px-4 py-3 text-sm font-semibold text-white transition hover:bg-coral/90"
-        >
-          Contacter
-          <HeartHandshake className="h-4 w-4" />
-        </Link>
+        <div className="grid gap-2">
+          <button
+            type="button"
+            onClick={() => onPropose?.(listing)}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-coral px-4 py-3 text-sm font-semibold text-white transition hover:bg-coral/90"
+          >
+            Proposer un troc
+            <ArrowLeftRight className="h-4 w-4" />
+          </button>
+
+          <Link
+            href={`/annonces/${listing.id}`}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm font-semibold text-night transition hover:border-coral/30 hover:text-coral"
+          >
+            Contacter
+            <HeartHandshake className="h-4 w-4" />
+          </Link>
+        </div>
       </div>
     </article>
   )

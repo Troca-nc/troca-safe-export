@@ -11,8 +11,33 @@ const BLOCKED_PATTERNS = [
   { pattern: /paypal\.me\//i, reason: 'arnaque_paiement' },
   { pattern: /bit\.?coin|crypto|ethereum/i, reason: 'crypto_paiement' },
   { pattern: /t\.me\/|telegram\.me\//i, reason: 'redirect_externe' },
-  { pattern: /je suis.{0,30}(étranger|voyage|expatrié)/i, reason: 'arnaque_eloignement' },
+  { pattern: /je suis.{0,30}(Ã©tranger|voyage|expatriÃ©)/i, reason: 'arnaque_eloignement' },
 ];
+
+const TROC_PROPOSAL_PREFIX = '__TROC_PROPOSAL__::';
+
+function decodeStructuredMessage(content) {
+  if (typeof content !== 'string') {
+    return { content: content ?? null, metadata: {}, type: null };
+  }
+
+  if (!content.startsWith(TROC_PROPOSAL_PREFIX)) {
+    return { content, metadata: {}, type: null };
+  }
+
+  const raw = content.slice(TROC_PROPOSAL_PREFIX.length);
+
+  try {
+    const parsed = JSON.parse(raw);
+    return {
+      content: typeof parsed?.content === 'string' && parsed.content.trim() ? parsed.content : null,
+      metadata: parsed?.metadata && typeof parsed.metadata === 'object' ? parsed.metadata : {},
+      type: parsed?.type === 'troc_proposal' ? 'troc_proposal' : null,
+    };
+  } catch {
+    return { content: raw || null, metadata: {}, type: 'troc_proposal' };
+  }
+}
 
 function filterMessage(content) {
   for (const { pattern, reason } of BLOCKED_PATTERNS) {
@@ -26,27 +51,38 @@ function filterMessage(content) {
 function maskPhoneNumbers(content) {
   return content.replace(
     /(\+687|00687)?[\s.-]?[0-9]{2}[\s.-]?[0-9]{2}[\s.-]?[0-9]{2}/g,
-    '[numéro masqué — échangez via Troca]'
+    '[numÃ©ro masquÃ© â€” Ã©changez via Troca]'
   );
 }
 
 function formatPreviewText(type, content) {
-  if (content) return content;
+  const decoded = decodeStructuredMessage(content);
+  if (decoded.type === 'troc_proposal') {
+    return decoded.content || 'Proposition de troc';
+  }
+  if (decoded.content) return decoded.content;
+  if (type === 'troc_proposal') return 'Proposition de troc';
   if (type === 'photo') return 'Photo';
   if (type === 'audio') return 'Message vocal';
-  if (type === 'document') return 'Document partagé';
+  if (type === 'document') return 'Document partagÃ©';
   if (type === 'offer') return 'Offre de prix';
-  if (type === 'system') return 'Message système';
+  if (type === 'system') return 'Message systÃ¨me';
   return '';
 }
 
 function mapMessageRow(row, conversationId, currentUserId = null) {
+  const decoded = decodeStructuredMessage(row.content);
+
   return {
     id: row.id,
     conv_id: Number(conversationId ?? row.conv_id),
     sender_id: row.sender_id,
-    type: row.type,
-    content: row.content ?? null,
+    type: decoded.type || row.type,
+    content: decoded.content,
+    metadata: {
+      ...decoded.metadata,
+      ...(row.proposal_status ? { status: row.proposal_status } : {}),
+    },
     photo_url: row.photo_url ?? null,
     attachment_url: row.attachment_url ?? null,
     attachment_download_url: buildAttachmentDownloadUrl(row.id, currentUserId),
@@ -140,6 +176,7 @@ function mapConversationRow(row, currentUserId) {
 
 module.exports = {
   filterMessage,
+  decodeStructuredMessage,
   maskPhoneNumbers,
   mapConversationRow,
   mapMessageRow,

@@ -449,5 +449,6 @@ export function useConversation(convId: number | null) {
     respondOffer,
     onTyping,
     loadMore,
-  }), [messages, loading, typing, connectionState, reconnectInMs, hasMore, sendMessage, sendPhoto, sendDocument, sendAudio, makeOffer, respondOffer, onTyping, loadMore])
+    refetchMessages: () => fetchMessages({ reset: true }),
+  }), [messages, loading, typing, connectionState, reconnectInMs, hasMore, sendMessage, sendPhoto, sendDocument, sendAudio, makeOffer, respondOffer, onTyping, loadMore, fetchMessages])
 }

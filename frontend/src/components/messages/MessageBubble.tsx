@@ -1,9 +1,10 @@
 'use client'
 
+import ListingImage from '@/components/ListingImage'
 import { Check, CheckCheck, Clock, AlertCircle, TrendingUp, Play, FileText, ExternalLink } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import type { Message } from '@/types/messaging.types'
+import type { Message, MessageMetadata } from '@/types/messaging.types'
 
 interface MessageBubbleProps {
   message: Message
@@ -12,6 +13,12 @@ interface MessageBubbleProps {
   onAcceptOffer: (offer_id: number) => void
   onDeclineOffer: (offer_id: number) => void
   onCounterOffer: (offer_id: number) => void
+  onAcceptTrocProposal?: (proposal_id: number) => void
+  onDeclineTrocProposal?: (proposal_id: number) => void
+}
+
+function getProposalMetadata(message: Message) {
+  return (message.metadata ?? {}) as MessageMetadata
 }
 
 function TextBubble({ message, isMine }: { message: Message; isMine: boolean }) {
@@ -208,6 +215,127 @@ function OfferBubble({
   )
 }
 
+function TrocProposalBubble({
+  message,
+  isMine,
+  isSeller,
+  onAccept,
+  onDecline,
+}: {
+  message: Message
+  isMine: boolean
+  isSeller: boolean
+  onAccept?: () => void
+  onDecline?: () => void
+}) {
+  const metadata = getProposalMetadata(message)
+  const proposalId = Number(metadata.proposal_id ?? metadata.troc_proposal_id ?? 0) || null
+  const proposerTitle = String(metadata.proposer_listing_title ?? 'Mon annonce')
+  const targetTitle = String(metadata.target_listing_title ?? 'Annonce cible')
+  const proposerPrice = metadata.proposer_listing_price != null ? Number(metadata.proposer_listing_price) : null
+  const targetPrice = metadata.target_listing_price != null ? Number(metadata.target_listing_price) : null
+  const proposerImage = String(metadata.proposer_listing_image ?? '')
+  const targetImage = String(metadata.target_listing_image ?? '')
+  const status = String(metadata.status ?? 'pending')
+  const isPending = status === 'pending' || status === 'seen'
+  const statusConfig = {
+    pending: { label: 'En attente', className: 'bg-amber-50 text-amber-700' },
+    seen: { label: 'Vue', className: 'bg-sand text-night/55' },
+    accepted: { label: 'Troc accepté', className: 'bg-emerald-50 text-emerald-700' },
+    declined: { label: 'Proposition déclinée', className: 'bg-red-50 text-red-700' },
+    countered: { label: 'Contre-proposition', className: 'bg-blue-50 text-blue-700' },
+    completed: { label: 'Troc finalisé', className: 'bg-jungle/10 text-jungle' },
+  } as const
+  const statusMeta = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending
+
+  return (
+    <div className="w-full max-w-[420px] overflow-hidden rounded-3xl border border-coral/15 bg-white shadow-sm">
+      <div className="flex items-center gap-2 border-b border-coral/10 bg-coral/5 px-4 py-3">
+        <TrendingUp size={16} className="text-coral" />
+        <span className="text-sm font-semibold text-night">Proposition de troc</span>
+        <span className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-medium ${statusMeta.className}`}>
+          {isMine && isPending ? 'En attente de réponse…' : statusMeta.label}
+        </span>
+      </div>
+
+      <div className="grid gap-3 px-4 py-4 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
+        <div className="rounded-2xl border border-night/10 bg-sand/30 p-2">
+          <div className="relative h-24 overflow-hidden rounded-2xl bg-sand">
+            <ListingImage
+              src={proposerImage || null}
+              alt={proposerTitle}
+              fallbackIcon="📦"
+              className="h-full w-full"
+            />
+          </div>
+          <p className="mt-2 line-clamp-2 text-sm font-semibold text-night">{proposerTitle}</p>
+          <p className="mt-1 text-sm font-bold text-[#0A7EA4]">
+            {proposerPrice != null ? `${proposerPrice.toLocaleString('fr-FR')} XPF` : 'Prix non communiqué'}
+          </p>
+        </div>
+
+        <div className="flex justify-center">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-coral/10 text-coral">
+            ⇄
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-night/10 bg-sand/30 p-2">
+          <div className="relative h-24 overflow-hidden rounded-2xl bg-sand">
+            <ListingImage
+              src={targetImage || null}
+              alt={targetTitle}
+              fallbackIcon="🔄"
+              className="h-full w-full"
+            />
+          </div>
+          <p className="mt-2 line-clamp-2 text-sm font-semibold text-night">{targetTitle}</p>
+          <p className="mt-1 text-sm font-bold text-[#0A7EA4]">
+            {targetPrice != null ? `${targetPrice.toLocaleString('fr-FR')} XPF` : 'Prix non communiqué'}
+          </p>
+        </div>
+      </div>
+
+      {message.content ? (
+        <div className="px-4 pb-4">
+          <div className="rounded-2xl bg-sand/40 px-3 py-2 text-sm leading-relaxed text-night/70">
+            {message.content}
+          </div>
+        </div>
+      ) : null}
+
+      {!isMine && isSeller && proposalId && isPending ? (
+        <div className="flex gap-2 border-t border-night/8 px-4 py-4">
+          <button
+            type="button"
+            onClick={onAccept}
+            className="flex-1 rounded-2xl bg-emerald-500 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-600"
+          >
+            ✓ Accepter
+          </button>
+          <button
+            type="button"
+            onClick={onDecline}
+            className="flex-1 rounded-2xl border border-night/10 bg-white px-3 py-2.5 text-sm font-semibold text-night transition hover:border-coral/25 hover:text-coral"
+          >
+            ✗ Refuser
+          </button>
+        </div>
+      ) : (
+        <div className="border-t border-night/8 px-4 py-3 text-sm text-night/55">
+          {status === 'accepted'
+            ? '✅ Troc accepté'
+            : status === 'declined'
+              ? '❌ Proposition déclinée'
+              : isMine
+                ? 'En attente de réponse…'
+                : 'Réponse traitée'}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function SystemMessage({ content }: { content: string }) {
   return (
     <div className="py-1 text-center">
@@ -225,6 +353,8 @@ export default function MessageBubble({
   onAcceptOffer,
   onDeclineOffer,
   onCounterOffer,
+  onAcceptTrocProposal,
+  onDeclineTrocProposal,
 }: MessageBubbleProps) {
   if (message.type === 'system') {
     return <SystemMessage content={message.content ?? ''} />
@@ -243,6 +373,22 @@ export default function MessageBubble({
             onCounter={() => onCounterOffer(message.offer!.id)}
           />
         )
+        : (message.type === 'troc_proposal' || Boolean(message.metadata?.proposer_listing_id))
+          ? (
+            <TrocProposalBubble
+              message={message}
+              isMine={isMine}
+              isSeller={isSeller}
+              onAccept={() => {
+                const proposalId = Number(message.metadata?.proposal_id ?? message.metadata?.troc_proposal_id ?? 0)
+                if (proposalId && onAcceptTrocProposal) onAcceptTrocProposal(proposalId)
+              }}
+              onDecline={() => {
+                const proposalId = Number(message.metadata?.proposal_id ?? message.metadata?.troc_proposal_id ?? 0)
+                if (proposalId && onDeclineTrocProposal) onDeclineTrocProposal(proposalId)
+              }}
+            />
+          )
         : <TextBubble message={message} isMine={isMine} />
       }
     </div>
