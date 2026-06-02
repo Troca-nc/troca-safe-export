@@ -574,6 +574,62 @@ export const proApi = {
     return res
   },
   downloadInvoicePdf: (id: string | number) => api.get(`/pro/invoices/${id}/pdf`, { responseType: 'blob' }),
+  getAutoReply: () => cachedGet(
+    buildCacheKey('pro.autoReply.get', '/pro/auto-reply'),
+    () => api.get('/pro/auto-reply'),
+    CACHE_TTL.short,
+  ),
+  updateAutoReply: async (data: object) => {
+    const res = await api.put('/pro/auto-reply', data)
+    invalidateApiCache('pro.')
+    return res
+  },
+}
+
+export const reviewsApi = {
+  getByPro: (proId: string | number, params: object = {}) => cachedGet(
+    buildCacheKey('reviews.getByPro', `/reviews/pro/${proId}`, params),
+    () => api.get(`/reviews/pro/${proId}`, { params }),
+    CACHE_TTL.short,
+  ),
+  getInvite: (token: string) => cachedGet(
+    buildCacheKey('reviews.getInvite', `/reviews/invite/${token}`),
+    () => api.get(`/reviews/invite/${token}`),
+    CACHE_TTL.short,
+  ),
+  createInvite: (data: object) => api.post('/reviews/invite', data),
+  createReview: (data: object) => api.post('/reviews', data),
+  reply: (reviewId: string | number, data: object) => api.post(`/reviews/${reviewId}/reply`, data),
+  helpful: (reviewId: string | number, data: object = {}) => api.post(`/reviews/${reviewId}/helpful`, data),
+  report: (reviewId: string | number, data: object = {}) => api.post(`/reviews/${reviewId}/report`, data),
+}
+
+export const newsletterApi = {
+  getSubscription: () => cachedGet(
+    buildCacheKey('newsletter.subscription.get', '/newsletter/subscription'),
+    () => api.get('/newsletter/subscription'),
+    CACHE_TTL.short,
+  ),
+  subscribe: async (data: object) => {
+    const res = await api.post('/newsletter/subscribe', data)
+    invalidateApiCache('newsletter.')
+    return res
+  },
+  unsubscribe: async (data: object = {}) => {
+    const res = await api.delete('/newsletter/unsubscribe', { data })
+    invalidateApiCache('newsletter.')
+    return res
+  },
+  preview: (userId: string | number) => cachedGet(
+    buildCacheKey('newsletter.preview', `/newsletter/preview/${userId}`),
+    () => api.get(`/newsletter/preview/${userId}`),
+    CACHE_TTL.short,
+  ),
+  send: async (data: object = {}) => {
+    const res = await api.post('/newsletter/send', data)
+    invalidateApiCache('newsletter.')
+    return res
+  },
 }
 
 export const proTransportApi = {

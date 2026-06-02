@@ -18,6 +18,7 @@ const { emitNewMessage, emitConversationRead } = require('../services/websocketS
 const { sendNewMessageEmail } = require('../services/emailService');
 const { sendPushToUser } = require('../services/pushService');
 const { notifyNewMessage } = require('../services/notificationService');
+const { maybeSendAutoReply } = require('../services/autoReplyService');
 const {
   archiveConversation,
   appendConversationMessage,
@@ -196,6 +197,21 @@ router.post('/conversations/:id', messageLimiter, validate({ body: sendMessageSc
           data: { type: 'new_message', convId: id },
         }).catch(() => {});
         notifyNewMessage(result.recipientId, sender, target.titre ?? '', id).catch(() => {});
+      }).catch(() => {});
+
+      maybeSendAutoReply({
+        conversationId: id,
+        senderId: userId,
+        recipientId: result.recipientId,
+        sourceMessage: result.message,
+      }).then((autoReply) => {
+        if (!autoReply?.message) return;
+        emitNewMessage(id, { ...autoReply.message, conversation_id: id }, autoReply.recipientId);
+        sendPushToUser(autoReply.recipientId, {
+          title: '💬 Réponse automatique',
+          body: String(autoReply.message.content || '').slice(0, 120) || 'Réponse automatique',
+          data: { type: 'new_message', convId: id },
+        }).catch(() => {});
       }).catch(() => {});
     }
 

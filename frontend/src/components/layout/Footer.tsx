@@ -2,8 +2,12 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Mail, Shield, FileText, Lock, MessageCircle } from 'lucide-react'
+
+import { newsletterApi } from '@/lib/api'
+import { useAuthStore } from '@/store/authStore'
 
 const links = [
   { href: '/mentions-legales', label: 'Mentions légales', icon: FileText },
@@ -15,9 +19,38 @@ const links = [
 ]
 
 export default function Footer() {
+  const router = useRouter()
+  const { user, isAuthenticated } = useAuthStore()
+  const [newsletterEmail, setNewsletterEmail] = useState('')
+  const [newsletterLoading, setNewsletterLoading] = useState(false)
+  const [newsletterMessage, setNewsletterMessage] = useState('')
+
   const openCookieBanner = useCallback(() => {
     window.dispatchEvent(new Event('troca-cookie-banner-open'))
   }, [])
+
+  const handleNewsletterSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!isAuthenticated) {
+      router.push(`/inscription?next=${encodeURIComponent('/newsletter/preferences')}`)
+      return
+    }
+
+    setNewsletterLoading(true)
+    setNewsletterMessage('')
+    try {
+      await newsletterApi.subscribe({
+        communes: user?.commune_name ? [user.commune_name] : [],
+        categories: [],
+        frequency: 'weekly',
+      })
+      setNewsletterMessage('✅ Abonnement enregistré')
+    } catch {
+      setNewsletterMessage('Impossible de vous abonner pour le moment.')
+    } finally {
+      setNewsletterLoading(false)
+    }
+  }
 
   return (
     <footer className="border-t border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-sm">
@@ -77,6 +110,33 @@ export default function Footer() {
             </div>
           </div>
         </div>
+
+        <section className="mt-8 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)]/80 p-5">
+          <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Newsletter</p>
+              <h2 className="mt-1 font-display text-2xl font-bold text-night">Recevez notre newsletter</h2>
+              <p className="mt-2 text-sm leading-relaxed text-night/60">
+                Les meilleures annonces, bons plans et pros locaux directement dans votre boîte mail.
+              </p>
+            </div>
+
+            <form onSubmit={handleNewsletterSubmit} className="space-y-3">
+              <input
+                value={newsletterEmail}
+                onChange={(event) => setNewsletterEmail(event.target.value)}
+                type="email"
+                required
+                placeholder="Votre email"
+                className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm outline-none transition focus:border-[#0A7EA4] focus:ring-4 focus:ring-[#0A7EA4]/10"
+              />
+              <button type="submit" disabled={newsletterLoading} className="btn-primary w-full rounded-2xl px-4 py-3 text-sm">
+                {isAuthenticated ? 'S’abonner' : 'Créer mon compte'}
+              </button>
+              {newsletterMessage ? <p className="text-sm text-night/55">{newsletterMessage}</p> : null}
+            </form>
+          </div>
+        </section>
 
         <div className="mt-8 flex flex-col gap-2 border-t border-[var(--color-border)] pt-4 text-xs text-night/40 sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 Troca. Tous droits réservés.</p>

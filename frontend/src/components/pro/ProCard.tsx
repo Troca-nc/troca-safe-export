@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { BadgeCheck, MapPin, Star, Store, ArrowRight } from 'lucide-react'
+import { BadgeCheck, MapPin, Quote, Star, Store, ArrowRight } from 'lucide-react'
 
 export type ProCardModel = {
   id: string | number
@@ -23,6 +23,10 @@ export type ProCardModel = {
   listing_count?: number | null
   is_pro?: boolean
   pro_verified?: boolean
+  latest_review_comment?: string | null
+  latest_review_rating?: number | null
+  latest_review_prenom?: string | null
+  latest_review_created_at?: string | null
 }
 
 function getDisplayName(pro: ProCardModel) {
@@ -125,6 +129,22 @@ export default function ProCard({ pro }: { pro: ProCardModel }) {
             </Link>
           </div>
         </div>
+
+        {pro.latest_review_comment ? (
+          <div className="mt-3 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-3">
+            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
+              <Quote className="h-3.5 w-3.5" />
+              Dernier avis
+            </p>
+            <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-night/70">
+              {pro.latest_review_comment}
+            </p>
+            <p className="mt-2 text-xs text-night/50">
+              {pro.latest_review_prenom ? `Par ${pro.latest_review_prenom}` : 'Avis vérifié'}
+              {pro.latest_review_rating ? ` · ${Number(pro.latest_review_rating).toFixed(1)}/5` : ''}
+            </p>
+          </div>
+        ) : null}
       </div>
     </article>
   )

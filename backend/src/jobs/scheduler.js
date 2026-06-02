@@ -32,6 +32,7 @@ const { recordJob }       = require('../services/observability');
 const { flushBonPlanViews } = require('../services/bonPlansService');
 const { checkAdminAlerts } = require('../services/adminAlerts');
 const { ensureNotificationPreferences } = require('../services/notificationPreferencesService');
+const { sendNewsletterBatch } = require('../services/newsletterService');
 
 async function runSingletonJob(lockName, ttlMs, task) {
   const started = await withLock(lockName, ttlMs, async () => {
@@ -1111,6 +1112,23 @@ function startReviewReminderJob() {
   logger.info('cron_job_started', { job: 'reviews' });
 }
 
+function startNewsletterJob() {
+  cron.schedule('0 18 * * 0', async () => {
+    recordJob('started', { job: 'newsletter' });
+    await runSingletonJob('cron:newsletter-weekly', 60 * 60 * 1000, async () => {
+      try {
+        const result = await sendNewsletterBatch();
+        logger.info('cron_newsletter_sent', result);
+      } catch (err) {
+        recordJob('error', { job: 'newsletter', message: err.message });
+        logger.error('cron_newsletter_error', { error: err });
+      }
+    });
+  }, { timezone: 'Pacific/Noumea' });
+
+  logger.info('cron_job_started', { job: 'newsletter' });
+}
+
 function startAllJobs() {
   startBoostExpiryJob();
   startBonPlanMaintenanceJob();
@@ -1120,6 +1138,7 @@ function startAllJobs() {
   startListingExpiryJob();
   startExpiringListingsJob();
   startReviewReminderJob();
+  startNewsletterJob();
   startDailyAlertsJob();
   startWeeklyAlertsJob();
   startPerformanceReportsJob();

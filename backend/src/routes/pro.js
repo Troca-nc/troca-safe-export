@@ -7,6 +7,7 @@ const { query, withTransaction } = require('../config/database');
 const { authenticate } = require('../middleware/auth');
 const { sendMail } = require('../services/emailService');
 const { mapListingSearchRow } = require('../services/listingsPresentation');
+const { getAutoReply, saveAutoReply } = require('../services/autoReplyService');
 
 const router = express.Router();
 
@@ -153,6 +154,10 @@ function mapProsRow(row) {
     avg_rating: Number(row.avg_rating ?? 0),
     review_count: Number(row.review_count ?? 0),
     listing_count: Number(row.listing_count ?? 0),
+    latest_review_comment: row.latest_review_comment ?? null,
+    latest_review_rating: row.latest_review_rating == null ? null : Number(row.latest_review_rating),
+    latest_review_prenom: row.latest_review_prenom ?? null,
+    latest_review_created_at: row.latest_review_created_at ?? null,
     display_name: formatCompanyName(row),
     is_pro: true,
     pro_verified: true,
@@ -177,13 +182,15 @@ async function loadProProfile(proId) {
        u.pro_siret,
        COALESCE(ROUND((
          SELECT AVG(r.rating)::numeric
-         FROM pro_reviews r
+         FROM verified_reviews r
          WHERE r.pro_id = u.id
+           AND r.status = 'published'
        ), 1), 0) AS avg_rating,
        COALESCE((
          SELECT COUNT(*)::int
-         FROM pro_reviews r
+         FROM verified_reviews r
          WHERE r.pro_id = u.id
+           AND r.status = 'published'
        ), 0) AS review_count,
        COALESCE((
          SELECT COUNT(*)::int
@@ -192,6 +199,39 @@ async function loadProProfile(proId) {
            AND a.status = 'active'
            AND a.deleted_at IS NULL
        ), 0) AS listing_count
+       ,
+       (
+         SELECT pr.comment
+         FROM verified_reviews pr
+         WHERE pr.pro_id = u.id
+           AND pr.status = 'published'
+         ORDER BY pr.created_at DESC
+         LIMIT 1
+       ) AS latest_review_comment,
+       (
+         SELECT pr.rating
+         FROM verified_reviews pr
+         WHERE pr.pro_id = u.id
+           AND pr.status = 'published'
+         ORDER BY pr.created_at DESC
+         LIMIT 1
+       ) AS latest_review_rating,
+       (
+         SELECT pr.reviewer_prenom
+         FROM verified_reviews pr
+         WHERE pr.pro_id = u.id
+           AND pr.status = 'published'
+         ORDER BY pr.created_at DESC
+         LIMIT 1
+       ) AS latest_review_prenom,
+       (
+         SELECT pr.created_at
+         FROM verified_reviews pr
+         WHERE pr.pro_id = u.id
+           AND pr.status = 'published'
+         ORDER BY pr.created_at DESC
+         LIMIT 1
+       ) AS latest_review_created_at
      FROM users u
      WHERE u.id = $1
        AND u.is_pro = TRUE
@@ -206,20 +246,26 @@ async function loadProProfile(proId) {
 
   const [reviewsRes, listingsRes] = await Promise.all([
     query(
-      `SELECT
+     `SELECT
          pr.id,
          pr.pro_id,
          pr.reviewer_id,
          pr.rating,
+         pr.title,
          pr.comment,
          pr.verified_purchase,
          pr.created_at,
+         pr.reply_content,
+         pr.reply_at,
+         rev2.prenom AS reply_author_name,
          rev.prenom AS reviewer_prenom,
          rev.nom AS reviewer_nom,
          rev.avatar_url AS reviewer_avatar_url
-       FROM pro_reviews pr
+       FROM verified_reviews pr
        LEFT JOIN users rev ON rev.id = pr.reviewer_id
+       LEFT JOIN users rev2 ON rev2.id = pr.reply_by
        WHERE pr.pro_id = $1
+         AND pr.status = 'published'
        ORDER BY pr.created_at DESC
        LIMIT 3`,
       [proId]
@@ -331,16 +377,50 @@ router.get('/', async (_req, res, next) => {
          ), 1), 0) AS avg_rating,
          COALESCE((
            SELECT COUNT(*)::int
-           FROM pro_reviews r
+           FROM verified_reviews r
            WHERE r.pro_id = u.id
+             AND r.status = 'published'
          ), 0) AS review_count,
          COALESCE((
            SELECT COUNT(*)::int
            FROM annonces a
-           WHERE a.user_id = u.id
+            WHERE a.user_id = u.id
              AND a.status = 'active'
              AND a.deleted_at IS NULL
          ), 0) AS listing_count
+         ,
+         (
+           SELECT pr.comment
+           FROM verified_reviews pr
+           WHERE pr.pro_id = u.id
+             AND pr.status = 'published'
+           ORDER BY pr.created_at DESC
+           LIMIT 1
+         ) AS latest_review_comment,
+         (
+           SELECT pr.rating
+           FROM verified_reviews pr
+           WHERE pr.pro_id = u.id
+             AND pr.status = 'published'
+           ORDER BY pr.created_at DESC
+           LIMIT 1
+         ) AS latest_review_rating,
+         (
+           SELECT pr.reviewer_prenom
+           FROM verified_reviews pr
+           WHERE pr.pro_id = u.id
+             AND pr.status = 'published'
+           ORDER BY pr.created_at DESC
+           LIMIT 1
+         ) AS latest_review_prenom,
+         (
+           SELECT pr.created_at
+           FROM verified_reviews pr
+           WHERE pr.pro_id = u.id
+             AND pr.status = 'published'
+           ORDER BY pr.created_at DESC
+           LIMIT 1
+         ) AS latest_review_created_at
        FROM users u
        WHERE u.is_pro = TRUE
          AND COALESCE(u.pro_verified, FALSE) = TRUE
@@ -915,22 +995,28 @@ router.get('/:id/reviews', async (req, res, next) => {
          pr.pro_id,
          pr.reviewer_id,
          pr.rating,
+         pr.title,
          pr.comment,
          pr.verified_purchase,
          pr.created_at,
+         pr.reply_content,
+         pr.reply_at,
+         rev2.prenom AS reply_author_name,
          rev.prenom AS reviewer_prenom,
          rev.nom AS reviewer_nom,
          rev.avatar_url AS reviewer_avatar_url
-       FROM pro_reviews pr
-       LEFT JOIN users rev ON rev.id = pr.reviewer_id
-       WHERE pr.pro_id = $1
-       ORDER BY pr.created_at DESC
-       LIMIT $2 OFFSET $3`,
+      FROM verified_reviews pr
+      LEFT JOIN users rev ON rev.id = pr.reviewer_id
+      LEFT JOIN users rev2 ON rev2.id = pr.reply_by
+      WHERE pr.pro_id = $1
+        AND pr.status = 'published'
+      ORDER BY pr.created_at DESC
+      LIMIT $2 OFFSET $3`,
       [proId, limit, offset]
     );
 
     const countRes = await query(
-      'SELECT COUNT(*)::int AS total FROM pro_reviews WHERE pro_id = $1',
+      "SELECT COUNT(*)::int AS total FROM verified_reviews WHERE pro_id = $1 AND status = 'published'",
       [proId]
     );
 
@@ -940,12 +1026,16 @@ router.get('/:id/reviews', async (req, res, next) => {
         pro_id: Number(row.pro_id),
         reviewer_id: Number(row.reviewer_id),
         rating: Number(row.rating),
+        title: row.title ?? null,
         comment: row.comment ?? null,
         verified_purchase: Boolean(row.verified_purchase),
         created_at: row.created_at,
         reviewer_prenom: row.reviewer_prenom ?? null,
         reviewer_nom: row.reviewer_nom ?? null,
         reviewer_avatar_url: row.reviewer_avatar_url ?? null,
+        reply_content: row.reply_content ?? null,
+        reply_at: row.reply_at ?? null,
+        reply_author_name: row.reply_author_name ?? null,
       })),
       pagination: {
         total: Number(countRes.rows[0]?.total ?? 0),
@@ -1101,18 +1191,26 @@ router.post('/:id/reviews', authenticate, async (req, res, next) => {
 
     const created = await withTransaction(async (client) => {
       const reviewRes = await client.query(
-        `INSERT INTO pro_reviews (pro_id, reviewer_id, rating, comment, verified_purchase)
-         VALUES ($1, $2, $3, $4, TRUE)
+        `INSERT INTO verified_reviews (pro_id, reviewer_id, reviewer_prenom, reviewer_avatar_url, rating, comment, verified_purchase, source)
+         VALUES ($1, $2, $3, $4, $5, $6, TRUE, 'profile')
          RETURNING *`,
-        [proId, req.user.id, value.rating, normalizeMaybeText(value.comment)]
+        [
+          proId,
+          req.user.id,
+          req.user.prenom || null,
+          req.user.avatar_url || null,
+          value.rating,
+          normalizeMaybeText(value.comment),
+        ]
       );
 
       const statsRes = await client.query(
         `SELECT
            COALESCE(ROUND(AVG(rating)::numeric, 1), 0) AS avg_rating,
            COUNT(*)::int AS review_count
-         FROM pro_reviews
-         WHERE pro_id = $1`,
+         FROM verified_reviews
+         WHERE pro_id = $1
+           AND status = 'published'`,
         [proId]
       );
 
@@ -1140,6 +1238,26 @@ router.post('/:id/reviews', authenticate, async (req, res, next) => {
         pro_name: `${pro.prenom} ${pro.nom}`.trim(),
       },
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/auto-reply', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    const config = await getAutoReply(req.user.id);
+    return res.json({ data: config });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/auto-reply', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    const config = await saveAutoReply(req.user.id, req.body || {});
+    return res.json({ data: config });
   } catch (err) {
     next(err);
   }

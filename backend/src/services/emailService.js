@@ -440,6 +440,61 @@ async function sendListingExpiredEmail(to, prenom, details = {}, recipientUserId
   return sendMail({ to, subject: payload.subject, html: payload.html });
 }
 
+function buildNewsletterItemsHtml(items = []) {
+  return items.slice(0, 6).map((item) => `
+    <div style="border:1px solid #e5e7eb;border-radius:14px;padding:14px 16px;margin:0 0 12px;background:#f8fafc;">
+      <p style="margin:0 0 4px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#0a7ea4;">${escapeHtml(item.type || 'Annonce')}</p>
+      <p style="margin:0 0 4px;font-size:16px;font-weight:700;color:#0f172a;">${escapeHtml(item.title || 'Publication locale')}</p>
+      <p style="margin:0;color:#475569;font-size:14px;">${escapeHtml(item.description || item.summary || '')}</p>
+      <p style="margin:6px 0 0;color:#64748b;font-size:13px;">${escapeHtml(item.meta || '')}</p>
+    </div>
+  `).join('');
+}
+
+async function sendNewsletterEmail(to, prenom, newsletter = {}, recipientUserId = null) {
+  const prefs = recipientUserId ? await ensureNotificationPreferences(recipientUserId) : null;
+  if (prefs && prefs.email_performance_report === false && prefs.performance_report_frequency === 'never') {
+    return null;
+  }
+
+  const items = Array.isArray(newsletter.items) ? newsletter.items : [];
+  const summary = newsletter.summary || {};
+  const unsubscribeUrl = newsletter.unsubscribeUrl || (newsletter.unsubscribeToken
+    ? `${BASE_URL()}/newsletter/unsubscribe?token=${newsletter.unsubscribeToken}`
+    : `${BASE_URL()}/newsletter/unsubscribe`);
+
+  return sendMail({
+    to,
+    subject: newsletter.subject || '📰 La newsletter locale Troca',
+    html: baseTemplate(`
+      <p>Bonjour ${escapeHtml(prenom)},</p>
+      <p>${escapeHtml(newsletter.intro || 'Voici une sélection locale de nouveautés publiées sur Troca.')}</p>
+      ${items.length ? buildNewsletterItemsHtml(items) : '<p>Aucun contenu à afficher pour le moment.</p>'}
+      ${summary.total ? `<p style="margin-top:18px;color:#475569;font-size:14px;">${escapeHtml(summary.total)} contenu${summary.total > 1 ? 's' : ''} sélectionné${summary.total > 1 ? 's' : ''} cette semaine.</p>` : ''}
+      <a class="btn" href="${newsletter.ctaUrl || `${BASE_URL()}/`}">${escapeHtml(newsletter.ctaLabel || 'Voir sur Troca')}</a>
+      ${buildNotificationFooter({
+        manageUrl: `${BASE_URL()}/parametres/notifications`,
+        unsubscribeUrl,
+        unsubscribeLabel: 'Se désabonner de la newsletter',
+      })}
+    `),
+  });
+}
+
+async function sendReviewInviteEmail(to, prenom, details = {}) {
+  const link = details.reviewUrl || `${BASE_URL()}/avis/${details.token}`;
+  return sendMail({
+    to,
+    subject: details.subject || 'Votre avis vérifié sur Troca',
+    html: baseTemplate(`
+      <p>Bonjour ${escapeHtml(prenom)},</p>
+      <p>Merci pour votre échange. Vous pouvez maintenant partager votre avis vérifié sur <strong>${escapeHtml(details.proName || 'ce professionnel')}</strong>.</p>
+      <a class="btn" href="${link}">Laisser un avis</a>
+      <p style="color:#6b7280;font-size:13px;">Ce lien est personnel et peut expirer après un certain délai.</p>
+    `),
+  });
+}
+
 function buildRideSummary(details = {}) {
   const departure = escapeHtml(details.departure || 'Départ');
   const destination = escapeHtml(details.destination || 'Destination');
@@ -543,6 +598,8 @@ module.exports = {
   sendOfferReceivedEmail,
   sendListingExpiringEmail,
   sendListingExpiredEmail,
+  sendNewsletterEmail,
+  sendReviewInviteEmail,
   sendRideAutoBookingPassengerEmail,
   sendRideAutoBookingDriverEmail,
   sendRideManualRequestEmail,

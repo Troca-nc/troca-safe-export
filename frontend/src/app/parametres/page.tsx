@@ -1,13 +1,13 @@
-'use client'
+﻿'use client'
 // src/app/parametres/page.tsx
-// ── Page paramètres RGPD — Suppression compte + Export données ───────────────
+// â”€â”€ Page paramÃ¨tres RGPD â€” Suppression compte + Export donnÃ©es â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   Shield, Download, Trash2, AlertTriangle, ChevronRight,
-  Eye, Bell, Lock, LogOut, CheckCircle2, Cookie,
+  Eye, Bell, Lock, LogOut, CheckCircle2, Cookie, ToggleLeft, ToggleRight, Mail,
 } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import { useAuthStore } from '@/store/authStore'
@@ -15,6 +15,7 @@ import axios from 'axios'
 import { useEffect } from 'react'
 import { Star, Receipt, CreditCard, Calendar, AlertCircle, ExternalLink } from 'lucide-react'
 import { API_ORIGIN } from '@/lib/api'
+import { newsletterApi } from '@/lib/api'
 import { getStoredAccessToken } from '@/lib/tokenStorage'
 const COOKIE_STORAGE_KEY = 'troca-cookie-consent'
 const COOKIE_BANNER_EVENT = 'troca-cookie-banner-open'
@@ -25,7 +26,7 @@ type CookieConsentState = {
   decidedAt?: string
 }
 
-// ── Section générique ─────────────────────────────────────────────────────────
+// â”€â”€ Section gÃ©nÃ©rique â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function Section({ icon: Icon, title, children, id }: {
   icon: React.ElementType; title: string; children: React.ReactNode; id?: string
@@ -43,9 +44,9 @@ function Section({ icon: Icon, title, children, id }: {
   )
 }
 
-// ── Export données (Art. 20) ──────────────────────────────────────────────────
+// â”€â”€ Export donnÃ©es (Art. 20) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// ── Section Abonnement ────────────────────────────────────────────────────────
+// â”€â”€ Section Abonnement â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function AbonnementSection() {
   const { user } = useAuthStore()
@@ -63,7 +64,7 @@ function AbonnementSection() {
   }, [])
 
   const handleCancel = async () => {
-    if (!confirm('Voulez-vous vraiment annuler votre abonnement ? Il restera actif jusqu\'à la fin de la période en cours.')) return
+    if (!confirm('Voulez-vous vraiment annuler votre abonnement ? Il restera actif jusqu\'Ã  la fin de la pÃ©riode en cours.')) return
     setCancelling(true)
     setError('')
     try {
@@ -89,7 +90,7 @@ function AbonnementSection() {
           <p className="text-night/60 text-sm mb-4">Vous n\'avez pas encore d\'abonnement Pro.</p>
           <Link href="/pro" className="btn-primary inline-flex items-center gap-2 py-2 px-6 text-sm">
             <Star className="w-4 h-4" />
-            Découvrir les offres Pro
+            DÃ©couvrir les offres Pro
           </Link>
         </div>
       ) : (
@@ -104,12 +105,12 @@ function AbonnementSection() {
             </div>
             {sub?.status === 'trialing' && (
               <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
-                Période d\'essai
+                PÃ©riode d\'essai
               </span>
             )}
           </div>
 
-          {/* Détails abonnement */}
+          {/* DÃ©tails abonnement */}
           {sub && (
             <div className="space-y-2 text-sm">
               {sub.current_period_end && (
@@ -133,18 +134,18 @@ function AbonnementSection() {
             </div>
           )}
 
-          {/* Messages état */}
+          {/* Messages Ã©tat */}
           {cancelled && (
             <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">
               <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-              <span>Abonnement annulé. Vous conservez vos avantages jusqu\'à la fin de la période.</span>
+              <span>Abonnement annulÃ©. Vous conservez vos avantages jusqu\'Ã  la fin de la pÃ©riode.</span>
             </div>
           )}
           {sub?.cancel_at_period_end && !cancelled && (
             <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>
-                Votre abonnement ne sera pas renouvelé.
+                Votre abonnement ne sera pas renouvelÃ©.
                 {sub.cancel_at && ` Il reste actif jusqu\'au ${formatDate(sub.cancel_at)}.`}
               </span>
             </div>
@@ -160,7 +161,7 @@ function AbonnementSection() {
               disabled={cancelling}
               className="w-full text-sm text-red-500 hover:text-red-700 border border-red-200 hover:border-red-400 py-2 rounded-xl transition-colors disabled:opacity-50"
             >
-              {cancelling ? 'Annulation en cours…' : 'Annuler mon abonnement'}
+              {cancelling ? 'Annulation en coursâ€¦' : 'Annuler mon abonnement'}
             </button>
           )}
         </div>
@@ -169,8 +170,78 @@ function AbonnementSection() {
   )
 }
 
-// ── Section Factures ───────────────────────────────────────────────────────────
+// â”€â”€ Section Factures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+function NewsletterSection() {
+  const { user } = useAuthStore()
+  const [enabled, setEnabled] = useState(true)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    newsletterApi.getSubscription()
+      .then(({ data }) => {
+        const subscription = data?.data || null
+        setEnabled(Boolean(subscription?.enabled ?? true))
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const toggleNewsletter = async () => {
+    setSaving(true)
+    setError('')
+    try {
+      await newsletterApi.subscribe({
+        enabled: !enabled,
+        communes: user?.commune_name ? [user.commune_name] : [],
+        categories: [],
+        frequency: !enabled ? 'weekly' : 'off',
+      })
+      setEnabled((value) => !value)
+    } catch {
+      setError('Impossible de mettre à jour vos préférences.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) return null
+
+  return (
+    <Section icon={Mail} title="Newsletter" id="newsletter">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)]/60 px-4 py-3">
+          <div>
+            <p className="text-sm font-semibold text-night">Recevoir la newsletter</p>
+            <p className="text-xs text-night/55">Recevez les meilleures annonces de votre secteur chaque semaine.</p>
+          </div>
+          <button
+            type="button"
+            onClick={toggleNewsletter}
+            disabled={saving}
+            className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+              enabled ? 'bg-emerald-50 text-emerald-700' : 'bg-sand text-night/55'
+            }`}
+          >
+            {enabled ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+            {enabled ? 'Activée' : 'Désactivée'}
+          </button>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <Link href="/newsletter/preferences" className="text-sm font-semibold text-coral hover:underline">
+            Gérer mes préférences
+          </Link>
+          <Link href="/newsletter/unsubscribe" className="text-xs text-night/45 hover:text-night/65">
+            Se désabonner
+          </Link>
+        </div>
+        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      </div>
+    </Section>
+  )
+}
 function FacturesSection() {
   const [invoices, setInvoices] = useState<any[]>([])
   const [loading,  setLoading]  = useState(true)
@@ -188,9 +259,9 @@ function FacturesSection() {
   if (!invoices.length) return null
 
   const labelFor = (inv: any) => {
-    if (inv.document_type === 'refund' || inv.status === 'refunded') return 'Remboursée'
-    if (inv.status === 'succeeded' || inv.status === 'paid') return 'Payée'
-    return 'Échouée'
+    if (inv.document_type === 'refund' || inv.status === 'refunded') return 'RemboursÃ©e'
+    if (inv.status === 'succeeded' || inv.status === 'paid') return 'PayÃ©e'
+    return 'Ã‰chouÃ©e'
   }
 
   return (
@@ -204,8 +275,8 @@ function FacturesSection() {
               </p>
               <p className="text-xs text-night/50">
                 {inv.amount_xpf != null ? `${Number(inv.amount_xpf).toLocaleString('fr-FR')} XPF` : 'Montant indisponible'}
-                {inv.amount_eur ? ` · ${inv.amount_eur} €` : ''}
-                {inv.provider ? ` · ${inv.provider}` : ''}
+                {inv.amount_eur ? ` Â· ${inv.amount_eur} â‚¬` : ''}
+                {inv.provider ? ` Â· ${inv.provider}` : ''}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -257,23 +328,23 @@ function CookiesSection() {
   }
 
   return (
-    <Section icon={Cookie} title="Cookies et mesure d’audience" id="cookies">
+    <Section icon={Cookie} title="Cookies et mesure dâ€™audience" id="cookies">
       <p className="text-sm text-night/60 leading-relaxed">
-        Vous pouvez à tout moment consulter, modifier ou retirer votre consentement aux cookies
-        non essentiels. La mesure d’audience first-party n’est activée qu’avec votre accord.
+        Vous pouvez Ã  tout moment consulter, modifier ou retirer votre consentement aux cookies
+        non essentiels. La mesure dâ€™audience first-party nâ€™est activÃ©e quâ€™avec votre accord.
       </p>
 
       <div className="rounded-xl border border-night/10 bg-sand/40 p-4 space-y-2 text-sm">
         <div className="flex items-center justify-between gap-4">
-          <span className="text-night/60">Mesure d’audience</span>
+          <span className="text-night/60">Mesure dâ€™audience</span>
           <span className={`font-medium ${consent?.analytics ? 'text-jungle' : 'text-night/45'}`}>
-            {consent?.analytics ? 'Activée' : 'Désactivée'}
+            {consent?.analytics ? 'ActivÃ©e' : 'DÃ©sactivÃ©e'}
           </span>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <span className="text-night/60">Préférences marketing</span>
+          <span className="text-night/60">PrÃ©fÃ©rences marketing</span>
           <span className={`font-medium ${consent?.marketing ? 'text-jungle' : 'text-night/45'}`}>
-            {consent?.marketing ? 'Autorisé' : 'Non autorisé'}
+            {consent?.marketing ? 'AutorisÃ©' : 'Non autorisÃ©'}
           </span>
         </div>
         <div className="flex items-center justify-between gap-4">
@@ -285,7 +356,7 @@ function CookiesSection() {
                   month: 'long',
                   year: 'numeric',
                 })
-              : 'Non défini'}
+              : 'Non dÃ©fini'}
           </span>
         </div>
       </div>
@@ -295,7 +366,7 @@ function CookiesSection() {
           Modifier mon consentement
         </button>
         <button onClick={resetCookieChoice} className="btn-ghost flex-1 justify-center text-sm py-2">
-          Réinitialiser la bannière
+          RÃ©initialiser la banniÃ¨re
         </button>
       </div>
     </Section>
@@ -324,23 +395,23 @@ function ExportSection() {
       setDone(true)
       setTimeout(() => setDone(false), 5000)
     } catch {
-      setError('Impossible de générer l’export pour le moment. Réessayez dans quelques minutes.')
+      setError('Impossible de gÃ©nÃ©rer lâ€™export pour le moment. RÃ©essayez dans quelques minutes.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <Section icon={Download} title="Mes données (Art. 20 RGPD)">
+    <Section icon={Download} title="Mes donnÃ©es (Art. 20 RGPD)">
       <p className="text-sm text-night/60 mb-4 leading-relaxed">
-        Téléchargez une copie complète de toutes vos données : profil, annonces, messages, favoris et historique de paiements. Le fichier ZIP est généré immédiatement.
+        TÃ©lÃ©chargez une copie complÃ¨te de toutes vos donnÃ©es : profil, annonces, messages, favoris et historique de paiements. Le fichier ZIP est gÃ©nÃ©rÃ© immÃ©diatement.
       </p>
       <div className="bg-sand rounded-xl p-3 mb-4 text-xs text-night/50 space-y-1">
-        <p>📋 Profil et informations personnelles</p>
-        <p>📦 Toutes vos annonces (actives et archivées)</p>
-        <p>💬 Vos conversations et messages</p>
-        <p>🤍 Vos annonces sauvegardées</p>
-        <p>💳 Historique des paiements</p>
+        <p>ðŸ“‹ Profil et informations personnelles</p>
+        <p>ðŸ“¦ Toutes vos annonces (actives et archivÃ©es)</p>
+        <p>ðŸ’¬ Vos conversations et messages</p>
+        <p>ðŸ¤ Vos annonces sauvegardÃ©es</p>
+        <p>ðŸ’³ Historique des paiements</p>
       </div>
       <button
         onClick={handleExport}
@@ -348,11 +419,11 @@ function ExportSection() {
         className="btn-secondary w-full justify-center gap-2"
       >
         {loading ? (
-          <><span className="w-4 h-4 border-2 border-coral/30 border-t-coral rounded-full animate-spin" />Préparation…</>
+          <><span className="w-4 h-4 border-2 border-coral/30 border-t-coral rounded-full animate-spin" />PrÃ©parationâ€¦</>
         ) : done ? (
-          <><CheckCircle2 className="w-4 h-4 text-jungle" />Téléchargement lancé</>
+          <><CheckCircle2 className="w-4 h-4 text-jungle" />TÃ©lÃ©chargement lancÃ©</>
         ) : (
-          <><Download className="w-4 h-4" />Télécharger mes données</>
+          <><Download className="w-4 h-4" />TÃ©lÃ©charger mes donnÃ©es</>
         )}
       </button>
       {error ? (
@@ -369,7 +440,7 @@ function ExportSection() {
   )
 }
 
-// ── Suppression compte (Art. 17) ──────────────────────────────────────────────
+// â”€â”€ Suppression compte (Art. 17) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function SuppressionSection() {
   const router  = useRouter()
@@ -393,7 +464,7 @@ function SuppressionSection() {
         { confirmation, password },
         { headers: { Authorization: `Bearer ${getStoredAccessToken()}` } }
       )
-      // Déconnecter et rediriger
+      // DÃ©connecter et rediriger
       await logout()
       router.push('/?compte=supprime')
     } catch (err: any) {
@@ -406,7 +477,7 @@ function SuppressionSection() {
   return (
     <Section icon={Trash2} title="Supprimer mon compte (Art. 17 RGPD)">
       <p className="text-sm text-night/60 mb-4 leading-relaxed">
-        Vous pouvez demander la suppression de votre compte et de vos données personnelles. Vos annonces seront dépubliées et vos informations anonymisées sous 30 jours.
+        Vous pouvez demander la suppression de votre compte et de vos donnÃ©es personnelles. Vos annonces seront dÃ©publiÃ©es et vos informations anonymisÃ©es sous 30 jours.
       </p>
 
       {!open ? (
@@ -415,7 +486,7 @@ function SuppressionSection() {
           className="flex items-center gap-2 text-red-500 text-sm font-medium hover:text-red-600 transition-colors"
         >
           <Trash2 className="w-4 h-4" />
-          Supprimer mon compte définitivement
+          Supprimer mon compte dÃ©finitivement
         </button>
       ) : (
         <div className="border border-red-200 rounded-xl p-4 space-y-4 bg-red-50/50 animate-fade-in">
@@ -424,20 +495,20 @@ function SuppressionSection() {
           <div className="flex items-start gap-2">
             <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
             <div className="text-sm text-red-700 space-y-1">
-              <p className="font-semibold">Cette action est irréversible.</p>
-              <p>• Vos annonces seront dépubliées immédiatement</p>
-              <p>• Vos données personnelles seront anonymisées sous 30 jours</p>
-              <p>• Vous perdrez l'accès à votre compte et vos messages</p>
-              {user?.is_pro && <p className="font-medium">• Votre abonnement Pro sera résilié</p>}
+              <p className="font-semibold">Cette action est irrÃ©versible.</p>
+              <p>â€¢ Vos annonces seront dÃ©publiÃ©es immÃ©diatement</p>
+              <p>â€¢ Vos donnÃ©es personnelles seront anonymisÃ©es sous 30 jours</p>
+              <p>â€¢ Vous perdrez l'accÃ¨s Ã  votre compte et vos messages</p>
+              {user?.is_pro && <p className="font-medium">â€¢ Votre abonnement Pro sera rÃ©siliÃ©</p>}
             </div>
           </div>
 
-          {/* Étape 1 : info */}
+          {/* Ã‰tape 1 : info */}
           {step === 1 && (
             <div className="space-y-3">
               <p className="text-xs text-night/50">
-                Avant de supprimer votre compte, pensez à{' '}
-                <button onClick={() => {}} className="text-coral underline">télécharger vos données</button>.
+                Avant de supprimer votre compte, pensez Ã {' '}
+                <button onClick={() => {}} className="text-coral underline">tÃ©lÃ©charger vos donnÃ©es</button>.
               </p>
               <div className="flex gap-2">
                 <button onClick={() => setOpen(false)} className="btn-ghost flex-1 justify-center text-sm">
@@ -453,7 +524,7 @@ function SuppressionSection() {
             </div>
           )}
 
-          {/* Étape 2 : confirmation */}
+          {/* Ã‰tape 2 : confirmation */}
           {step === 2 && (
             <div className="space-y-3">
               <div>
@@ -495,8 +566,8 @@ function SuppressionSection() {
                   className="flex-1 py-2 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {loading
-                    ? <span className="flex items-center justify-center gap-2"><span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"/>Suppression…</span>
-                    : 'Supprimer définitivement'
+                    ? <span className="flex items-center justify-center gap-2"><span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"/>Suppressionâ€¦</span>
+                    : 'Supprimer dÃ©finitivement'
                   }
                 </button>
               </div>
@@ -508,7 +579,7 @@ function SuppressionSection() {
   )
 }
 
-// ── Page principale ───────────────────────────────────────────────────────────
+// â”€â”€ Page principale â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function ParametresPage() {
   const { user, logout } = useAuthStore()
@@ -524,8 +595,8 @@ export default function ParametresPage() {
       <Header />
       <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="mb-6">
-          <h1 className="font-display font-bold text-2xl text-night">Paramètres</h1>
-          <p className="text-night/50 text-sm mt-1">Gérez votre compte et vos données personnelles</p>
+          <h1 className="font-display font-bold text-2xl text-night">ParamÃ¨tres</h1>
+          <p className="text-night/50 text-sm mt-1">GÃ©rez votre compte et vos donnÃ©es personnelles</p>
         </div>
 
         <div className="space-y-4">
@@ -533,11 +604,11 @@ export default function ParametresPage() {
           {/* Navigation rapide */}
           <div className="card divide-y divide-night/8">
           {[
-            { icon: Shield,   label: 'Sécurité et connexion',    href: '/profil?tab=securite' },
+            { icon: Shield,   label: 'SÃ©curitÃ© et connexion',    href: '/profil?tab=securite' },
             { icon: Bell,     label: 'Notifications',             href: '/parametres/notifications' },
-            { icon: Eye,      label: 'Confidentialité',           href: '#confidentialite' },
+            { icon: Eye,      label: 'ConfidentialitÃ©',           href: '#confidentialite' },
             { icon: Cookie,   label: 'Cookies',                   href: '#cookies' },
-            { icon: Lock,     label: 'Mes données (RGPD)',        href: '#donnees' },
+            { icon: Lock,     label: 'Mes donnÃ©es (RGPD)',        href: '#donnees' },
           ].map(({ icon: Icon, label, href }) => (
               <Link
                 key={label}
@@ -553,9 +624,10 @@ export default function ParametresPage() {
             ))}
           </div>
 
-          {/* Export données */}
+          {/* Export donnÃ©es */}
           <div id="donnees">
             <AbonnementSection />
+            <NewsletterSection />
             <FacturesSection />
             <CookiesSection />
             <ExportSection />
@@ -564,21 +636,21 @@ export default function ParametresPage() {
           {/* Suppression compte */}
           <SuppressionSection />
 
-          {/* Déconnexion */}
+          {/* DÃ©connexion */}
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 py-3 text-sm text-night/50 hover:text-red-500 transition-colors"
           >
             <LogOut className="w-4 h-4" />
-            Se déconnecter
+            Se dÃ©connecter
           </button>
 
-          {/* Liens légaux */}
+          {/* Liens lÃ©gaux */}
           <div className="flex items-center justify-center gap-4 text-xs text-night/35">
             <Link href="/cgu" className="hover:text-night/60">CGU</Link>
-            <span>·</span>
-            <Link href="/politique-de-confidentialite" className="hover:text-night/60">Politique de confidentialité</Link>
-            <span>·</span>
+            <span>Â·</span>
+            <Link href="/politique-de-confidentialite" className="hover:text-night/60">Politique de confidentialitÃ©</Link>
+            <span>Â·</span>
             <a href="mailto:privacy@troca.nc" className="hover:text-night/60">Contact DPO</a>
           </div>
         </div>
