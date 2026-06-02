@@ -70,6 +70,8 @@ type ListingLike = TrocometerListing & {
   location_name?: string | null
 }
 
+type ListingCardListing = React.ComponentProps<typeof ListingCard>['listing']
+
 function extractListings(payload: unknown): ListingLike[] {
   if (Array.isArray(payload)) return payload as ListingLike[]
 
@@ -110,6 +112,17 @@ function chunkListings(listings: ListingLike[]) {
     groups.push(listings.slice(index, index + PAGE_SIZE))
   }
   return groups
+}
+
+function toListingCardListing(listing: ListingLike): ListingCardListing {
+  return {
+    ...listing,
+    id: String(listing.id),
+    price_negotiable: Boolean(listing.price_negotiable),
+    is_free: Boolean(listing.is_free),
+    is_featured: Boolean(listing.is_featured),
+    is_urgent: Boolean(listing.is_urgent),
+  } as ListingCardListing
 }
 
 export default function TrocPage() {
@@ -368,7 +381,7 @@ export default function TrocPage() {
         ) : marketListings.length > 0 ? (
           <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {marketListings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
+              <ListingCard key={String(listing.id)} listing={toListingCardListing(listing)} />
             ))}
           </div>
         ) : (
