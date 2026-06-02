@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+
 import Header from '@/components/layout/Header'
+import FaqAccordion from '@/components/contact/FaqAccordion'
 
 export const metadata: Metadata = {
   title: 'Contact — Troca',
@@ -11,8 +13,8 @@ export const metadata: Metadata = {
 function Card({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="card p-5">
-      <h2 className="font-display font-bold text-xl text-night mb-3">{title}</h2>
-      <div className="text-sm text-night/70 leading-relaxed space-y-3">{children}</div>
+      <h2 className="mb-3 font-display text-xl font-bold text-night">{title}</h2>
+      <div className="space-y-3 text-sm leading-relaxed text-night/70">{children}</div>
     </section>
   )
 }
@@ -21,10 +23,10 @@ export default function ContactPage() {
   return (
     <>
       <Header />
-      <main className="max-w-4xl mx-auto px-4 py-10">
+      <main className="mx-auto max-w-4xl px-4 py-10">
         <div className="mb-10">
-          <h1 className="font-display font-bold text-3xl text-night mb-2">Contact</h1>
-          <p className="text-night/40 text-sm">
+          <h1 className="mb-2 font-display text-3xl font-bold text-night">Contact</h1>
+          <p className="text-sm text-night/40">
             Une question, un souci technique, un signalement ou une demande juridique ?
           </p>
         </div>
@@ -81,9 +83,20 @@ export default function ContactPage() {
           </Card>
         </div>
 
-        <section className="mt-6 card p-5 bg-coral/5 border-coral/20">
-          <h2 className="font-display font-bold text-xl text-night mb-2">Délais de réponse</h2>
-          <p className="text-sm text-night/70 leading-relaxed">
+        <section className="mt-10">
+          <FaqAccordion />
+        </section>
+
+        <div className="mt-8 text-sm text-night/65">
+          Vous n&apos;avez pas trouvé votre réponse ?{' '}
+          <a href="#formulaire-contact" className="font-semibold text-coral underline">
+            Contactez-nous directement
+          </a>
+        </div>
+
+        <section id="formulaire-contact" className="mt-6 card border-coral/20 bg-coral/5 p-5">
+          <h2 className="mb-2 font-display text-xl font-bold text-night">Délais de réponse</h2>
+          <p className="text-sm leading-relaxed text-night/70">
             L&apos;équipe vise une première réponse sous 24 à 48 heures ouvrées pour le support
             général. Les urgences liées à la sécurité ou à un contenu manifestement illicite sont
             traitées en priorité.
