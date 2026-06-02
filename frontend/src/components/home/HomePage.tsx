@@ -1,13 +1,12 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight, BadgeCheck } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
 import { HomeSpotlightSection } from '@/components/home/HomeSpotlightSection'
-import BonPlanCard from '@/components/bon-plans/BonPlanCard'
 import {
   BonPlanSection,
   FeaturedListingsSection,
@@ -17,9 +16,8 @@ import {
 } from '@/components/home/HomeSections'
 import CategoryTreeSection from '@/components/home/CategoryTreeSection'
 import ProCarousel from '@/components/pro/ProCarousel'
-import TransporterCard, { type TransporterCardModel } from '@/components/transport/TransporterCard'
 import Trocometer from '@/components/trocometer/Trocometer'
-import { API_ORIGIN, proApi, proTransportApi } from '@/lib/api'
+import { API_ORIGIN, proApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 
 export default function HomePage() {
@@ -32,8 +30,6 @@ export default function HomePage() {
   const [eventBonPlans, setEventBonPlans] = useState<any[]>([])
   const [covoiturages, setCovoiturages] = useState<any[]>([])
   const [bonPlansLoading, setBonPlansLoading] = useState(true)
-  const [transportPros, setTransportPros] = useState<TransporterCardModel[]>([])
-  const [transportLoading, setTransportLoading] = useState(true)
   const [proSummary, setProSummary] = useState<{
     listings?: { active?: number; total?: number }
     stats?: { views_7d?: number }
@@ -73,7 +69,7 @@ export default function HomePage() {
       }
     }
 
-    fetchBonPlans()
+    void fetchBonPlans()
     return () => {
       alive = false
     }
@@ -103,29 +99,6 @@ export default function HomePage() {
       alive = false
     }
   }, [hasHydrated, user?.is_pro])
-
-  useEffect(() => {
-    let alive = true
-
-    const loadTransportPros = async () => {
-      try {
-        const response = await proTransportApi.list({ limit: 3 })
-        const items = Array.isArray(response.data?.data) ? response.data.data : []
-        if (!alive) return
-        setTransportPros(items)
-      } catch {
-        if (!alive) return
-        setTransportPros([])
-      } finally {
-        if (alive) setTransportLoading(false)
-      }
-    }
-
-    void loadTransportPros()
-    return () => {
-      alive = false
-    }
-  }, [])
 
   useEffect(() => {
     let alive = true
@@ -160,11 +133,7 @@ export default function HomePage() {
     <main className="min-h-screen bg-[var(--color-bg-page)] text-[var(--color-text-primary)]">
       <Header />
 
-      <HomeHeroSection
-        q={q}
-        onQueryChange={setQ}
-        onSubmit={handleSearch}
-      />
+      <HomeHeroSection q={q} onQueryChange={setQ} onSubmit={handleSearch} />
 
       {hasHydrated && user?.is_pro && proSummary ? (
         <section className="mx-auto max-w-7xl px-4 pt-4">
@@ -176,7 +145,8 @@ export default function HomePage() {
               <BadgeCheck className="h-4 w-4 shrink-0 text-nc-lagon" />
               <span className="text-sm font-semibold text-nc-lagon">Espace Pro</span>
               <span className="truncate text-sm text-night/60">
-                · {Number(proSummary.listings?.active ?? 0).toLocaleString('fr-FR')} annonces actives · {Number(proSummary.stats?.views_7d ?? 0).toLocaleString('fr-FR')} vues cette semaine
+                · {Number(proSummary.listings?.active ?? 0).toLocaleString('fr-FR')} annonces actives ·{' '}
+                {Number(proSummary.stats?.views_7d ?? 0).toLocaleString('fr-FR')} vues cette semaine
               </span>
             </div>
             <span className="text-sm font-semibold text-nc-lagon hover:underline">Tableau de bord →</span>
@@ -209,62 +179,12 @@ export default function HomePage() {
         loading={loading || bonPlansLoading}
       />
 
-      <section className="mx-auto max-w-7xl px-4 pb-10">
-        <div className="mb-5 flex items-end justify-between gap-4 rounded-[2rem] border border-[var(--color-border)] border-l-4 border-l-nc-emeraude bg-[var(--color-surface)] p-4 shadow-sm">
-          <div className="section-emeraude">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Bons Plans du moment</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Les dernières promos actives sur Troca</h2>
-          </div>
-          <Link href="/bons-plans" className="hidden items-center gap-1 text-sm font-semibold text-nc-emeraude hover:underline md:inline-flex">
-            Voir tous les bons plans <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {(promoBonPlans.length > 0 ? promoBonPlans : eventBonPlans).slice(0, 4).map((item) => (
-            <BonPlanCard key={item.id} bonPlan={item} compact />
-          ))}
-        </div>
-      </section>
-
       <BonPlanSection
         promoItems={promoBonPlans}
         eventItems={eventBonPlans}
         covoiturageItems={covoiturages}
         loading={bonPlansLoading}
       />
-
-      {transportLoading || transportPros.length > 0 ? (
-        <section className="mx-auto max-w-7xl px-4 pb-10">
-          <div className="mb-5 flex items-end justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Transport Pro</p>
-              <h2 className="mt-1 font-display text-2xl font-bold text-night">Nos transporteurs recommandés</h2>
-              <p className="mt-1 text-sm text-night/55">Des pros du transport local à portée de message.</p>
-            </div>
-            <Link href="/covoiturage?tab=transport" className="hidden items-center gap-1 text-sm font-semibold text-nc-emeraude hover:underline md:inline-flex">
-              Voir tous les transporteurs <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-          {transportLoading ? (
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="h-[26rem] animate-pulse rounded-[1.75rem] bg-sand/70" />
-              ))}
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {transportPros.map((transporter) => (
-                <TransporterCard
-                  key={transporter.id}
-                  transporter={transporter}
-                  detailHref={`/covoiturage/transport/${transporter.id}`}
-                  quoteHref={`/covoiturage/transport/${transporter.id}#devis`}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-      ) : null}
 
       <FeaturedListingsSection loading={loading} listings={featuredListings} />
 
@@ -273,12 +193,8 @@ export default function HomePage() {
       <section className="mx-auto max-w-7xl px-4 pb-10">
         <div className="mb-5">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Nouveau</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">
-            Le Trocômètre
-          </h2>
-          <p className="mt-1 text-sm text-night/55">
-            Trouvez des objets de même valeur prêts à être échangés.
-          </p>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">Le Trocômètre</h2>
+          <p className="mt-1 text-sm text-night/55">Trouvez des objets de même valeur prêts à être échangés.</p>
         </div>
         <Trocometer />
       </section>
@@ -287,4 +203,3 @@ export default function HomePage() {
     </main>
   )
 }
-// rebuild trigger

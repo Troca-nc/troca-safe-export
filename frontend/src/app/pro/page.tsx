@@ -6,13 +6,13 @@ import {
   ArrowRight,
   BadgeCheck,
   BarChart2,
+  CheckCircle2,
   Loader2,
   MessageCircle,
   Sparkles,
   Store,
   Tag,
   TrendingUp,
-  CheckCircle2,
 } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
@@ -20,7 +20,7 @@ import { proApi } from '@/lib/api'
 import { useAuthActionStore } from '@/store/authActionStore'
 import { useAuthStore } from '@/store/authStore'
 
-const PRO_CATEGORIES = [
+const PRO_SECTORS = [
   'Commerçant',
   'Restaurateur',
   'Artisan BTP',
@@ -31,8 +31,21 @@ const PRO_CATEGORIES = [
   'Activité nautique',
   'Transporteur',
   'Professionnel de santé',
-  'Organisateur d’événements',
+  "Organisateur d'événements",
   'Agriculteur',
+  'Boutique mode',
+  'Salon de beauté',
+  'Coiffeur',
+  'Électricien',
+  'Plombier',
+  'Menuisier',
+  'Photographe',
+  'Traiteur',
+  'Hébergement / hôtel',
+  'Location de véhicules',
+  'Association',
+  'Formation',
+  'Service digital',
 ] as const
 
 const COMMUNES = [
@@ -115,23 +128,26 @@ export default function ProLandingPage() {
   const [successMessage, setSuccessMessage] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
 
-  const stats = useMemo(() => [
-    {
-      value: '100%',
-      title: '100% calédonien',
-      subtitle: 'Une plateforme pensée pour le marché local.',
-    },
-    {
-      value: '15',
-      title: '15 catégories',
-      subtitle: 'Touchez exactement vos clients cibles.',
-    },
-    {
-      value: 'Gratuit',
-      title: 'Gratuit pour commencer',
-      subtitle: 'Publiez vos premières annonces sans frais.',
-    },
-  ], [])
+  const stats = useMemo(
+    () => [
+      {
+        value: '100%',
+        title: '100% calédonien',
+        subtitle: 'Une plateforme pensée pour le marché local.',
+      },
+      {
+        value: '15+',
+        title: 'Catégories ciblées',
+        subtitle: 'Touchez exactement vos clients cibles.',
+      },
+      {
+        value: 'Gratuit',
+        title: 'Gratuit pour commencer',
+        subtitle: 'Publiez vos premières annonces sans frais.',
+      },
+    ],
+    []
+  )
 
   const advantages = [
     {
@@ -180,13 +196,6 @@ export default function ProLandingPage() {
       highlighted: true,
       features: ['Annonces illimitées', 'Remontée auto hebdomadaire', 'Vitrine personnalisée', 'Statistiques de base', '1 boost offert/mois'],
       cta: 'Choisir Pro',
-    },
-    {
-      name: 'Premium',
-      price: '5 900 XPF/mois',
-      highlighted: false,
-      features: ['Tout Pro +', 'Bon plan prioritaire', 'Statistiques avancées', '3 boosts offerts/mois', 'Support prioritaire'],
-      cta: 'Choisir Premium',
     },
   ] as const
 
@@ -245,7 +254,7 @@ export default function ProLandingPage() {
 
       <main>
         <section className="overflow-hidden bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.18))] px-4 py-14 text-white">
-          <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+          <div className="mx-auto max-w-7xl">
             <div className="max-w-3xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-emeraude">
                 <Sparkles className="h-3.5 w-3.5" />
@@ -264,23 +273,6 @@ export default function ProLandingPage() {
                 <a href="#avantages" className="rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/15">
                   En savoir plus
                 </a>
-              </div>
-            </div>
-
-            <div className="rounded-[2rem] border border-white/10 bg-white/10 p-5 shadow-[0_24px_80px_rgba(8,32,50,0.16)] backdrop-blur-sm">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15">
-                  <BadgeCheck className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">Avantage Pro</p>
-                  <p className="mt-1 text-sm text-white/70">Badge, vitrine, stats et visibilité locale.</p>
-                </div>
-              </div>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {stats.slice(0, 2).map((item) => (
-                  <StatCard key={item.title} value={item.value} title={item.title} subtitle={item.subtitle} />
-                ))}
               </div>
             </div>
           </div>
@@ -316,18 +308,18 @@ export default function ProLandingPage() {
             <h2 className="mt-1 font-display text-2xl font-bold text-night">Choisissez votre secteur</h2>
           </div>
           <div className="flex flex-wrap gap-2">
-            {PRO_CATEGORIES.map((category) => (
+            {PRO_SECTORS.map((sector) => (
               <button
-                key={category}
+                key={sector}
                 type="button"
-                onClick={() => handleChipSelect(category)}
+                onClick={() => handleChipSelect(sector)}
                 className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                  selectedCategory === category
+                  selectedCategory === sector
                     ? 'border-[#0A7EA4] bg-nc-lagonLight text-[#0A7EA4]'
                     : 'border-[var(--color-border)] bg-[var(--color-surface)] text-night/70 hover:bg-[var(--color-background-secondary)]'
                 }`}
               >
-                {category}
+                {sector}
               </button>
             ))}
           </div>
@@ -338,7 +330,7 @@ export default function ProLandingPage() {
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Simple et transparent</p>
             <h2 className="mt-1 font-display text-2xl font-bold text-night">Des offres claires pour démarrer</h2>
           </div>
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-4 lg:grid-cols-2">
             {plans.map((plan) => (
               <article
                 key={plan.name}
@@ -362,7 +354,7 @@ export default function ProLandingPage() {
                   ))}
                 </ul>
                 <Link
-                  href={plan.highlighted ? '/pro#formulaire-pro' : '/pro/inscription'}
+                  href="/pro#formulaire-pro"
                   className={`mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
                     plan.highlighted
                       ? 'bg-[#0A7EA4] text-white shadow-sm hover:-translate-y-0.5 hover:shadow-md'
@@ -451,9 +443,9 @@ export default function ProLandingPage() {
                       required
                     >
                       <option value="">Choisissez votre secteur</option>
-                      {PRO_CATEGORIES.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
+                      {PRO_SECTORS.map((sector) => (
+                        <option key={sector} value={sector}>
+                          {sector}
                         </option>
                       ))}
                     </select>
@@ -527,46 +519,20 @@ export default function ProLandingPage() {
                       value={form.siret}
                       onChange={(e) => handleChange('siret', e.target.value)}
                       className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
-                      placeholder="Numéro RIDET / SIRET équivalent"
+                      placeholder="Ex. 1 234 567.8"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="btn-primary mt-2 inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm"
+                    className="btn-primary inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm disabled:opacity-70"
                   >
-                    {submitting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Envoi en cours...
-                      </>
-                    ) : (
-                      <>
-                        Envoyer ma demande
-                        <ArrowRight className="h-4 w-4" />
-                      </>
-                    )}
+                    {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                    Envoyer ma demande
                   </button>
                 </form>
               </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 pb-16">
-          <div className="grid gap-4 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 md:grid-cols-3">
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">1. Choisissez</p>
-              <p className="mt-2 text-sm font-semibold text-night">Votre secteur et votre offre</p>
-            </div>
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">2. Diffusez</p>
-              <p className="mt-2 text-sm font-semibold text-night">Votre vitrine locale sur Troca</p>
-            </div>
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">3. Convertissez</p>
-              <p className="mt-2 text-sm font-semibold text-night">Vos contacts en clients réels</p>
             </div>
           </div>
         </section>

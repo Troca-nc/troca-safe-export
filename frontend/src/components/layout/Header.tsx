@@ -190,15 +190,9 @@ export default function Header() {
     { href: '/', label: 'Accueil' },
     { href: '/annonces', label: 'Annonces' },
     { href: '/troc', label: 'Troc' },
-    { href: '/bons-plans', label: 'Bons plans & Événements' },
+    { href: '/covoiturage', label: 'Covoiturage' },
+    { href: '/bons-plans', label: 'Bons plans' },
     { href: '/pro', label: 'Pros' },
-  ]
-
-  const covoiturageLinks = [
-    { href: '/covoiturage', label: 'Trouver un trajet' },
-    { href: '/covoiturage?mode=publish', label: 'Proposer un trajet' },
-    { href: '/covoiturage?tab=transport', label: 'Transport Pro' },
-    { href: '/covoiturage/mes-courses', label: 'Mes courses' },
   ]
 
   const isActiveLink = (href: string) => {
@@ -248,36 +242,12 @@ export default function Header() {
                 className={`rounded-full px-3 py-2 text-sm font-semibold transition ${
                   isActiveLink(link.href)
                     ? 'bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-sm'
-                    : 'text-night/75 hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)]'
+                  : 'text-night/75 hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)]'
                 }`}
               >
                 {link.label}
               </Link>
             ))}
-            <div className="group relative">
-              <Link
-                href="/covoiturage"
-                className={`inline-flex items-center gap-1 rounded-full px-3 py-2 text-sm font-semibold transition ${
-                  pathname.startsWith('/covoiturage')
-                    ? 'bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-sm'
-                    : 'text-night/75 hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)]'
-                }`}
-              >
-                Covoiturage
-                <ChevronDown className="h-3.5 w-3.5" />
-              </Link>
-              <div className="absolute left-0 top-full z-30 mt-2 hidden min-w-56 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 shadow-modal group-hover:block group-focus-within:block">
-                {covoiturageLinks.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="block rounded-xl px-3 py-2 text-sm font-medium text-night/75 transition hover:bg-sand hover:text-night"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
           </div>
 
           {isAuthenticated ? (
