@@ -56,6 +56,10 @@ const steps = [
 ]
 
 type ListingLike = TrocometerListing & {
+  price_negotiable?: boolean
+  is_free?: boolean
+  is_featured?: boolean
+  is_urgent?: boolean
   category?: string | null
   category_name?: string | null
   category_slug?: string | null
