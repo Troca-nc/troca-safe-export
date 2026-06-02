@@ -543,6 +543,37 @@ export const proApi = {
     invalidateApiCache('pro.')
     return res
   },
+  getDashboard: () => cachedGet(
+    buildCacheKey('pro.dashboard', '/pro/dashboard'),
+    () => api.get('/pro/dashboard'),
+    CACHE_TTL.short,
+  ),
+  getListings: () => cachedGet(
+    buildCacheKey('pro.listings', '/pro/listings'),
+    () => api.get('/pro/listings'),
+    CACHE_TTL.short,
+  ),
+  renewListing: async (id: string | number) => {
+    const res = await api.post(`/pro/listings/${id}/renew`)
+    invalidateApiCache('pro.')
+    return res
+  },
+  getBoosts: () => cachedGet(
+    buildCacheKey('pro.boosts', '/pro/boosts'),
+    () => api.get('/pro/boosts'),
+    CACHE_TTL.short,
+  ),
+  getInvoices: () => cachedGet(
+    buildCacheKey('pro.invoices', '/pro/invoices'),
+    () => api.get('/pro/invoices'),
+    CACHE_TTL.short,
+  ),
+  updateProfile: async (data: object) => {
+    const res = await api.patch('/pro/me', data)
+    invalidateApiCache('pro.')
+    return res
+  },
+  downloadInvoicePdf: (id: string | number) => api.get(`/pro/invoices/${id}/pdf`, { responseType: 'blob' }),
 }
 
 export const businessesApi = {

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, BadgeCheck } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
 import { HomeSpotlightSection } from '@/components/home/HomeSpotlightSection'
@@ -18,10 +18,12 @@ import {
 import CategoryTreeSection from '@/components/home/CategoryTreeSection'
 import ProCarousel from '@/components/pro/ProCarousel'
 import Trocometer from '@/components/trocometer/Trocometer'
-import { API_ORIGIN } from '@/lib/api'
+import { API_ORIGIN, proApi } from '@/lib/api'
+import { useAuthStore } from '@/store/authStore'
 
 export default function HomePage() {
   const router = useRouter()
+  const { user, hasHydrated } = useAuthStore()
   const [q, setQ] = useState('')
   const [listings, setListings] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -29,6 +31,10 @@ export default function HomePage() {
   const [eventBonPlans, setEventBonPlans] = useState<any[]>([])
   const [covoiturages, setCovoiturages] = useState<any[]>([])
   const [bonPlansLoading, setBonPlansLoading] = useState(true)
+  const [proSummary, setProSummary] = useState<{
+    listings?: { active?: number; total?: number }
+    stats?: { views_7d?: number }
+  } | null>(null)
 
   const featuredListings = useMemo(() => listings.slice(0, 8), [listings])
   const premiumListings = useMemo(
@@ -72,6 +78,31 @@ export default function HomePage() {
 
   useEffect(() => {
     let alive = true
+
+    const loadProSummary = async () => {
+      if (!hasHydrated || !user?.is_pro) {
+        if (alive) setProSummary(null)
+        return
+      }
+
+      try {
+        const response = await proApi.getDashboard()
+        if (!alive) return
+        setProSummary(response.data?.data ?? null)
+      } catch {
+        if (!alive) return
+        setProSummary(null)
+      }
+    }
+
+    void loadProSummary()
+    return () => {
+      alive = false
+    }
+  }, [hasHydrated, user?.is_pro])
+
+  useEffect(() => {
+    let alive = true
     const run = async () => {
       try {
         const baseUrl = API_ORIGIN
@@ -108,6 +139,24 @@ export default function HomePage() {
         onQueryChange={setQ}
         onSubmit={handleSearch}
       />
+
+      {hasHydrated && user?.is_pro && proSummary ? (
+        <section className="mx-auto max-w-7xl px-4 pt-4">
+          <Link
+            href="/pro/dashboard"
+            className="flex items-center justify-between gap-4 rounded-[1.5rem] border border-nc-lagon/20 bg-nc-lagonLight px-4 py-3 transition hover:-translate-y-0.5 hover:shadow-sm"
+          >
+            <div className="flex min-w-0 items-center gap-2">
+              <BadgeCheck className="h-4 w-4 shrink-0 text-nc-lagon" />
+              <span className="text-sm font-semibold text-nc-lagon">Espace Pro</span>
+              <span className="truncate text-sm text-night/60">
+                · {Number(proSummary.listings?.active ?? 0).toLocaleString('fr-FR')} annonces actives · {Number(proSummary.stats?.views_7d ?? 0).toLocaleString('fr-FR')} vues cette semaine
+              </span>
+            </div>
+            <span className="text-sm font-semibold text-nc-lagon hover:underline">Tableau de bord →</span>
+          </Link>
+        </section>
+      ) : null}
 
       <HomeStatsSection />
 

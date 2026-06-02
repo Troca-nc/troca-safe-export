@@ -157,6 +157,17 @@ async function processStripeWebhookEvent({
       payload: intent,
     }).catch(() => {});
 
+    await upsertInvoiceRecord(query, {
+      userId: payment.user_id,
+      amountXpf: Number(meta.amount_xpf ?? payment.metadata?.amount_xpf ?? 0) || 0,
+      description: payment.type === 'subscription'
+        ? `Abonnement Pro — ${meta.billing_period || 'mensuel'}`
+        : `Boost annonce — ${meta.boost_type || 'Troca'}`,
+      stripePaymentId: paymentRef,
+      invoiceNumber: buildInvoiceNumber('ST', paymentRef),
+      paidAt: new Date(),
+    }).catch(() => {});
+
     if (meta.payment_type === 'boost' && meta.annonce_id) {
       const annonceId = Number(meta.annonce_id);
       const boostType = meta.boost_type;
@@ -272,13 +283,22 @@ async function processStripeWebhookEvent({
         );
         const { rows: pmtRows } = await query(`SELECT id FROM payments WHERE provider_ref = $1 LIMIT 1`, [session.id]);
         if (pmtRows[0]) {
-          await query(
-            `INSERT INTO annonce_boosts (annonce_id, type, expires_at, payment_id)
-             VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING`,
-            [annonceId, boostType, expiresAt, pmtRows[0].id]
-          ).catch(() => {});
-        }
+        await query(
+          `INSERT INTO annonce_boosts (annonce_id, type, expires_at, payment_id)
+           VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING`,
+          [annonceId, boostType, expiresAt, pmtRows[0].id]
+        ).catch(() => {});
+
+        await upsertInvoiceRecord(query, {
+          userId: payment.user_id,
+          amountXpf: Number(meta.amount_xpf ?? payment.metadata?.amount_xpf ?? 0) || 0,
+          description: `Boost annonce — ${boostType || 'Troca'}`,
+          stripePaymentId: session.id,
+          invoiceNumber: buildInvoiceNumber('ST', session.id),
+          paidAt: new Date(),
+        }).catch(() => {});
       }
+    }
     }
 
     if (paymentType === 'subscription') {
@@ -319,6 +339,15 @@ async function processStripeWebhookEvent({
             [session.id, JSON.stringify({ provider_sub_id: subId })]
           );
         });
+
+        await upsertInvoiceRecord(query, {
+          userId,
+          amountXpf: Number(session.metadata?.amount_xpf ?? payment.metadata?.amount_xpf ?? 0) || 0,
+          description: `Abonnement Pro — ${billingPeriod || 'mensuel'}`,
+          stripePaymentId: session.id,
+          invoiceNumber: buildInvoiceNumber('ST', session.id),
+          paidAt: new Date(),
+        }).catch(() => {});
 
         const { rows: userRows } = await query('SELECT email, prenom FROM users WHERE id = $1', [userId]);
         if (userRows[0]) {
@@ -436,6 +465,14 @@ async function processStripeWebhookEvent({
           hostedUrl: inv.hosted_invoice_url ?? null,
           payload: inv,
         }).catch(() => {});
+        await upsertInvoiceRecord(query, {
+          userId: userRows[0].id,
+          amountXpf: Math.round((inv.amount_paid / 100) * XPF_PER_EUR),
+          description: 'Renouvellement abonnement Pro',
+          stripePaymentId: inv.id,
+          invoiceNumber: buildInvoiceNumber('ST', inv.id),
+          paidAt: new Date(),
+        }).catch(() => {});
         await sendMail({
           to: userRows[0].email,
           subject: '[Troca] Renouvellement de votre abonnement Pro confirmé',
@@ -546,6 +583,41 @@ async function upsertBillingDocument(query, {
   );
 }
 
+function buildInvoiceNumber(provider, providerRef, prefix = 'FAC') {
+  const day = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const safeProvider = String(provider || 'pay').toUpperCase().replace(/[^A-Z0-9]+/g, '');
+  const safeRef = String(providerRef || Date.now()).replace(/[^A-Za-z0-9]+/g, '').slice(-10).toUpperCase();
+  return `${prefix}-${day}-${safeProvider}-${safeRef}`;
+}
+
+async function upsertInvoiceRecord(query, {
+  userId,
+  amountXpf,
+  description,
+  status = 'paid',
+  stripePaymentId = null,
+  invoiceNumber = null,
+  paidAt = new Date(),
+}) {
+  if (!userId || !amountXpf || !description) return null;
+  const number = invoiceNumber || buildInvoiceNumber('PAY', `${userId}-${description}-${Date.now()}`);
+  const { rows } = await query(
+    `INSERT INTO invoices
+       (user_id, invoice_number, amount_xpf, description, status, stripe_payment_id, created_at, paid_at)
+     VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7)
+     ON CONFLICT (invoice_number)
+     DO UPDATE SET
+       amount_xpf = EXCLUDED.amount_xpf,
+       description = EXCLUDED.description,
+       status = EXCLUDED.status,
+       stripe_payment_id = EXCLUDED.stripe_payment_id,
+       paid_at = EXCLUDED.paid_at
+     RETURNING *`,
+    [userId, number, amountXpf, description, status, stripePaymentId, paidAt]
+  );
+  return rows[0] || null;
+}
+
 async function processPayplugWebhook({
   resourceId,
   resourceType,
@@ -590,6 +662,17 @@ async function processPayplugWebhook({
       status: 'succeeded',
       amountXpf: expectedAmountXpf || providerAmountXpf || Number(payment.amount_xpf ?? 0) || null,
       payload: resource,
+    }).catch(() => {});
+
+    await upsertInvoiceRecord(query, {
+      userId: payment.user_id,
+      amountXpf: expectedAmountXpf || providerAmountXpf || Number(payment.amount_xpf ?? 0) || 0,
+      description: meta.payment_type === 'subscription'
+        ? `Abonnement Pro — ${meta.billing_period || 'mensuel'}`
+        : `Boost annonce — ${meta.boost_type || 'Troca'}`,
+      stripePaymentId: resourceId,
+      invoiceNumber: buildInvoiceNumber('PP', resourceId),
+      paidAt: new Date(),
     }).catch(() => {});
 
     if (meta.payment_type === 'boost' && meta.annonce_id) {
@@ -771,6 +854,14 @@ async function processPayplugWebhook({
         status: 'succeeded',
         amountXpf: expectedAmountXpf || paymentAmountXpf || Number(payment.amount_xpf ?? 0) || null,
         payload: resource,
+      }).catch(() => {});
+      await upsertInvoiceRecord(query, {
+        userId,
+        amountXpf: expectedAmountXpf || paymentAmountXpf || Number(payment.amount_xpf ?? 0) || 0,
+        description: `Abonnement Pro — ${period || 'mensuel'}`,
+        stripePaymentId: resourceId,
+        invoiceNumber: buildInvoiceNumber('PP', resourceId),
+        paidAt: new Date(),
       }).catch(() => {});
 
       const { rows: userRows } = await query('SELECT email, prenom FROM users WHERE id = $1', [userId]);

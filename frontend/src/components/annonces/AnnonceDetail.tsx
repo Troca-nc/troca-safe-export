@@ -12,6 +12,7 @@ import { consumePendingAuthAction, peekPendingAuthAction } from '@/lib/authActio
 import { useAuthActionStore } from '@/store/authActionStore'
 import { useFavorite } from '@/hooks/useFavorite'
 import { trackEvent } from '@/lib/analytics'
+import { API_ORIGIN } from '@/lib/api'
 import ShareButton from '@/components/annonces/ShareButton'
 import {
   ListingHeroCard,
@@ -242,6 +243,14 @@ export default function AnnonceDetail({ id, initialData }: Props) {
       category_id: listing.category_id ?? null,
       seller_id: listing.user?.id ?? null,
     }).catch(() => {})
+    void fetch(`${API_ORIGIN}/api/listings/${listing.id}/view`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        source: typeof document !== 'undefined' && document.referrer.includes('/annonces') ? 'search' : 'direct',
+      }),
+    }).catch(() => {})
   }, [listing])
 
   useEffect(() => {
@@ -380,6 +389,12 @@ export default function AnnonceDetail({ id, initialData }: Props) {
         message: starter,
       })
       const convId = res.data?.conversation_id ?? res.data?.data?.conversation_id ?? res.data?.id
+      void fetch(`${API_ORIGIN}/api/listings/${listing.id}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ contact_type: 'message' }),
+      }).catch(() => {})
       if (convId) router.push(`/messages/${convId}`)
     } catch {
       setError("Impossible d'ouvrir la conversation.")

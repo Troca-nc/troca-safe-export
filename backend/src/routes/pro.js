@@ -21,6 +21,19 @@ const applySchema = Joi.object({
   siret: Joi.string().trim().max(60).allow('', null).optional(),
 });
 
+const profileUpdateSchema = Joi.object({
+  company_name: Joi.string().trim().min(2).max(200).allow('', null).optional(),
+  category: Joi.string().trim().min(2).max(120).allow('', null).optional(),
+  description: Joi.string().trim().max(300).allow('', null).optional(),
+  website: Joi.string().trim().uri().allow('', null).optional(),
+  phone: Joi.string().trim().min(6).max(30).allow('', null).optional(),
+  hours: Joi.string().trim().max(255).allow('', null).optional(),
+  commune: Joi.string().trim().min(2).max(120).allow('', null).optional(),
+  siret: Joi.string().trim().max(60).allow('', null).optional(),
+  logo_url: Joi.string().trim().uri().allow('', null).optional(),
+  banner_url: Joi.string().trim().uri().allow('', null).optional(),
+});
+
 const reviewSchema = Joi.object({
   rating: Joi.number().integer().min(1).max(5).required(),
   comment: Joi.string().trim().max(1000).allow('', null).optional(),
@@ -31,8 +44,95 @@ function normalizeMaybeText(value) {
   return text.length > 0 ? text : null;
 }
 
+function requirePro(req, res) {
+  if (!req.user) {
+    res.status(401).json({ error: 'Connexion requise.' });
+    return false;
+  }
+  if (!req.user.is_pro) {
+    res.status(403).json({ error: 'Espace réservé aux comptes Pro.' });
+    return false;
+  }
+  return true;
+}
+
 function formatCompanyName(row) {
   return row.pro_company_name || [row.prenom, row.nom].filter(Boolean).join(' ').trim() || 'Professionnel Troca';
+}
+
+async function refreshProStats() {
+  await query('REFRESH MATERIALIZED VIEW pro_listing_stats').catch(() => {});
+}
+
+function escapePdfText(value) {
+  return String(value ?? '')
+    .replace(/\\/g, '\\\\')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)');
+}
+
+function buildSimplePdfBuffer(lines) {
+  const safeLines = Array.isArray(lines) ? lines.slice(0, 30) : [];
+  const contentLines = [
+    'BT',
+    '/F1 12 Tf',
+    '72 770 Td',
+  ];
+
+  safeLines.forEach((line, index) => {
+    const escaped = escapePdfText(line);
+    if (index === 0) {
+      contentLines.push(`(${escaped}) Tj`);
+    } else {
+      contentLines.push('T*');
+      contentLines.push(`(${escaped}) Tj`);
+    }
+  });
+  contentLines.push('ET');
+
+  const contentStream = contentLines.join('\n');
+  const objects = [];
+
+  const addObject = (body) => {
+    objects.push(body);
+    return objects.length;
+  };
+
+  addObject('<< /Type /Catalog /Pages 2 0 R >>');
+  addObject('<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+  addObject('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>');
+  addObject('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+  addObject(`<< /Length ${Buffer.byteLength(contentStream, 'utf8')} >>\nstream\n${contentStream}\nendstream`);
+
+  let pdf = '%PDF-1.4\n';
+  const offsets = [0];
+  objects.forEach((body, index) => {
+    offsets.push(Buffer.byteLength(pdf, 'utf8'));
+    pdf += `${index + 1} 0 obj\n${body}\nendobj\n`;
+  });
+  const xrefOffset = Buffer.byteLength(pdf, 'utf8');
+  pdf += `xref\n0 ${objects.length + 1}\n`;
+  pdf += '0000000000 65535 f \n';
+  for (let i = 1; i <= objects.length; i += 1) {
+    pdf += `${String(offsets[i]).padStart(10, '0')} 00000 n \n`;
+  }
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+  return Buffer.from(pdf, 'utf8');
+}
+
+function mapProListingRow(row) {
+  const listing = mapListingSearchRow(row);
+  return {
+    ...listing,
+    total_views: Number(row.total_views ?? 0),
+    views_7d: Number(row.views_7d ?? 0),
+    views_30d: Number(row.views_30d ?? 0),
+    total_contacts: Number(row.total_contacts ?? 0),
+    contacts_7d: Number(row.contacts_7d ?? 0),
+    conversion_rate: Number(row.conversion_rate ?? 0),
+    is_boosted: Boolean(row.is_boosted),
+    boost_expires_at: row.boost_expires_at ?? null,
+  };
 }
 
 function mapProsRow(row) {
@@ -251,6 +351,539 @@ router.get('/', async (_req, res, next) => {
     );
 
     return res.json({ data: result.rows.map(mapProsRow) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch('/me', authenticate, async (req, res, next) => {
+  try {
+    const { error, value } = profileUpdateSchema.validate(req.body, {
+      stripUnknown: true,
+      convert: true,
+    });
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const fields = [];
+    const params = [];
+    let p = 1;
+    const mapping = {
+      company_name: 'pro_company_name',
+      category: 'pro_category',
+      description: 'pro_description',
+      website: 'pro_website',
+      phone: 'pro_phone',
+      hours: 'pro_hours',
+      commune: 'pro_commune',
+      siret: 'pro_siret',
+      logo_url: 'pro_logo_url',
+      banner_url: 'pro_banner_url',
+    };
+
+    for (const [key, column] of Object.entries(mapping)) {
+      if (Object.prototype.hasOwnProperty.call(value, key)) {
+        fields.push(`${column} = $${p}`);
+        params.push(normalizeMaybeText(value[key]));
+        p += 1;
+      }
+    }
+
+    if (fields.length === 0) {
+      return res.status(400).json({ error: 'Aucun champ à modifier.' });
+    }
+
+    fields.push(`is_pro = TRUE`);
+    fields.push(`updated_at = NOW()`);
+
+    params.push(req.user.id);
+    await query(
+      `UPDATE users SET ${fields.join(', ')} WHERE id = $${p} RETURNING id`,
+      params
+    );
+
+    const updated = await query(
+      `SELECT
+         u.id,
+         u.prenom,
+         u.nom,
+         u.pro_company_name,
+         u.pro_category,
+         u.pro_logo_url,
+         u.pro_banner_url,
+         u.pro_description,
+         u.pro_commune,
+         u.pro_website,
+         u.pro_phone,
+         u.pro_hours,
+         u.pro_siret,
+         COALESCE(ROUND((SELECT AVG(r.rating)::numeric FROM pro_reviews r WHERE r.pro_id = u.id), 1), 0) AS avg_rating,
+         COALESCE((SELECT COUNT(*)::int FROM pro_reviews r WHERE r.pro_id = u.id), 0) AS review_count,
+         COALESCE((SELECT COUNT(*)::int FROM annonces a WHERE a.user_id = u.id AND a.status = 'active' AND a.deleted_at IS NULL), 0) AS listing_count
+       FROM users u
+       WHERE u.id = $1
+       LIMIT 1`,
+      [req.user.id]
+    );
+
+    return res.json({ data: mapProsRow(updated.rows[0]) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/dashboard', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    await refreshProStats();
+
+    const [summaryRes, topRes, contactsRes, boostsRes, spendRes, viewsRes, contactsTimelineRes] = await Promise.all([
+      query(
+        `SELECT
+           COUNT(*)::int AS total,
+           COUNT(*) FILTER (WHERE status = 'active')::int AS active,
+           COUNT(*) FILTER (WHERE status IN ('inactive', 'sold'))::int AS expired,
+           COUNT(*) FILTER (
+             WHERE EXISTS(
+               SELECT 1 FROM listing_boosts b
+               WHERE b.listing_id = a.id
+                 AND b.status = 'active'
+                 AND b.expires_at > NOW()
+             )
+           )::int AS boosted,
+           COALESCE(SUM(pls.total_views), 0)::int AS views_total,
+           COALESCE(SUM(pls.views_7d), 0)::int AS views_7d,
+           COALESCE(SUM(pls.views_30d), 0)::int AS views_30d,
+           COALESCE(SUM(pls.total_contacts), 0)::int AS contacts_total,
+           COALESCE(SUM(pls.contacts_7d), 0)::int AS contacts_7d,
+           COALESCE(ROUND(AVG(COALESCE(pls.conversion_rate, 0))::numeric, 1), 0) AS avg_conversion_rate
+         FROM annonces a
+         LEFT JOIN pro_listing_stats pls ON pls.listing_id = a.id
+         WHERE a.user_id = $1 AND a.deleted_at IS NULL`,
+        [req.user.id]
+      ),
+      query(
+        `SELECT
+           a.id,
+           a.titre AS titre,
+           a.titre AS title,
+           a.prix AS prix,
+           a.prix AS price,
+           a.condition,
+           a.is_negotiable AS price_negotiable,
+           (a.prix IS NULL) AS is_free,
+           a.contre_quoi,
+           a.metadata,
+           a.created_at AS published_at,
+           a.created_at AS created_at_sort,
+           a.boost_expires_at AS boost_expires_at,
+           a.boost_expires_at AS boosted_until,
+           a.nb_vues,
+           a.commune_id,
+           cat.id AS category_id,
+           cat.name AS category_name,
+           cat.slug AS category_slug,
+           cat.icon AS category_icon,
+           com.name AS commune_name,
+           u.id AS seller_id,
+           u.prenom AS seller_prenom,
+           u.nom AS seller_nom,
+           u.avatar_url AS seller_avatar,
+           TRUE AS is_pro,
+           u.pro_verified AS seller_pro_verified,
+           u.email_verified AS seller_email_verified,
+           u.phone_verified AS seller_phone_verified,
+           u.trust_score AS seller_trust_score,
+           u.trust_level AS seller_trust_level,
+           u.note_moyenne AS seller_note_moyenne,
+           u.nb_avis AS seller_nb_avis,
+           u.note_moyenne AS user_rating,
+           pls.total_views,
+           pls.views_7d,
+           pls.views_30d,
+           pls.total_contacts,
+           pls.contacts_7d,
+           pls.conversion_rate,
+           pls.is_boosted,
+           pls.boost_expires_at,
+           (SELECT thumbnail_url FROM annonce_images WHERE annonce_id = a.id AND is_cover = TRUE LIMIT 1) AS cover_image_thumbnail,
+           (SELECT id FROM annonce_images WHERE annonce_id = a.id AND is_cover = TRUE LIMIT 1) AS cover_image_id
+         FROM annonces a
+         LEFT JOIN categories cat ON cat.id = a.category_id
+         LEFT JOIN communes com ON com.id = a.commune_id
+         LEFT JOIN users u ON u.id = a.user_id
+         LEFT JOIN pro_listing_stats pls ON pls.listing_id = a.id
+         WHERE a.user_id = $1 AND a.deleted_at IS NULL
+         ORDER BY pls.total_views DESC NULLS LAST, a.created_at DESC
+         LIMIT 3`,
+        [req.user.id]
+      ),
+      query(
+        `SELECT
+           lc.id,
+           lc.contacted_at,
+           lc.contact_type,
+           a.id AS listing_id,
+           a.titre AS listing_title,
+           a.prix AS listing_price,
+           cat.name AS category_name
+         FROM listing_contacts lc
+         JOIN annonces a ON a.id = lc.listing_id
+         LEFT JOIN categories cat ON cat.id = a.category_id
+         WHERE a.user_id = $1
+         ORDER BY lc.contacted_at DESC
+         LIMIT 5`,
+        [req.user.id]
+      ),
+      query(
+        `SELECT
+           lb.id,
+           lb.listing_id,
+           lb.started_at,
+           lb.expires_at,
+           lb.duration_days,
+           lb.price_xpf,
+           lb.status,
+           lb.invoice_number,
+           a.titre AS listing_title,
+           a.prix AS listing_price,
+           (SELECT thumbnail_url FROM annonce_images WHERE annonce_id = a.id AND is_cover = TRUE LIMIT 1) AS cover_image
+         FROM listing_boosts lb
+         JOIN annonces a ON a.id = lb.listing_id
+         WHERE lb.author_id = $1
+         ORDER BY lb.status = 'active' DESC, lb.expires_at DESC
+         LIMIT 12`,
+        [req.user.id]
+      ),
+      query(
+        `SELECT
+           COALESCE(SUM(price_xpf), 0)::int AS spend_total_xpf,
+           COALESCE(SUM(price_xpf) FILTER (WHERE started_at >= NOW() - INTERVAL '30 days'), 0)::int AS spend_30d_xpf
+         FROM listing_boosts
+         WHERE author_id = $1 AND status <> 'cancelled'`,
+        [req.user.id]
+      ),
+      query(
+        `SELECT to_char(date_trunc('day', viewed_at), 'YYYY-MM-DD') AS day, COUNT(*)::int AS value
+         FROM listing_stats ls
+         JOIN annonces a ON a.id = ls.listing_id
+         WHERE a.user_id = $1
+           AND ls.viewed_at >= NOW() - INTERVAL '30 days'
+         GROUP BY 1
+         ORDER BY 1`,
+        [req.user.id]
+      ),
+      query(
+        `SELECT to_char(date_trunc('day', contacted_at), 'YYYY-MM-DD') AS day, COUNT(*)::int AS value
+         FROM listing_contacts lc
+         JOIN annonces a ON a.id = lc.listing_id
+         WHERE a.user_id = $1
+           AND lc.contacted_at >= NOW() - INTERVAL '30 days'
+         GROUP BY 1
+         ORDER BY 1`,
+        [req.user.id]
+      ),
+    ]);
+
+    const summary = summaryRes.rows[0] || {};
+    const topListings = topRes.rows.map(mapProListingRow);
+    const recentContacts = contactsRes.rows.map((row) => ({
+      id: Number(row.id),
+      contacted_at: row.contacted_at,
+      contact_type: row.contact_type ?? null,
+      listing_id: Number(row.listing_id),
+      listing_title: row.listing_title,
+      listing_price: row.listing_price,
+      category_name: row.category_name ?? null,
+    }));
+    const boostsActive = boostsRes.rows.map((row) => ({
+      id: Number(row.id),
+      listing_id: Number(row.listing_id),
+      started_at: row.started_at,
+      expires_at: row.expires_at,
+      duration_days: Number(row.duration_days ?? 0),
+      price_xpf: Number(row.price_xpf ?? 0),
+      status: row.status,
+      invoice_number: row.invoice_number ?? null,
+      listing_title: row.listing_title,
+      listing_price: row.listing_price,
+      cover_image: row.cover_image ?? null,
+    }));
+
+    const today = new Date();
+    const timeline = [];
+    for (let offset = 29; offset >= 0; offset -= 1) {
+      const date = new Date(today);
+      date.setHours(0, 0, 0, 0);
+      date.setDate(date.getDate() - offset);
+      const key = date.toISOString().slice(0, 10);
+      const viewRow = viewsRes.rows.find((row) => row.day === key);
+      const contactRow = contactsTimelineRes.rows.find((row) => row.day === key);
+      timeline.push({
+        day: key,
+        label: new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short' }).format(date),
+        views: Number(viewRow?.value ?? 0),
+        contacts: Number(contactRow?.value ?? 0),
+      });
+    }
+
+    return res.json({
+      data: {
+        listings: {
+          total: Number(summary.total ?? 0),
+          active: Number(summary.active ?? 0),
+          boosted: Number(summary.boosted ?? 0),
+          expired: Number(summary.expired ?? 0),
+        },
+        stats: {
+          views_total: Number(summary.views_total ?? 0),
+          views_7d: Number(summary.views_7d ?? 0),
+          views_30d: Number(summary.views_30d ?? 0),
+          contacts_total: Number(summary.contacts_total ?? 0),
+          contacts_7d: Number(summary.contacts_7d ?? 0),
+          avg_conversion_rate: Number(summary.avg_conversion_rate ?? 0),
+        },
+        top_listings: topListings,
+        recent_contacts: recentContacts,
+        boosts_active: boostsActive.filter((boost) => boost.status === 'active' && new Date(boost.expires_at) > new Date()),
+        spend_total_xpf: Number(spendRes.rows[0]?.spend_total_xpf ?? 0),
+        spend_30d_xpf: Number(spendRes.rows[0]?.spend_30d_xpf ?? 0),
+        timeline_30d: timeline,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/listings', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    await refreshProStats();
+
+    const result = await query(
+      `SELECT
+         a.id,
+         a.titre AS titre,
+         a.titre AS title,
+         a.prix AS prix,
+         a.prix AS price,
+         a.condition,
+         a.is_negotiable AS price_negotiable,
+         (a.prix IS NULL) AS is_free,
+         a.contre_quoi,
+         a.metadata,
+         a.created_at AS published_at,
+         a.created_at AS created_at_sort,
+         a.boost_expires_at AS boost_expires_at,
+         a.boost_expires_at AS boosted_until,
+         a.nb_vues,
+         a.commune_id,
+         cat.id AS category_id,
+         cat.name AS category_name,
+         cat.slug AS category_slug,
+         cat.icon AS category_icon,
+         com.name AS commune_name,
+         u.id AS seller_id,
+         u.prenom AS seller_prenom,
+         u.nom AS seller_nom,
+         u.avatar_url AS seller_avatar,
+         TRUE AS is_pro,
+         u.pro_verified AS seller_pro_verified,
+         u.email_verified AS seller_email_verified,
+         u.phone_verified AS seller_phone_verified,
+         u.trust_score AS seller_trust_score,
+         u.trust_level AS seller_trust_level,
+         u.note_moyenne AS seller_note_moyenne,
+         u.nb_avis AS seller_nb_avis,
+         u.note_moyenne AS user_rating,
+         pls.total_views,
+         pls.views_7d,
+         pls.views_30d,
+         pls.total_contacts,
+         pls.contacts_7d,
+         pls.conversion_rate,
+         pls.is_boosted,
+         pls.boost_expires_at,
+         (SELECT thumbnail_url FROM annonce_images WHERE annonce_id = a.id AND is_cover = TRUE LIMIT 1) AS cover_image_thumbnail,
+         (SELECT id FROM annonce_images WHERE annonce_id = a.id AND is_cover = TRUE LIMIT 1) AS cover_image_id
+       FROM annonces a
+       LEFT JOIN categories cat ON cat.id = a.category_id
+       LEFT JOIN communes com ON com.id = a.commune_id
+       LEFT JOIN users u ON u.id = a.user_id
+       LEFT JOIN pro_listing_stats pls ON pls.listing_id = a.id
+       WHERE a.user_id = $1 AND a.deleted_at IS NULL
+       ORDER BY a.created_at DESC`,
+      [req.user.id]
+    );
+
+    return res.json({
+      data: result.rows.map(mapProListingRow),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/listings/:id/renew', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    const listingId = Number(req.params.id);
+    if (!Number.isFinite(listingId) || listingId <= 0) {
+      return res.status(400).json({ error: 'Annonce invalide.' });
+    }
+
+    const result = await query(
+      `UPDATE annonces
+       SET status = 'active',
+           renewed_at = NOW(),
+           updated_at = NOW()
+       WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
+       RETURNING id, status, renewed_at`,
+      [listingId, req.user.id]
+    );
+
+    if (!result.rows[0]) {
+      return res.status(404).json({ error: 'Annonce introuvable.' });
+    }
+
+    return res.json({ data: result.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/boosts', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    const result = await query(
+      `SELECT
+         lb.id,
+         lb.listing_id,
+         lb.author_id,
+         lb.started_at,
+         lb.expires_at,
+         lb.duration_days,
+         lb.price_xpf,
+         lb.status,
+         lb.stripe_payment_id,
+         lb.invoice_number,
+         lb.created_at,
+         a.titre AS listing_title,
+         a.prix AS listing_price,
+         (SELECT thumbnail_url FROM annonce_images WHERE annonce_id = a.id AND is_cover = TRUE LIMIT 1) AS cover_image
+       FROM listing_boosts lb
+       JOIN annonces a ON a.id = lb.listing_id
+       WHERE lb.author_id = $1
+       ORDER BY lb.created_at DESC`,
+      [req.user.id]
+    );
+
+    return res.json({
+      data: result.rows.map((row) => ({
+        id: Number(row.id),
+        listing_id: Number(row.listing_id),
+        author_id: Number(row.author_id),
+        started_at: row.started_at,
+        expires_at: row.expires_at,
+        duration_days: Number(row.duration_days ?? 0),
+        price_xpf: Number(row.price_xpf ?? 0),
+        status: row.status,
+        stripe_payment_id: row.stripe_payment_id ?? null,
+        invoice_number: row.invoice_number ?? null,
+        created_at: row.created_at,
+        listing_title: row.listing_title,
+        listing_price: row.listing_price,
+        cover_image: row.cover_image ?? null,
+      })),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/invoices', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    const result = await query(
+      `SELECT id, user_id, invoice_number, amount_xpf, description, status, stripe_payment_id, created_at, paid_at
+       FROM invoices
+       WHERE user_id = $1
+       ORDER BY created_at DESC`,
+      [req.user.id]
+    );
+
+    return res.json({
+      data: result.rows.map((row) => ({
+        id: Number(row.id),
+        user_id: Number(row.user_id),
+        invoice_number: row.invoice_number,
+        amount_xpf: Number(row.amount_xpf ?? 0),
+        description: row.description ?? null,
+        status: row.status,
+        stripe_payment_id: row.stripe_payment_id ?? null,
+        created_at: row.created_at,
+        paid_at: row.paid_at ?? null,
+      })),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/invoices/:id/pdf', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    const invoiceId = Number(req.params.id);
+    if (!Number.isFinite(invoiceId) || invoiceId <= 0) {
+      return res.status(400).json({ error: 'Facture invalide.' });
+    }
+
+    const result = await query(
+      `SELECT
+         i.id,
+         i.invoice_number,
+         i.amount_xpf,
+         i.description,
+         i.status,
+         i.created_at,
+         i.paid_at,
+         u.prenom,
+         u.nom,
+         u.pro_company_name,
+         u.pro_siret
+       FROM invoices i
+       JOIN users u ON u.id = i.user_id
+       WHERE i.id = $1 AND i.user_id = $2
+       LIMIT 1`,
+      [invoiceId, req.user.id]
+    );
+
+    const invoice = result.rows[0];
+    if (!invoice) {
+      return res.status(404).json({ error: 'Facture introuvable.' });
+    }
+
+    const lines = [
+      'TROCA NC',
+      `FACTURE N° ${invoice.invoice_number}`,
+      `Date: ${new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' }).format(new Date(invoice.created_at))}`,
+      `Nom pro: ${invoice.pro_company_name || [invoice.prenom, invoice.nom].filter(Boolean).join(' ').trim() || 'Professionnel Troca'}`,
+      `RIDET: ${invoice.pro_siret || 'Non renseigné'}`,
+      '',
+      'Description | Montant XPF',
+      `${invoice.description || 'Prestation'} | ${Number(invoice.amount_xpf ?? 0).toLocaleString('fr-FR')} XPF`,
+      '',
+      `Total TTC: ${Number(invoice.amount_xpf ?? 0).toLocaleString('fr-FR')} XPF`,
+      '',
+      'Mentions légales Troca NC',
+    ];
+
+    const pdfBuffer = buildSimplePdfBuffer(lines);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${invoice.invoice_number}.pdf"`);
+    return res.send(pdfBuffer);
   } catch (err) {
     next(err);
   }

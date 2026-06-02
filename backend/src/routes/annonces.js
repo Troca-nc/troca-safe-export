@@ -304,6 +304,46 @@ router.get('/immobilier', optionalAuth, async (req, res, next) => {
 
 // ── GET /api/listings/:id — Détail ──────────────────────────
 
+router.post('/:id/view', async (req, res, next) => {
+  try {
+    const listingId = Number(req.params.id);
+    if (!Number.isFinite(listingId) || listingId <= 0) {
+      return res.status(400).json({ error: 'Annonce invalide.' });
+    }
+
+    const source = String(req.body?.source || 'direct').slice(0, 40);
+    await query(
+      `INSERT INTO listing_stats (listing_id, viewer_ip, source)
+       VALUES ($1, $2, $3)`,
+      [listingId, req.ip || req.headers['x-forwarded-for'] || null, source]
+    );
+
+    return res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/:id/contact', async (req, res, next) => {
+  try {
+    const listingId = Number(req.params.id);
+    if (!Number.isFinite(listingId) || listingId <= 0) {
+      return res.status(400).json({ error: 'Annonce invalide.' });
+    }
+
+    const contactType = String(req.body?.contact_type || 'message').slice(0, 30);
+    await query(
+      `INSERT INTO listing_contacts (listing_id, contact_type)
+       VALUES ($1, $2)`,
+      [listingId, contactType]
+    );
+
+    return res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/:id', optionalAuth, async (req, res, next) => {
   try {
     const { id } = req.params;

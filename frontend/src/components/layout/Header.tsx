@@ -16,6 +16,8 @@ export function MobileBottomNav() {
   const { isAuthenticated } = useAuthStore()
   const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
 
+  if (pathname.startsWith('/pro/dashboard')) return null
+
   const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href))
 
   const items = [

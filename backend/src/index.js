@@ -181,6 +181,7 @@ app.use('/api/bon-plans',  bonPlansRouter);
 app.use('/api/businesses', businessesRouter);
 app.use('/api/admin/businesses', businessesAdminRouter);
 app.use('/api/pros',       proRouter);
+app.use('/api/pro',        proRouter);
 app.use('/api/covoiturage', covoiturageRouter);
 app.use('/api/demo',       demoRouter);
 app.use('/api/troc',       trocRouter);
