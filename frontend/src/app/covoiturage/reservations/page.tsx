@@ -1,11 +1,13 @@
 'use client'
 
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { CalendarDays, Car, CheckCircle2, Clock3, MapPinned, MessageCircle, ShieldCheck, UserRound } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
 import PassengerProfileModal from '@/components/covoiturage/PassengerProfileModal'
+import RideReviewModal from '@/components/covoiturage/RideReviewModal'
 import { covoiturageApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 
@@ -20,6 +22,8 @@ type Booking = {
   responded_at?: string | null
   expires_at?: string | null
   is_expired?: boolean
+  review_id?: number | string | null
+  review_exists?: boolean
   role: 'driver' | 'passenger'
   ride: {
     id: number | string
@@ -74,14 +78,19 @@ function BookingCard({
   booking,
   onViewProfile,
   onCancel,
+  onReview,
 }: {
   booking: Booking
   onViewProfile: (booking: Booking) => void
   onCancel: (booking: Booking) => void
+  onReview: (booking: Booking) => void
 }) {
   const status = statusLabel(booking.status, booking.expires_at)
   const isDriver = booking.role === 'driver'
   const canManage = isDriver && booking.booking_mode === 'manual' && booking.status === 'pending'
+  const rideDateTime = new Date(`${booking.ride.ride_date}T${booking.ride.ride_time.slice(0, 5)}`).getTime()
+  const isRidePast = Number.isFinite(rideDateTime) && rideDateTime < Date.now()
+  const canReview = booking.role === 'passenger' && ['accepted', 'auto_confirmed'].includes(booking.status) && isRidePast && !booking.review_exists
 
   return (
     <article className="rounded-[1.75rem] border border-night/8 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -145,6 +154,24 @@ function BookingCard({
           </button>
         ) : null}
 
+        {canReview ? (
+          <button
+            type="button"
+            onClick={() => onReview(booking)}
+            className="inline-flex items-center gap-2 rounded-2xl border border-[#0A7EA4]/20 bg-[#0A7EA4]/5 px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10"
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            Noter mon conducteur
+          </button>
+        ) : null}
+
+        {booking.role === 'passenger' && booking.review_exists ? (
+          <span className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700">
+            <CheckCircle2 className="h-4 w-4" />
+            Avis envoyé
+          </span>
+        ) : null}
+
         {booking.role === 'passenger' && !['cancelled', 'refused'].includes(booking.status) ? (
           <button
             type="button"
@@ -161,10 +188,12 @@ function BookingCard({
 
 export default function CovoiturageReservationsPage() {
   const { user, isAuthenticated, hasHydrated } = useAuthStore()
+  const searchParams = useSearchParams()
   const [tab, setTab] = useState<TabKey>('passenger')
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
+  const [selectedReviewBooking, setSelectedReviewBooking] = useState<Booking | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
 
   useEffect(() => {
@@ -192,6 +221,18 @@ export default function CovoiturageReservationsPage() {
     void loadReservations()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user])
+
+  useEffect(() => {
+    const targetBookingId = searchParams.get('review_booking')
+    if (!targetBookingId || bookings.length === 0) return
+    const booking = bookings.find((item) => String(item.id) === String(targetBookingId))
+    if (!booking) return
+    const rideDateTime = new Date(`${booking.ride.ride_date}T${booking.ride.ride_time.slice(0, 5)}`).getTime()
+    const isRidePast = Number.isFinite(rideDateTime) && rideDateTime < Date.now()
+    if (booking.role === 'passenger' && ['accepted', 'auto_confirmed'].includes(booking.status) && isRidePast && !booking.review_exists) {
+      setSelectedReviewBooking(booking)
+    }
+  }, [bookings, searchParams])
 
   const passengerBookings = useMemo(
     () => bookings.filter((booking) => booking.role === 'passenger'),
@@ -235,6 +276,11 @@ export default function CovoiturageReservationsPage() {
     } finally {
       setActionLoading(false)
     }
+  }
+
+  const handleReviewSubmitted = async () => {
+    await loadReservations()
+    setSelectedReviewBooking(null)
   }
 
   if (!hasHydrated || (!isAuthenticated && typeof window !== 'undefined')) {
@@ -291,6 +337,7 @@ export default function CovoiturageReservationsPage() {
                   booking={booking}
                   onViewProfile={(item) => setSelectedBooking(item)}
                   onCancel={handleCancel}
+                  onReview={(item) => setSelectedReviewBooking(item)}
                 />
               ))}
             </div>
@@ -322,6 +369,13 @@ export default function CovoiturageReservationsPage() {
         onClose={() => setSelectedBooking(null)}
         onAccept={handleAccept}
         onRefuse={handleRefuse}
+      />
+
+      <RideReviewModal
+        open={Boolean(selectedReviewBooking)}
+        booking={selectedReviewBooking}
+        onClose={() => setSelectedReviewBooking(null)}
+        onSubmitted={handleReviewSubmitted}
       />
 
       {actionLoading ? (

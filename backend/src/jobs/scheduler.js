@@ -14,6 +14,7 @@ const {
   sendPerformanceReportEmail,
   sendListingExpiringEmail,
   sendListingExpiredEmail,
+  sendRideReviewReminderEmail,
 } = require('../services/emailService');
 const { sendMail }        = require('../services/emailService');
 const {
@@ -1112,6 +1113,104 @@ function startReviewReminderJob() {
   logger.info('cron_job_started', { job: 'reviews' });
 }
 
+function startRideReviewReminderJob() {
+  cron.schedule('20 10 * * *', async () => {
+    recordJob('started', { job: 'covoiturage-reviews' });
+    await runSingletonJob('cron:covoiturage-review-reminder', 30 * 60 * 1000, async () => {
+      try {
+        const result = await query(`
+          SELECT
+            b.id AS booking_id,
+            b.ride_id,
+            b.passenger_id,
+            b.review_reminder_sent_at,
+            c.user_id AS driver_id,
+            c.departure,
+            c.destination,
+            c.ride_date,
+            c.ride_time,
+            d.prenom AS driver_prenom,
+            p.prenom AS passenger_prenom,
+            p.email AS passenger_email
+          FROM ride_bookings b
+          JOIN covoiturages c ON c.id = b.ride_id
+          JOIN users d ON d.id = c.user_id
+          JOIN users p ON p.id = b.passenger_id
+          WHERE b.status IN ('auto_confirmed', 'accepted')
+            AND b.review_reminder_sent_at IS NULL
+            AND p.deleted_at IS NULL
+            AND d.deleted_at IS NULL
+            AND (c.ride_date + c.ride_time) <= NOW() - INTERVAL '24 hours'
+            AND NOT EXISTS (
+              SELECT 1
+              FROM covoiturage_reviews r
+              WHERE r.booking_id = b.id
+                AND r.reviewer_id = b.passenger_id
+                AND r.target_user_id = c.user_id
+            )
+          ORDER BY c.ride_date DESC, c.ride_time DESC, b.created_at DESC
+          LIMIT 50
+        `);
+
+        let sent = 0;
+        for (const row of result.rows) {
+          const claimed = await query(
+            `UPDATE ride_bookings
+             SET review_reminder_sent_at = NOW()
+             WHERE id = $1 AND review_reminder_sent_at IS NULL
+             RETURNING id`,
+            [row.booking_id]
+          );
+          if (!claimed.rows[0]) continue;
+
+          const rideLabel = `${row.departure} → ${row.destination}`;
+          const details = {
+            departure: row.departure,
+            destination: row.destination,
+            rideDate: row.ride_date,
+            rideTime: row.ride_time,
+            driverPrenom: row.driver_prenom,
+            passengerPrenom: row.passenger_prenom,
+            bookingId: row.booking_id,
+            reviewUrl: `${getTrocBaseUrl()}/covoiturage/reservations?review_booking=${encodeURIComponent(String(row.booking_id))}`,
+          };
+
+          await createNotification(row.passenger_id, {
+            type: 'review',
+            title: '✍️ Notez votre conducteur',
+            body: `Partagez votre avis sur ${rideLabel} pour aider la communauté.`,
+            href: `/covoiturage/reservations?review_booking=${row.booking_id}`,
+          }).catch(() => {});
+
+          await sendPushToUser(row.passenger_id, {
+            title: '✍️ Notez votre conducteur',
+            body: `Partagez votre avis sur ${rideLabel}.`,
+            data: { type: 'ride_review_reminder', booking_id: row.booking_id, ride_id: row.ride_id },
+          }).catch(() => {});
+
+          await sendRideReviewReminderEmail(
+            row.passenger_email,
+            row.passenger_prenom || 'Bonjour',
+            details,
+            row.passenger_id
+          ).catch(() => {});
+
+          sent++;
+        }
+
+        if (sent > 0) {
+          logger.info('cron_covoiturage_reviews_sent', { count: sent });
+        }
+      } catch (err) {
+        recordJob('error', { job: 'covoiturage-reviews', message: err.message });
+        logger.error('cron_covoiturage_reviews_error', { error: err });
+      }
+    });
+  }, { timezone: 'Pacific/Noumea' });
+
+  logger.info('cron_job_started', { job: 'covoiturage-reviews' });
+}
+
 function startNewsletterJob() {
   cron.schedule('0 18 * * 0', async () => {
     recordJob('started', { job: 'newsletter' });
@@ -1138,6 +1237,7 @@ function startAllJobs() {
   startListingExpiryJob();
   startExpiringListingsJob();
   startReviewReminderJob();
+  startRideReviewReminderJob();
   startNewsletterJob();
   startDailyAlertsJob();
   startWeeklyAlertsJob();

@@ -14,6 +14,7 @@ const {
   sendRideManualRequestEmail,
   sendRideBookingAcceptedPassengerEmail,
   sendRideBookingAcceptedDriverEmail,
+  sendRideReviewReminderEmail,
 } = require('../services/emailService');
 
 const router = express.Router();
@@ -136,6 +137,8 @@ function mapBookingRow(row, currentUserId) {
     created_at: row.booking_created_at,
     responded_at: row.booking_responded_at,
     expires_at: row.booking_expires_at,
+    review_id: row.review_id || null,
+    review_exists: Boolean(row.review_id),
     is_expired: row.booking_status === 'pending' && row.booking_expires_at ? new Date(row.booking_expires_at).getTime() < Date.now() : false,
     ride: {
       id: row.ride_id,
@@ -972,6 +975,7 @@ router.get('/reservations/mine', authenticate, async (req, res, next) => {
          p.nom AS passenger_nom,
          p.avatar_url AS passenger_avatar_url,
          p.trust_score AS passenger_trust_score,
+         review.id AS review_id,
          CASE WHEN c.user_id = $1 THEN 'driver' ELSE 'passenger' END AS role,
          CASE WHEN c.user_id = $1 THEN p.id ELSE d.id END AS other_user_id,
          CASE WHEN c.user_id = $1 THEN p.prenom ELSE d.prenom END AS other_user_prenom,
@@ -982,6 +986,14 @@ router.get('/reservations/mine', authenticate, async (req, res, next) => {
        JOIN covoiturages c ON c.id = b.ride_id
        JOIN users d ON d.id = c.user_id
        JOIN users p ON p.id = b.passenger_id
+       LEFT JOIN LATERAL (
+         SELECT r.id
+         FROM covoiturage_reviews r
+         WHERE r.booking_id = b.id
+           AND r.reviewer_id = $1
+           AND r.target_user_id = CASE WHEN c.user_id = $1 THEN p.id ELSE d.id END
+         LIMIT 1
+       ) review ON TRUE
        WHERE b.passenger_id = $1 OR c.user_id = $1
        ORDER BY b.created_at DESC`,
       [req.user.id]

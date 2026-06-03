@@ -827,6 +827,7 @@ CREATE TABLE IF NOT EXISTS ride_bookings (
   created_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
   responded_at     TIMESTAMPTZ  DEFAULT NULL,
   expires_at       TIMESTAMPTZ  NOT NULL DEFAULT (NOW() + INTERVAL '24 hours'),
+  review_reminder_sent_at TIMESTAMPTZ DEFAULT NULL,
   UNIQUE (ride_id, passenger_id)
 );
 

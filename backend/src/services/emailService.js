@@ -625,6 +625,22 @@ async function sendRideBookingAcceptedDriverEmail(to, prenom, details = {}, reci
   });
 }
 
+async function sendRideReviewReminderEmail(to, prenom, details = {}, recipientUserId) {
+  const link = details.reviewUrl || `${BASE_URL()}/covoiturage/reservations${details.bookingId ? `?review_booking=${encodeURIComponent(String(details.bookingId))}` : ''}`;
+  return sendMail({
+    to,
+    subject: `✍️ Notez votre conducteur — ${details.departure || 'Trajet'} → ${details.destination || 'Destination'}`,
+    html: baseTemplate(`
+      <p>Bonjour ${escapeHtml(prenom)},</p>
+      <p>Votre trajet est terminé. Partagez votre avis pour aider la communauté à voyager en confiance.</p>
+      ${buildRideSummary(details)}
+      <p>Il ne faut qu'une minute pour noter votre conducteur.</p>
+      <a class="btn" href="${link}">Noter mon conducteur</a>
+      <p style="color:#6b7280;font-size:13px;">Votre retour aide les autres passagers à réserver en toute confiance.</p>
+    `),
+  });
+}
+
 module.exports = {
   sendMail,
   sendResetEmail,
@@ -643,6 +659,7 @@ module.exports = {
   sendRideManualRequestEmail,
   sendRideBookingAcceptedPassengerEmail,
   sendRideBookingAcceptedDriverEmail,
+  sendRideReviewReminderEmail,
   sendPerformanceReportEmail,
 };
 
