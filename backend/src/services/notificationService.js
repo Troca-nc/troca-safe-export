@@ -59,7 +59,7 @@ async function notifyListingExpiring(userId, annonceId, annonceTitre, daysLeft) 
   return createNotification(userId, {
     type:  'listing_expiring',
     title: `⏰ Votre annonce expire dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''}`,
-    body:  annonceTitre,
+    body:  `${annonceTitre} · Renouvelez ou boostez-la pour garder de la visibilité.`,
     href:  `/annonces/${annonceId}/edit`,
   });
 }
