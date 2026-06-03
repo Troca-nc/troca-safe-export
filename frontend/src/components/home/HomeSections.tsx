@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { type FormEvent, type KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Anchor,
   Archive,
@@ -14,6 +15,7 @@ import {
   HardHat,
   HeartHandshake,
   Home,
+  LocateFixed,
   Package,
   PawPrint,
   Search,
@@ -64,13 +66,106 @@ type HomeHeroSectionProps = {
   q: string
   onQueryChange: (value: string) => void
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
+  suggestions: string[]
 }
 
 export function HomeHeroSection({
   q,
   onQueryChange,
   onSubmit,
+  suggestions,
 }: HomeHeroSectionProps) {
+  const router = useRouter()
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const [isFocused, setIsFocused] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  const normalizedQuery = q.trim().toLowerCase()
+  const suggestionPool = useMemo(() => {
+    const unique = new Map<string, string>()
+    for (const suggestion of suggestions || []) {
+      const label = String(suggestion || '').trim()
+      if (!label) continue
+      const key = label.toLowerCase()
+      if (!unique.has(key)) unique.set(key, label)
+    }
+    return Array.from(unique.values())
+  }, [suggestions])
+
+  const filteredSuggestions = useMemo(() => {
+    const scored = suggestionPool
+      .filter((suggestion) => {
+        if (!normalizedQuery) return true
+        const haystack = suggestion.toLowerCase()
+        return haystack.includes(normalizedQuery)
+      })
+      .sort((a, b) => {
+        const aStarts = a.toLowerCase().startsWith(normalizedQuery) ? 1 : 0
+        const bStarts = b.toLowerCase().startsWith(normalizedQuery) ? 1 : 0
+        if (aStarts !== bStarts) return bStarts - aStarts
+        return a.localeCompare(b, 'fr')
+      })
+
+    return scored.slice(0, 7)
+  }, [normalizedQuery, suggestionPool])
+
+  const quickSuggestions = useMemo(() => {
+    if (normalizedQuery) return filteredSuggestions.slice(0, 4)
+    return suggestionPool.slice(0, 4)
+  }, [filteredSuggestions, normalizedQuery, suggestionPool])
+
+  const selectSuggestion = (value: string) => {
+    const nextValue = value.trim()
+    if (!nextValue) return
+    onQueryChange(nextValue)
+    setIsFocused(false)
+    setActiveIndex(0)
+    router.push(`/annonces?q=${encodeURIComponent(nextValue)}`)
+  }
+
+  const handleGeoSearch = () => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      window.alert('La géolocalisation n’est pas disponible dans ce navigateur.')
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const params = new URLSearchParams()
+        params.set('lat', position.coords.latitude.toFixed(6))
+        params.set('lng', position.coords.longitude.toFixed(6))
+        params.set('radius', '20')
+        router.push(`/annonces?${params.toString()}`)
+      },
+      () => {
+        window.alert('Impossible de récupérer votre position pour le moment.')
+      },
+      {
+        enableHighAccuracy: false,
+      },
+    )
+  }
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (!filteredSuggestions.length) return
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      setActiveIndex((current) => (current + 1) % filteredSuggestions.length)
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      setActiveIndex((current) => (current - 1 + filteredSuggestions.length) % filteredSuggestions.length)
+    } else if (event.key === 'Enter' && isFocused && filteredSuggestions[activeIndex]) {
+      event.preventDefault()
+      selectSuggestion(filteredSuggestions[activeIndex])
+    } else if (event.key === 'Escape') {
+      setIsFocused(false)
+    }
+  }
+
+  useEffect(() => {
+    setActiveIndex(0)
+  }, [normalizedQuery])
+
   return (
     <section className="relative overflow-hidden px-4 py-10 text-white md:py-14">
       <div className="absolute inset-0 bg-[linear-gradient(135deg,_#0A7EA4_0%,_#065f7a_100%)]" />
@@ -97,23 +192,88 @@ export function HomeHeroSection({
             La première plateforme d&apos;annonces 100% calédonienne.
           </p>
 
-          <form onSubmit={onSubmit} className="mt-5 flex w-full max-w-[460px] gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/45" />
-              <input
-                value={q}
-                onChange={(e) => onQueryChange(e.target.value)}
-                placeholder="Que recherchez-vous ?"
-                className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 pl-11 text-sm text-white placeholder:text-white/50 shadow-sm outline-none ring-0 backdrop-blur-sm transition focus:border-white/30 focus:ring-4 focus:ring-white/10"
-              />
+          <div className="mt-5 w-full max-w-[560px]">
+            <form onSubmit={onSubmit} className="relative flex w-full gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/45" />
+                <input
+                  ref={inputRef}
+                  value={q}
+                  onChange={(e) => {
+                    onQueryChange(e.target.value)
+                    setIsFocused(true)
+                  }}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => {
+                    window.setTimeout(() => setIsFocused(false), 120)
+                  }}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Que recherchez-vous ?"
+                  className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 pl-11 text-sm text-white placeholder:text-white/50 shadow-sm outline-none ring-0 backdrop-blur-sm transition focus:border-white/30 focus:ring-4 focus:ring-white/10"
+                  autoComplete="off"
+                  aria-autocomplete="list"
+                  aria-expanded={isFocused && filteredSuggestions.length > 0}
+                  aria-controls="hero-search-suggestions"
+                />
+              </div>
+              <button
+                type="submit"
+                className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-nc-lagon shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/15"
+              >
+                Rechercher
+              </button>
+
+              {isFocused && filteredSuggestions.length > 0 ? (
+                <div
+                  id="hero-search-suggestions"
+                  className="absolute left-0 right-0 top-[calc(100%+0.75rem)] z-20 overflow-hidden rounded-3xl border border-white/15 bg-[rgba(8,32,50,0.98)] p-2 shadow-[0_24px_80px_rgba(8,32,50,0.25)] backdrop-blur-md"
+                >
+                  <p className="px-3 pb-2 pt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">
+                    Suggestions
+                  </p>
+                  <div className="max-h-72 space-y-1 overflow-y-auto">
+                    {filteredSuggestions.map((suggestion, index) => (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => selectSuggestion(suggestion)}
+                        className={`flex w-full items-center justify-between gap-3 rounded-2xl px-3 py-2.5 text-left text-sm transition ${
+                          index === activeIndex ? 'bg-white/12 text-white' : 'text-white/85 hover:bg-white/8'
+                        }`}
+                      >
+                        <span className="min-w-0 flex-1 truncate">{suggestion}</span>
+                        <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/65">
+                          Rechercher
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </form>
+
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
+              {quickSuggestions.map((suggestion) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  onClick={() => selectSuggestion(suggestion)}
+                  className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90 transition hover:bg-white/15"
+                >
+                  {suggestion}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={handleGeoSearch}
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90 transition hover:bg-white/15"
+              >
+                <LocateFixed className="h-3.5 w-3.5" />
+                Autour de moi
+              </button>
             </div>
-            <button
-              type="submit"
-              className="rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-nc-lagon shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/15"
-            >
-              Rechercher
-            </button>
-          </form>
+          </div>
 
           <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
             <Link href="/annonces/nouvelle" className="rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-nc-lagon shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/15">

@@ -20,6 +20,39 @@ import TrocListingsPreview from '@/components/home/TrocListingsPreview'
 import { API_ORIGIN, proApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 
+function buildHeroSearchSuggestions(listings: any[]) {
+  const staticSuggestions = [
+    'Toyota Hilux',
+    'Toyota RAV4',
+    'Toyota pièces',
+    'iPhone',
+    'Samsung Galaxy',
+    'Véhicules',
+    'Immobilier',
+    'Nouméa',
+    'Dumbéa',
+    'Païta',
+    'Location',
+    'Troc possible',
+  ]
+
+  const dynamicSuggestions = listings.flatMap((listing) => [
+    listing?.title,
+    listing?.category_name,
+    listing?.category,
+    listing?.commune_name,
+    listing?.location_name,
+  ])
+
+  return Array.from(
+    new Set(
+      [...staticSuggestions, ...dynamicSuggestions]
+        .map((value) => String(value || '').trim())
+        .filter(Boolean),
+    ),
+  ).slice(0, 24)
+}
+
 export default function HomePage() {
   const router = useRouter()
   const { user, hasHydrated } = useAuthStore()
@@ -36,6 +69,7 @@ export default function HomePage() {
   } | null>(null)
 
   const featuredListings = useMemo(() => listings.slice(0, 8), [listings])
+  const heroSearchSuggestions = useMemo(() => buildHeroSearchSuggestions(listings), [listings])
   const premiumListings = useMemo(
     () =>
       listings
@@ -133,7 +167,7 @@ export default function HomePage() {
     <main className="min-h-screen bg-[var(--color-bg-page)] text-[var(--color-text-primary)]">
       <Header />
 
-      <HomeHeroSection q={q} onQueryChange={setQ} onSubmit={handleSearch} />
+      <HomeHeroSection q={q} onQueryChange={setQ} onSubmit={handleSearch} suggestions={heroSearchSuggestions} />
 
       {hasHydrated && user?.is_pro && proSummary ? (
         <section className="mx-auto max-w-7xl px-4 pt-4">
