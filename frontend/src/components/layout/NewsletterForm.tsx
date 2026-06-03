@@ -1,5 +1,4 @@
 'use client'
-
 import { useState } from 'react'
 
 export default function NewsletterForm() {
@@ -27,7 +26,11 @@ export default function NewsletterForm() {
   }
 
   if (status === 'success') {
-    return <p className="mt-3 text-sm font-semibold text-nc-lagon">✅ Vous êtes abonné !</p>
+    return (
+      <p className="mt-3 text-sm font-semibold text-nc-lagon">
+        ✅ Vous êtes abonné !
+      </p>
+    )
   }
 
   return (
@@ -37,12 +40,18 @@ export default function NewsletterForm() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="votre@email.com"
-        className="flex-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] px-4 py-2.5 text-sm text-[var(--color-text-primary)] placeholder:text-night/40 outline-none focus:border-[#0A7EA4] focus:ring-2 focus:ring-[#0A7EA4]/20 transition"
+        className="flex-1 rounded-2xl border border-[var(--color-border)]
+          bg-[var(--color-background)] px-4 py-2.5 text-sm
+          text-[var(--color-text-primary)] placeholder:text-night/40
+          outline-none focus:border-[#0A7EA4]
+          focus:ring-2 focus:ring-[#0A7EA4]/20 transition"
       />
       <button
         onClick={handleSubmit}
         disabled={status === 'loading'}
-        className="rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a] disabled:opacity-60"
+        className="rounded-2xl bg-[#0A7EA4] px-4 py-2.5
+          text-sm font-semibold text-white
+          transition hover:bg-[#065f7a] disabled:opacity-60"
       >
         {status === 'loading' ? '...' : "S'abonner"}
       </button>
