@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { ArrowRight, Car, Search, Star, Users } from 'lucide-react'
+import { ArrowRight, Bell, Car, Search, Star, Users } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
 import BookingButton from '@/components/covoiturage/BookingButton'
 import TransporterCard from '@/components/transport/TransporterCard'
 import { API_ORIGIN, covoiturageApi, proTransportApi } from '@/lib/api'
+import { useAuthActionStore } from '@/store/authActionStore'
 import { useAuthStore } from '@/store/authStore'
 
 type Ride = {
@@ -154,7 +155,16 @@ function RideCard({
 
       <div className="mt-4 flex items-center justify-between gap-3 border-t border-[var(--color-border)] pt-4">
         <div className="text-sm text-[var(--color-text-secondary)]">
-          <p className="font-semibold text-[var(--color-text-primary)]">{ride.driver_prenom || 'Conducteur local'}</p>
+          {ride.user_id ? (
+            <Link
+              href={`/covoiturage/conducteur/${ride.user_id}`}
+              className="font-semibold text-[var(--color-text-primary)] hover:text-[#0A7EA4] hover:underline"
+            >
+              {ride.driver_prenom || 'Conducteur local'}
+            </Link>
+          ) : (
+            <p className="font-semibold text-[var(--color-text-primary)]">{ride.driver_prenom || 'Conducteur local'}</p>
+          )}
           <p>{ride.trust_score != null ? `Confiance ${ride.trust_score}/100` : 'Profil rassurant'}</p>
         </div>
         <BookingButton
@@ -172,6 +182,7 @@ function RideCard({
 
 export default function CovoituragePage() {
   const { user } = useAuthStore()
+  const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
   const [activeTab, setActiveTab] = useState<'search' | 'publish' | 'transport'>('search')
   const [rides, setRides] = useState<Ride[]>([])
   const [loading, setLoading] = useState(true)
@@ -408,13 +419,38 @@ export default function CovoituragePage() {
                     />
                   </label>
                   <div className="md:col-span-2">
-                    <button
-                      type="submit"
-                      className="btn-primary inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5"
-                    >
-                      <Search className="h-4 w-4" />
-                      Rechercher
-                    </button>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="submit"
+                        className="btn-primary inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5"
+                      >
+                        <Search className="h-4 w-4" />
+                        Rechercher
+                      </button>
+                      {user ? (
+                        <Link
+                          href="/profil/alertes-trajet"
+                          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#0A7EA4]/20 bg-[#0A7EA4]/5 px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10"
+                        >
+                          <Bell className="h-4 w-4" />
+                          Alerte
+                        </Link>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            openAuthModal({
+                              type: 'login',
+                              redirectTo: '/profil/alertes-trajet',
+                            })
+                          }
+                          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#0A7EA4]/20 bg-[#0A7EA4]/5 px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10"
+                        >
+                          <Bell className="h-4 w-4" />
+                          Alerte
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </form>
 

@@ -298,6 +298,210 @@ router.get('/mine', authenticate, async (req, res, next) => {
   }
 });
 
+router.get('/drivers/:id/profile', async (req, res, next) => {
+  try {
+    const driverId = Number(req.params.id);
+    if (!Number.isFinite(driverId) || driverId <= 0) {
+      return res.status(400).json({ error: 'Conducteur invalide.' });
+    }
+
+    const profileRes = await query(
+      `SELECT
+         u.id,
+         u.prenom,
+         u.nom,
+         u.avatar_url,
+         u.bio,
+         u.member_since,
+         COALESCE(u.rides_as_driver, 0) AS rides_as_driver,
+         COALESCE(u.rides_as_passenger, 0) AS rides_as_passenger,
+         COALESCE(u.trust_score, 100) AS trust_score,
+         CASE WHEN u.is_pro = TRUE AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
+         u.nb_avis,
+         u.note_moyenne,
+         u.created_at,
+         u.phone_verified,
+         u.email_verified,
+         com.name AS commune_name,
+         prov.name AS province_name,
+         COALESCE((
+           SELECT COUNT(*)
+           FROM covoiturages c
+           WHERE c.user_id = u.id AND c.deleted_at IS NULL
+         ), 0) AS rides_total,
+         COALESCE((
+           SELECT COUNT(*)
+           FROM covoiturages c
+           WHERE c.user_id = u.id AND c.deleted_at IS NULL AND c.status IN ('published', 'full')
+         ), 0) AS rides_active,
+         COALESCE((
+           SELECT COUNT(*)
+           FROM covoiturage_reviews r
+           WHERE r.target_user_id = u.id
+         ), 0) AS reviews_count,
+         COALESCE((
+           SELECT ROUND(AVG(r.rating)::numeric, 1)
+           FROM covoiturage_reviews r
+           WHERE r.target_user_id = u.id
+         ), 0) AS avg_rating,
+         (
+           SELECT c.vehicle
+           FROM covoiturages c
+           WHERE c.user_id = u.id
+             AND c.deleted_at IS NULL
+             AND c.vehicle IS NOT NULL
+             AND c.vehicle <> ''
+           ORDER BY c.ride_date DESC, c.ride_time DESC, c.created_at DESC
+           LIMIT 1
+         ) AS vehicle,
+         (
+           SELECT c.comfort
+           FROM covoiturages c
+           WHERE c.user_id = u.id
+             AND c.deleted_at IS NULL
+             AND c.comfort IS NOT NULL
+             AND c.comfort <> ''
+           ORDER BY c.ride_date DESC, c.ride_time DESC, c.created_at DESC
+           LIMIT 1
+         ) AS comfort,
+         (
+           SELECT c.luggage_allowed
+           FROM covoiturages c
+           WHERE c.user_id = u.id
+             AND c.deleted_at IS NULL
+             AND c.luggage_allowed IS NOT NULL
+             AND c.luggage_allowed <> ''
+           ORDER BY c.ride_date DESC, c.ride_time DESC, c.created_at DESC
+           LIMIT 1
+         ) AS luggage_allowed,
+         (
+           SELECT c.seats_total
+           FROM covoiturages c
+           WHERE c.user_id = u.id
+             AND c.deleted_at IS NULL
+           ORDER BY c.ride_date DESC, c.ride_time DESC, c.created_at DESC
+           LIMIT 1
+         ) AS vehicle_capacity,
+         (
+           SELECT c.music_allowed
+           FROM covoiturages c
+           WHERE c.user_id = u.id
+             AND c.deleted_at IS NULL
+           ORDER BY c.ride_date DESC, c.ride_time DESC, c.created_at DESC
+           LIMIT 1
+         ) AS music_allowed,
+         (
+           SELECT c.no_smoking
+           FROM covoiturages c
+           WHERE c.user_id = u.id
+             AND c.deleted_at IS NULL
+           ORDER BY c.ride_date DESC, c.ride_time DESC, c.created_at DESC
+           LIMIT 1
+         ) AS no_smoking,
+         (
+           SELECT c.animals_allowed
+           FROM covoiturages c
+           WHERE c.user_id = u.id
+             AND c.deleted_at IS NULL
+           ORDER BY c.ride_date DESC, c.ride_time DESC, c.created_at DESC
+           LIMIT 1
+         ) AS animals_allowed
+       FROM users u
+       LEFT JOIN communes com ON com.id = u.commune_id
+       LEFT JOIN provinces prov ON prov.id = com.province_id
+       WHERE u.id = $1 AND u.deleted_at IS NULL
+       GROUP BY u.id, com.name, prov.name`,
+      [driverId]
+    );
+
+    const profile = profileRes.rows[0];
+    if (!profile) {
+      return res.status(404).json({ error: 'Conducteur introuvable.' });
+    }
+
+    const ridesRes = await query(
+      `SELECT
+         c.*,
+         c.seats_total,
+         COALESCE(c.seats_remaining, GREATEST(c.seats_total - c.seats_reserved, 0)) AS seats_remaining,
+         c.booking_mode,
+         COALESCE(bookings.total_bookings, 0) AS bookings_count,
+         COALESCE(reviews.total_reviews, 0) AS reviews_count,
+         COALESCE(reviews.avg_rating, 0) AS avg_rating,
+         co_dep.name AS departure_commune_name,
+         co_dest.name AS destination_commune_name,
+         u.prenom AS driver_prenom,
+         u.nom AS driver_nom,
+         u.avatar_url AS driver_avatar_url,
+         u.trust_score AS driver_trust_score
+       FROM covoiturages c
+       JOIN users u ON u.id = c.user_id
+       LEFT JOIN communes co_dep ON co_dep.id = c.departure_commune_id
+       LEFT JOIN communes co_dest ON co_dest.id = c.destination_commune_id
+       LEFT JOIN LATERAL (
+         SELECT COUNT(*) AS total_bookings
+         FROM ride_bookings b
+         WHERE b.ride_id = c.id AND b.status IN ('auto_confirmed', 'accepted', 'pending')
+       ) bookings ON TRUE
+       LEFT JOIN LATERAL (
+         SELECT COUNT(*) AS total_reviews, ROUND(AVG(r.rating)::numeric, 1) AS avg_rating
+         FROM covoiturage_reviews r
+         WHERE r.covoiturage_id = c.id
+       ) reviews ON TRUE
+       WHERE c.user_id = $1
+         AND c.deleted_at IS NULL
+       ORDER BY c.ride_date DESC, c.ride_time DESC, c.created_at DESC
+       LIMIT 8`,
+      [driverId]
+    );
+
+    const reviewsRes = await query(
+      `SELECT
+         r.id,
+         r.rating,
+         r.comment,
+         r.created_at,
+         rev.prenom AS reviewer_prenom,
+         rev.nom AS reviewer_nom,
+         rev.avatar_url AS reviewer_avatar_url,
+         c.id AS ride_id,
+         c.departure,
+         c.destination,
+         c.ride_date,
+         c.ride_time
+       FROM covoiturage_reviews r
+       LEFT JOIN users rev ON rev.id = r.reviewer_id
+       LEFT JOIN covoiturages c ON c.id = r.covoiturage_id
+       WHERE r.target_user_id = $1
+       ORDER BY r.created_at DESC
+       LIMIT 12`,
+      [driverId]
+    );
+
+    const mappedRides = ridesRes.rows.map(mapRide);
+
+    return res.json({
+      data: {
+        profile,
+        vehicle: {
+          vehicle: profile.vehicle,
+          vehicle_description: profile.comfort ?? null,
+          vehicle_capacity: profile.vehicle_capacity != null ? Number(profile.vehicle_capacity) : null,
+          luggage_allowed: profile.luggage_allowed ?? null,
+          music_allowed: profile.music_allowed,
+          no_smoking: profile.no_smoking,
+          animals_allowed: profile.animals_allowed,
+        },
+        rides: mappedRides,
+        latest_ride: mappedRides[0] || null,
+        reviews: reviewsRes.rows,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post('/', authenticate, async (req, res, next) => {
   try {
     const { error, value } = createSchema.validate(req.body, { stripUnknown: true, convert: true });

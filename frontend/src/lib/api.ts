@@ -731,6 +731,11 @@ export const covoiturageApi = {
     () => api.get('/covoiturage', { params }),
     CACHE_TTL.short,
   ),
+  getDriverProfile: (id: string | number) => cachedGet(
+    buildCacheKey('covoiturage.driverProfile', `/covoiturage/drivers/${id}/profile`),
+    () => api.get(`/covoiturage/drivers/${id}/profile`),
+    CACHE_TTL.short,
+  ),
   mine: () => cachedGet(
     buildCacheKey('covoiturage.mine', '/covoiturage/mine'),
     () => api.get('/covoiturage/mine'),
