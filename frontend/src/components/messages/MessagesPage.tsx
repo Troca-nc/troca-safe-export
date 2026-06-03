@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Files, MessageCircle, PanelRightOpen, ShieldAlert, Tag, Users } from 'lucide-react'
+import { ArrowLeft, ArrowLeftRight, Files, MessageCircle, PanelRightOpen, ShieldAlert, Tag, Users } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useConversations, useConversation } from '@/hooks/useMessaging'
 import ConversationList from '@/components/messages/ConversationList'
@@ -361,6 +361,7 @@ export default function MessagesPage() {
   const searchParams = useSearchParams()
   const { user, isAuthenticated, hasHydrated } = useAuthStore()
   const initialConvId = searchParams.get('conv') ? Number(searchParams.get('conv')) : null
+  const targetUserId = searchParams.get('user') || searchParams.get('listing_user')
 
   const [activeConvId, setActiveConvId] = useState<number | null>(initialConvId)
   const [panel, setPanel] = useState<MobilePanel>('chat')
@@ -415,6 +416,15 @@ export default function MessagesPage() {
   }, [convs, activeConvId, initialConvId])
 
   useEffect(() => {
+    if (!targetUserId || convs.length === 0 || initialConvId) return
+
+    const existing = convs.find((conversation) => Number(conversation.other_user?.id) === Number(targetUserId))
+    if (existing) {
+      setActiveConvId((current) => (current === existing.id ? current : existing.id))
+    }
+  }, [convs, initialConvId, targetUserId])
+
+  useEffect(() => {
     const participantId = activeConversation?.other_user?.id
     if (!participantId) {
       setParticipantProfile(null)
@@ -447,6 +457,10 @@ export default function MessagesPage() {
   const attachments = useMemo(() => buildAttachments(messages, currentUserId), [messages, currentUserId])
   const inactiveListing = isListingInactive(activeConversation?.annonce.statut)
   const participantMeta = participantProfile ?? activeConversation?.other_user ?? null
+  const conversationType = (activeConversation as Conversation & { conversation_type?: string; metadata?: Record<string, unknown> | null })?.conversation_type ?? 'listing_chat'
+  const isTrocConversation = conversationType !== 'listing_chat'
+    || activeConversation?.last_message?.type === 'troc_proposal'
+    || Boolean(activeConversation?.last_message?.metadata?.proposer_listing_id)
 
   const handleLoadMore = async () => {
     suppressAutoScrollRef.current = true
@@ -579,6 +593,22 @@ export default function MessagesPage() {
             </span>
           </div>
         </div>
+
+        {isTrocConversation && (
+          <div className="mx-4 mt-4 rounded-[1.5rem] border border-emerald-200 bg-emerald-50/70 px-4 py-3">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+                <ArrowLeftRight className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-emerald-800">Proposition de troc</p>
+                <p className="mt-1 text-sm leading-6 text-emerald-900/75">
+                  Cette conversation concerne un échange entre annonces. Vous pouvez proposer, accepter ou refuser un troc.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex-1 overflow-y-auto px-4 py-4">
           {hasMore && (

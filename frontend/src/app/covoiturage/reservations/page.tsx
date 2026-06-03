@@ -77,11 +77,13 @@ function statusLabel(status: string, expiresAt?: string | null) {
 function BookingCard({
   booking,
   onViewProfile,
+  onContact,
   onCancel,
   onReview,
 }: {
   booking: Booking
   onViewProfile: (booking: Booking) => void
+  onContact: (booking: Booking) => void
   onCancel: (booking: Booking) => void
   onReview: (booking: Booking) => void
 }) {
@@ -144,6 +146,15 @@ function BookingCard({
       ) : null}
 
       <div className="mt-4 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => onContact(booking)}
+          className="inline-flex items-center gap-2 rounded-2xl border border-[#0A7EA4]/20 bg-white px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/5"
+        >
+          <MessageCircle className="h-4 w-4" />
+          Contacter
+        </button>
+
         {canManage ? (
           <button
             type="button"
@@ -336,6 +347,11 @@ export default function CovoiturageReservationsPage() {
                   key={booking.id}
                   booking={booking}
                   onViewProfile={(item) => setSelectedBooking(item)}
+                  onContact={(item) => {
+                    const partnerId = item.other_user?.id
+                    if (!partnerId) return
+                    window.location.assign(`/messages?user=${partnerId}`)
+                  }}
                   onCancel={handleCancel}
                   onReview={(item) => setSelectedReviewBooking(item)}
                 />
