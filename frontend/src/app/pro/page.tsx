@@ -184,17 +184,17 @@ export default function ProLandingPage() {
 
   const plans = [
     {
-      name: 'Starter',
+      name: 'Gratuit',
       price: 'Gratuit',
       highlighted: false,
-      features: ['5 annonces actives', 'Badge Pro', 'Messagerie standard'],
+      features: ['5 annonces actives', 'Badge Pro vérifié', 'Messagerie standard', 'Vitrine publique basique'],
       cta: 'Commencer gratuitement',
     },
     {
       name: 'Pro',
       price: '2 900 XPF/mois',
       highlighted: true,
-      features: ['Annonces illimitées', 'Remontée auto hebdomadaire', 'Vitrine personnalisée', 'Statistiques de base', '1 boost offert/mois'],
+      features: ['Annonces illimitées', 'Remontée automatique hebdomadaire', 'Vitrine complète (logo, bannière, horaires, site)', 'Statistiques de performance', '1 boost offert par mois', 'Bons plans prioritaires', 'Réponse automatique', 'Support prioritaire'],
       cta: 'Choisir Pro',
     },
   ] as const
@@ -330,7 +330,7 @@ export default function ProLandingPage() {
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Simple et transparent</p>
             <h2 className="mt-1 font-display text-2xl font-bold text-night">Des offres claires pour démarrer</h2>
           </div>
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="mx-auto grid max-w-2xl gap-4 md:grid-cols-2">
             {plans.map((plan) => (
               <article
                 key={plan.name}
@@ -354,7 +354,7 @@ export default function ProLandingPage() {
                   ))}
                 </ul>
                 <Link
-                  href="/pro#formulaire-pro"
+                  href={plan.highlighted ? '/pro/inscription?plan=pro' : '/pro/inscription'}
                   className={`mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
                     plan.highlighted
                       ? 'bg-[#0A7EA4] text-white shadow-sm hover:-translate-y-0.5 hover:shadow-md'

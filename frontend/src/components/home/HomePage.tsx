@@ -204,10 +204,6 @@ export default function HomePage() {
                 Publiez votre besoin en 2 minutes - les pros de votre commune vous répondent.
               </p>
             </div>
-            <Link href="/appels-offres" className="hidden items-center gap-1 text-sm font-semibold text-nc-emeraude hover:underline md:inline-flex">
-              Voir les demandes
-              <ArrowRight className="h-4 w-4" />
-            </Link>
           </div>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link href="/appels-offres?action=publish" className="btn-primary rounded-2xl px-4 py-2.5 text-sm">

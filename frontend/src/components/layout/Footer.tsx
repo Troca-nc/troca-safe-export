@@ -2,12 +2,10 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useCallback, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Loader2, Mail, Shield, FileText, Lock, MessageCircle } from 'lucide-react'
+import { useCallback } from 'react'
+import { Mail, Shield, FileText, Lock, MessageCircle } from 'lucide-react'
 
-import { newsletterApi } from '@/lib/api'
-import { useAuthStore } from '@/store/authStore'
+import NewsletterForm from '@/components/layout/NewsletterForm'
 
 const links = [
   { href: '/mentions-legales', label: 'Mentions légales', icon: FileText },
@@ -18,55 +16,10 @@ const links = [
   { href: '/contact', label: 'Contact', icon: MessageCircle },
 ]
 
-function isValidEmail(value: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
-}
-
 export default function Footer() {
-  const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
-  const [newsletterEmail, setNewsletterEmail] = useState('')
-  const [newsletterLoading, setNewsletterLoading] = useState(false)
-  const [newsletterError, setNewsletterError] = useState('')
-  const [newsletterToast, setNewsletterToast] = useState('')
-
   const openCookieBanner = useCallback(() => {
     window.dispatchEvent(new Event('troca-cookie-banner-open'))
   }, [])
-
-  useEffect(() => {
-    if (!newsletterToast) return
-    const timeout = window.setTimeout(() => setNewsletterToast(''), 3000)
-    return () => window.clearTimeout(timeout)
-  }, [newsletterToast])
-
-  const handleNewsletterSubmit = async () => {
-    if (!isAuthenticated) {
-      router.push(`/inscription?next=${encodeURIComponent('/newsletter/preferences')}`)
-      return
-    }
-
-    if (!isValidEmail(newsletterEmail)) {
-      setNewsletterError('Email invalide')
-      return
-    }
-
-    setNewsletterLoading(true)
-    setNewsletterError('')
-    try {
-      await newsletterApi.subscribe({
-        email: newsletterEmail.trim(),
-        communes: [],
-        frequency: 'weekly',
-      })
-      setNewsletterEmail('')
-      setNewsletterToast('✅ Vous êtes abonné à la newsletter !')
-    } catch {
-      setNewsletterError('Impossible de vous abonner pour le moment.')
-    } finally {
-      setNewsletterLoading(false)
-    }
-  }
 
   return (
     <footer className="border-t border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-sm">
@@ -138,48 +91,13 @@ export default function Footer() {
             </div>
 
             <div>
-              <form
-                className="mt-3 flex gap-2"
-                onSubmit={(event) => {
-                  event.preventDefault()
-                  void handleNewsletterSubmit()
-                }}
-              >
-                <input
-                  value={newsletterEmail}
-                  onChange={(event) => {
-                    setNewsletterEmail(event.target.value)
-                    if (newsletterError) setNewsletterError('')
-                  }}
-                  type="email"
-                  placeholder="votre@email.com"
-                  aria-invalid={Boolean(newsletterError)}
-                  className={`flex-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] px-4 py-2.5 text-sm text-[var(--color-text-primary)] placeholder:text-night/40 outline-none focus:border-[#0A7EA4] focus:ring-2 focus:ring-[#0A7EA4]/20 transition ${
-                    newsletterError ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''
-                  }`}
-                />
-                <button
-                  type="submit"
-                  disabled={newsletterLoading}
-                  className="rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a] disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  {newsletterLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "S'abonner"}
-                </button>
-              </form>
+              <NewsletterForm />
               <p className="mt-2 text-xs text-night/40">
                 Pas de spam. Désinscription en un clic.
               </p>
-              {newsletterError ? <p className="mt-2 text-xs font-medium text-red-600">{newsletterError}</p> : null}
             </div>
           </div>
         </section>
-
-        {newsletterToast ? (
-          <div className="fixed bottom-5 right-5 z-50 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 shadow-lg">
-            {newsletterToast}
-          </div>
-        ) : null}
-
         <div className="mt-8 flex flex-col gap-2 border-t border-[var(--color-border)] pt-4 text-xs text-night/40 sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 Troca. Tous droits réservés.</p>
           <p>Nouvelle-Calédonie.</p>
