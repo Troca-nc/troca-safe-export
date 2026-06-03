@@ -169,6 +169,408 @@ function findCategoryBySlug(categories: any[], slug: string): any | null {
   return null
 }
 
+type FilterSidebarProps = {
+  filters: ListingFilters
+  selectedCategoryLabel: string | null
+  visibleCategories: any[]
+  expandedCategorySet: Set<string>
+  updateFilter: (key: keyof ListingFilters, value: string | number) => void
+  toggleCategoryNode: (slug: string) => void
+  communes: any[]
+  selectedProvince: any
+  selectedProvinceCommunes: any[]
+  sortedProvinces: any[]
+  handleUseLocation: () => void
+  clearLocation: () => void
+  clearFilters: () => void
+  collapsedSections: { radius: boolean; condition: boolean }
+  toggleSidebarSection: (key: 'radius' | 'condition') => void
+  priceHistogramView: any
+  displayedListings: any[]
+  activeFilterCount: number
+  handleCreateSearchAlert: () => void
+  geoLoading: boolean
+}
+
+function FilterSidebar({
+  filters,
+  selectedCategoryLabel,
+  visibleCategories,
+  expandedCategorySet,
+  updateFilter,
+  toggleCategoryNode,
+  selectedProvince,
+  selectedProvinceCommunes,
+  sortedProvinces,
+  handleUseLocation,
+  clearLocation,
+  clearFilters,
+  collapsedSections,
+  toggleSidebarSection,
+  priceHistogramView,
+  displayedListings,
+  activeFilterCount,
+  handleCreateSearchAlert,
+  geoLoading,
+}: FilterSidebarProps) {
+  return (
+    <div className="space-y-6">
+      {/* Catégories */}
+      <div>
+        <h3 className="mb-3 text-sm font-semibold text-night">Catégorie</h3>
+        <div className="space-y-3 rounded-2xl border border-night/8 bg-white/80 p-3 shadow-sm">
+          <button
+            type="button"
+            onClick={() => updateFilter('category', '')}
+            className={`w-full rounded-2xl px-3 py-2 text-left text-sm transition-colors ${
+              !filters.category
+                ? 'bg-nc-lagon text-white shadow-sm'
+                : 'text-night/70 hover:bg-sand'
+            }`}
+          >
+            Toutes les catégories
+          </button>
+
+          {selectedCategoryLabel ? (
+            <div className="rounded-2xl border border-nc-lagon/20 bg-nc-lagon/8 px-3 py-3 text-sm text-night">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-nc-lagon">Catégorie active</p>
+              <p className="mt-1 font-semibold">{selectedCategoryLabel}</p>
+            </div>
+          ) : null}
+
+          <div className="max-h-[42rem] space-y-2 overflow-y-auto pr-1">
+            {visibleCategories.map((cat: any) => (
+              <CategoryTreeNode
+                key={cat.id}
+                category={cat}
+                selectedSlug={filters.category}
+                expandedSlugs={expandedCategorySet}
+                onSelect={(slug) => updateFilter('category', slug)}
+                onToggleExpand={toggleCategoryNode}
+              />
+            ))}
+          </div>
+
+          <p className="text-[11px] text-night/40">
+            Cliquez sur une catégorie pour ouvrir ses sous-catégories. Le filtre actif reste mis en avant.
+          </p>
+        </div>
+      </div>
+
+      {/* Localisation */}
+      <div className="rounded-2xl border border-night/8 bg-white/80 p-4 shadow-sm">
+        <div className="mb-3">
+          <h3 className="text-sm font-semibold text-night">Localisation</h3>
+          <p className="mt-1 text-xs text-night/45">
+            Choisissez d'abord une province, puis une commune.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-night/40">
+              Province
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  updateFilter('province_id', '')
+                  updateFilter('commune_id', '')
+                }}
+                className={`rounded-full border px-4 py-2 text-sm transition-colors ${
+                  !filters.province_id
+                    ? 'border-nc-lagon bg-nc-lagon text-white'
+                    : 'border-night/12 bg-white text-night/65 hover:bg-sand'
+                }`}
+              >
+                Toute la NC
+              </button>
+              {sortedProvinces.map((province: any) => {
+                const isActiveProvince = String(filters.province_id) === String(province.id)
+                return (
+                  <button
+                    key={province.id}
+                    type="button"
+                    onClick={() => updateFilter('province_id', String(province.id))}
+                    className={`rounded-full border px-4 py-2 text-sm transition-colors ${
+                      isActiveProvince
+                        ? 'border-nc-lagon bg-nc-lagon text-white'
+                        : 'border-night/12 bg-white text-night/65 hover:bg-sand'
+                    }`}
+                  >
+                    {province.name}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-night/40">
+              Commune
+            </label>
+            {!selectedProvince ? (
+              <div className="rounded-xl border border-dashed border-night/15 bg-sand/30 px-3 py-3 text-sm text-night/45">
+                Choisissez une province pour voir les communes.
+              </div>
+            ) : (
+              <div className="max-h-56 overflow-y-auto rounded-2xl border border-night/8 bg-white p-3">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => updateFilter('commune_id', '')}
+                    className={`rounded-full border px-3 py-2 text-sm transition-colors ${
+                      !filters.commune_id
+                        ? 'border-nc-lagon bg-nc-lagon text-white'
+                        : 'border-night/12 bg-white text-night/65 hover:bg-sand'
+                    }`}
+                  >
+                    Toutes les communes
+                  </button>
+                  {selectedProvinceCommunes.map((c: any) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => updateFilter('commune_id', String(c.id))}
+                      className={`rounded-full border px-3 py-2 text-sm transition-colors ${
+                        String(filters.commune_id) === String(c.id)
+                          ? 'border-nc-lagon bg-nc-lagon text-white'
+                          : 'border-night/12 bg-white text-night/65 hover:bg-sand'
+                      }`}
+                    >
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-2 rounded-2xl border border-night/8 bg-sand/20 p-3">
+        <button
+          type="button"
+          onClick={() => toggleSidebarSection('radius')}
+          className="flex w-full items-center justify-between gap-3 text-left"
+          aria-expanded={!collapsedSections.radius}
+        >
+          <div>
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-night/40">
+              Rayon de recherche
+            </label>
+            <p className="mt-1 text-xs text-night/45">
+              Distance max autour de votre position partagée.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-night shadow-sm">
+              {filters.radius} km
+            </div>
+            <ChevronDown className={`h-4 w-4 text-night/35 transition-transform ${collapsedSections.radius ? '' : 'rotate-180'}`} />
+          </div>
+        </button>
+        {!collapsedSections.radius ? (
+          <>
+            <input
+              type="range"
+              min={RADIUS_OPTIONS[0]}
+              max={RADIUS_OPTIONS[RADIUS_OPTIONS.length - 1]}
+              step={1}
+              value={filters.radius}
+              onChange={(e) => updateFilter('radius', snapRadius(Number(e.target.value)))}
+              className="w-full accent-coral"
+              aria-label="Rayon de recherche en kilomètres"
+            />
+            <div className="flex justify-between text-[10px] text-night/35">
+              {RADIUS_OPTIONS.map((value) => (
+                <span key={value}>{value} km</span>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <button
+                type="button"
+                onClick={handleUseLocation}
+                disabled={geoLoading}
+                className="rounded-full bg-night px-3 py-2 text-xs font-medium text-white disabled:opacity-60"
+              >
+                {geoLoading ? 'Localisation…' : 'Utiliser ma position'}
+              </button>
+              {filters.lat && filters.lng && (
+                <button
+                  type="button"
+                  onClick={clearLocation}
+                  className="rounded-full border border-night/10 bg-white px-3 py-2 text-xs font-medium text-night/60 hover:bg-sand"
+                >
+                  Effacer la position
+                </button>
+              )}
+            </div>
+            {filters.lat && filters.lng ? (
+              <p className="text-[11px] text-jungle">
+                Position partagée activée.
+              </p>
+            ) : (
+              <p className="text-[11px] text-night/40">
+                Aucune demande de permission n’est envoyée tant que vous ne cliquez pas sur le bouton.
+              </p>
+            )}
+          </>
+        ) : null}
+      </div>
+
+      <div className="relative overflow-hidden rounded-2xl border border-night/8 bg-sand/20 p-3">
+        <div className="pointer-events-none absolute inset-x-3 bottom-3 top-10 overflow-hidden rounded-xl">
+          <div className="absolute inset-0 flex items-end gap-1">
+            {(priceHistogramView.bins.length > 0 ? priceHistogramView.bins : Array.from({ length: 12 }, () => 0)).map((count: number, index: number) => {
+              const maxCount = Math.max(1, ...(priceHistogramView.bins.length > 0 ? priceHistogramView.bins : [1]))
+              const heightPct = priceHistogramView.bins.length > 0 ? Math.max(8, Math.round((count / maxCount) * 100)) : 18
+              const faded = priceHistogramView.bins.length === 0
+              const barCenter = ((index + 0.5) / Math.max(1, priceHistogramView.bins.length || 12)) * 100
+              const highlighted = barCenter >= priceHistogramView.selectedStart && barCenter <= priceHistogramView.selectedEnd
+              return (
+                <div
+                  key={`price-bin-${index}`}
+                  className={`flex-1 rounded-t-lg transition-all duration-200 ${
+                    faded
+                      ? 'bg-night/6'
+                      : highlighted
+                        ? 'bg-nc-lagon/60 shadow-[0_-8px_24px_rgba(30,144,255,0.18)]'
+                        : 'bg-nc-lagon/25'
+                  }`}
+                  style={{
+                    height: `${heightPct}%`,
+                    opacity: faded ? 0.6 : highlighted ? 1 : 0.72,
+                  }}
+                  aria-hidden="true"
+                />
+              )
+            })}
+          </div>
+
+          {priceHistogramView.datasetMax > 0 ? (
+            <>
+              <div
+                className="absolute inset-y-0 rounded-xl border border-nc-lagon/20 bg-gradient-to-r from-nc-lagon/5 via-nc-lagon/10 to-nc-lagon/5"
+                style={{
+                  left: `${priceHistogramView.selectedStart}%`,
+                  width: `${Math.min(100 - priceHistogramView.selectedStart, priceHistogramView.selectedWidth)}%`,
+                }}
+                aria-hidden="true"
+              />
+              <div
+                className="absolute inset-y-1 w-px bg-nc-lagon/50"
+                style={{ left: `${priceHistogramView.selectedStart}%` }}
+                aria-hidden="true"
+              />
+              <div
+                className="absolute inset-y-1 w-px bg-nc-lagon/50"
+                style={{ left: `${priceHistogramView.selectedEnd}%` }}
+                aria-hidden="true"
+              />
+              <div className="absolute inset-x-0 bottom-0 h-px bg-night/10" aria-hidden="true" />
+            </>
+          ) : null}
+        </div>
+
+        <div className="relative z-10">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <h3 className="text-sm font-semibold text-night">Prix (XPF)</h3>
+            <span className="text-[11px] text-night/40">
+              {priceHistogramView.rangeLabel}
+            </span>
+          </div>
+
+          <div className="rounded-2xl border border-night/8 bg-white/80 p-3 backdrop-blur-sm">
+            <div className="mb-2 flex items-center justify-between gap-3 text-[10px] text-night/40">
+              <span>0 XPF</span>
+              <span className="rounded-full bg-white/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-night/50 shadow-sm">
+                {priceHistogramView.selectionLabel}
+              </span>
+              <span>{priceHistogramView.datasetMax > 0 ? `${Math.round(priceHistogramView.datasetMax).toLocaleString('fr-FR')} XPF` : '—'}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                placeholder="Min"
+                value={filters.price_min}
+                step={10}
+                min={0}
+                onChange={(e) => updateFilter('price_min', e.target.value)}
+                onBlur={(e) => updateFilter('price_min', snapTo10(e.target.value))}
+                className="input w-full bg-white/90 text-sm"
+              />
+              <span className="text-sm text-night/30">-</span>
+              <input
+                type="number"
+                placeholder="Max"
+                value={filters.price_max}
+                step={10}
+                min={0}
+                onChange={(e) => updateFilter('price_max', e.target.value)}
+                onBlur={(e) => updateFilter('price_max', snapTo10(e.target.value))}
+                className="input w-full bg-white/90 text-sm"
+              />
+            </div>
+            <div className="mt-2 flex items-center justify-between gap-3 text-[10px] text-night/35">
+              <span>La courbe reflète les annonces chargées pour cette recherche.</span>
+              <span className="rounded-full bg-nc-lagon/10 px-2 py-1 font-medium text-nc-lagonText">
+                {priceHistogramView.bins.length > 0 ? `${displayedListings.length} résultats` : 'Aucune donnée'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-2 rounded-2xl border border-night/8 bg-sand/20 p-3">
+        <button
+          type="button"
+          onClick={() => toggleSidebarSection('condition')}
+          className="flex w-full items-center justify-between gap-3 text-left"
+          aria-expanded={!collapsedSections.condition}
+        >
+          <div>
+            <h3 className="text-sm font-semibold text-night">État</h3>
+            <p className="mt-1 text-xs text-night/45">
+              Affinez selon l’état du produit.
+            </p>
+          </div>
+          <ChevronDown className={`h-4 w-4 text-night/35 transition-transform ${collapsedSections.condition ? '' : 'rotate-180'}`} />
+        </button>
+        {!collapsedSections.condition ? (
+          <div className="space-y-1">
+            {CONDITION_OPTIONS.map((opt) => (
+              <label key={opt.value} className="flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 hover:bg-sand">
+                <input
+                  type="radio"
+                  name="condition"
+                  value={opt.value}
+                  checked={filters.condition === opt.value}
+                  onChange={() => updateFilter('condition', opt.value)}
+                  className="accent-coral"
+                />
+                <span className="text-sm text-night/70">{opt.label}</span>
+              </label>
+            ))}
+            {filters.condition && (
+              <button onClick={() => updateFilter('condition', '')} className="pl-3 text-xs text-coral hover:underline">
+                Effacer
+              </button>
+            )}
+          </div>
+        ) : null}
+      </div>
+
+      {activeFilterCount > 0 && (
+        <button onClick={clearFilters} className="btn-ghost w-full justify-center text-sm text-red-500">
+          <X className="h-4 w-4" /> Réinitialiser les filtres ({activeFilterCount})
+        </button>
+      )}
+    </div>
+  )
+}
+
 function snapTo10(value: string) {
   if (!value.trim()) return ''
   const parsed = Number(value)
@@ -574,7 +976,7 @@ function ListingsPageContent() {
   }
 
   // Sidebar filtres
-  const FilterSidebar = () => (
+  const LegacyFilterSidebar = () => (
       <div className="space-y-6">
       {/* Catégories */}
       <div>
@@ -1057,7 +1459,28 @@ function ListingsPageContent() {
           {/* Sidebar desktop */}
           <aside className="hidden lg:block w-80 xl:w-96 shrink-0">
             <div className="card p-5 sticky top-20 border-l-4 border-l-nc-lagon">
-              <FilterSidebar />
+              <FilterSidebar
+                filters={filters}
+                selectedCategoryLabel={selectedCategoryLabel}
+                visibleCategories={visibleCategories}
+                expandedCategorySet={expandedCategorySet}
+                updateFilter={updateFilter}
+                toggleCategoryNode={toggleCategoryNode}
+                communes={communes}
+                selectedProvince={selectedProvince}
+                selectedProvinceCommunes={selectedProvinceCommunes}
+                sortedProvinces={sortedProvinces}
+                handleUseLocation={handleUseLocation}
+                clearLocation={clearLocation}
+                clearFilters={clearFilters}
+                collapsedSections={collapsedSections}
+                toggleSidebarSection={toggleSidebarSection}
+                priceHistogramView={priceHistogramView}
+                displayedListings={displayedListings}
+                activeFilterCount={activeFilterCount}
+                handleCreateSearchAlert={handleCreateSearchAlert}
+                geoLoading={geoLoading}
+              />
             </div>
           </aside>
 
@@ -1072,7 +1495,28 @@ function ListingsPageContent() {
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                <FilterSidebar />
+                <FilterSidebar
+                  filters={filters}
+                  selectedCategoryLabel={selectedCategoryLabel}
+                  visibleCategories={visibleCategories}
+                  expandedCategorySet={expandedCategorySet}
+                  updateFilter={updateFilter}
+                  toggleCategoryNode={toggleCategoryNode}
+                  communes={communes}
+                  selectedProvince={selectedProvince}
+                  selectedProvinceCommunes={selectedProvinceCommunes}
+                  sortedProvinces={sortedProvinces}
+                  handleUseLocation={handleUseLocation}
+                  clearLocation={clearLocation}
+                  clearFilters={clearFilters}
+                  collapsedSections={collapsedSections}
+                  toggleSidebarSection={toggleSidebarSection}
+                  priceHistogramView={priceHistogramView}
+                  displayedListings={displayedListings}
+                  activeFilterCount={activeFilterCount}
+                  handleCreateSearchAlert={handleCreateSearchAlert}
+                  geoLoading={geoLoading}
+                />
               </div>
             </div>
           )}
