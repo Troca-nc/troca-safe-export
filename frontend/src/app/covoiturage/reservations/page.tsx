@@ -92,6 +92,7 @@ function BookingCard({
   const canManage = isDriver && booking.booking_mode === 'manual' && booking.status === 'pending'
   const rideDateTime = new Date(`${booking.ride.ride_date}T${booking.ride.ride_time.slice(0, 5)}`).getTime()
   const isRidePast = Number.isFinite(rideDateTime) && rideDateTime < Date.now()
+  const isRideSoon = Number.isFinite(rideDateTime) && rideDateTime > Date.now() && (rideDateTime - Date.now()) <= 24 * 60 * 60 * 1000
   const canReview = booking.role === 'passenger' && ['accepted', 'auto_confirmed'].includes(booking.status) && isRidePast && !booking.review_exists
   const contactLabel = booking.role === 'passenger' ? 'Contacter le conducteur' : 'Contacter le passager'
 
@@ -145,6 +146,45 @@ function BookingCard({
           {booking.message}
         </p>
       ) : null}
+
+      <div className="mt-4 rounded-2xl border border-[#0A7EA4]/10 bg-[#0A7EA4]/5 px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#0A7EA4]">
+              Coordonnées utiles
+            </p>
+            <p className="mt-1 text-sm font-semibold text-night">
+              Le jour du trajet, ouvrez la conversation pour vous coordonner.
+            </p>
+            <p className="mt-1 text-xs text-night/55">
+              {booking.other_user.prenom || 'Votre interlocuteur'} est joignable via la messagerie interne.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-night/65 shadow-sm">
+              {booking.ride.ride_date} à {booking.ride.ride_time.slice(0, 5)}
+            </span>
+            <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-night/65 shadow-sm">
+              {booking.ride.departure} → {booking.ride.destination}
+            </span>
+            {isRideSoon ? (
+              <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700 shadow-sm">
+                Jour du trajet
+              </span>
+            ) : null}
+          </div>
+        </div>
+        {isRideSoon ? (
+          <button
+            type="button"
+            onClick={() => onContact(booking)}
+            className="mt-3 inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
+          >
+            <MessageCircle className="h-4 w-4" />
+            Ouvrir la conversation
+          </button>
+        ) : null}
+      </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
         <button

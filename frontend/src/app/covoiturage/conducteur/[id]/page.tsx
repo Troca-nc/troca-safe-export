@@ -227,8 +227,8 @@ export default function DriverPublicProfilePage() {
             ) : null}
           </div>
           <div className="-mt-10 px-6 pb-6">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div className="flex items-end gap-4">
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div className="flex items-end gap-4">
                 <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-white shadow-lg">
                   {profile.avatar_url ? (
                     <img src={profile.avatar_url} alt={displayName} className="h-full w-full object-cover" />
@@ -261,11 +261,17 @@ export default function DriverPublicProfilePage() {
                     </span>
                   </div>
                 </div>
-              </div>
+                </div>
 
-              <Link href="/covoiturage" className="btn-primary rounded-2xl px-4 py-2.5">
-                Voir les trajets
-              </Link>
+              <div className="flex flex-wrap gap-3">
+                <Link href={`/messages?user=${profile.id}`} className="btn-secondary rounded-2xl px-4 py-2.5">
+                  <MessageCircle className="h-4 w-4" />
+                  Contacter
+                </Link>
+                <Link href="/covoiturage" className="btn-primary rounded-2xl px-4 py-2.5">
+                  Voir les trajets
+                </Link>
+              </div>
             </div>
 
             {profile.bio ? (
