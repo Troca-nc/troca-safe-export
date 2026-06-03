@@ -93,6 +93,7 @@ function BookingCard({
   const rideDateTime = new Date(`${booking.ride.ride_date}T${booking.ride.ride_time.slice(0, 5)}`).getTime()
   const isRidePast = Number.isFinite(rideDateTime) && rideDateTime < Date.now()
   const canReview = booking.role === 'passenger' && ['accepted', 'auto_confirmed'].includes(booking.status) && isRidePast && !booking.review_exists
+  const contactLabel = booking.role === 'passenger' ? 'Contacter le conducteur' : 'Contacter le passager'
 
   return (
     <article className="rounded-[1.75rem] border border-night/8 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -152,7 +153,7 @@ function BookingCard({
           className="inline-flex items-center gap-2 rounded-2xl border border-[#0A7EA4]/20 bg-white px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/5"
         >
           <MessageCircle className="h-4 w-4" />
-          Contacter
+          {contactLabel}
         </button>
 
         {canManage ? (
