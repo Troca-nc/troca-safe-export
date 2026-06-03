@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
@@ -409,36 +409,31 @@ export default function TrocPage() {
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Trocômètre</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">⚖️ Trocômètre — Trouvez un équivalent</h2>
           <p className="mt-1 text-sm text-night/55">
-            Vous avez posté une annonce troc ? Entrez son prix et découvrez 3 annonces de valeur équivalente prêtes à l'échange.
+            Vous avez posté une annonce troc ? Entrez son prix et découvrez 3 annonces de valeur équivalente prêtes à l&apos;échange.
           </p>
         </div>
 
         <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-            <div className="mb-5 flex gap-2 rounded-2xl bg-[var(--color-background-secondary)] p-1">
-              <button
-                type="button"
-                onClick={() => setTrocTab('mine')}
-                className={`flex-1 rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
-                  trocTab === 'mine' ? 'bg-[#0A7EA4] text-white shadow-sm' : 'text-night/60 hover:text-night'
-                }`}
-              >
-                Mes annonces
-              </button>
-              <button
-                type="button"
-                onClick={() => setTrocTab('free')}
-                className={`flex-1 rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
-                  trocTab === 'free' ? 'bg-[#0A7EA4] text-white shadow-sm' : 'text-night/60 hover:text-night'
-                }`}
-              >
-                Saisie libre
-              </button>
-            </div>
-          ) : (
-            <div className="mb-5 rounded-2xl border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-3 text-sm text-night/70">
-              Connectez-vous pour utiliser vos annonces avec le Troc?m?tre. En attendant, vous pouvez faire une saisie libre.
-            </div>
-          )}
+          <div className="mb-5 flex gap-2 rounded-2xl bg-[var(--color-background-secondary)] p-1">
+            <button
+              type="button"
+              onClick={() => setTrocTab('mine')}
+              className={`flex-1 rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
+                trocTab === 'mine' ? 'bg-[#0A7EA4] text-white shadow-sm' : 'text-night/60 hover:text-night'
+              }`}
+            >
+              Mes annonces
+            </button>
+            <button
+              type="button"
+              onClick={() => setTrocTab('free')}
+              className={`flex-1 rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
+                trocTab === 'free' ? 'bg-[#0A7EA4] text-white shadow-sm' : 'text-night/60 hover:text-night'
+              }`}
+            >
+              Saisie libre
+            </button>
+          </div>
 
           {isAuthenticated && trocTab === 'mine' ? (
             ownListings.length > 0 ? (
@@ -458,7 +453,7 @@ export default function TrocPage() {
               </label>
             ) : (
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-4 py-4 text-sm text-night/65">
-                Vous n’avez pas encore d’annonce active avec prix.{' '}
+                Vous n&apos;avez pas encore d&apos;annonce active avec prix.{' '}
                 <button
                   type="button"
                   onClick={() => setTrocTab('free')}
@@ -495,7 +490,7 @@ export default function TrocPage() {
                       {category.label}
                     </option>
                   ))}
-                  </select>
+                </select>
               </label>
             </div>
           )}
