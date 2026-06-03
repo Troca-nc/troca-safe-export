@@ -191,6 +191,36 @@ export default function HomePage() {
       <SearchAlertsSection />
 
       <section className="mx-auto max-w-7xl px-4 pb-10">
+        <div className="rounded-[2rem] border border-[var(--color-border)] border-l-4 border-l-nc-emeraude bg-[var(--color-surface)] p-5 shadow-sm">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">
+                Appels d'offres
+              </p>
+              <h2 className="mt-1 font-display text-2xl font-bold text-night">
+                Vous cherchez un professionnel ?
+              </h2>
+              <p className="mt-1 text-sm text-night/55">
+                Publiez votre besoin en 2 minutes - les pros de votre commune vous répondent.
+              </p>
+            </div>
+            <Link href="/appels-offres" className="hidden items-center gap-1 text-sm font-semibold text-nc-emeraude hover:underline md:inline-flex">
+              Voir les demandes
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link href="/appels-offres?action=publish" className="btn-primary rounded-2xl px-4 py-2.5 text-sm">
+              Publier un besoin
+            </Link>
+            <Link href="/appels-offres" className="btn-secondary rounded-2xl px-4 py-2.5 text-sm">
+              Voir les demandes
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pb-10">
         <div className="mb-5">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Nouveau</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">Le Trocômètre</h2>

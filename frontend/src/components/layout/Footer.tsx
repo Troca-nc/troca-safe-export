@@ -138,7 +138,13 @@ export default function Footer() {
             </div>
 
             <div>
-              <div className="mt-3 flex gap-2">
+              <form
+                className="mt-3 flex gap-2"
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  void handleNewsletterSubmit()
+                }}
+              >
                 <input
                   value={newsletterEmail}
                   onChange={(event) => {
@@ -153,14 +159,13 @@ export default function Footer() {
                   }`}
                 />
                 <button
-                  type="button"
-                  onClick={handleNewsletterSubmit}
+                  type="submit"
                   disabled={newsletterLoading}
                   className="rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {newsletterLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "S'abonner"}
                 </button>
-              </div>
+              </form>
               <p className="mt-2 text-xs text-night/40">
                 Pas de spam. Désinscription en un clic.
               </p>

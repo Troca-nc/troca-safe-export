@@ -27,6 +27,7 @@ export function MobileBottomNav() {
   const items = [
     { href: '/', icon: Home, label: 'Accueil' },
     { href: '/annonces', icon: Search, label: 'Annonces' },
+    { href: '/covoiturage', icon: Car, label: 'Covoit' },
     { href: '/annonces/nouvelle', icon: PlusCircle, label: 'Déposer', isCta: true },
     { href: '/messages', icon: MessageCircle, label: 'Messages' },
     { href: '#more', icon: Menu, label: 'Plus', isDrawer: true },
@@ -78,7 +79,7 @@ export function MobileBottomNav() {
             isAuthenticated ? (
               <Link key={href} href={href} className="mt-[-1.25rem] flex flex-col items-center gap-0.5">
                 <span className="flex h-14 w-14 items-center justify-center rounded-full bg-coral shadow-lg shadow-coral/30 ring-4 ring-white">
-                  <Icon className="h-6 w-6 text-white" strokeWidth={2.5} />
+                  <Icon className="h-4 w-4 text-white" strokeWidth={2.5} />
                 </span>
                 <span className="text-[10px] font-semibold text-coral">{label}</span>
               </Link>
@@ -95,7 +96,7 @@ export function MobileBottomNav() {
                 className="mt-[-1.25rem] flex flex-col items-center gap-0.5"
               >
                 <span className="flex h-14 w-14 items-center justify-center rounded-full bg-coral shadow-lg shadow-coral/30 ring-4 ring-white">
-                  <Icon className="h-6 w-6 text-white" strokeWidth={2.5} />
+                  <Icon className="h-4 w-4 text-white" strokeWidth={2.5} />
                 </span>
                 <span className="text-[10px] font-semibold text-coral">{label}</span>
               </button>
@@ -109,7 +110,7 @@ export function MobileBottomNav() {
                 moreOpen ? 'bg-sand/70 text-night' : 'text-night/70 hover:bg-sand/60 hover:text-night'
               }`}
             >
-              <Icon className="h-5 w-5 text-current" strokeWidth={moreOpen ? 2.5 : 2} />
+              <Icon className="h-4 w-4 text-current" strokeWidth={moreOpen ? 2.5 : 2} />
               <span className={`text-[10px] font-medium ${moreOpen ? 'font-semibold text-night' : ''}`}>{label}</span>
             </button>
           ) : (
@@ -120,7 +121,7 @@ export function MobileBottomNav() {
                 isActive(href) ? 'bg-sand/70 text-night' : 'text-night/70 hover:bg-sand/60 hover:text-night'
               }`}
             >
-              <Icon className="h-5 w-5 text-current" strokeWidth={isActive(href) ? 2.5 : 2} />
+              <Icon className="h-4 w-4 text-current" strokeWidth={isActive(href) ? 2.5 : 2} />
               <span className={`text-[10px] font-medium ${isActive(href) ? 'font-semibold text-night' : ''}`}>
                 {label}
               </span>
@@ -193,6 +194,7 @@ export default function Header() {
     { href: '/covoiturage', label: 'Covoiturage' },
     { href: '/bons-plans', label: 'Bons plans' },
     { href: '/pro', label: 'Pros' },
+    { href: '/appels-offres', label: "Appels d'offres" },
   ]
 
   const isActiveLink = (href: string) => {
