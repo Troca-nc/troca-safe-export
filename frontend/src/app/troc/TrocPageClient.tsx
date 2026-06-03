@@ -302,7 +302,7 @@ export default function TrocPage() {
           </h1>
 
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/80 md:text-base">
-            ?changez vos objets entre Cal?doniens. Parcourez les annonces troc disponibles ou publiez la v?tre.
+            Échangez vos objets entre Calédoniens. Parcourez les annonces troc disponibles ou publiez la vôtre.
           </p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -324,7 +324,7 @@ export default function TrocPage() {
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Annonces disponibles au troc</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">Annonces disponibles au troc</h2>
           <p className="mt-1 text-sm text-night/55">
-            Ces Cal?doniens acceptent les ?changes ? trouvez votre bonheur.
+            Ces Calédoniens acceptent les échanges — trouvez votre bonheur.
           </p>
         </div>
 
@@ -406,10 +406,10 @@ export default function TrocPage() {
 
       <section className="mx-auto max-w-4xl px-4 pb-12">
         <div className="mb-5">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Troc?m?tre</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">?? Troc?m?tre ? Trouvez un ?quivalent</h2>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Trocômètre</p>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">⚖️ Trocômètre — Trouvez un équivalent</h2>
           <p className="mt-1 text-sm text-night/55">
-            Vous avez post? une annonce troc ? Entrez son prix et d?couvrez 3 annonces de valeur ?quivalente pr?tes ? l'?change.
+            Vous avez posté une annonce troc ? Entrez son prix et découvrez 3 annonces de valeur équivalente prêtes à l'échange.
           </p>
         </div>
 

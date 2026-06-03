@@ -220,7 +220,7 @@ export default function HomePage() {
         <div className="mb-5 flex items-end justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">
-              Troc
+              Annonces troc
             </p>
             <h2 className="mt-1 font-display text-2xl font-bold text-night">
               Annonces disponibles au troc
