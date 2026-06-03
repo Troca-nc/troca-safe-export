@@ -183,6 +183,7 @@ type FilterSidebarProps = {
   handleUseLocation: () => void
   clearLocation: () => void
   clearFilters: () => void
+  snapRadius: (value: number) => number
   collapsedSections: { radius: boolean; condition: boolean }
   toggleSidebarSection: (key: 'radius' | 'condition') => void
   priceHistogramView: any
@@ -205,6 +206,7 @@ function FilterSidebar({
   handleUseLocation,
   clearLocation,
   clearFilters,
+  snapRadius,
   collapsedSections,
   toggleSidebarSection,
   priceHistogramView,
@@ -1473,6 +1475,7 @@ function ListingsPageContent() {
                 handleUseLocation={handleUseLocation}
                 clearLocation={clearLocation}
                 clearFilters={clearFilters}
+                snapRadius={snapRadius}
                 collapsedSections={collapsedSections}
                 toggleSidebarSection={toggleSidebarSection}
                 priceHistogramView={priceHistogramView}
@@ -1509,6 +1512,7 @@ function ListingsPageContent() {
                   handleUseLocation={handleUseLocation}
                   clearLocation={clearLocation}
                   clearFilters={clearFilters}
+                  snapRadius={snapRadius}
                   collapsedSections={collapsedSections}
                   toggleSidebarSection={toggleSidebarSection}
                   priceHistogramView={priceHistogramView}
