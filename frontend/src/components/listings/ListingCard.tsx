@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -65,9 +65,9 @@ interface Props {
 const CONDITION_LABELS: Record<string, string> = {
   new: 'Neuf',
   like_new: 'Comme neuf',
-  good: 'Bon état',
+  good: 'Bon Ã©tat',
   fair: 'Correct',
-  for_parts: 'Pour pièces',
+  for_parts: 'Pour piÃ¨ces',
 }
 
 const blurPlaceholder = 'data:image/gif;base64,R0lGODlhAQABAAAAACw='
@@ -177,14 +177,14 @@ function ListingImageFrame({
           {getListingCategoryLabel(listing)}
         </span>
         {listing.is_troc || listing.contre_quoi ? (
-          <span className="badge bg-night/90 text-[10px] text-white shadow-sm backdrop-blur-sm">
-            ↔ Troc
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 shadow-sm backdrop-blur-sm">
+            ⇄ Troc
           </span>
         ) : null}
       </div>
 
       <div className="absolute right-3 top-3 z-10 flex flex-col items-end gap-2">
-        {boosted ? <span className="badge badge-warning bg-white/90 text-[10px] shadow-sm backdrop-blur-sm">⭐ Boosté</span> : null}
+        {boosted ? <span className="badge badge-warning bg-white/90 text-[10px] shadow-sm backdrop-blur-sm">â­ BoostÃ©</span> : null}
       </div>
 
       <button
@@ -276,7 +276,7 @@ export default function ListingCard({ listing, className = '' }: Props) {
     }
 
     if (!listing.price) {
-      return <span className="text-night/50 text-sm italic">Prix à débattre</span>
+      return <span className="text-night/50 text-sm italic">Prix Ã  dÃ©battre</span>
     }
 
     return (
@@ -298,7 +298,7 @@ export default function ListingCard({ listing, className = '' }: Props) {
     'Vendeur Troca'
 
   const isConditionVisible = Boolean(listing.condition && CONDITION_LABELS[listing.condition])
-  const locationText = listing.commune_name || 'Nouvelle-Calédonie'
+  const locationText = listing.commune_name || 'Nouvelle-CalÃ©donie'
   const isProVerified = Boolean(
     (listing.author?.is_pro && listing.author?.pro_verified)
     || (listing.is_pro && listing.seller_pro_verified)
@@ -357,13 +357,13 @@ export default function ListingCard({ listing, className = '' }: Props) {
                 {listing.seller_email_verified ? (
                   <span className="inline-flex items-center gap-1">
                     <MailCheck className="h-3 w-3" />
-                    Email vérifié
+                    Email vÃ©rifiÃ©
                   </span>
                 ) : null}
                 {listing.seller_phone_verified ? (
                   <span className="inline-flex items-center gap-1">
                     <Phone className="h-3 w-3" />
-                    Téléphone vérifié
+                    TÃ©lÃ©phone vÃ©rifiÃ©
                   </span>
                 ) : null}
                 {listing.seller_trust_score != null ? (
@@ -407,3 +407,4 @@ export default function ListingCard({ listing, className = '' }: Props) {
     </Link>
   )
 }
+
