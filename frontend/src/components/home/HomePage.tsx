@@ -16,7 +16,7 @@ import {
 } from '@/components/home/HomeSections'
 import CategoryTreeSection from '@/components/home/CategoryTreeSection'
 import ProCarousel from '@/components/pro/ProCarousel'
-import Trocometer from '@/components/trocometer/Trocometer'
+import TrocListingsPreview from '@/components/home/TrocListingsPreview'
 import { API_ORIGIN, proApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 
@@ -217,12 +217,24 @@ export default function HomePage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 pb-10">
-        <div className="mb-5">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Nouveau</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">Le Trocômètre</h2>
-          <p className="mt-1 text-sm text-night/55">Trouvez des objets de même valeur prêts à être échangés.</p>
+        <div className="mb-5 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">
+              Troc
+            </p>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">
+              Annonces disponibles au troc
+            </h2>
+            <p className="mt-1 text-sm text-night/55">
+              Ces calédoniens acceptent les échanges — trouvez votre bonheur.
+            </p>
+          </div>
+          <Link href="/troc" className="hidden items-center gap-1 text-sm font-semibold text-coral hover:underline md:inline-flex">
+            Voir toutes les annonces troc
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
-        <Trocometer />
+        <TrocListingsPreview />
       </section>
 
       <CategoryTreeSection />
