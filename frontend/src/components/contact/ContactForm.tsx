@@ -6,6 +6,7 @@ import { Loader2, Mail, PhoneCall, Send, ShieldCheck } from 'lucide-react'
 import { contactApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import FeedbackAlert from '@/components/ui/FeedbackAlert'
+import { showToast } from '@/lib/toast'
 
 type ContactCategory = 'support' | 'annonce' | 'pro' | 'covoiturage' | 'legal' | 'security' | 'other'
 
@@ -92,6 +93,11 @@ export default function ContactForm() {
       })
 
       setSuccess('Votre message a bien été envoyé. Nous vous répondrons dès que possible.')
+      showToast({
+        tone: 'success',
+        title: 'Message envoyé',
+        message: 'Votre demande de support a bien été transmise à l’équipe Troca.',
+      })
       setForm((current) => ({
         ...INITIAL_STATE,
         name: current.name,
@@ -100,6 +106,11 @@ export default function ContactForm() {
     } catch (err: any) {
       const message = err?.response?.data?.error || 'Une erreur est survenue, veuillez réessayer.'
       setError(message)
+      showToast({
+        tone: 'error',
+        title: 'Envoi impossible',
+        message,
+      })
     } finally {
       setSubmitting(false)
     }

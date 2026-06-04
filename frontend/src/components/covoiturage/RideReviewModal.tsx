@@ -5,6 +5,7 @@ import { Star, X } from 'lucide-react'
 
 import { covoiturageApi } from '@/lib/api'
 import FeedbackAlert from '@/components/ui/FeedbackAlert'
+import { showToast } from '@/lib/toast'
 
 type Booking = {
   id: number | string
@@ -68,10 +69,21 @@ export default function RideReviewModal({
         comment: comment.trim(),
       })
       setSuccess(true)
+      showToast({
+        tone: 'success',
+        title: 'Avis publié',
+        message: `Merci, votre avis sur ${driverName} a bien été ajouté.`,
+      })
       await onSubmitted?.()
       setTimeout(() => onClose(), 1500)
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible de publier l’avis.')
+      const message = err?.response?.data?.error || 'Impossible de publier l’avis.'
+      setError(message)
+      showToast({
+        tone: 'error',
+        title: 'Avis non publié',
+        message,
+      })
     } finally {
       setSubmitting(false)
     }

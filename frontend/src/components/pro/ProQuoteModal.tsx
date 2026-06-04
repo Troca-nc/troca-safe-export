@@ -6,6 +6,7 @@ import { CalendarDays, CreditCard, MapPin, MessageSquareQuote, Send, Sparkles, X
 import { proApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import FeedbackAlert from '@/components/ui/FeedbackAlert'
+import { showToast } from '@/lib/toast'
 import {
   DEFAULT_QUOTE_TEMPLATE,
   normalizeQuoteTemplate,
@@ -129,8 +130,19 @@ export default function ProQuoteModal({ proId, proName, open, onClose, template,
         template: quoteTemplate,
       })
       setSent(true)
+      showToast({
+        tone: 'success',
+        title: 'Demande de devis envoyée',
+        message: `${proName} a reçu votre demande et peut vous répondre rapidement.`,
+      })
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible d’envoyer votre demande.')
+      const message = err?.response?.data?.error || 'Impossible d’envoyer votre demande.'
+      setError(message)
+      showToast({
+        tone: 'error',
+        title: 'Devis non envoyé',
+        message,
+      })
     } finally {
       setSending(false)
     }

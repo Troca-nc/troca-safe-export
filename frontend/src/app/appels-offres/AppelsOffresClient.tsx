@@ -8,6 +8,7 @@ import ProQuoteModal from '@/components/pro/ProQuoteModal'
 import { type ProCardModel } from '@/components/pro/ProCard'
 import { proApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
+import { showToast } from '@/lib/toast'
 
 type QuoteHistoryItem = {
   id: string
@@ -262,6 +263,11 @@ export default function AppelsOffresClient() {
       return next
     })
     setActiveTab('requests')
+    showToast({
+      tone: 'success',
+      title: 'Demande enregistrée',
+      message: 'Votre demande de devis est disponible dans Mes demandes.',
+    })
   }
 
   const openQuoteForPro = (pro: ProCardModel) => {
