@@ -182,6 +182,12 @@ export default function ProDashboardSettingsPage() {
     setSuccess('')
   }
 
+  const resetTemplate = () => {
+    setQuoteTemplate(DEFAULT_QUOTE_TEMPLATE)
+    setError('')
+    setSuccess('')
+  }
+
   const uploadImage = async (kind: 'logo' | 'banner', event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
@@ -369,6 +375,13 @@ export default function ProDashboardSettingsPage() {
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
                   type="button"
+                  onClick={resetTemplate}
+                  className="rounded-full border border-dashed border-[#0A7EA4]/35 bg-nc-lagonLight px-4 py-2 text-sm font-semibold text-[#0A7EA4] transition hover:border-[#0A7EA4] hover:bg-[#d7eef3]"
+                >
+                  Sur mesure
+                </button>
+                <button
+                  type="button"
                   onClick={() => applyPreset('artisan')}
                   className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-night transition hover:border-[#0A7EA4]/30 hover:bg-nc-lagonLight hover:text-[#0A7EA4]"
                 >
@@ -387,6 +400,13 @@ export default function ProDashboardSettingsPage() {
                   className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-night transition hover:border-[#0A7EA4]/30 hover:bg-nc-lagonLight hover:text-[#0A7EA4]"
                 >
                   Service / prestation
+                </button>
+                <button
+                  type="button"
+                  onClick={resetTemplate}
+                  className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-night transition hover:border-red-300 hover:bg-red-50 hover:text-red-700"
+                >
+                  Réinitialiser la template
                 </button>
               </div>
               <p className="mt-2 text-xs text-night/45">
