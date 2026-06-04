@@ -534,8 +534,14 @@ export const proApi = {
   requestQuote: async (id: string | number, data: object) => {
     const res = await api.post(`/pro/${id}/quote`, data)
     invalidateApiCache('pro.')
+    invalidateApiCache('pro.quoteRequests.')
     return res
   },
+  getQuoteRequestsMine: (params: object = {}) => cachedGet(
+    buildCacheKey('pro.quoteRequests.mine', '/pro/quote-requests/mine', params),
+    () => api.get('/pro/quote-requests/mine', { params }),
+    CACHE_TTL.short,
+  ),
   getReviews: (id: string | number, params: object = {}) => cachedGet(
     buildCacheKey('pro.getReviews', `/pros/${id}/reviews`, params),
     () => api.get(`/pros/${id}/reviews`, { params }),

@@ -4,7 +4,7 @@ const express = require('express');
 const Joi = require('joi');
 
 const { query, withTransaction } = require('../config/database');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, optionalAuth } = require('../middleware/auth');
 const { sendMail } = require('../services/emailService');
 const { sendPushToUser } = require('../services/pushService');
 const { createNotification } = require('../services/notificationService');
@@ -528,7 +528,7 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-router.post('/:id/quote', async (req, res, next) => {
+router.post('/:id/quote', optionalAuth, async (req, res, next) => {
   try {
     const proId = Number(req.params.id);
     if (!Number.isFinite(proId) || proId <= 0) {
@@ -646,6 +646,62 @@ router.post('/:id/quote', async (req, res, next) => {
         id: Number(saved.rows[0].id),
         created_at: saved.rows[0].created_at,
       },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/quote-requests/mine', optionalAuth, async (req, res, next) => {
+  try {
+    if (!req.user?.id) {
+      return res.json({ data: [] });
+    }
+
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit || '12', 10)));
+    const offset = Math.max(0, (Math.max(1, parseInt(req.query.page || '1', 10)) - 1) * limit);
+
+    const result = await query(
+      `SELECT
+         q.id,
+         q.pro_id,
+         q.requester_name,
+         q.requester_email,
+         q.requester_phone,
+         q.need_type,
+         q.commune,
+         q.budget_xpf,
+         q.desired_date,
+         q.details,
+         q.created_at,
+         u.pro_company_name,
+         u.prenom,
+         u.nom
+       FROM pro_quote_requests q
+       JOIN users u ON u.id = q.pro_id
+       WHERE q.requester_user_id = $1
+       ORDER BY q.created_at DESC
+       LIMIT $2 OFFSET $3`,
+      [req.user.id, limit, offset]
+    );
+
+    return res.json({
+      data: result.rows.map((row) => ({
+        id: String(row.id),
+        proId: Number(row.pro_id),
+        proName: formatCompanyName(row),
+        createdAt: row.created_at,
+        request: {
+          requester_name: row.requester_name ?? '',
+          requester_email: row.requester_email ?? '',
+          requester_phone: row.requester_phone ?? '',
+          need_type: row.need_type ?? '',
+          commune: row.commune ?? '',
+          budget_xpf: row.budget_xpf == null ? '' : String(row.budget_xpf),
+          desired_date: row.desired_date ?? '',
+          details: row.details ?? '',
+        },
+      })),
     });
   } catch (err) {
     next(err);
