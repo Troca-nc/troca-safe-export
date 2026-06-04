@@ -650,7 +650,7 @@ export default function PublishWizard() {
 
       clearDraft()
       setSuccess('Annonce publiée avec succès.')
-      router.push(`/annonces/${createdId}`)
+      router.push(`/annonces/${createdId}?published=1`)
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'La publication a échoué.'
       setError(message)

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { formatDistanceToNow, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { ArrowLeft, BadgeDollarSign, Flag, Heart, X } from 'lucide-react'
@@ -189,6 +189,7 @@ function snapTo10(value: number) {
 
 export default function AnnonceDetail({ id, initialData }: Props) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user, isAuthenticated } = useAuthStore()
   const { isFavorited, toggleFavorite } = useFavorite()
   const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
@@ -218,6 +219,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
   const [reportFeedback, setReportFeedback] = useState<string | null>(null)
   const [reportError, setReportError] = useState<string | null>(null)
   const [trocModalOpen, setTrocModalOpen] = useState(false)
+  const [publishedBannerOpen, setPublishedBannerOpen] = useState(false)
   const replayedMessageRef = useRef(false)
   const trackedViewRef = useRef<string | null>(null)
 
@@ -251,6 +253,10 @@ export default function AnnonceDetail({ id, initialData }: Props) {
   useEffect(() => {
     setActiveImage(0)
   }, [listing?.id])
+
+  useEffect(() => {
+    setPublishedBannerOpen(searchParams.get('published') === '1')
+  }, [searchParams])
 
   useEffect(() => {
     if (!listing?.id) return
@@ -582,6 +588,44 @@ export default function AnnonceDetail({ id, initialData }: Props) {
           {error}
         </div>
       )}
+
+      {publishedBannerOpen ? (
+        <div className="mb-5 rounded-[2rem] border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">Publication réussie</p>
+              <h2 className="mt-2 text-2xl font-bold text-emerald-950">Votre annonce est en ligne</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-emerald-950/70">
+                Partagez-la maintenant, retrouvez-la dans vos annonces et découvrez les options de visibilité pour lui donner un coup de pouce.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPublishedBannerOpen(false)}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-emerald-200 bg-white text-emerald-700 transition hover:bg-emerald-100"
+              aria-label="Fermer le message de publication"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-3">
+            {shareAnnonce && <ShareButton annonce={shareAnnonce} variant="full" className="rounded-2xl" />}
+            <Link
+              href="/profil?tab=listings"
+              className="inline-flex items-center justify-center rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"
+            >
+              Voir mes annonces
+            </Link>
+            <Link
+              href="/pro"
+              className="inline-flex items-center justify-center rounded-2xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
+            >
+              Découvrir les boosts
+            </Link>
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid lg:grid-cols-[1.25fr_0.95fr] gap-6 items-start">
         <ListingHeroCard
