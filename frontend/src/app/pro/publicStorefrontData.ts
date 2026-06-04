@@ -18,6 +18,26 @@ export type ProPublicReview = {
   reviewer_avatar_url?: string | null
 }
 
+export type ProPublicBookingSettings = {
+  is_enabled: boolean
+  title: string
+  subtitle: string
+  location_label: string
+  location_text?: string | null
+  instructions?: string | null
+  slot_duration_minutes: number
+  advance_notice_hours: number
+  max_days_ahead: number
+}
+
+export type ProPublicBookingSlot = {
+  id: number | string
+  starts_at: string
+  ends_at: string
+  label?: string | null
+  status?: string | null
+}
+
 export type ProPublicProfile = {
   id: number | string
   prenom?: string | null
@@ -36,6 +56,8 @@ export type ProPublicProfile = {
   avg_rating?: number | null
   review_count?: number | null
   listing_count?: number | null
+  booking_settings?: ProPublicBookingSettings | null
+  booking_slots?: ProPublicBookingSlot[]
   reviews?: ProPublicReview[]
   listings?: any[]
 }
@@ -75,4 +97,3 @@ export const fetchProPublicReviews = cache(async (id: string, limit = 20) => {
     return []
   }
 })
-

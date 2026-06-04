@@ -51,6 +51,7 @@ const proRouter            = require('./routes/pro');
 const reviewsRouter        = require('./routes/reviews');
 const newsletterRouter     = require('./routes/newsletter');
 const contactRouter        = require('./routes/contact.route');
+const proBookingsRouter    = require('./routes/pro.bookings');
 const proTransportRouter   = require('./routes/pro-transport');
 const covoiturageRouter    = require('./routes/covoiturage.route');
 const proProductsRouter    = require('./routes/pro.products');
@@ -185,6 +186,7 @@ app.use('/api/messages',   offersRouter);          // POST /api/messages/offers
 app.use('/api/bon-plans',  bonPlansRouter);
 app.use('/api/businesses', businessesRouter);
 app.use('/api/admin/businesses', businessesAdminRouter);
+app.use('/api/pro',        proBookingsRouter);
 app.use('/api/pros',       proRouter);
 app.use('/api/pro',        proRouter);
 app.use('/api/pro',        proProductsRouter);

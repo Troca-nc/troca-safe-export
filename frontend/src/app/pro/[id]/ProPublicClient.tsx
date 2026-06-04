@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   ArrowRight,
   BadgeCheck,
+  CalendarDays,
   Globe,
   MapPin,
   MessageCircle,
@@ -19,6 +20,7 @@ import {
 import ListingCard from '@/components/listings/ListingCard'
 import ReviewCard from '@/components/reviews/ReviewCard'
 import ReviewSummary from '@/components/reviews/ReviewSummary'
+import ProBookingModal from '@/components/pro/ProBookingModal'
 import ProQuoteModal from '@/components/pro/ProQuoteModal'
 import { normalizeQuoteTemplate } from '@/components/pro/quoteTemplate'
 import { proApi } from '@/lib/api'
@@ -56,6 +58,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
   const [inviteLoading, setInviteLoading] = useState(false)
   const [inviteError, setInviteError] = useState('')
   const [quoteOpen, setQuoteOpen] = useState(false)
+  const [bookingOpen, setBookingOpen] = useState(false)
 
   useEffect(() => {
     if (!proId || initialProfile) {
@@ -157,6 +160,10 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
   const reviewCount = Number(profile.review_count ?? 0)
   const listingCount = Number(profile.listing_count ?? 0)
   const quoteTemplate = normalizeQuoteTemplate(profile.pro_quote_template)
+  const bookingSettings = profile.booking_settings
+  const bookingSlots = profile.booking_slots ?? []
+  const bookingEnabled = Boolean(bookingSettings?.is_enabled)
+  const bookingPreviewSlots = bookingSlots.slice(0, 3)
 
   return (
     <div className="min-h-screen bg-[var(--color-bg-page)] text-night">
@@ -256,6 +263,16 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                     <MessageCircle className="h-4 w-4" />
                     Demander un devis
                   </button>
+                  {bookingEnabled ? (
+                    <button
+                      type="button"
+                      onClick={() => setBookingOpen(true)}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                    >
+                      <CalendarDays className="h-4 w-4" />
+                      Prendre rendez-vous
+                    </button>
+                  ) : null}
                 </div>
               </div>
 
@@ -297,6 +314,108 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
             </div>
           </div>
         </section>
+
+        {bookingEnabled ? (
+          <section className="mx-auto max-w-7xl px-4 pb-8">
+            <div className="rounded-[2rem] border border-[var(--color-border)] bg-[linear-gradient(135deg,_rgba(214,240,246,0.45),_rgba(255,255,255,0.98))] p-5 shadow-sm md:p-6">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">
+                    Rendez-vous en ligne
+                  </p>
+                  <h2 className="mt-1 font-display text-2xl font-bold text-night">
+                    {bookingSettings?.title || 'Prendre rendez-vous'}
+                  </h2>
+                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-night/60">
+                    {bookingSettings?.subtitle || 'Réservez un créneau directement avec ce professionnel.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setBookingOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
+                >
+                  <CalendarDays className="h-4 w-4" />
+                  Voir les créneaux
+                </button>
+              </div>
+
+              <div className="mt-5 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+                <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral/80">Créneaux récents</p>
+                  {bookingPreviewSlots.length ? (
+                    <div className="mt-3 space-y-2">
+                      {bookingPreviewSlots.map((slot) => {
+                        const startsAt = new Date(slot.starts_at)
+                        const endsAt = new Date(slot.ends_at)
+                        const label = new Intl.DateTimeFormat('fr-FR', {
+                          weekday: 'short',
+                          day: 'numeric',
+                          month: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        }).format(startsAt)
+                        const endTime = new Intl.DateTimeFormat('fr-FR', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        }).format(endsAt)
+                        return (
+                          <div
+                            key={slot.id}
+                            className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--color-border)] px-4 py-3"
+                          >
+                            <div>
+                              <p className="text-sm font-semibold text-night">
+                                {slot.label || label}
+                              </p>
+                              <p className="mt-1 text-xs text-night/55">
+                                {label} · {endTime}
+                              </p>
+                            </div>
+                            <span className="rounded-full bg-nc-lagonLight px-2.5 py-1 text-[11px] font-semibold text-nc-lagon">
+                              Disponible
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <div className="mt-3 rounded-2xl border border-dashed border-[var(--color-border)] p-4 text-sm text-night/55">
+                      Ce professionnel n&apos;a pas encore publié de créneau visible.
+                    </div>
+                  )}
+                </div>
+
+                <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-nc-emeraude">
+                    Informations pratiques
+                  </p>
+                  <div className="mt-3 space-y-3 text-sm text-night/65">
+                    <p className="flex items-start gap-2">
+                      <MapPin className="mt-0.5 h-4 w-4 text-[#0A7EA4]" />
+                      <span>
+                        {bookingSettings?.location_label || 'Lieu du rendez-vous'} :{' '}
+                        {bookingSettings?.location_text || profile.pro_commune || 'À confirmer'}
+                      </span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <CalendarDays className="mt-0.5 h-4 w-4 text-[#0A7EA4]" />
+                      <span>
+                        Créneau minimum {bookingSettings?.advance_notice_hours ?? 24} h à l&apos;avance.
+                      </span>
+                    </p>
+                    {bookingSettings?.instructions ? (
+                      <p className="flex items-start gap-2">
+                        <MessageCircle className="mt-0.5 h-4 w-4 text-[#0A7EA4]" />
+                        <span>{bookingSettings.instructions}</span>
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         <section className="mx-auto max-w-7xl px-4 pb-8">
           <div className="flex flex-wrap gap-2 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-2 shadow-sm">
@@ -432,7 +551,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
       ) : null}      </main>
 
       <div className="fixed inset-x-4 bottom-4 z-40 md:hidden">
-        <div className="grid grid-cols-2 gap-3">
+        <div className={`grid gap-3 ${bookingEnabled ? 'grid-cols-3' : 'grid-cols-2'}`}>
           <Link
             href={`/messages/new?to=${profile.id}`}
             className="flex items-center justify-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#0A7EA4]/25"
@@ -448,6 +567,16 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
             <Package className="h-4 w-4 text-[#0A7EA4]" />
             Devis
           </button>
+          {bookingEnabled ? (
+            <button
+              type="button"
+              onClick={() => setBookingOpen(true)}
+              className="flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 shadow-lg shadow-black/5"
+            >
+              <CalendarDays className="h-4 w-4" />
+              RDV
+            </button>
+          ) : null}
         </div>
       </div>
       <ProQuoteModal
@@ -456,6 +585,13 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
         open={quoteOpen}
         onClose={() => setQuoteOpen(false)}
         template={quoteTemplate}
+      />
+      <ProBookingModal
+        proId={profile.id}
+        proName={displayName}
+        open={bookingOpen}
+        onClose={() => setBookingOpen(false)}
+        settings={bookingSettings}
       />
 </div>
   )

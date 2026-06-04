@@ -7,6 +7,7 @@ import {
   BarChart3,
   Bell,
   Building2,
+  CalendarDays,
   ChevronRight,
   FileText,
   MessageCircle,
@@ -23,6 +24,7 @@ import { useAuthStore } from '@/store/authStore'
 const NAV_ITEMS = [
   { href: '/pro/dashboard', label: "Vue d'ensemble", icon: BarChart3 },
   { href: '/pro/dashboard/produits', label: 'Produits', icon: Package },
+  { href: '/pro/dashboard/rdv', label: 'Rendez-vous', icon: CalendarDays },
   { href: '/pro/dashboard/annonces', label: 'Mes annonces', icon: Store },
   { href: '/pro/dashboard/boosts', label: 'Boosts', icon: Bell },
   { href: '/pro/dashboard/factures', label: 'Factures', icon: FileText },

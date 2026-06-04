@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import type { TouchEvent } from 'react'
-import { Search, MessageCircle, Plus, User, Menu, X, ChevronDown, LogOut, Heart, Home, Settings2, PlusCircle, Tag, Trophy, Car, PhoneCall, ArrowLeftRight } from 'lucide-react'
+import { Search, MessageCircle, Plus, User, Menu, X, ChevronDown, LogOut, Heart, Home, Settings2, PlusCircle, Tag, Trophy, Car, PhoneCall, ArrowLeftRight, CalendarDays } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useAuthActionStore } from '@/store/authActionStore'
 import { proApi } from '@/lib/api'
@@ -372,6 +372,10 @@ export default function Header() {
                           <Car className="h-4 w-4 text-night/50" />
                           Mes réservations
                         </Link>
+                        <Link href="/mes-rdv" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-sand" role="menuitem">
+                          <CalendarDays className="h-4 w-4 text-night/50" />
+                          Mes rendez-vous
+                        </Link>
                         <Link href="/covoiturage/mes-courses" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-sand" role="menuitem">
                           <Car className="h-4 w-4 text-night/50" />
                           Mes courses
@@ -472,6 +476,9 @@ export default function Header() {
                 </Link>
                 <Link href="/messages" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
                   Messages
+                </Link>
+                <Link href="/mes-rdv" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
+                  Mes rendez-vous
                 </Link>
                 <Link href="/favoris" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
                   Favoris

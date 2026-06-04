@@ -123,6 +123,34 @@ function normalizeQuoteTemplate(value) {
   };
 }
 
+function normalizeBookingTemplateSettings(row) {
+  if (!row) {
+    return {
+      is_enabled: false,
+      title: 'Prendre rendez-vous',
+      subtitle: 'Réservez un créneau directement avec ce professionnel.',
+      location_label: 'Lieu du rendez-vous',
+      location_text: null,
+      instructions: null,
+      slot_duration_minutes: 30,
+      advance_notice_hours: 24,
+      max_days_ahead: 30,
+    };
+  }
+
+  return {
+    is_enabled: Boolean(row.is_enabled),
+    title: normalizeMaybeText(row.title) || 'Prendre rendez-vous',
+    subtitle: normalizeMaybeText(row.subtitle) || 'Réservez un créneau directement avec ce professionnel.',
+    location_label: normalizeMaybeText(row.location_label) || 'Lieu du rendez-vous',
+    location_text: normalizeMaybeText(row.location_text),
+    instructions: normalizeMaybeText(row.instructions),
+    slot_duration_minutes: Number(row.slot_duration_minutes ?? 30),
+    advance_notice_hours: Number(row.advance_notice_hours ?? 24),
+    max_days_ahead: Number(row.max_days_ahead ?? 30),
+  };
+}
+
 function requirePro(req, res) {
   if (!req.user) {
     res.status(401).json({ error: 'Connexion requise.' });
@@ -330,7 +358,7 @@ async function loadProProfile(proId) {
   const profile = profileRes.rows[0];
   if (!profile) return null;
 
-  const [reviewsRes, listingsRes] = await Promise.all([
+  const [reviewsRes, listingsRes, bookingSettingsRes, bookingSlotsRes] = await Promise.all([
     query(
      `SELECT
          pr.id,
@@ -406,13 +434,60 @@ async function loadProProfile(proId) {
          AND a.status = 'active'
          AND a.deleted_at IS NULL
        ORDER BY a.is_boosted DESC, a.created_at DESC
-       LIMIT 12`,
+      LIMIT 12`,
+      [proId]
+    ),
+    query(
+      `SELECT
+         id,
+         pro_id,
+         is_enabled,
+         title,
+         subtitle,
+         location_label,
+         location_text,
+         instructions,
+         slot_duration_minutes,
+         advance_notice_hours,
+         max_days_ahead
+       FROM pro_booking_settings
+       WHERE pro_id = $1
+       LIMIT 1`,
+      [proId]
+    ),
+    query(
+      `SELECT
+         id,
+         pro_id,
+         starts_at,
+         ends_at,
+         label,
+         status,
+         source,
+         created_at
+       FROM pro_booking_slots
+       WHERE pro_id = $1
+         AND status = 'available'
+         AND starts_at >= NOW()
+       ORDER BY starts_at ASC
+       LIMIT 6`,
       [proId]
     ),
   ]);
 
   return {
     ...mapProsRow(profile),
+    booking_settings: normalizeBookingTemplateSettings(bookingSettingsRes.rows[0]),
+    booking_slots: bookingSlotsRes.rows.map((row) => ({
+      id: Number(row.id),
+      pro_id: Number(row.pro_id),
+      starts_at: row.starts_at,
+      ends_at: row.ends_at,
+      label: row.label ?? null,
+      status: row.status,
+      source: row.source,
+      created_at: row.created_at,
+    })),
     reviews: reviewsRes.rows.map((row) => ({
       id: Number(row.id),
       pro_id: Number(row.pro_id),

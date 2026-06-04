@@ -627,6 +627,82 @@ export const proApi = {
   },
 }
 
+export const proBookingsApi = {
+  getSlots: (proId: string | number) => cachedGet(
+    buildCacheKey('proBookings.getSlots', `/pro/${proId}/booking-slots`),
+    () => api.get(`/pro/${proId}/booking-slots`),
+    CACHE_TTL.short,
+  ),
+  book: async (proId: string | number, data: object) => {
+    const res = await api.post(`/pro/${proId}/bookings`, data)
+    invalidateApiCache('proBookings.')
+    invalidateApiCache('pro.')
+    invalidateApiCache('notifications.')
+    return res
+  },
+  getMine: () => cachedGet(
+    buildCacheKey('proBookings.mine', '/pro/bookings/mine'),
+    () => api.get('/pro/bookings/mine'),
+    CACHE_TTL.short,
+  ),
+  getDashboard: () => cachedGet(
+    buildCacheKey('proBookings.dashboard', '/pro/dashboard/bookings'),
+    () => api.get('/pro/dashboard/bookings'),
+    CACHE_TTL.short,
+  ),
+  getSettings: () => cachedGet(
+    buildCacheKey('proBookings.settings', '/pro/dashboard/booking-settings'),
+    () => api.get('/pro/dashboard/booking-settings'),
+    CACHE_TTL.short,
+  ),
+  updateSettings: async (data: object) => {
+    const res = await api.put('/pro/dashboard/booking-settings', data)
+    invalidateApiCache('proBookings.')
+    invalidateApiCache('pro.')
+    return res
+  },
+  createSlot: async (data: object) => {
+    const res = await api.post('/pro/dashboard/booking-slots', data)
+    invalidateApiCache('proBookings.')
+    invalidateApiCache('pro.')
+    return res
+  },
+  deleteSlot: async (slotId: string | number) => {
+    const res = await api.delete(`/pro/dashboard/booking-slots/${slotId}`)
+    invalidateApiCache('proBookings.')
+    invalidateApiCache('pro.')
+    return res
+  },
+  confirm: async (bookingId: string | number) => {
+    const res = await api.post(`/pro/bookings/${bookingId}/confirm`)
+    invalidateApiCache('proBookings.')
+    invalidateApiCache('pro.')
+    invalidateApiCache('notifications.')
+    return res
+  },
+  decline: async (bookingId: string | number) => {
+    const res = await api.post(`/pro/bookings/${bookingId}/decline`)
+    invalidateApiCache('proBookings.')
+    invalidateApiCache('pro.')
+    invalidateApiCache('notifications.')
+    return res
+  },
+  cancel: async (bookingId: string | number) => {
+    const res = await api.post(`/pro/bookings/${bookingId}/cancel`)
+    invalidateApiCache('proBookings.')
+    invalidateApiCache('pro.')
+    invalidateApiCache('notifications.')
+    return res
+  },
+  complete: async (bookingId: string | number) => {
+    const res = await api.post(`/pro/bookings/${bookingId}/complete`)
+    invalidateApiCache('proBookings.')
+    invalidateApiCache('pro.')
+    invalidateApiCache('notifications.')
+    return res
+  },
+}
+
 export const reviewsApi = {
   getByPro: (proId: string | number, params: object = {}) => cachedGet(
     buildCacheKey('reviews.getByPro', `/reviews/pro/${proId}`, params),
