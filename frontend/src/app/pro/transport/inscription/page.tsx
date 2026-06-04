@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState, type FormEvent } from 'react'
 import { ArrowRight, BadgeCheck, Upload } from 'lucide-react'
 
@@ -47,6 +48,7 @@ const COMMUNES = [
 ]
 
 export default function ProTransportInscriptionPage() {
+  const router = useRouter()
   const { user, isAuthenticated, hasHydrated } = useAuthStore()
   const [form, setForm] = useState<FormState>({
     company_name: '',
@@ -65,13 +67,13 @@ export default function ProTransportInscriptionPage() {
   useEffect(() => {
     if (!hasHydrated) return
     if (!isAuthenticated) {
-      window.location.replace('/connexion')
+      router.replace('/connexion')
       return
     }
     if (user && !user.is_pro) {
-      window.location.replace('/pro')
+      router.replace('/pro')
     }
-  }, [hasHydrated, isAuthenticated, user])
+  }, [hasHydrated, isAuthenticated, router, user])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()

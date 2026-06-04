@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight, CalendarDays, Clock3, MapPin, Users } from 'lucide-react'
 
@@ -48,22 +49,26 @@ function StatCard({
 }
 
 export default function ProDashboardTransportPage() {
+  const router = useRouter()
   const { user, isAuthenticated, hasHydrated } = useAuthStore()
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
+  const canAccess = hasHydrated && isAuthenticated && Boolean(user?.is_pro)
 
   useEffect(() => {
     if (!hasHydrated) return
     if (!isAuthenticated) {
-      window.location.replace('/connexion')
+      router.replace('/connexion')
       return
     }
     if (user && !user.is_pro) {
-      window.location.replace('/pro')
+      router.replace('/pro')
     }
-  }, [hasHydrated, isAuthenticated, user])
+  }, [hasHydrated, isAuthenticated, router, user])
 
   useEffect(() => {
+    if (!canAccess) return
+
     let alive = true
     const load = async () => {
       try {
@@ -82,13 +87,13 @@ export default function ProDashboardTransportPage() {
     return () => {
       alive = false
     }
-  }, [])
+  }, [canAccess])
 
   const transporter = data?.transporter
   const todayRides = useMemo(() => data?.rides_today ?? [], [data])
   const upcomingRides = useMemo(() => data?.rides_upcoming ?? [], [data])
 
-  if (!hasHydrated || !isAuthenticated || (user && !user.is_pro)) {
+  if (!canAccess) {
     return (
       <main className="mx-auto flex min-h-[60vh] max-w-7xl items-center justify-center px-4">
         <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-10 text-center shadow-sm">
