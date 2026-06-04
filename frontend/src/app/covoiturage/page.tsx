@@ -118,6 +118,44 @@ function formatRecurrenceLabel(ride: Ride) {
   return days.map((day) => WEEKDAY_OPTIONS.find((option) => option.value === day)?.short || '').filter(Boolean).join(', ')
 }
 
+function formatRecurrenceDraftSummary(draft: {
+  recurrence_type: 'daily' | 'weekly'
+  recurrence_days: number[]
+  recurrence_until: string
+  ride_date: string
+}) {
+  if (!draft.ride_date || !draft.recurrence_until) return null
+
+  const untilLabel = formatDateLabel(draft.recurrence_until)
+  const days = [...new Set(draft.recurrence_days.map((value) => Number(value)).filter((value) => Number.isInteger(value) && value >= 0 && value <= 6))].sort((a, b) => a - b)
+  const dayLabel =
+    draft.recurrence_type === 'daily'
+      ? 'Tous les jours'
+      : days.length
+        ? days.map((day) => WEEKDAY_OPTIONS.find((option) => option.value === day)?.label || '').filter(Boolean).join(', ')
+        : 'Chaque semaine'
+
+  let occurrences = 1
+  const start = new Date(`${draft.ride_date}T12:00:00Z`)
+  const end = new Date(`${draft.recurrence_until}T12:00:00Z`)
+  if (!Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime()) && end >= start) {
+    if (draft.recurrence_type === 'daily') {
+      occurrences = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+    } else if (days.length) {
+      let count = 0
+      const cursor = new Date(start)
+      cursor.setUTCHours(12, 0, 0, 0)
+      while (cursor <= end) {
+        if (days.includes(cursor.getUTCDay())) count += 1
+        cursor.setUTCDate(cursor.getUTCDate() + 1)
+      }
+      occurrences = count || 1
+    }
+  }
+
+  return { untilLabel, dayLabel, occurrences }
+}
+
 function formatTimeLabel(value?: string | null) {
   if (!value) return 'Heure libre'
   return value.slice(0, 5)
@@ -312,6 +350,19 @@ export default function CovoituragePage() {
           route: formatRouteLabel(ride),
         })),
     [rides],
+  )
+
+  const recurrenceDraftSummary = useMemo(
+    () =>
+      form.recurrence_enabled
+        ? formatRecurrenceDraftSummary({
+            recurrence_type: form.recurrence_type,
+            recurrence_days: form.recurrence_days,
+            recurrence_until: form.recurrence_until,
+            ride_date: form.ride_date,
+          })
+        : null,
+    [form.recurrence_days, form.recurrence_enabled, form.recurrence_type, form.recurrence_until, form.ride_date],
   )
 
   const refreshRides = async () => {
@@ -799,6 +850,26 @@ export default function CovoituragePage() {
                             </div>
                           </div>
                         ) : null}
+                      </div>
+                    ) : null}
+                    {form.recurrence_enabled ? (
+                      <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Récapitulatif</p>
+                        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-night">
+                          <span className="rounded-full bg-white px-3 py-1 font-semibold text-emerald-700">Trajet récurrent</span>
+                          {recurrenceDraftSummary ? (
+                            <>
+                              <span>•</span>
+                              <span>Jusqu’au {recurrenceDraftSummary.untilLabel}</span>
+                              <span>•</span>
+                              <span>{recurrenceDraftSummary.dayLabel}</span>
+                              <span>•</span>
+                              <span>{recurrenceDraftSummary.occurrences} trajet{recurrenceDraftSummary.occurrences > 1 ? 's' : ''} programmés</span>
+                            </>
+                          ) : (
+                            <span>Choisissez une date de début et une date de fin pour prévisualiser la série.</span>
+                          )}
+                        </div>
                       </div>
                     ) : null}
                   </div>
