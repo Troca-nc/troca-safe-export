@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, CalendarDays, Check, Eye, MapPin, Sparkles, X } from 'lucide-react'
 
+import ListingCoachCard from '@/components/annonces/ListingCoachCard'
 import Header from '@/components/layout/Header'
 
 type PreviewPhoto = {
@@ -24,6 +25,8 @@ type PreviewDraft = {
   condition: 'new' | 'like_new' | 'good' | 'fair' | 'for_parts'
   price_negotiable: boolean
   is_free: boolean
+  is_troc?: boolean
+  contre_quoi?: string
 }
 
 type PreviewPayload = {
@@ -237,11 +240,23 @@ export default function ListingPreviewPage() {
                   <span className="text-night/45">Annonce gratuite</span>
                   <span className="font-semibold text-night">{preview.draft.is_free ? 'Oui' : 'Non'}</span>
                 </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-night/45">Troc possible</span>
+                  <span className="font-semibold text-night">{preview.draft.is_troc ? 'Oui' : 'Non'}</span>
+                </div>
+                {preview.draft.is_troc && preview.draft.contre_quoi ? (
+                  <div className="rounded-2xl border border-[#0A7EA4]/15 bg-[#0A7EA4]/6 px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#0A7EA4]">Contre quoi ?</p>
+                    <p className="mt-1 text-sm text-night/75">{preview.draft.contre_quoi}</p>
+                  </div>
+                ) : null}
               </div>
             </div>
 
+            <ListingCoachCard photoCount={preview.photos.length} description={preview.draft.description} />
+
             <div className="rounded-[2rem] border border-night/8 bg-[linear-gradient(180deg,_rgba(8,32,50,0.98),_rgba(8,32,50,0.9))] p-5 text-white shadow-[0_24px_80px_rgba(8,32,50,0.18)]">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-lagoon">Conseil</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-lagoon">Conseil final</p>
               <p className="mt-3 text-sm leading-6 text-white/70">
                 Vérifiez le cadrage des photos et les informations de prix avant de publier.
               </p>

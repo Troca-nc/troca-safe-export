@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { formatDistanceToNow, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { ArrowLeft, Heart } from 'lucide-react'
+import { ArrowLeft, BadgeDollarSign, Flag, Heart, X } from 'lucide-react'
 import { listingsApi, messagesApi, usersApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import { consumePendingAuthAction, peekPendingAuthAction } from '@/lib/authAction'
@@ -14,6 +14,7 @@ import { useFavorite } from '@/hooks/useFavorite'
 import { trackEvent } from '@/lib/analytics'
 import { API_ORIGIN } from '@/lib/api'
 import ShareButton from '@/components/annonces/ShareButton'
+import TrocProposalForm from '@/components/troc/TrocProposalForm'
 import {
   ListingHeroCard,
   RelatedSearchesSection,
@@ -181,6 +182,11 @@ function buildAssociatedSearches(listing: ListingDetail) {
   return searches.slice(0, 7)
 }
 
+function snapTo10(value: number) {
+  if (!Number.isFinite(value)) return 0
+  return Math.max(0, Math.round(value / 10) * 10)
+}
+
 export default function AnnonceDetail({ id, initialData }: Props) {
   const router = useRouter()
   const { user, isAuthenticated } = useAuthStore()
@@ -199,6 +205,19 @@ export default function AnnonceDetail({ id, initialData }: Props) {
   const [reviewSubmitting, setReviewSubmitting] = useState(false)
   const [reviewFeedback, setReviewFeedback] = useState<string | null>(null)
   const [reviewError, setReviewError] = useState<string | null>(null)
+  const [offerModalOpen, setOfferModalOpen] = useState(false)
+  const [offerAmount, setOfferAmount] = useState('')
+  const [offerNote, setOfferNote] = useState('')
+  const [offerSubmitting, setOfferSubmitting] = useState(false)
+  const [offerFeedback, setOfferFeedback] = useState<string | null>(null)
+  const [offerError, setOfferError] = useState<string | null>(null)
+  const [reportModalOpen, setReportModalOpen] = useState(false)
+  const [reportReason, setReportReason] = useState<'spam' | 'fake' | 'prohibited' | 'offensive' | 'other'>('spam')
+  const [reportComment, setReportComment] = useState('')
+  const [reportSubmitting, setReportSubmitting] = useState(false)
+  const [reportFeedback, setReportFeedback] = useState<string | null>(null)
+  const [reportError, setReportError] = useState<string | null>(null)
+  const [trocModalOpen, setTrocModalOpen] = useState(false)
   const replayedMessageRef = useRef(false)
   const trackedViewRef = useRef<string | null>(null)
 
@@ -403,6 +422,106 @@ export default function AnnonceDetail({ id, initialData }: Props) {
     }
   }
 
+  const openOfferModal = () => {
+    if (!listing) return
+    if (!isAuthenticated) {
+      openAuthModal({
+        type: 'login',
+        redirectTo: `/annonces/${listing.id}`,
+      })
+      return
+    }
+    setOfferFeedback(null)
+    setOfferError(null)
+    setOfferAmount((current) => current || String(snapTo10((listing.price ?? 0) * 0.9 || 0)))
+    setOfferNote('')
+    setOfferModalOpen(true)
+  }
+
+  const openReportModal = () => {
+    if (!listing) return
+    if (!isAuthenticated) {
+      openAuthModal({
+        type: 'login',
+        redirectTo: `/annonces/${listing.id}`,
+      })
+      return
+    }
+    setReportFeedback(null)
+    setReportError(null)
+    setReportComment('')
+    setReportReason('spam')
+    setReportModalOpen(true)
+  }
+
+  const handleSubmitOffer = async () => {
+    if (!listing) return
+    const amount = snapTo10(Number(String(offerAmount).replace(/\s/g, '')))
+    if (!amount) {
+      setOfferError('Indiquez un montant valide pour votre offre.')
+      return
+    }
+
+    if (!isAuthenticated) {
+      openAuthModal({
+        type: 'login',
+        redirectTo: `/annonces/${listing.id}`,
+      })
+      return
+    }
+
+    setOfferSubmitting(true)
+    setOfferError(null)
+    setOfferFeedback(null)
+    try {
+      const starter = `Bonjour, je souhaite faire une offre de ${amount.toLocaleString('fr-FR')} XPF pour "${listing.title}".${offerNote.trim() ? `\n\n${offerNote.trim()}` : ''}`
+      const convoRes = await messagesApi.startConversation({
+        annonce_id: Number(listing.id),
+        message: starter,
+      })
+      const convId =
+        convoRes.data?.data?.conversationId ??
+        convoRes.data?.conversationId ??
+        convoRes.data?.data?.conversation_id ??
+        convoRes.data?.conversation_id ??
+        convoRes.data?.id
+
+      if (!convId) {
+        throw new Error('Conversation introuvable')
+      }
+
+      await messagesApi.makeOffer(convId, amount)
+      setOfferFeedback('Votre offre a bien été envoyée. Vous êtes redirigé vers la conversation.')
+      setOfferModalOpen(false)
+      router.push(`/messages/${convId}`)
+    } catch {
+      setOfferError("Impossible d'envoyer votre offre pour le moment.")
+    } finally {
+      setOfferSubmitting(false)
+    }
+  }
+
+  const handleSubmitReport = async () => {
+    if (!listing) return
+    setReportSubmitting(true)
+    setReportError(null)
+    setReportFeedback(null)
+    try {
+      await listingsApi.report(listing.id, {
+        reason: reportReason,
+        comment: reportComment.trim(),
+      })
+      setReportFeedback('Merci, votre signalement a bien été envoyé.')
+      setReportModalOpen(false)
+      setReportComment('')
+      setReportReason('spam')
+    } catch {
+      setReportError("Impossible d'envoyer le signalement pour le moment.")
+    } finally {
+      setReportSubmitting(false)
+    }
+  }
+
   const handleSubmitReview = async () => {
     if (!listing) return
     setReviewSubmitting(true)
@@ -481,6 +600,9 @@ export default function AnnonceDetail({ id, initialData }: Props) {
             isOwner={isOwner}
             sendingMessage={sendingMessage}
             onMessageSeller={handleMessageSeller}
+            onMakeOffer={openOfferModal}
+            onProposeTroc={() => setTrocModalOpen(true)}
+            onReportListing={openReportModal}
             onOpenPro={() => router.push('/pro')}
             onViewSeller={() => router.push(`/profil/${listing.user.id}`)}
             trustState={trustState}
@@ -514,6 +636,201 @@ export default function AnnonceDetail({ id, initialData }: Props) {
 
       <SellerListingsSection items={otherSellerListings} sellerId={listing.user.id} />
       <RelatedSearchesSection searches={associatedSearches} />
+
+      {offerModalOpen && (
+        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-night/55 px-4 py-6 backdrop-blur-sm sm:items-center">
+          <div className="relative w-full max-w-2xl rounded-[2rem] border border-night/10 bg-white p-6 shadow-[0_24px_80px_rgba(8,32,50,0.2)]">
+            <button
+              type="button"
+              onClick={() => setOfferModalOpen(false)}
+              className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-night/10 bg-white text-night/50 transition hover:text-night"
+              aria-label="Fermer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-start gap-3 pr-10">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-coral/10 text-coral">
+                <BadgeDollarSign className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Offre rapide</p>
+                <h2 className="mt-1 text-2xl font-bold text-night">Faire une offre pour {listing.title}</h2>
+                <p className="mt-2 text-sm leading-6 text-night/60">
+                  Proposez un montant et ajoutez un message bref. La discussion s’ouvrira directement avec le vendeur.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-4 sm:grid-cols-[1fr_1.1fr]">
+              <label className="block space-y-2">
+                <span className="text-sm font-medium text-night">Montant proposé (XPF)</span>
+                <input
+                  type="number"
+                  min={0}
+                  step={10}
+                  value={offerAmount}
+                  onChange={(event) => setOfferAmount(event.target.value)}
+                  onBlur={(event) => setOfferAmount(String(snapTo10(Number(event.target.value || 0))))}
+                  className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10"
+                  placeholder="Ex. 12 000"
+                />
+                {listing.price != null && (
+                  <p className="text-xs text-night/45">
+                    Prix affiché: {listing.price.toLocaleString('fr-FR')} XPF
+                    {listing.price_negotiable ? ' · négociable' : ''}
+                  </p>
+                )}
+              </label>
+
+              <label className="block space-y-2">
+                <span className="text-sm font-medium text-night">Message facultatif</span>
+                <textarea
+                  value={offerNote}
+                  onChange={(event) => setOfferNote(event.target.value)}
+                  rows={4}
+                  className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10"
+                  placeholder="Ajoutez une courte note sur votre offre..."
+                  maxLength={500}
+                />
+              </label>
+            </div>
+
+            {offerFeedback && (
+              <div className="mt-4 rounded-2xl bg-jungle/10 px-4 py-3 text-sm font-medium text-jungle">
+                {offerFeedback}
+              </div>
+            )}
+            {offerError && (
+              <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {offerError}
+              </div>
+            )}
+
+            <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setOfferModalOpen(false)}
+                className="inline-flex items-center justify-center rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-semibold text-night transition hover:bg-night/5"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmitOffer}
+                disabled={offerSubmitting}
+                className="inline-flex items-center justify-center rounded-2xl bg-coral px-4 py-3 text-sm font-semibold text-white transition hover:bg-coral/90 disabled:cursor-wait disabled:opacity-60"
+              >
+                {offerSubmitting ? 'Envoi...' : 'Envoyer mon offre'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {reportModalOpen && (
+        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-night/55 px-4 py-6 backdrop-blur-sm sm:items-center">
+          <div className="relative w-full max-w-xl rounded-[2rem] border border-night/10 bg-white p-6 shadow-[0_24px_80px_rgba(8,32,50,0.2)]">
+            <button
+              type="button"
+              onClick={() => setReportModalOpen(false)}
+              className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-night/10 bg-white text-night/50 transition hover:text-night"
+              aria-label="Fermer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-start gap-3 pr-10">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+                <Flag className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-red-600/80">Signalement</p>
+                <h2 className="mt-1 text-2xl font-bold text-night">Signaler cette annonce</h2>
+                <p className="mt-2 text-sm leading-6 text-night/60">
+                  Aidez-nous à garder une plateforme de confiance. Votre signalement sera transmis à notre équipe.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-4">
+              <label className="block space-y-2">
+                <span className="text-sm font-medium text-night">Motif</span>
+                <select
+                  value={reportReason}
+                  onChange={(event) => setReportReason(event.target.value as typeof reportReason)}
+                  className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-red-300 focus:ring-4 focus:ring-red-100"
+                >
+                  <option value="spam">Spam ou publicité abusive</option>
+                  <option value="fake">Annonce douteuse ou trompeuse</option>
+                  <option value="prohibited">Produit ou contenu interdit</option>
+                  <option value="offensive">Contenu offensant</option>
+                  <option value="other">Autre</option>
+                </select>
+              </label>
+
+              <label className="block space-y-2">
+                <span className="text-sm font-medium text-night">Commentaire (facultatif)</span>
+                <textarea
+                  value={reportComment}
+                  onChange={(event) => setReportComment(event.target.value)}
+                  rows={4}
+                  className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-red-300 focus:ring-4 focus:ring-red-100"
+                  placeholder="Expliquez brièvement ce qui vous paraît problématique..."
+                  maxLength={500}
+                />
+              </label>
+            </div>
+
+            {reportFeedback && (
+              <div className="mt-4 rounded-2xl bg-jungle/10 px-4 py-3 text-sm font-medium text-jungle">
+                {reportFeedback}
+              </div>
+            )}
+            {reportError && (
+              <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {reportError}
+              </div>
+            )}
+
+            <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setReportModalOpen(false)}
+                className="inline-flex items-center justify-center rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-semibold text-night transition hover:bg-night/5"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmitReport}
+                disabled={reportSubmitting}
+                className="inline-flex items-center justify-center rounded-2xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-wait disabled:opacity-60"
+              >
+                {reportSubmitting ? 'Envoi...' : 'Envoyer le signalement'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {trocModalOpen && (
+        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-night/55 px-4 py-6 backdrop-blur-sm sm:items-center">
+          <div className="relative w-full max-w-2xl overflow-hidden rounded-[2rem] border border-night/10 bg-white shadow-[0_24px_80px_rgba(8,32,50,0.2)]">
+            <button
+              type="button"
+              onClick={() => setTrocModalOpen(false)}
+              className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-night/10 bg-white text-night/50 transition hover:text-night z-10"
+              aria-label="Fermer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <div className="max-h-[85vh] overflow-y-auto p-4 sm:p-6">
+              <TrocProposalForm listingId={listing.id} listingTitle={listing.title} />
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

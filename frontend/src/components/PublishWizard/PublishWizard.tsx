@@ -21,6 +21,7 @@ import { listingsApi, metaApi, uploadApi } from '@/lib/api'
 import { useAutosave, useBeforeUnload } from '@/hooks/useAutosave'
 import { useAuthStore } from '@/store/authStore'
 import CategoryFields from '@/components/annonces/CategoryFields'
+import ListingCoachCard from '@/components/annonces/ListingCoachCard'
 import { FALLBACK_CATEGORIES } from '@/lib/categoryCatalog'
 import { getCategoryIcon } from '@/lib/categoryPresentation'
 import { findCategoryNodeById, findCategoryPathById } from '../../../../shared/categoryTaxonomy'
@@ -51,6 +52,8 @@ type WizardDraft = {
   condition: 'new' | 'like_new' | 'good' | 'fair' | 'for_parts'
   price_negotiable: boolean
   is_free: boolean
+  is_troc: boolean
+  contre_quoi: string
   metadata: Record<string, unknown>
 }
 
@@ -71,6 +74,8 @@ const INITIAL_DRAFT: WizardDraft = {
   condition: 'good',
   price_negotiable: false,
   is_free: false,
+  is_troc: false,
+  contre_quoi: '',
   metadata: {},
 }
 
@@ -531,6 +536,7 @@ export default function PublishWizard() {
         ...draft,
         title: draft.title.trim(),
         description: draft.description.trim(),
+        contre_quoi: draft.contre_quoi.trim(),
         metadata: metadataPayload,
       },
       category_name: selectedCategory?.name ?? null,
@@ -624,6 +630,8 @@ export default function PublishWizard() {
         condition: draft.condition,
         price: draft.is_free ? null : snapTo10(draft.price),
         is_free: draft.is_free,
+        is_troc: draft.is_troc,
+        contre_quoi: draft.is_troc ? draft.contre_quoi.trim() : '',
         price_negotiable: draft.price_negotiable,
         is_negotiable: draft.price_negotiable,
         duration_days: Number(draft.duration_days),
@@ -869,6 +877,42 @@ export default function PublishWizard() {
 
             {draft.step === 3 && (
               <div className="space-y-4">
+                <div className="rounded-[1.75rem] border border-[#0A7EA4]/18 bg-[#0A7EA4]/6 p-4 shadow-sm">
+                  <label className="flex cursor-pointer items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={draft.is_troc}
+                      onChange={(event) =>
+                        setDraft((current) => ({
+                          ...current,
+                          is_troc: event.target.checked,
+                          contre_quoi: event.target.checked ? current.contre_quoi : '',
+                        }))
+                      }
+                      className="mt-1 h-4 w-4 rounded border-night/20 text-[#0A7EA4] focus:ring-[#0A7EA4]/25"
+                    />
+                    <span className="flex-1">
+                      <span className="block text-sm font-semibold text-night">Troc possible</span>
+                      <span className="mt-1 block text-xs leading-relaxed text-night/60">
+                        Les autres utilisateurs pourront vous proposer un échange au lieu d&apos;un paiement.
+                      </span>
+                    </span>
+                  </label>
+
+                  {draft.is_troc ? (
+                    <label className="mt-4 block space-y-2">
+                      <span className="text-sm font-semibold text-night">Contre quoi souhaitez-vous échanger ?</span>
+                      <input
+                        type="text"
+                        value={draft.contre_quoi}
+                        onChange={(event) => setDraft((current) => ({ ...current, contre_quoi: event.target.value }))}
+                        placeholder="Ex. vélo, smartphone, console, outillage..."
+                        className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#0A7EA4] focus:ring-4 focus:ring-[#0A7EA4]/15"
+                      />
+                    </label>
+                  ) : null}
+                </div>
+
                 <div className="grid gap-4 md:grid-cols-2">
                   <label className="block space-y-2">
                     <span className="text-sm font-semibold text-night">Prix *</span>
@@ -1002,6 +1046,7 @@ export default function PublishWizard() {
           </section>
 
           <aside className="space-y-5">
+            <ListingCoachCard photoCount={photos.length} description={draft.description} />
             <div className="rounded-[2rem] border border-night/8 bg-[linear-gradient(180deg,_rgba(8,32,50,0.98),_rgba(8,32,50,0.9))] p-5 text-white shadow-[0_24px_80px_rgba(8,32,50,0.18)]">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-lagoon">
                 <Sparkles className="h-3.5 w-3.5" />

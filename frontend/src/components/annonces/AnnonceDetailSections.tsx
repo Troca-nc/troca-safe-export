@@ -3,9 +3,12 @@
 import Link from 'next/link'
 import ListingImageComponent from '@/components/ListingImage'
 import {
+  ArrowLeftRight,
   AlertTriangle,
   BadgeCheck,
+  BadgeDollarSign,
   Clock,
+  Flag,
   Heart,
   MailCheck,
   MapPin,
@@ -250,6 +253,9 @@ export function SellerSidebar({
   isOwner,
   sendingMessage,
   onMessageSeller,
+  onMakeOffer,
+  onProposeTroc,
+  onReportListing,
   onOpenPro,
   onViewSeller,
   trustState,
@@ -260,6 +266,9 @@ export function SellerSidebar({
   isOwner: boolean
   sendingMessage: boolean
   onMessageSeller: () => void
+  onMakeOffer: () => void
+  onProposeTroc: () => void
+  onReportListing: () => void
   onOpenPro: () => void
   onViewSeller: () => void
   trustState: TrustState
@@ -367,6 +376,28 @@ export function SellerSidebar({
             <MessageCircle size={16} />
             {isOwner ? 'Votre annonce' : sendingMessage ? 'Ouverture...' : 'Envoyer un message'}
           </button>
+          {!isOwner && (
+            <div className="grid gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={onMakeOffer}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-medium text-night transition hover:border-coral/20 hover:bg-coral/5 hover:text-coral"
+              >
+                <BadgeDollarSign size={16} />
+                Faire une offre
+              </button>
+              {listing.contre_quoi && (
+                <button
+                  type="button"
+                  onClick={onProposeTroc}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-jungle/20 bg-jungle/5 px-4 py-3 text-sm font-medium text-jungle transition hover:bg-jungle/10"
+                >
+                  <ArrowLeftRight size={16} />
+                  Proposer un troc
+                </button>
+              )}
+            </div>
+          )}
           <button
             type="button"
             disabled
@@ -383,6 +414,16 @@ export function SellerSidebar({
             >
               <TrendingUp size={16} />
               Booster et mettre en avant
+            </button>
+          )}
+          {!isOwner && (
+            <button
+              type="button"
+              onClick={onReportListing}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 hover:bg-red-100"
+            >
+              <Flag size={16} />
+              Signaler l’annonce
             </button>
           )}
           <button
