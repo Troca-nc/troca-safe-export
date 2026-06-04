@@ -14,6 +14,7 @@ import {
   Package,
   Settings2,
   Store,
+  Users2,
   X,
 } from 'lucide-react'
 
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
   { href: '/pro/dashboard/annonces', label: 'Mes annonces', icon: Store },
   { href: '/pro/dashboard/boosts', label: 'Boosts', icon: Bell },
   { href: '/pro/dashboard/factures', label: 'Factures', icon: FileText },
+  { href: '/pro/dashboard/parrainage', label: 'Parrainage', icon: Users2 },
   { href: '/pro/dashboard/auto-reply', label: 'Réponse auto', icon: MessageCircle },
   { href: '/pro/dashboard/transport', label: 'Transport', icon: Building2 },
   { href: '/pro/[id]', label: 'Ma vitrine', icon: Building2 },
