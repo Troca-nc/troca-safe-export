@@ -24,23 +24,32 @@ const applySchema = Joi.object({
   siret: Joi.string().trim().max(60).allow('', null).optional(),
 });
 
-const profileUpdateSchema = Joi.object({
-  company_name: Joi.string().trim().min(2).max(200).allow('', null).optional(),
-  category: Joi.string().trim().min(2).max(120).allow('', null).optional(),
-  description: Joi.string().trim().max(300).allow('', null).optional(),
-  website: Joi.string().trim().uri().allow('', null).optional(),
-  phone: Joi.string().trim().min(6).max(30).allow('', null).optional(),
-  hours: Joi.string().trim().max(255).allow('', null).optional(),
-  commune: Joi.string().trim().min(2).max(120).allow('', null).optional(),
-  siret: Joi.string().trim().max(60).allow('', null).optional(),
-  logo_url: Joi.string().trim().uri().allow('', null).optional(),
-  banner_url: Joi.string().trim().uri().allow('', null).optional(),
-});
-
 const reviewSchema = Joi.object({
   rating: Joi.number().integer().min(1).max(5).required(),
   comment: Joi.string().trim().max(1000).allow('', null).optional(),
 });
+
+const quoteTemplateSchema = Joi.object({
+  title: Joi.string().trim().max(120).allow('', null).optional(),
+  subtitle: Joi.string().trim().max(220).allow('', null).optional(),
+  need_type_label: Joi.string().trim().max(120).allow('', null).optional(),
+  need_type_placeholder: Joi.string().trim().max(160).allow('', null).optional(),
+  commune_label: Joi.string().trim().max(120).allow('', null).optional(),
+  commune_placeholder: Joi.string().trim().max(160).allow('', null).optional(),
+  requester_phone_label: Joi.string().trim().max(120).allow('', null).optional(),
+  requester_phone_placeholder: Joi.string().trim().max(160).allow('', null).optional(),
+  budget_label: Joi.string().trim().max(120).allow('', null).optional(),
+  budget_placeholder: Joi.string().trim().max(160).allow('', null).optional(),
+  desired_date_label: Joi.string().trim().max(120).allow('', null).optional(),
+  desired_date_placeholder: Joi.string().trim().max(160).allow('', null).optional(),
+  details_label: Joi.string().trim().max(120).allow('', null).optional(),
+  details_placeholder: Joi.string().trim().max(220).allow('', null).optional(),
+  show_phone: Joi.boolean().optional(),
+  show_budget: Joi.boolean().optional(),
+  show_date: Joi.boolean().optional(),
+  show_details: Joi.boolean().optional(),
+  budget_presets: Joi.array().items(Joi.number().integer().min(0)).max(6).optional(),
+}).allow(null).optional();
 
 const quoteSchema = Joi.object({
   requester_name: Joi.string().trim().min(2).max(120).required(),
@@ -53,9 +62,65 @@ const quoteSchema = Joi.object({
   details: Joi.string().trim().max(1200).allow('', null).optional(),
 });
 
+const profileUpdateSchema = Joi.object({
+  company_name: Joi.string().trim().min(2).max(200).allow('', null).optional(),
+  category: Joi.string().trim().min(2).max(120).allow('', null).optional(),
+  description: Joi.string().trim().max(300).allow('', null).optional(),
+  website: Joi.string().trim().uri().allow('', null).optional(),
+  phone: Joi.string().trim().min(6).max(30).allow('', null).optional(),
+  hours: Joi.string().trim().max(255).allow('', null).optional(),
+  commune: Joi.string().trim().min(2).max(120).allow('', null).optional(),
+  siret: Joi.string().trim().max(60).allow('', null).optional(),
+  logo_url: Joi.string().trim().uri().allow('', null).optional(),
+  banner_url: Joi.string().trim().uri().allow('', null).optional(),
+  quote_template: quoteTemplateSchema,
+});
+
 function normalizeMaybeText(value) {
   const text = String(value ?? '').trim();
   return text.length > 0 ? text : null;
+}
+
+function normalizeQuoteTemplate(value) {
+  let input = value;
+  if (typeof input === 'string') {
+    try {
+      input = JSON.parse(input);
+    } catch {
+      input = null;
+    }
+  }
+
+  const source = input && typeof input === 'object' ? input : {};
+  const budgetPresets = Array.isArray(source.budget_presets)
+    ? source.budget_presets
+        .map((entry) => Number(entry))
+        .filter((entry) => Number.isFinite(entry) && entry > 0)
+        .map((entry) => Math.round(entry))
+        .slice(0, 6)
+    : [15000, 30000, 50000];
+
+  return {
+    title: normalizeMaybeText(source.title) || 'Demander un devis',
+    subtitle: normalizeMaybeText(source.subtitle) || 'Décrivez votre besoin et recevez une réponse plus précise du professionnel.',
+    need_type_label: normalizeMaybeText(source.need_type_label) || 'Type de besoin',
+    need_type_placeholder: normalizeMaybeText(source.need_type_placeholder) || 'Plomberie, rénovation, logo...',
+    commune_label: normalizeMaybeText(source.commune_label) || 'Commune',
+    commune_placeholder: normalizeMaybeText(source.commune_placeholder) || 'Nouméa, Dumbéa...',
+    requester_phone_label: normalizeMaybeText(source.requester_phone_label) || 'Téléphone',
+    requester_phone_placeholder: normalizeMaybeText(source.requester_phone_placeholder) || 'XX XX XX XX',
+    budget_label: normalizeMaybeText(source.budget_label) || 'Budget estimé',
+    budget_placeholder: normalizeMaybeText(source.budget_placeholder) || '25000',
+    desired_date_label: normalizeMaybeText(source.desired_date_label) || 'Date souhaitée',
+    desired_date_placeholder: normalizeMaybeText(source.desired_date_placeholder) || '',
+    details_label: normalizeMaybeText(source.details_label) || 'Précisions',
+    details_placeholder: normalizeMaybeText(source.details_placeholder) || "Expliquez votre besoin, les contraintes, le niveau d'urgence...",
+    show_phone: typeof source.show_phone === 'boolean' ? source.show_phone : true,
+    show_budget: typeof source.show_budget === 'boolean' ? source.show_budget : true,
+    show_date: typeof source.show_date === 'boolean' ? source.show_date : true,
+    show_details: typeof source.show_details === 'boolean' ? source.show_details : true,
+    budget_presets: budgetPresets.length > 0 ? budgetPresets : [15000, 30000, 50000],
+  };
 }
 
 function requirePro(req, res) {
@@ -170,6 +235,7 @@ function mapProsRow(row) {
     pro_phone: row.pro_phone ?? null,
     pro_hours: row.pro_hours ?? null,
     pro_siret: row.pro_siret ?? null,
+    pro_quote_template: normalizeQuoteTemplate(row.pro_quote_template),
     avg_rating: Number(row.avg_rating ?? 0),
     review_count: Number(row.review_count ?? 0),
     listing_count: Number(row.listing_count ?? 0),
@@ -199,6 +265,7 @@ async function loadProProfile(proId) {
        u.pro_phone,
        u.pro_hours,
        u.pro_siret,
+       u.pro_quote_template,
        COALESCE(ROUND((
          SELECT AVG(r.rating)::numeric
          FROM verified_reviews r
@@ -393,6 +460,7 @@ router.get('/', async (req, res, next) => {
          u.pro_phone,
          u.pro_hours,
          u.pro_siret,
+         u.pro_quote_template,
          COALESCE(ROUND((
            SELECT AVG(r.rating)::numeric
            FROM pro_reviews r
@@ -608,12 +676,13 @@ router.patch('/me', authenticate, async (req, res, next) => {
       siret: 'pro_siret',
       logo_url: 'pro_logo_url',
       banner_url: 'pro_banner_url',
+      quote_template: 'pro_quote_template',
     };
 
     for (const [key, column] of Object.entries(mapping)) {
       if (Object.prototype.hasOwnProperty.call(value, key)) {
         fields.push(`${column} = $${p}`);
-        params.push(normalizeMaybeText(value[key]));
+        params.push(key === 'quote_template' ? JSON.stringify(normalizeQuoteTemplate(value[key])) : normalizeMaybeText(value[key]));
         p += 1;
       }
     }
@@ -646,6 +715,7 @@ router.patch('/me', authenticate, async (req, res, next) => {
          u.pro_phone,
          u.pro_hours,
          u.pro_siret,
+         u.pro_quote_template,
          COALESCE(ROUND((SELECT AVG(r.rating)::numeric FROM pro_reviews r WHERE r.pro_id = u.id), 1), 0) AS avg_rating,
          COALESCE((SELECT COUNT(*)::int FROM pro_reviews r WHERE r.pro_id = u.id), 0) AS review_count,
          COALESCE((SELECT COUNT(*)::int FROM annonces a WHERE a.user_id = u.id AND a.status = 'active' AND a.deleted_at IS NULL), 0) AS listing_count

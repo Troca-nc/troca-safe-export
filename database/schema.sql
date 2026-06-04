@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS users (
   pro_hours           TEXT          DEFAULT NULL,
   pro_commune         TEXT          DEFAULT NULL,
   pro_siret           TEXT          DEFAULT NULL,
+  pro_quote_template   JSONB        NOT NULL DEFAULT '{}'::jsonb,
   stripe_customer_id  VARCHAR(255)  DEFAULT NULL,
   nb_annonces         INTEGER       NOT NULL DEFAULT 0,
   note_moyenne        NUMERIC(3,2)  DEFAULT NULL,
@@ -646,6 +647,7 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS apple_id     VARCHAR(255) DEFAULT NUL
 -- ── BAN TEMPORAIRE ───────────────────────────────────────────────────────────
 ALTER TABLE users ADD COLUMN IF NOT EXISTS banned_until TIMESTAMPTZ  DEFAULT NULL;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS pro_since    TIMESTAMPTZ  DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS pro_quote_template JSONB NOT NULL DEFAULT '{}'::jsonb;
 
 -- ── REFRESH TOKENS (révocation, rotation) ────────────────────────────────────
 CREATE TABLE IF NOT EXISTS refresh_tokens (

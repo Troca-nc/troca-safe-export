@@ -6,6 +6,13 @@ import { ArrowRight, BadgeCheck, Clock3, Eye, Globe, Loader2, MapPin, Package, P
 
 import { proApi, uploadApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
+import {
+  DEFAULT_QUOTE_TEMPLATE,
+  formatBudgetPresetInput,
+  normalizeQuoteTemplate,
+  parseBudgetPresetInput,
+  type QuoteTemplate,
+} from '@/components/pro/quoteTemplate'
 
 const PRO_CATEGORIES = [
   'Commerçant',
@@ -52,6 +59,20 @@ type FormState = {
   banner_url: string
 }
 
+type ProProfileResponse = FormState & {
+  pro_company_name?: string | null
+  pro_category?: string | null
+  pro_description?: string | null
+  pro_commune?: string | null
+  pro_phone?: string | null
+  pro_website?: string | null
+  pro_hours?: string | null
+  pro_siret?: string | null
+  pro_logo_url?: string | null
+  pro_banner_url?: string | null
+  pro_quote_template?: QuoteTemplate | null
+}
+
 const INITIAL_FORM: FormState = {
   company_name: '',
   category: '',
@@ -68,6 +89,7 @@ const INITIAL_FORM: FormState = {
 export default function ProDashboardSettingsPage() {
   const user = useAuthStore((state) => state.user)
   const [form, setForm] = useState<FormState>(INITIAL_FORM)
+  const [quoteTemplate, setQuoteTemplate] = useState<QuoteTemplate>(DEFAULT_QUOTE_TEMPLATE)
   const [loading, setLoading] = useState(false)
   const [pageLoading, setPageLoading] = useState(true)
   const [uploading, setUploading] = useState<'logo' | 'banner' | null>(null)
@@ -107,7 +129,7 @@ export default function ProDashboardSettingsPage() {
       try {
         const response = await proApi.getById(user.id)
         if (!alive) return
-        const profile = response.data?.data || {}
+        const profile = response.data?.data as ProProfileResponse || {}
         setForm({
           company_name: profile.pro_company_name || '',
           category: profile.pro_category || '',
@@ -120,6 +142,7 @@ export default function ProDashboardSettingsPage() {
           logo_url: profile.pro_logo_url || '',
           banner_url: profile.pro_banner_url || '',
         })
+        setQuoteTemplate(normalizeQuoteTemplate(profile.pro_quote_template))
         setLogoPreview(profile.pro_logo_url || '')
         setBannerPreview(profile.pro_banner_url || '')
       } catch {
@@ -139,6 +162,16 @@ export default function ProDashboardSettingsPage() {
     setForm((current) => ({ ...current, [key]: value }))
     setError('')
     setSuccess('')
+  }
+
+  const handleTemplateChange = <K extends keyof QuoteTemplate>(key: K, value: QuoteTemplate[K]) => {
+    setQuoteTemplate((current) => ({ ...current, [key]: value }))
+    setError('')
+    setSuccess('')
+  }
+
+  const handleBudgetPresetInput = (value: string) => {
+    setQuoteTemplate((current) => ({ ...current, budget_presets: parseBudgetPresetInput(value) }))
   }
 
   const uploadImage = async (kind: 'logo' | 'banner', event: ChangeEvent<HTMLInputElement>) => {
@@ -183,6 +216,7 @@ export default function ProDashboardSettingsPage() {
         siret: form.siret.trim(),
         logo_url: form.logo_url.trim(),
         banner_url: form.banner_url.trim(),
+        quote_template: quoteTemplate,
       })
       setSuccess('✅ Paramètres enregistrés avec succès.')
     } catch (err: any) {
@@ -288,6 +322,187 @@ export default function ProDashboardSettingsPage() {
             <span className="text-sm font-semibold text-night">Horaires</span>
             <textarea value={form.hours} onChange={(e) => handleChange('hours', e.target.value)} rows={3} className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm" />
           </label>
+
+          <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Demande de devis</p>
+                <h3 className="mt-1 font-display text-xl font-bold text-night">Template modifiable</h3>
+                <p className="mt-1 text-sm text-night/60">
+                  Choisissez les champs visibles et les montants rapides pour mieux cadrer les demandes.
+                </p>
+              </div>
+              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                Personnalisable
+              </span>
+            </div>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-night">Titre de la modale</span>
+                <input
+                  value={quoteTemplate.title}
+                  onChange={(e) => handleTemplateChange('title', e.target.value)}
+                  className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
+                />
+              </label>
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-night">Sous-titre</span>
+                <input
+                  value={quoteTemplate.subtitle}
+                  onChange={(e) => handleTemplateChange('subtitle', e.target.value)}
+                  className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
+                />
+              </label>
+            </div>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-night">Libellé du besoin</span>
+                <input
+                  value={quoteTemplate.need_type_label}
+                  onChange={(e) => handleTemplateChange('need_type_label', e.target.value)}
+                  className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
+                />
+              </label>
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-night">Placeholder du besoin</span>
+                <input
+                  value={quoteTemplate.need_type_placeholder}
+                  onChange={(e) => handleTemplateChange('need_type_placeholder', e.target.value)}
+                  className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
+                />
+              </label>
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-night">Libellé de commune</span>
+                <input
+                  value={quoteTemplate.commune_label}
+                  onChange={(e) => handleTemplateChange('commune_label', e.target.value)}
+                  className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
+                />
+              </label>
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-night">Placeholder commune</span>
+                <input
+                  value={quoteTemplate.commune_placeholder}
+                  onChange={(e) => handleTemplateChange('commune_placeholder', e.target.value)}
+                  className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
+                />
+              </label>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <label className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm font-semibold text-night">
+                <input
+                  type="checkbox"
+                  checked={quoteTemplate.show_phone}
+                  onChange={(e) => handleTemplateChange('show_phone', e.target.checked)}
+                  className="h-4 w-4 rounded border-[var(--color-border)] text-[#0A7EA4]"
+                />
+                Téléphone visible
+              </label>
+              <label className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm font-semibold text-night">
+                <input
+                  type="checkbox"
+                  checked={quoteTemplate.show_budget}
+                  onChange={(e) => handleTemplateChange('show_budget', e.target.checked)}
+                  className="h-4 w-4 rounded border-[var(--color-border)] text-[#0A7EA4]"
+                />
+                Budget visible
+              </label>
+              <label className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm font-semibold text-night">
+                <input
+                  type="checkbox"
+                  checked={quoteTemplate.show_date}
+                  onChange={(e) => handleTemplateChange('show_date', e.target.checked)}
+                  className="h-4 w-4 rounded border-[var(--color-border)] text-[#0A7EA4]"
+                />
+                Date visible
+              </label>
+            </div>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-night">Libellé budget</span>
+                <input
+                  value={quoteTemplate.budget_label}
+                  onChange={(e) => handleTemplateChange('budget_label', e.target.value)}
+                  className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
+                />
+              </label>
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-night">Montants rapides (séparés par des virgules)</span>
+                <input
+                  value={formatBudgetPresetInput(quoteTemplate.budget_presets)}
+                  onChange={(e) => handleBudgetPresetInput(e.target.value)}
+                  className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
+                  placeholder="15000, 30000, 50000"
+                />
+              </label>
+            </div>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-night">Libellé détails</span>
+                <input
+                  value={quoteTemplate.details_label}
+                  onChange={(e) => handleTemplateChange('details_label', e.target.value)}
+                  className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
+                />
+              </label>
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-night">Libellé téléphone</span>
+                <input
+                  value={quoteTemplate.requester_phone_label}
+                  onChange={(e) => handleTemplateChange('requester_phone_label', e.target.value)}
+                  className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
+                />
+              </label>
+            </div>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-night">Placeholder téléphone</span>
+                <input
+                  value={quoteTemplate.requester_phone_placeholder}
+                  onChange={(e) => handleTemplateChange('requester_phone_placeholder', e.target.value)}
+                  className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
+                />
+              </label>
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-night">Placeholder détails</span>
+                <input
+                  value={quoteTemplate.details_placeholder}
+                  onChange={(e) => handleTemplateChange('details_placeholder', e.target.value)}
+                  className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
+                />
+              </label>
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-night">Label date</span>
+                <input
+                  value={quoteTemplate.desired_date_label}
+                  onChange={(e) => handleTemplateChange('desired_date_label', e.target.value)}
+                  className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
+                />
+              </label>
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-night">Placeholder budget</span>
+                <input
+                  value={quoteTemplate.budget_placeholder}
+                  onChange={(e) => handleTemplateChange('budget_placeholder', e.target.value)}
+                  className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
+                />
+              </label>
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-night">Placeholder date</span>
+                <input
+                  value={quoteTemplate.desired_date_placeholder}
+                  onChange={(e) => handleTemplateChange('desired_date_placeholder', e.target.value)}
+                  className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
+                />
+              </label>
+            </div>
+          </div>
 
           <button type="submit" disabled={loading} className="btn-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm disabled:opacity-60">
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}

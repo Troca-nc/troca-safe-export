@@ -22,6 +22,7 @@ import ListingCard from '@/components/listings/ListingCard'
 import ReviewCard from '@/components/reviews/ReviewCard'
 import ReviewSummary from '@/components/reviews/ReviewSummary'
 import ProQuoteModal from '@/components/pro/ProQuoteModal'
+import { normalizeQuoteTemplate, type QuoteTemplate } from '@/components/pro/quoteTemplate'
 import { proApi } from '@/lib/api'
 import { reviewsApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
@@ -55,6 +56,7 @@ type ProProfile = {
   pro_website?: string | null
   pro_phone?: string | null
   pro_hours?: string | null
+  pro_quote_template?: QuoteTemplate | null
   avg_rating?: number | null
   review_count?: number | null
   listing_count?: number | null
@@ -187,6 +189,7 @@ export default function ProPublicPage() {
   const rating = Number(profile.avg_rating ?? 0)
   const reviewCount = Number(profile.review_count ?? 0)
   const listingCount = Number(profile.listing_count ?? 0)
+  const quoteTemplate = normalizeQuoteTemplate(profile.pro_quote_template)
 
   return (
     <div className="min-h-screen bg-[var(--color-bg-page)] text-night">
@@ -487,6 +490,7 @@ export default function ProPublicPage() {
         proName={displayName}
         open={quoteOpen}
         onClose={() => setQuoteOpen(false)}
+        template={quoteTemplate}
       />
 </div>
   )
