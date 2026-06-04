@@ -1,8 +1,9 @@
 'use client'
 
 import Image from 'next/image'
-import { ChangeEvent, useEffect, useMemo, useState } from 'react'
-import { BadgeCheck, Loader2, Upload } from 'lucide-react'
+import Link from 'next/link'
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { ArrowRight, BadgeCheck, Clock3, Eye, Globe, Loader2, MapPin, Package, Phone, Star, Store, Upload } from 'lucide-react'
 
 import { proApi, uploadApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
@@ -75,6 +76,22 @@ export default function ProDashboardSettingsPage() {
   const [error, setError] = useState('')
   const [logoPreview, setLogoPreview] = useState('')
   const [bannerPreview, setBannerPreview] = useState('')
+  const [showPreview, setShowPreview] = useState(false)
+  const previewRef = useRef<HTMLElement | null>(null)
+  const previewProfile = useMemo(
+    () => ({
+      name: form.company_name || user?.first_name || 'Votre entreprise',
+      category: form.category || 'Cat?gorie',
+      description: form.description || 'Votre description appara?tra ici.',
+      commune: form.commune || 'Noum?a',
+      website: form.website || '',
+      phone: form.phone || '',
+      hours: form.hours || 'Horaires ? compl?ter',
+      logo: logoPreview || '',
+      banner: bannerPreview || '',
+    }),
+    [bannerPreview, form.category, form.company_name, form.description, form.hours, form.phone, form.commune, form.website, logoPreview, user?.first_name],
+  )
 
   const descriptionCount = useMemo(() => form.description.length, [form.description])
 
@@ -181,16 +198,31 @@ export default function ProDashboardSettingsPage() {
         <div className="h-28 animate-pulse rounded-[2rem] bg-sand/70" />
       ) : null}
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
-        <div className="flex items-end justify-between gap-3">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Paramètres Pro</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-night">Ma vitrine professionnelle</h1>
-            <p className="mt-2 text-sm text-night/60">Mettez à jour votre marque, vos coordonnées et vos visuels.</p>
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Paramètres Pro</p>
+              <h1 className="mt-2 font-display text-3xl font-bold text-night">Ma vitrine professionnelle</h1>
+              <p className="mt-2 text-sm text-night/60">Mettez à jour votre marque, vos coordonnées et vos visuels.</p>
+            </div>
+          <div className="flex flex-col items-end gap-2">
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
+              <BadgeCheck className="h-4 w-4" />
+              Compte Pro
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setShowPreview(true)
+                window.requestAnimationFrame(() => {
+                  previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                })
+              }}
+              className="inline-flex items-center gap-2 rounded-2xl border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-2 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10"
+            >
+              Pr?visualiser ma vitrine
+              <Eye className="h-4 w-4" />
+            </button>
           </div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
-            <BadgeCheck className="h-4 w-4" />
-            Compte Pro
-          </span>
         </div>
       </section>
 
@@ -299,6 +331,108 @@ export default function ProDashboardSettingsPage() {
             </label>
           </div>
         </div>
+      {showPreview ? (
+        <section ref={previewRef} className="mx-auto max-w-7xl px-4 pb-16 pt-2">
+          <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Aper?u vitrine</p>
+                <h2 className="mt-1 font-display text-2xl font-bold text-night">Voici ce que verront vos visiteurs</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPreview(false)}
+                className="rounded-2xl border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
+              >
+                Fermer l?aper?u
+              </button>
+            </div>
+
+            <div className="overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+              <div className="relative h-40 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.35))]">
+                {previewProfile.banner ? (
+                  <Image src={previewProfile.banner} alt={previewProfile.name} fill sizes="100vw" className="object-cover opacity-80" />
+                ) : null}
+              </div>
+              <div className="-mt-10 px-5 pb-6 md:px-8">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-[1.75rem] border-4 border-white bg-white shadow-md">
+                      {previewProfile.logo ? (
+                        <Image src={previewProfile.logo} alt={previewProfile.name} width={80} height={80} className="h-full w-full object-cover" />
+                      ) : (
+                        <span className="text-2xl font-bold text-[#0A7EA4]">{previewProfile.name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase() || '').join('').slice(0, 2) || 'P'}</span>
+                      )}
+                    </div>
+
+                    <div className="pt-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-display text-3xl font-bold text-night">{previewProfile.name}</h3>
+                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                          <BadgeCheck className="h-3.5 w-3.5" />
+                          Pro v?rifi?
+                        </span>
+                      </div>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-night/60">
+                        <span className="inline-flex items-center gap-1">
+                          <MapPin className="h-4 w-4 text-coral" />
+                          {previewProfile.commune}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Store className="h-4 w-4 text-coral" />
+                          {previewProfile.category}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Clock3 className="h-4 w-4 text-coral" />
+                          {previewProfile.hours}
+                        </span>
+                      </div>
+                      <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-night/60">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
+                          <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                          0.0 (0 avis)
+                        </span>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
+                          <Package className="h-4 w-4 text-[#0A7EA4]" />
+                          0 annonce active
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    {previewProfile.website ? (
+                      <span className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm font-semibold text-night">
+                        <Globe className="h-4 w-4" />
+                        Site web
+                      </span>
+                    ) : null}
+                    {previewProfile.phone ? (
+                      <span className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm font-semibold text-night">
+                        <Phone className="h-4 w-4" />
+                        Appeler
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+
+                <p className="mt-6 max-w-4xl text-sm leading-relaxed text-night/65 md:text-base">{previewProfile.description}</p>
+
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button type="button" className="btn-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm">
+                    Voir mes offres
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                  <button type="button" className="rounded-2xl border border-[var(--color-border)] px-5 py-3 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]">
+                    Contacter
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       </form>
     </div>
   )
