@@ -1,7 +1,6 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowRight, BadgeCheck, Clock3, Eye, Globe, Loader2, MapPin, Package, Phone, Star, Store, Upload } from 'lucide-react'
 
@@ -331,13 +330,23 @@ export default function ProDashboardSettingsPage() {
             </label>
           </div>
         </div>
+
+      </form>
+
       {showPreview ? (
-        <section ref={previewRef} className="mx-auto max-w-7xl px-4 pb-16 pt-2">
-          <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          onClick={() => setShowPreview(false)}
+        >
+          <div
+            className="relative max-h-[92vh] w-full max-w-6xl overflow-y-auto rounded-[2rem] bg-[var(--color-background)] p-4 shadow-2xl md:p-6"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Aper?u vitrine</p>
                 <h2 className="mt-1 font-display text-2xl font-bold text-night">Voici ce que verront vos visiteurs</h2>
+                <p className="mt-2 text-sm text-night/60">Cette pr?visualisation refl?te vos changements avant sauvegarde.</p>
               </div>
               <button
                 type="button"
@@ -349,7 +358,7 @@ export default function ProDashboardSettingsPage() {
             </div>
 
             <div className="overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-              <div className="relative h-40 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.35))]">
+              <div className="relative h-44 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.35))]">
                 {previewProfile.banner ? (
                   <Image src={previewProfile.banner} alt={previewProfile.name} fill sizes="100vw" className="object-cover opacity-80" />
                 ) : null}
@@ -430,10 +439,8 @@ export default function ProDashboardSettingsPage() {
               </div>
             </div>
           </div>
-        </section>
+        </div>
       ) : null}
-
-      </form>
     </div>
   )
 }
