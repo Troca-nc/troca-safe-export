@@ -148,6 +148,7 @@ export default function AppelsOffresClient() {
   const [selectedPro, setSelectedPro] = useState<ProCardModel | null>(null)
   const [quoteOpen, setQuoteOpen] = useState(false)
   const [quoteHistory, setQuoteHistory] = useState<QuoteHistoryItem[]>([])
+  const [pdfLoadingId, setPdfLoadingId] = useState<string | null>(null)
   const topRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -268,6 +269,35 @@ export default function AppelsOffresClient() {
       title: 'Demande enregistrée',
       message: 'Votre demande de devis est disponible dans Mes demandes.',
     })
+  }
+
+  const downloadQuotePdf = async (requestId: string) => {
+    setPdfLoadingId(requestId)
+    try {
+      const response = await proApi.downloadQuoteRequestPdf(requestId)
+      const blob = new Blob([response.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = `devis-${requestId}.pdf`
+      document.body.appendChild(anchor)
+      anchor.click()
+      anchor.remove()
+      window.URL.revokeObjectURL(url)
+      showToast({
+        tone: 'success',
+        title: 'PDF prêt',
+        message: 'Votre devis a été téléchargé.',
+      })
+    } catch (error: any) {
+      showToast({
+        tone: 'error',
+        title: 'Téléchargement impossible',
+        message: error?.response?.data?.error || 'Impossible de générer le PDF pour le moment.',
+      })
+    } finally {
+      setPdfLoadingId(null)
+    }
   }
 
   const openQuoteForPro = (pro: ProCardModel) => {
@@ -572,6 +602,14 @@ export default function AppelsOffresClient() {
                         className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-white"
                       >
                         Relancer
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => downloadQuotePdf(request.id)}
+                        disabled={pdfLoadingId === request.id}
+                        className="inline-flex items-center gap-2 rounded-2xl border border-[#0A7EA4]/20 bg-nc-lagonLight px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {pdfLoadingId === request.id ? 'Génération...' : 'Télécharger PDF'}
                       </button>
                     </div>
                   </article>

@@ -233,6 +233,36 @@ function buildSimplePdfBuffer(lines) {
   return Buffer.from(pdf, 'utf8');
 }
 
+function buildQuotePdfBuffer(quote) {
+  const proName = quote.pro_name || 'Professionnel Troca';
+  const requesterName = quote.requester_name || 'Client';
+  const requesterContact = [quote.requester_email, quote.requester_phone].filter(Boolean).join(' · ') || 'Non renseigné';
+  const budgetLabel = formatBudgetXpf(quote.budget_xpf);
+  const dateLabel = quote.desired_date || 'Non précisée';
+  const lines = [
+    'TROCA NC',
+    `DEMANDE DE DEVIS N° ${quote.id}`,
+    `Date de génération : ${new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' }).format(new Date(quote.created_at))}`,
+    '',
+    `Professionnel : ${proName}`,
+    `Commune du pro : ${quote.pro_commune || 'Non renseignée'}`,
+    '',
+    `Demandeur : ${requesterName}`,
+    `Contact : ${requesterContact}`,
+    '',
+    `Besoin : ${quote.need_type}`,
+    `Commune du besoin : ${quote.commune}`,
+    `Budget : ${budgetLabel}`,
+    `Date souhaitée : ${dateLabel}`,
+    '',
+    'Détails :',
+    quote.details ? String(quote.details).split('\n').filter(Boolean).join(' | ') : 'Aucun détail supplémentaire',
+    '',
+    'Ce document a été généré par Troca.',
+  ];
+  return buildSimplePdfBuffer(lines);
+}
+
 function mapProListingRow(row) {
   const listing = mapListingSearchRow(row);
   return {
@@ -861,6 +891,57 @@ router.get('/quote-requests/mine', optionalAuth, async (req, res, next) => {
         },
       })),
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/quote-requests/:id/pdf', authenticate, async (req, res, next) => {
+  try {
+    const quoteId = Number(req.params.id);
+    if (!Number.isFinite(quoteId) || quoteId <= 0) {
+      return res.status(400).json({ error: 'Demande de devis invalide.' });
+    }
+
+    const result = await query(
+      `SELECT
+         q.id,
+         q.pro_id,
+         q.requester_user_id,
+         q.requester_name,
+         q.requester_email,
+         q.requester_phone,
+         q.need_type,
+         q.commune,
+         q.budget_xpf,
+         q.desired_date,
+         q.details,
+         q.created_at,
+         u.pro_company_name,
+         u.pro_commune
+       FROM pro_quote_requests q
+       JOIN users u ON u.id = q.pro_id
+       WHERE q.id = $1
+       LIMIT 1`,
+      [quoteId]
+    );
+
+    const quote = result.rows[0];
+    if (!quote) {
+      return res.status(404).json({ error: 'Demande de devis introuvable.' });
+    }
+
+    const isRequester = quote.requester_user_id != null && Number(quote.requester_user_id) === Number(req.user.id);
+    const isProOwner = Number(quote.pro_id) === Number(req.user.id);
+    if (!isRequester && !isProOwner) {
+      return res.status(403).json({ error: 'Accès refusé.' });
+    }
+
+    const pdfBuffer = buildQuotePdfBuffer(quote);
+    const filename = `devis-${String(quote.id).padStart(4, '0')}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    return res.send(pdfBuffer);
   } catch (err) {
     next(err);
   }
