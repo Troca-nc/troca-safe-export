@@ -9,8 +9,10 @@ import { useAuthStore } from '@/store/authStore'
 import {
   DEFAULT_QUOTE_TEMPLATE,
   formatBudgetPresetInput,
+  getQuoteTemplatePreset,
   normalizeQuoteTemplate,
   parseBudgetPresetInput,
+  type QuoteTemplatePresetKey,
   type QuoteTemplate,
 } from '@/components/pro/quoteTemplate'
 
@@ -172,6 +174,12 @@ export default function ProDashboardSettingsPage() {
 
   const handleBudgetPresetInput = (value: string) => {
     setQuoteTemplate((current) => ({ ...current, budget_presets: parseBudgetPresetInput(value) }))
+  }
+
+  const applyPreset = (preset: QuoteTemplatePresetKey) => {
+    setQuoteTemplate(getQuoteTemplatePreset(preset))
+    setError('')
+    setSuccess('')
   }
 
   const uploadImage = async (kind: 'logo' | 'banner', event: ChangeEvent<HTMLInputElement>) => {
@@ -354,6 +362,36 @@ export default function ProDashboardSettingsPage() {
                   className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
                 />
               </label>
+            </div>
+
+            <div className="mt-4">
+              <p className="text-sm font-semibold text-night">Modèles rapides</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => applyPreset('artisan')}
+                  className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-night transition hover:border-[#0A7EA4]/30 hover:bg-nc-lagonLight hover:text-[#0A7EA4]"
+                >
+                  Artisan
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyPreset('commercant')}
+                  className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-night transition hover:border-[#0A7EA4]/30 hover:bg-nc-lagonLight hover:text-[#0A7EA4]"
+                >
+                  Commerçant
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyPreset('service')}
+                  className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-night transition hover:border-[#0A7EA4]/30 hover:bg-nc-lagonLight hover:text-[#0A7EA4]"
+                >
+                  Service / prestation
+                </button>
+              </div>
+              <p className="mt-2 text-xs text-night/45">
+                Ces modèles pré-remplissent la template et restent modifiables champ par champ.
+              </p>
             </div>
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">

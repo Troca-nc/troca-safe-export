@@ -20,6 +20,8 @@ export type QuoteTemplate = {
   budget_presets: number[]
 }
 
+export type QuoteTemplatePresetKey = 'artisan' | 'commercant' | 'service'
+
 export const DEFAULT_QUOTE_TEMPLATE: QuoteTemplate = {
   title: 'Demander un devis',
   subtitle: 'Décrivez votre besoin et recevez une réponse plus précise du professionnel.',
@@ -40,6 +42,63 @@ export const DEFAULT_QUOTE_TEMPLATE: QuoteTemplate = {
   show_date: true,
   show_details: true,
   budget_presets: [15000, 30000, 50000],
+}
+
+export const QUOTE_TEMPLATE_PRESETS: Record<QuoteTemplatePresetKey, QuoteTemplate> = {
+  artisan: {
+    ...DEFAULT_QUOTE_TEMPLATE,
+    title: 'Demander un devis artisan',
+    subtitle: 'Décrivez votre chantier et recevez une estimation adaptée à vos contraintes.',
+    need_type_label: 'Type de chantier',
+    need_type_placeholder: 'Plomberie, peinture, électricité...',
+    commune_label: 'Commune du chantier',
+    commune_placeholder: 'Nouméa, Dumbéa...',
+    requester_phone_label: 'Téléphone de contact',
+    requester_phone_placeholder: 'XX XX XX XX',
+    budget_label: 'Budget chantier',
+    budget_placeholder: '50000',
+    desired_date_label: 'Date souhaitée',
+    desired_date_placeholder: '',
+    details_label: 'Détails du projet',
+    details_placeholder: 'Surface, accès, urgence, matériaux souhaités...',
+    budget_presets: [25000, 50000, 100000],
+  },
+  commercant: {
+    ...DEFAULT_QUOTE_TEMPLATE,
+    title: 'Demander un devis commerçant',
+    subtitle: 'Préparez votre demande pour un produit, une livraison ou une commande spéciale.',
+    need_type_label: 'Type de besoin',
+    need_type_placeholder: 'Commande, livraison, stock, commande spéciale...',
+    commune_label: 'Commune de livraison',
+    commune_placeholder: 'Nouméa, Païta...',
+    requester_phone_label: 'Téléphone',
+    requester_phone_placeholder: 'XX XX XX XX',
+    budget_label: 'Budget estimé',
+    budget_placeholder: '30000',
+    desired_date_label: 'Date de livraison souhaitée',
+    desired_date_placeholder: '',
+    details_label: 'Quantités et précisions',
+    details_placeholder: 'Quantités, délais, produits recherchés, contraintes...',
+    budget_presets: [10000, 30000, 50000],
+  },
+  service: {
+    ...DEFAULT_QUOTE_TEMPLATE,
+    title: 'Demander un devis service',
+    subtitle: 'Expliquez votre besoin pour obtenir une réponse rapide et claire.',
+    need_type_label: 'Type de prestation',
+    need_type_placeholder: 'Logo, site web, événement, transport...',
+    commune_label: 'Commune',
+    commune_placeholder: 'Nouméa, Dumbéa...',
+    requester_phone_label: 'Téléphone',
+    requester_phone_placeholder: 'XX XX XX XX',
+    budget_label: 'Budget projet',
+    budget_placeholder: '20000',
+    desired_date_label: 'Date souhaitée',
+    desired_date_placeholder: '',
+    details_label: 'Précisions',
+    details_placeholder: "Décrivez le contexte, l'objectif, le délai et vos attentes...",
+    budget_presets: [15000, 25000, 50000],
+  },
 }
 
 function normalizeText(value: unknown, fallback: string) {
@@ -97,4 +156,8 @@ export function parseBudgetPresetInput(value: string) {
 
 export function formatBudgetPresetInput(presets: number[]) {
   return presets.map((value) => String(value)).join(', ')
+}
+
+export function getQuoteTemplatePreset(key: QuoteTemplatePresetKey) {
+  return normalizeQuoteTemplate(QUOTE_TEMPLATE_PRESETS[key])
 }
