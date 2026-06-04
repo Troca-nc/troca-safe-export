@@ -76,6 +76,7 @@ export default function ProDashboardSettingsPage() {
   const [logoPreview, setLogoPreview] = useState('')
   const [bannerPreview, setBannerPreview] = useState('')
   const [showPreview, setShowPreview] = useState(false)
+  const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop')
   const previewRef = useRef<HTMLElement | null>(null)
   const previewProfile = useMemo(
     () => ({
@@ -208,14 +209,15 @@ export default function ProDashboardSettingsPage() {
               <BadgeCheck className="h-4 w-4" />
               Compte Pro
             </span>
-            <button
-              type="button"
-              onClick={() => {
-                setShowPreview(true)
-                window.requestAnimationFrame(() => {
-                  previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                })
-              }}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPreview(true)
+                  setPreviewMode('desktop')
+                  window.requestAnimationFrame(() => {
+                    previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  })
+                }}
               className="inline-flex items-center gap-2 rounded-2xl border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-2 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10"
             >
               Pr?visualiser ma vitrine
@@ -348,16 +350,43 @@ export default function ProDashboardSettingsPage() {
                 <h2 className="mt-1 font-display text-2xl font-bold text-night">Voici ce que verront vos visiteurs</h2>
                 <p className="mt-2 text-sm text-night/60">Cette pr?visualisation refl?te vos changements avant sauvegarde.</p>
               </div>
-              <button
-                type="button"
-                onClick={() => setShowPreview(false)}
-                className="rounded-2xl border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
-              >
-                Fermer l?aper?u
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-1">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewMode('desktop')}
+                    className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
+                      previewMode === 'desktop'
+                        ? 'bg-white text-[#0A7EA4] shadow-sm'
+                        : 'text-night/55 hover:text-night'
+                    }`}
+                  >
+                    Desktop
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewMode('mobile')}
+                    className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
+                      previewMode === 'mobile'
+                        ? 'bg-white text-[#0A7EA4] shadow-sm'
+                        : 'text-night/55 hover:text-night'
+                    }`}
+                  >
+                    Mobile
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPreview(false)}
+                  className="rounded-2xl border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
+                >
+                  Fermer l’aperçu
+                </button>
+              </div>
             </div>
 
             <div className="overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+              <div className={`mx-auto transition-all duration-300 ${previewMode === 'mobile' ? 'max-w-[390px] px-2 py-2' : 'w-full px-0 py-0'}`}>
               <div className="relative h-44 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.35))]">
                 {previewProfile.banner ? (
                   <Image src={previewProfile.banner} alt={previewProfile.name} fill sizes="100vw" className="object-cover opacity-80" />
@@ -436,6 +465,7 @@ export default function ProDashboardSettingsPage() {
                     Contacter
                   </button>
                 </div>
+              </div>
               </div>
             </div>
           </div>
