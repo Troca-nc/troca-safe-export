@@ -21,6 +21,11 @@ type Ride = {
   seats_reserved: number
   seats_remaining?: number
   booking_mode?: 'auto' | 'manual'
+  recurrence_type?: 'none' | 'daily' | 'weekly'
+  recurrence_days?: number[]
+  recurrence_until?: string | null
+  recurrence_count?: number | null
+  recurrence_parent_id?: number | string | null
   price_xpf: number
   vehicle?: string | null
   description: string
@@ -73,6 +78,46 @@ function snapTo10(value: number) {
   return Math.max(0, Math.round(value / 10) * 10)
 }
 
+const WEEKDAY_OPTIONS = [
+  { value: 1, short: 'Lun', label: 'Lundi' },
+  { value: 2, short: 'Mar', label: 'Mardi' },
+  { value: 3, short: 'Mer', label: 'Mercredi' },
+  { value: 4, short: 'Jeu', label: 'Jeudi' },
+  { value: 5, short: 'Ven', label: 'Vendredi' },
+  { value: 6, short: 'Sam', label: 'Samedi' },
+  { value: 0, short: 'Dim', label: 'Dimanche' },
+] as const
+
+function addIsoDays(value: string, days: number) {
+  if (!value) return ''
+  const date = new Date(`${value}T12:00:00Z`)
+  if (Number.isNaN(date.getTime())) return ''
+  date.setUTCDate(date.getUTCDate() + days)
+  return date.toISOString().slice(0, 10)
+}
+
+function formatRecurrenceLabel(ride: Ride) {
+  if (!ride.recurrence_type || ride.recurrence_type === 'none') return ''
+
+  if (ride.recurrence_type === 'daily') {
+    return 'Tous les jours'
+  }
+
+  const days = Array.isArray(ride.recurrence_days)
+    ? [...new Set(ride.recurrence_days.map((value) => Number(value)).filter((value) => Number.isInteger(value) && value >= 0 && value <= 6))].sort((a, b) => a - b)
+    : []
+
+  if (!days.length) {
+    return 'Chaque semaine'
+  }
+
+  if (days.length === 5 && [1, 2, 3, 4, 5].every((day, index) => days[index] === day)) {
+    return 'Lun-ven'
+  }
+
+  return days.map((day) => WEEKDAY_OPTIONS.find((option) => option.value === day)?.short || '').filter(Boolean).join(', ')
+}
+
 function formatTimeLabel(value?: string | null) {
   if (!value) return 'Heure libre'
   return value.slice(0, 5)
@@ -115,6 +160,7 @@ function RideCard({
   onBooked?: () => void | Promise<void>
 }) {
   const rating = ride.avg_rating ?? ride.trust_score ?? 0
+  const recurrenceLabel = formatRecurrenceLabel(ride)
 
   return (
     <article className="rounded-[1.75rem] border border-[var(--color-border)] border-l-4 border-l-nc-corail bg-[var(--color-surface)] p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -122,6 +168,11 @@ function RideCard({
         <span className="badge-corail rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">
           {ride.is_featured ? 'Boosté' : 'Covoiturage'}
         </span>
+        {recurrenceLabel ? (
+          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
+            ↻ {recurrenceLabel}
+          </span>
+        ) : null}
         {ride.is_verified_driver ? (
           <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
             Conducteur vérifié
@@ -208,6 +259,10 @@ export default function CovoituragePage() {
     vehicle: '',
     description: '',
     booking_mode: 'auto' as 'auto' | 'manual',
+    recurrence_enabled: false,
+    recurrence_type: 'weekly' as 'daily' | 'weekly',
+    recurrence_days: [1, 2, 3, 4, 5] as number[],
+    recurrence_until: '',
   })
   const [saving, setSaving] = useState(false)
 
@@ -216,6 +271,19 @@ export default function CovoituragePage() {
     const tab = new URLSearchParams(window.location.search).get('tab')
     setActiveTab(tab === 'transport' ? 'transport' : mode === 'publish' ? 'publish' : 'search')
   }, [])
+
+  useEffect(() => {
+    if (!form.recurrence_enabled || !form.ride_date) return
+    setForm((prev) => {
+      if (!prev.recurrence_enabled || !prev.ride_date) return prev
+      const suggestedUntil = addIsoDays(prev.ride_date, 30)
+      if (!suggestedUntil) return prev
+      if (!prev.recurrence_until || prev.recurrence_until < prev.ride_date) {
+        return { ...prev, recurrence_until: suggestedUntil }
+      }
+      return prev
+    })
+  }, [form.recurrence_enabled, form.ride_date])
 
   const hasFilters = useMemo(
     () => Boolean(filters.departure || filters.destination || filters.ride_date),
@@ -326,6 +394,10 @@ export default function CovoituragePage() {
         vehicle: '',
         description: '',
         booking_mode: 'auto',
+        recurrence_enabled: false,
+        recurrence_type: 'weekly',
+        recurrence_days: [1, 2, 3, 4, 5],
+        recurrence_until: '',
       })
       await refreshRides()
       setActiveTab('search')
@@ -645,6 +717,91 @@ export default function CovoituragePage() {
                       ))}
                     </div>
                   </div>
+                  <div className="md:col-span-2 rounded-3xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div>
+                        <p className="text-sm font-semibold text-night">Trajet récurrent</p>
+                        <p className="mt-1 text-xs text-night/60">
+                          Publiez une seule fois, puis générez automatiquement les prochains trajets.
+                        </p>
+                      </div>
+                      <label className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-3 py-2 text-sm font-semibold text-night">
+                        <input
+                          type="checkbox"
+                          checked={form.recurrence_enabled}
+                          onChange={(e) =>
+                            setForm((prev) => ({
+                              ...prev,
+                              recurrence_enabled: e.target.checked,
+                              recurrence_until: e.target.checked && prev.ride_date ? addIsoDays(prev.ride_date, 30) : prev.recurrence_until,
+                            }))
+                          }
+                          className="h-4 w-4 rounded border-night/20 text-[#0A7EA4] focus:ring-[#0A7EA4]/25"
+                        />
+                        Activer
+                      </label>
+                    </div>
+                    {form.recurrence_enabled ? (
+                      <div className="mt-4 grid gap-4 md:grid-cols-2">
+                        <label className="block">
+                          <span className="mb-1 block text-sm font-semibold text-night">Fréquence</span>
+                          <select
+                            value={form.recurrence_type}
+                            onChange={(e) =>
+                              setForm((prev) => ({
+                                ...prev,
+                                recurrence_type: e.target.value as 'daily' | 'weekly',
+                              }))
+                            }
+                            className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm outline-none"
+                          >
+                            <option value="weekly">Chaque semaine</option>
+                            <option value="daily">Tous les jours</option>
+                          </select>
+                        </label>
+                        <label className="block">
+                          <span className="mb-1 block text-sm font-semibold text-night">Jusqu'au</span>
+                          <input
+                            type="date"
+                            value={form.recurrence_until}
+                            onChange={(e) => setForm((prev) => ({ ...prev, recurrence_until: e.target.value }))}
+                            className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm outline-none"
+                          />
+                        </label>
+                        {form.recurrence_type === 'weekly' ? (
+                          <div className="md:col-span-2">
+                            <span className="mb-2 block text-sm font-semibold text-night">Jours de départ</span>
+                            <div className="flex flex-wrap gap-2">
+                              {WEEKDAY_OPTIONS.map((weekday) => {
+                                const isActive = form.recurrence_days.includes(weekday.value)
+                                return (
+                                  <button
+                                    key={weekday.value}
+                                    type="button"
+                                    onClick={() =>
+                                      setForm((prev) => ({
+                                        ...prev,
+                                        recurrence_days: prev.recurrence_days.includes(weekday.value)
+                                          ? prev.recurrence_days.filter((day) => day !== weekday.value)
+                                          : [...prev.recurrence_days, weekday.value].sort((a, b) => a - b),
+                                      }))
+                                    }
+                                    className={`rounded-full px-3 py-2 text-xs font-semibold transition ${
+                                      isActive
+                                        ? 'bg-[#0A7EA4] text-white shadow-sm'
+                                        : 'border border-[var(--color-border)] bg-white text-[var(--color-text-secondary)] hover:bg-[var(--color-background-secondary)]'
+                                    }`}
+                                  >
+                                    {weekday.short}
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
                   <label className="block md:col-span-2">
                     <span className="mb-1 block text-sm font-semibold text-night">Description du trajet</span>
                     <textarea
@@ -668,17 +825,21 @@ export default function CovoituragePage() {
                     <button
                       type="button"
                       onClick={() =>
-                        setForm({
-                          departure: '',
-                          destination: '',
-                          ride_date: '',
-                          ride_time: '',
-                          seats_total: 3,
-                          price_xpf: 0,
-                          vehicle: '',
-                          description: '',
-                          booking_mode: 'auto',
-                        })
+        setForm({
+          departure: '',
+          destination: '',
+          ride_date: '',
+          ride_time: '',
+          seats_total: 3,
+          price_xpf: 0,
+          vehicle: '',
+          description: '',
+          booking_mode: 'auto',
+          recurrence_enabled: false,
+          recurrence_type: 'weekly',
+          recurrence_days: [1, 2, 3, 4, 5],
+          recurrence_until: '',
+        })
                       }
                       className="btn-secondary inline-flex items-center gap-2 rounded-2xl px-5 py-3"
                     >

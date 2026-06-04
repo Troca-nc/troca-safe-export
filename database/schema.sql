@@ -795,6 +795,12 @@ CREATE TABLE IF NOT EXISTS covoiturages (
   seats_remaining    INTEGER      NOT NULL DEFAULT 3 CHECK (seats_remaining >= 0),
   booking_mode       VARCHAR(20)  NOT NULL DEFAULT 'auto'
                           CHECK (booking_mode IN ('auto','manual')),
+  recurrence_type    VARCHAR(20)  NOT NULL DEFAULT 'none'
+                          CHECK (recurrence_type IN ('none','daily','weekly')),
+  recurrence_days    JSONB        NOT NULL DEFAULT '[]',
+  recurrence_until   DATE         DEFAULT NULL,
+  recurrence_count   INTEGER      DEFAULT NULL,
+  recurrence_parent_id INTEGER    DEFAULT NULL REFERENCES covoiturages(id) ON DELETE CASCADE,
   price_xpf          INTEGER      NOT NULL DEFAULT 0 CHECK (price_xpf >= 0),
   vehicle            VARCHAR(120) DEFAULT NULL,
   comfort            VARCHAR(120) DEFAULT NULL,

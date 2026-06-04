@@ -40,6 +40,11 @@ const createSchema = Joi.object({
   trust_score: Joi.number().integer().min(0).max(100).allow(null),
   is_verified_driver: Joi.boolean().default(false),
   expires_at: Joi.string().isoDate().allow(null),
+  recurrence_enabled: Joi.boolean().default(false),
+  recurrence_type: Joi.string().valid('none', 'daily', 'weekly').default('none'),
+  recurrence_days: recurrenceDaysSchema,
+  recurrence_until: Joi.string().isoDate().allow('', null),
+  recurrence_count: Joi.number().integer().min(1).max(60).allow(null),
 });
 
 const bookingSchema = Joi.object({
@@ -53,6 +58,8 @@ const reviewSchema = Joi.object({
   rating: Joi.number().integer().min(1).max(5).required(),
   comment: Joi.string().min(2).max(1000).allow('', null),
 });
+
+const recurrenceDaysSchema = Joi.array().items(Joi.number().integer().min(0).max(6)).default([]);
 
 const alertSchema = Joi.object({
   from_commune: Joi.string().max(100).allow('', null),
@@ -92,11 +99,71 @@ function computeExpiryDate(rideDate, explicitExpiry) {
   return new Date(base.getTime() + 24 * 60 * 60 * 1000);
 }
 
+function parseUtcMiddayDate(value) {
+  const date = new Date(`${value}T12:00:00Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatUtcDate(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function addUtcDays(date, days) {
+  const next = new Date(date);
+  next.setUTCDate(next.getUTCDate() + days);
+  return next;
+}
+
+function normalizeRecurrenceDays(days) {
+  return [...new Set((Array.isArray(days) ? days : []).map((value) => Number(value)).filter((value) => Number.isInteger(value) && value >= 0 && value <= 6))].sort((a, b) => a - b);
+}
+
+function buildRecurrenceDates({ rideDate, recurrenceType, recurrenceDays, recurrenceUntil, recurrenceCount }) {
+  const baseDate = parseUtcMiddayDate(rideDate);
+  if (!baseDate) return [rideDate];
+
+  const maxOccurrences = Number.isFinite(Number(recurrenceCount)) ? Math.min(Math.max(1, Number(recurrenceCount)), 60) : null;
+  const untilDate = recurrenceUntil ? parseUtcMiddayDate(recurrenceUntil) : addUtcDays(baseDate, 30);
+  const dates = [formatUtcDate(baseDate)];
+
+  if (!untilDate || untilDate.getTime() < baseDate.getTime()) {
+    return dates;
+  }
+
+  if (recurrenceType === 'daily') {
+    let cursor = addUtcDays(baseDate, 1);
+    while (cursor.getTime() <= untilDate.getTime() && (!maxOccurrences || dates.length < maxOccurrences)) {
+      dates.push(formatUtcDate(cursor));
+      cursor = addUtcDays(cursor, 1);
+    }
+    return dates;
+  }
+
+  if (recurrenceType === 'weekly') {
+    const selectedDays = recurrenceDays.length > 0 ? recurrenceDays : [baseDate.getUTCDay()];
+    const allowedDays = new Set(selectedDays);
+    let cursor = addUtcDays(baseDate, 1);
+    while (cursor.getTime() <= untilDate.getTime() && (!maxOccurrences || dates.length < maxOccurrences)) {
+      if (allowedDays.has(cursor.getUTCDay())) {
+        dates.push(formatUtcDate(cursor));
+      }
+      cursor = addUtcDays(cursor, 1);
+    }
+  }
+
+  return dates;
+}
+
 function mapRide(item) {
   return {
     ...item,
     stops: parseJson(item.stops, []),
     booking_mode: item.booking_mode || 'auto',
+    recurrence_type: item.recurrence_type || 'none',
+    recurrence_days: parseJson(item.recurrence_days, []),
+    recurrence_until: item.recurrence_until || null,
+    recurrence_count: item.recurrence_count == null ? null : Number(item.recurrence_count),
+    recurrence_parent_id: item.recurrence_parent_id == null ? null : Number(item.recurrence_parent_id),
     seats_remaining: Number.isFinite(Number(item.seats_remaining))
       ? Math.max(0, Number(item.seats_remaining))
       : Math.max(0, Number(item.seats_total || 0) - Number(item.seats_reserved || 0)),
@@ -211,6 +278,11 @@ router.get('/', optionalAuth, async (req, res, next) => {
          c.seats_reserved,
          c.seats_remaining,
          c.booking_mode,
+         c.recurrence_type,
+         c.recurrence_days,
+         c.recurrence_until,
+         c.recurrence_count,
+         c.recurrence_parent_id,
          c.price_xpf,
          c.vehicle,
          c.comfort,
@@ -516,51 +588,91 @@ router.post('/', authenticate, async (req, res, next) => {
     }
 
     const expiresAt = computeExpiryDate(value.ride_date, value.expires_at);
+    const recurrenceEnabled = Boolean(value.recurrence_enabled) && value.recurrence_type !== 'none';
+    const recurrenceType = recurrenceEnabled ? value.recurrence_type : 'none';
+    const recurrenceDays = recurrenceEnabled ? normalizeRecurrenceDays(value.recurrence_days) : [];
+    const recurrenceBaseDate = parseUtcMiddayDate(value.ride_date) || new Date(`${value.ride_date}T12:00:00Z`);
+    const recurrenceUntil = recurrenceEnabled
+      ? value.recurrence_until || formatUtcDate(addUtcDays(recurrenceBaseDate, 30))
+      : null;
+    const recurrenceCount = Number.isFinite(Number(value.recurrence_count)) ? Number(value.recurrence_count) : null;
+    const recurrenceDates = recurrenceEnabled
+      ? buildRecurrenceDates({
+          rideDate: value.ride_date,
+          recurrenceType,
+          recurrenceDays,
+          recurrenceUntil,
+          recurrenceCount,
+        })
+      : [value.ride_date];
 
     const created = await withTransaction(async (client) => {
-      const inserted = await client.query(
-        `INSERT INTO covoiturages
-           (user_id, departure, destination, stops, ride_date, ride_time, seats_total, seats_reserved,
-            seats_remaining, booking_mode,
-            price_xpf, vehicle, comfort, luggage_allowed, music_allowed, no_smoking, animals_allowed,
-            description, status, departure_commune_id, destination_commune_id, trust_score,
-            is_verified_driver, expires_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,0,$7,$8,$9,$10,$11,$12,$13,$14,$15,'published',$16,$17,$18,$19,$20,$21)
-         RETURNING *`,
-        [
-          req.user.id,
-          value.departure.trim(),
-          value.destination.trim(),
-          JSON.stringify(value.stops || []),
-          value.ride_date,
-          value.ride_time,
-          value.seats_total,
-          value.booking_mode,
-          value.price_xpf,
-          value.vehicle?.trim() || null,
-          value.comfort?.trim() || null,
-          value.luggage_allowed?.trim() || null,
-          value.music_allowed,
-          value.no_smoking,
-          value.animals_allowed,
-          value.description.trim(),
-          value.departure_commune_id || null,
-          value.destination_commune_id || null,
-          value.trust_score ?? null,
-          Boolean(value.is_verified_driver),
-          expiresAt,
-        ]
-      );
+      const insertRide = async (rideDateValue, recurrenceParentId = null) => {
+        const rideExpiresAt = computeExpiryDate(rideDateValue, value.expires_at);
+        const inserted = await client.query(
+          `INSERT INTO covoiturages
+             (user_id, departure, destination, stops, ride_date, ride_time, seats_total, seats_reserved,
+              seats_remaining, booking_mode, recurrence_type, recurrence_days, recurrence_until, recurrence_count,
+              recurrence_parent_id, price_xpf, vehicle, comfort, luggage_allowed, music_allowed, no_smoking, animals_allowed,
+              description, status, departure_commune_id, destination_commune_id, trust_score,
+              is_verified_driver, expires_at)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,0,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,'published',$22,$23,$24,$25,$26)
+           RETURNING *`,
+          [
+            req.user.id,
+            value.departure.trim(),
+            value.destination.trim(),
+            JSON.stringify(value.stops || []),
+            rideDateValue,
+            value.ride_time,
+            value.seats_total,
+            value.booking_mode,
+            recurrenceType,
+            JSON.stringify(recurrenceDays),
+            recurrenceUntil,
+            recurrenceCount,
+            recurrenceParentId,
+            value.price_xpf,
+            value.vehicle?.trim() || null,
+            value.comfort?.trim() || null,
+            value.luggage_allowed?.trim() || null,
+            value.music_allowed,
+            value.no_smoking,
+            value.animals_allowed,
+            value.description.trim(),
+            value.departure_commune_id || null,
+            value.destination_commune_id || null,
+            value.trust_score ?? null,
+            Boolean(value.is_verified_driver),
+            rideExpiresAt,
+          ]
+        );
 
-      return inserted.rows[0];
+        return inserted.rows[0];
+      };
+
+      const baseRide = await insertRide(recurrenceDates[0], null);
+      if (recurrenceEnabled && recurrenceDates.length > 1) {
+        await client.query(`UPDATE covoiturages SET recurrence_parent_id = $2 WHERE id = $1`, [baseRide.id, baseRide.id]);
+        baseRide.recurrence_parent_id = baseRide.id;
+        for (const rideDateValue of recurrenceDates.slice(1)) {
+          await insertRide(rideDateValue, baseRide.id);
+        }
+      }
+
+      return baseRide;
     });
 
-    logger.info('covoiturage_created', { user_id: req.user.id, covoiturage_id: created.id });
+    logger.info('covoiturage_created', {
+      user_id: req.user.id,
+      covoiturage_id: created.id,
+      occurrences: recurrenceDates.length,
+    });
     await query(
       `UPDATE users
-       SET rides_as_driver = COALESCE(rides_as_driver, 0) + 1
+       SET rides_as_driver = COALESCE(rides_as_driver, 0) + $2
        WHERE id = $1`,
-      [req.user.id]
+      [req.user.id, recurrenceDates.length]
     ).catch(() => {});
     void triggerCovoiturageAlerts(created).catch((error) => {
       logger.warn('covoiturage_alert_trigger_failed', {
@@ -714,11 +826,16 @@ router.post('/:id/book', authenticate, async (req, res, next) => {
            c.stops,
            c.ride_date,
            c.ride_time,
-           c.seats_total,
-           c.seats_reserved,
-           c.seats_remaining,
-           c.booking_mode,
-           c.price_xpf,
+         c.seats_total,
+         c.seats_reserved,
+         c.seats_remaining,
+         c.booking_mode,
+         c.recurrence_type,
+         c.recurrence_days,
+         c.recurrence_until,
+         c.recurrence_count,
+         c.recurrence_parent_id,
+         c.price_xpf,
            c.vehicle,
            c.comfort,
            c.luggage_allowed,
