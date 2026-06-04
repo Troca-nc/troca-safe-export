@@ -22,6 +22,7 @@ import {
 } from 'recharts'
 
 import { proApi } from '@/lib/api'
+import ProOnboardingGuide from '@/components/pro/ProOnboardingGuide'
 import { useAuthStore } from '@/store/authStore'
 
 type DashboardData = {
@@ -147,6 +148,8 @@ export default function ProDashboardPage() {
 
   return (
     <div className="space-y-6">
+      <ProOnboardingGuide />
+
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
@@ -163,7 +166,7 @@ export default function ProDashboardPage() {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section id="stats" className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           icon={Eye}
           title="Vues totales"
