@@ -1,9 +1,30 @@
-import ProsDirectoryClient from './ProsDirectoryClient'
+import type { Metadata } from 'next'
 
-export const metadata = {
+import ProsDirectoryClient from './ProsDirectoryClient'
+import { SITE_URL } from '@/types/seo.types'
+
+export const metadata: Metadata = {
   title: 'Annuaire des pros — Troca NC',
   description:
     'Découvrez les professionnels vérifiés de Nouvelle-Calédonie. Filtrez par catégorie, commune et note pour trouver le bon partenaire local.',
+  alternates: {
+    canonical: `${SITE_URL}/pros`,
+  },
+  openGraph: {
+    title: 'Annuaire des pros — Troca NC',
+    description:
+      'Découvrez les professionnels vérifiés de Nouvelle-Calédonie. Filtrez par catégorie, commune et note pour trouver le bon partenaire local.',
+    url: `${SITE_URL}/pros`,
+    siteName: 'Troca',
+    locale: 'fr_NC',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Annuaire des pros — Troca NC',
+    description:
+      'Découvrez les professionnels vérifiés de Nouvelle-Calédonie. Filtrez par catégorie, commune et note pour trouver le bon partenaire local.',
+  },
 }
 
 export default function ProsDirectoryPage() {
