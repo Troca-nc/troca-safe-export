@@ -18,6 +18,7 @@ import {
   LocateFixed,
   Package,
   PawPrint,
+  Bell,
   Search,
   Shirt,
   Smartphone,
@@ -26,10 +27,12 @@ import {
   Wrench,
 } from 'lucide-react'
 
+import SearchAlertModal from '@/components/SearchAlertModal'
 import PlatformStats from '@/components/PlatformStats'
 import CategoryTreeSection from '@/components/home/CategoryTreeSection'
 import ListingCard from '@/components/listings/ListingCard'
 import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
+import type { ListingFilters } from '@/hooks/useListingFilters'
 import type { CategoryNode } from '@/lib/categoryCatalog'
 import { SEARCH_ALERTS } from '@/lib/categoryPresentation'
 
@@ -79,6 +82,7 @@ export function HomeHeroSection({
   const inputRef = useRef<HTMLInputElement | null>(null)
   const [isFocused, setIsFocused] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [searchAlertOpen, setSearchAlertOpen] = useState(false)
 
   const normalizedQuery = q.trim().toLowerCase()
   const suggestionPool = useMemo(() => {
@@ -145,6 +149,25 @@ export function HomeHeroSection({
       },
     )
   }
+
+  const alertFilters: ListingFilters = useMemo(
+    () => ({
+      q,
+      category: '',
+      commune_id: '',
+      province_id: '',
+      price_min: '',
+      price_max: '',
+      condition: '',
+      troc: '',
+      lat: '',
+      lng: '',
+      radius: 20,
+      sort: 'date',
+      page: 1,
+    }),
+    [q],
+  )
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (!filteredSuggestions.length) return
@@ -222,6 +245,16 @@ export function HomeHeroSection({
               >
                 Rechercher
               </button>
+              <button
+                type="button"
+                onClick={() => setSearchAlertOpen(true)}
+                disabled={!q.trim()}
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
+                title="Créer une alerte sur cette recherche"
+              >
+                <Bell className="h-4 w-4" />
+                Alerte
+              </button>
 
               {isFocused && filteredSuggestions.length > 0 ? (
                 <div
@@ -274,6 +307,12 @@ export function HomeHeroSection({
               </button>
             </div>
           </div>
+
+          <SearchAlertModal
+            open={searchAlertOpen}
+            onClose={() => setSearchAlertOpen(false)}
+            filters={alertFilters}
+          />
 
           <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
             <Link href="/annonces/nouvelle" className="rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-nc-lagon shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/15">
@@ -357,6 +396,8 @@ export function FeaturedListingsSection({
   listings: any[]
   loading: boolean
 }) {
+  if (!loading && listings.length === 0) return null
+
   return (
     <section id="featured-listings" className="mx-auto max-w-7xl px-4 pb-10">
       <div className="mb-5 flex items-end justify-between gap-4">
@@ -437,8 +478,8 @@ export function SearchAlertsSection() {
               <p className="mt-1 text-sm text-white/65">État bon ou comme neuf, en Nouvelle-Calédonie</p>
             </div>
           </div>
-          <Link href="/annonces" className="btn-primary mt-5 inline-flex w-full items-center justify-center gap-2">
-            Créer une alerte
+          <Link href="/alertes" className="btn-primary mt-5 inline-flex w-full items-center justify-center gap-2">
+            Gérer mes alertes
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
