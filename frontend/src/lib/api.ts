@@ -553,6 +553,33 @@ export const proApi = {
     () => api.get('/pro/listings'),
     CACHE_TTL.short,
   ),
+  getProducts: () => cachedGet(
+    buildCacheKey('pro.products', '/pro/products'),
+    () => api.get('/pro/products'),
+    CACHE_TTL.short,
+  ),
+  createProduct: async (data: object) => {
+    const res = await api.post('/pro/products', data)
+    invalidateApiCache('pro.')
+    return res
+  },
+  updateProduct: async (id: string | number, data: object) => {
+    const res = await api.put(`/pro/products/${id}`, data)
+    invalidateApiCache('pro.')
+    return res
+  },
+  archiveProduct: async (id: string | number) => {
+    const res = await api.patch(`/pro/products/${id}/archive`)
+    invalidateApiCache('pro.')
+    return res
+  },
+  publishProduct: async (id: string | number) => {
+    const res = await api.post(`/pro/products/${id}/publish`)
+    invalidateApiCache('pro.')
+    invalidateApiCache('listings.')
+    invalidateApiCache('stats.')
+    return res
+  },
   renewListing: async (id: string | number) => {
     const res = await api.post(`/pro/listings/${id}/renew`)
     invalidateApiCache('pro.')

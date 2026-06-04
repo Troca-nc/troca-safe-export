@@ -8,6 +8,7 @@ import {
   BadgeCheck,
   Eye,
   MessageCircle,
+  Package,
   TrendingUp,
   Zap,
 } from 'lucide-react'
@@ -214,6 +215,27 @@ export default function ProDashboardPage() {
           subtitle="Ce mois-ci"
           tone="amber"
         />
+      </section>
+
+      <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
+              <Package className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Catalogue produit</p>
+              <h2 className="mt-1 font-display text-2xl font-bold text-night">Créez votre vitrine de produits</h2>
+              <p className="mt-2 text-sm text-night/60">
+                Centralisez vos fiches produits fixes, suivez le stock et publiez une annonce ponctuelle quand vous voulez booster une référence.
+              </p>
+            </div>
+          </div>
+          <Link href="/pro/dashboard/produits" className="inline-flex items-center gap-2 rounded-2xl border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10">
+            Ouvrir le catalogue
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">

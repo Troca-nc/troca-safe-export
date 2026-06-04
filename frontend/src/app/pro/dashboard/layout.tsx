@@ -11,6 +11,7 @@ import {
   FileText,
   MessageCircle,
   Menu,
+  Package,
   Settings2,
   Store,
   X,
@@ -20,6 +21,7 @@ import { useAuthStore } from '@/store/authStore'
 
 const NAV_ITEMS = [
   { href: '/pro/dashboard', label: "Vue d'ensemble", icon: BarChart3 },
+  { href: '/pro/dashboard/produits', label: 'Produits', icon: Package },
   { href: '/pro/dashboard/annonces', label: 'Mes annonces', icon: Store },
   { href: '/pro/dashboard/boosts', label: 'Boosts', icon: Bell },
   { href: '/pro/dashboard/factures', label: 'Factures', icon: FileText },

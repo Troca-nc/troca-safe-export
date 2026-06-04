@@ -52,6 +52,7 @@ const reviewsRouter        = require('./routes/reviews');
 const newsletterRouter     = require('./routes/newsletter');
 const proTransportRouter   = require('./routes/pro-transport');
 const covoiturageRouter    = require('./routes/covoiturage.route');
+const proProductsRouter    = require('./routes/pro.products');
 const demoRouter           = require('./routes/demo.route');
 const trocRouter           = require('./routes/troc');
 
@@ -185,6 +186,7 @@ app.use('/api/businesses', businessesRouter);
 app.use('/api/admin/businesses', businessesAdminRouter);
 app.use('/api/pros',       proRouter);
 app.use('/api/pro',        proRouter);
+app.use('/api/pro',        proProductsRouter);
 app.use('/api/reviews',    reviewsRouter);
 app.use('/api/newsletter', newsletterRouter);
 app.use('/api/pro-transport', proTransportRouter);
