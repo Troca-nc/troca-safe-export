@@ -1,7 +1,19 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, BarChart3, BadgeCheck, ImageIcon, Megaphone, Sparkles, Store, TrendingUp } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  ArrowRight,
+  BarChart3,
+  BadgeCheck,
+  CheckCircle2,
+  Circle,
+  ImageIcon,
+  Megaphone,
+  Sparkles,
+  Store,
+  TrendingUp,
+} from 'lucide-react'
 
 const steps = [
   {
@@ -55,7 +67,57 @@ const steps = [
   },
 ] as const
 
+const STORAGE_KEY = 'troca-pro-onboarding-progress'
+
 export default function ProOnboardingGuide() {
+  const [completedSteps, setCompletedSteps] = useState<string[]>(['1'])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY)
+      if (!raw) {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(['1']))
+        setCompletedSteps(['1'])
+        return
+      }
+
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed)) {
+        const valid = parsed
+          .map((value) => String(value))
+          .filter((value) => steps.some((step) => step.number === value))
+        setCompletedSteps(valid.length ? valid : ['1'])
+      }
+    } catch {
+      setCompletedSteps(['1'])
+    }
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(completedSteps))
+  }, [completedSteps])
+
+  const totalSteps = steps.length
+  const completionRate = useMemo(
+    () => Math.round((completedSteps.length / totalSteps) * 100),
+    [completedSteps.length, totalSteps],
+  )
+
+  const toggleStep = (stepNumber: string) => {
+    setCompletedSteps((current) => {
+      const exists = current.includes(stepNumber)
+      if (exists) {
+        const next = current.filter((value) => value !== stepNumber)
+        return next.length ? next : ['1']
+      }
+
+      return [...current, stepNumber].sort((a, b) => Number(a) - Number(b))
+    })
+  }
+
   return (
     <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -75,9 +137,25 @@ export default function ProOnboardingGuide() {
         </Link>
       </div>
 
+      <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-semibold text-night">
+            Progression: {completedSteps.length}/{totalSteps} étapes complétées
+          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">{completionRate}%</p>
+        </div>
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-white">
+          <div
+            className="h-full rounded-full bg-[#0A7EA4] transition-all duration-300"
+            style={{ width: `${completionRate}%` }}
+          />
+        </div>
+      </div>
+
       <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {steps.map((step) => {
           const Icon = step.icon
+          const isCompleted = completedSteps.includes(step.number)
 
           return (
             <article
@@ -89,14 +167,34 @@ export default function ProOnboardingGuide() {
               }`}
             >
               <div className="flex items-start gap-3">
-                <div className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${step.highlighted ? 'bg-[#0A7EA4] text-white' : 'bg-white text-[#0A7EA4]'}`}>
-                  <Icon className="h-5 w-5" />
-                </div>
+                <button
+                  type="button"
+                  onClick={() => toggleStep(step.number)}
+                  className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition ${
+                    isCompleted
+                      ? 'bg-emerald-600 text-white'
+                      : step.highlighted
+                        ? 'bg-[#0A7EA4] text-white'
+                        : 'bg-white text-[#0A7EA4]'
+                  }`}
+                  aria-label={`${isCompleted ? 'Décocher' : 'Cocher'} l'étape ${step.number}`}
+                >
+                  {isCompleted ? <CheckCircle2 className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
+                </button>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-night/55">
                       Étape {step.number}
                     </span>
+                    {isCompleted ? (
+                      <span className="rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
+                        Complété
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
+                        À faire
+                      </span>
+                    )}
                     {step.highlighted ? (
                       <span className="rounded-full bg-[#0A7EA4] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
                         Suivi live
@@ -120,6 +218,11 @@ export default function ProOnboardingGuide() {
             </article>
           )
         })}
+      </div>
+
+      <div className="mt-6 flex items-center gap-2 text-xs font-medium text-night/55">
+        <Circle className="h-3.5 w-3.5 text-nc-emeraude" />
+        La première étape est cochée automatiquement lors de votre première visite.
       </div>
     </section>
   )
