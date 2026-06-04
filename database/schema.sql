@@ -1145,6 +1145,25 @@ CREATE TABLE IF NOT EXISTS product_images (
 
 CREATE INDEX IF NOT EXISTS idx_product_images_product ON product_images (product_id, position, id);
 
+-- -- DEMANDES DE DEVIS PRO -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS pro_quote_requests (
+  id                 SERIAL PRIMARY KEY,
+  pro_id             INTEGER      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  requester_user_id  INTEGER      REFERENCES users(id) ON DELETE SET NULL,
+  requester_name     TEXT         NOT NULL,
+  requester_email    TEXT         NOT NULL,
+  requester_phone    TEXT,
+  need_type          TEXT         NOT NULL,
+  commune            TEXT         NOT NULL,
+  budget_xpf         INTEGER,
+  desired_date       TEXT,
+  details            TEXT,
+  created_at         TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_pro_quote_requests_pro ON pro_quote_requests (pro_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_pro_quote_requests_requester ON pro_quote_requests (requester_user_id, created_at DESC);
+
 -- ── PURGE AUTOMATIQUE DES TOKENS EXPIRÉS (appelé par pg_cron ou un cron job) ─
 -- Exemple de cron job à ajouter : 0 3 * * * psql -U troca -d troca_prod -c "SELECT cleanup_expired_tokens();"
 CREATE OR REPLACE FUNCTION cleanup_expired_tokens() RETURNS void AS $$

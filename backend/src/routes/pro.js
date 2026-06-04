@@ -6,6 +6,8 @@ const Joi = require('joi');
 const { query, withTransaction } = require('../config/database');
 const { authenticate } = require('../middleware/auth');
 const { sendMail } = require('../services/emailService');
+const { sendPushToUser } = require('../services/pushService');
+const { createNotification } = require('../services/notificationService');
 const { mapListingSearchRow } = require('../services/listingsPresentation');
 const { getAutoReply, saveAutoReply } = require('../services/autoReplyService');
 
@@ -40,6 +42,17 @@ const reviewSchema = Joi.object({
   comment: Joi.string().trim().max(1000).allow('', null).optional(),
 });
 
+const quoteSchema = Joi.object({
+  requester_name: Joi.string().trim().min(2).max(120).required(),
+  requester_email: Joi.string().trim().email().max(255).required(),
+  requester_phone: Joi.string().trim().max(30).allow('', null).optional(),
+  need_type: Joi.string().trim().min(2).max(120).required(),
+  commune: Joi.string().trim().min(2).max(120).required(),
+  budget_xpf: Joi.number().integer().min(0).allow(null).optional(),
+  desired_date: Joi.string().trim().max(40).allow('', null).optional(),
+  details: Joi.string().trim().max(1200).allow('', null).optional(),
+});
+
 function normalizeMaybeText(value) {
   const text = String(value ?? '').trim();
   return text.length > 0 ? text : null;
@@ -70,6 +83,12 @@ function escapePdfText(value) {
     .replace(/\\/g, '\\\\')
     .replace(/\(/g, '\\(')
     .replace(/\)/g, '\\)');
+}
+
+function formatBudgetXpf(value) {
+  const amount = Number(value ?? 0);
+  if (!Number.isFinite(amount) || amount <= 0) return 'Budget non précisé';
+  return `${amount.toLocaleString('fr-FR')} XPF`;
 }
 
 function buildSimplePdfBuffer(lines) {
@@ -436,6 +455,130 @@ router.get('/', async (req, res, next) => {
     );
 
     return res.json({ data: result.rows.map(mapProsRow) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/:id/quote', async (req, res, next) => {
+  try {
+    const proId = Number(req.params.id);
+    if (!Number.isFinite(proId) || proId <= 0) {
+      return res.status(400).json({ error: 'Professionnel invalide.' });
+    }
+
+    const { error, value } = quoteSchema.validate(req.body, { stripUnknown: true, convert: true });
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const proRes = await query(
+      `SELECT id, prenom, nom, email, pro_company_name, pro_verified, is_pro, pro_expires_at
+       FROM users
+       WHERE id = $1
+         AND is_pro = TRUE
+         AND COALESCE(pro_verified, FALSE) = TRUE
+         AND (pro_expires_at IS NULL OR pro_expires_at > NOW())
+         AND deleted_at IS NULL
+       LIMIT 1`,
+      [proId]
+    );
+    const pro = proRes.rows[0];
+    if (!pro) {
+      return res.status(404).json({ error: 'Professionnel introuvable.' });
+    }
+
+    const requesterUser = req.user ? {
+      id: req.user.id,
+      prenom: req.user.prenom || null,
+      nom: req.user.nom || null,
+      email: req.user.email || null,
+    } : null;
+
+    const requesterName = requesterUser?.prenom || requesterUser?.nom
+      ? [requesterUser.prenom, requesterUser.nom].filter(Boolean).join(' ').trim()
+      : value.requester_name.trim();
+    const requesterEmail = requesterUser?.email || value.requester_email.trim();
+    const requesterPhone = value.requester_phone ? String(value.requester_phone).trim() : null;
+    const needType = value.need_type.trim();
+    const commune = value.commune.trim();
+    const budgetXpf = value.budget_xpf == null ? null : Number(value.budget_xpf);
+    const desiredDate = value.desired_date ? String(value.desired_date).trim() : null;
+    const details = value.details ? String(value.details).trim() : null;
+
+    const saved = await query(
+      `INSERT INTO pro_quote_requests
+         (pro_id, requester_user_id, requester_name, requester_email, requester_phone, need_type, commune, budget_xpf, desired_date, details)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+       RETURNING id, created_at`,
+      [
+        proId,
+        requesterUser?.id ?? null,
+        requesterName,
+        requesterEmail,
+        requesterPhone,
+        needType,
+        commune,
+        budgetXpf,
+        desiredDate,
+        details,
+      ]
+    );
+
+    const proLabel = pro.pro_company_name || [pro.prenom, pro.nom].filter(Boolean).join(' ').trim() || 'Professionnel Troca';
+    const budgetLabel = formatBudgetXpf(budgetXpf);
+    const subject = `Nouvelle demande de devis pour ${needType}`;
+    const dashboardLink = `${process.env.BASE_URL || 'https://troca.nc'}/pro/dashboard`;
+    const intro = `${requesterName} vous a envoyé une demande de devis pour ${needType}.`;
+    const meta = `
+      <div style="border:1px solid #e5e7eb;border-radius:14px;padding:16px 18px;margin:18px 0;background:#f8fafc;">
+        <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;">Détails de la demande</p>
+        <p style="margin:0 0 6px;font-size:15px;"><strong>Besoin :</strong> ${needType}</p>
+        <p style="margin:0 0 6px;font-size:15px;"><strong>Commune :</strong> ${commune}</p>
+        <p style="margin:0 0 6px;font-size:15px;"><strong>Budget :</strong> ${budgetLabel}</p>
+        <p style="margin:0 0 6px;font-size:15px;"><strong>Date souhaitée :</strong> ${desiredDate || 'Non précisée'}</p>
+        <p style="margin:0;font-size:15px;"><strong>Contact :</strong> ${requesterName} · ${requesterEmail}${requesterPhone ? ` · ${requesterPhone}` : ''}</p>
+      </div>
+      ${details ? `<p style="white-space:pre-line;">${details.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>` : ''}
+    `;
+
+    await Promise.all([
+      sendMail({
+        to: pro.email,
+        subject,
+        html: `<!DOCTYPE html>
+<html lang="fr"><body style="font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:0;">
+  <div style="max-width:560px;margin:32px auto;background:#fff;border-radius:16px;overflow:hidden">
+    <div style="background:#0A7EA4;padding:24px 28px;color:#fff;font-weight:700;font-size:20px;">Troca</div>
+    <div style="padding:28px;color:#1f2937;line-height:1.6;">
+      <p>Bonjour ${proLabel},</p>
+      <p>${intro}</p>
+      ${meta}
+      <p>Vous pouvez répondre rapidement pour transformer cette demande en opportunité.</p>
+      <p><a href="${dashboardLink}" style="display:inline-block;background:#0A7EA4;color:#fff;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:700;">Voir mon dashboard</a></p>
+    </div>
+  </div>
+</body></html>`,
+      }).catch(() => {}),
+      createNotification(proId, {
+        type: 'quote_request',
+        title: `📩 Nouvelle demande de devis`,
+        body: `${requesterName} · ${needType} · ${commune}`,
+        href: `/pro/dashboard`,
+      }),
+      sendPushToUser(proId, {
+        title: '📩 Nouvelle demande de devis',
+        body: `${requesterName} · ${needType} · ${commune}`,
+        data: { type: 'quote_request', proId },
+      }),
+    ]);
+
+    return res.status(201).json({
+      data: {
+        id: Number(saved.rows[0].id),
+        created_at: saved.rows[0].created_at,
+      },
+    });
   } catch (err) {
     next(err);
   }

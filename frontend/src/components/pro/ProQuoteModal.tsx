@@ -1,0 +1,297 @@
+'use client'
+
+import { useEffect, useMemo, useState } from 'react'
+import { CalendarDays, CheckCircle2, CreditCard, MapPin, MessageSquareQuote, Send, Sparkles, X } from 'lucide-react'
+
+import { proApi } from '@/lib/api'
+import { useAuthStore } from '@/store/authStore'
+
+type ProQuoteModalProps = {
+  proId: string | number
+  proName: string
+  open: boolean
+  onClose: () => void
+}
+
+type QuoteFormState = {
+  requester_name: string
+  requester_email: string
+  requester_phone: string
+  need_type: string
+  commune: string
+  budget_xpf: string
+  desired_date: string
+  details: string
+}
+
+const INITIAL_STATE: QuoteFormState = {
+  requester_name: '',
+  requester_email: '',
+  requester_phone: '',
+  need_type: '',
+  commune: '',
+  budget_xpf: '',
+  desired_date: '',
+  details: '',
+}
+
+export default function ProQuoteModal({ proId, proName, open, onClose }: ProQuoteModalProps) {
+  const { user } = useAuthStore()
+  const [form, setForm] = useState<QuoteFormState>(INITIAL_STATE)
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState('')
+  const [sent, setSent] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+    setError('')
+    setSent(false)
+    setForm((current) => ({
+      ...current,
+      requester_name: current.requester_name || [user?.prenom, user?.nom].filter(Boolean).join(' ').trim(),
+      requester_email: current.requester_email || user?.email || '',
+    }))
+  }, [open, user?.email, user?.nom, user?.prenom])
+
+  const budgetLabel = useMemo(() => {
+    const amount = Number(form.budget_xpf || 0)
+    if (!Number.isFinite(amount) || amount <= 0) return 'Budget à définir'
+    return `${amount.toLocaleString('fr-FR')} XPF`
+  }, [form.budget_xpf])
+
+  if (!open) return null
+
+  const handleSubmit = async () => {
+    if (!form.requester_name.trim()) {
+      setError('Votre nom est requis.')
+      return
+    }
+    if (!form.requester_email.trim() || !form.requester_email.includes('@')) {
+      setError('Un email valide est requis.')
+      return
+    }
+    if (!form.need_type.trim()) {
+      setError('Le type de besoin est requis.')
+      return
+    }
+    if (!form.commune.trim()) {
+      setError('La commune est requise.')
+      return
+    }
+
+    setSending(true)
+    setError('')
+    try {
+      await proApi.requestQuote(proId, {
+        requester_name: form.requester_name.trim(),
+        requester_email: form.requester_email.trim(),
+        requester_phone: form.requester_phone.trim() || null,
+        need_type: form.need_type.trim(),
+        commune: form.commune.trim(),
+        budget_xpf: form.budget_xpf.trim() ? Number(form.budget_xpf) : null,
+        desired_date: form.desired_date || null,
+        details: form.details.trim() || null,
+      })
+      setSent(true)
+    } catch (err: any) {
+      setError(err?.response?.data?.error || 'Impossible d’envoyer votre demande.')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="relative w-full max-w-2xl overflow-hidden rounded-[2rem] bg-[var(--color-surface)] shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-[var(--color-border)] px-6 py-5">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Demande de devis rapide</p>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Demander un devis à {proName}</h2>
+            <p className="mt-1 text-sm text-night/55">
+              Décrivez votre besoin en quelques champs. Le pro reçoit la demande immédiatement.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full p-2 text-night/45 transition hover:bg-sand hover:text-night"
+            aria-label="Fermer"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="grid gap-0 lg:grid-cols-[1fr_0.9fr]">
+          <div className="border-b border-[var(--color-border)] px-6 py-6 lg:border-b-0 lg:border-r">
+            {sent ? (
+              <div className="flex h-full flex-col items-center justify-center rounded-[1.5rem] border border-emerald-200 bg-emerald-50 px-6 py-10 text-center">
+                <CheckCircle2 className="h-12 w-12 text-emerald-600" />
+                <h3 className="mt-4 text-xl font-semibold text-night">Demande envoyée !</h3>
+                <p className="mt-2 text-sm text-night/60">
+                  {proName} a reçu votre demande de devis. Vous pouvez suivre vos échanges depuis votre messagerie.
+                </p>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="mt-6 rounded-2xl bg-[#0A7EA4] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
+                >
+                  Fermer
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <label className="block space-y-2">
+                  <span className="text-sm font-semibold text-night">Votre nom *</span>
+                  <input
+                    value={form.requester_name}
+                    onChange={(event) => setForm((current) => ({ ...current, requester_name: event.target.value }))}
+                    className="input w-full rounded-2xl"
+                    placeholder="Votre nom"
+                  />
+                </label>
+
+                <label className="block space-y-2">
+                  <span className="text-sm font-semibold text-night">Votre email *</span>
+                  <input
+                    type="email"
+                    value={form.requester_email}
+                    onChange={(event) => setForm((current) => ({ ...current, requester_email: event.target.value }))}
+                    className="input w-full rounded-2xl"
+                    placeholder="vous@email.com"
+                  />
+                </label>
+
+                <label className="block space-y-2">
+                  <span className="text-sm font-semibold text-night">Téléphone</span>
+                  <input
+                    value={form.requester_phone}
+                    onChange={(event) => setForm((current) => ({ ...current, requester_phone: event.target.value }))}
+                    className="input w-full rounded-2xl"
+                    placeholder="XX XX XX XX"
+                  />
+                </label>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="block space-y-2">
+                    <span className="text-sm font-semibold text-night">Type de besoin *</span>
+                    <input
+                      value={form.need_type}
+                      onChange={(event) => setForm((current) => ({ ...current, need_type: event.target.value }))}
+                      className="input w-full rounded-2xl"
+                      placeholder="Plomberie, rénovation, logo..."
+                    />
+                  </label>
+
+                  <label className="block space-y-2">
+                    <span className="text-sm font-semibold text-night">Commune *</span>
+                    <input
+                      value={form.commune}
+                      onChange={(event) => setForm((current) => ({ ...current, commune: event.target.value }))}
+                      className="input w-full rounded-2xl"
+                      placeholder="Nouméa, Dumbéa..."
+                    />
+                  </label>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="block space-y-2">
+                    <span className="text-sm font-semibold text-night">Budget estimé</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={form.budget_xpf}
+                      onChange={(event) => setForm((current) => ({ ...current, budget_xpf: event.target.value }))}
+                      className="input w-full rounded-2xl"
+                      placeholder="25000"
+                    />
+                  </label>
+
+                  <label className="block space-y-2">
+                    <span className="text-sm font-semibold text-night">Date souhaitée</span>
+                    <input
+                      type="date"
+                      value={form.desired_date}
+                      onChange={(event) => setForm((current) => ({ ...current, desired_date: event.target.value }))}
+                      className="input w-full rounded-2xl"
+                    />
+                  </label>
+                </div>
+
+                <label className="block space-y-2">
+                  <span className="text-sm font-semibold text-night">Précisions</span>
+                  <textarea
+                    value={form.details}
+                    onChange={(event) => setForm((current) => ({ ...current, details: event.target.value }))}
+                    rows={4}
+                    className="input w-full rounded-2xl py-3"
+                    placeholder="Expliquez votre besoin, les contraintes, le niveau d'urgence..."
+                  />
+                </label>
+
+                {error ? (
+                  <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {error}
+                  </div>
+                ) : null}
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={sending}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {sending ? <Sparkles className="h-4 w-4 animate-pulse" /> : <Send className="h-4 w-4" />}
+                    Envoyer la demande
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="rounded-2xl border border-[var(--color-border)] px-5 py-3 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <aside className="space-y-4 px-6 py-6">
+            <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral/80">Récapitulatif</p>
+              <div className="mt-3 space-y-3 text-sm text-night/65">
+                <p className="flex items-start gap-2">
+                  <MessageSquareQuote className="mt-0.5 h-4 w-4 text-[#0A7EA4]" />
+                  <span>Votre demande part directement au professionnel sélectionné.</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <MapPin className="mt-0.5 h-4 w-4 text-[#0A7EA4]" />
+                  <span>Vous pouvez préciser la commune pour un retour plus rapide.</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <CreditCard className="mt-0.5 h-4 w-4 text-[#0A7EA4]" />
+                  <span>Budget estimé actuel : {budgetLabel}.</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <CalendarDays className="mt-0.5 h-4 w-4 text-[#0A7EA4]" />
+                  <span>La date souhaitée permet au pro de prioriser votre demande.</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-[1.5rem] border border-emerald-100 bg-emerald-50/70 p-4 text-sm text-night/70">
+              <p className="font-semibold text-emerald-800">Astuce</p>
+              <p className="mt-2">
+                Plus votre besoin est clair, plus le professionnel peut répondre vite et avec une estimation
+                réaliste.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  )
+}

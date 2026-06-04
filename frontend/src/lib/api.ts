@@ -528,6 +528,11 @@ export const proApi = {
     () => api.get(`/pros/${id}`),
     CACHE_TTL.short,
   ),
+  requestQuote: async (id: string | number, data: object) => {
+    const res = await api.post(`/pro/${id}/quote`, data)
+    invalidateApiCache('pro.')
+    return res
+  },
   getReviews: (id: string | number, params: object = {}) => cachedGet(
     buildCacheKey('pro.getReviews', `/pros/${id}/reviews`, params),
     () => api.get(`/pros/${id}/reviews`, { params }),

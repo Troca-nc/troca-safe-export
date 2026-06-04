@@ -21,6 +21,7 @@ import Header from '@/components/layout/Header'
 import ListingCard from '@/components/listings/ListingCard'
 import ReviewCard from '@/components/reviews/ReviewCard'
 import ReviewSummary from '@/components/reviews/ReviewSummary'
+import ProQuoteModal from '@/components/pro/ProQuoteModal'
 import { proApi } from '@/lib/api'
 import { reviewsApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
@@ -86,6 +87,7 @@ export default function ProPublicPage() {
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteLoading, setInviteLoading] = useState(false)
   const [inviteError, setInviteError] = useState('')
+  const [quoteOpen, setQuoteOpen] = useState(false)
 
   useEffect(() => {
     if (!proId) return
@@ -278,6 +280,14 @@ export default function ProPublicPage() {
                       Appeler
                     </a>
                   ) : null}
+                  <button
+                    type="button"
+                    onClick={() => setQuoteOpen(true)}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    Demander un devis
+                  </button>
                 </div>
               </div>
 
@@ -454,14 +464,30 @@ export default function ProPublicPage() {
       ) : null}      </main>
 
       <div className="fixed inset-x-4 bottom-4 z-40 md:hidden">
-        <Link
-          href={`/messages/new?to=${profile.id}`}
-          className="flex items-center justify-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#0A7EA4]/25"
-        >
-          <MessageCircle className="h-4 w-4" />
-          Envoyer un message
-        </Link>
+        <div className="grid grid-cols-2 gap-3">
+          <Link
+            href={`/messages/new?to=${profile.id}`}
+            className="flex items-center justify-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#0A7EA4]/25"
+          >
+            <MessageCircle className="h-4 w-4" />
+            Message
+          </Link>
+          <button
+            type="button"
+            onClick={() => setQuoteOpen(true)}
+            className="flex items-center justify-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm font-semibold text-night shadow-lg shadow-black/5"
+          >
+            <Package className="h-4 w-4 text-[#0A7EA4]" />
+            Devis
+          </button>
+        </div>
       </div>
+      <ProQuoteModal
+        proId={profile.id}
+        proName={displayName}
+        open={quoteOpen}
+        onClose={() => setQuoteOpen(false)}
+      />
 </div>
   )
 }
