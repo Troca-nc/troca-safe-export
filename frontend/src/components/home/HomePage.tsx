@@ -57,6 +57,7 @@ export default function HomePage() {
   const router = useRouter()
   const { user, hasHydrated } = useAuthStore()
   const [q, setQ] = useState('')
+  const [recentSearches, setRecentSearches] = useState<string[]>([])
   const [listings, setListings] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [promoBonPlans, setPromoBonPlans] = useState<any[]>([])
@@ -77,6 +78,16 @@ export default function HomePage() {
         .slice(0, 4),
     [listings]
   )
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem('troca_search_history')
+      const parsed = raw ? JSON.parse(raw) : []
+      setRecentSearches(Array.isArray(parsed) ? parsed.slice(0, 5).filter((value) => typeof value === 'string' && value.trim()) : [])
+    } catch {
+      setRecentSearches([])
+    }
+  }, [])
 
   useEffect(() => {
     let alive = true
@@ -169,6 +180,32 @@ export default function HomePage() {
 
       <HomeHeroSection q={q} onQueryChange={setQ} onSubmit={handleSearch} suggestions={heroSearchSuggestions} />
 
+      {recentSearches.length > 0 ? (
+        <section className="mx-auto max-w-7xl px-4 pt-4">
+          <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-night/40">
+                Recherches récentes
+              </p>
+              <span className="text-xs text-night/40">
+                5 dernières recherches
+              </span>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]">
+              {recentSearches.map((term) => (
+                <Link
+                  key={term}
+                  href={`/annonces?q=${encodeURIComponent(term)}`}
+                  className="whitespace-nowrap rounded-full border border-[var(--color-border)] bg-white px-3 py-2 text-sm font-medium text-night transition hover:-translate-y-0.5 hover:border-nc-lagon/30 hover:text-nc-lagon"
+                >
+                  {term}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       {hasHydrated && user?.is_pro && proSummary ? (
         <section className="mx-auto max-w-7xl px-4 pt-4">
           <Link
@@ -197,9 +234,14 @@ export default function HomePage() {
             <h2 className="mt-1 font-display text-2xl font-bold text-night">Nos professionnels recommandés</h2>
             <p className="mt-1 text-sm text-night/55">Des pros calédoniens vérifiés, à portée de message.</p>
           </div>
-          <Link href="/pro" className="hidden items-center gap-1 text-sm font-semibold text-nc-emeraude hover:underline md:inline-flex">
-            Devenir Pro <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="hidden items-center gap-3 md:flex">
+            <Link href="/pros" className="inline-flex items-center gap-1 text-sm font-semibold text-nc-emeraude hover:underline">
+              Voir l'annuaire <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link href="/pro" className="inline-flex items-center gap-1 text-sm font-semibold text-night/60 hover:text-night">
+              Devenir Pro <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
         <ProCarousel />
       </section>

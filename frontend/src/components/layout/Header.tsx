@@ -36,7 +36,7 @@ export function MobileBottomNav() {
 
   const drawerItems = [
     { href: '/troc', icon: ArrowLeftRight, label: 'Troc' },
-    { href: '/pro', icon: Trophy, label: 'Pros' },
+    { href: '/pros', icon: Trophy, label: 'Pros' },
     { href: '/covoiturage', icon: Car, label: 'Covoit' },
     { href: '/favoris', icon: Heart, label: 'Favoris' },
     { href: '/bons-plans', icon: Tag, label: 'Bons plans' },
@@ -221,7 +221,7 @@ export default function Header() {
     { href: '/troc', label: 'Troc' },
     { href: '/covoiturage', label: 'Covoiturage' },
     { href: '/bons-plans', label: 'Bons plans' },
-    { href: '/pro', label: 'Pros' },
+    { href: '/pros', label: 'Pros' },
     { href: '/appels-offres', label: "Appels d'offres" },
   ]
 

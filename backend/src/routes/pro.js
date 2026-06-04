@@ -353,8 +353,12 @@ async function loadProProfile(proId) {
   };
 }
 
-router.get('/', async (_req, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || '12', 10)));
+    const page = Math.max(1, parseInt(req.query.page || '1', 10));
+    const offset = (page - 1) * limit;
+
     const result = await query(
       `SELECT
          u.id,
@@ -427,7 +431,8 @@ router.get('/', async (_req, res, next) => {
          AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW())
          AND u.deleted_at IS NULL
        ORDER BY avg_rating DESC, listing_count DESC, COALESCE(u.pro_company_name, u.prenom, u.nom) ASC
-       LIMIT 12`
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
     );
 
     return res.json({ data: result.rows.map(mapProsRow) });
