@@ -300,6 +300,7 @@ export const listingsApi = {
     invalidateApiCache('stats.')
     return res
   },
+  report: (id: string | number, data: object = {}) => api.post(`/listings/${id}/signaler`, data),
 }
 
 export const trocApi = {
@@ -383,6 +384,8 @@ export const messagesApi = {
     }
     return api.post('/messages/conversations', data)
   },
+  makeOffer: (convId: string | number, amount_xpf: number) =>
+    api.post('/messages/offers', { conv_id: Number(convId), amount_xpf }),
   sendMessage: (convId: string, content: string) => {
     if (isDemoMode()) {
       showDemoToast('Désactivé en mode démo')
@@ -662,6 +665,10 @@ export const newsletterApi = {
     invalidateApiCache('newsletter.')
     return res
   },
+}
+
+export const contactApi = {
+  send: (data: object) => api.post('/contact', data),
 }
 
 export const proTransportApi = {

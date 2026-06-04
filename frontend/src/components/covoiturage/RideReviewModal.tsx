@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, Star, X } from 'lucide-react'
+import { Star, X } from 'lucide-react'
 
 import { covoiturageApi } from '@/lib/api'
+import FeedbackAlert from '@/components/ui/FeedbackAlert'
 
 type Booking = {
   id: number | string
@@ -99,14 +100,13 @@ export default function RideReviewModal({
         </div>
 
         {success ? (
-          <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-700">
-            <div className="flex items-center gap-2 font-semibold">
-              <CheckCircle2 className="h-5 w-5" />
-              Merci, votre avis a été publié !
-            </div>
-            <p className="mt-1 text-sm text-emerald-700/80">
-              {driverName} et la communauté Troca vous remercient.
-            </p>
+          <div className="mt-5">
+            <FeedbackAlert tone="success" title="Avis publié">
+              <p>Merci, votre avis a été publié !</p>
+              <p className="mt-1 text-sm text-emerald-700/80">
+                {driverName} et la communauté Troca vous remercient.
+              </p>
+            </FeedbackAlert>
           </div>
         ) : (
           <>
@@ -151,7 +151,13 @@ export default function RideReviewModal({
               />
             </label>
 
-            {error ? <p className="mt-3 text-sm font-medium text-red-600">{error}</p> : null}
+            {error ? (
+              <div className="mt-3">
+                <FeedbackAlert tone="error" title="Envoi impossible">
+                  {error}
+                </FeedbackAlert>
+              </div>
+            ) : null}
 
             <div className="mt-6 flex flex-wrap gap-3">
               <button

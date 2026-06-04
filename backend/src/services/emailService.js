@@ -36,7 +36,7 @@ function getTransporter() {
 
 // â”€â”€ Envoi gÃ©nÃ©rique â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-async function sendMail({ to, subject, html, text }) {
+async function sendMail({ to, subject, html, text, replyTo, cc, bcc }) {
   const transporter = getTransporter();
   if (!transporter) {
     console.log(`[email] (simulÃ©) â†’ ${to} | ${subject}`);
@@ -49,6 +49,9 @@ async function sendMail({ to, subject, html, text }) {
     subject,
     html,
     text: text || html.replace(/<[^>]+>/g, ''),
+    ...(replyTo ? { replyTo } : {}),
+    ...(cc ? { cc } : {}),
+    ...(bcc ? { bcc } : {}),
   });
 }
 

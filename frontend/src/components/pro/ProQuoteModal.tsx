@@ -1,10 +1,11 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, CheckCircle2, CreditCard, MapPin, MessageSquareQuote, Send, Sparkles, X } from 'lucide-react'
+import { CalendarDays, CreditCard, MapPin, MessageSquareQuote, Send, Sparkles, X } from 'lucide-react'
 
 import { proApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
+import FeedbackAlert from '@/components/ui/FeedbackAlert'
 import {
   DEFAULT_QUOTE_TEMPLATE,
   normalizeQuoteTemplate,
@@ -17,6 +18,12 @@ type ProQuoteModalProps = {
   open: boolean
   onClose: () => void
   template?: QuoteTemplate | null
+  onSent?: (payload: {
+    proId: string | number
+    proName: string
+    request: QuoteFormState
+    template: QuoteTemplate
+  }) => void
 }
 
 type QuoteFormState = {
@@ -45,7 +52,7 @@ function formatBudget(value: number) {
   return `${value.toLocaleString('fr-FR')} XPF`
 }
 
-export default function ProQuoteModal({ proId, proName, open, onClose, template }: ProQuoteModalProps) {
+export default function ProQuoteModal({ proId, proName, open, onClose, template, onSent }: ProQuoteModalProps) {
   const { user } = useAuthStore()
   const [form, setForm] = useState<QuoteFormState>(INITIAL_STATE)
   const [sending, setSending] = useState(false)
@@ -57,13 +64,16 @@ export default function ProQuoteModal({ proId, proName, open, onClose, template 
     if (!open) return
     setError('')
     setSent(false)
-    setForm((current) => ({
-      ...current,
-      requester_name: current.requester_name || [user?.prenom, user?.nom].filter(Boolean).join(' ').trim(),
-      requester_email: current.requester_email || user?.email || '',
-      need_type: current.need_type || quoteTemplate.need_type_placeholder || DEFAULT_QUOTE_TEMPLATE.need_type_placeholder,
-      commune: current.commune || quoteTemplate.commune_placeholder || DEFAULT_QUOTE_TEMPLATE.commune_placeholder,
-    }))
+    setForm({
+      requester_name: [user?.prenom, user?.nom].filter(Boolean).join(' ').trim(),
+      requester_email: user?.email || '',
+      requester_phone: '',
+      need_type: quoteTemplate.need_type_placeholder || DEFAULT_QUOTE_TEMPLATE.need_type_placeholder,
+      commune: quoteTemplate.commune_placeholder || DEFAULT_QUOTE_TEMPLATE.commune_placeholder,
+      budget_xpf: '',
+      desired_date: '',
+      details: '',
+    })
   }, [
     open,
     quoteTemplate.commune_placeholder,
@@ -112,6 +122,12 @@ export default function ProQuoteModal({ proId, proName, open, onClose, template 
         desired_date: quoteTemplate.show_date && form.desired_date ? form.desired_date : null,
         details: quoteTemplate.show_details && form.details.trim() ? form.details.trim() : null,
       })
+      onSent?.({
+        proId,
+        proName,
+        request: { ...form },
+        template: quoteTemplate,
+      })
       setSent(true)
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Impossible d’envoyer votre demande.')
@@ -147,19 +163,19 @@ export default function ProQuoteModal({ proId, proName, open, onClose, template 
         <div className="grid gap-0 lg:grid-cols-[1fr_0.9fr]">
           <div className="border-b border-[var(--color-border)] px-6 py-6 lg:border-b-0 lg:border-r">
             {sent ? (
-              <div className="flex h-full flex-col items-center justify-center rounded-[1.5rem] border border-emerald-200 bg-emerald-50 px-6 py-10 text-center">
-                <CheckCircle2 className="h-12 w-12 text-emerald-600" />
-                <h3 className="mt-4 text-xl font-semibold text-night">Demande envoyée !</h3>
-                <p className="mt-2 text-sm text-night/60">
+              <div className="flex h-full flex-col justify-center">
+                <FeedbackAlert tone="success" title="Demande envoyée !">
                   {proName} a reçu votre demande de devis. Vous pouvez suivre vos échanges depuis votre messagerie.
-                </p>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="mt-6 rounded-2xl bg-[#0A7EA4] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
-                >
-                  Fermer
-                </button>
+                </FeedbackAlert>
+                <div className="mt-6 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="rounded-2xl bg-[#0A7EA4] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
+                  >
+                    Fermer
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="space-y-4">
@@ -277,9 +293,9 @@ export default function ProQuoteModal({ proId, proName, open, onClose, template 
                 ) : null}
 
                 {error ? (
-                  <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  <FeedbackAlert tone="error" title="Envoi impossible">
                     {error}
-                  </div>
+                  </FeedbackAlert>
                 ) : null}
 
                 <div className="flex flex-wrap gap-3">

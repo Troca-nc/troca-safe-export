@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 
 import Header from '@/components/layout/Header'
 import FaqAccordion from '@/components/contact/FaqAccordion'
+import ContactForm from '@/components/contact/ContactForm'
 
 export const metadata: Metadata = {
   title: 'Contact — Troca',
@@ -94,13 +95,8 @@ export default function ContactPage() {
           </a>
         </div>
 
-        <section id="formulaire-contact" className="mt-6 card border-coral/20 bg-coral/5 p-5">
-          <h2 className="mb-2 font-display text-xl font-bold text-night">Délais de réponse</h2>
-          <p className="text-sm leading-relaxed text-night/70">
-            L&apos;équipe vise une première réponse sous 24 à 48 heures ouvrées pour le support
-            général. Les urgences liées à la sécurité ou à un contenu manifestement illicite sont
-            traitées en priorité.
-          </p>
+        <section id="formulaire-contact" className="mt-6">
+          <ContactForm />
         </section>
       </main>
     </>
