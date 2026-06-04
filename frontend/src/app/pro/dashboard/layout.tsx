@@ -13,6 +13,7 @@ import {
   MessageCircle,
   Menu,
   Package,
+  Rocket,
   Settings2,
   Store,
   Users2,
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { href: '/pro/dashboard/boosts', label: 'Boosts', icon: Bell },
   { href: '/pro/dashboard/factures', label: 'Factures', icon: FileText },
   { href: '/pro/dashboard/parrainage', label: 'Parrainage', icon: Users2 },
+  { href: '/pro/dashboard/pack-lancement', label: 'Pack lancement', icon: Rocket },
   { href: '/pro/dashboard/auto-reply', label: 'Réponse auto', icon: MessageCircle },
   { href: '/pro/dashboard/transport', label: 'Transport', icon: Building2 },
   { href: '/pro/[id]', label: 'Ma vitrine', icon: Building2 },
@@ -62,7 +64,7 @@ export default function ProDashboardLayout({ children }: { children: ReactNode }
       <main className="mx-auto flex min-h-[60vh] max-w-7xl items-center justify-center px-4">
         <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-10 text-center shadow-sm">
           <div className="mx-auto h-10 w-10 animate-pulse rounded-full bg-sand/80" />
-          <p className="mt-4 text-sm text-night/55">Chargement de votre espace Pro…</p>
+          <p className="mt-4 text-sm text-night/55">Chargement de votre espace Pro...</p>
         </div>
       </main>
     )

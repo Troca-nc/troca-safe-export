@@ -187,6 +187,22 @@ export default function ProDashboardPage() {
         </div>
       </section>
 
+      <section className="rounded-[2rem] border border-[#0A7EA4]/15 bg-gradient-to-br from-nc-lagonLight via-white to-nc-emeraudeLight p-6 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-3xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Pack de lancement</p>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Accélérez votre démarrage Pro avec un parcours guidé</h2>
+            <p className="mt-2 text-sm text-night/65">
+              Retrouvez vos étapes prioritaires, de la vitrine à la première annonce, en passant par le catalogue, les rendez-vous et les devis.
+            </p>
+          </div>
+          <Link href="/pro/dashboard/pack-lancement" className="btn-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm">
+            Ouvrir le pack
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
+
       <ProScoreWidget
         listings={listings}
         stats={stats}
