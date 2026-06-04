@@ -26,10 +26,11 @@ import { normalizeQuoteTemplate } from '@/components/pro/quoteTemplate'
 import { proApi } from '@/lib/api'
 import { reviewsApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
-import type { ProPublicProfile, ProPublicReview } from '@/app/pro/publicStorefrontData'
+import type { ProPublicProfile, ProPublicProduct, ProPublicReview } from '@/app/pro/publicStorefrontData'
 
 const TABS = [
   { id: 'annonces', label: 'Annonces', icon: Package },
+  { id: 'catalogue', label: 'Catalogue', icon: Store },
   { id: 'avis', label: 'Avis', icon: Star },
   { id: 'apropos', label: 'Ã€ propos', icon: Store },
 ] as const
@@ -44,6 +45,12 @@ function formatRating(value?: number | null) {
   const rating = Number(value ?? 0)
   if (!Number.isFinite(rating) || rating <= 0) return '0.0'
   return rating.toFixed(1)
+}
+
+function formatPrice(value?: number | null) {
+  const amount = Number(value ?? 0)
+  if (!Number.isFinite(amount) || amount <= 0) return 'Prix sur demande'
+  return `${amount.toLocaleString('fr-FR')} XPF`
 }
 
 export default function ProPublicPage({ proId, initialProfile, initialReviews }: ProPublicClientProps) {
@@ -159,9 +166,11 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
   const rating = Number(profile.avg_rating ?? 0)
   const reviewCount = Number(profile.review_count ?? 0)
   const listingCount = Number(profile.listing_count ?? 0)
+  const productCount = Number(profile.product_count ?? profile.products?.length ?? 0)
   const quoteTemplate = normalizeQuoteTemplate(profile.pro_quote_template)
   const bookingSettings = profile.booking_settings
   const bookingSlots = profile.booking_slots ?? []
+  const products = (profile.products ?? []) as ProPublicProduct[]
   const bookingEnabled = Boolean(bookingSettings?.is_enabled)
   const bookingPreviewSlots = bookingSlots.slice(0, 3)
 
@@ -230,6 +239,12 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                         <Package className="h-4 w-4 text-[#0A7EA4]" />
                         {listingCount} annonce{listingCount > 1 ? 's' : ''} active{listingCount > 1 ? 's' : ''}
                       </span>
+                      {productCount > 0 ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
+                          <Store className="h-4 w-4 text-nc-emeraude" />
+                          {productCount} produit{productCount > 1 ? 's' : ''} au catalogue
+                        </span>
+                      ) : null}
                     </div>
                   </div>
                 </div>
@@ -454,6 +469,91 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                 <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-14 text-center text-night/55">
                   <p className="text-lg font-semibold text-night">Aucune annonce active</p>
                   <p className="mt-2 text-sm">Ce professionnel nâ€™a pas encore dâ€™annonce en ligne.</p>
+                </div>
+              )}
+            </div>
+          ) : null}
+
+          {activeTab === 'catalogue' ? (
+            <div>
+              {products.length ? (
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {products.map((product) => {
+                    const cover = product.cover_image_url || product.images?.[0]?.url || null
+                    const comparePrice = product.compare_at_price_xpf && product.compare_at_price_xpf > product.price_xpf
+                      ? product.compare_at_price_xpf
+                      : null
+
+                    return (
+                      <article
+                        key={product.id}
+                        className="overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                      >
+                        <div className="relative h-52 bg-sand">
+                          {cover ? (
+                            <Image
+                              src={cover}
+                              alt={product.title}
+                              fill
+                              sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center bg-gradient-to-br from-nc-lagonLight to-nc-emeraudeLight text-3xl font-bold text-[#0A7EA4]">
+                              {product.title.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          {product.is_featured ? (
+                            <span className="absolute left-3 top-3 rounded-full bg-[#0A7EA4] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
+                              À la une
+                            </span>
+                          ) : null}
+                        </div>
+
+                        <div className="space-y-3 p-5">
+                          <div>
+                            <h3 className="line-clamp-1 text-lg font-semibold text-night">{product.title}</h3>
+                            <p className="mt-1 text-sm text-night/55">
+                              {product.category_name || 'Catalogue'} · {product.commune_name || profile.pro_commune || 'Nouvelle-Calédonie'}
+                            </p>
+                          </div>
+
+                          <div className="flex items-end justify-between gap-3">
+                            <div>
+                              <p className="text-2xl font-bold text-night">{formatPrice(product.price_xpf)}</p>
+                              {comparePrice ? (
+                                <p className="text-sm text-night/45 line-through">{formatPrice(comparePrice)}</p>
+                              ) : null}
+                            </div>
+                            <span className="rounded-full bg-sand px-3 py-1 text-xs font-semibold text-night/60">
+                              Stock {Math.max(0, Number(product.stock_quantity ?? 0))}
+                            </span>
+                          </div>
+
+                          <p className="line-clamp-3 text-sm leading-relaxed text-night/65">
+                            {product.description}
+                          </p>
+
+                          <div className="flex flex-wrap gap-2 pt-1 text-xs font-medium text-night/55">
+                            {product.unit_label ? (
+                              <span className="rounded-full bg-[var(--color-background-secondary)] px-2.5 py-1">{product.unit_label}</span>
+                            ) : null}
+                            {product.brand ? (
+                              <span className="rounded-full bg-[var(--color-background-secondary)] px-2.5 py-1">{product.brand}</span>
+                            ) : null}
+                            <span className="rounded-full bg-[var(--color-background-secondary)] px-2.5 py-1">
+                              {product.image_count || product.images?.length || 0} photo{(product.image_count || product.images?.length || 0) > 1 ? 's' : ''}
+                            </span>
+                          </div>
+                        </div>
+                      </article>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-14 text-center text-night/55">
+                  <p className="text-lg font-semibold text-night">Aucun produit actif</p>
+                  <p className="mt-2 text-sm">Ce professionnel n&apos;a pas encore publié de catalogue visible.</p>
                 </div>
               )}
             </div>

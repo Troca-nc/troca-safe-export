@@ -267,6 +267,7 @@ function mapProsRow(row) {
     avg_rating: Number(row.avg_rating ?? 0),
     review_count: Number(row.review_count ?? 0),
     listing_count: Number(row.listing_count ?? 0),
+    product_count: Number(row.product_count ?? 0),
     latest_review_comment: row.latest_review_comment ?? null,
     latest_review_rating: row.latest_review_rating == null ? null : Number(row.latest_review_rating),
     latest_review_prenom: row.latest_review_prenom ?? null,
@@ -312,8 +313,14 @@ async function loadProProfile(proId) {
          WHERE a.user_id = u.id
            AND a.status = 'active'
            AND a.deleted_at IS NULL
-       ), 0) AS listing_count
-       ,
+       ), 0) AS listing_count,
+       COALESCE((
+         SELECT COUNT(*)::int
+         FROM products p
+         WHERE p.owner_id = u.id
+           AND p.is_active = TRUE
+           AND p.archived_at IS NULL
+       ), 0) AS product_count,
        (
          SELECT pr.comment
          FROM verified_reviews pr
@@ -358,7 +365,7 @@ async function loadProProfile(proId) {
   const profile = profileRes.rows[0];
   if (!profile) return null;
 
-  const [reviewsRes, listingsRes, bookingSettingsRes, bookingSlotsRes] = await Promise.all([
+  const [reviewsRes, listingsRes, productsRes, bookingSettingsRes, bookingSlotsRes] = await Promise.all([
     query(
      `SELECT
          pr.id,
@@ -439,6 +446,62 @@ async function loadProProfile(proId) {
     ),
     query(
       `SELECT
+         p.id,
+         p.owner_id,
+         p.title,
+         p.slug,
+         p.description,
+         p.price_xpf,
+         p.compare_at_price_xpf,
+         p.stock_quantity,
+         p.sku,
+         p.brand,
+         p.category_id,
+         cat.name AS category_name,
+         p.commune_id,
+         com.name AS commune_name,
+         p.unit_label,
+         p.cover_image_url,
+         COALESCE(
+           p.cover_image_url,
+           (
+             SELECT pi.url
+             FROM product_images pi
+             WHERE pi.product_id = p.id
+             ORDER BY pi.position ASC, pi.id ASC
+             LIMIT 1
+           )
+         ) AS effective_cover_image_url,
+         COALESCE((
+           SELECT COUNT(*)::int
+           FROM product_images pi
+           WHERE pi.product_id = p.id
+         ), 0) AS image_count,
+         COALESCE((
+           SELECT json_agg(
+             json_build_object(
+               'id', pi.id,
+               'url', pi.url,
+               'position', pi.position,
+               'alt_text', pi.alt_text
+             )
+             ORDER BY pi.position ASC, pi.id ASC
+           )
+           FROM product_images pi
+           WHERE pi.product_id = p.id
+         ), '[]'::json) AS images
+       FROM products p
+       LEFT JOIN categories cat ON cat.id = p.category_id
+       LEFT JOIN communes com ON com.id = p.commune_id
+       WHERE p.owner_id = $1
+         AND p.is_active = TRUE
+         AND p.archived_at IS NULL
+       ORDER BY p.is_featured DESC, p.updated_at DESC, p.created_at DESC
+       LIMIT 12`,
+      [proId]
+    ),
+    query(
+      `SELECT
          id,
          pro_id,
          is_enabled,
@@ -510,6 +573,26 @@ async function loadProProfile(proId) {
         is_pro: Boolean(row.is_pro),
         pro_verified: Boolean(row.seller_pro_verified),
       },
+    })),
+    products: productsRes.rows.map((row) => ({
+      id: Number(row.id),
+      owner_id: Number(row.owner_id),
+      title: row.title,
+      slug: row.slug,
+      description: row.description,
+      price_xpf: Number(row.price_xpf ?? 0),
+      compare_at_price_xpf: row.compare_at_price_xpf == null ? null : Number(row.compare_at_price_xpf),
+      stock_quantity: Number(row.stock_quantity ?? 0),
+      sku: row.sku ?? null,
+      brand: row.brand ?? null,
+      category_id: row.category_id == null ? null : Number(row.category_id),
+      category_name: row.category_name ?? null,
+      commune_id: row.commune_id == null ? null : Number(row.commune_id),
+      commune_name: row.commune_name ?? null,
+      unit_label: row.unit_label ?? null,
+      cover_image_url: row.effective_cover_image_url ?? row.cover_image_url ?? null,
+      image_count: Number(row.image_count ?? 0),
+      images: Array.isArray(row.images) ? row.images : [],
     })),
   };
 }

@@ -21,6 +21,7 @@ function buildDescription(profile: NonNullable<Awaited<ReturnType<typeof fetchPr
   const parts = [
     profile.pro_category ? `${profile.pro_category}` : null,
     profile.pro_commune ? `à ${profile.pro_commune}` : null,
+    profile.product_count ? `${profile.product_count} produit${Number(profile.product_count) > 1 ? 's' : ''} dans son catalogue` : null,
     profile.pro_description ? profile.pro_description.replace(/\s+/g, ' ').trim() : null,
   ].filter(Boolean)
 

@@ -38,6 +38,31 @@ export type ProPublicBookingSlot = {
   status?: string | null
 }
 
+export type ProPublicProduct = {
+  id: number | string
+  title: string
+  slug?: string | null
+  description?: string | null
+  price_xpf: number
+  compare_at_price_xpf?: number | null
+  stock_quantity: number
+  sku?: string | null
+  brand?: string | null
+  category_id?: number | null
+  category_name?: string | null
+  commune_id?: number | null
+  commune_name?: string | null
+  unit_label?: string | null
+  cover_image_url?: string | null
+  image_count?: number
+  images?: Array<{
+    id?: number | string
+    url: string
+    position?: number
+    alt_text?: string | null
+  }>
+}
+
 export type ProPublicProfile = {
   id: number | string
   prenom?: string | null
@@ -56,8 +81,10 @@ export type ProPublicProfile = {
   avg_rating?: number | null
   review_count?: number | null
   listing_count?: number | null
+  product_count?: number | null
   booking_settings?: ProPublicBookingSettings | null
   booking_slots?: ProPublicBookingSlot[]
+  products?: ProPublicProduct[]
   reviews?: ProPublicReview[]
   listings?: any[]
 }
