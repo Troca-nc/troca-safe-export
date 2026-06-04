@@ -3,11 +3,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { TouchEvent } from 'react'
 import { Search, MessageCircle, Plus, User, Menu, X, ChevronDown, LogOut, Heart, Home, Settings2, PlusCircle, Tag, Trophy, Car, PhoneCall, ArrowLeftRight } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useAuthActionStore } from '@/store/authActionStore'
+import { proApi } from '@/lib/api'
 import NotificationBell from '@/components/ui/NotificationBell'
 import DemoModeSwitcher from '@/components/ui/DemoModeSwitcher'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
@@ -37,6 +38,7 @@ export function MobileBottomNav() {
     { href: '/troc', icon: ArrowLeftRight, label: 'Troc' },
     { href: '/pro', icon: Trophy, label: 'Pros' },
     { href: '/covoiturage', icon: Car, label: 'Covoit' },
+    { href: '/favoris', icon: Heart, label: 'Favoris' },
     { href: '/bons-plans', icon: Tag, label: 'Bons plans' },
     { href: '/contact', icon: PhoneCall, label: 'Contact' },
     { href: isAuthenticated && user?.id ? `/profil/${user.id}` : '/connexion', icon: User, label: isAuthenticated && user?.id ? 'Mon profil' : 'Connexion' },
@@ -173,8 +175,34 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [proUnreadCount, setProUnreadCount] = useState(0)
   const demoModeEnabled = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
   const userMenuId = 'header-user-menu'
+
+  useEffect(() => {
+    let alive = true
+
+    const loadUnreadCount = async () => {
+      if (!isAuthenticated || !user?.is_pro || demoProfile) {
+        if (alive) setProUnreadCount(0)
+        return
+      }
+
+      try {
+        const response = await proApi.getDashboard()
+        const unreadMessages = Number(response.data?.data?.unread_messages_total ?? 0)
+        if (alive) setProUnreadCount(unreadMessages)
+      } catch {
+        if (alive) setProUnreadCount(0)
+      }
+    }
+
+    void loadUnreadCount()
+
+    return () => {
+      alive = false
+    }
+  }, [demoProfile, isAuthenticated, user?.is_pro])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -280,8 +308,16 @@ export default function Header() {
             {isAuthenticated ? (
               <>
                 {!demoProfile ? <NotificationBell /> : null}
-                <Link href="/messages" className="btn-ghost relative p-2">
+                <Link href="/profil?tab=listings" className="btn-ghost px-3 py-2 text-sm">
+                  Mes annonces
+                </Link>
+                <Link href="/messages" className="btn-ghost relative p-2" aria-label="Messages">
                   <MessageCircle className="h-5 w-5" />
+                  {proUnreadCount > 0 ? (
+                    <span className="absolute -right-0.5 -top-0.5 inline-flex min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white shadow-sm">
+                      {proUnreadCount > 99 ? '99+' : proUnreadCount}
+                    </span>
+                  ) : null}
                 </Link>
                 <Link href="/favoris" className="btn-ghost relative p-2" aria-label="Favoris">
                   <Heart className="h-5 w-5" />
