@@ -303,6 +303,11 @@ export default function CovoituragePage() {
     recurrence_until: '',
   })
   const [saving, setSaving] = useState(false)
+  const [publishNotice, setPublishNotice] = useState<null | {
+    title: string
+    description: string
+    details: string[]
+  }>(null)
 
   useEffect(() => {
     const mode = new URLSearchParams(window.location.search).get('mode')
@@ -322,6 +327,12 @@ export default function CovoituragePage() {
       return prev
     })
   }, [form.recurrence_enabled, form.ride_date])
+
+  useEffect(() => {
+    if (!publishNotice) return
+    const timer = window.setTimeout(() => setPublishNotice(null), 9000)
+    return () => window.clearTimeout(timer)
+  }, [publishNotice])
 
   const hasFilters = useMemo(
     () => Boolean(filters.departure || filters.destination || filters.ride_date),
@@ -425,6 +436,15 @@ export default function CovoituragePage() {
     if (!user) return
     setSaving(true)
     try {
+      const recurrenceSummary = form.recurrence_enabled
+        ? formatRecurrenceDraftSummary({
+            recurrence_type: form.recurrence_type,
+            recurrence_days: form.recurrence_days,
+            recurrence_until: form.recurrence_until,
+            ride_date: form.ride_date,
+          })
+        : null
+
       await covoiturageApi.create({
         ...form,
         price_xpf: snapTo10(Number(form.price_xpf)),
@@ -450,6 +470,22 @@ export default function CovoituragePage() {
         recurrence_days: [1, 2, 3, 4, 5],
         recurrence_until: '',
       })
+
+      setPublishNotice({
+        title: form.recurrence_enabled ? 'Série publiée' : 'Trajet publié',
+        description: form.recurrence_enabled
+          ? 'Votre série récurrente est désormais en ligne. Elle sera visible sur les créneaux choisis.'
+          : 'Votre trajet est désormais visible dans la liste des covoiturages disponibles.',
+        details:
+          form.recurrence_enabled && recurrenceSummary
+            ? [
+                `${recurrenceSummary.occurrences} trajet${recurrenceSummary.occurrences > 1 ? 's' : ''} programmés`,
+                `Jusqu’au ${recurrenceSummary.untilLabel}`,
+                recurrenceSummary.dayLabel,
+              ]
+            : ['Votre trajet est prêt à être consulté et réservé.'],
+      })
+
       await refreshRides()
       setActiveTab('search')
     } catch (err) {
@@ -463,6 +499,33 @@ export default function CovoituragePage() {
     <div className="min-h-screen bg-sand-light text-night">
       <Header />
       <main className="mx-auto max-w-7xl px-4 py-8 md:py-12">
+        {publishNotice ? (
+          <section className="mb-6 rounded-[2rem] border border-emerald-200 bg-emerald-50 p-5 text-emerald-950 shadow-sm">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">Publication réussie</p>
+                <h2 className="mt-1 text-xl font-bold text-emerald-950">{publishNotice.title}</h2>
+                <p className="mt-2 text-sm text-emerald-900/75">{publishNotice.description}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPublishNotice(null)}
+                className="rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                aria-label="Fermer la notification de publication"
+              >
+                Fermer
+              </button>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {publishNotice.details.map((detail) => (
+                <span key={detail} className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-emerald-800 shadow-sm">
+                  {detail}
+                </span>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
         <section className="rounded-[2rem] border border-night/8 border-b-4 border-b-nc-corail bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.18))] px-6 py-8 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)]">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-corail">
             <Car className="h-3.5 w-3.5" />
