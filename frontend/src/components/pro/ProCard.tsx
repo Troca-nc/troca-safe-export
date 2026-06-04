@@ -18,6 +18,7 @@ export type ProCardModel = {
   pro_website?: string | null
   pro_phone?: string | null
   pro_hours?: string | null
+  pro_quote_template?: unknown
   avg_rating?: number | null
   review_count?: number | null
   listing_count?: number | null

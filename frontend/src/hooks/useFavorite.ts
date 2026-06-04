@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api, invalidateApiCache } from '@/lib/api'
 import { trackEvent } from '@/lib/analytics'
 import { useFavorisStore } from '@/store/favorisStore'
+import { useAuthStore } from '@/store/authStore'
 
 export type FavoriteListing = {
   id: string
@@ -35,6 +36,9 @@ export function useFavorite() {
   // TODO: test E2E sur le toggle favori optimiste et le rollback en cas d'échec réseau.
   const mutation = useMutation<FavoriteListing, unknown, FavoriteListing, { snapshot: FavoriteSnapshot; wasSaved: boolean; listing: FavoriteListing }>({
     mutationFn: async (listing: FavoriteListing) => {
+      if (!useAuthStore.getState().isAuthenticated) {
+        return listing
+      }
       await api.post(`/listings/${listing.id}/favoris`)
       return listing
     },
@@ -83,10 +87,12 @@ export function useFavorite() {
       const nextLoading = new Set(current.loading)
       nextLoading.delete(listing.id)
       useFavorisStore.setState({ loading: nextLoading })
-      queryClient.invalidateQueries({ queryKey: ['favorites'] })
-      queryClient.invalidateQueries({ queryKey: ['listings'] })
-      invalidateApiCache('favorites.')
-      invalidateApiCache('listings.')
+      if (useAuthStore.getState().isAuthenticated) {
+        queryClient.invalidateQueries({ queryKey: ['favorites'] })
+        queryClient.invalidateQueries({ queryKey: ['listings'] })
+        invalidateApiCache('favorites.')
+        invalidateApiCache('listings.')
+      }
     },
     onSuccess: async (_data, _listing, context) => {
       if (context && !context.wasSaved) {

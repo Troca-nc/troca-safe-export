@@ -2,7 +2,7 @@
 
 import { formatDistanceToNow, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { FileText, ShieldCheck, Star } from 'lucide-react'
+import { ArrowLeftRight, FileText, ShieldCheck, Star } from 'lucide-react'
 import type { Conversation } from '@/types/messaging.types'
 
 interface ConversationListProps {
@@ -69,6 +69,13 @@ function getLastMessagePreview(conv: Conversation) {
   return last.content ?? 'Message'
 }
 
+function isTrocConversation(conv: Conversation) {
+  const conversationType = conv.conversation_type || 'listing_chat'
+  return conversationType !== 'listing_chat'
+    || conv.last_message?.type === 'troc_proposal'
+    || Boolean(conv.last_message?.metadata?.proposer_listing_id)
+}
+
 export default function ConversationList({ conversations, activeId, onSelect, loading }: ConversationListProps) {
   if (loading) {
     return (
@@ -105,6 +112,7 @@ export default function ConversationList({ conversations, activeId, onSelect, lo
         const hasUnread = conv.unread_count > 0
         const u = conv.other_user
         const attachment = getAttachmentPreview(conv)
+        const trocConversation = isTrocConversation(conv)
 
         return (
           <button
@@ -112,7 +120,13 @@ export default function ConversationList({ conversations, activeId, onSelect, lo
             type="button"
             onClick={() => onSelect(conv)}
             className={`flex items-center gap-3 px-4 py-3 text-left transition-all hover:bg-sand/60 ${
-              isActive ? 'border-l-2 border-coral bg-coral/8' : ''
+              trocConversation
+                ? 'border-l-2 border-nc-emeraude/35 bg-nc-emeraudeLight/40'
+                : ''
+            } ${
+              isActive
+                ? 'border-l-2 border-coral bg-coral/8'
+                : ''
             }`}
           >
             <div className="relative shrink-0">
@@ -151,6 +165,12 @@ export default function ConversationList({ conversations, activeId, onSelect, lo
                 {u.avg_response_time_label && (
                   <span className="rounded-full bg-nc-emeraudeLight px-2 py-0.5 font-medium text-nc-emeraudeText">
                     Répond en {u.avg_response_time_label}
+                  </span>
+                )}
+                {trocConversation && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-medium text-emerald-700">
+                    <ArrowLeftRight size={10} />
+                    Troc
                   </span>
                 )}
               </div>

@@ -338,6 +338,9 @@ function ProfilePageContent() {
         <Link href="/parametres/notifications" className="btn-primary px-4 py-2 text-sm">
           Ouvrir les paramètres
         </Link>
+        <Link href="/alertes" className="btn-ghost px-4 py-2 text-sm">
+          Mes alertes
+        </Link>
         <Link href="/messages" className="btn-ghost px-4 py-2 text-sm">
           Ouvrir mes messages
         </Link>
@@ -365,6 +368,25 @@ function ProfilePageContent() {
     </div>
   ) : null
 
+  const favoritesPanel = isOwn ? (
+    <div className="card border-coral/15 bg-white p-5 shadow-sm">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Favoris</p>
+          <h2 className="mt-2 text-xl font-bold text-night">Mes favoris</h2>
+          <p className="mt-2 text-sm text-night/60">
+            Retrouvez ici les annonces que vous avez mises en mémoire pour les consulter plus tard.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/favoris" className="btn-primary px-4 py-2 text-sm">
+            Ouvrir mes favoris
+          </Link>
+        </div>
+      </div>
+    </div>
+  ) : null
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -372,6 +394,7 @@ function ProfilePageContent() {
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-5">
         {securityPanel}
         {notificationsPanel}
+        {favoritesPanel}
 
         <div className="card p-5 border-coral/15 bg-coral/5">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">

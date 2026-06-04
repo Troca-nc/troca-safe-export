@@ -24,13 +24,13 @@ interface Props {
   onSearch?:    (q: string) => void // pour usage dans la page /annonces sans navigation
 }
 
-// Historique local (sessionStorage)
+// Historique local (localStorage)
 const HISTORY_KEY = 'troca_search_history'
 const MAX_HISTORY = 5
 
 function getHistory(): string[] {
   try {
-    const raw = sessionStorage.getItem(HISTORY_KEY)
+    const raw = localStorage.getItem(HISTORY_KEY)
     return raw ? JSON.parse(raw) : []
   } catch { return [] }
 }
@@ -38,12 +38,12 @@ function getHistory(): string[] {
 function saveHistory(q: string) {
   try {
     const prev = getHistory().filter(h => h !== q)
-    sessionStorage.setItem(HISTORY_KEY, JSON.stringify([q, ...prev].slice(0, MAX_HISTORY)))
+    localStorage.setItem(HISTORY_KEY, JSON.stringify([q, ...prev].slice(0, MAX_HISTORY)))
   } catch {}
 }
 
 function clearHistory() {
-  try { sessionStorage.removeItem(HISTORY_KEY) } catch {}
+  try { localStorage.removeItem(HISTORY_KEY) } catch {}
 }
 
 export default function SearchAutocomplete({ placeholder = 'Rechercher…', className = '', autoFocus, onSearch }: Props) {

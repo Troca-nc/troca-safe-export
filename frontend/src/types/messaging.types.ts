@@ -28,6 +28,8 @@ export interface Conversation {
   annonce_id:      number
   buyer_id:        number
   seller_id:       number
+  conversation_type?: string
+  metadata?:      Record<string, unknown> | null
   status:          ConvStatus
   last_message?:   Message
   unread_count:    number

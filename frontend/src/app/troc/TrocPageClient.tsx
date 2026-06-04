@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import {
+  Bell,
   Handshake,
   Loader2,
   RefreshCw,
@@ -12,11 +13,13 @@ import {
 } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
+import SearchAlertModal from '@/components/SearchAlertModal'
 import ListingCard from '@/components/listings/ListingCard'
 import TrocometerCard, { type TrocometerListing } from '@/components/trocometer/TrocometerCard'
 import { FALLBACK_CATEGORIES } from '@/lib/categoryCatalog'
 import { listingsApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
+import type { ListingFilters } from '@/hooks/useListingFilters'
 
 const PAGE_SIZE = 3
 
@@ -132,6 +135,7 @@ export default function TrocPage() {
   const [marketCategory, setMarketCategory] = useState('')
   const [marketCommune, setMarketCommune] = useState('')
   const [marketPriceMax, setMarketPriceMax] = useState('')
+  const [marketAlertOpen, setMarketAlertOpen] = useState(false)
 
   const [ownListings, setOwnListings] = useState<ListingLike[]>([])
   const [selectedOwnListingId, setSelectedOwnListingId] = useState('')
@@ -150,6 +154,30 @@ export default function TrocPage() {
         label: category.name,
       })),
     []
+  )
+
+  const marketAlertFilters: ListingFilters = useMemo(
+    () => ({
+      q: '',
+      category: marketCategory,
+      commune_id: marketCommune,
+      province_id: '',
+      price_min: '',
+      price_max: marketPriceMax,
+      condition: '',
+      troc: 'true',
+      lat: '',
+      lng: '',
+      radius: 20,
+      sort: 'date',
+      page: 1,
+    }),
+    [marketCategory, marketCommune, marketPriceMax],
+  )
+
+  const marketCategoryLabel = useMemo(
+    () => categoryOptions.find((category) => category.value === marketCategory)?.label ?? null,
+    [categoryOptions, marketCategory],
   )
 
   const loadMarketListings = async () => {
@@ -381,8 +409,25 @@ export default function TrocPage() {
               <Search className="h-4 w-4" />
               Filtrer
             </button>
+
+            <button
+              type="button"
+              onClick={() => setMarketAlertOpen(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#0A7EA4]/20 bg-[#0A7EA4]/5 px-4 py-3 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10"
+            >
+              <Bell className="h-4 w-4" />
+              Alerte
+            </button>
           </div>
         </form>
+
+        <SearchAlertModal
+          open={marketAlertOpen}
+          onClose={() => setMarketAlertOpen(false)}
+          filters={marketAlertFilters}
+          categoryLabel={marketCategoryLabel}
+          communeLabel={marketCommune || undefined}
+        />
 
         {marketLoading ? (
           <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
