@@ -537,6 +537,11 @@ export const proApi = {
     invalidateApiCache('pro.quoteRequests.')
     return res
   },
+  getQuoteRequestsReceived: (params: object = {}) => cachedGet(
+    buildCacheKey('pro.quoteRequests.received', '/pro/quote-requests', params),
+    () => api.get('/pro/quote-requests', { params }),
+    CACHE_TTL.short,
+  ),
   downloadQuoteRequestPdf: (id: string | number) => api.get(`/pro/quote-requests/${id}/pdf`, { responseType: 'blob' }),
   getQuoteRequestsMine: (params: object = {}) => cachedGet(
     buildCacheKey('pro.quoteRequests.mine', '/pro/quote-requests/mine', params),

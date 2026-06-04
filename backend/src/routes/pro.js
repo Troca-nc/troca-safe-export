@@ -896,6 +896,64 @@ router.get('/quote-requests/mine', optionalAuth, async (req, res, next) => {
   }
 });
 
+router.get('/quote-requests', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || '20', 10)));
+    const offset = Math.max(0, (Math.max(1, parseInt(req.query.page || '1', 10)) - 1) * limit);
+
+    const result = await query(
+      `SELECT
+         q.id,
+         q.pro_id,
+         q.requester_user_id,
+         q.requester_name,
+         q.requester_email,
+         q.requester_phone,
+         q.need_type,
+         q.commune,
+         q.budget_xpf,
+         q.desired_date,
+         q.details,
+         q.created_at,
+         u.pro_company_name,
+         u.pro_commune,
+         u.pro_category
+       FROM pro_quote_requests q
+       JOIN users u ON u.id = q.pro_id
+       WHERE q.pro_id = $1
+       ORDER BY q.created_at DESC
+       LIMIT $2 OFFSET $3`,
+      [req.user.id, limit, offset]
+    );
+
+    return res.json({
+      data: result.rows.map((row) => ({
+        id: String(row.id),
+        proId: Number(row.pro_id),
+        proName: formatCompanyName(row),
+        proCommune: row.pro_commune ?? null,
+        proCategory: row.pro_category ?? null,
+        requesterUserId: row.requester_user_id == null ? null : Number(row.requester_user_id),
+        createdAt: row.created_at,
+        request: {
+          requester_name: row.requester_name ?? '',
+          requester_email: row.requester_email ?? '',
+          requester_phone: row.requester_phone ?? '',
+          need_type: row.need_type ?? '',
+          commune: row.commune ?? '',
+          budget_xpf: row.budget_xpf == null ? '' : String(row.budget_xpf),
+          desired_date: row.desired_date ?? '',
+          details: row.details ?? '',
+        },
+      })),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/quote-requests/:id/pdf', authenticate, async (req, res, next) => {
   try {
     const quoteId = Number(req.params.id);
