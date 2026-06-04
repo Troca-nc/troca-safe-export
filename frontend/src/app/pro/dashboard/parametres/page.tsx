@@ -562,6 +562,113 @@ export default function ProDashboardSettingsPage() {
             </div>
           </div>
 
+          <div className="rounded-[1.5rem] border border-[#0A7EA4]/15 bg-[linear-gradient(180deg,_rgba(214,240,246,0.55),_rgba(255,255,255,0.95))] p-4 shadow-sm">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Aperçu en direct</p>
+                <h4 className="mt-1 font-display text-xl font-bold text-night">{quoteTemplate.title}</h4>
+                <p className="mt-1 text-sm text-night/60">{quoteTemplate.subtitle}</p>
+              </div>
+              <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#0A7EA4] shadow-sm">
+                <Eye className="h-3.5 w-3.5" />
+                Mise à jour instantanée
+              </span>
+            </div>
+
+            <div className="mt-4 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+              <div className="rounded-[1.25rem] border border-white/80 bg-white/90 p-4 shadow-sm">
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Ce que verra le visiteur</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold text-night/60">
+                      {quoteTemplate.show_phone ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
+                          <Phone className="h-3.5 w-3.5 text-[#0A7EA4]" />
+                          Téléphone
+                        </span>
+                      ) : null}
+                      {quoteTemplate.show_budget ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
+                          <Package className="h-3.5 w-3.5 text-[#0A7EA4]" />
+                          Budget
+                        </span>
+                      ) : null}
+                      {quoteTemplate.show_date ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
+                          <Clock3 className="h-3.5 w-3.5 text-[#0A7EA4]" />
+                          Date souhaitée
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">{quoteTemplate.need_type_label}</p>
+                      <p className="mt-1 text-sm text-night/65">{quoteTemplate.need_type_placeholder}</p>
+                    </div>
+                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">{quoteTemplate.commune_label}</p>
+                      <p className="mt-1 text-sm text-night/65">{quoteTemplate.commune_placeholder}</p>
+                    </div>
+                    {quoteTemplate.show_phone ? (
+                      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">{quoteTemplate.requester_phone_label}</p>
+                        <p className="mt-1 text-sm text-night/65">{quoteTemplate.requester_phone_placeholder}</p>
+                      </div>
+                    ) : null}
+                    {quoteTemplate.show_date ? (
+                      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">{quoteTemplate.desired_date_label}</p>
+                        <p className="mt-1 text-sm text-night/65">Date à sélectionner par le client</p>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {quoteTemplate.show_details ? (
+                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">{quoteTemplate.details_label}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-night/65">{quoteTemplate.details_placeholder}</p>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+
+              <div className="space-y-3 rounded-[1.25rem] border border-white/80 bg-white/90 p-4 shadow-sm">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Montants rapides</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {quoteTemplate.budget_presets.map((preset) => (
+                      <span
+                        key={preset}
+                        className="inline-flex items-center rounded-full bg-nc-lagonLight px-3 py-1 text-xs font-semibold text-[#0A7EA4]"
+                      >
+                        {preset.toLocaleString('fr-FR')} XPF
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Résumé</p>
+                  <div className="mt-2 space-y-2 text-sm text-night/65">
+                    <p>• Champ téléphone : {quoteTemplate.show_phone ? 'visible' : 'masqué'}</p>
+                    <p>• Champ budget : {quoteTemplate.show_budget ? 'visible' : 'masqué'}</p>
+                    <p>• Champ date : {quoteTemplate.show_date ? 'visible' : 'masqué'}</p>
+                    <p>• Champ détails : {quoteTemplate.show_details ? 'visible' : 'masqué'}</p>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-emerald-100 bg-emerald-50/80 p-3 text-sm text-night/70">
+                  <p className="font-semibold text-emerald-800">Astuce</p>
+                  <p className="mt-1">
+                    Ce bloc montre le rendu final que verra le visiteur avant même la sauvegarde.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <button type="submit" disabled={loading} className="btn-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm disabled:opacity-60">
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             Sauvegarder
