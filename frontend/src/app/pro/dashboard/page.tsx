@@ -24,6 +24,7 @@ import {
 
 import { proApi } from '@/lib/api'
 import ProOnboardingGuide from '@/components/pro/ProOnboardingGuide'
+import ProScoreWidget from '@/components/pro/ProScoreWidget'
 import { useAuthStore } from '@/store/authStore'
 
 type DashboardData = {
@@ -185,6 +186,17 @@ export default function ProDashboardPage() {
           </div>
         </div>
       </section>
+
+      <ProScoreWidget
+        listings={listings}
+        stats={stats}
+        unreadMessages={unreadMessages}
+        unreadClients={unreadClients}
+        unreadConversations={unreadConversations}
+        boostsActiveCount={data?.boosts_active?.length ?? 0}
+        topListingsCount={data?.top_listings?.length ?? 0}
+        recentContactsCount={data?.recent_contacts?.length ?? 0}
+      />
 
       <section id="stats" className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <KpiCard
