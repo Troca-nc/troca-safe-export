@@ -40,6 +40,21 @@ type DashboardData = {
     contacts_7d: number
     avg_conversion_rate: number
   }
+  unread_messages_total: number
+  unread_clients_total: number
+  unread_conversations_total: number
+  unread_threads: Array<{
+    conversation_id: number
+    buyer_id: number
+    buyer_prenom: string | null
+    buyer_nom: string | null
+    buyer_avatar_url: string | null
+    listing_id: number
+    listing_title: string | null
+    unread_count: number
+    last_unread_at: string | null
+    last_unread_message: string | null
+  }>
   top_listings: any[]
   recent_contacts: any[]
   boosts_active: any[]
@@ -138,6 +153,10 @@ export default function ProDashboardPage() {
     contacts_7d: 0,
     avg_conversion_rate: 0,
   }
+  const unreadMessages = data?.unread_messages_total ?? 0
+  const unreadClients = data?.unread_clients_total ?? 0
+  const unreadConversations = data?.unread_conversations_total ?? 0
+  const unreadThreads = data?.unread_threads ?? []
 
   const listings = data?.listings ?? {
     total: 0,
@@ -297,6 +316,98 @@ export default function ProDashboardPage() {
             )}
           </article>
         </aside>
+      </section>
+
+      <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Messages à traiter</p>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Vos messages non lus</h2>
+            <p className="mt-2 text-sm text-night/60">
+              Vue consolidée des messages en attente, avec les clients à rappeler en priorité.
+            </p>
+          </div>
+          <Link href="/messages" className="inline-flex items-center gap-2 rounded-2xl border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10">
+            Ouvrir la messagerie
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        <div className="mt-5 grid gap-4 md:grid-cols-3">
+          <article className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
+            <p className="text-sm font-semibold text-night/55">Messages non lus</p>
+            <p className="mt-2 text-3xl font-bold text-night">{unreadMessages.toLocaleString('fr-FR')}</p>
+          </article>
+          <article className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
+            <p className="text-sm font-semibold text-night/55">Clients différents</p>
+            <p className="mt-2 text-3xl font-bold text-night">{unreadClients.toLocaleString('fr-FR')}</p>
+          </article>
+          <article className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
+            <p className="text-sm font-semibold text-night/55">Conversations en attente</p>
+            <p className="mt-2 text-3xl font-bold text-night">{unreadConversations.toLocaleString('fr-FR')}</p>
+          </article>
+        </div>
+
+        <div className="mt-5">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Priorité</p>
+            <span className="text-xs font-medium text-night/45">5 conversations maximum affichées</span>
+          </div>
+          {unreadThreads.length ? (
+            <div className="space-y-3">
+              {unreadThreads.map((thread) => {
+                const buyerName = [thread.buyer_prenom, thread.buyer_nom].filter(Boolean).join(' ').trim() || 'Client'
+                const initials = buyerName
+                  .split(/\s+/)
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .map((part) => part[0]?.toUpperCase() || '')
+                  .join('')
+                  .slice(0, 2) || 'C'
+
+                return (
+                  <div key={thread.conversation_id} className="flex flex-col gap-3 rounded-2xl border border-[var(--color-border)] p-4 md:flex-row md:items-center md:justify-between">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-nc-lagonLight text-sm font-bold text-[#0A7EA4]">
+                        {thread.buyer_avatar_url ? (
+                          <Image src={thread.buyer_avatar_url} alt={buyerName} width={48} height={48} className="h-full w-full object-cover" />
+                        ) : (
+                          initials
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="font-semibold text-night">{buyerName}</h3>
+                          <span className="rounded-full bg-coral/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-coral">
+                            {thread.unread_count} non lus
+                          </span>
+                        </div>
+                        <p className="mt-1 text-sm text-night/60">
+                          {thread.listing_title || 'Annonce'} · Conversation #{thread.conversation_id}
+                        </p>
+                        {thread.last_unread_message ? (
+                          <p className="mt-2 line-clamp-2 text-sm text-night/70">{thread.last_unread_message}</p>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                      <Link href={`/messages?user=${thread.buyer_id}`} className="rounded-2xl border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]">
+                        Répondre
+                      </Link>
+                      <Link href={`/messages?conv=${thread.conversation_id}`} className="btn-primary rounded-2xl px-4 py-2 text-sm">
+                        Ouvrir
+                      </Link>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-[var(--color-border)] p-4 text-sm text-night/60">
+              Aucun message non lu pour le moment.
+            </div>
+          )}
+        </div>
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">

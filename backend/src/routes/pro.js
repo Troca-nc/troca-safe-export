@@ -518,7 +518,7 @@ router.get('/dashboard', authenticate, async (req, res, next) => {
     if (!requirePro(req, res)) return;
     await refreshProStats();
 
-    const [summaryRes, topRes, contactsRes, boostsRes, spendRes, viewsRes, contactsTimelineRes] = await Promise.all([
+    const [summaryRes, topRes, contactsRes, boostsRes, spendRes, viewsRes, contactsTimelineRes, unreadSummaryRes, unreadThreadsRes] = await Promise.all([
       query(
         `SELECT
            COUNT(*)::int AS total,
@@ -541,6 +541,51 @@ router.get('/dashboard', authenticate, async (req, res, next) => {
          FROM annonces a
          LEFT JOIN pro_listing_stats pls ON pls.listing_id = a.id
          WHERE a.user_id = $1 AND a.deleted_at IS NULL`,
+        [req.user.id]
+      ),
+      query(
+        `SELECT
+           COUNT(m.id)::int AS unread_messages_total,
+           COUNT(DISTINCT c.buyer_id)::int AS unread_clients_total,
+           COUNT(DISTINCT c.id)::int AS unread_conversations_total
+         FROM messages m
+         JOIN conversations c ON c.id = m.conv_id
+         JOIN annonces a ON a.id = c.annonce_id
+         WHERE a.user_id = $1
+           AND m.sender_id != $1
+           AND m.read_at IS NULL`,
+        [req.user.id]
+      ),
+      query(
+        `SELECT
+           c.id AS conversation_id,
+           c.buyer_id,
+           buyer.prenom AS buyer_prenom,
+           buyer.nom AS buyer_nom,
+           buyer.avatar_url AS buyer_avatar_url,
+           a.id AS listing_id,
+           a.titre AS listing_title,
+           COUNT(m.id)::int AS unread_count,
+           MAX(m.created_at) AS last_unread_at,
+           (
+             SELECT m2.content
+             FROM messages m2
+             WHERE m2.conv_id = c.id
+               AND m2.sender_id != $1
+               AND m2.read_at IS NULL
+             ORDER BY m2.created_at DESC, m2.id DESC
+             LIMIT 1
+           ) AS last_unread_message
+         FROM conversations c
+         JOIN annonces a ON a.id = c.annonce_id
+         JOIN users buyer ON buyer.id = c.buyer_id
+         JOIN messages m ON m.conv_id = c.id
+         WHERE a.user_id = $1
+           AND m.sender_id != $1
+           AND m.read_at IS NULL
+         GROUP BY c.id, c.buyer_id, buyer.prenom, buyer.nom, buyer.avatar_url, a.id, a.titre
+         ORDER BY MAX(m.created_at) DESC
+         LIMIT 5`,
         [req.user.id]
       ),
       query(
@@ -690,6 +735,19 @@ router.get('/dashboard', authenticate, async (req, res, next) => {
       listing_price: row.listing_price,
       cover_image: row.cover_image ?? null,
     }));
+    const unreadSummary = unreadSummaryRes.rows[0] || {};
+    const unreadThreads = unreadThreadsRes.rows.map((row) => ({
+      conversation_id: Number(row.conversation_id),
+      buyer_id: Number(row.buyer_id),
+      buyer_prenom: row.buyer_prenom ?? null,
+      buyer_nom: row.buyer_nom ?? null,
+      buyer_avatar_url: row.buyer_avatar_url ?? null,
+      listing_id: Number(row.listing_id),
+      listing_title: row.listing_title ?? null,
+      unread_count: Number(row.unread_count ?? 0),
+      last_unread_at: row.last_unread_at ?? null,
+      last_unread_message: row.last_unread_message ?? null,
+    }));
 
     const today = new Date();
     const timeline = [];
@@ -730,6 +788,10 @@ router.get('/dashboard', authenticate, async (req, res, next) => {
         spend_total_xpf: Number(spendRes.rows[0]?.spend_total_xpf ?? 0),
         spend_30d_xpf: Number(spendRes.rows[0]?.spend_30d_xpf ?? 0),
         timeline_30d: timeline,
+        unread_messages_total: Number(unreadSummary.unread_messages_total ?? 0),
+        unread_clients_total: Number(unreadSummary.unread_clients_total ?? 0),
+        unread_conversations_total: Number(unreadSummary.unread_conversations_total ?? 0),
+        unread_threads: unreadThreads,
       },
     });
   } catch (err) {
