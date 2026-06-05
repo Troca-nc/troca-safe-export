@@ -13,6 +13,9 @@ export type RdvBookingItem = {
   requester_email: string
   requester_phone?: string | null
   commune?: string | null
+  service_title?: string | null
+  service_price_xpf?: number | null
+  service_duration_minutes?: number | null
   subject: string
   details?: string | null
   starts_at: string
@@ -22,6 +25,12 @@ export type RdvBookingItem = {
   role: 'client' | 'pro'
   created_at?: string
   updated_at?: string
+  confirmed_at?: string | null
+  declined_at?: string | null
+  cancelled_at?: string | null
+  completed_at?: string | null
+  reminder_24h_sent_at?: string | null
+  reminder_2h_sent_at?: string | null
   pro: {
     id: number | string
     display_name: string
@@ -87,7 +96,13 @@ function statusLabel(status: string) {
   if (value === 'declined') return { label: 'Refusé', tone: 'bg-red-50 text-red-700 border-red-200' }
   if (value === 'cancelled') return { label: 'Annulé', tone: 'bg-slate-100 text-slate-500 border-slate-200' }
   if (value === 'completed') return { label: 'Terminé', tone: 'bg-sky-50 text-sky-700 border-sky-200' }
+  if (value === 'no_show') return { label: 'Absent', tone: 'bg-rose-50 text-rose-700 border-rose-200' }
   return { label: 'En cours', tone: 'bg-slate-100 text-slate-600 border-slate-200' }
+}
+
+function reminderLabel(value?: string | null, fallback = 'Rappel') {
+  if (!value) return null;
+  return `${fallback} envoyé`;
 }
 
 export default function RdvBookingCard({
@@ -112,7 +127,14 @@ export default function RdvBookingCard({
     .slice(0, 2) || 'RD'
 
   const canManageAsPro = booking.role === 'pro' && booking.status === 'pending'
-  const canCancelAsClient = booking.role === 'client' && !['cancelled', 'declined', 'completed'].includes(String(booking.status).toLowerCase())
+  const isFutureBooking = new Date(booking.starts_at).getTime() > Date.now()
+  const canCancelAsClient = booking.role === 'client'
+    && isFutureBooking
+    && !['cancelled', 'declined', 'completed'].includes(String(booking.status).toLowerCase())
+  const reminderBadges = [
+    reminderLabel(booking.reminder_24h_sent_at, 'Rappel J-1'),
+    reminderLabel(booking.reminder_2h_sent_at, 'Rappel H-2'),
+  ].filter(Boolean) as string[]
 
   return (
     <article className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -161,10 +183,41 @@ export default function RdvBookingCard({
         </p>
       </div>
 
+      {reminderBadges.length ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {reminderBadges.map((badge) => (
+            <span
+              key={badge}
+              className="rounded-full bg-nc-lagonLight px-3 py-1 text-xs font-semibold text-nc-lagon"
+            >
+              {badge}
+            </span>
+          ))}
+        </div>
+      ) : null}
+
       {booking.details ? (
         <p className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm leading-relaxed text-night/70">
           {booking.details}
         </p>
+      ) : null}
+
+      {booking.service_title ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className="rounded-full bg-nc-lagonLight px-3 py-1 text-xs font-semibold text-nc-lagon">
+            {booking.service_title}
+          </span>
+          {booking.service_duration_minutes ? (
+            <span className="rounded-full bg-sand px-3 py-1 text-xs font-semibold text-night/60">
+              {booking.service_duration_minutes} min
+            </span>
+          ) : null}
+          {booking.service_price_xpf != null ? (
+            <span className="rounded-full bg-sand px-3 py-1 text-xs font-semibold text-night/60">
+              {Number(booking.service_price_xpf).toLocaleString('fr-FR')} XPF
+            </span>
+          ) : null}
+        </div>
       ) : null}
 
       <div className="mt-4 flex flex-wrap gap-2">

@@ -9,6 +9,7 @@ const { query, withTransaction, checkConnection, pool } = require('../config/dat
 const { getRedisClient } = require('../config/redis')
 const { requireAdminToken, adminRateLimit } = require('../middleware/adminApiToken')
 const { getSnapshot } = require('../services/observability')
+const { ensureLaunchPack } = require('./pro.launch-pack')
 
 const router = express.Router()
 router.use(adminRateLimit, requireAdminToken)
@@ -1173,7 +1174,10 @@ router.post('/users/:id/:action', async (req, res, next) => {
         await query(`UPDATE users SET is_admin = FALSE, updated_at = NOW() WHERE id = $1`, [id])
         break
       case 'pro':
-        await query(`UPDATE users SET is_pro = TRUE, pro_since = NOW(), updated_at = NOW() WHERE id = $1`, [id])
+        await withTransaction(async (client) => {
+          await client.query(`UPDATE users SET is_pro = TRUE, pro_since = NOW(), updated_at = NOW() WHERE id = $1`, [id])
+          await ensureLaunchPack(client, id)
+        })
         break
       case 'unpro':
         await query(`UPDATE users SET is_pro = FALSE, updated_at = NOW() WHERE id = $1`, [id])

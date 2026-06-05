@@ -64,6 +64,8 @@ CREATE TABLE IF NOT EXISTS pro_bookings (
   declined_at         TIMESTAMPTZ  DEFAULT NULL,
   cancelled_at        TIMESTAMPTZ  DEFAULT NULL,
   completed_at        TIMESTAMPTZ  DEFAULT NULL,
+  reminder_24h_sent_at TIMESTAMPTZ  DEFAULT NULL,
+  reminder_2h_sent_at  TIMESTAMPTZ  DEFAULT NULL,
   created_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
   updated_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );

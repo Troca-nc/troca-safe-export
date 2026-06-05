@@ -19,6 +19,7 @@ type ProQuoteModalProps = {
   open: boolean
   onClose: () => void
   template?: QuoteTemplate | null
+  prefill?: Partial<QuoteFormState>
   onSent?: (payload: {
     proId: string | number
     proName: string
@@ -53,7 +54,7 @@ function formatBudget(value: number) {
   return `${value.toLocaleString('fr-FR')} XPF`
 }
 
-export default function ProQuoteModal({ proId, proName, open, onClose, template, onSent }: ProQuoteModalProps) {
+export default function ProQuoteModal({ proId, proName, open, onClose, template, prefill, onSent }: ProQuoteModalProps) {
   const { user } = useAuthStore()
   const [form, setForm] = useState<QuoteFormState>(INITIAL_STATE)
   const [sending, setSending] = useState(false)
@@ -74,11 +75,13 @@ export default function ProQuoteModal({ proId, proName, open, onClose, template,
       budget_xpf: '',
       desired_date: '',
       details: '',
+      ...prefill,
     })
   }, [
     open,
     quoteTemplate.commune_placeholder,
     quoteTemplate.need_type_placeholder,
+    prefill,
     user?.email,
     user?.nom,
     user?.prenom,

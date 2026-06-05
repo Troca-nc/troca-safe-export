@@ -395,7 +395,7 @@ async function loadProProfile(proId) {
   const profile = profileRes.rows[0];
   if (!profile) return null;
 
-  const [reviewsRes, listingsRes, productsRes, bookingSettingsRes, bookingSlotsRes] = await Promise.all([
+  const [reviewsRes, listingsRes, productsRes, catalogCategoriesRes, bookingSettingsRes, bookingSlotsRes] = await Promise.all([
     query(
      `SELECT
          pr.id,
@@ -481,6 +481,7 @@ async function loadProProfile(proId) {
          p.title,
          p.slug,
          p.description,
+         p.price_type,
          p.price_xpf,
          p.compare_at_price_xpf,
          p.stock_quantity,
@@ -488,6 +489,8 @@ async function loadProProfile(proId) {
          p.brand,
          p.category_id,
          cat.name AS category_name,
+         p.catalog_category_id,
+         ccat.name AS catalog_category_name,
          p.commune_id,
          com.name AS commune_name,
          p.unit_label,
@@ -522,12 +525,27 @@ async function loadProProfile(proId) {
          ), '[]'::json) AS images
        FROM products p
        LEFT JOIN categories cat ON cat.id = p.category_id
+       LEFT JOIN pro_catalog_categories ccat ON ccat.id = p.catalog_category_id
        LEFT JOIN communes com ON com.id = p.commune_id
        WHERE p.owner_id = $1
          AND p.is_active = TRUE
          AND p.archived_at IS NULL
        ORDER BY p.is_featured DESC, p.updated_at DESC, p.created_at DESC
        LIMIT 12`,
+      [proId]
+    ),
+    query(
+      `SELECT
+         id,
+         pro_id,
+         name,
+         slug,
+         position,
+         created_at,
+         updated_at
+       FROM pro_catalog_categories
+       WHERE pro_id = $1
+       ORDER BY position ASC, name ASC, id ASC`,
       [proId]
     ),
     query(
@@ -610,19 +628,31 @@ async function loadProProfile(proId) {
       title: row.title,
       slug: row.slug,
       description: row.description,
+      price_type: row.price_type || 'fixed',
       price_xpf: Number(row.price_xpf ?? 0),
       compare_at_price_xpf: row.compare_at_price_xpf == null ? null : Number(row.compare_at_price_xpf),
-      stock_quantity: Number(row.stock_quantity ?? 0),
+      stock_quantity: row.stock_quantity == null ? null : Number(row.stock_quantity),
       sku: row.sku ?? null,
       brand: row.brand ?? null,
       category_id: row.category_id == null ? null : Number(row.category_id),
       category_name: row.category_name ?? null,
+      catalog_category_id: row.catalog_category_id == null ? null : Number(row.catalog_category_id),
+      catalog_category_name: row.catalog_category_name ?? null,
       commune_id: row.commune_id == null ? null : Number(row.commune_id),
       commune_name: row.commune_name ?? null,
       unit_label: row.unit_label ?? null,
       cover_image_url: row.effective_cover_image_url ?? row.cover_image_url ?? null,
       image_count: Number(row.image_count ?? 0),
       images: Array.isArray(row.images) ? row.images : [],
+    })),
+    catalog_categories: catalogCategoriesRes.rows.map((row) => ({
+      id: Number(row.id),
+      pro_id: Number(row.pro_id),
+      name: row.name,
+      slug: row.slug,
+      position: Number(row.position ?? 0),
+      created_at: row.created_at,
+      updated_at: row.updated_at,
     })),
   };
 }

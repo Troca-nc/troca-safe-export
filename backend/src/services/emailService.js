@@ -555,6 +555,24 @@ function buildRideSummary(details = {}) {
   `;
 }
 
+function buildBookingSummary(details = {}) {
+  const proName = escapeHtml(details.proName || details.pro_company_name || 'Professionnel');
+  const subject = escapeHtml(details.subject || 'Rendez-vous');
+  const location = escapeHtml(details.locationText || details.location_text || 'Lieu à confirmer');
+  const dateLabel = escapeHtml(details.slotLabel || details.when || 'Créneau à venir');
+  const commune = escapeHtml(details.commune || details.proCommune || '');
+
+  return `
+    <div style="border:1px solid #e5e7eb;border-radius:14px;padding:16px 18px;margin:18px 0;background:#f8fafc;">
+      <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;">Rendez-vous</p>
+      <p style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">${subject}</p>
+      <p style="margin:6px 0 0;color:#475569;font-size:14px;">${dateLabel}</p>
+      <p style="margin:6px 0 0;color:#475569;font-size:14px;">${proName}${commune ? ` · ${commune}` : ''}</p>
+      <p style="margin:6px 0 0;color:#475569;font-size:14px;">${location}</p>
+    </div>
+  `;
+}
+
 async function sendRideAutoBookingPassengerEmail(to, prenom, details = {}, recipientUserId) {
   const link = `${BASE_URL()}/covoiturage/reservations`;
   return sendMail({
@@ -644,6 +662,25 @@ async function sendRideReviewReminderEmail(to, prenom, details = {}, recipientUs
   });
 }
 
+async function sendProBookingReminderEmail(to, prenom, details = {}, recipientUserId) {
+  const reminderLabel = escapeHtml(details.reminderLabel || 'Rappel de rendez-vous');
+  const bookingUrl = details.bookingUrl || `${BASE_URL()}/mes-rdv`;
+  return sendMail({
+    to,
+    subject: `${reminderLabel} — ${details.subject || 'Votre rendez-vous'}`,
+    html: baseTemplate(`
+      <p>Bonjour ${escapeHtml(prenom)},</p>
+      <p>Votre rendez-vous approche. Voici un rappel pour vous organiser et, si besoin, ouvrir la conversation avant le jour J.</p>
+      ${buildBookingSummary(details)}
+      <p style="margin:0 0 16px;color:#475569;font-size:14px;line-height:1.6;">
+        Pensez à vérifier vos disponibilités, vos documents et le lieu du rendez-vous pour arriver prêt le jour J.
+      </p>
+      <a class="btn" href="${bookingUrl}">Voir mes rendez-vous</a>
+      <p style="color:#6b7280;font-size:13px;">Vous pouvez aussi suivre l&apos;échange dans la messagerie Troca si besoin.</p>
+    `),
+  });
+}
+
 module.exports = {
   sendMail,
   sendResetEmail,
@@ -663,6 +700,7 @@ module.exports = {
   sendRideBookingAcceptedPassengerEmail,
   sendRideBookingAcceptedDriverEmail,
   sendRideReviewReminderEmail,
+  sendProBookingReminderEmail,
   sendPerformanceReportEmail,
 };
 

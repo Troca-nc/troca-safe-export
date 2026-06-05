@@ -578,6 +578,26 @@ export const proApi = {
     () => api.get('/pro/products'),
     CACHE_TTL.short,
   ),
+  getCatalogCategories: () => cachedGet(
+    buildCacheKey('pro.catalogCategories', '/pro/products/categories'),
+    () => api.get('/pro/products/categories'),
+    CACHE_TTL.short,
+  ),
+  createCatalogCategory: async (data: object) => {
+    const res = await api.post('/pro/products/categories', data)
+    invalidateApiCache('pro.')
+    return res
+  },
+  updateCatalogCategory: async (id: string | number, data: object) => {
+    const res = await api.put(`/pro/products/categories/${id}`, data)
+    invalidateApiCache('pro.')
+    return res
+  },
+  deleteCatalogCategory: async (id: string | number) => {
+    const res = await api.delete(`/pro/products/categories/${id}`)
+    invalidateApiCache('pro.')
+    return res
+  },
   createProduct: async (data: object) => {
     const res = await api.post('/pro/products', data)
     invalidateApiCache('pro.')
@@ -633,10 +653,88 @@ export const proApi = {
   },
 }
 
+export const proLaunchPackApi = {
+  get: () => cachedGet(
+    buildCacheKey('proLaunchPack.get', '/pro/launch-pack'),
+    () => api.get('/pro/launch-pack'),
+    CACHE_TTL.short,
+  ),
+  scheduleCall: async (data: object) => {
+    const res = await api.post('/pro/launch-pack/schedule-call', data)
+    invalidateApiCache('proLaunchPack.')
+    invalidateApiCache('pro.')
+    return res
+  },
+  completeStep: async (data: { step_key: string }) => {
+    const res = await api.post('/pro/onboarding/complete-step', data)
+    invalidateApiCache('proLaunchPack.')
+    invalidateApiCache('pro.')
+    return res
+  },
+}
+
+export const proQuotesApi = {
+  create: async (data: object) => {
+    const res = await api.post('/pro-quotes', data)
+    invalidateApiCache('proQuotes.')
+    return res
+  },
+  list: (params: object = {}) => cachedGet(
+    buildCacheKey('proQuotes.list', '/pro-quotes', params),
+    () => api.get('/pro-quotes', { params }),
+    CACHE_TTL.short,
+  ),
+  getById: (id: string | number, token?: string) => cachedGet(
+    buildCacheKey('proQuotes.getById', `/pro-quotes/${id}`, { token: token || '' }),
+    () => api.get(`/pro-quotes/${id}`, { params: token ? { token } : {} }),
+    CACHE_TTL.short,
+  ),
+  update: async (id: string | number, data: object) => {
+    const res = await api.put(`/pro-quotes/${id}`, data)
+    invalidateApiCache('proQuotes.')
+    return res
+  },
+  send: async (id: string | number, data: object = {}) => {
+    const res = await api.post(`/pro-quotes/${id}/send`, data)
+    invalidateApiCache('proQuotes.')
+    invalidateApiCache('pro.')
+    return res
+  },
+  accept: async (id: string | number, data: object = {}) => {
+    const res = await api.post(`/pro-quotes/${id}/accept`, data)
+    invalidateApiCache('proQuotes.')
+    invalidateApiCache('pro.')
+    invalidateApiCache('notifications.')
+    return res
+  },
+  refuse: async (id: string | number, data: object = {}) => {
+    const res = await api.post(`/pro-quotes/${id}/refuse`, data)
+    invalidateApiCache('proQuotes.')
+    invalidateApiCache('pro.')
+    invalidateApiCache('notifications.')
+    return res
+  },
+  convert: async (id: string | number, data: object = {}) => {
+    const res = await api.post(`/pro-quotes/${id}/convert`, data)
+    invalidateApiCache('proQuotes.')
+    invalidateApiCache('pro.')
+    return res
+  },
+  downloadPdf: (id: string | number, token?: string) => api.get(`/pro-quotes/${id}/pdf`, {
+    responseType: 'blob',
+    params: token ? { token } : {},
+  }),
+}
+
 export const proBookingsApi = {
   getSlots: (proId: string | number) => cachedGet(
     buildCacheKey('proBookings.getSlots', `/pro/${proId}/booking-slots`),
     () => api.get(`/pro/${proId}/booking-slots`),
+    CACHE_TTL.short,
+  ),
+  getCalendar: (proId: string | number, month?: string) => cachedGet(
+    buildCacheKey('proBookings.getCalendar', `/pro/${proId}/booking-calendar`, { month: month || '' }),
+    () => api.get(`/pro/${proId}/booking-calendar`, { params: month ? { month } : {} }),
     CACHE_TTL.short,
   ),
   book: async (proId: string | number, data: object) => {
@@ -675,6 +773,23 @@ export const proBookingsApi = {
   },
   deleteSlot: async (slotId: string | number) => {
     const res = await api.delete(`/pro/dashboard/booking-slots/${slotId}`)
+    invalidateApiCache('proBookings.')
+    invalidateApiCache('pro.')
+    return res
+  },
+  getExceptions: () => cachedGet(
+    buildCacheKey('proBookings.exceptions', '/pro/dashboard/booking-exceptions'),
+    () => api.get('/pro/dashboard/booking-exceptions'),
+    CACHE_TTL.short,
+  ),
+  createException: async (data: object) => {
+    const res = await api.post('/pro/dashboard/booking-exceptions', data)
+    invalidateApiCache('proBookings.')
+    invalidateApiCache('pro.')
+    return res
+  },
+  deleteException: async (exceptionId: string | number) => {
+    const res = await api.delete(`/pro/dashboard/booking-exceptions/${exceptionId}`)
     invalidateApiCache('proBookings.')
     invalidateApiCache('pro.')
     return res

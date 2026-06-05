@@ -13,7 +13,9 @@ import {
   Search,
 } from 'lucide-react'
 
+import QuoteBuilder from '@/components/pro/QuoteBuilder'
 import { proApi } from '@/lib/api'
+import { proQuotesApi } from '@/lib/api'
 import { showToast } from '@/lib/toast'
 
 type QuoteRequest = {
@@ -36,29 +38,63 @@ type QuoteRequest = {
   }
 }
 
+type QuoteRecord = {
+  id: string | number
+  quote_number?: string | null
+  source_quote_request_id?: number | null
+  subject: string
+  requester_name: string
+  commune: string
+  status: string
+  total_xpf?: number | null
+  valid_until?: string | null
+  sent_at?: string | null
+  viewed_at?: string | null
+}
+
 function formatDate(value: string) {
   const date = new Date(value)
   return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }).format(date)
 }
 
+function formatQuoteStatus(status: string) {
+  const normalized = String(status || '').toLowerCase()
+  if (normalized === 'draft') return { label: 'Brouillon', tone: 'bg-sand text-night/70' }
+  if (normalized === 'sent') return { label: 'Envoyé', tone: 'bg-nc-lagonLight text-nc-lagon' }
+  if (normalized === 'viewed') return { label: 'Vu', tone: 'bg-blue-50 text-blue-700' }
+  if (normalized === 'accepted') return { label: 'Accepté', tone: 'bg-emerald-50 text-emerald-700' }
+  if (normalized === 'refused') return { label: 'Refusé', tone: 'bg-red-50 text-red-700' }
+  if (normalized === 'expired') return { label: 'Expiré', tone: 'bg-slate-100 text-slate-500' }
+  if (normalized === 'converted') return { label: 'Converti', tone: 'bg-violet-50 text-violet-700' }
+  return { label: status || 'Inconnu', tone: 'bg-slate-100 text-slate-600' }
+}
+
 export default function ProDashboardDevisPage() {
   const [requests, setRequests] = useState<QuoteRequest[]>([])
+  const [quotes, setQuotes] = useState<QuoteRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<'all' | 'today' | 'budget' | 'details'>('all')
+  const [builderOpen, setBuilderOpen] = useState(false)
+  const [builderRequest, setBuilderRequest] = useState<QuoteRequest | null>(null)
 
   useEffect(() => {
     let alive = true
 
     const load = async () => {
       try {
-        const response = await proApi.getQuoteRequestsReceived()
+        const [requestsResponse, quotesResponse] = await Promise.all([
+          proApi.getQuoteRequestsReceived(),
+          proQuotesApi.list(),
+        ])
         if (!alive) return
-        setRequests(Array.isArray(response.data?.data) ? response.data.data : [])
+        setRequests(Array.isArray(requestsResponse.data?.data) ? requestsResponse.data.data : [])
+        setQuotes(Array.isArray(quotesResponse.data?.data) ? quotesResponse.data.data : [])
       } catch {
         if (!alive) return
         setRequests([])
+        setQuotes([])
       } finally {
         if (alive) setLoading(false)
       }
@@ -69,6 +105,16 @@ export default function ProDashboardDevisPage() {
       alive = false
     }
   }, [])
+
+  const openBuilder = (request?: QuoteRequest | null) => {
+    setBuilderRequest(request || null)
+    setBuilderOpen(true)
+  }
+
+  const closeBuilder = () => {
+    setBuilderOpen(false)
+    setBuilderRequest(null)
+  }
 
   const handleDownload = async (request: QuoteRequest) => {
     setDownloadingId(request.id)
@@ -96,6 +142,32 @@ export default function ProDashboardDevisPage() {
       })
     } finally {
       setDownloadingId(null)
+    }
+  }
+
+  const handleQuoteDownload = async (quote: QuoteRecord) => {
+    try {
+      const response = await proQuotesApi.downloadPdf(quote.id)
+      const blob = new Blob([response.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = `${quote.quote_number || `devis-${quote.id}`}.pdf`
+      document.body.appendChild(anchor)
+      anchor.click()
+      anchor.remove()
+      window.URL.revokeObjectURL(url)
+      showToast({
+        tone: 'success',
+        title: 'PDF telecharge',
+        message: 'Le devis a ete exporte en PDF.',
+      })
+    } catch (error: any) {
+      showToast({
+        tone: 'error',
+        title: 'Export impossible',
+        message: error?.response?.data?.error || 'Impossible de generer le PDF pour le moment.',
+      })
     }
   }
 
@@ -161,6 +233,17 @@ export default function ProDashboardDevisPage() {
             <BadgeCheck className="h-4 w-4" />
             {requests.length} demande{requests.length > 1 ? 's' : ''}
           </div>
+        </div>
+
+        <div className="mt-5 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => openBuilder(null)}
+            className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-white/90"
+          >
+            <FileText className="h-4 w-4" />
+            Nouveau devis
+          </button>
         </div>
 
         <div className="mt-6 grid gap-3 md:grid-cols-4">
@@ -295,9 +378,17 @@ export default function ProDashboardDevisPage() {
                 <div className="flex shrink-0 flex-col gap-2 lg:w-56">
                   <button
                     type="button"
+                    onClick={() => openBuilder(request)}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Repondre avec un devis
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => handleDownload(request)}
                     disabled={downloadingId === request.id}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {downloadingId === request.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                     Telecharger PDF
@@ -330,6 +421,90 @@ export default function ProDashboardDevisPage() {
           </p>
         </div>
       )}
+
+      <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Devis crees</p>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Suivi des devis envoyes</h2>
+          </div>
+          <button
+            type="button"
+            onClick={() => openBuilder(null)}
+            className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
+          >
+            <Plus className="h-4 w-4" />
+            Nouveau devis
+          </button>
+        </div>
+
+        {quotes.length ? (
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            {quotes.map((quote) => {
+              const status = formatQuoteStatus(quote.status)
+              return (
+                <article key={quote.id} className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">
+                        {quote.quote_number || `DEVIS-${quote.id}`}
+                      </p>
+                      <h3 className="mt-1 text-lg font-semibold text-night">{quote.subject}</h3>
+                      <p className="mt-1 text-sm text-night/60">
+                        {quote.requester_name} · {quote.commune}
+                      </p>
+                    </div>
+                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${status.tone}`}>{status.label}</span>
+                  </div>
+
+                  <div className="mt-4 grid gap-2 text-sm text-night/65 sm:grid-cols-2">
+                    <p><strong>Total :</strong> {Number(quote.total_xpf || 0).toLocaleString('fr-FR')} XPF</p>
+                    <p><strong>Validité :</strong> {quote.valid_until ? formatDate(quote.valid_until) : 'Non précisée'}</p>
+                    <p><strong>Envoyé :</strong> {quote.sent_at ? formatDate(quote.sent_at) : 'Brouillon'}</p>
+                    <p><strong>Vu :</strong> {quote.viewed_at ? formatDate(quote.viewed_at) : 'Pas encore'}</p>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleQuoteDownload(quote)}
+                      className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
+                    >
+                      <Download className="h-4 w-4" />
+                      PDF
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openBuilder(requests.find((request) => String(request.id) === String(quote.source_quote_request_id)) || null)}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      Repondre
+                    </button>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="mt-5 rounded-[1.5rem] border border-dashed border-[var(--color-border)] bg-[var(--color-background-secondary)] px-6 py-10 text-center text-night/55">
+            <FileText className="mx-auto h-8 w-8 text-night/25" />
+            <p className="mt-3 text-lg font-semibold text-night">Aucun devis cree pour l’instant</p>
+            <p className="mt-2 text-sm">Créez votre premier devis depuis une demande reçue ou depuis le bouton Nouveau devis.</p>
+          </div>
+        )}
+      </section>
+
+      {builderOpen ? (
+        <QuoteBuilder
+          open={builderOpen}
+          onClose={closeBuilder}
+          proId={builderRequest?.proId || requests[0]?.proId || 'current'}
+          proName={builderRequest?.proName || requests[0]?.proName || 'Professionnel Troca'}
+          initialRequest={builderRequest || null}
+          onFinished={load}
+        />
+      ) : null}
     </div>
   )
 }

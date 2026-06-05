@@ -28,6 +28,20 @@ export type ProPublicBookingSettings = {
   slot_duration_minutes: number
   advance_notice_hours: number
   max_days_ahead: number
+  services?: Array<{
+    title: string
+    duration_minutes: number
+    price_xpf?: number | null
+    description?: string | null
+    is_active?: boolean
+  }>
+  weekly_hours?: Array<{
+    day_index: number
+    label?: string | null
+    is_open?: boolean
+    start_time?: string | null
+    end_time?: string | null
+  }>
 }
 
 export type ProPublicBookingSlot = {
@@ -43,13 +57,16 @@ export type ProPublicProduct = {
   title: string
   slug?: string | null
   description?: string | null
+  price_type?: 'fixed' | 'from' | 'on_quote' | 'free'
   price_xpf: number
   compare_at_price_xpf?: number | null
-  stock_quantity: number
+  stock_quantity?: number | null
   sku?: string | null
   brand?: string | null
   category_id?: number | null
   category_name?: string | null
+  catalog_category_id?: number | null
+  catalog_category_name?: string | null
   commune_id?: number | null
   commune_name?: string | null
   unit_label?: string | null
@@ -61,6 +78,13 @@ export type ProPublicProduct = {
     position?: number
     alt_text?: string | null
   }>
+}
+
+export type ProPublicCatalogCategory = {
+  id: number | string
+  name: string
+  slug?: string | null
+  position?: number | null
 }
 
 export type ProPublicProfile = {
@@ -85,6 +109,7 @@ export type ProPublicProfile = {
   booking_settings?: ProPublicBookingSettings | null
   booking_slots?: ProPublicBookingSlot[]
   products?: ProPublicProduct[]
+  catalog_categories?: ProPublicCatalogCategory[]
   reviews?: ProPublicReview[]
   listings?: any[]
 }

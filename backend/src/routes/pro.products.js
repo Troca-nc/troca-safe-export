@@ -16,12 +16,14 @@ const LIST_CACHE_PREFIX = 'cache:listings:';
 const createSchema = Joi.object({
   title: Joi.string().trim().min(2).max(200).required(),
   description: Joi.string().trim().min(10).max(2000).required(),
-  price_xpf: Joi.number().integer().min(0).required(),
+  price_type: Joi.string().valid('fixed', 'from', 'on_quote', 'free').default('fixed'),
+  price_xpf: Joi.alternatives().try(Joi.number().integer().min(0), Joi.valid(null)).optional(),
   compare_at_price_xpf: Joi.number().integer().min(0).allow(null).optional(),
-  stock_quantity: Joi.number().integer().min(0).required(),
+  stock_quantity: Joi.alternatives().try(Joi.number().integer().min(0), Joi.valid(null)).optional(),
   sku: Joi.string().trim().max(80).allow('', null).optional(),
   brand: Joi.string().trim().max(120).allow('', null).optional(),
   category_id: Joi.number().integer().positive().required(),
+  catalog_category_id: Joi.number().integer().positive().allow(null).optional(),
   commune_id: Joi.number().integer().positive().required(),
   unit_label: Joi.string().trim().max(80).allow('', null).optional(),
   cover_image_url: Joi.string().trim().uri().allow('', null).optional(),
@@ -32,18 +34,30 @@ const createSchema = Joi.object({
 const updateSchema = Joi.object({
   title: Joi.string().trim().min(2).max(200).optional(),
   description: Joi.string().trim().min(10).max(2000).optional(),
-  price_xpf: Joi.number().integer().min(0).optional(),
+  price_type: Joi.string().valid('fixed', 'from', 'on_quote', 'free').optional(),
+  price_xpf: Joi.alternatives().try(Joi.number().integer().min(0), Joi.valid(null)).optional(),
   compare_at_price_xpf: Joi.number().integer().min(0).allow(null).optional(),
-  stock_quantity: Joi.number().integer().min(0).optional(),
+  stock_quantity: Joi.alternatives().try(Joi.number().integer().min(0), Joi.valid(null)).optional(),
   sku: Joi.string().trim().max(80).allow('', null).optional(),
   brand: Joi.string().trim().max(120).allow('', null).optional(),
   category_id: Joi.number().integer().positive().optional(),
+  catalog_category_id: Joi.number().integer().positive().allow(null).optional(),
   commune_id: Joi.number().integer().positive().optional(),
   unit_label: Joi.string().trim().max(80).allow('', null).optional(),
   cover_image_url: Joi.string().trim().uri().allow('', null).optional(),
   image_urls: Joi.array().items(Joi.string().trim().uri()).max(12).optional(),
   is_active: Joi.boolean().optional(),
   is_featured: Joi.boolean().optional(),
+});
+
+const catalogCategoryCreateSchema = Joi.object({
+  name: Joi.string().trim().min(2).max(120).required(),
+  position: Joi.number().integer().min(0).optional(),
+});
+
+const catalogCategoryUpdateSchema = Joi.object({
+  name: Joi.string().trim().min(2).max(120).optional(),
+  position: Joi.number().integer().min(0).optional(),
 });
 
 function requirePro(req, res) {
@@ -79,13 +93,16 @@ function mapProductRow(row) {
     title: row.title,
     slug: row.slug,
     description: row.description,
+    price_type: row.price_type || 'fixed',
     price_xpf: Number(row.price_xpf ?? 0),
     compare_at_price_xpf: row.compare_at_price_xpf == null ? null : Number(row.compare_at_price_xpf),
-    stock_quantity: Number(row.stock_quantity ?? 0),
+    stock_quantity: row.stock_quantity == null ? null : Number(row.stock_quantity),
     sku: row.sku ?? null,
     brand: row.brand ?? null,
     category_id: row.category_id == null ? null : Number(row.category_id),
     category_name: row.category_name ?? null,
+    catalog_category_id: row.catalog_category_id == null ? null : Number(row.catalog_category_id),
+    catalog_category_name: row.catalog_category_name ?? null,
     commune_id: row.commune_id == null ? null : Number(row.commune_id),
     commune_name: row.commune_name ?? null,
     unit_label: row.unit_label ?? null,
@@ -109,6 +126,7 @@ async function loadProductOr404(productId, ownerId) {
     `SELECT
        p.*,
        cat.name AS category_name,
+       ccat.name AS catalog_category_name,
        com.name AS commune_name,
        (
          SELECT a.titre
@@ -146,6 +164,7 @@ async function loadProductOr404(productId, ownerId) {
        ), '[]'::json) AS images
      FROM products p
      LEFT JOIN categories cat ON cat.id = p.category_id
+     LEFT JOIN pro_catalog_categories ccat ON ccat.id = p.catalog_category_id
      LEFT JOIN communes com ON com.id = p.commune_id
      WHERE p.id = $1 AND p.owner_id = $2`,
     [productId, ownerId]
@@ -156,6 +175,180 @@ async function loadProductOr404(productId, ownerId) {
 
 router.use(authenticate);
 
+router.get('/categories', async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+
+    const result = await query(
+      `SELECT id, pro_id, name, slug, position, created_at, updated_at
+       FROM pro_catalog_categories
+       WHERE pro_id = $1
+       ORDER BY position ASC, name ASC, id ASC`,
+      [req.user.id]
+    );
+
+    return res.json({
+      data: result.rows.map((row) => ({
+        id: Number(row.id),
+        pro_id: Number(row.pro_id),
+        name: row.name,
+        slug: row.slug,
+        position: Number(row.position ?? 0),
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+      })),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/categories', async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+
+    const { error, value } = catalogCategoryCreateSchema.validate(req.body, { abortEarly: true });
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
+    const name = normalizeText(value.name);
+    const slugBase = slugifyCategoryName(name) || 'catalogue';
+
+    const created = await withTransaction(async (client) => {
+      const slugResult = await client.query(
+        `SELECT slug
+         FROM pro_catalog_categories
+         WHERE pro_id = $1 AND slug LIKE $2
+         ORDER BY id DESC
+         LIMIT 1`,
+        [req.user.id, `${slugBase}%`]
+      );
+
+      const nextSlug = slugResult.rows[0]
+        ? `${slugBase}-${Date.now().toString(36)}`
+        : slugBase;
+
+      const inserted = await client.query(
+        `INSERT INTO pro_catalog_categories (pro_id, name, slug, position)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id, pro_id, name, slug, position, created_at, updated_at`,
+        [req.user.id, name, nextSlug, Number(value.position ?? 0)]
+      );
+
+      return inserted.rows[0];
+    });
+
+    await clearListCache();
+
+    return res.status(201).json({
+      data: {
+        id: Number(created.id),
+        pro_id: Number(created.pro_id),
+        name: created.name,
+        slug: created.slug,
+        position: Number(created.position ?? 0),
+        created_at: created.created_at,
+        updated_at: created.updated_at,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/categories/:id', async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+
+    const categoryId = Number(req.params.id);
+    if (!Number.isFinite(categoryId) || categoryId <= 0) {
+      return res.status(400).json({ error: 'Catégorie invalide.' });
+    }
+
+    const { error, value } = catalogCategoryUpdateSchema.validate(req.body, { abortEarly: true });
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
+    const existing = await query(
+      `SELECT id, pro_id, name, slug, position
+       FROM pro_catalog_categories
+       WHERE id = $1 AND pro_id = $2
+       LIMIT 1`,
+      [categoryId, req.user.id]
+    );
+    if (!existing.rows[0]) return res.status(404).json({ error: 'Catégorie introuvable.' });
+
+    const nextName = Object.prototype.hasOwnProperty.call(value, 'name') ? normalizeText(value.name) : existing.rows[0].name;
+    const nextSlug = Object.prototype.hasOwnProperty.call(value, 'name')
+      ? `${slugifyCategoryName(nextName) || 'catalogue'}-${categoryId}`
+      : existing.rows[0].slug;
+    const nextPosition = Object.prototype.hasOwnProperty.call(value, 'position') ? Number(value.position ?? 0) : existing.rows[0].position;
+
+    const updated = await query(
+      `UPDATE pro_catalog_categories
+       SET name = $1,
+           slug = $2,
+           position = $3,
+           updated_at = NOW()
+       WHERE id = $4 AND pro_id = $5
+       RETURNING id, pro_id, name, slug, position, created_at, updated_at`,
+      [nextName, nextSlug, nextPosition, categoryId, req.user.id]
+    );
+
+    await clearListCache();
+
+    return res.json({
+      data: {
+        id: Number(updated.rows[0].id),
+        pro_id: Number(updated.rows[0].pro_id),
+        name: updated.rows[0].name,
+        slug: updated.rows[0].slug,
+        position: Number(updated.rows[0].position ?? 0),
+        created_at: updated.rows[0].created_at,
+        updated_at: updated.rows[0].updated_at,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/categories/:id', async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+
+    const categoryId = Number(req.params.id);
+    if (!Number.isFinite(categoryId) || categoryId <= 0) {
+      return res.status(400).json({ error: 'Catégorie invalide.' });
+    }
+
+    const deleted = await withTransaction(async (client) => {
+      await client.query(
+        `UPDATE products
+         SET catalog_category_id = NULL,
+             updated_at = NOW()
+         WHERE owner_id = $1 AND catalog_category_id = $2`,
+        [req.user.id, categoryId]
+      );
+
+      const result = await client.query(
+        `DELETE FROM pro_catalog_categories
+         WHERE id = $1 AND pro_id = $2
+         RETURNING id`,
+        [categoryId, req.user.id]
+      );
+
+      return result.rows[0] || null;
+    });
+
+    if (!deleted) return res.status(404).json({ error: 'Catégorie introuvable.' });
+
+    await clearListCache();
+
+    return res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/', async (req, res, next) => {
   try {
     if (!requirePro(req, res)) return;
@@ -164,6 +357,7 @@ router.get('/', async (req, res, next) => {
       `SELECT
          p.*,
          cat.name AS category_name,
+         ccat.name AS catalog_category_name,
          com.name AS commune_name,
          (
            SELECT a.titre
@@ -201,6 +395,7 @@ router.get('/', async (req, res, next) => {
          ), '[]'::json) AS images
        FROM products p
        LEFT JOIN categories cat ON cat.id = p.category_id
+       LEFT JOIN pro_catalog_categories ccat ON ccat.id = p.catalog_category_id
        LEFT JOIN communes com ON com.id = p.commune_id
        WHERE p.owner_id = $1
        ORDER BY p.is_featured DESC, p.is_active DESC, p.created_at DESC`,
@@ -229,21 +424,23 @@ router.post('/', async (req, res, next) => {
     const created = await withTransaction(async (client) => {
       const inserted = await client.query(
         `INSERT INTO products
-           (owner_id, title, slug, description, price_xpf, compare_at_price_xpf, stock_quantity,
-            sku, brand, category_id, commune_id, unit_label, cover_image_url, is_featured)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+           (owner_id, title, slug, description, price_type, price_xpf, compare_at_price_xpf, stock_quantity,
+            sku, brand, category_id, catalog_category_id, commune_id, unit_label, cover_image_url, is_featured)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
          RETURNING *`,
         [
           req.user.id,
           title,
           tempSlug,
           description,
-          Number(value.price_xpf ?? 0),
+          value.price_type || 'fixed',
+          value.price_xpf == null ? 0 : Number(value.price_xpf ?? 0),
           value.compare_at_price_xpf == null ? null : Number(value.compare_at_price_xpf),
-          Number(value.stock_quantity ?? 0),
+          value.stock_quantity == null ? null : Number(value.stock_quantity ?? 0),
           normalizeText(value.sku),
           normalizeText(value.brand),
           Number(value.category_id),
+          value.catalog_category_id == null ? null : Number(value.catalog_category_id),
           Number(value.commune_id),
           normalizeText(value.unit_label),
           normalizeText(value.cover_image_url),
@@ -315,12 +512,14 @@ router.put('/:id', async (req, res, next) => {
 
       if (Object.prototype.hasOwnProperty.call(value, 'title')) push('title', nextTitle);
       if (Object.prototype.hasOwnProperty.call(value, 'description')) push('description', normalizeText(value.description));
+      if (Object.prototype.hasOwnProperty.call(value, 'price_type')) push('price_type', value.price_type || 'fixed');
       if (Object.prototype.hasOwnProperty.call(value, 'price_xpf')) push('price_xpf', Number(value.price_xpf ?? 0));
       if (Object.prototype.hasOwnProperty.call(value, 'compare_at_price_xpf')) push('compare_at_price_xpf', value.compare_at_price_xpf == null ? null : Number(value.compare_at_price_xpf));
-      if (Object.prototype.hasOwnProperty.call(value, 'stock_quantity')) push('stock_quantity', Number(value.stock_quantity ?? 0));
+      if (Object.prototype.hasOwnProperty.call(value, 'stock_quantity')) push('stock_quantity', value.stock_quantity == null ? null : Number(value.stock_quantity ?? 0));
       if (Object.prototype.hasOwnProperty.call(value, 'sku')) push('sku', normalizeText(value.sku));
       if (Object.prototype.hasOwnProperty.call(value, 'brand')) push('brand', normalizeText(value.brand));
       if (Object.prototype.hasOwnProperty.call(value, 'category_id')) push('category_id', Number(value.category_id));
+      if (Object.prototype.hasOwnProperty.call(value, 'catalog_category_id')) push('catalog_category_id', value.catalog_category_id == null ? null : Number(value.catalog_category_id));
       if (Object.prototype.hasOwnProperty.call(value, 'commune_id')) push('commune_id', Number(value.commune_id));
       if (Object.prototype.hasOwnProperty.call(value, 'unit_label')) push('unit_label', normalizeText(value.unit_label));
       if (Object.prototype.hasOwnProperty.call(value, 'cover_image_url')) push('cover_image_url', normalizeText(value.cover_image_url));
@@ -399,7 +598,7 @@ router.post('/:id/publish', async (req, res, next) => {
     const product = await loadProductOr404(productId, req.user.id);
     if (!product) return res.status(404).json({ error: 'Produit introuvable.' });
     if (!product.is_active) return res.status(400).json({ error: 'Le produit doit être actif pour être publié.' });
-    if (Number(product.stock_quantity ?? 0) <= 0) {
+    if (product.stock_quantity != null && Number(product.stock_quantity ?? 0) <= 0) {
       return res.status(400).json({ error: 'Le stock doit être supérieur à 0.' });
     }
     if (!product.category_id || !product.commune_id) {

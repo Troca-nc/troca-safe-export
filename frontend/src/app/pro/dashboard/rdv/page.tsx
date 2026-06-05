@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, Loader2, MessageCircle, Plus, Save, Trash2 } from 'lucide-react'
+import { Bell, CalendarDays, Loader2, MessageCircle, Plus, Save, Trash2 } from 'lucide-react'
 
 import FeedbackAlert from '@/components/ui/FeedbackAlert'
 import RdvBookingCard, { type RdvBookingItem } from '@/components/pro/RdvBookingCard'
@@ -14,6 +14,13 @@ type DashboardData = {
   settings: ProPublicBookingSettings
   slots: ProPublicBookingSlot[]
   bookings: RdvBookingItem[]
+}
+
+type BookingException = {
+  id: number | string
+  exception_date: string
+  is_unavailable: boolean
+  reason?: string | null
 }
 
 type SettingsForm = ProPublicBookingSettings
@@ -74,15 +81,26 @@ export default function ProDashboardRdvPage() {
   const [savingSettings, setSavingSettings] = useState(false)
   const [savingSlot, setSavingSlot] = useState(false)
   const [slotDeletingId, setSlotDeletingId] = useState<string | number | null>(null)
+  const [savingException, setSavingException] = useState(false)
+  const [exceptionDeletingId, setExceptionDeletingId] = useState<string | number | null>(null)
   const [error, setError] = useState('')
   const [settingsForm, setSettingsForm] = useState<SettingsForm>(DEFAULT_SETTINGS)
   const [slotForm, setSlotForm] = useState<SlotForm>(DEFAULT_SLOT)
+  const [exceptions, setExceptions] = useState<BookingException[]>([])
+  const [exceptionForm, setExceptionForm] = useState({
+    exception_date: '',
+    reason: '',
+    is_unavailable: true,
+  })
 
   const loadDashboard = async () => {
     setLoading(true)
     setError('')
     try {
-      const response = await proBookingsApi.getDashboard()
+      const [response, exceptionsResponse] = await Promise.all([
+        proBookingsApi.getDashboard(),
+        proBookingsApi.getExceptions(),
+      ])
       const payload = response.data?.data || {}
       const nextData: DashboardData = {
         settings: payload.settings || DEFAULT_SETTINGS,
@@ -90,6 +108,7 @@ export default function ProDashboardRdvPage() {
         bookings: Array.isArray(payload.bookings) ? payload.bookings : [],
       }
       setData(nextData)
+      setExceptions(Array.isArray(exceptionsResponse.data?.data) ? exceptionsResponse.data.data : [])
       setSettingsForm({
         ...DEFAULT_SETTINGS,
         ...nextData.settings,
@@ -114,6 +133,44 @@ export default function ProDashboardRdvPage() {
       pending: bookings.filter((booking) => booking.status === 'pending').length,
       confirmed: bookings.filter((booking) => ['confirmed', 'accepted', 'auto_confirmed'].includes(String(booking.status).toLowerCase())).length,
       completed: bookings.filter((booking) => String(booking.status).toLowerCase() === 'completed').length,
+    }
+  }, [data])
+
+  const nextReminder = useMemo(() => {
+    const bookings = (data?.bookings ?? [])
+      .filter((booking) => ['pending', 'confirmed', 'accepted', 'auto_confirmed'].includes(String(booking.status).toLowerCase()))
+      .filter((booking) => new Date(booking.starts_at).getTime() > Date.now())
+      .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
+
+    const target = bookings[0]
+    if (!target) return null
+
+    const startsAt = new Date(target.starts_at)
+    const diffHours = (startsAt.getTime() - Date.now()) / (1000 * 60 * 60)
+    const reminderType = diffHours <= 2.5
+      ? 'H-2'
+      : diffHours <= 24.5
+        ? 'J-1'
+        : null
+
+    if (!reminderType) {
+      return {
+        title: 'Prochain rendez-vous',
+        subtitle: `${target.requester_name} · ${formatSlot(target)}`,
+        href: '/mes-rdv',
+        tone: 'bg-nc-lagonLight text-nc-lagon',
+      }
+    }
+
+    const sentAt = reminderType === 'H-2' ? target.reminder_2h_sent_at : target.reminder_24h_sent_at
+    const label = sentAt ? `${reminderType} envoyé` : `${reminderType} à venir`
+
+    return {
+      title: `Prochain rappel ${reminderType}`,
+      subtitle: `${target.requester_name} · ${formatSlot(target)}`,
+      href: '/mes-rdv',
+      tone: sentAt ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700',
+      label,
     }
   }, [data])
 
@@ -208,6 +265,68 @@ export default function ProDashboardRdvPage() {
     }
   }
 
+  const handleAddException = async () => {
+    if (!exceptionForm.exception_date) {
+      setError('Merci de choisir une date d’indisponibilité.')
+      return
+    }
+
+    setSavingException(true)
+    setError('')
+    try {
+      await proBookingsApi.createException({
+        exception_date: exceptionForm.exception_date,
+        reason: exceptionForm.reason.trim() || null,
+        is_unavailable: exceptionForm.is_unavailable,
+      })
+      setExceptionForm({
+        exception_date: '',
+        reason: '',
+        is_unavailable: true,
+      })
+      await loadDashboard()
+      showToast({
+        tone: 'success',
+        title: 'Indisponibilité ajoutée',
+        message: 'Le calendrier public a été mis à jour.',
+      })
+    } catch (err: any) {
+      const message = err?.response?.data?.error || 'Impossible de créer cette exception.'
+      setError(message)
+      showToast({
+        tone: 'error',
+        title: 'Exception non ajoutée',
+        message,
+      })
+    } finally {
+      setSavingException(false)
+    }
+  }
+
+  const handleDeleteException = async (exceptionId: string | number) => {
+    setExceptionDeletingId(exceptionId)
+    setError('')
+    try {
+      await proBookingsApi.deleteException(exceptionId)
+      await loadDashboard()
+      showToast({
+        tone: 'success',
+        title: 'Indisponibilité supprimée',
+        message: 'Le créneau redeviendra publiquement réservable.',
+      })
+    } catch (err: any) {
+      const message = err?.response?.data?.error || 'Impossible de supprimer cette indisponibilité.'
+      setError(message)
+      showToast({
+        tone: 'error',
+        title: 'Suppression impossible',
+        message,
+      })
+    } finally {
+      setExceptionDeletingId(null)
+    }
+  }
+
   const handleBookingAction = async (bookingId: string | number, action: 'confirm' | 'decline' | 'cancel') => {
     setError('')
     try {
@@ -288,6 +407,34 @@ export default function ProDashboardRdvPage() {
           <p className="mt-2 text-3xl font-bold text-night">{stats.completed}</p>
         </article>
       </section>
+
+      {nextReminder ? (
+        <section className="rounded-[2rem] border border-[#0A7EA4]/15 bg-[linear-gradient(135deg,_rgba(214,240,246,0.75),_rgba(255,255,255,0.95))] p-5 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#0A7EA4] shadow-sm">
+                <Bell className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Prochain rappel</p>
+                <h2 className="mt-1 font-display text-2xl font-bold text-night">{nextReminder.title}</h2>
+                <p className="mt-2 text-sm text-night/65">{nextReminder.subtitle}</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {'label' in nextReminder && nextReminder.label ? (
+                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${nextReminder.tone}`}>
+                  {nextReminder.label}
+                </span>
+              ) : null}
+              <Link href={nextReminder.href} className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a]">
+                Voir mes rendez-vous
+                <MessageCircle className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
@@ -506,6 +653,74 @@ export default function ProDashboardRdvPage() {
                 Aucun créneau publié pour le moment.
               </div>
             )}
+          </article>
+          <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Indisponibilités</p>
+            <p className="mt-1 text-sm text-night/60">
+              Bloquez un jour entier ou notez une raison temporaire pour masquer la réservation en ligne.
+            </p>
+
+            <div className="mt-4 space-y-3">
+              <label className="block space-y-2">
+                <span className="text-sm font-semibold text-night">Date</span>
+                <input
+                  type="date"
+                  value={exceptionForm.exception_date}
+                  onChange={(event) => setExceptionForm((current) => ({ ...current, exception_date: event.target.value }))}
+                  className="input w-full rounded-2xl"
+                />
+              </label>
+
+              <label className="block space-y-2">
+                <span className="text-sm font-semibold text-night">Raison</span>
+                <input
+                  value={exceptionForm.reason}
+                  onChange={(event) => setExceptionForm((current) => ({ ...current, reason: event.target.value }))}
+                  className="input w-full rounded-2xl"
+                  placeholder="Vacances, fermeture, déplacement..."
+                />
+              </label>
+
+              <button
+                type="button"
+                onClick={() => void handleAddException()}
+                disabled={savingException}
+                className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a] disabled:opacity-60"
+              >
+                {savingException ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                Bloquer la date
+              </button>
+
+              {exceptions.length ? (
+                <div className="space-y-2">
+                  {exceptions.map((exception) => (
+                    <div key={exception.id} className="rounded-2xl border border-[var(--color-border)] p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-night">
+                            {new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full' }).format(new Date(`${exception.exception_date}T00:00:00`))}
+                          </p>
+                          {exception.reason ? <p className="mt-1 text-xs text-night/55">{exception.reason}</p> : null}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => void handleDeleteException(exception.id)}
+                          disabled={exceptionDeletingId === exception.id}
+                          className="inline-flex items-center gap-1 rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
+                        >
+                          {exceptionDeletingId === exception.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                          Supprimer
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-[var(--color-border)] p-4 text-sm text-night/60">
+                  Aucune indisponibilité enregistrée.
+                </div>
+              )}
+            </div>
           </article>
         </aside>
       </section>

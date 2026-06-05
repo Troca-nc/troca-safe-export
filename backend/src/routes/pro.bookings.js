@@ -22,6 +22,20 @@ const bookingSettingsSchema = Joi.object({
   slot_duration_minutes: Joi.number().integer().min(15).max(240).default(30),
   advance_notice_hours: Joi.number().integer().min(0).max(168).default(24),
   max_days_ahead: Joi.number().integer().min(1).max(365).default(30),
+  services: Joi.array().items(Joi.object({
+    title: Joi.string().trim().min(2).max(120).required(),
+    duration_minutes: Joi.number().integer().min(15).max(240).required(),
+    price_xpf: Joi.number().integer().min(0).allow(null).optional(),
+    description: Joi.string().trim().max(300).allow('', null).optional(),
+    is_active: Joi.boolean().default(true),
+  })).max(20).default([]),
+  weekly_hours: Joi.array().items(Joi.object({
+    day_index: Joi.number().integer().min(0).max(6).required(),
+    label: Joi.string().trim().max(60).allow('', null).optional(),
+    is_open: Joi.boolean().default(true),
+    start_time: Joi.string().trim().pattern(/^\d{2}:\d{2}$/).allow('', null).optional(),
+    end_time: Joi.string().trim().pattern(/^\d{2}:\d{2}$/).allow('', null).optional(),
+  })).max(7).default([]),
 });
 
 const slotSchema = Joi.object({
@@ -30,8 +44,17 @@ const slotSchema = Joi.object({
   label: Joi.string().trim().max(120).allow('', null).optional(),
 });
 
+const bookingExceptionSchema = Joi.object({
+  exception_date: Joi.string().trim().isoDate().required(),
+  reason: Joi.string().trim().max(200).allow('', null).optional(),
+  is_unavailable: Joi.boolean().default(true),
+});
+
 const bookingSchema = Joi.object({
   slot_id: Joi.number().integer().positive().required(),
+  service_title: Joi.string().trim().max(120).allow('', null).optional(),
+  service_price_xpf: Joi.number().integer().min(0).allow(null).optional(),
+  service_duration_minutes: Joi.number().integer().min(15).max(240).allow(null).optional(),
   requester_name: Joi.string().trim().min(2).max(120).required(),
   requester_email: Joi.string().trim().email().max(255).required(),
   requester_phone: Joi.string().trim().max(30).allow('', null).optional(),
@@ -72,6 +95,17 @@ function formatDisplayName(row) {
     || 'Professionnel Troca';
 }
 
+function parseJsonArray(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value !== 'string') return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 function mapBookingSettings(row) {
   if (!row) {
     return {
@@ -84,6 +118,8 @@ function mapBookingSettings(row) {
       slot_duration_minutes: 30,
       advance_notice_hours: 24,
       max_days_ahead: 30,
+      services: [],
+      weekly_hours: [],
     };
   }
 
@@ -97,6 +133,8 @@ function mapBookingSettings(row) {
     slot_duration_minutes: Number(row.slot_duration_minutes ?? 30),
     advance_notice_hours: Number(row.advance_notice_hours ?? 24),
     max_days_ahead: Number(row.max_days_ahead ?? 30),
+    services: parseJsonArray(row.services_json),
+    weekly_hours: parseJsonArray(row.weekly_hours_json),
   };
 }
 
@@ -123,6 +161,9 @@ function mapBookingRow(row) {
     requester_email: row.requester_email,
     requester_phone: row.requester_phone ?? null,
     commune: row.commune ?? null,
+    service_title: row.service_title ?? null,
+    service_price_xpf: row.service_price_xpf == null ? null : Number(row.service_price_xpf),
+    service_duration_minutes: row.service_duration_minutes == null ? null : Number(row.service_duration_minutes),
     subject: row.subject,
     details: row.details ?? null,
     starts_at: row.starts_at,
@@ -133,6 +174,8 @@ function mapBookingRow(row) {
     declined_at: row.declined_at ?? null,
     cancelled_at: row.cancelled_at ?? null,
     completed_at: row.completed_at ?? null,
+    reminder_24h_sent_at: row.reminder_24h_sent_at ?? null,
+    reminder_2h_sent_at: row.reminder_2h_sent_at ?? null,
     created_at: row.created_at,
     updated_at: row.updated_at,
     role: row.role || 'client',
@@ -192,7 +235,9 @@ async function loadBookingProfile(proId) {
        s.instructions AS booking_instructions,
        s.slot_duration_minutes AS booking_slot_duration_minutes,
        s.advance_notice_hours AS booking_advance_notice_hours,
-       s.max_days_ahead AS booking_max_days_ahead
+       s.max_days_ahead AS booking_max_days_ahead,
+       s.services_json AS booking_services_json,
+       s.weekly_hours_json AS booking_weekly_hours_json
      FROM users u
      LEFT JOIN pro_booking_settings s ON s.pro_id = u.id
      WHERE u.id = $1
@@ -232,6 +277,8 @@ async function loadBookingProfile(proId) {
       slot_duration_minutes: profile.booking_slot_duration_minutes,
       advance_notice_hours: profile.booking_advance_notice_hours,
       max_days_ahead: profile.booking_max_days_ahead,
+      services_json: profile.booking_services_json,
+      weekly_hours_json: profile.booking_weekly_hours_json,
     }),
   };
 }
@@ -251,12 +298,106 @@ async function loadUpcomingSlots(proId, limit = 12) {
      WHERE pro_id = $1
        AND status = 'available'
        AND starts_at >= NOW()
+       AND NOT EXISTS (
+         SELECT 1
+         FROM pro_booking_exceptions e
+         WHERE e.pro_id = pro_booking_slots.pro_id
+           AND e.is_unavailable = TRUE
+           AND e.exception_date = DATE(pro_booking_slots.starts_at AT TIME ZONE 'UTC')
+       )
      ORDER BY starts_at ASC
      LIMIT $2`,
     [proId, limit]
   );
 
   return result.rows.map(mapBookingSlot);
+}
+
+function startOfMonthUtc(monthInput) {
+  const candidate = monthInput && /^\d{4}-\d{2}$/.test(monthInput)
+    ? new Date(`${monthInput}-01T00:00:00.000Z`)
+    : new Date();
+  return new Date(Date.UTC(candidate.getUTCFullYear(), candidate.getUTCMonth(), 1));
+}
+
+function addMonthsUtc(date, delta) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + delta, 1));
+}
+
+function toDayKey(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+async function loadBookingCalendar(proId, monthInput) {
+  const monthStart = startOfMonthUtc(monthInput);
+  const monthEnd = addMonthsUtc(monthStart, 1);
+
+  const [slotsRes, exceptionsRes, settingsRes] = await Promise.all([
+    query(
+      `SELECT
+         id,
+         pro_id,
+         starts_at,
+         ends_at,
+         label,
+         status,
+         source,
+         created_at
+       FROM pro_booking_slots
+       WHERE pro_id = $1
+         AND status = 'available'
+         AND starts_at >= $2
+         AND starts_at < $3
+       ORDER BY starts_at ASC`,
+      [proId, monthStart.toISOString(), monthEnd.toISOString()]
+    ),
+    query(
+      `SELECT id, exception_date, is_unavailable, reason
+       FROM pro_booking_exceptions
+       WHERE pro_id = $1
+         AND exception_date >= $2::date
+         AND exception_date < $3::date
+       ORDER BY exception_date ASC`,
+      [proId, monthStart.toISOString(), monthEnd.toISOString()]
+    ),
+    query(`SELECT * FROM pro_booking_settings WHERE pro_id = $1 LIMIT 1`, [proId]),
+  ]);
+
+  const slots = slotsRes.rows.map(mapBookingSlot);
+  const exceptionsByDay = new Map(exceptionsRes.rows.map((row) => [String(row.exception_date).slice(0, 10), row]));
+  const days = [];
+  const cursor = new Date(monthStart);
+  while (cursor < monthEnd) {
+    const dayKey = toDayKey(cursor);
+    const isBlocked = exceptionsByDay.get(dayKey)?.is_unavailable === true;
+    const daySlots = slots.filter((slot) => String(slot.starts_at).slice(0, 10) === dayKey);
+    days.push({
+      date: dayKey,
+      is_available: !isBlocked && daySlots.length > 0,
+      is_blocked: isBlocked,
+      slots: daySlots,
+      exception: exceptionsByDay.get(dayKey)
+        ? {
+            id: Number(exceptionsByDay.get(dayKey).id),
+            reason: exceptionsByDay.get(dayKey).reason ?? null,
+          }
+        : null,
+    });
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+
+  return {
+    month: monthStart.toISOString().slice(0, 7),
+    settings: mapBookingSettings(settingsRes.rows[0]),
+    days,
+    slots,
+    exceptions: exceptionsRes.rows.map((row) => ({
+      id: Number(row.id),
+      exception_date: String(row.exception_date).slice(0, 10),
+      is_unavailable: Boolean(row.is_unavailable),
+      reason: row.reason ?? null,
+    })),
+  };
 }
 
 async function loadBookingById(bookingId) {
@@ -451,6 +592,8 @@ router.get('/bookings/mine', authenticate, async (req, res, next) => {
          b.declined_at,
          b.cancelled_at,
          b.completed_at,
+         b.reminder_24h_sent_at,
+         b.reminder_2h_sent_at,
          b.created_at,
          b.updated_at,
          CASE WHEN b.requester_user_id = $1 THEN 'client' ELSE 'pro' END AS role,
@@ -522,6 +665,8 @@ router.get('/dashboard/bookings', authenticate, async (req, res, next) => {
            b.declined_at,
            b.cancelled_at,
            b.completed_at,
+           b.reminder_24h_sent_at,
+           b.reminder_2h_sent_at,
            b.created_at,
            b.updated_at,
            CASE WHEN b.requester_user_id = $1 THEN 'client' ELSE 'pro' END AS role,
@@ -598,8 +743,10 @@ router.put('/dashboard/booking-settings', authenticate, async (req, res, next) =
          instructions,
          slot_duration_minutes,
          advance_notice_hours,
-         max_days_ahead
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+          max_days_ahead,
+          services_json,
+          weekly_hours_json
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb)
        ON CONFLICT (pro_id)
        DO UPDATE SET
          is_enabled = EXCLUDED.is_enabled,
@@ -610,8 +757,10 @@ router.put('/dashboard/booking-settings', authenticate, async (req, res, next) =
          instructions = EXCLUDED.instructions,
          slot_duration_minutes = EXCLUDED.slot_duration_minutes,
          advance_notice_hours = EXCLUDED.advance_notice_hours,
-         max_days_ahead = EXCLUDED.max_days_ahead,
-         updated_at = NOW()
+          max_days_ahead = EXCLUDED.max_days_ahead,
+          services_json = EXCLUDED.services_json,
+          weekly_hours_json = EXCLUDED.weekly_hours_json,
+          updated_at = NOW()
        RETURNING *`,
       [
         req.user.id,
@@ -624,6 +773,8 @@ router.put('/dashboard/booking-settings', authenticate, async (req, res, next) =
         Number(value.slot_duration_minutes ?? 30),
         Number(value.advance_notice_hours ?? 24),
         Number(value.max_days_ahead ?? 30),
+        JSON.stringify(Array.isArray(value.services) ? value.services : []),
+        JSON.stringify(Array.isArray(value.weekly_hours) ? value.weekly_hours : []),
       ]
     );
 
@@ -713,6 +864,96 @@ router.delete('/dashboard/booking-slots/:slotId', authenticate, async (req, res,
   }
 });
 
+router.get('/dashboard/booking-exceptions', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    const result = await query(
+      `SELECT id, exception_date, is_unavailable, reason, created_at
+       FROM pro_booking_exceptions
+       WHERE pro_id = $1
+       ORDER BY exception_date DESC
+       LIMIT 100`,
+      [req.user.id]
+    );
+    return res.json({
+      data: result.rows.map((row) => ({
+        id: Number(row.id),
+        exception_date: String(row.exception_date).slice(0, 10),
+        is_unavailable: Boolean(row.is_unavailable),
+        reason: row.reason ?? null,
+        created_at: row.created_at,
+      })),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/dashboard/booking-exceptions', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    const { error, value } = bookingExceptionSchema.validate(req.body, {
+      stripUnknown: true,
+      convert: true,
+    });
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const result = await query(
+      `INSERT INTO pro_booking_exceptions (pro_id, exception_date, is_unavailable, reason)
+       VALUES ($1, $2::date, $3, $4)
+       ON CONFLICT (pro_id, exception_date)
+       DO UPDATE SET is_unavailable = EXCLUDED.is_unavailable, reason = EXCLUDED.reason
+       RETURNING id, exception_date, is_unavailable, reason, created_at`,
+      [
+        req.user.id,
+        value.exception_date,
+        value.is_unavailable,
+        value.reason ? String(value.reason).trim() : null,
+      ]
+    );
+
+    return res.status(201).json({
+      data: {
+        id: Number(result.rows[0].id),
+        exception_date: String(result.rows[0].exception_date).slice(0, 10),
+        is_unavailable: Boolean(result.rows[0].is_unavailable),
+        reason: result.rows[0].reason ?? null,
+        created_at: result.rows[0].created_at,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/dashboard/booking-exceptions/:exceptionId', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    const exceptionId = Number(req.params.exceptionId);
+    if (!Number.isFinite(exceptionId) || exceptionId <= 0) {
+      return res.status(400).json({ error: 'Exception invalide.' });
+    }
+
+    const result = await query(
+      `DELETE FROM pro_booking_exceptions
+       WHERE id = $1
+         AND pro_id = $2
+       RETURNING id`,
+      [exceptionId, req.user.id]
+    );
+
+    if (!result.rows[0]) {
+      return res.status(404).json({ error: 'Exception introuvable.' });
+    }
+
+    return res.json({ data: { id: exceptionId, deleted: true } });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/:id/booking-slots', optionalAuth, async (req, res, next) => {
   try {
     const proId = Number(req.params.id);
@@ -731,6 +972,31 @@ router.get('/:id/booking-slots', optionalAuth, async (req, res, next) => {
         profile,
         settings: profile.booking_settings,
         slots,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/:id/booking-calendar', optionalAuth, async (req, res, next) => {
+  try {
+    const proId = Number(req.params.id);
+    if (!Number.isFinite(proId) || proId <= 0) {
+      return res.status(400).json({ error: 'Professionnel invalide.' });
+    }
+
+    const profile = await loadBookingProfile(proId);
+    if (!profile) {
+      return res.status(404).json({ error: 'Professionnel introuvable.' });
+    }
+
+    const month = String(req.query.month || '').trim();
+    const calendar = await loadBookingCalendar(proId, month);
+    return res.json({
+      data: {
+        profile,
+        ...calendar,
       },
     });
   } catch (err) {
@@ -778,6 +1044,20 @@ router.post('/:id/bookings', optionalAuth, async (req, res, next) => {
         error.status = 404;
         throw error;
       }
+      const exceptionResult = await client.query(
+        `SELECT id, is_unavailable
+         FROM pro_booking_exceptions
+         WHERE pro_id = $1
+           AND exception_date = DATE($2 AT TIME ZONE 'UTC')
+         LIMIT 1`,
+        [proId, slot.starts_at]
+      );
+      if (exceptionResult.rows[0]?.is_unavailable) {
+        const error = new Error('Ce jour est indisponible.');
+        error.status = 409;
+        throw error;
+      }
+
       if (slot.status !== 'available') {
         const error = new Error('Ce créneau n’est plus disponible.');
         error.status = 409;
@@ -811,6 +1091,9 @@ router.post('/:id/bookings', optionalAuth, async (req, res, next) => {
            pro_id,
            requester_user_id,
            slot_id,
+           service_title,
+           service_price_xpf,
+           service_duration_minutes,
            requester_name,
            requester_email,
            requester_phone,
@@ -821,12 +1104,15 @@ router.post('/:id/bookings', optionalAuth, async (req, res, next) => {
            ends_at,
            status,
            source
-         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending', 'public')
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'pending', 'public')
          RETURNING *`,
         [
           proId,
           req.user?.id ? Number(req.user.id) : null,
           slot.id,
+          normalizeMaybeText(value.service_title),
+          value.service_price_xpf == null ? null : Number(value.service_price_xpf),
+          value.service_duration_minutes == null ? null : Number(value.service_duration_minutes),
           normalizeMaybeText(value.requester_name),
           normalizeMaybeText(value.requester_email),
           normalizeMaybeText(value.requester_phone),

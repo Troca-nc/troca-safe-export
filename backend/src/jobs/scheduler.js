@@ -14,6 +14,7 @@ const {
   sendPerformanceReportEmail,
   sendListingExpiringEmail,
   sendListingExpiredEmail,
+  sendProBookingReminderEmail,
   sendRideReviewReminderEmail,
 } = require('../services/emailService');
 const { sendMail }        = require('../services/emailService');
@@ -1211,6 +1212,212 @@ function startRideReviewReminderJob() {
   logger.info('cron_job_started', { job: 'covoiturage-reviews' });
 }
 
+async function runProBookingReminderWindow({
+  lockName,
+  reminderColumn,
+  windowStartHours,
+  windowEndHours,
+  reminderLabel,
+  notificationTitle,
+  notificationBody,
+  emailIntro,
+}) {
+  const result = await query(`
+    SELECT
+      b.id AS booking_id,
+      b.pro_id,
+      b.requester_user_id,
+      b.requester_name,
+      b.requester_email,
+      b.requester_phone,
+      b.commune,
+      b.subject,
+      b.details,
+      b.starts_at,
+      b.ends_at,
+      b.status,
+      b.${reminderColumn},
+      p.prenom AS pro_prenom,
+      p.nom AS pro_nom,
+      p.pro_company_name,
+      p.pro_commune,
+      p.pro_phone,
+      p.pro_website,
+      p.pro_hours,
+      p.email AS pro_email,
+      p.expo_push_token AS pro_push_token,
+      requester.prenom AS requester_prenom,
+      requester.nom AS requester_nom,
+      requester.email AS requester_email,
+      requester.expo_push_token AS requester_push_token
+    FROM pro_bookings b
+    JOIN users p ON p.id = b.pro_id
+    LEFT JOIN users requester ON requester.id = b.requester_user_id
+    WHERE b.status = 'confirmed'
+      AND b.${reminderColumn} IS NULL
+      AND b.starts_at >= NOW() + ($1 * INTERVAL '1 hour')
+      AND b.starts_at < NOW() + ($2 * INTERVAL '1 hour')
+      AND p.deleted_at IS NULL
+      AND (requester.id IS NULL OR requester.deleted_at IS NULL)
+    ORDER BY b.starts_at ASC
+    LIMIT 100
+  `, [windowStartHours, windowEndHours]);
+
+  let sent = 0;
+  for (const row of result.rows) {
+    const claimed = await query(
+      `UPDATE pro_bookings
+       SET ${reminderColumn} = NOW()
+       WHERE id = $1
+         AND ${reminderColumn} IS NULL
+       RETURNING id`,
+      [row.booking_id]
+    );
+    if (!claimed.rows[0]) continue;
+
+    const startsAt = new Date(row.starts_at);
+    const when = Number.isNaN(startsAt.getTime())
+      ? 'votre rendez-vous'
+      : new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full', timeStyle: 'short' }).format(startsAt);
+    const proName = formatUserName(row.pro_prenom, row.pro_nom) || row.pro_company_name || 'Professionnel';
+    const bookingUrlForRequester = `${getTrocBaseUrl()}/mes-rdv`;
+    const bookingUrlForPro = `${getTrocBaseUrl()}/pro/dashboard/rdv`;
+
+    if (row.requester_user_id) {
+      const requesterName = formatUserName(row.requester_prenom, row.requester_nom) || row.requester_name || 'Client';
+      await createNotification(row.requester_user_id, {
+        type: 'appointment_reminder',
+        title: notificationTitle,
+        body: `${proName} · ${when}`,
+        href: '/mes-rdv',
+      }).catch(() => {});
+
+      await sendPushToUser(row.requester_user_id, {
+        title: notificationTitle,
+        body: notificationBody(row, proName, requesterName, when),
+        data: {
+          type: 'appointment_reminder',
+          booking_id: row.booking_id,
+          pro_id: row.pro_id,
+          reminder: reminderLabel,
+        },
+      }).catch(() => {});
+
+      if (row.requester_email) {
+        await sendProBookingReminderEmail(
+          row.requester_email,
+          row.requester_prenom || row.requester_name || 'Bonjour',
+          {
+            reminderLabel,
+            intro: emailIntro('client', row, proName, when),
+            subject: row.subject,
+            proName,
+            proCommune: row.pro_commune,
+            commune: row.commune,
+            locationText: row.pro_commune || 'Lieu à confirmer',
+            slotLabel: when,
+            bookingUrl: bookingUrlForRequester,
+          },
+          row.requester_user_id
+        ).catch(() => {});
+      }
+    }
+
+    await createNotification(row.pro_id, {
+      type: 'appointment_reminder',
+      title: notificationTitle,
+      body: `${row.requester_name || 'Client'} · ${when}`,
+      href: '/pro/dashboard/rdv',
+    }).catch(() => {});
+
+    await sendPushToUser(row.pro_id, {
+      title: notificationTitle,
+      body: notificationBody(row, proName, row.requester_name || 'Client', when),
+      data: {
+        type: 'appointment_reminder',
+        booking_id: row.booking_id,
+        pro_id: row.pro_id,
+        reminder: reminderLabel,
+      },
+    }).catch(() => {});
+
+    if (row.pro_email) {
+      await sendProBookingReminderEmail(
+        row.pro_email,
+        row.pro_prenom || row.pro_company_name || 'Bonjour',
+        {
+          reminderLabel,
+          intro: emailIntro('pro', row, proName, when),
+          subject: row.subject,
+          proName,
+          proCommune: row.pro_commune,
+          commune: row.commune,
+          locationText: row.pro_commune || 'Lieu à confirmer',
+          slotLabel: when,
+          bookingUrl: bookingUrlForPro,
+        },
+        row.pro_id
+      ).catch(() => {});
+    }
+
+    sent++;
+  }
+
+  if (sent > 0) {
+    logger.info('cron_pro_booking_reminders_sent', {
+      reminder: reminderLabel,
+      count: sent,
+      lock_name: lockName,
+    });
+  }
+
+  return sent;
+}
+
+function startProBookingReminderJob() {
+  cron.schedule('*/15 * * * *', async () => {
+    recordJob('started', { job: 'pro-booking-reminders' });
+    await runSingletonJob('cron:pro-booking-reminders', 10 * 60 * 1000, async () => {
+      try {
+        const sent24h = await runProBookingReminderWindow({
+          lockName: 'pro-booking-reminder-24h',
+          reminderColumn: 'reminder_24h_sent_at',
+          windowStartHours: 23.75,
+          windowEndHours: 24.25,
+          reminderLabel: 'J-1',
+          notificationTitle: '📅 Rendez-vous demain',
+          notificationBody: (row, proName, partnerName, when) => `Rendez-vous avec ${proName} · ${when}`,
+          emailIntro: (role, row, proName, when) => role === 'client'
+            ? `Votre rendez-vous avec ${proName} approche.`
+            : `Votre rendez-vous avec ${row.requester_name || 'un client'} approche.`,
+        });
+
+        const sent2h = await runProBookingReminderWindow({
+          lockName: 'pro-booking-reminder-2h',
+          reminderColumn: 'reminder_2h_sent_at',
+          windowStartHours: 1.75,
+          windowEndHours: 2.25,
+          reminderLabel: 'H-2',
+          notificationTitle: '⏰ Rendez-vous dans 2 heures',
+          notificationBody: (row, proName, partnerName, when) => `Préparez votre rendez-vous avec ${proName} · ${when}`,
+          emailIntro: (role, row, proName, when) => role === 'client'
+            ? `Votre rendez-vous avec ${proName} est prévu dans moins de 2 heures.`
+            : `Votre rendez-vous avec ${row.requester_name || 'un client'} est prévu dans moins de 2 heures.`,
+        });
+
+        if (sent24h || sent2h) {
+          logger.info('cron_pro_booking_reminders', { sent_24h: sent24h, sent_2h: sent2h });
+        }
+      } catch (err) {
+        recordJob('error', { job: 'pro-booking-reminders', message: err.message });
+        logger.error('cron_pro_booking_reminders_error', { error: err });
+      }
+    });
+  }, { timezone: 'Pacific/Noumea' });
+
+  logger.info('cron_job_started', { job: 'pro-booking-reminders' });
+}
+
 function startNewsletterJob() {
   cron.schedule('0 18 * * 0', async () => {
     recordJob('started', { job: 'newsletter' });
@@ -1238,6 +1445,7 @@ function startAllJobs() {
   startExpiringListingsJob();
   startReviewReminderJob();
   startRideReviewReminderJob();
+  startProBookingReminderJob();
   startNewsletterJob();
   startDailyAlertsJob();
   startWeeklyAlertsJob();

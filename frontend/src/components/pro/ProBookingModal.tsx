@@ -1,13 +1,15 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, MapPin, MessageSquareQuote, Send, Sparkles, X } from 'lucide-react'
+import { CalendarDays, ChevronLeft, ChevronRight, MapPin, MessageSquareQuote, Send, Sparkles, X } from 'lucide-react'
 
 import { proBookingsApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import FeedbackAlert from '@/components/ui/FeedbackAlert'
 import { showToast } from '@/lib/toast'
 import type { ProPublicBookingSettings, ProPublicBookingSlot } from '@/app/pro/publicStorefrontData'
+
+type BookingService = NonNullable<ProPublicBookingSettings['services']>[number]
 
 type BookingFormState = {
   requester_name: string
@@ -16,6 +18,13 @@ type BookingFormState = {
   commune: string
   subject: string
   details: string
+}
+
+type BookingCalendarDay = {
+  date: string
+  is_available: boolean
+  is_blocked: boolean
+  slots: ProPublicBookingSlot[]
 }
 
 const INITIAL_STATE: BookingFormState = {
@@ -47,6 +56,25 @@ function formatSlot(slot: ProPublicBookingSlot) {
   return `${date} · ${startTime} → ${endTime}`
 }
 
+function toMonthKey(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  return `${year}-${month}`
+}
+
+function formatMonthLabel(monthKey: string) {
+  const [year, month] = monthKey.split('-').map((part) => Number(part))
+  if (!year || !month) return monthKey
+  return new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(new Date(year, month - 1, 1))
+}
+
+function dayKey(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 type ProBookingModalProps = {
   proId: string | number
   proName: string
@@ -72,7 +100,11 @@ export default function ProBookingModal({
   const { user } = useAuthStore()
   const [form, setForm] = useState<BookingFormState>(INITIAL_STATE)
   const [slots, setSlots] = useState<ProPublicBookingSlot[]>([])
+  const [calendarDays, setCalendarDays] = useState<BookingCalendarDay[]>([])
+  const [calendarMonth, setCalendarMonth] = useState(() => toMonthKey(new Date()))
+  const [selectedDate, setSelectedDate] = useState('')
   const [selectedSlotId, setSelectedSlotId] = useState<string>('')
+  const [selectedServiceTitle, setSelectedServiceTitle] = useState('')
   const [loadingSlots, setLoadingSlots] = useState(false)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
@@ -87,47 +119,81 @@ export default function ProBookingModal({
       requester_email: user?.email || '',
       requester_phone: user?.telephone || '',
       commune: user?.commune_name || '',
-      subject: settings?.title || 'Prendre rendez-vous',
+      subject: settings?.services?.find((service) => service.is_active !== false)?.title || settings?.title || 'Prendre rendez-vous',
       details: '',
     })
+    const firstService = settings?.services?.find((service) => service.is_active !== false)
+    setSelectedServiceTitle(firstService?.title || '')
   }, [open, settings?.title, user?.commune_name, user?.email, user?.nom, user?.prenom, user?.telephone])
 
   useEffect(() => {
     if (!open) return
     let alive = true
 
-    const loadSlots = async () => {
+    const loadCalendar = async () => {
       setLoadingSlots(true)
       try {
-        const response = await proBookingsApi.getSlots(proId)
+        const response = await proBookingsApi.getCalendar(proId, calendarMonth)
         const payload = response.data?.data || {}
         const nextSlots = Array.isArray(payload.slots) ? payload.slots : []
+        const nextDays = Array.isArray(payload.days) ? payload.days : []
         if (!alive) return
         setSlots(nextSlots)
-        setSelectedSlotId((current) => {
-          if (current && nextSlots.some((slot: ProPublicBookingSlot) => String(slot.id) === String(current))) {
+        setCalendarDays(nextDays)
+        const nextSelectedDate = (() => {
+          const current = selectedDate
+          if (current && nextDays.some((day: BookingCalendarDay) => day.date === current && day.is_available)) {
             return current
           }
-          return nextSlots[0] ? String(nextSlots[0].id) : ''
+          const firstAvailable = nextDays.find((day: BookingCalendarDay) => day.is_available)
+          return firstAvailable?.date || nextDays[0]?.date || ''
+        })()
+        setSelectedDate(nextSelectedDate)
+        setSelectedSlotId((current) => {
+          const currentVisibleSlots = nextSlots.filter((slot: ProPublicBookingSlot) => {
+            const candidateDate = String(slot.starts_at).slice(0, 10)
+            return !nextSelectedDate || candidateDate === nextSelectedDate
+          })
+          if (current && currentVisibleSlots.some((slot: ProPublicBookingSlot) => String(slot.id) === String(current))) {
+            return current
+          }
+          return currentVisibleSlots[0] ? String(currentVisibleSlots[0].id) : nextSlots[0] ? String(nextSlots[0].id) : ''
         })
       } catch {
         if (!alive) return
         setSlots([])
+        setCalendarDays([])
         setSelectedSlotId('')
+        setSelectedDate('')
       } finally {
         if (alive) setLoadingSlots(false)
       }
     }
 
-    void loadSlots()
+    void loadCalendar()
     return () => {
       alive = false
     }
-  }, [open, proId])
+  }, [open, proId, calendarMonth])
 
   const selectedSlot = useMemo(
     () => slots.find((slot) => String(slot.id) === String(selectedSlotId)) || null,
     [selectedSlotId, slots],
+  )
+
+  const visibleSlots = useMemo(
+    () => (selectedDate ? slots.filter((slot) => String(slot.starts_at).slice(0, 10) === selectedDate) : slots),
+    [selectedDate, slots],
+  )
+
+  const visibleServices = useMemo(
+    () => (Array.isArray(settings?.services) ? settings.services : []).filter((service) => service.is_active !== false),
+    [settings?.services],
+  )
+
+  const selectedService = useMemo(
+    () => visibleServices.find((service) => service.title === selectedServiceTitle) || null,
+    [selectedServiceTitle, visibleServices],
   )
 
   if (!open) return null
@@ -153,13 +219,17 @@ export default function ProBookingModal({
     setSending(true)
     setError('')
     try {
+      const subject = selectedService?.title || form.subject.trim()
       await proBookingsApi.book(proId, {
         slot_id: Number(selectedSlot.id),
+        service_title: selectedService?.title || null,
+        service_price_xpf: selectedService?.price_xpf == null ? null : Number(selectedService.price_xpf),
+        service_duration_minutes: selectedService?.duration_minutes == null ? null : Number(selectedService.duration_minutes),
         requester_name: form.requester_name.trim(),
         requester_email: form.requester_email.trim(),
         requester_phone: form.requester_phone.trim() || null,
         commune: form.commune.trim() || null,
-        subject: form.subject.trim(),
+        subject,
         details: form.details.trim() || null,
       })
       onSent?.({
@@ -229,12 +299,53 @@ export default function ProBookingModal({
             </div>
           </div>
         ) : (
-          <div className="grid gap-0 lg:grid-cols-[1fr_0.9fr]">
-            <div className="border-b border-[var(--color-border)] px-6 py-6 lg:border-b-0 lg:border-r">
-              <div className="space-y-4">
-                <label className="block space-y-2">
-                  <span className="text-sm font-semibold text-night">Votre nom *</span>
-                  <input
+        <div className="grid gap-0 lg:grid-cols-[1fr_0.9fr]">
+          <div className="border-b border-[var(--color-border)] px-6 py-6 lg:border-b-0 lg:border-r">
+            <div className="space-y-4">
+              {visibleServices.length ? (
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold text-night">Service</p>
+                  <div className="grid gap-2">
+                    {visibleServices.map((service) => (
+                      <label
+                        key={service.title}
+                        className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-4 py-3 transition ${
+                          selectedServiceTitle === service.title
+                            ? 'border-[#0A7EA4] bg-nc-lagonLight/60'
+                            : 'border-[var(--color-border)] bg-white hover:bg-[var(--color-background-secondary)]'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="booking-service"
+                          checked={selectedServiceTitle === service.title}
+                          onChange={() => {
+                            setSelectedServiceTitle(service.title)
+                            setForm((current) => ({
+                              ...current,
+                              subject: service.title,
+                            }))
+                          }}
+                          className="mt-1 h-4 w-4 border-[var(--color-border)] text-[#0A7EA4] focus:ring-[#0A7EA4]"
+                        />
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-semibold text-night">{service.title}</span>
+                          <span className="mt-1 block text-xs text-night/55">
+                            {service.duration_minutes} min{service.price_xpf != null ? ` · ${Number(service.price_xpf).toLocaleString('fr-FR')} XPF` : ''}
+                          </span>
+                          {service.description ? (
+                            <span className="mt-1 block text-xs leading-relaxed text-night/60">{service.description}</span>
+                          ) : null}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              <label className="block space-y-2">
+                <span className="text-sm font-semibold text-night">Votre nom *</span>
+                <input
                     value={form.requester_name}
                     onChange={(event) => setForm((current) => ({ ...current, requester_name: event.target.value }))}
                     className="input w-full rounded-2xl"
@@ -281,7 +392,7 @@ export default function ProBookingModal({
                     value={form.subject}
                     onChange={(event) => setForm((current) => ({ ...current, subject: event.target.value }))}
                     className="input w-full rounded-2xl"
-                    placeholder="Ex. devis, dépannage, visite..."
+                    placeholder={selectedService?.title || 'Ex. devis, dépannage, visite...'}
                   />
                 </label>
 
@@ -325,13 +436,88 @@ export default function ProBookingModal({
 
             <aside className="space-y-4 px-6 py-6">
               <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral/80">Calendrier</p>
+                    <p className="mt-1 text-sm text-night/60">{formatMonthLabel(calendarMonth)}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const current = new Date(`${calendarMonth}-01T00:00:00`)
+                        current.setMonth(current.getMonth() - 1)
+                        setCalendarMonth(toMonthKey(current))
+                      }}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-border)] bg-white text-night/70"
+                      aria-label="Mois précédent"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const current = new Date(`${calendarMonth}-01T00:00:00`)
+                        current.setMonth(current.getMonth() + 1)
+                        setCalendarMonth(toMonthKey(current))
+                      }}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-border)] bg-white text-night/70"
+                      aria-label="Mois suivant"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-7 gap-2 text-center text-[10px] font-semibold uppercase tracking-[0.18em] text-night/40">
+                  {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day) => (
+                    <span key={day}>{day}</span>
+                  ))}
+                </div>
+
+                <div className="mt-2 grid grid-cols-7 gap-2">
+                  {calendarDays.map((day) => {
+                    const active = selectedDate === day.date
+                    return (
+                      <button
+                        key={day.date}
+                        type="button"
+                        onClick={() => {
+                          setSelectedDate(day.date)
+                          setSelectedSlotId(day.slots[0] ? String(day.slots[0].id) : '')
+                        }}
+                        className={`min-h-[64px] rounded-2xl border px-2 py-2 text-left transition ${
+                          active
+                            ? 'border-[#0A7EA4] bg-nc-lagonLight text-[#0A7EA4]'
+                            : day.is_blocked
+                              ? 'border-slate-200 bg-slate-100 text-slate-400 line-through'
+                              : day.is_available
+                                ? 'border-[var(--color-border)] bg-white text-night hover:border-[#0A7EA4]/30'
+                                : 'border-dashed border-slate-200 bg-slate-50 text-slate-400'
+                        }`}
+                      >
+                        <span className="block text-xs font-semibold uppercase tracking-[0.12em]">
+                          {new Intl.DateTimeFormat('fr-FR', { weekday: 'short' }).format(new Date(`${day.date}T00:00:00`))}
+                        </span>
+                        <span className="mt-1 block text-lg font-bold">
+                          {new Intl.DateTimeFormat('fr-FR', { day: 'numeric' }).format(new Date(`${day.date}T00:00:00`))}
+                        </span>
+                        <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.12em]">
+                          {day.is_blocked ? 'Bloqué' : day.slots.length ? `${day.slots.length} créneau${day.slots.length > 1 ? 'x' : ''}` : 'Aucun'}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+              <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral/80">Créneaux disponibles</p>
                 <p className="mt-1 text-sm text-night/60">
                   {loadingSlots ? 'Chargement des créneaux...' : 'Choisissez l’horaire qui vous convient le mieux.'}
                 </p>
                 <div className="mt-4 space-y-2">
-                  {slots.length ? (
-                    slots.map((slot) => {
+                  {visibleSlots.length ? (
+                    visibleSlots.map((slot) => {
                       const active = String(selectedSlotId) === String(slot.id)
                       return (
                         <button
@@ -351,7 +537,9 @@ export default function ProBookingModal({
                     })
                   ) : (
                     <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-sm text-night/55">
-                      Aucun créneau n’est encore publié. Le professionnel peut en ajouter depuis son espace.
+                      {selectedDate
+                        ? 'Aucun créneau disponible pour ce jour.'
+                        : 'Aucun créneau n’est encore publié. Le professionnel peut en ajouter depuis son espace.'}
                     </div>
                   )}
                 </div>

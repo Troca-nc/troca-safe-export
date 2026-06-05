@@ -1105,18 +1105,37 @@ CREATE INDEX IF NOT EXISTS idx_annonces_boosted  ON annonces (boosted_until) WHE
 CREATE INDEX IF NOT EXISTS idx_users_google      ON users (google_id) WHERE google_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_users_apple       ON users (apple_id)  WHERE apple_id  IS NOT NULL;
 -- CATALOGUE PRODUITS PRO
+CREATE TABLE IF NOT EXISTS pro_catalog_categories (
+  id          SERIAL PRIMARY KEY,
+  pro_id      INTEGER      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name        TEXT         NOT NULL,
+  slug        TEXT         NOT NULL,
+  position    INTEGER      NOT NULL DEFAULT 0,
+  created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  UNIQUE (pro_id, slug)
+);
+
+DROP TRIGGER IF EXISTS trg_pro_catalog_categories_updated_at ON pro_catalog_categories;
+CREATE TRIGGER trg_pro_catalog_categories_updated_at
+  BEFORE UPDATE ON pro_catalog_categories
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
 CREATE TABLE IF NOT EXISTS products (
   id                       SERIAL PRIMARY KEY,
   owner_id                 INTEGER      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   title                    TEXT         NOT NULL,
   slug                     TEXT         NOT NULL,
   description              TEXT         NOT NULL,
+  price_type               VARCHAR(20)  NOT NULL DEFAULT 'fixed'
+    CHECK (price_type IN ('fixed', 'from', 'on_quote', 'free')),
   price_xpf                INTEGER      NOT NULL DEFAULT 0,
   compare_at_price_xpf     INTEGER      DEFAULT NULL,
-  stock_quantity           INTEGER      NOT NULL DEFAULT 0,
+  stock_quantity           INTEGER      DEFAULT NULL,
   sku                      TEXT         DEFAULT NULL,
   brand                    TEXT         DEFAULT NULL,
   category_id              INTEGER      DEFAULT NULL REFERENCES categories(id),
+  catalog_category_id      INTEGER      DEFAULT NULL REFERENCES pro_catalog_categories(id) ON DELETE SET NULL,
   commune_id               INTEGER      DEFAULT NULL REFERENCES communes(id),
   unit_label               TEXT         DEFAULT NULL,
   cover_image_url          TEXT         DEFAULT NULL,
@@ -1133,6 +1152,7 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE UNIQUE INDEX IF NOT EXISTS idx_products_owner_slug ON products (owner_id, slug);
 CREATE INDEX IF NOT EXISTS idx_products_owner ON products (owner_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_products_category ON products (category_id);
+CREATE INDEX IF NOT EXISTS idx_products_catalog_category ON products (catalog_category_id);
 CREATE INDEX IF NOT EXISTS idx_products_commune ON products (commune_id);
 CREATE INDEX IF NOT EXISTS idx_products_active ON products (owner_id, is_active, archived_at);
 
@@ -1179,6 +1199,8 @@ CREATE TABLE IF NOT EXISTS pro_booking_settings (
   slot_duration_minutes INTEGER      NOT NULL DEFAULT 30,
   advance_notice_hours  INTEGER      NOT NULL DEFAULT 24,
   max_days_ahead        INTEGER      NOT NULL DEFAULT 30,
+  services_json         JSONB        NOT NULL DEFAULT '[]'::jsonb,
+  weekly_hours_json     JSONB        NOT NULL DEFAULT '{}'::jsonb,
   created_at            TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
   updated_at            TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
@@ -1217,6 +1239,9 @@ CREATE TABLE IF NOT EXISTS pro_bookings (
   pro_id              INTEGER      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   requester_user_id   INTEGER      DEFAULT NULL REFERENCES users(id) ON DELETE SET NULL,
   slot_id             INTEGER      DEFAULT NULL REFERENCES pro_booking_slots(id) ON DELETE SET NULL,
+  service_title       TEXT         DEFAULT NULL,
+  service_price_xpf   INTEGER      DEFAULT NULL,
+  service_duration_minutes INTEGER DEFAULT NULL,
   requester_name      TEXT         NOT NULL,
   requester_email     TEXT         NOT NULL,
   requester_phone     TEXT         DEFAULT NULL,
@@ -1233,6 +1258,8 @@ CREATE TABLE IF NOT EXISTS pro_bookings (
   declined_at         TIMESTAMPTZ  DEFAULT NULL,
   cancelled_at        TIMESTAMPTZ  DEFAULT NULL,
   completed_at        TIMESTAMPTZ  DEFAULT NULL,
+  reminder_24h_sent_at TIMESTAMPTZ  DEFAULT NULL,
+  reminder_2h_sent_at  TIMESTAMPTZ  DEFAULT NULL,
   created_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
   updated_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
@@ -1264,3 +1291,101 @@ BEGIN
   DELETE FROM analytics_events WHERE created_at < NOW() - INTERVAL '90 days';
 END;
 $$ LANGUAGE plpgsql;
+
+-- â”€â”€ DEVIS PRO ---------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS pro_quotes (
+  id                     SERIAL PRIMARY KEY,
+  pro_id                 INTEGER      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  requester_user_id      INTEGER      DEFAULT NULL REFERENCES users(id) ON DELETE SET NULL,
+  source_quote_request_id INTEGER     DEFAULT NULL REFERENCES pro_quote_requests(id) ON DELETE SET NULL,
+  quote_number           TEXT         NOT NULL UNIQUE,
+  share_token            TEXT         NOT NULL UNIQUE,
+  requester_name         TEXT         NOT NULL,
+  requester_email        TEXT         NOT NULL,
+  requester_phone        TEXT         DEFAULT NULL,
+  commune                TEXT         NOT NULL,
+  subject                TEXT         NOT NULL,
+  client_note            TEXT         DEFAULT NULL,
+  items                  JSONB        NOT NULL DEFAULT '[]'::jsonb,
+  subtotal_xpf           INTEGER      NOT NULL DEFAULT 0,
+  tax_rate               NUMERIC(5,2) NOT NULL DEFAULT 0,
+  tax_amount_xpf         INTEGER      NOT NULL DEFAULT 0,
+  total_xpf              INTEGER      NOT NULL DEFAULT 0,
+  validity_days          INTEGER      NOT NULL DEFAULT 30,
+  status                 VARCHAR(20)  NOT NULL DEFAULT 'draft'
+                         CHECK (status IN ('draft', 'sent', 'viewed', 'accepted', 'refused', 'expired', 'converted')),
+  valid_until            TIMESTAMPTZ  DEFAULT NULL,
+  sent_at                TIMESTAMPTZ  DEFAULT NULL,
+  viewed_at              TIMESTAMPTZ  DEFAULT NULL,
+  accepted_at            TIMESTAMPTZ  DEFAULT NULL,
+  refused_at             TIMESTAMPTZ  DEFAULT NULL,
+  refused_reason         TEXT         DEFAULT NULL,
+  converted_listing_id   INTEGER      DEFAULT NULL REFERENCES annonces(id) ON DELETE SET NULL,
+  created_at             TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  updated_at             TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+DROP TRIGGER IF EXISTS trg_pro_quotes_updated_at ON pro_quotes;
+CREATE TRIGGER trg_pro_quotes_updated_at
+  BEFORE UPDATE ON pro_quotes
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE INDEX IF NOT EXISTS idx_pro_quotes_pro_created ON pro_quotes (pro_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_pro_quotes_requester_created ON pro_quotes (requester_user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_pro_quotes_status ON pro_quotes (status, created_at DESC);
+
+-- â”€â”€ EXCEPTIONS DE RDV PRO ---------------------------------------------------
+CREATE TABLE IF NOT EXISTS pro_booking_exceptions (
+  id              SERIAL PRIMARY KEY,
+  pro_id          INTEGER      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  exception_date  DATE         NOT NULL,
+  is_unavailable  BOOLEAN      NOT NULL DEFAULT TRUE,
+  reason          TEXT         DEFAULT NULL,
+  created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  UNIQUE (pro_id, exception_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_pro_booking_exceptions_pro_date
+  ON pro_booking_exceptions (pro_id, exception_date);
+
+-- ── PACK LANCEMENT PRO --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS pro_launch_packs (
+  id                       SERIAL PRIMARY KEY,
+  pro_id                   INTEGER      NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+  status                   VARCHAR(20)  NOT NULL DEFAULT 'active'
+    CHECK (status IN ('active', 'completed')),
+  call_scheduled_at        TIMESTAMPTZ  DEFAULT NULL,
+  call_phone               TEXT         DEFAULT NULL,
+  call_notes               TEXT         DEFAULT NULL,
+  welcome_email_sent_at    TIMESTAMPTZ  DEFAULT NULL,
+  completed_at             TIMESTAMPTZ  DEFAULT NULL,
+  expires_at               TIMESTAMPTZ  NOT NULL DEFAULT (NOW() + INTERVAL '30 days'),
+  created_at               TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  updated_at               TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+DROP TRIGGER IF EXISTS trg_pro_launch_packs_updated_at ON pro_launch_packs;
+CREATE TRIGGER trg_pro_launch_packs_updated_at
+  BEFORE UPDATE ON pro_launch_packs
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE TABLE IF NOT EXISTS pro_onboarding_steps (
+  id              SERIAL PRIMARY KEY,
+  pack_id         INTEGER      NOT NULL REFERENCES pro_launch_packs(id) ON DELETE CASCADE,
+  pro_id          INTEGER      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  step_key        VARCHAR(60)  NOT NULL,
+  title           TEXT         NOT NULL,
+  points          INTEGER      NOT NULL DEFAULT 1,
+  completed_at    TIMESTAMPTZ  DEFAULT NULL,
+  created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  UNIQUE (pro_id, step_key)
+);
+
+DROP TRIGGER IF EXISTS trg_pro_onboarding_steps_updated_at ON pro_onboarding_steps;
+CREATE TRIGGER trg_pro_onboarding_steps_updated_at
+  BEFORE UPDATE ON pro_onboarding_steps
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE INDEX IF NOT EXISTS idx_pro_onboarding_steps_pro_key
+  ON pro_onboarding_steps (pro_id, step_key);
