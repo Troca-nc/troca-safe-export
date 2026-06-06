@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS users (
   pro_hours           TEXT          DEFAULT NULL,
   pro_commune         TEXT          DEFAULT NULL,
   pro_siret           TEXT          DEFAULT NULL,
+  pro_referral_code   TEXT          DEFAULT NULL,
   pro_quote_template   JSONB        NOT NULL DEFAULT '{}'::jsonb,
   stripe_customer_id  VARCHAR(255)  DEFAULT NULL,
   nb_annonces         INTEGER       NOT NULL DEFAULT 0,
@@ -65,6 +66,9 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE INDEX IF NOT EXISTS idx_users_email      ON users (email);
 CREATE INDEX IF NOT EXISTS idx_users_commune    ON users (commune_id);
 CREATE INDEX IF NOT EXISTS idx_users_deleted_at ON users (deleted_at) WHERE deleted_at IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_pro_referral_code
+  ON users (pro_referral_code)
+  WHERE pro_referral_code IS NOT NULL;
 
 DROP TRIGGER IF EXISTS trg_users_updated_at ON users;
 CREATE TRIGGER trg_users_updated_at
@@ -1239,6 +1243,7 @@ CREATE TABLE IF NOT EXISTS pro_bookings (
   pro_id              INTEGER      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   requester_user_id   INTEGER      DEFAULT NULL REFERENCES users(id) ON DELETE SET NULL,
   slot_id             INTEGER      DEFAULT NULL REFERENCES pro_booking_slots(id) ON DELETE SET NULL,
+  booking_access_token TEXT        DEFAULT NULL,
   service_title       TEXT         DEFAULT NULL,
   service_price_xpf   INTEGER      DEFAULT NULL,
   service_duration_minutes INTEGER DEFAULT NULL,
@@ -1275,6 +1280,8 @@ CREATE INDEX IF NOT EXISTS idx_pro_bookings_requester
   ON pro_bookings (requester_user_id, starts_at DESC);
 CREATE INDEX IF NOT EXISTS idx_pro_bookings_status
   ON pro_bookings (status, starts_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_pro_bookings_access_token
+  ON pro_bookings (booking_access_token);
 
 -- ── PURGE AUTOMATIQUE DES TOKENS EXPIRÉS (appelé par pg_cron ou un cron job) ─
 -- Exemple de cron job à ajouter : 0 3 * * * psql -U troca -d troca_prod -c "SELECT cleanup_expired_tokens();"

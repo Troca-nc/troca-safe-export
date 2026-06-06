@@ -15,6 +15,7 @@ import axios from 'axios'
 import { useEffect } from 'react'
 import { Star, Receipt, CreditCard, Calendar, AlertCircle, ExternalLink } from 'lucide-react'
 import { API_ORIGIN } from '@/lib/api'
+import { rgpdApi } from '@/lib/api'
 import { newsletterApi } from '@/lib/api'
 import { getStoredAccessToken } from '@/lib/tokenStorage'
 const COOKIE_STORAGE_KEY = 'troca-cookie-consent'
@@ -24,6 +25,16 @@ type CookieConsentState = {
   analytics?: boolean
   marketing?: boolean
   decidedAt?: string
+}
+
+async function downloadRgpdExport() {
+  const res = await rgpdApi.exportData()
+  const url = URL.createObjectURL(res.data)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `troca-mes-donnees-${Date.now()}.zip`
+  link.click()
+  URL.revokeObjectURL(url)
 }
 
 // â”€â”€ Section gÃ©nÃ©rique â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -382,16 +393,7 @@ function ExportSection() {
     setLoading(true)
     setError('')
     try {
-      const res = await axios.get(`${API_ORIGIN}/api/rgpd/exporter-donnees`, {
-        responseType: 'blob',
-        headers: { Authorization: `Bearer ${getStoredAccessToken()}` },
-      })
-      const url  = URL.createObjectURL(res.data)
-      const link = document.createElement('a')
-      link.href  = url
-      link.download = `troca-mes-donnees-${Date.now()}.zip`
-      link.click()
-      URL.revokeObjectURL(url)
+      await downloadRgpdExport()
       setDone(true)
       setTimeout(() => setDone(false), 5000)
     } catch {
@@ -459,11 +461,7 @@ function SuppressionSection() {
     setError('')
     setLoading(true)
     try {
-      await axios.post(
-        `${API_ORIGIN}/api/rgpd/supprimer-compte`,
-        { confirmation, password },
-        { headers: { Authorization: `Bearer ${getStoredAccessToken()}` } }
-      )
+      await rgpdApi.deleteAccount({ confirmation, password })
       // DÃ©connecter et rediriger
       await logout()
       router.push('/?compte=supprime')
@@ -508,7 +506,13 @@ function SuppressionSection() {
             <div className="space-y-3">
               <p className="text-xs text-night/50">
                 Avant de supprimer votre compte, pensez Ã {' '}
-                <button onClick={() => {}} className="text-coral underline">tÃ©lÃ©charger vos donnÃ©es</button>.
+                <button
+                  type="button"
+                  onClick={() => { void downloadRgpdExport().catch(() => {}) }}
+                  className="text-coral underline"
+                >
+                  tÃ©lÃ©charger vos donnÃ©es
+                </button>.
               </p>
               <div className="flex gap-2">
                 <button onClick={() => setOpen(false)} className="btn-ghost flex-1 justify-center text-sm">

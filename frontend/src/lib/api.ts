@@ -65,6 +65,19 @@ function getRequestId() {
   return `req_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`
 }
 
+function getCookieValue(name: string) {
+  if (typeof document === 'undefined') return ''
+
+  const prefix = `${name}=`
+  const cookie = document.cookie
+    .split(';')
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(prefix))
+
+  if (!cookie) return ''
+  return decodeURIComponent(cookie.slice(prefix.length))
+}
+
 function redirectToLoginAfterAuthFailure() {
   if (typeof window === 'undefined') return
 
@@ -155,6 +168,19 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (typeof window !== 'undefined') {
     const token = getStoredAccessToken()
     if (token) config.headers.Authorization = `Bearer ${token}`
+
+    const method = String(config.method || 'get').toUpperCase()
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+      const csrfToken = getCookieValue('troca_csrf')
+      if (csrfToken) {
+        const headers = config.headers as Record<string, string> & { set?: (key: string, value: string) => void }
+        if (typeof headers.set === 'function') {
+          headers.set('x-csrf-token', csrfToken)
+        } else {
+          headers['x-csrf-token'] = csrfToken
+        }
+      }
+    }
   }
   config.headers['x-request-id'] = config.headers['x-request-id'] ?? getRequestId()
   return config
@@ -338,6 +364,14 @@ export const uploadApi = {
     const form = new FormData()
     files.forEach((f) => form.append('images', f))
     return api.post(`/upload/listing/${listingId}`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      ...config,
+    })
+  },
+  uploadProductImages: (files: File[], config?: Pick<AxiosRequestConfig, 'onUploadProgress'>) => {
+    const form = new FormData()
+    files.forEach((f) => form.append('images', f))
+    return api.post('/upload/product', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
       ...config,
     })
@@ -542,6 +576,11 @@ export const proApi = {
     () => api.get('/pro/quote-requests', { params }),
     CACHE_TTL.short,
   ),
+  getQuoteRequestById: (id: string | number) => cachedGet(
+    buildCacheKey('pro.quoteRequests.getById', `/pro/quote-requests/${id}`),
+    () => api.get(`/pro/quote-requests/${id}`),
+    CACHE_TTL.short,
+  ),
   downloadQuoteRequestPdf: (id: string | number) => api.get(`/pro/quote-requests/${id}/pdf`, { responseType: 'blob' }),
   getQuoteRequestsMine: (params: object = {}) => cachedGet(
     buildCacheKey('pro.quoteRequests.mine', '/pro/quote-requests/mine', params),
@@ -566,6 +605,11 @@ export const proApi = {
   getDashboard: () => cachedGet(
     buildCacheKey('pro.dashboard', '/pro/dashboard'),
     () => api.get('/pro/dashboard'),
+    CACHE_TTL.short,
+  ),
+  getReferral: () => cachedGet(
+    buildCacheKey('pro.referral', '/pro/referral'),
+    () => api.get('/pro/referral'),
     CACHE_TTL.short,
   ),
   getListings: () => cachedGet(
@@ -749,6 +793,11 @@ export const proBookingsApi = {
     () => api.get('/pro/bookings/mine'),
     CACHE_TTL.short,
   ),
+  getById: (bookingId: string | number, token?: string) => cachedGet(
+    buildCacheKey('proBookings.byId', `/pro/bookings/${bookingId}`, token ? { token } : {}),
+    () => api.get(`/pro/bookings/${bookingId}`, { params: token ? { token } : {} }),
+    CACHE_TTL.short,
+  ),
   getDashboard: () => cachedGet(
     buildCacheKey('proBookings.dashboard', '/pro/dashboard/bookings'),
     () => api.get('/pro/dashboard/bookings'),
@@ -872,6 +921,17 @@ export const newsletterApi = {
 
 export const contactApi = {
   send: (data: object) => api.post('/contact', data),
+}
+
+export const rgpdApi = {
+  exportData: () => api.get('/rgpd/exporter-donnees', { responseType: 'blob' }),
+  deleteAccount: (data: { confirmation: string; password?: string }) => api.post('/rgpd/supprimer-compte', data),
+  getLogs: () => cachedGet(
+    buildCacheKey('rgpd.logs', '/rgpd/mes-logs'),
+    () => api.get('/rgpd/mes-logs'),
+    CACHE_TTL.short,
+  ),
+  setConsent: (data: { analytics?: boolean; marketing?: boolean }) => api.post('/rgpd/consentement', data),
 }
 
 export const proTransportApi = {

@@ -2,10 +2,10 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowDown, ArrowRight, ArrowUp, Archive, BadgeCheck, Layers3, Package, PencilLine, PlusCircle, RefreshCw, Save, Sparkles, Store, Trash2, X } from 'lucide-react'
 
-import { metaApi, proApi } from '@/lib/api'
+import { metaApi, proApi, uploadApi } from '@/lib/api'
 import type { CategoryNode } from '@/lib/categoryCatalog'
 import { FALLBACK_CATEGORIES } from '@/lib/categoryCatalog'
 
@@ -244,6 +244,8 @@ export default function ProductsManager() {
   const [catalogCategorySaving, setCatalogCategorySaving] = useState(false)
   const [catalogCategoryEditingId, setCatalogCategoryEditingId] = useState<number | null>(null)
   const [catalogCategoryLoading, setCatalogCategoryLoading] = useState(false)
+  const [productUploading, setProductUploading] = useState(false)
+  const productImagesInputRef = useRef<HTMLInputElement | null>(null)
 
   const leafCategories = useMemo(() => collectLeafCategories(categories), [categories])
 
@@ -325,6 +327,64 @@ export default function ProductsManager() {
     setEditingId(null)
     setForm(INITIAL_FORM)
     setError('')
+  }
+
+  const handleProductImagesUpload = async (files: FileList | File[] | null) => {
+    const selectedFiles = Array.from(files || []).filter(Boolean)
+    if (!selectedFiles.length) return
+
+    setProductUploading(true)
+    setError('')
+    try {
+      const response = await uploadApi.uploadProductImages(selectedFiles)
+      const uploaded = Array.isArray(response.data?.data) ? response.data.data : []
+      const urls = uploaded.map((item: { url?: string }) => String(item.url || '').trim()).filter(Boolean)
+      if (!urls.length) {
+        throw new Error('Aucune image n’a pu être importée.')
+      }
+
+      setForm((current) => {
+        const currentUrls = parseImageUrls(current.image_urls_text)
+        const mergedUrls = Array.from(new Set([...currentUrls, ...urls]))
+        return {
+          ...current,
+          cover_image_url: current.cover_image_url.trim() || mergedUrls[0] || '',
+          image_urls_text: mergedUrls.join('\n'),
+        }
+      })
+      setSuccess({ title: `${urls.length} photo${urls.length > 1 ? 's' : ''} importée${urls.length > 1 ? 's' : ''}.` })
+    } catch (err: any) {
+      setError(err?.response?.data?.error || err?.message || 'Impossible d’importer ces photos.')
+    } finally {
+      setProductUploading(false)
+      if (productImagesInputRef.current) {
+        productImagesInputRef.current.value = ''
+      }
+    }
+  }
+
+  const handleRemoveUploadedPhoto = (url: string) => {
+    setForm((current) => {
+      const currentUrls = parseImageUrls(current.image_urls_text)
+      const nextUrls = currentUrls.filter((item) => item !== url)
+      const nextCover = current.cover_image_url.trim() === url
+        ? nextUrls[0] || ''
+        : current.cover_image_url
+
+      return {
+        ...current,
+        cover_image_url: nextCover,
+        image_urls_text: nextUrls.join('\n'),
+      }
+    })
+  }
+
+  const handleClearUploadedPhotos = () => {
+    setForm((current) => ({
+      ...current,
+      cover_image_url: '',
+      image_urls_text: '',
+    }))
   }
 
   const startEdit = (product: ProductItem) => {
@@ -840,25 +900,86 @@ export default function ProductsManager() {
             </label>
 
             <label className="space-y-2 md:col-span-2">
-              <span className="text-sm font-semibold text-night">Photo principale (URL)</span>
+              <span className="text-sm font-semibold text-night">Photo principale</span>
               <input
                 value={form.cover_image_url}
                 onChange={(event) => setForm((current) => ({ ...current, cover_image_url: event.target.value }))}
                 className="input w-full rounded-2xl"
-                placeholder="https://..."
+                placeholder="La première photo importée sera utilisée par défaut"
               />
             </label>
 
-            <label className="space-y-2 md:col-span-2">
-              <span className="text-sm font-semibold text-night">Galerie (URLs, une par ligne)</span>
+            <div className="md:col-span-2 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <span className="text-sm font-semibold text-night">Importer des photos</span>
+                  <p className="mt-1 text-xs text-night/55">Choisissez vos fichiers image, nous générons automatiquement les URLs du catalogue. L’import est désormais la voie principale.</p>
+                </div>
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-night/60">
+                  {parseImageUrls(form.image_urls_text).length} photo{parseImageUrls(form.image_urls_text).length > 1 ? 's' : ''}
+                </span>
+              </div>
+              <input
+                ref={productImagesInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(event) => void handleProductImagesUpload(event.currentTarget.files)}
+                className="mt-3 block w-full text-sm text-night/70 file:mr-4 file:rounded-2xl file:border-0 file:bg-[#0A7EA4] file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white hover:file:bg-[#065f7a]"
+              />
+              {productUploading ? (
+                <p className="mt-2 text-xs text-night/55">Import des photos en cours...</p>
+              ) : null}
+              {parseImageUrls(form.image_urls_text).length ? (
+                <div className="mt-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-night">Photos importées</p>
+                    <button
+                      type="button"
+                      onClick={handleClearUploadedPhotos}
+                      className="text-xs font-semibold text-night/55 transition hover:text-rose-600"
+                    >
+                      Tout retirer
+                    </button>
+                  </div>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {parseImageUrls(form.image_urls_text).map((url) => (
+                      <div key={url} className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+                        <div className="relative aspect-[4/3] bg-sand">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={url} alt="Photo produit importée" className="h-full w-full object-cover" />
+                        </div>
+                        <div className="flex items-center justify-between gap-2 px-3 py-2">
+                          <p className="truncate text-xs text-night/60">{url}</p>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveUploadedPhoto(url)}
+                            className="rounded-full p-1 text-night/45 transition hover:bg-sand hover:text-rose-600"
+                            aria-label="Supprimer cette photo"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="md:col-span-2 rounded-[1.5rem] border border-dashed border-[var(--color-border)] bg-[var(--color-background-secondary)]/40 p-4">
+              <p className="text-sm font-semibold text-night">URLs manuelles avancées</p>
+              <p className="mt-1 text-xs text-night/55">
+                Si vous avez déjà des images hébergées, vous pouvez encore les coller ci-dessous. Sinon, l&apos;import de fichiers suffit.
+              </p>
               <textarea
                 value={form.image_urls_text}
                 onChange={(event) => setForm((current) => ({ ...current, image_urls_text: event.target.value }))}
                 rows={4}
-                className="input w-full rounded-2xl py-3"
+                className="input mt-3 w-full rounded-2xl py-3"
                 placeholder="https://image1...\nhttps://image2..."
               />
-            </label>
+            </div>
 
             <label className="md:col-span-2 flex items-start gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
               <input

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import {
   ArrowRight,
   BadgeCheck,
@@ -17,6 +18,7 @@ import {
   Package,
 } from 'lucide-react'
 
+import Header from '@/components/layout/Header'
 import ListingCard from '@/components/listings/ListingCard'
 import ReviewCard from '@/components/reviews/ReviewCard'
 import ReviewSummary from '@/components/reviews/ReviewSummary'
@@ -81,11 +83,20 @@ function getStockBadge(stockQuantity?: number | null) {
 
 export default function ProPublicPage({ proId, initialProfile, initialReviews }: ProPublicClientProps) {
   const { user } = useAuthStore()
+  const searchParams = useSearchParams()
+
+  const initialTab = useMemo(() => {
+    const requestedTab = searchParams.get('tab')
+    if (requestedTab === 'catalogue') return 'catalogue'
+    if (requestedTab === 'avis') return 'avis'
+    if (requestedTab === 'apropos') return 'apropos'
+    return 'annonces'
+  }, [searchParams])
 
   const [profile, setProfile] = useState<ProPublicProfile | null>(initialProfile)
   const [reviews, setReviews] = useState<ProPublicReview[]>(initialReviews)
   const [loading, setLoading] = useState(!initialProfile)
-  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]['id']>('annonces')
+  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]['id']>(initialTab)
   const [inviteOpen, setInviteOpen] = useState(false)
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteLoading, setInviteLoading] = useState(false)
@@ -162,6 +173,12 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
     count: Number(profile?.review_count ?? reviews.length ?? 0),
     verified: Number(reviews.filter((review) => review.verified_purchase).length ?? 0),
   }), [profile?.avg_rating, profile?.review_count, reviews])
+
+  useEffect(() => {
+    if (searchParams.get('review_booking') && activeTab !== 'avis') {
+      setActiveTab('avis')
+    }
+  }, [activeTab, searchParams])
 
   if (loading) {
     return (
@@ -615,7 +632,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                               {product.title.charAt(0).toUpperCase()}
                             </div>
                           )}
-                          {product.is_featured ? (
+                          {product.is_featured || false ? (
                             <span className="absolute left-3 top-3 rounded-full bg-[#0A7EA4] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
                               À la une
                             </span>
@@ -682,6 +699,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                       <p className="mt-2 text-sm">Essayez une autre catégorie du catalogue.</p>
                     </div>
                   )}
+                </div>
               ) : (
                 <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-14 text-center text-night/55">
                   <p className="text-lg font-semibold text-night">Aucun produit actif</p>
@@ -780,7 +798,8 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
             </form>
           </div>
         </div>
-      ) : null}      </main>
+      ) : null}
+      </main>
 
       <div className="fixed inset-x-4 bottom-4 z-40 md:hidden">
         <div className={`grid gap-3 ${bookingEnabled ? 'grid-cols-3' : 'grid-cols-2'}`}>
@@ -829,6 +848,6 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
         onClose={() => setBookingOpen(false)}
         settings={bookingSettings}
       />
-</div>
+    </div>
   )
 }

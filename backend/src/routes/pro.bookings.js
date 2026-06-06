@@ -1,5 +1,6 @@
 'use strict';
 
+const crypto = require('crypto');
 const express = require('express');
 const Joi = require('joi');
 
@@ -157,6 +158,7 @@ function mapBookingRow(row) {
     pro_id: Number(row.pro_id),
     requester_user_id: row.requester_user_id == null ? null : Number(row.requester_user_id),
     slot_id: row.slot_id == null ? null : Number(row.slot_id),
+    booking_access_token: row.booking_access_token ?? null,
     requester_name: row.requester_name,
     requester_email: row.requester_email,
     requester_phone: row.requester_phone ?? null,
@@ -209,6 +211,12 @@ function mapBookingRow(row) {
       status: row.slot_status ?? null,
     },
   };
+}
+
+function buildBookingShareUrl(bookingRow) {
+  const token = String(bookingRow.booking_access_token || '').trim();
+  const path = `/mes-rdv/${bookingRow.id}`;
+  return token ? `${BASE_URL}${path}?token=${encodeURIComponent(token)}` : `${BASE_URL}${path}`;
 }
 
 async function loadBookingProfile(proId) {
@@ -404,6 +412,7 @@ async function loadBookingById(bookingId) {
   const result = await query(
     `SELECT
        b.*,
+       b.booking_access_token,
        p.prenom AS pro_prenom,
        p.nom AS pro_nom,
        p.pro_company_name,
@@ -433,12 +442,23 @@ async function loadBookingById(bookingId) {
   return result.rows[0] || null;
 }
 
+async function assertBookingAccess(req, booking) {
+  if (!booking) return false;
+  if (req.user?.is_admin) return true;
+  if (req.user?.id && Number(req.user.id) === Number(booking.pro_id)) return true;
+  if (req.user?.id && booking.requester_user_id != null && Number(req.user.id) === Number(booking.requester_user_id)) return true;
+  const token = String(req.query.token || req.body?.token || '').trim();
+  if (token && booking.booking_access_token && token === booking.booking_access_token) return true;
+  return false;
+}
+
 async function notifyBookingCreated(bookingRow) {
   const proName = formatDisplayName(bookingRow);
   const startsAt = new Date(bookingRow.starts_at);
   const when = Number.isNaN(startsAt.getTime())
     ? 'votre créneau'
     : new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full', timeStyle: 'short' }).format(startsAt);
+  const bookingUrl = buildBookingShareUrl(bookingRow);
 
   await createNotification(bookingRow.pro_id, {
     type: 'appointment_request',
@@ -465,7 +485,7 @@ async function notifyBookingCreated(bookingRow) {
         <li><strong>Objet :</strong> ${escapeHtml(bookingRow.subject)}</li>
         <li><strong>Commune :</strong> ${escapeHtml(bookingRow.commune || bookingRow.pro_commune || 'Non précisée')}</li>
       </ul>
-      <p><a href="${BASE_URL}/pro/dashboard/rdv">Voir les rendez-vous</a></p>
+      <p><a href="${bookingUrl}">Voir le rendez-vous</a></p>
     `,
   }).catch(() => {});
 
@@ -494,7 +514,7 @@ async function notifyBookingCreated(bookingRow) {
         <li><strong>Créneau :</strong> ${escapeHtml(when)}</li>
         <li><strong>Objet :</strong> ${escapeHtml(bookingRow.subject)}</li>
       </ul>
-      <p>Vous pourrez suivre son statut dans <a href="${BASE_URL}/mes-rdv">Mes rendez-vous</a>.</p>
+      <p>Vous pourrez suivre son statut dans <a href="${bookingUrl}">Mes rendez-vous</a>.</p>
     `,
   }).catch(() => {});
 }
@@ -505,6 +525,7 @@ async function notifyBookingDecision(bookingRow, decision) {
   const when = Number.isNaN(startsAt.getTime())
     ? 'votre créneau'
     : new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full', timeStyle: 'short' }).format(startsAt);
+  const bookingUrl = buildBookingShareUrl(bookingRow);
 
   const configs = {
     confirmed: {
@@ -565,7 +586,8 @@ async function notifyBookingDecision(bookingRow, decision) {
         <li><strong>Créneau :</strong> ${escapeHtml(when)}</li>
         <li><strong>Objet :</strong> ${escapeHtml(bookingRow.subject)}</li>
       </ul>
-      <p>Consultez vos rendez-vous sur <a href="${BASE_URL}/mes-rdv">Mes rendez-vous</a>.</p>
+      <p>Consultez vos rendez-vous sur <a href="${bookingUrl}">Mes rendez-vous</a>.</p>
+      <p><a href="${bookingUrl}">Ouvrir ce rendez-vous</a></p>
     `,
   }).catch(() => {});
 }
@@ -626,6 +648,29 @@ router.get('/bookings/mine', authenticate, async (req, res, next) => {
     );
 
     return res.json({ data: result.rows.map(mapBookingRow) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/bookings/:bookingId', optionalAuth, async (req, res, next) => {
+  try {
+    const bookingId = Number(req.params.bookingId);
+    if (!Number.isFinite(bookingId) || bookingId <= 0) {
+      return res.status(400).json({ error: 'Réservation invalide.' });
+    }
+
+    const booking = await loadBookingById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ error: 'Réservation introuvable.' });
+    }
+
+    const allowed = await assertBookingAccess(req, booking);
+    if (!allowed) {
+      return res.status(403).json({ error: 'Accès refusé.' });
+    }
+
+    return res.json({ data: mapBookingRow(booking) });
   } catch (err) {
     next(err);
   }
@@ -1073,6 +1118,8 @@ router.post('/:id/bookings', optionalAuth, async (req, res, next) => {
         throw error;
       }
 
+      const bookingAccessToken = crypto.randomBytes(24).toString('hex');
+
       const minDelay = Number(profile.booking_settings.advance_notice_hours || 24) * 60 * 60 * 1000;
       const maxDelay = Number(profile.booking_settings.max_days_ahead || 30) * 24 * 60 * 60 * 1000;
       if (slotStart.getTime() - now < minDelay) {
@@ -1102,9 +1149,10 @@ router.post('/:id/bookings', optionalAuth, async (req, res, next) => {
            details,
            starts_at,
            ends_at,
+           booking_access_token,
            status,
            source
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'pending', 'public')
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 'pending', 'public')
          RETURNING *`,
         [
           proId,
@@ -1121,6 +1169,7 @@ router.post('/:id/bookings', optionalAuth, async (req, res, next) => {
           normalizeMaybeText(value.details),
           slot.starts_at,
           slot.ends_at,
+          bookingAccessToken,
         ]
       );
 

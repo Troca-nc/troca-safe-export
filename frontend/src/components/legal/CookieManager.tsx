@@ -1,10 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import axios from 'axios'
 import { Check, Shield, Sparkles, ToggleLeft, ToggleRight } from 'lucide-react'
-import { API_ORIGIN } from '@/lib/api'
-import { getStoredAccessToken } from '@/lib/tokenStorage'
+import { rgpdApi } from '@/lib/api'
 
 const STORAGE_KEY = 'troca-cookie-consent'
 
@@ -30,14 +28,7 @@ function saveConsent(state: ConsentState) {
 }
 
 async function persistToServer(choice: { analytics: boolean; marketing: boolean }) {
-  const token = getStoredAccessToken()
-  if (!token) return
-
-  await axios
-    .post(`${API_ORIGIN}/api/rgpd/consentement`, choice, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .catch(() => {})
+  await rgpdApi.setConsent(choice).catch(() => {})
 }
 
 function CookieToggle({

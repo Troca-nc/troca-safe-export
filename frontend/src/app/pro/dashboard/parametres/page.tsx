@@ -131,7 +131,10 @@ export default function ProDashboardSettingsPage() {
       try {
         const response = await proApi.getById(user.id)
         if (!alive) return
-        const profile = response.data?.data as ProProfileResponse || {}
+        const profile = (response.data?.data as ProProfileResponse | undefined) ?? null
+        if (!profile) {
+          return
+        }
         setForm({
           company_name: profile.pro_company_name || '',
           category: profile.pro_category || '',

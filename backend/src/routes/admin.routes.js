@@ -10,6 +10,8 @@ const { getRedisClient } = require('../config/redis')
 const { requireAdminToken, adminRateLimit } = require('../middleware/adminApiToken')
 const { getSnapshot } = require('../services/observability')
 const { ensureLaunchPack } = require('./pro.launch-pack')
+const { ensureProReferralCode } = require('../services/referralCodeService')
+const { refreshTrustScore } = require('../services/trustService')
 
 const router = express.Router()
 router.use(adminRateLimit, requireAdminToken)
@@ -1176,8 +1178,10 @@ router.post('/users/:id/:action', async (req, res, next) => {
       case 'pro':
         await withTransaction(async (client) => {
           await client.query(`UPDATE users SET is_pro = TRUE, pro_since = NOW(), updated_at = NOW() WHERE id = $1`, [id])
+          await ensureProReferralCode(client, id)
           await ensureLaunchPack(client, id)
         })
+        await refreshTrustScore(id).catch(() => {})
         break
       case 'unpro':
         await query(`UPDATE users SET is_pro = FALSE, updated_at = NOW() WHERE id = $1`, [id])

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { CalendarDays, CheckCircle2, Clock3, MessageCircle, MapPin, UserRound, XCircle } from 'lucide-react'
+import { CalendarDays, CheckCircle2, Clock3, MessageCircle, MapPin, Star, UserRound, XCircle } from 'lucide-react'
 
 export type RdvBookingItem = {
   id: number | string
@@ -66,6 +66,7 @@ type RdvBookingCardProps = {
   onConfirm?: (bookingId: number | string) => Promise<void> | void
   onDecline?: (bookingId: number | string) => Promise<void> | void
   onCancel?: (bookingId: number | string) => Promise<void> | void
+  onReview?: (bookingId: number | string) => Promise<void> | void
 }
 
 function formatSlotLabel(booking: RdvBookingItem) {
@@ -111,6 +112,7 @@ export default function RdvBookingCard({
   onConfirm,
   onDecline,
   onCancel,
+  onReview,
 }: RdvBookingCardProps) {
   const status = statusLabel(booking.status)
   const isClient = booking.role === 'client'
@@ -131,6 +133,7 @@ export default function RdvBookingCard({
   const canCancelAsClient = booking.role === 'client'
     && isFutureBooking
     && !['cancelled', 'declined', 'completed'].includes(String(booking.status).toLowerCase())
+  const canReview = booking.role === 'client' && String(booking.status).toLowerCase() === 'completed' && Boolean(onReview)
   const reminderBadges = [
     reminderLabel(booking.reminder_24h_sent_at, 'Rappel J-1'),
     reminderLabel(booking.reminder_2h_sent_at, 'Rappel H-2'),
@@ -274,6 +277,17 @@ export default function RdvBookingCard({
           >
             <XCircle className="h-4 w-4" />
             Annuler
+          </button>
+        ) : null}
+
+        {canReview && onReview ? (
+          <button
+            type="button"
+            onClick={() => onReview(booking.id)}
+            className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-700 transition hover:bg-amber-100"
+          >
+            <Star className="h-4 w-4" />
+            Laisser un avis
           </button>
         ) : null}
       </div>

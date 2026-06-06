@@ -254,6 +254,38 @@ router.post('/listing/:id', uploadLimiter, upload.array('images', MAX_IMAGES), a
   }
 });
 
+// ── POST /upload/product — Préparer des photos produit ───────
+
+router.post('/product', uploadLimiter, upload.array('images', MAX_IMAGES), async (req, res, next) => {
+  try {
+    if (!req.user?.is_pro) {
+      return res.status(403).json({ error: 'Espace réservé aux comptes Pro.' });
+    }
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: 'Aucune image reçue' });
+    }
+
+    const savedImages = [];
+    for (const file of req.files) {
+      const processed = await processImage(file.buffer, `products/${req.user.id}`);
+      savedImages.push({
+        url: processed.url,
+        thumbnail_url: processed.thumbnail_url,
+      });
+    }
+
+    res.status(201).json({
+      message: `${savedImages.length} photo(s) importée(s)`,
+      data: savedImages,
+    });
+  } catch (err) {
+    if (err.message?.includes('Format non supporté')) {
+      return res.status(400).json({ error: err.message });
+    }
+    next(err);
+  }
+});
+
 // ── POST /upload/chat — Uploader une image de messagerie ─────────
 
 router.post('/chat', uploadLimiter, upload.single('image'), async (req, res, next) => {

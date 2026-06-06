@@ -664,7 +664,10 @@ async function sendRideReviewReminderEmail(to, prenom, details = {}, recipientUs
 
 async function sendProBookingReminderEmail(to, prenom, details = {}, recipientUserId) {
   const reminderLabel = escapeHtml(details.reminderLabel || 'Rappel de rendez-vous');
-  const bookingUrl = details.bookingUrl || `${BASE_URL()}/mes-rdv`;
+  const bookingUrl = details.bookingUrl
+    || (details.bookingId
+      ? `${BASE_URL()}/mes-rdv/${encodeURIComponent(String(details.bookingId))}${details.bookingAccessToken ? `?token=${encodeURIComponent(String(details.bookingAccessToken))}` : ''}`
+      : `${BASE_URL()}/mes-rdv`);
   return sendMail({
     to,
     subject: `${reminderLabel} — ${details.subject || 'Votre rendez-vous'}`,

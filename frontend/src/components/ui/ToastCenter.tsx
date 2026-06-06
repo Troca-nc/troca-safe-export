@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CheckCircle2, CircleAlert, Info, X } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react'
 
 import { TOAST_EVENT, type ToastPayload, type ToastTone } from '@/lib/toast'
 
@@ -19,7 +19,7 @@ const TONE_STYLES: Record<ToastTone, { root: string; icon: string; Icon: typeof 
   error: {
     root: 'border-red-200 bg-red-50 text-red-700',
     icon: 'text-red-600',
-    Icon: CircleAlert,
+    Icon: AlertCircle,
   },
   info: {
     root: 'border-[#0A7EA4]/15 bg-white text-night',

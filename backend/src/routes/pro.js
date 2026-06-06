@@ -8,8 +8,10 @@ const { authenticate, optionalAuth } = require('../middleware/auth');
 const { sendMail } = require('../services/emailService');
 const { sendPushToUser } = require('../services/pushService');
 const { createNotification } = require('../services/notificationService');
+const { refreshTrustScore } = require('../services/trustService');
 const { mapListingSearchRow } = require('../services/listingsPresentation');
 const { getAutoReply, saveAutoReply } = require('../services/autoReplyService');
+const { buildReferralLink, ensureProReferralCode } = require('../services/referralCodeService');
 
 const router = express.Router();
 
@@ -984,6 +986,75 @@ router.get('/quote-requests', authenticate, async (req, res, next) => {
   }
 });
 
+router.get('/quote-requests/:id', authenticate, async (req, res, next) => {
+  try {
+    const quoteId = Number(req.params.id);
+    if (!Number.isFinite(quoteId) || quoteId <= 0) {
+      return res.status(400).json({ error: 'Demande de devis invalide.' });
+    }
+
+    const result = await query(
+      `SELECT
+         q.id,
+         q.pro_id,
+         q.requester_user_id,
+         q.requester_name,
+         q.requester_email,
+         q.requester_phone,
+         q.need_type,
+         q.commune,
+         q.budget_xpf,
+         q.desired_date,
+         q.details,
+         q.created_at,
+         u.pro_company_name,
+         u.pro_commune,
+         u.pro_category,
+         u.prenom,
+         u.nom
+       FROM pro_quote_requests q
+       JOIN users u ON u.id = q.pro_id
+       WHERE q.id = $1
+       LIMIT 1`,
+      [quoteId]
+    );
+
+    const quote = result.rows[0];
+    if (!quote) {
+      return res.status(404).json({ error: 'Demande de devis introuvable.' });
+    }
+
+    const isOwner = Number(req.user.id) === Number(quote.pro_id) || Number(req.user.id) === Number(quote.requester_user_id);
+    if (!isOwner) {
+      return res.status(403).json({ error: 'Accès refusé.' });
+    }
+
+    return res.json({
+      data: {
+        id: String(quote.id),
+        proId: Number(quote.pro_id),
+        proName: formatCompanyName(quote),
+        proCommune: quote.pro_commune ?? null,
+        proCategory: quote.pro_category ?? null,
+        requesterUserId: quote.requester_user_id == null ? null : Number(quote.requester_user_id),
+        createdAt: quote.created_at,
+        request: {
+          requester_name: quote.requester_name ?? '',
+          requester_email: quote.requester_email ?? '',
+          requester_phone: quote.requester_phone ?? '',
+          need_type: quote.need_type ?? '',
+          commune: quote.commune ?? '',
+          budget_xpf: quote.budget_xpf == null ? '' : String(quote.budget_xpf),
+          desired_date: quote.desired_date ?? '',
+          details: quote.details ?? '',
+        },
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/quote-requests/:id/pdf', authenticate, async (req, res, next) => {
   try {
     const quoteId = Number(req.params.id);
@@ -1082,6 +1153,7 @@ router.patch('/me', authenticate, async (req, res, next) => {
       `UPDATE users SET ${fields.join(', ')} WHERE id = $${p} RETURNING id`,
       params
     );
+    await refreshTrustScore(req.user.id).catch(() => {});
 
     const updated = await query(
       `SELECT
@@ -1393,6 +1465,21 @@ router.get('/dashboard', authenticate, async (req, res, next) => {
         unread_clients_total: Number(unreadSummary.unread_clients_total ?? 0),
         unread_conversations_total: Number(unreadSummary.unread_conversations_total ?? 0),
         unread_threads: unreadThreads,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/referral', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    const referralCode = await ensureProReferralCode(query, req.user.id);
+    return res.json({
+      data: {
+        referral_code: referralCode,
+        referral_link: buildReferralLink(referralCode),
       },
     });
   } catch (err) {
@@ -1775,6 +1862,8 @@ router.post('/apply', authenticate, async (req, res, next) => {
       ]
     );
 
+    const referralCode = await ensureProReferralCode(query, req.user.id).catch(() => null);
+
     const adminEmail = process.env.ADMIN_ALERT_EMAIL || process.env.ADMIN_EMAIL;
     if (adminEmail) {
       const payload = result.rows[0];
@@ -1802,6 +1891,8 @@ router.post('/apply', authenticate, async (req, res, next) => {
         pro_verified: result.rows[0].pro_verified,
         pro_company_name: result.rows[0].pro_company_name,
         pro_category: result.rows[0].pro_category,
+        referral_code: referralCode,
+        referral_link: buildReferralLink(referralCode),
       },
     });
   } catch (err) {

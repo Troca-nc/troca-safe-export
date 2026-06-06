@@ -114,7 +114,7 @@ function EmptyFavoris({
           Parcourir les annonces
         </Link>
         {isGuest ? (
-          <Link href="/inscription?redirect=/favoris" className="rounded-2xl border border-[var(--color-border)] px-6 py-2.5 text-sm font-semibold text-night transition hover:bg-night/5">
+          <Link href="/inscription?next=/favoris" className="rounded-2xl border border-[var(--color-border)] px-6 py-2.5 text-sm font-semibold text-night transition hover:bg-night/5">
             Créer un compte
           </Link>
         ) : null}
@@ -227,10 +227,10 @@ export default function FavorisPage() {
               Vos annonces sauvegardées restent visibles ici. Créez un compte pour les synchroniser sur tous vos appareils.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
-              <Link href="/inscription?redirect=/favoris" className="btn-primary rounded-2xl px-4 py-2.5 text-sm">
+              <Link href="/inscription?next=/favoris" className="btn-primary rounded-2xl px-4 py-2.5 text-sm">
                 Créer un compte
               </Link>
-              <Link href="/connexion?redirect=/favoris" className="btn-secondary rounded-2xl px-4 py-2.5 text-sm">
+              <Link href="/connexion?next=/favoris" className="btn-secondary rounded-2xl px-4 py-2.5 text-sm">
                 Se connecter
               </Link>
             </div>

@@ -28,6 +28,8 @@ const {
   getOrCreateStripeCustomer,
   markPaymentSucceeded,
 } = require('../services/paymentHelpers');
+const { ensureProReferralCode } = require('../services/referralCodeService');
+const { refreshTrustScore } = require('../services/trustService');
 const {
   processPayplugWebhook,
   processStripeWebhookEvent,
@@ -633,6 +635,8 @@ router.post('/subscribe/mobile', authenticate, paymentLimiter, validate(mobilePl
       `UPDATE users SET is_pro = TRUE, pro_plan = $2, updated_at = NOW() WHERE id = $1`,
       [req.user.id, 'pro']
     );
+    await ensureProReferralCode(query, req.user.id).catch(() => {});
+    await refreshTrustScore(req.user.id).catch(() => {});
 
     return res.json({
       data: {
@@ -1031,6 +1035,8 @@ router.post('/webhooks/stripe', async (req, res) => {
               `UPDATE users SET is_pro = TRUE, pro_plan = $2, pro_expires_at = $3, updated_at = NOW() WHERE id = $1`,
               [userId, planId, periodEnd]
             );
+            await ensureProReferralCode(client, userId).catch(() => {});
+            await refreshTrustScore(userId).catch(() => {});
             await client.query(
               `UPDATE payments SET metadata = metadata || $2::jsonb, updated_at = NOW() WHERE provider_ref = $1`,
               [session.id, JSON.stringify({ provider_sub_id: subId })]
@@ -1072,11 +1078,22 @@ router.post('/webhooks/stripe', async (req, res) => {
       );
 
       if (sub.status === 'active') {
+        const activeUserRes = await query(
+          `SELECT user_id
+           FROM subscriptions
+           WHERE provider_sub_id = $1
+           LIMIT 1`,
+          [subId]
+        );
         await query(
           `UPDATE users SET is_pro = TRUE, pro_expires_at = $2, updated_at = NOW()
            WHERE id = (SELECT user_id FROM subscriptions WHERE provider_sub_id = $1 LIMIT 1)`,
           [subId, periodEnd]
         );
+        if (activeUserRes.rows[0]?.user_id) {
+          await ensureProReferralCode(query, activeUserRes.rows[0].user_id).catch(() => {});
+          await refreshTrustScore(activeUserRes.rows[0].user_id).catch(() => {});
+        }
       }
     }
 
@@ -1360,6 +1377,8 @@ router.post('/webhooks/payplug', async (req, res) => {
              WHERE id = $1`,
             [userId, planId, periodEnd]
           );
+          await ensureProReferralCode(client, userId).catch(() => {});
+          await refreshTrustScore(userId).catch(() => {});
 
           await client.query(
             `UPDATE payments SET status = 'succeeded', updated_at = NOW()

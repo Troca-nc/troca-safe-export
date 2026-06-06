@@ -2,10 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import axios from 'axios'
 import { Cookie, ShieldCheck } from 'lucide-react'
-import { API_ORIGIN } from '@/lib/api'
-import { getStoredAccessToken } from '@/lib/tokenStorage'
+import { rgpdApi } from '@/lib/api'
 
 const STORAGE_KEY = 'troca-cookie-consent'
 const OPEN_EVENT = 'troca-cookie-banner-open'
@@ -33,14 +31,7 @@ function saveConsent(choice: { analytics: boolean; marketing: boolean }) {
 }
 
 async function syncConsent(choice: { analytics: boolean; marketing: boolean }) {
-  const token = getStoredAccessToken()
-  if (!token) return
-
-  await axios
-    .post(`${API_ORIGIN}/api/rgpd/consentement`, choice, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .catch(() => {})
+  await rgpdApi.setConsent(choice).catch(() => {})
 }
 
 export default function CookieBanner() {

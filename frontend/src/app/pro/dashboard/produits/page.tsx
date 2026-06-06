@@ -1,5 +1,5 @@
-import ProductsManager from '@/components/pro/ProductsManager'
+import { redirect } from 'next/navigation'
 
 export default function ProDashboardProductsPage() {
-  return <ProductsManager />
+  redirect('/pro/dashboard/catalogue')
 }

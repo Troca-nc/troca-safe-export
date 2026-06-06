@@ -4,10 +4,16 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { ArrowRight, Copy, Gift, Share2, Sparkles, Users2, BadgeCheck } from 'lucide-react'
 
+import { proApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 
-function buildReferralLink(userId: string | number | undefined) {
-  const ref = String(userId ?? '').trim()
+type ReferralInfo = {
+  referral_code: string
+  referral_link: string
+}
+
+function buildReferralLink(referralCode: string | undefined) {
+  const ref = String(referralCode ?? '').trim()
   if (!ref) return '/inscription'
   return `/inscription?ref=${encodeURIComponent(ref)}`
 }
@@ -24,16 +30,46 @@ export default function ProDashboardReferralPage() {
   const { user } = useAuthStore()
   const [copied, setCopied] = useState(false)
   const [origin, setOrigin] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [referralInfo, setReferralInfo] = useState<ReferralInfo | null>(null)
 
-  const referralLink = useMemo(() => buildReferralLink(user?.id), [user?.id])
   const displayCode = useMemo(() => {
-    const raw = String(user?.id ?? '').trim()
+    const raw = String(referralInfo?.referral_code || '').trim()
     if (!raw) return 'TROCA-PRO'
-    return `TROCA-${raw.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8).toUpperCase()}`
-  }, [user?.id])
+    return raw.toUpperCase()
+  }, [referralInfo?.referral_code])
+
+  const referralLink = useMemo(() => {
+    if (referralInfo?.referral_link) return referralInfo.referral_link
+    return buildReferralLink(referralInfo?.referral_code || String(user?.id ?? ''))
+  }, [referralInfo, user?.id])
 
   useEffect(() => {
     setOrigin(window.location.origin)
+  }, [])
+
+  useEffect(() => {
+    let alive = true
+
+    const loadReferral = async () => {
+      setLoading(true)
+      try {
+        const response = await proApi.getReferral()
+        if (!alive) return
+        const payload = response.data?.data || null
+        setReferralInfo(payload && typeof payload === 'object' ? payload : null)
+      } catch {
+        if (!alive) return
+        setReferralInfo(null)
+      } finally {
+        if (alive) setLoading(false)
+      }
+    }
+
+    void loadReferral()
+    return () => {
+      alive = false
+    }
   }, [])
 
   const copyLink = async () => {
@@ -52,7 +88,7 @@ export default function ProDashboardReferralPage() {
       try {
         await navigator.share({
           title: 'Troca - Parrainage Pro',
-          text: 'Rejoignez Troca et développez votre activité avec une vitrine Pro.',
+          text: 'Rejoignez Troca et developpez votre activite avec une vitrine Pro.',
           url,
         })
         return
@@ -69,9 +105,9 @@ export default function ProDashboardReferralPage() {
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Parrainage</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-night">Invitez d&apos;autres pros et développez votre réseau</h1>
+            <h1 className="mt-2 font-display text-3xl font-bold text-night">Invitez d&apos;autres pros et developpez votre reseau</h1>
             <p className="mt-3 text-sm leading-relaxed text-night/60 sm:text-base">
-              Partagez votre lien de parrainage pour faire découvrir Troca à d&apos;autres professionnels. Cette première version prépare le suivi du parrainage directement dans votre espace Pro.
+              Partagez votre lien de parrainage pour faire decouvrir Troca a d&apos;autres professionnels. Le code est maintenant genere et conserve cote serveur.
             </p>
           </div>
           <div className="rounded-3xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800">
@@ -94,7 +130,7 @@ export default function ProDashboardReferralPage() {
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Votre code</p>
               <h2 className="mt-1 font-display text-2xl font-bold text-night">{displayCode}</h2>
               <p className="mt-2 text-sm text-night/60">
-                Ce code peut être utilisé comme repère de partage pour vos invitations.
+                Ce code est genere par le serveur et reste identique pour votre compte Pro.
               </p>
             </div>
           </div>
@@ -112,7 +148,7 @@ export default function ProDashboardReferralPage() {
                   className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
                 >
                   <Copy className="h-4 w-4" />
-                  {copied ? 'Lien copié' : 'Copier'}
+                  {copied ? 'Lien copie' : 'Copier'}
                 </button>
                 <button
                   type="button"
@@ -124,9 +160,12 @@ export default function ProDashboardReferralPage() {
                 </button>
               </div>
             </div>
+            {loading ? (
+              <div className="mt-4 h-10 animate-pulse rounded-2xl bg-white/70" />
+            ) : null}
             <div className="mt-4 flex flex-wrap gap-2">
               <Pill><BadgeCheck className="h-3.5 w-3.5" /> Pro</Pill>
-              <Pill><Sparkles className="h-3.5 w-3.5" /> Suivi à venir</Pill>
+              <Pill><Sparkles className="h-3.5 w-3.5" /> Suivi a venir</Pill>
               <Pill><Gift className="h-3.5 w-3.5" /> Partage rapide</Pill>
             </div>
           </div>
@@ -134,25 +173,25 @@ export default function ProDashboardReferralPage() {
 
         <aside className="space-y-4">
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">À quoi ça sert ?</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">A quoi ca sert ?</p>
             <div className="mt-4 space-y-3 text-sm leading-relaxed text-night/65">
               <p>
-                1. Partagez votre lien à un autre professionnel ou partenaire local.
+                1. Partagez votre lien a un autre professionnel ou partenaire local.
               </p>
               <p>
-                2. Facilitez sa création de compte et son inscription dans l&apos;écosystème Troca.
+                2. Facilitez sa creation de compte et son inscription dans l&apos;ecosysteme Troca.
               </p>
               <p>
-                3. Gardez un espace dédié pour suivre les bénéfices du parrainage quand le suivi automatisé sera activé.
+                3. Gardez un espace dedie pour suivre les benefices du parrainage quand le suivi automatise sera active.
               </p>
             </div>
           </article>
 
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Étape suivante</p>
-            <h2 className="mt-1 font-display text-xl font-bold text-night">Reliez ce lien à vos contacts</h2>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Etape suivante</p>
+            <h2 className="mt-1 font-display text-xl font-bold text-night">Reliez ce lien a vos contacts</h2>
             <p className="mt-2 text-sm text-night/60">
-              Vous pouvez déjà copier le lien et le coller dans un message, un devis ou un email d&apos;invitation.
+              Vous pouvez deja copier le lien et le coller dans un message, un devis ou un email d&apos;invitation.
             </p>
             <Link
               href="/pro/dashboard"

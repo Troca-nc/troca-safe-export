@@ -30,9 +30,20 @@ type LaunchPackStep = {
   description: string
   href: string
   cta: string
+  icon: ComponentType<{ className?: string }>
   points: number
   completed: boolean
   completed_at: string | null
+  highlighted?: boolean
+}
+
+type LaunchPackStepMeta = {
+  step_key: string
+  title: string
+  description: string
+  href: string
+  cta: string
+  icon: ComponentType<{ className?: string }>
   highlighted?: boolean
 }
 
@@ -127,7 +138,7 @@ function DashboardSkeleton() {
   )
 }
 
-const STEP_META = [
+const STEP_META: LaunchPackStepMeta[] = [
   {
     step_key: 'profile_complete',
     title: 'Complétez vos infos',
@@ -177,7 +188,7 @@ const STEP_META = [
     icon: BarChart3,
     highlighted: true,
   },
-] as const
+]
 
 export default function ProLaunchPack() {
   const [data, setData] = useState<LaunchPackData | null>(null)

@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowRight, FilterX, MapPin, Search, Star, Sparkles, BadgeCheck, MessageSquareQuote } from 'lucide-react'
+import { ArrowRight, BadgeCheck, FilterX, MapPin, MessageSquareQuote, Search, Sparkles, Star } from 'lucide-react'
 
 import ProQuoteModal from '@/components/pro/ProQuoteModal'
+import { normalizeQuoteTemplate } from '@/components/pro/quoteTemplate'
 import { type ProCardModel } from '@/components/pro/ProCard'
-import { proApi } from '@/lib/api'
+import { proApi, proQuotesApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import { showToast } from '@/lib/toast'
 
@@ -14,6 +15,7 @@ type QuoteHistoryItem = {
   id: string
   proId: string | number
   proName: string
+  requestId?: string | number | null
   createdAt: string
   request: {
     requester_name: string
@@ -25,6 +27,19 @@ type QuoteHistoryItem = {
     desired_date: string
     details: string
   }
+}
+
+type QuoteProposalItem = {
+  id: string | number
+  quote_number?: string | null
+  subject?: string | null
+  requester_name?: string | null
+  requester_email?: string | null
+  commune?: string | null
+  status?: string | null
+  total_xpf?: number | null
+  valid_until?: string | null
+  share_token?: string | null
 }
 
 function getDisplayName(pro: ProCardModel) {
@@ -51,6 +66,18 @@ function formatDateLabel(value: string) {
   } catch {
     return value
   }
+}
+
+function formatQuoteStatus(status?: string | null) {
+  const normalized = String(status || '').toLowerCase()
+  if (normalized === 'draft') return { label: 'Brouillon', tone: 'bg-slate-100 text-slate-700' }
+  if (normalized === 'sent') return { label: 'Envoyé', tone: 'bg-sky-100 text-sky-700' }
+  if (normalized === 'viewed') return { label: 'Vu', tone: 'bg-amber-100 text-amber-700' }
+  if (normalized === 'accepted') return { label: 'Accepté', tone: 'bg-emerald-100 text-emerald-700' }
+  if (normalized === 'refused') return { label: 'Refusé', tone: 'bg-rose-100 text-rose-700' }
+  if (normalized === 'expired') return { label: 'Expiré', tone: 'bg-neutral-100 text-neutral-700' }
+  if (normalized === 'converted') return { label: 'Converti', tone: 'bg-violet-100 text-violet-700' }
+  return { label: status || 'Statut', tone: 'bg-slate-100 text-slate-700' }
 }
 
 function ProQuoteCard({
@@ -135,8 +162,60 @@ function ProQuoteCard({
   )
 }
 
+function QuoteProposalCard({ quote }: { quote: QuoteProposalItem }) {
+  const status = formatQuoteStatus(quote.status)
+  const quoteHref = quote.share_token
+    ? `/devis/${quote.id}?token=${encodeURIComponent(String(quote.share_token))}`
+    : `/devis/${quote.id}`
+
+  return (
+    <article className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-emeraude">
+            Proposition {quote.quote_number || `#${quote.id}`}
+          </p>
+          <h3 className="mt-1 text-lg font-semibold text-night">{quote.subject || 'Devis'}</h3>
+        </div>
+        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${status.tone}`}>{status.label}</span>
+      </div>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-2xl bg-white px-4 py-3">
+          <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Client</p>
+          <p className="mt-1 font-semibold text-night">{quote.requester_name || 'Client'}</p>
+        </div>
+        <div className="rounded-2xl bg-white px-4 py-3">
+          <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Total</p>
+          <p className="mt-1 font-semibold text-night">{Number(quote.total_xpf ?? 0).toLocaleString('fr-FR')} XPF</p>
+        </div>
+        <div className="rounded-2xl bg-white px-4 py-3 sm:col-span-2">
+          <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Validité</p>
+          <p className="mt-1 font-semibold text-night">{quote.valid_until ? formatDateLabel(String(quote.valid_until)) : 'Non précisée'}</p>
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Link
+          href={quoteHref}
+          className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
+        >
+          Ouvrir
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+        <Link
+          href={`/pro/dashboard/devis?quote=${quote.id}`}
+          className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-white"
+        >
+          Gérer
+        </Link>
+      </div>
+    </article>
+  )
+}
+
 export default function AppelsOffresClient() {
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, user } = useAuthStore()
   const [pros, setPros] = useState<ProCardModel[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -144,10 +223,12 @@ export default function AppelsOffresClient() {
   const [category, setCategory] = useState('')
   const [commune, setCommune] = useState('')
   const [minRating, setMinRating] = useState('')
-  const [activeTab, setActiveTab] = useState<'pros' | 'requests'>('pros')
+  const [activeTab, setActiveTab] = useState<'pros' | 'requests' | 'quotes'>('pros')
   const [selectedPro, setSelectedPro] = useState<ProCardModel | null>(null)
   const [quoteOpen, setQuoteOpen] = useState(false)
   const [quoteHistory, setQuoteHistory] = useState<QuoteHistoryItem[]>([])
+  const [quoteProposals, setQuoteProposals] = useState<QuoteProposalItem[]>([])
+  const [quoteProposalsLoading, setQuoteProposalsLoading] = useState(false)
   const [pdfLoadingId, setPdfLoadingId] = useState<string | null>(null)
   const topRef = useRef<HTMLDivElement | null>(null)
 
@@ -178,7 +259,6 @@ export default function AppelsOffresClient() {
 
   useEffect(() => {
     let alive = true
-
     const loadQuoteHistory = async () => {
       if (!isAuthenticated) {
         if (alive) setQuoteHistory([])
@@ -201,6 +281,37 @@ export default function AppelsOffresClient() {
       alive = false
     }
   }, [isAuthenticated])
+
+  useEffect(() => {
+    let alive = true
+    const loadQuoteProposals = async () => {
+      if (activeTab !== 'quotes' || !isAuthenticated || !user?.is_pro) {
+        if (alive) {
+          setQuoteProposals([])
+          setQuoteProposalsLoading(false)
+        }
+        return
+      }
+
+      setQuoteProposalsLoading(true)
+      try {
+        const response = await proQuotesApi.list({ limit: 12 })
+        const items = Array.isArray(response.data?.data) ? response.data.data : []
+        if (!alive) return
+        setQuoteProposals(items)
+      } catch {
+        if (!alive) return
+        setQuoteProposals([])
+      } finally {
+        if (alive) setQuoteProposalsLoading(false)
+      }
+    }
+
+    void loadQuoteProposals()
+    return () => {
+      alive = false
+    }
+  }, [activeTab, isAuthenticated, user?.is_pro])
 
   const categoryOptions = useMemo(() => {
     const values = new Set<string>()
@@ -316,9 +427,7 @@ export default function AppelsOffresClient() {
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm sm:p-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">
-              Appels d&apos;offres
-            </p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Appels d&apos;offres</p>
             <h1 className="mt-2 font-display text-3xl font-bold text-night sm:text-4xl">
               Déposez votre besoin et recevez un devis rapide
             </h1>
@@ -393,6 +502,19 @@ export default function AppelsOffresClient() {
           >
             Mes demandes
           </button>
+          {user?.is_pro ? (
+            <button
+              type="button"
+              onClick={() => setActiveTab('quotes')}
+              className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                activeTab === 'quotes'
+                  ? 'bg-[#0A7EA4] text-white'
+                  : 'border border-[var(--color-border)] bg-white text-night hover:bg-[var(--color-background-secondary)]'
+              }`}
+            >
+              Mes propositions
+            </button>
+          ) : null}
         </div>
 
         {activeTab === 'pros' ? (
@@ -431,11 +553,7 @@ export default function AppelsOffresClient() {
 
               <label className="space-y-2">
                 <span className="text-sm font-semibold text-night">Catégorie</span>
-                <select
-                  value={category}
-                  onChange={(event) => setCategory(event.target.value)}
-                  className="input w-full rounded-2xl"
-                >
+                <select value={category} onChange={(event) => setCategory(event.target.value)} className="input w-full rounded-2xl">
                   <option value="">Toutes les catégories</option>
                   {categoryOptions.map((value) => (
                     <option key={value} value={value}>
@@ -447,11 +565,7 @@ export default function AppelsOffresClient() {
 
               <label className="space-y-2">
                 <span className="text-sm font-semibold text-night">Commune</span>
-                <select
-                  value={commune}
-                  onChange={(event) => setCommune(event.target.value)}
-                  className="input w-full rounded-2xl"
-                >
+                <select value={commune} onChange={(event) => setCommune(event.target.value)} className="input w-full rounded-2xl">
                   <option value="">Toutes les communes</option>
                   {communeOptions.map((value) => (
                     <option key={value} value={value}>
@@ -463,11 +577,7 @@ export default function AppelsOffresClient() {
 
               <label className="space-y-2">
                 <span className="text-sm font-semibold text-night">Note minimum</span>
-                <select
-                  value={minRating}
-                  onChange={(event) => setMinRating(event.target.value)}
-                  className="input w-full rounded-2xl"
-                >
+                <select value={minRating} onChange={(event) => setMinRating(event.target.value)} className="input w-full rounded-2xl">
                   <option value="">Toutes les notes</option>
                   <option value="4.5">4.5 et +</option>
                   <option value="4">4.0 et +</option>
@@ -476,35 +586,28 @@ export default function AppelsOffresClient() {
               </label>
             </div>
 
-            {error ? (
-              <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {error}
-              </div>
-            ) : null}
+            {error ? <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div> : null}
 
             <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {loading
                 ? Array.from({ length: 6 }).map((_, index) => (
-                    <div
-                      key={index}
-                      className="h-80 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] animate-pulse"
-                    />
+                    <div key={index} className="h-80 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] animate-pulse" />
                   ))
                 : filteredPros.map((pro) => (
                     <ProQuoteCard key={pro.id} pro={pro} onRequestQuote={() => openQuoteForPro(pro)} />
                   ))}
             </div>
 
-            {!loading && filteredPros.length === 0 && (
+            {!loading && filteredPros.length === 0 ? (
               <div className="mt-6 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-6 py-10 text-center">
                 <p className="text-lg font-semibold text-night">Aucun professionnel ne correspond à vos filtres.</p>
                 <p className="mt-2 text-sm text-night/55">
                   Essayez un autre mot-clé ou réinitialisez les filtres pour voir plus de résultats.
                 </p>
               </div>
-            )}
+            ) : null}
           </div>
-        ) : (
+        ) : activeTab === 'requests' ? (
           <div className="pt-5">
             {!isAuthenticated ? (
               <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-6 text-center">
@@ -513,16 +616,10 @@ export default function AppelsOffresClient() {
                   Sans compte, vos demandes restent visibles pendant cette visite seulement. Avec un compte, elles sont synchronisées sur tous vos appareils.
                 </p>
                 <div className="mt-5 flex flex-wrap justify-center gap-3">
-                  <Link
-                    href="/connexion?redirect=/appels-offres"
-                    className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
-                  >
+                  <Link href="/connexion?next=/appels-offres" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a]">
                     Se connecter
                   </Link>
-                  <Link
-                    href="/inscription?redirect=/appels-offres"
-                    className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] px-5 py-3 text-sm font-semibold text-night transition hover:bg-white"
-                  >
+                  <Link href="/inscription?next=/appels-offres" className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] px-5 py-3 text-sm font-semibold text-night transition hover:bg-white">
                     Créer un compte
                   </Link>
                 </div>
@@ -533,11 +630,7 @@ export default function AppelsOffresClient() {
                 <p className="mt-2 text-sm text-night/55">
                   Envoyez votre première demande de devis depuis la liste des professionnels vérifiés.
                 </p>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('pros')}
-                  className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
-                >
+                <button type="button" onClick={() => setActiveTab('pros')} className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a]">
                   Trouver un pro
                   <ArrowRight className="h-4 w-4" />
                 </button>
@@ -545,18 +638,13 @@ export default function AppelsOffresClient() {
             ) : (
               <div className="grid gap-4 lg:grid-cols-2">
                 {quoteHistory.map((request) => (
-                  <article
-                    key={request.id}
-                    className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5"
-                  >
+                  <article key={request.id} className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Demande envoyée</p>
                         <h3 className="mt-1 text-lg font-semibold text-night">{request.proName}</h3>
                       </div>
-                      <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-night/60">
-                        {formatDateLabel(request.createdAt)}
-                      </span>
+                      <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-night/60">{formatDateLabel(request.createdAt)}</span>
                     </div>
 
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -570,9 +658,7 @@ export default function AppelsOffresClient() {
                       </div>
                       <div className="rounded-2xl bg-white px-4 py-3">
                         <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Budget</p>
-                        <p className="mt-1 font-semibold text-night">
-                          {request.request.budget_xpf ? `${Number(request.request.budget_xpf).toLocaleString('fr-FR')} XPF` : 'Non précisé'}
-                        </p>
+                        <p className="mt-1 font-semibold text-night">{request.request.budget_xpf ? `${Number(request.request.budget_xpf).toLocaleString('fr-FR')} XPF` : 'Non précisé'}</p>
                       </div>
                       <div className="rounded-2xl bg-white px-4 py-3">
                         <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Date souhaitée</p>
@@ -581,10 +667,7 @@ export default function AppelsOffresClient() {
                     </div>
 
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <Link
-                        href={`/pro/${request.proId}`}
-                        className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
-                      >
+                      <Link href={`/pro/${request.proId}`} className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a]">
                         Voir la vitrine
                         <ArrowRight className="h-4 w-4" />
                       </Link>
@@ -603,6 +686,11 @@ export default function AppelsOffresClient() {
                       >
                         Relancer
                       </button>
+                      {request.id ? (
+                        <Link href={`/appels-offres/${request.id}`} className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-white">
+                          Voir le détail
+                        </Link>
+                      ) : null}
                       <button
                         type="button"
                         onClick={() => downloadQuotePdf(request.id)}
@@ -617,24 +705,52 @@ export default function AppelsOffresClient() {
               </div>
             )}
           </div>
+        ) : (
+          <div className="pt-5">
+            {!isAuthenticated || !user?.is_pro ? (
+              <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-6 text-center">
+                <p className="text-lg font-semibold text-night">Cette section est réservée aux professionnels.</p>
+                <p className="mt-2 text-sm text-night/55">Connectez-vous avec un compte Pro pour consulter vos devis créés et leurs statuts.</p>
+                <div className="mt-5 flex flex-wrap justify-center gap-3">
+                  <Link href="/connexion?next=/appels-offres" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a]">
+                    Se connecter
+                  </Link>
+                </div>
+              </div>
+            ) : quoteProposalsLoading ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div key={index} className="h-44 animate-pulse rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)]" />
+                ))}
+              </div>
+            ) : quoteProposals.length === 0 ? (
+              <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-6 text-center">
+                <p className="text-lg font-semibold text-night">Aucune proposition pour le moment.</p>
+                <p className="mt-2 text-sm text-night/55">
+                  Créez votre premier devis depuis le dashboard Pro pour retrouver ici votre historique commercial.
+                </p>
+                <Link href="/pro/dashboard/devis" className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a]">
+                  Aller au dashboard devis
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2">
+                {quoteProposals.map((quote) => (
+                  <QuoteProposalCard key={String(quote.id)} quote={quote} />
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </section>
 
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         <div className="grid gap-4 md:grid-cols-3">
           {[
-            {
-              title: '1. Choisissez un pro',
-              desc: 'Filtrez par spécialité, commune et note pour trouver la bonne vitrine.',
-            },
-            {
-              title: '2. Décrivez votre besoin',
-              desc: 'La modale de devis vous aide à remplir les champs essentiels en quelques secondes.',
-            },
-            {
-              title: '3. Suivez vos demandes',
-              desc: 'Vos demandes restent visibles dans Mes demandes pour relancer rapidement.',
-            },
+            { title: '1. Choisissez un pro', desc: 'Filtrez par spécialité, commune et note pour trouver la bonne vitrine.' },
+            { title: '2. Décrivez votre besoin', desc: 'La modale de devis vous aide à remplir les champs essentiels en quelques secondes.' },
+            { title: '3. Suivez vos demandes', desc: 'Vos demandes restent visibles dans Mes demandes pour relancer rapidement.' },
           ].map((step) => (
             <div key={step.title} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">{step.title}</p>
@@ -644,18 +760,19 @@ export default function AppelsOffresClient() {
         </div>
       </section>
 
-      {selectedPro && (
+      {selectedPro ? (
         <ProQuoteModal
           proId={selectedPro.id}
           proName={getDisplayName(selectedPro)}
           open={quoteOpen}
           onClose={() => setQuoteOpen(false)}
-          template={selectedPro.pro_quote_template ?? null}
+          template={normalizeQuoteTemplate(selectedPro.pro_quote_template ?? null)}
           onSent={(payload) => {
             const next: QuoteHistoryItem = {
-              id: `${payload.proId}-${Date.now()}`,
+              id: String(payload.requestId ?? `${payload.proId}-${Date.now()}`),
               proId: payload.proId,
               proName: payload.proName,
+              requestId: payload.requestId ?? null,
               createdAt: new Date().toISOString(),
               request: {
                 requester_name: payload.request.requester_name,
@@ -671,7 +788,7 @@ export default function AppelsOffresClient() {
             saveQuoteHistory(next)
           }}
         />
-      )}
+      ) : null}
     </div>
   )
 }

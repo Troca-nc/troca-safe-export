@@ -61,6 +61,7 @@ export type ProPublicProduct = {
   price_xpf: number
   compare_at_price_xpf?: number | null
   stock_quantity?: number | null
+  is_featured?: boolean
   sku?: string | null
   brand?: string | null
   category_id?: number | null

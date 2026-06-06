@@ -23,6 +23,7 @@ type ProQuoteModalProps = {
   onSent?: (payload: {
     proId: string | number
     proName: string
+    requestId: string | number | null
     request: QuoteFormState
     template: QuoteTemplate
   }) => void
@@ -116,7 +117,7 @@ export default function ProQuoteModal({ proId, proName, open, onClose, template,
     setSending(true)
     setError('')
     try {
-      await proApi.requestQuote(proId, {
+      const response = await proApi.requestQuote(proId, {
         requester_name: form.requester_name.trim(),
         requester_email: form.requester_email.trim(),
         requester_phone: quoteTemplate.show_phone && form.requester_phone.trim() ? form.requester_phone.trim() : null,
@@ -129,6 +130,7 @@ export default function ProQuoteModal({ proId, proName, open, onClose, template,
       onSent?.({
         proId,
         proName,
+        requestId: response.data?.data?.id ?? null,
         request: { ...form },
         template: quoteTemplate,
       })

@@ -5,7 +5,7 @@ import { useMemo, type ComponentType } from 'react'
 import {
   ArrowRight,
   BadgeCheck,
-  CircleAlert,
+  AlertCircle,
   Gauge,
   Megaphone,
   MessageCircle,
@@ -285,7 +285,7 @@ export default function ProScoreWidget({
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-medium text-night/55">
-          <CircleAlert className="h-3.5 w-3.5 text-amber-600" />
+          <AlertCircle className="h-3.5 w-3.5 text-amber-600" />
           Ces recommandations s&apos;appuient sur vos vues, contacts, messages et boosts en cours.
         </div>
       </div>

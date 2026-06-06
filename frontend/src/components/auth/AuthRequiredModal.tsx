@@ -65,7 +65,7 @@ export default function AuthRequiredModal() {
             ) : (
               <>
                 <Link
-                  href="/connexion"
+                  href={redirectTo ? `/connexion?next=${encodeURIComponent(redirectTo)}` : '/connexion'}
                   className="inline-flex w-full items-center justify-center rounded-2xl bg-night px-4 py-3 text-sm font-semibold text-white transition hover:bg-night/90"
                   onClick={() => closeAuthModal()}
                 >

@@ -15,7 +15,17 @@ import {
   TrendingUp,
 } from 'lucide-react'
 
-const steps = [
+type OnboardingStep = {
+  number: string
+  title: string
+  description: string
+  href: string
+  cta: string
+  icon: typeof Store
+  highlighted?: boolean
+}
+
+const steps: OnboardingStep[] = [
   {
     number: '1',
     title: 'Complétez vos infos',
@@ -65,7 +75,7 @@ const steps = [
     icon: BarChart3,
     highlighted: true,
   },
-] as const
+]
 
 const STORAGE_KEY = 'troca-pro-onboarding-progress'
 

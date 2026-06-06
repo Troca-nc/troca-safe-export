@@ -29,10 +29,10 @@ export default function AlertesPage() {
               Sauvegardez vos recherches et retrouvez vos alertes sur tous vos appareils.
             </p>
             <div className="mt-5 flex flex-wrap justify-center gap-3">
-              <Link href="/connexion?redirect=/alertes" className="btn-primary rounded-2xl px-4 py-2.5 text-sm">
+              <Link href="/connexion?next=/alertes" className="btn-primary rounded-2xl px-4 py-2.5 text-sm">
                 Se connecter
               </Link>
-              <Link href="/inscription?redirect=/alertes" className="btn-secondary rounded-2xl px-4 py-2.5 text-sm">
+              <Link href="/inscription?next=/alertes" className="btn-secondary rounded-2xl px-4 py-2.5 text-sm">
                 Créer un compte
               </Link>
             </div>

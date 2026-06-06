@@ -1236,6 +1236,7 @@ async function runProBookingReminderWindow({
       b.starts_at,
       b.ends_at,
       b.status,
+      b.booking_access_token,
       b.${reminderColumn},
       p.prenom AS pro_prenom,
       p.nom AS pro_nom,
@@ -1280,8 +1281,9 @@ async function runProBookingReminderWindow({
       ? 'votre rendez-vous'
       : new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full', timeStyle: 'short' }).format(startsAt);
     const proName = formatUserName(row.pro_prenom, row.pro_nom) || row.pro_company_name || 'Professionnel';
-    const bookingUrlForRequester = `${getTrocBaseUrl()}/mes-rdv`;
-    const bookingUrlForPro = `${getTrocBaseUrl()}/pro/dashboard/rdv`;
+    const bookingToken = String(row.booking_access_token || '').trim();
+    const bookingUrlForRequester = `${getTrocBaseUrl()}/mes-rdv/${row.booking_id}${bookingToken ? `?token=${encodeURIComponent(bookingToken)}` : ''}`;
+    const bookingUrlForPro = `${getTrocBaseUrl()}/mes-rdv/${row.booking_id}${bookingToken ? `?token=${encodeURIComponent(bookingToken)}` : ''}`;
 
     if (row.requester_user_id) {
       const requesterName = formatUserName(row.requester_prenom, row.requester_nom) || row.requester_name || 'Client';
@@ -1316,6 +1318,8 @@ async function runProBookingReminderWindow({
             commune: row.commune,
             locationText: row.pro_commune || 'Lieu à confirmer',
             slotLabel: when,
+            bookingId: row.booking_id,
+            bookingAccessToken: row.booking_access_token,
             bookingUrl: bookingUrlForRequester,
           },
           row.requester_user_id
@@ -1354,6 +1358,8 @@ async function runProBookingReminderWindow({
           commune: row.commune,
           locationText: row.pro_commune || 'Lieu à confirmer',
           slotLabel: when,
+          bookingId: row.booking_id,
+          bookingAccessToken: row.booking_access_token,
           bookingUrl: bookingUrlForPro,
         },
         row.pro_id

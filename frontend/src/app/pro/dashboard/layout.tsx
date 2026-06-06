@@ -25,7 +25,7 @@ import { useAuthStore } from '@/store/authStore'
 
 const NAV_ITEMS = [
   { href: '/pro/dashboard', label: "Vue d'ensemble", icon: BarChart3 },
-  { href: '/pro/dashboard/produits', label: 'Produits', icon: Package },
+  { href: '/pro/dashboard/catalogue', label: 'Catalogue', icon: Package },
   { href: '/pro/dashboard/rdv', label: 'Rendez-vous', icon: CalendarDays },
   { href: '/pro/dashboard/annonces', label: 'Mes annonces', icon: Store },
   { href: '/pro/dashboard/boosts', label: 'Boosts', icon: Bell },

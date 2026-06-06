@@ -34,7 +34,7 @@ export default function MesRdvPage() {
   useEffect(() => {
     if (!hasHydrated) return
     if (!isAuthenticated || !user) {
-      window.location.assign('/connexion?redirect=/mes-rdv')
+      window.location.assign('/connexion?next=/mes-rdv')
     }
   }, [hasHydrated, isAuthenticated, user])
 
@@ -80,6 +80,10 @@ export default function MesRdvPage() {
     const partnerId = getPartnerId(booking)
     if (!partnerId) return
     window.location.assign(`/messages?user=${partnerId}`)
+  }
+
+  const handleReview = (booking: RdvBookingItem) => {
+    window.location.assign(`/pro/${booking.pro.id}?tab=avis&review_booking=${booking.id}`)
   }
 
   const handleAction = async (bookingId: number | string, action: 'confirm' | 'decline' | 'cancel') => {
@@ -192,6 +196,7 @@ export default function MesRdvPage() {
                   onConfirm={(bookingId) => handleAction(bookingId, 'confirm')}
                   onDecline={(bookingId) => handleAction(bookingId, 'decline')}
                   onCancel={(bookingId) => handleAction(bookingId, 'cancel')}
+                  onReview={() => handleReview(booking)}
                 />
               ))}
             </div>

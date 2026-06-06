@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { Bell, CalendarDays, Loader2, MessageCircle, Plus, Save, Trash2 } from 'lucide-react'
+import { Bell, CalendarDays, Clock3, Loader2, MessageCircle, Plus, Save, Trash2 } from 'lucide-react'
 
 import FeedbackAlert from '@/components/ui/FeedbackAlert'
 import RdvBookingCard, { type RdvBookingItem } from '@/components/pro/RdvBookingCard'
@@ -41,12 +41,36 @@ const DEFAULT_SETTINGS: SettingsForm = {
   slot_duration_minutes: 30,
   advance_notice_hours: 24,
   max_days_ahead: 30,
+  services: [],
+  weekly_hours: [],
 }
 
 const DEFAULT_SLOT: SlotForm = {
   starts_at: '',
   ends_at: '',
   label: '',
+}
+
+const WEEKDAY_LABELS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
+
+function createDefaultService() {
+  return {
+    title: '',
+    duration_minutes: 30,
+    price_xpf: null as number | null,
+    description: '',
+    is_active: true,
+  }
+}
+
+function createDefaultWeeklyHour(dayIndex: number) {
+  return {
+    day_index: dayIndex,
+    label: WEEKDAY_LABELS[dayIndex] || `Jour ${dayIndex + 1}`,
+    is_open: dayIndex >= 0 && dayIndex <= 4,
+    start_time: '08:00',
+    end_time: '17:00',
+  }
 }
 
 function toLocalDatetimeInputValue(date: Date) {
@@ -58,9 +82,9 @@ function toLocalDatetimeInputValue(date: Date) {
   ].join('-') + `T${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
-function formatSlot(slot: ProPublicBookingSlot) {
+function formatSlot(slot: Pick<ProPublicBookingSlot, 'starts_at'> & { ends_at?: string | null }) {
   const startsAt = new Date(slot.starts_at)
-  const endsAt = new Date(slot.ends_at)
+  const endsAt = slot.ends_at ? new Date(slot.ends_at) : null
   const date = new Intl.DateTimeFormat('fr-FR', {
     weekday: 'short',
     day: 'numeric',
@@ -68,11 +92,13 @@ function formatSlot(slot: ProPublicBookingSlot) {
     hour: '2-digit',
     minute: '2-digit',
   }).format(startsAt)
-  const endTime = new Intl.DateTimeFormat('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(endsAt)
-  return `${date} · ${endTime}`
+  const endTime = endsAt
+    ? new Intl.DateTimeFormat('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(endsAt)
+    : null
+  return `${date} · ${endTime || '...'}`
 }
 
 export default function ProDashboardRdvPage() {
@@ -112,6 +138,8 @@ export default function ProDashboardRdvPage() {
       setSettingsForm({
         ...DEFAULT_SETTINGS,
         ...nextData.settings,
+        services: Array.isArray(nextData.settings?.services) ? nextData.settings.services : [],
+        weekly_hours: Array.isArray(nextData.settings?.weekly_hours) ? nextData.settings.weekly_hours : [],
       })
     } catch (err: any) {
       setData(null)
@@ -134,6 +162,27 @@ export default function ProDashboardRdvPage() {
       confirmed: bookings.filter((booking) => ['confirmed', 'accepted', 'auto_confirmed'].includes(String(booking.status).toLowerCase())).length,
       completed: bookings.filter((booking) => String(booking.status).toLowerCase() === 'completed').length,
     }
+  }, [data])
+
+  const todayBookings = useMemo(() => {
+    const todayKey = new Intl.DateTimeFormat('fr-CA', {
+      timeZone: 'Pacific/Noumea',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(new Date())
+
+    return (data?.bookings ?? [])
+      .filter((booking) => {
+        const bookingKey = new Intl.DateTimeFormat('fr-CA', {
+          timeZone: 'Pacific/Noumea',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        }).format(new Date(booking.starts_at))
+        return bookingKey === todayKey
+      })
+      .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
   }, [data])
 
   const nextReminder = useMemo(() => {
@@ -180,6 +229,24 @@ export default function ProDashboardRdvPage() {
     try {
       const response = await proBookingsApi.updateSettings({
         ...settingsForm,
+        services: (settingsForm.services || [])
+          .map((service) => ({
+            title: String(service.title || '').trim(),
+            duration_minutes: Number(service.duration_minutes || 30),
+            price_xpf: service.price_xpf == null ? null : Number(service.price_xpf),
+            description: String(service.description || '').trim() || null,
+            is_active: service.is_active !== false,
+          }))
+          .filter((service) => service.title.length > 0),
+        weekly_hours: (settingsForm.weekly_hours || [])
+          .map((entry, index) => ({
+            day_index: Number(entry.day_index ?? index),
+            label: String(entry.label || WEEKDAY_LABELS[index] || '').trim() || WEEKDAY_LABELS[index] || `Jour ${index + 1}`,
+            is_open: entry.is_open !== false,
+            start_time: String(entry.start_time || '08:00'),
+            end_time: String(entry.end_time || '17:00'),
+          }))
+          .filter((entry) => Number.isInteger(entry.day_index)),
         location_text: settingsForm.location_text?.trim() || null,
         instructions: settingsForm.instructions?.trim() || null,
       })
@@ -327,6 +394,47 @@ export default function ProDashboardRdvPage() {
     }
   }
 
+  const handleAddService = () => {
+    setSettingsForm((current) => ({
+      ...current,
+      services: [...(current.services || []), createDefaultService()],
+    }))
+  }
+
+  const handleUpdateService = (index: number, patch: Partial<NonNullable<SettingsForm['services']>[number]>) => {
+    setSettingsForm((current) => ({
+      ...current,
+      services: (current.services || []).map((service, serviceIndex) => (serviceIndex === index ? { ...service, ...patch } : service)),
+    }))
+  }
+
+  const handleRemoveService = (index: number) => {
+    setSettingsForm((current) => ({
+      ...current,
+      services: (current.services || []).filter((_, serviceIndex) => serviceIndex !== index),
+    }))
+  }
+
+  const handleUpdateWeeklyHour = (dayIndex: number, patch: Partial<NonNullable<SettingsForm['weekly_hours']>[number]>) => {
+    setSettingsForm((current) => {
+      const currentHours = Array.isArray(current.weekly_hours) ? [...current.weekly_hours] : []
+      const existingIndex = currentHours.findIndex((entry) => Number(entry.day_index) === dayIndex)
+      const base = existingIndex >= 0
+        ? currentHours[existingIndex]
+        : createDefaultWeeklyHour(dayIndex)
+      const next = { ...base, day_index: dayIndex, ...patch }
+      if (existingIndex >= 0) {
+        currentHours[existingIndex] = next
+      } else {
+        currentHours.push(next)
+      }
+      return {
+        ...current,
+        weekly_hours: currentHours.sort((a, b) => Number(a.day_index) - Number(b.day_index)),
+      }
+    })
+  }
+
   const handleBookingAction = async (bookingId: string | number, action: 'confirm' | 'decline' | 'cancel') => {
     setError('')
     try {
@@ -407,6 +515,93 @@ export default function ProDashboardRdvPage() {
           <p className="mt-2 text-3xl font-bold text-night">{stats.completed}</p>
         </article>
       </section>
+
+      {todayBookings.length ? (
+        <section className="rounded-[2rem] border border-[#0A7EA4]/15 bg-[linear-gradient(135deg,_rgba(214,240,246,0.72),_rgba(255,255,255,0.96))] p-5 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Aujourd’hui</p>
+              <h2 className="mt-1 font-display text-2xl font-bold text-night">Votre timeline du jour</h2>
+              <p className="mt-1 text-sm text-night/60">Les rendez-vous à venir aujourd’hui, classés par heure.</p>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white px-3 py-1.5 text-sm font-semibold text-[#0A7EA4] shadow-sm">
+              <Clock3 className="h-4 w-4" />
+              {todayBookings.length} rendez-vous
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {todayBookings.map((booking) => {
+              const status = String(booking.status || '').toLowerCase()
+              const isPending = status === 'pending'
+              const isCompleted = status === 'completed'
+              const isFuture = new Date(booking.starts_at).getTime() > Date.now()
+
+              return (
+                <article key={booking.id} className="rounded-[1.5rem] border border-white/80 bg-white p-4 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">
+                        {new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date(booking.starts_at))}
+                      </p>
+                      <h3 className="mt-1 font-semibold text-night">{booking.subject}</h3>
+                      <p className="mt-1 text-sm text-night/60">
+                        {booking.role === 'client' ? booking.pro.display_name : booking.requester_name}
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-[#0A7EA4]/10 px-3 py-1 text-xs font-semibold text-[#0A7EA4]">
+                      {isPending ? 'En attente' : isCompleted ? 'Terminé' : booking.status}
+                    </span>
+                  </div>
+
+                  <p className="mt-3 text-sm text-night/65">
+                    {booking.commune || booking.pro.pro_commune || 'Nouvelle-Calédonie'}
+                  </p>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {booking.role === 'pro' && isPending ? (
+                      <button
+                        type="button"
+                        onClick={() => void handleBookingAction(booking.id, 'confirm')}
+                        className="rounded-2xl bg-[#0A7EA4] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#065f7a]"
+                      >
+                        Confirmer
+                      </button>
+                    ) : null}
+                    {booking.role === 'pro' && isPending ? (
+                      <button
+                        type="button"
+                        onClick={() => void handleBookingAction(booking.id, 'decline')}
+                        className="rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+                      >
+                        Refuser
+                      </button>
+                    ) : null}
+                    {booking.role === 'client' && isFuture && !['cancelled', 'declined', 'completed'].includes(status) ? (
+                      <button
+                        type="button"
+                        onClick={() => void handleBookingAction(booking.id, 'cancel')}
+                        className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-800"
+                      >
+                        Annuler
+                      </button>
+                    ) : null}
+                    {booking.role === 'client' && isCompleted ? (
+                      <button
+                        type="button"
+                        onClick={() => window.location.assign(`/pro/${booking.pro.id}?tab=avis&review_booking=${booking.id}`)}
+                        className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 transition hover:bg-amber-100"
+                      >
+                        Laisser un avis
+                      </button>
+                    ) : null}
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        </section>
+      ) : null}
 
       {nextReminder ? (
         <section className="rounded-[2rem] border border-[#0A7EA4]/15 bg-[linear-gradient(135deg,_rgba(214,240,246,0.75),_rgba(255,255,255,0.95))] p-5 shadow-sm">
@@ -557,6 +752,148 @@ export default function ProDashboardRdvPage() {
                   className="input w-full rounded-2xl"
                 />
               </label>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-night">Services réservable</p>
+                  <p className="mt-1 text-xs text-night/55">Ajoutez vos prestations pour guider le client vers le bon créneau.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddService}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-white px-3 py-2 text-xs font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Ajouter un service
+                </button>
+              </div>
+
+              <div className="mt-4 space-y-3">
+                {(Array.isArray(settingsForm.services) ? settingsForm.services : []).length ? (
+                  (Array.isArray(settingsForm.services) ? settingsForm.services : []).map((service, index) => (
+                    <div key={`${service.title || 'service'}-${index}`} className="rounded-2xl border border-[var(--color-border)] bg-white p-4">
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <label className="block space-y-2">
+                          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Titre</span>
+                          <input
+                            value={service.title || ''}
+                            onChange={(event) => handleUpdateService(index, { title: event.target.value })}
+                            className="input w-full rounded-2xl"
+                            placeholder="Consultation, devis, visite..."
+                          />
+                        </label>
+                        <label className="block space-y-2">
+                          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Prix XPF</span>
+                          <input
+                            type="number"
+                            min={0}
+                            value={service.price_xpf ?? ''}
+                            onChange={(event) => handleUpdateService(index, { price_xpf: event.target.value ? Number(event.target.value) : null })}
+                            className="input w-full rounded-2xl"
+                            placeholder="15000"
+                          />
+                        </label>
+                        <label className="block space-y-2">
+                          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Durée (min)</span>
+                          <input
+                            type="number"
+                            min={15}
+                            max={240}
+                            value={service.duration_minutes || 30}
+                            onChange={(event) => handleUpdateService(index, { duration_minutes: Number(event.target.value) })}
+                            className="input w-full rounded-2xl"
+                          />
+                        </label>
+                        <label className="block space-y-2">
+                          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Description</span>
+                          <input
+                            value={service.description || ''}
+                            onChange={(event) => handleUpdateService(index, { description: event.target.value })}
+                            className="input w-full rounded-2xl"
+                            placeholder="Ce que couvre ce service..."
+                          />
+                        </label>
+                      </div>
+                      <div className="mt-3 flex flex-wrap items-center gap-3">
+                        <label className="inline-flex items-center gap-2 text-sm text-night/70">
+                          <input
+                            type="checkbox"
+                            checked={service.is_active !== false}
+                            onChange={(event) => handleUpdateService(index, { is_active: event.target.checked })}
+                            className="h-4 w-4 rounded border-[var(--color-border)] text-[#0A7EA4] focus:ring-[#0A7EA4]/20"
+                          />
+                          Service actif
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveService(index)}
+                          className="inline-flex items-center gap-1 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          Supprimer
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-white px-4 py-5 text-sm text-night/55">
+                    Aucun service ajouté pour le moment.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-night">Horaires hebdomadaires</p>
+                  <p className="mt-1 text-xs text-night/55">Activez ou fermez chaque jour selon vos disponibilités.</p>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3">
+                {WEEKDAY_LABELS.map((label, dayIndex) => {
+                  const currentHours = Array.isArray(settingsForm.weekly_hours) ? settingsForm.weekly_hours : []
+                  const entry = currentHours.find((item) => Number(item.day_index) === dayIndex) || createDefaultWeeklyHour(dayIndex)
+                  return (
+                    <div key={label} className="grid gap-3 rounded-2xl border border-[var(--color-border)] bg-white p-4 md:grid-cols-[1.1fr_0.7fr_0.7fr_0.7fr] md:items-center">
+                      <div className="flex items-center gap-3">
+                        <label className="inline-flex items-center gap-2 text-sm font-semibold text-night">
+                          <input
+                            type="checkbox"
+                            checked={entry.is_open !== false}
+                            onChange={(event) => handleUpdateWeeklyHour(dayIndex, { is_open: event.target.checked })}
+                            className="h-4 w-4 rounded border-[var(--color-border)] text-[#0A7EA4] focus:ring-[#0A7EA4]/20"
+                          />
+                          {label}
+                        </label>
+                      </div>
+                      <input
+                        value={entry.label || ''}
+                        onChange={(event) => handleUpdateWeeklyHour(dayIndex, { label: event.target.value })}
+                        className="input w-full rounded-2xl"
+                        placeholder="Libellé"
+                      />
+                      <input
+                        type="time"
+                        value={entry.start_time || ''}
+                        onChange={(event) => handleUpdateWeeklyHour(dayIndex, { start_time: event.target.value })}
+                        className="input w-full rounded-2xl"
+                        disabled={entry.is_open === false}
+                      />
+                      <input
+                        type="time"
+                        value={entry.end_time || ''}
+                        onChange={(event) => handleUpdateWeeklyHour(dayIndex, { end_time: event.target.value })}
+                        className="input w-full rounded-2xl"
+                        disabled={entry.is_open === false}
+                      />
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           </div>
         </article>

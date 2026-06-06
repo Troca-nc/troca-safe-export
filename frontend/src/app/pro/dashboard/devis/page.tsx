@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import {
   BadgeCheck,
+  Plus,
   Download,
   FileText,
   FilterX,
@@ -76,35 +77,38 @@ export default function ProDashboardDevisPage() {
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<'all' | 'today' | 'budget' | 'details'>('all')
+  const [quoteStatusFilter, setQuoteStatusFilter] = useState<'all' | 'draft' | 'sent' | 'viewed' | 'accepted' | 'refused' | 'expired' | 'converted'>('all')
   const [builderOpen, setBuilderOpen] = useState(false)
   const [builderRequest, setBuilderRequest] = useState<QuoteRequest | null>(null)
+  const [reloadKey, setReloadKey] = useState(0)
+
+  const loadData = async () => {
+    try {
+      const [requestsResponse, quotesResponse] = await Promise.all([
+        proApi.getQuoteRequestsReceived(),
+        proQuotesApi.list(),
+      ])
+      setRequests(Array.isArray(requestsResponse.data?.data) ? requestsResponse.data.data : [])
+      setQuotes(Array.isArray(quotesResponse.data?.data) ? quotesResponse.data.data : [])
+    } catch {
+      setRequests([])
+      setQuotes([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     let alive = true
 
-    const load = async () => {
-      try {
-        const [requestsResponse, quotesResponse] = await Promise.all([
-          proApi.getQuoteRequestsReceived(),
-          proQuotesApi.list(),
-        ])
-        if (!alive) return
-        setRequests(Array.isArray(requestsResponse.data?.data) ? requestsResponse.data.data : [])
-        setQuotes(Array.isArray(quotesResponse.data?.data) ? quotesResponse.data.data : [])
-      } catch {
-        if (!alive) return
-        setRequests([])
-        setQuotes([])
-      } finally {
-        if (alive) setLoading(false)
-      }
-    }
-
-    void load()
+    void loadData().finally(() => {
+      if (!alive) return
+      setLoading(false)
+    })
     return () => {
       alive = false
     }
-  }, [])
+  }, [reloadKey])
 
   const openBuilder = (request?: QuoteRequest | null) => {
     setBuilderRequest(request || null)
@@ -208,6 +212,22 @@ export default function ProDashboardDevisPage() {
     const today = requests.filter((request) => new Intl.DateTimeFormat('fr-CA').format(new Date(request.createdAt)) === todayKey).length
     return { total, withBudget, withDetails, today }
   }, [requests])
+
+  const filteredQuotes = useMemo(() => {
+    if (quoteStatusFilter === 'all') return quotes
+    return quotes.filter((quote) => String(quote.status || '').toLowerCase() === quoteStatusFilter)
+  }, [quoteStatusFilter, quotes])
+
+  const quoteStatusFilters = [
+    { id: 'all', label: 'Tous' },
+    { id: 'draft', label: 'Brouillons' },
+    { id: 'sent', label: 'Envoyés' },
+    { id: 'viewed', label: 'Vus' },
+    { id: 'accepted', label: 'Acceptés' },
+    { id: 'refused', label: 'Refusés' },
+    { id: 'expired', label: 'Expirés' },
+    { id: 'converted', label: 'Convertis' },
+  ] as const
 
   if (loading) {
     return (
@@ -438,9 +458,29 @@ export default function ProDashboardDevisPage() {
           </button>
         </div>
 
-        {quotes.length ? (
+        <div className="mt-5 flex flex-wrap gap-2">
+          {quoteStatusFilters.map((item) => {
+            const active = quoteStatusFilter === item.id
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setQuoteStatusFilter(item.id)}
+                className={`rounded-full px-3 py-2 text-xs font-semibold transition ${
+                  active
+                    ? 'bg-[#0A7EA4] text-white'
+                    : 'bg-[var(--color-background-secondary)] text-night/60 hover:bg-white'
+                }`}
+              >
+                {item.label}
+              </button>
+            )
+          })}
+        </div>
+
+        {filteredQuotes.length ? (
           <div className="mt-5 grid gap-4 md:grid-cols-2">
-            {quotes.map((quote) => {
+            {filteredQuotes.map((quote) => {
               const status = formatQuoteStatus(quote.status)
               return (
                 <article key={quote.id} className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
@@ -502,7 +542,7 @@ export default function ProDashboardDevisPage() {
           proId={builderRequest?.proId || requests[0]?.proId || 'current'}
           proName={builderRequest?.proName || requests[0]?.proName || 'Professionnel Troca'}
           initialRequest={builderRequest || null}
-          onFinished={load}
+          onFinished={loadData}
         />
       ) : null}
     </div>

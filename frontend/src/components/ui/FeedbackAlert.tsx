@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { CheckCircle2, CircleAlert, Info, type LucideIcon } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Info, type LucideIcon } from 'lucide-react'
 
 type FeedbackTone = 'success' | 'error' | 'info'
 
@@ -21,7 +21,7 @@ const STYLES: Record<FeedbackTone, { root: string; icon: string; Icon: LucideIco
   error: {
     root: 'border-red-200 bg-red-50 text-red-700',
     icon: 'text-red-600',
-    Icon: CircleAlert,
+    Icon: AlertCircle,
   },
   info: {
     root: 'border-[#0A7EA4]/15 bg-nc-lagonLight text-[#0A7EA4]',
