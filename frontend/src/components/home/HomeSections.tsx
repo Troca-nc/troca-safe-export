@@ -249,11 +249,11 @@ export function HomeHeroSection({
                 type="button"
                 onClick={() => setSearchAlertOpen(true)}
                 disabled={!q.trim()}
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
                 title="Créer une alerte sur cette recherche"
               >
                 <Bell className="h-4 w-4" />
-                Alerte
+                <span className="sr-only">Creer une alerte</span>
               </button>
 
               {isFocused && filteredSuggestions.length > 0 ? (
@@ -286,13 +286,16 @@ export function HomeHeroSection({
               ) : null}
             </form>
 
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
+            <p className="mt-4 text-xs uppercase tracking-[0.18em] text-white/50">
+              Recherches populaires
+            </p>
+            <div className="mt-2 flex gap-2 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {quickSuggestions.map((suggestion) => (
                 <button
                   key={suggestion}
                   type="button"
                   onClick={() => selectSuggestion(suggestion)}
-                  className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90 transition hover:bg-white/15"
+                  className="shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90 transition hover:bg-white/15"
                 >
                   {suggestion}
                 </button>
@@ -300,7 +303,7 @@ export function HomeHeroSection({
               <button
                 type="button"
                 onClick={handleGeoSearch}
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90 transition hover:bg-white/15"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90 transition hover:bg-white/15"
               >
                 <LocateFixed className="h-3.5 w-3.5" />
                 Autour de moi
