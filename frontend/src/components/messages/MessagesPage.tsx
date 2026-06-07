@@ -5,13 +5,13 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, ArrowLeftRight, Files, MessageCircle, PanelRightOpen, ShieldAlert, Tag, Users } from 'lucide-react'
 import Header from '@/components/layout/Header'
-import { useAuthStore } from '@/store/authStore'
 import { useConversations, useConversation } from '@/hooks/useMessaging'
 import ConversationList from '@/components/messages/ConversationList'
 import MessageBubble from '@/components/messages/MessageBubble'
 import ChatInput from '@/components/messages/ChatInput'
 import { trocApi, usersApi } from '@/lib/api'
 import type { Conversation, Message } from '@/types/messaging.types'
+import { useAuthSessionSync } from '@/hooks/useAuthSessionSync'
 
 type MobilePanel = 'chat' | 'media' | 'listing'
 type AttachmentKind = 'image' | 'audio' | 'document'
@@ -359,7 +359,7 @@ function MobileTabs({
 
 export default function MessagesPage() {
   const searchParams = useSearchParams()
-  const { user, isAuthenticated, hasHydrated } = useAuthStore()
+  const { user, isAuthenticated, authReady } = useAuthSessionSync()
   const initialConvId = searchParams.get('conv') ? Number(searchParams.get('conv')) : null
   const targetUserId = searchParams.get('user') || searchParams.get('listing_user')
 
@@ -486,7 +486,7 @@ export default function MessagesPage() {
     await Promise.all([refetchMessages(), refetchConversations()])
   }
 
-  if (!hasHydrated) {
+  if (!authReady) {
     return (
       <div className="min-h-screen bg-sand-light">
         <Header />

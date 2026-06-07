@@ -16,7 +16,7 @@ import Header from '@/components/layout/Header'
 import ListingCard from '@/components/listings/ListingCard'
 import { subscriptionsApi, usersApi } from '@/lib/api'
 import { inferDemoAccount } from '@/lib/demoApi'
-import { useAuthStore } from '@/store/authStore'
+import { useAuthSessionSync } from '@/hooks/useAuthSessionSync'
 import ProfileDemoPreview from '@/components/ui/ProfileDemoPreview'
 import Link from 'next/link'
 
@@ -79,7 +79,7 @@ function getSubscriptionStatusMeta(status?: SubscriptionStatus | null) {
 function ProfilePageContent() {
   const params   = useParams<{ id?: string }>()
   const searchParams = useSearchParams()
-  const { user: me, demoProfile, hasHydrated } = useAuthStore()
+  const { user: me, demoProfile, authReady } = useAuthSessionSync()
 
   // Si pas d'id dans l'URL â†’ mon profil
   const profileId = params?.id || me?.id
@@ -118,7 +118,7 @@ function ProfilePageContent() {
   const { register, handleSubmit, reset } = useForm()
 
   useEffect(() => {
-    if (!hasHydrated) return
+    if (!authReady) return
     if (!profileId) {
       setLoading(false)
       return
@@ -128,7 +128,7 @@ function ProfilePageContent() {
       return
     }
     loadProfile()
-  }, [hasHydrated, profileId, demoActive])
+  }, [authReady, profileId, demoActive])
 
   const loadProfile = async () => {
     try {
@@ -170,7 +170,7 @@ function ProfilePageContent() {
     </div>
   )
 
-  if (!hasHydrated) {
+  if (!authReady) {
     return (
       <div className="min-h-screen">
         <Header />

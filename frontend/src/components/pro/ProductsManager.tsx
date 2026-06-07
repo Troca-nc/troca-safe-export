@@ -126,12 +126,12 @@ function formatDate(value?: string | null) {
 function formatProductPrice(product: ProductItem) {
   if (product.price_type === 'free') return 'Gratuit'
   if (product.price_type === 'on_quote') return 'Sur devis'
-  if (product.price_type === 'from') return `Ã€ partir de ${formatPrice(product.price_xpf)}`
+  if (product.price_type === 'from') return `À partir de ${formatPrice(product.price_xpf)}`
   return `${formatPrice(product.price_xpf)}${product.unit_label ? ` / ${product.unit_label}` : ''}`
 }
 
 function formatStockQuantity(stockQuantity: number | null) {
-  if (stockQuantity == null) return 'Stock illimitÃ©'
+  if (stockQuantity == null) return 'Stock illimité'
   if (stockQuantity <= 0) return 'Rupture'
   if (stockQuantity <= 5) return `Plus que ${stockQuantity}`
   return `Stock: ${stockQuantity}`
@@ -192,7 +192,7 @@ function ProductSteps() {
   const steps = [
     {
       icon: Package,
-      title: '1. CrÃ©ez votre produit',
+      title: '1. Créez votre produit',
       text: 'Nom, prix fixe, stock et description pour votre catalogue.',
     },
     {
@@ -203,7 +203,7 @@ function ProductSteps() {
     {
       icon: Sparkles,
       title: '3. Suivez vos retours',
-      text: 'Gardez un Å“il sur vos publications et revenez modifier le stock.',
+      text: 'Gardez un œil sur vos publications et revenez modifier le stock.',
     },
   ]
 
@@ -422,11 +422,11 @@ export default function ProductsManager() {
       return
     }
     if (!form.category_id) {
-      setError('La catÃ©gorie est requise.')
+      setError('La catégorie est requise.')
       return
     }
     if (!selectedCategory || !isLeafCategory(selectedCategory)) {
-      setError('Choisissez une sous-catÃ©gorie finale.')
+      setError('Choisissez une sous-catégorie finale.')
       return
     }
     if (!form.commune_id) {
@@ -434,7 +434,7 @@ export default function ProductsManager() {
       return
     }
     if (!form.catalog_category_id) {
-      setError('La catÃ©gorie du catalogue est requise.')
+      setError('La catégorie du catalogue est requise.')
       return
     }
 
@@ -468,9 +468,9 @@ export default function ProductsManager() {
       }
       await loadProducts()
       resetForm()
-      setSuccess({ title: editingId ? 'Produit mis Ã  jour.' : 'Produit crÃ©Ã©.' })
+      setSuccess({ title: editingId ? 'Produit mis à jour.' : 'Produit créé.' })
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible dâ€™enregistrer ce produit.')
+      setError(err?.response?.data?.error || 'Impossible d’enregistrer ce produit.')
     } finally {
       setSaving(false)
     }
@@ -482,9 +482,9 @@ export default function ProductsManager() {
     try {
       await proApi.archiveProduct(productId)
       await loadProducts()
-      setSuccess({ title: 'Produit archivÃ©.' })
+      setSuccess({ title: 'Produit archivé.' })
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible dâ€™archiver ce produit.')
+      setError(err?.response?.data?.error || 'Impossible d’archiver ce produit.')
     } finally {
       setArchivingId(null)
     }
@@ -499,7 +499,7 @@ export default function ProductsManager() {
       const listingId = response.data?.data?.listing_id
       const publishedProduct = products.find((item) => item.id === productId)
       setSuccess({
-        title: publishedProduct ? `Annonce crÃ©Ã©e depuis â€œ${publishedProduct.title}â€.` : 'Annonce publiÃ©e depuis le catalogue.',
+        title: publishedProduct ? `Annonce créée depuis “${publishedProduct.title}”.` : 'Annonce publiée depuis le catalogue.',
         listingId,
       })
     } catch (err: any) {
@@ -524,7 +524,7 @@ export default function ProductsManager() {
 
   const handleCatalogCategorySubmit = async () => {
     if (!catalogCategoryForm.name.trim()) {
-      setError('Le nom de la catÃ©gorie catalogue est requis.')
+      setError('Le nom de la catégorie catalogue est requis.')
       return
     }
 
@@ -542,9 +542,9 @@ export default function ProductsManager() {
       }
       await loadCatalogCategories()
       resetCatalogCategoryForm()
-      setSuccess({ title: catalogCategoryEditingId ? 'CatÃ©gorie catalogue mise Ã  jour.' : 'CatÃ©gorie catalogue crÃ©Ã©e.' })
+      setSuccess({ title: catalogCategoryEditingId ? 'Catégorie catalogue mise à jour.' : 'Catégorie catalogue créée.' })
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible dâ€™enregistrer cette catÃ©gorie catalogue.')
+      setError(err?.response?.data?.error || 'Impossible d’enregistrer cette catégorie catalogue.')
     } finally {
       setCatalogCategorySaving(false)
     }
@@ -559,9 +559,9 @@ export default function ProductsManager() {
       if (catalogCategoryEditingId === categoryId) {
         resetCatalogCategoryForm()
       }
-      setSuccess({ title: 'CatÃ©gorie catalogue supprimÃ©e.' })
+      setSuccess({ title: 'Catégorie catalogue supprimée.' })
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible de supprimer cette catÃ©gorie catalogue.')
+      setError(err?.response?.data?.error || 'Impossible de supprimer cette catégorie catalogue.')
     } finally {
       setCatalogCategorySaving(false)
     }
@@ -608,9 +608,9 @@ export default function ProductsManager() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Catalogue produits</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-night">GÃ©rez vos produits fixes sÃ©parÃ©ment des annonces</h1>
+            <h1 className="mt-2 font-display text-3xl font-bold text-night">Gérez vos produits fixes séparément des annonces</h1>
             <p className="mt-2 max-w-2xl text-sm text-night/60">
-              CrÃ©ez une fiche produit durable, suivez votre stock et publiez une annonce ponctuelle quand vous voulez la mettre en avant.
+              Créez une fiche produit durable, suivez votre stock et publiez une annonce ponctuelle quand vous voulez la mettre en avant.
             </p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-nc-lagonLight px-3 py-1.5 text-sm font-semibold text-nc-lagon">
@@ -627,10 +627,10 @@ export default function ProductsManager() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">
-                {editingId ? 'Modifier un produit' : 'CrÃ©er un produit'}
+                {editingId ? 'Modifier un produit' : 'Créer un produit'}
               </p>
               <h2 className="mt-1 font-display text-2xl font-bold text-night">
-                {editingId ? 'Mise Ã  jour du catalogue' : 'Nouveau produit'}
+                {editingId ? 'Mise à jour du catalogue' : 'Nouveau produit'}
               </h2>
             </div>
             {editingId ? (
@@ -648,7 +648,7 @@ export default function ProductsManager() {
           <div className="mt-5 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)]/40 p-4">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">CatÃ©gories du catalogue</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Catégories du catalogue</p>
                 <h3 className="mt-1 font-semibold text-night">Organisez vos produits par famille</h3>
               </div>
               {catalogCategoryEditingId ? (
@@ -730,7 +730,7 @@ export default function ProductsManager() {
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-night/55">Aucune catÃ©gorie catalogue pour le moment.</p>
+                <p className="text-sm text-night/55">Aucune catégorie catalogue pour le moment.</p>
               )}
             </div>
           </div>
@@ -752,7 +752,7 @@ export default function ProductsManager() {
                 value={form.description}
                 onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
                 rows={5}
-                placeholder="DÃ©crivez votre produit, son usage, ses atouts, ses variantes Ã©ventuelles..."
+                placeholder="Décrivez votre produit, son usage, ses atouts, ses variantes éventuelles..."
                 className="input w-full rounded-2xl py-3"
               />
             </label>
@@ -765,7 +765,7 @@ export default function ProductsManager() {
                 className="input w-full rounded-2xl"
               >
                 <option value="fixed">Prix fixe</option>
-                <option value="from">Ã€ partir de</option>
+                <option value="from">À partir de</option>
                 <option value="on_quote">Sur devis</option>
                 <option value="free">Gratuit</option>
               </select>
@@ -785,7 +785,7 @@ export default function ProductsManager() {
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-night">Prix barrÃ© / promo</span>
+              <span className="text-sm font-semibold text-night">Prix barré / promo</span>
               <input
                 type="number"
                 min="0"
@@ -814,29 +814,29 @@ export default function ProductsManager() {
                   onChange={(event) => setForm((current) => ({ ...current, stock_unlimited: event.target.checked }))}
                   className="h-4 w-4 rounded border-[var(--color-border)] text-[#0A7EA4] focus:ring-[#0A7EA4]"
                 />
-                Stock illimitÃ©
+                Stock illimité
               </label>
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-night">UnitÃ© / format</span>
+              <span className="text-sm font-semibold text-night">Unité / format</span>
               <input
                 value={form.unit_label}
                 onChange={(event) => setForm((current) => ({ ...current, unit_label: event.target.value }))}
                 className="input w-full rounded-2xl"
-                placeholder="Ã  lâ€™unitÃ©, lot de 6, 1 kg..."
+                placeholder="à l’unité, lot de 6, 1 kg..."
               />
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-night">CatÃ©gorie *</span>
+              <span className="text-sm font-semibold text-night">Catégorie *</span>
               <select
                 value={form.category_id}
                 onChange={(event) => setForm((current) => ({ ...current, category_id: event.target.value }))}
                 disabled={loadingMeta}
                 className="input w-full rounded-2xl"
               >
-                <option value="">{loadingMeta ? 'Chargement...' : 'Choisir une catÃ©gorie'}</option>
+                <option value="">{loadingMeta ? 'Chargement...' : 'Choisir une catégorie'}</option>
                 {leafCategories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.label}
@@ -846,14 +846,14 @@ export default function ProductsManager() {
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-night">CatÃ©gorie catalogue *</span>
+              <span className="text-sm font-semibold text-night">Catégorie catalogue *</span>
               <select
                 value={form.catalog_category_id}
                 onChange={(event) => setForm((current) => ({ ...current, catalog_category_id: event.target.value }))}
                 disabled={loadingMeta || catalogCategoryLoading}
                 className="input w-full rounded-2xl"
               >
-                <option value="">{loadingMeta || catalogCategoryLoading ? 'Chargement...' : 'Choisir une catÃ©gorie catalogue'}</option>
+                <option value="">{loadingMeta || catalogCategoryLoading ? 'Chargement...' : 'Choisir une catégorie catalogue'}</option>
                 {catalogCategories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
@@ -880,7 +880,7 @@ export default function ProductsManager() {
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-night">SKU / RÃ©fÃ©rence</span>
+              <span className="text-sm font-semibold text-night">SKU / Référence</span>
               <input
                 value={form.sku}
                 onChange={(event) => setForm((current) => ({ ...current, sku: event.target.value }))}
@@ -1084,7 +1084,7 @@ export default function ProductsManager() {
                 <span>{success.title}</span>
                 {success.listingId ? (
                   <Link href={`/annonces/${success.listingId}`} className="font-semibold underline">
-                    Voir lâ€™annonce
+                    Voir l’annonce
                   </Link>
                 ) : null}
               </div>
@@ -1099,7 +1099,7 @@ export default function ProductsManager() {
               className="btn-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              {editingId ? 'Enregistrer les modifications' : 'CrÃ©er le produit'}
+              {editingId ? 'Enregistrer les modifications' : 'Créer le produit'}
             </button>
             {!editingId ? (
               <button
@@ -1107,7 +1107,7 @@ export default function ProductsManager() {
                 onClick={resetForm}
                 className="rounded-2xl border border-[var(--color-border)] px-5 py-3 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
               >
-                RÃ©initialiser
+                Réinitialiser
               </button>
             ) : null}
           </div>
@@ -1125,9 +1125,9 @@ export default function ProductsManager() {
               </div>
             </div>
             <div className="mt-4 space-y-3 text-sm text-night/65">
-              <p>â€¢ Le produit reste votre fiche permanente avec prix et stock.</p>
-              <p>â€¢ Lâ€™annonce est une publication ponctuelle visible dans le flux.</p>
-              <p>â€¢ Vous pouvez publier le mÃªme produit plusieurs fois sans ressaisir le contenu.</p>
+              <p>• Le produit reste votre fiche permanente avec prix et stock.</p>
+              <p>• L’annonce est une publication ponctuelle visible dans le flux.</p>
+              <p>• Vous pouvez publier le même produit plusieurs fois sans ressaisir le contenu.</p>
             </div>
           </article>
 
@@ -1135,7 +1135,7 @@ export default function ProductsManager() {
             <div className="mb-3 flex items-end justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Statut</p>
-                <h2 className="mt-1 font-display text-xl font-bold text-night">AperÃ§u du catalogue</h2>
+                <h2 className="mt-1 font-display text-xl font-bold text-night">Aperçu du catalogue</h2>
               </div>
               <span className="rounded-full bg-nc-lagonLight px-3 py-1 text-xs font-semibold text-nc-lagon">
                 {products.filter((product) => product.is_active).length} actifs
@@ -1151,7 +1151,7 @@ export default function ProductsManager() {
                 <p className="mt-1 text-xl font-bold text-night">{products.reduce((acc, product) => acc + Math.max(0, Number(product.stock_quantity ?? 0)), 0)}</p>
               </div>
               <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
-                <p className="text-night/55">Annonces publiÃ©es</p>
+                <p className="text-night/55">Annonces publiées</p>
                 <p className="mt-1 text-xl font-bold text-night">{products.reduce((acc, product) => acc + Number(product.published_listing_count ?? 0), 0)}</p>
               </div>
               <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
@@ -1170,7 +1170,7 @@ export default function ProductsManager() {
             <h2 className="mt-1 font-display text-2xl font-bold text-night">Votre catalogue</h2>
           </div>
           <p className="text-sm text-night/55">
-            {loadingProducts ? 'Chargementâ€¦' : `${products.length} fiche${products.length > 1 ? 's' : ''} produit${products.length > 1 ? 's' : ''}`}
+            {loadingProducts ? 'Chargement…' : `${products.length} fiche${products.length > 1 ? 's' : ''} produit${products.length > 1 ? 's' : ''}`}
           </p>
         </div>
 
@@ -1198,7 +1198,7 @@ export default function ProductsManager() {
                         {product.is_active ? (
                           <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">Actif</span>
                         ) : (
-                          <span className="rounded-full bg-sand px-2.5 py-1 text-[11px] font-semibold text-night/60">ArchivÃ©</span>
+                          <span className="rounded-full bg-sand px-2.5 py-1 text-[11px] font-semibold text-night/60">Archivé</span>
                         )}
                       </div>
                       <p className="mt-1 text-sm text-night/60">
@@ -1209,8 +1209,8 @@ export default function ProductsManager() {
                         {product.unit_label ? ` · ${product.unit_label}` : ''}
                       </p>
                       <p className="mt-1 text-xs text-night/45">
-                        DerniÃ¨re publication: {product.last_published_at ? formatDate(product.last_published_at) : 'Aucune'}
-                        {' '}Â· PubliÃ© {product.published_listing_count} fois
+                        Dernière publication: {product.last_published_at ? formatDate(product.last_published_at) : 'Aucune'}
+                        {' '}· Publié {product.published_listing_count} fois
                       </p>
                       <p className="mt-2 line-clamp-2 text-sm text-night/65">{product.description}</p>
                     </div>
@@ -1247,10 +1247,10 @@ export default function ProductsManager() {
                 </div>
                 {product.last_published_listing_id ? (
                   <div className="mt-4 rounded-2xl border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-3 text-sm text-night/70">
-                    DerniÃ¨re annonce publiÃ©e:
+                    Dernière annonce publiée:
                     {' '}
                     <Link href={`/annonces/${product.last_published_listing_id}`} className="font-semibold text-[#0A7EA4] underline">
-                      {product.last_published_listing_title || 'Voir lâ€™annonce'}
+                      {product.last_published_listing_title || 'Voir l’annonce'}
                     </Link>
                   </div>
                 ) : null}
@@ -1259,7 +1259,7 @@ export default function ProductsManager() {
           ) : (
             <div className="rounded-[1.75rem] border border-dashed border-[var(--color-border)] p-8 text-center text-sm text-night/60">
               <p className="font-semibold text-night">Aucun produit pour le moment</p>
-              <p className="mt-2">CrÃ©ez votre premiÃ¨re fiche produit pour construire un vrai catalogue sÃ©parÃ© de vos annonces.</p>
+              <p className="mt-2">Créez votre première fiche produit pour construire un vrai catalogue séparé de vos annonces.</p>
             </div>
           )}
         </div>

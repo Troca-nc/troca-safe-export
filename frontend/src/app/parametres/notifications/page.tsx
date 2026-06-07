@@ -21,6 +21,7 @@ import {
 import Header from '@/components/layout/Header'
 import { bonPlansApi, notificationsApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
+import { useAuthSessionSync } from '@/hooks/useAuthSessionSync'
 
 type NotificationPrefs = {
   email_new_message: boolean
@@ -210,6 +211,7 @@ function ToggleRow({
 export default function NotificationPreferencesPage() {
   const router = useRouter()
   const { user, demoProfile, hasHydrated } = useAuthStore()
+  useAuthSessionSync()
   const isDemo = Boolean(demoProfile)
 
   const notificationStorageKey = useMemo(() => `${STORAGE_PREFIX}:${demoProfile ?? 'visitor'}`, [demoProfile])

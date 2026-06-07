@@ -254,7 +254,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      setUser: (user) => set({ user }),
+      setUser: (user) => set({ user, isAuthenticated: Boolean(user) }),
       setHasHydrated: (hasHydrated) => set({ hasHydrated }),
     }),
     {
