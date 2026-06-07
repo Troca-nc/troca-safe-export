@@ -101,7 +101,7 @@ function AbonnementSection() {
           <p className="text-night/60 text-sm mb-4">Vous n\'avez pas encore d\'abonnement Pro.</p>
           <Link href="/pro" className="btn-primary inline-flex items-center gap-2 py-2 px-6 text-sm">
             <Star className="w-4 h-4" />
-            DÃ©couvrir les offres Pro
+            Découvrir les offres Pro
           </Link>
         </div>
       ) : (

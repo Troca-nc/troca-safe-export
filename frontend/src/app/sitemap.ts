@@ -5,6 +5,7 @@
 
 import type { MetadataRoute } from 'next'
 import { SITE_URL, CATEGORIES_SEO } from '@/types/seo.types'
+import { normalizeApiBase } from '@/lib/apiBase'
 
 // Revalidation ISR : le sitemap est recalculé toutes les heures max
 export const revalidate = 3600
@@ -22,7 +23,7 @@ interface AnnonceSitemapRow {
 
 async function fetchAnnoncesForSitemap(): Promise<AnnonceSitemapRow[]> {
   try {
-    const apiBase = process.env.NEXT_PUBLIC_API_URL ?? `${SITE_URL}/api`
+    const apiBase = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? `${SITE_URL}/api`)
     const res = await fetch(`${apiBase}/annonces/sitemap`, {
       next: { revalidate: 3600 },
     })

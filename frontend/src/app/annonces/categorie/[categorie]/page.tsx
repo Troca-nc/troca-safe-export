@@ -4,6 +4,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { generateCategoryMetadata } from '@/lib/seoHelpers'
+import { normalizeApiBase } from '@/lib/apiBase'
 import JsonLd, { buildBreadcrumbSchema } from '@/components/seo/JsonLd'
 import { CATEGORIES_SEO, SITE_URL } from '@/types/seo.types'
 
@@ -13,8 +14,9 @@ async function getCategoryStats(slug: string, commune?: string) {
   try {
     const params = new URLSearchParams({ categorie: slug })
     if (commune) params.set('commune', commune)
+    const apiBase = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? `${SITE_URL}/api`)
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/annonces/stats?${params}`,
+      `${apiBase}/annonces/stats?${params}`,
       { next: { revalidate: 1800 } }
     )
     if (!res.ok) return { nb_annonces: 0 }

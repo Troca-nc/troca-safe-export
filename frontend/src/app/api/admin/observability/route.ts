@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-function normalizeApiBase(url: string) {
-  const trimmed = url.trim().replace(/\/+$/, '')
-  if (!trimmed) return 'http://localhost:3001/api'
-  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`
-}
+import { normalizeApiBase } from '@/lib/apiBase'
 
 function getApiBase() {
   return normalizeApiBase(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { generateProfilMetadata, generateNoindexMetadata } from '@/lib/seoHelpers'
+import { normalizeApiBase } from '@/lib/apiBase'
 import { SITE_URL } from '@/types/seo.types'
 
 type ProfilePayload = {
@@ -12,7 +13,7 @@ type ProfilePayload = {
 }
 
 async function fetchProfile(id: string) {
-  const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? `${SITE_URL}/api`).replace(/\/$/, '')
+  const apiBase = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? `${SITE_URL}/api`)
 
   try {
     const res = await fetch(`${apiBase}/users/${id}`, {

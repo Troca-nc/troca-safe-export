@@ -7,12 +7,7 @@ import { rememberRedirectAfterLogin } from '@/lib/authRedirect'
 import { requestDraftSave } from '@/lib/draftEvents'
 import { isDemoMode, showDemoToast } from '@/lib/demoMode'
 import { clearStoredTokens, getStoredAccessToken, getStoredRefreshToken, saveStoredTokens } from '@/lib/tokenStorage'
-
-function normalizeApiBase(url: string) {
-  const trimmed = url.trim().replace(/\/+$/, '')
-  if (!trimmed) return 'http://localhost:3001/api'
-  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`
-}
+import { normalizeApiBase } from '@/lib/apiBase'
 
 const API_URL = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')
 export const API_ORIGIN = API_URL.replace(/\/api$/, '')

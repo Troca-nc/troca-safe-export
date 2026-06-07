@@ -1,6 +1,7 @@
 import { cache } from 'react'
 
 import { SITE_URL } from '@/types/seo.types'
+import { normalizeApiBase } from '@/lib/apiBase'
 
 export type ProPublicReview = {
   id: number | string
@@ -119,7 +120,7 @@ type ApiResponse<T> = {
   data?: T
 }
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? `${SITE_URL}/api`).replace(/\/$/, '')
+const API_BASE = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? `${SITE_URL}/api`)
 
 export const fetchProPublicProfile = cache(async (id: string) => {
   try {

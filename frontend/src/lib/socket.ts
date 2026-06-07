@@ -1,5 +1,6 @@
 import { io, Socket } from 'socket.io-client'
 import { getStoredAccessToken } from './tokenStorage'
+import { normalizeApiOrigin } from './apiBase'
 
 export type SocketConnectionState = 'connected' | 'reconnecting' | 'offline'
 
@@ -20,12 +21,6 @@ interface QueuedEmit {
 const DEFAULT_BACKOFF_MS = 1_000
 const MAX_BACKOFF_MS = 30_000
 
-function normalizeApiBase(url: string) {
-  const trimmed = url.trim().replace(/\/+$/, '')
-  if (!trimmed) return 'http://localhost:3001'
-  return trimmed.endsWith('/api') ? trimmed.replace(/\/api$/, '') : trimmed
-}
-
 class ReliableMessagingSocket {
   private readonly url: string
   private readonly tokenProvider: () => string | null | Promise<string | null>
@@ -42,7 +37,7 @@ class ReliableMessagingSocket {
   private status: SocketConnectionState = 'offline'
 
   constructor(url: string, tokenProvider: () => string | null | Promise<string | null>) {
-    this.url = normalizeApiBase(url)
+    this.url = normalizeApiOrigin(url)
     this.tokenProvider = tokenProvider
 
     if (typeof window !== 'undefined') {
@@ -270,7 +265,7 @@ class ReliableMessagingSocket {
   }
 }
 
-const API_ORIGIN = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')
+const API_ORIGIN = normalizeApiOrigin(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')
 
 const accessTokenProvider = () => {
   if (typeof window === 'undefined') return null

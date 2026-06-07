@@ -9,9 +9,10 @@ import { notFound }      from 'next/navigation'
 import Header            from '@/components/layout/Header'
 import AnnonceDetail     from '@/components/annonces/AnnonceDetail'
 import JsonLd            from '@/components/seo/JsonLd'
+import { normalizeApiBase } from '@/lib/apiBase'
 import { generateAnnonceMetadata } from '@/lib/seoHelpers'
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api'
+const API = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001')
 
 // ── Fetch serveur (shared between generateMetadata + page) ────
 async function fetchAnnonce(id: string) {

@@ -6,13 +6,14 @@ import { ArrowRight } from 'lucide-react'
 
 import ListingCard from '@/components/listings/ListingCard'
 import { API_ORIGIN } from '@/lib/api'
+import { normalizeApiOrigin } from '@/lib/apiBase'
 
 export default function TrocListingsPreview() {
   const [listings, setListings] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const baseUrl = (API_ORIGIN || 'http://localhost:3001').replace(/\/+$/, '')
+    const baseUrl = normalizeApiOrigin(API_ORIGIN || 'http://localhost:3001')
 
     fetch(`${baseUrl}/api/listings?troc=true&limit=4&sort=date`, {
       credentials: 'include',
