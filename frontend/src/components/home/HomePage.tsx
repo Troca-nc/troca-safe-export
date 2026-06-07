@@ -53,6 +53,33 @@ function buildHeroSearchSuggestions(listings: any[]) {
   ).slice(0, 24)
 }
 
+function cleanText(value: unknown, fallback = '') {
+  const text = String(value ?? '')
+    .replace(/\bundefined\b/gi, '')
+    .replace(/\bnull\b/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+—\s*$/, '')
+    .trim()
+  return text.length > 0 ? text : fallback
+}
+
+function sanitizeValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((entry) => sanitizeValue(entry))
+  }
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, entry]) => {
+        if (typeof entry === 'string') {
+          return [key, cleanText(entry, '')]
+        }
+        return [key, sanitizeValue(entry)]
+      })
+    )
+  }
+  return value
+}
+
 export default function HomePage() {
   const router = useRouter()
   const { user, hasHydrated } = useAuthStore()
@@ -101,9 +128,9 @@ export default function HomePage() {
           fetch(`${baseUrl}/api/covoiturage?limit=3`, { credentials: 'include' }).then((res) => res.json()),
         ])
         if (!alive) return
-        setPromoBonPlans(Array.isArray(promoRes?.data) ? promoRes.data : [])
-        setEventBonPlans(Array.isArray(eventRes?.data) ? eventRes.data : [])
-        setCovoiturages(Array.isArray(rideRes?.data) ? rideRes.data : [])
+        setPromoBonPlans(Array.isArray(promoRes?.data) ? promoRes.data.map((item: any) => sanitizeValue(item)) : [])
+        setEventBonPlans(Array.isArray(eventRes?.data) ? eventRes.data.map((item: any) => sanitizeValue(item)) : [])
+        setCovoiturages(Array.isArray(rideRes?.data) ? rideRes.data.map((item: any) => sanitizeValue(item)) : [])
       } catch {
         if (!alive) return
         setPromoBonPlans([])
@@ -153,7 +180,7 @@ export default function HomePage() {
         const response = await fetch(`${baseUrl}/api/listings?limit=8&sort=date`, { credentials: 'include' })
         const json = await response.json()
         if (!alive) return
-        setListings(Array.isArray(json?.data) ? json.data : [])
+        setListings(Array.isArray(json?.data) ? json.data.map((item: any) => sanitizeValue(item)) : [])
       } catch {
         if (!alive) return
         setListings([])

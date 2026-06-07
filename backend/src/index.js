@@ -71,6 +71,8 @@ const allowedOrigins = [
   process.env.BASE_URL        || 'http://localhost:3000',
   'http://localhost:3000',
   'http://localhost:19006',   // Expo dev
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:19006',
 ];
 
 const allowedOriginSet = new Set(

@@ -23,7 +23,7 @@ const STEPS = [
 const STEP_KEY_SET = new Set(STEPS.map((step) => step.step_key));
 
 const scheduleCallSchema = Joi.object({
-  call_scheduled_at: Joi.string().trim().iso().required(),
+  call_scheduled_at: Joi.date().iso().required(),
   call_phone: Joi.string().trim().max(30).allow('', null).optional(),
   call_notes: Joi.string().trim().max(1000).allow('', null).optional(),
 });

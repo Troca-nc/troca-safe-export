@@ -6,7 +6,7 @@ const Joi = require('joi');
 const { query, withTransaction } = require('../config/database');
 const { authenticate } = require('../middleware/auth');
 const { deletePrefix } = require('../services/sharedCache');
-const { slugifyCategoryName } = require('../../shared/categoryTaxonomy');
+const { slugifyCategoryName } = require('../../../shared/categoryTaxonomy');
 const { matchImmediateAlerts } = require('../jobs/scheduler');
 const { flagIfSuspicious } = require('../middleware/antiScam');
 

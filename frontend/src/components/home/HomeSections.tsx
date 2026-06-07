@@ -251,9 +251,9 @@ export function HomeHeroSection({
                 disabled={!q.trim()}
                 className="inline-flex items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
                 title="Créer une alerte sur cette recherche"
+                aria-label="Créer une alerte sur cette recherche"
               >
                 <Bell className="h-4 w-4" />
-                <span className="sr-only">Creer une alerte</span>
               </button>
 
               {isFocused && filteredSuggestions.length > 0 ? (
@@ -291,14 +291,14 @@ export function HomeHeroSection({
             </p>
             <div className="mt-2 flex gap-2 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {quickSuggestions.map((suggestion) => (
-                <button
+                <Link
                   key={suggestion}
-                  type="button"
+                  href={`/annonces?q=${encodeURIComponent(suggestion)}`}
                   onClick={() => selectSuggestion(suggestion)}
                   className="shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90 transition hover:bg-white/15"
                 >
                   {suggestion}
-                </button>
+                </Link>
               ))}
               <button
                 type="button"
@@ -453,11 +453,11 @@ export function SearchAlertsSection() {
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
             Les utilisateurs peuvent enregistrer des mots-clés pour suivre ce qui compte vraiment: un modèle précis, une commune, une gamme de prix ou une catégorie.
           </p>
-          <div className="mt-5 flex flex-wrap gap-2">
+          <div className="mt-5 flex gap-2 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {SEARCH_ALERTS.map((term) => (
               <span
                 key={term}
-                className="rounded-full border border-white/10 bg-white/8 px-3 py-1.5 text-sm font-medium text-white/85"
+                className="shrink-0 rounded-full border border-white/10 bg-white/8 px-3 py-1.5 text-sm font-medium text-white/85"
               >
                 {term}
               </span>

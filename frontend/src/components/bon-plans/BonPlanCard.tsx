@@ -46,6 +46,16 @@ function formatPrice(value?: number | null) {
   return `${Number(value).toLocaleString('fr-FR')} XPF`
 }
 
+function cleanText(value?: string | null, fallback = '') {
+  const text = String(value ?? '')
+    .replace(/\bundefined\b/gi, '')
+    .replace(/\bnull\b/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+—\s*$/, '')
+    .trim()
+  return text.length > 0 ? text : fallback
+}
+
 function daysLeftLabel(value?: string | null) {
   if (!value) return 'Bientôt fini'
   const end = new Date(value)
@@ -68,8 +78,8 @@ function getFrameTone(bonPlan: BonPlanCardModel) {
 
 export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness }: Props) {
   const business = bonPlan.business || {
-    name: bonPlan.business_name,
-    slug: bonPlan.business_name ? bonPlan.business_name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : null,
+    name: cleanText(bonPlan.business_name, null),
+    slug: cleanText(bonPlan.business_name, '') ? cleanText(bonPlan.business_name, '').toLowerCase().replace(/[^a-z0-9]+/g, '-') : null,
     logo_url: bonPlan.business_logo_url,
     badge: bonPlan.business_badge ?? 'none',
     review_avg: bonPlan.business_review_avg ?? 0,
@@ -125,12 +135,12 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
           <div className="min-w-0">
             {business?.slug ? (
               <Link href={`/bons-plans/enseigne/${business.slug}`} className="block text-sm font-semibold text-night/75 hover:text-coral">
-                {business?.name || bonPlan.business_name || 'Enseigne locale'}
-              </Link>
-            ) : (
-              <p className="text-sm font-semibold text-night/75">{business?.name || bonPlan.business_name || 'Enseigne locale'}</p>
+              {business?.name || cleanText(bonPlan.business_name, 'Enseigne locale')}
+            </Link>
+          ) : (
+              <p className="text-sm font-semibold text-night/75">{business?.name || cleanText(bonPlan.business_name, 'Enseigne locale')}</p>
             )}
-            <h3 className="mt-1 line-clamp-2 text-base font-bold leading-tight text-night">{bonPlan.title}</h3>
+            <h3 className="mt-1 line-clamp-2 text-base font-bold leading-tight text-night">{cleanText(bonPlan.title, 'Bon plan local')}</h3>
           </div>
           {onFollowBusiness && business?.name ? (
             <button
@@ -144,7 +154,7 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
           ) : null}
         </div>
 
-        <p className="line-clamp-3 text-sm leading-relaxed text-night/65">{bonPlan.description}</p>
+        <p className="line-clamp-3 text-sm leading-relaxed text-night/65">{cleanText(bonPlan.description, 'Découvrez cette offre locale.')}</p>
 
         <div className="flex items-baseline gap-2">
           {priceBefore ? <span className="text-sm text-night/45 line-through">{priceBefore}</span> : null}
@@ -157,8 +167,8 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
               ⭐ {Number(business.review_avg || 0).toFixed(1)} ({Number(business.review_count)})
             </span>
           ) : null}
-          {bonPlan.promo_label ? (
-            <span className="rounded-full bg-sand px-2.5 py-1 font-medium">{bonPlan.promo_label}</span>
+          {cleanText(bonPlan.promo_label, '') ? (
+            <span className="rounded-full bg-sand px-2.5 py-1 font-medium">{cleanText(bonPlan.promo_label, '')}</span>
           ) : null}
         </div>
 

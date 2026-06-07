@@ -90,8 +90,9 @@ function CategoryTreeNode({
 
   return (
     <div className={depth === 0 ? 'space-y-2' : 'space-y-2 border-l border-night/8 pl-3'}>
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => {
           if (children.length > 0) {
             onToggleExpand(category.slug)
@@ -99,7 +100,17 @@ function CategoryTreeNode({
             onSelect(category.slug)
           }
         }}
-        className={`flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-colors ${
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            if (children.length > 0) {
+              onToggleExpand(category.slug)
+            } else {
+              onSelect(category.slug)
+            }
+          }
+        }}
+        className={`flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-colors outline-none ${
           isSelected
             ? 'border-nc-lagon bg-nc-lagon text-white shadow-sm'
             : 'border-night/8 bg-white hover:bg-sand text-night/75'
@@ -137,7 +148,7 @@ function CategoryTreeNode({
             <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
           </div>
         ) : null}
-      </button>
+      </div>
 
       {children.length > 0 && isExpanded ? (
         <div className="space-y-2 pt-1">

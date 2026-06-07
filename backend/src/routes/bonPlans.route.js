@@ -111,6 +111,16 @@ function toDateOrNull(value) {
   return date;
 }
 
+function cleanDisplayText(value, fallback = '') {
+  const text = String(value ?? '')
+    .replace(/\bundefined\b/gi, '')
+    .replace(/\bnull\b/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+—\s*$/, '')
+    .trim();
+  return text.length > 0 ? text : fallback;
+}
+
 function normalizePreviewBusinessName(body, user) {
   return normalizeBusinessName(body.business_name || body.contact_name || `${user.prenom || ''} ${user.nom || ''}`.trim() || body.title);
 }
@@ -148,14 +158,14 @@ function serializeBonPlan(row) {
   return {
     id: row.id,
     business_id: row.business_id ?? null,
-    business_name: row.business_name || row.title || 'Troca',
+    business_name: cleanDisplayText(row.business_name, cleanDisplayText(row.title, 'Troca')),
     business_logo_url: row.business_logo_url ?? null,
     business_badge: row.business_badge || row.badge || 'none',
     business_review_avg: row.business_review_avg ?? row.review_avg ?? 0,
     business_review_count: row.business_review_count ?? row.review_count ?? 0,
     user_id: row.user_id ?? null,
-    title: row.title,
-    description: row.description,
+    title: cleanDisplayText(row.title, 'Bon plan local'),
+    description: cleanDisplayText(row.description, 'Découvrez cette offre locale.'),
     image_url: row.image_url ?? null,
     promo_label: row.promo_label ?? null,
     original_price_xpf: originalPrice ?? null,
@@ -181,7 +191,7 @@ function serializeBonPlan(row) {
     is_free_included: Boolean(row.is_free_included),
     normal_price_xpf: originalPrice ?? null,
     discount_pct: row.discount_pct ?? pricing.discount_pct,
-    contact_name: row.contact_name ?? null,
+    contact_name: cleanDisplayText(row.contact_name, null),
     contact_phone: row.contact_phone ?? null,
     contact_email: row.contact_email ?? null,
     website_url: row.website_url ?? null,
@@ -189,8 +199,8 @@ function serializeBonPlan(row) {
     social_links: row.social_links ?? {},
     opening_hours: row.opening_hours ?? null,
     photos,
-    location_name: row.location_name ?? null,
-    commune_name: row.commune_name ?? null,
+    location_name: cleanDisplayText(row.location_name, null),
+    commune_name: cleanDisplayText(row.commune_name, null),
     event_date: row.event_date ?? null,
     author_id: row.author_id ?? null,
     author_prenom: row.author_prenom ?? null,

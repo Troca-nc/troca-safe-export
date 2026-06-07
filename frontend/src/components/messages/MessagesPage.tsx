@@ -1,9 +1,10 @@
 ﻿'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, ArrowLeftRight, Files, MessageCircle, PanelRightOpen, ShieldAlert, Tag, Users } from 'lucide-react'
+import Header from '@/components/layout/Header'
 import { useAuthStore } from '@/store/authStore'
 import { useConversations, useConversation } from '@/hooks/useMessaging'
 import ConversationList from '@/components/messages/ConversationList'
@@ -357,7 +358,6 @@ function MobileTabs({
 }
 
 export default function MessagesPage() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const { user, isAuthenticated, hasHydrated } = useAuthStore()
   const initialConvId = searchParams.get('conv') ? Number(searchParams.get('conv')) : null
@@ -395,13 +395,6 @@ export default function MessagesPage() {
     refetchMessages,
     hasMore,
   } = useConversation(activeConvId)
-
-  useEffect(() => {
-    if (!hasHydrated) return
-    if (!isAuthenticated) {
-      router.push('/connexion')
-    }
-  }, [hasHydrated, isAuthenticated, router])
 
   useEffect(() => {
     if (!activeConvId && convs.length > 0) {
@@ -493,8 +486,49 @@ export default function MessagesPage() {
     await Promise.all([refetchMessages(), refetchConversations()])
   }
 
-  if (!hasHydrated || !isAuthenticated) {
-    return <div className="min-h-screen bg-sand-light" />
+  if (!hasHydrated) {
+    return (
+      <div className="min-h-screen bg-sand-light">
+        <Header />
+        <div className="mx-auto max-w-5xl px-4 py-12 animate-pulse">
+          <div className="card p-6 flex gap-5">
+            <div className="skeleton w-20 h-20 rounded-full" />
+            <div className="space-y-2 flex-1">
+              <div className="skeleton h-6 w-48" />
+              <div className="skeleton h-4 w-32" />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-sand-light">
+        <Header />
+        <main className="mx-auto flex max-w-5xl flex-col items-center px-4 py-12 text-center">
+          <div className="w-full rounded-[2rem] border border-night/8 bg-white p-8 shadow-card">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Messages</p>
+            <h1 className="mt-3 font-display text-3xl font-bold text-night">
+              Connectez-vous pour consulter vos conversations
+            </h1>
+            <p className="mt-3 text-sm leading-relaxed text-night/60">
+              Retrouvez vos échanges, pièces jointes, offres et demandes depuis n'importe quel appareil.
+              Connectez-vous pour accéder à votre messagerie sécurisée.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link href="/connexion?next=/messages" className="btn-primary px-4 py-2 text-sm">
+                Se connecter
+              </Link>
+              <Link href="/inscription?next=/messages" className="btn-secondary px-4 py-2 text-sm">
+                Créer un compte
+              </Link>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   const renderChat = () => {

@@ -3,7 +3,7 @@
 // src/app/profil/[id]/page.tsx  (profil public)
 
 import { Suspense, useState, useEffect } from 'react'
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import {
@@ -79,7 +79,6 @@ function getSubscriptionStatusMeta(status?: SubscriptionStatus | null) {
 function ProfilePageContent() {
   const params   = useParams<{ id?: string }>()
   const searchParams = useSearchParams()
-  const router   = useRouter()
   const { user: me, demoProfile, hasHydrated } = useAuthStore()
 
   // Si pas d'id dans l'URL â†’ mon profil
@@ -120,13 +119,16 @@ function ProfilePageContent() {
 
   useEffect(() => {
     if (!hasHydrated) return
-    if (!profileId) { router.push('/connexion'); return }
+    if (!profileId) {
+      setLoading(false)
+      return
+    }
     if (demoActive) {
       setLoading(false)
       return
     }
     loadProfile()
-  }, [hasHydrated, profileId, demoActive, router])
+  }, [hasHydrated, profileId, demoActive])
 
   const loadProfile = async () => {
     try {

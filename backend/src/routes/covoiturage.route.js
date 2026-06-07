@@ -19,6 +19,8 @@ const {
 
 const router = express.Router();
 
+const recurrenceDaysSchema = Joi.array().items(Joi.number().integer().min(0).max(6)).default([]);
+
 const createSchema = Joi.object({
   departure: Joi.string().min(2).max(120).required(),
   destination: Joi.string().min(2).max(120).required(),
@@ -58,8 +60,6 @@ const reviewSchema = Joi.object({
   rating: Joi.number().integer().min(1).max(5).required(),
   comment: Joi.string().min(2).max(1000).allow('', null),
 });
-
-const recurrenceDaysSchema = Joi.array().items(Joi.number().integer().min(0).max(6)).default([]);
 
 const alertSchema = Joi.object({
   from_commune: Joi.string().max(100).allow('', null),

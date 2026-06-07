@@ -1,6 +1,6 @@
 ﻿'use client'
 // src/app/parametres/page.tsx
-// â”€â”€ Page paramÃ¨tres RGPD â€” Suppression compte + Export donnÃ©es â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Suppression compte (Art. 17)
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -57,7 +57,7 @@ function Section({ icon: Icon, title, children, id }: {
 
 // â”€â”€ Export donnÃ©es (Art. 20) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// â”€â”€ Section Abonnement â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Section Abonnement
 
 function AbonnementSection() {
   const { user } = useAuthStore()
@@ -181,7 +181,7 @@ function AbonnementSection() {
   )
 }
 
-// â”€â”€ Section Factures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Section Factures
 
 function NewsletterSection() {
   const { user } = useAuthStore()
@@ -442,7 +442,7 @@ function ExportSection() {
   )
 }
 
-// â”€â”€ Suppression compte (Art. 17) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Suppression compte (Art. 17)
 
 function SuppressionSection() {
   const router  = useRouter()
@@ -583,7 +583,7 @@ function SuppressionSection() {
   )
 }
 
-// â”€â”€ Page principale â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Suppression compte (Art. 17)
 
 export default function ParametresPage() {
   const { user, logout } = useAuthStore()
@@ -599,8 +599,8 @@ export default function ParametresPage() {
       <Header />
       <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="mb-6">
-          <h1 className="font-display font-bold text-2xl text-night">ParamÃ¨tres</h1>
-          <p className="text-night/50 text-sm mt-1">GÃ©rez votre compte et vos donnÃ©es personnelles</p>
+          <h1 className="font-display font-bold text-2xl text-night">Paramètres</h1>
+          <p className="text-night/50 text-sm mt-1">Gérez votre compte et vos données personnelles</p>
         </div>
 
         <div className="space-y-4">
@@ -608,11 +608,11 @@ export default function ParametresPage() {
           {/* Navigation rapide */}
           <div className="card divide-y divide-night/8">
           {[
-            { icon: Shield,   label: 'SÃ©curitÃ© et connexion',    href: '/profil?tab=securite' },
+            { icon: Shield,   label: 'Sécurité et connexion',    href: '/profil?tab=securite' },
             { icon: Bell,     label: 'Notifications',             href: '/parametres/notifications' },
-            { icon: Eye,      label: 'ConfidentialitÃ©',           href: '#confidentialite' },
+            { icon: Eye,      label: 'Confidentialité',           href: '#confidentialite' },
             { icon: Cookie,   label: 'Cookies',                   href: '#cookies' },
-            { icon: Lock,     label: 'Mes donnÃ©es (RGPD)',        href: '#donnees' },
+            { icon: Lock,     label: 'Mes données (RGPD)',        href: '#donnees' },
           ].map(({ icon: Icon, label, href }) => (
               <Link
                 key={label}
@@ -646,14 +646,14 @@ export default function ParametresPage() {
             className="w-full flex items-center justify-center gap-2 py-3 text-sm text-night/50 hover:text-red-500 transition-colors"
           >
             <LogOut className="w-4 h-4" />
-            Se dÃ©connecter
+            Se déconnecter
           </button>
 
           {/* Liens lÃ©gaux */}
           <div className="flex items-center justify-center gap-4 text-xs text-night/35">
             <Link href="/cgu" className="hover:text-night/60">CGU</Link>
             <span>Â·</span>
-            <Link href="/politique-de-confidentialite" className="hover:text-night/60">Politique de confidentialitÃ©</Link>
+            <Link href="/politique-de-confidentialite" className="hover:text-night/60">Politique de confidentialité</Link>
             <span>Â·</span>
             <a href="mailto:privacy@troca.nc" className="hover:text-night/60">Contact DPO</a>
           </div>

@@ -27,7 +27,7 @@ CREATE INDEX IF NOT EXISTS idx_listing_contacts_listing
 CREATE TABLE IF NOT EXISTS listing_boosts (
   id SERIAL PRIMARY KEY,
   listing_id INTEGER REFERENCES annonces(id) ON DELETE CASCADE,
-  author_id INTEGER REFERENCES users(id),
+  user_id INTEGER REFERENCES users(id),
   started_at TIMESTAMPTZ DEFAULT NOW(),
   expires_at TIMESTAMPTZ NOT NULL,
   duration_days INTEGER NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS listing_boosts (
 );
 
 CREATE INDEX IF NOT EXISTS idx_listing_boosts_author
-  ON listing_boosts (author_id, status, expires_at DESC);
+  ON listing_boosts (user_id, status, expires_at DESC);
 
 CREATE TABLE IF NOT EXISTS invoices (
   id SERIAL PRIMARY KEY,
@@ -60,7 +60,7 @@ CREATE INDEX IF NOT EXISTS idx_invoices_user_created
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS pro_listing_stats AS
 SELECT
-  l.author_id,
+  l.user_id,
   l.id as listing_id,
   l.titre as title,
   cat.name as category,
@@ -103,7 +103,7 @@ FROM annonces l
 LEFT JOIN listing_stats ls ON ls.listing_id = l.id
 LEFT JOIN listing_contacts lc ON lc.listing_id = l.id
 LEFT JOIN categories cat ON cat.id = l.category_id
-GROUP BY l.author_id, l.id, l.titre, cat.name, l.prix, l.status, l.created_at;
+GROUP BY l.user_id, l.id, l.titre, cat.name, l.prix, l.status, l.created_at;
 
 CREATE INDEX IF NOT EXISTS idx_pro_listing_stats_listing_id
   ON pro_listing_stats (listing_id);
