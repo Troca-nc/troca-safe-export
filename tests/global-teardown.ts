@@ -9,14 +9,21 @@ export default async function globalTeardown() {
   if (!fs.existsSync(SERVER_STATE_FILE)) return
 
   try {
-    const state = JSON.parse(fs.readFileSync(SERVER_STATE_FILE, 'utf-8')) as { pid?: number }
-    if (state.pid && process.platform === 'win32') {
-      spawnSync('taskkill', ['/PID', String(state.pid), '/T', '/F'], { stdio: 'ignore' })
-    } else if (state.pid) {
-      try {
-        process.kill(state.pid, 'SIGTERM')
-      } catch {
-        // ignore
+    const state = JSON.parse(fs.readFileSync(SERVER_STATE_FILE, 'utf-8')) as {
+      pid?: number
+      backendPid?: number
+      frontendPid?: number
+    }
+    const pids = [state.frontendPid, state.backendPid, state.pid].filter((pid): pid is number => typeof pid === 'number')
+    for (const pid of pids) {
+      if (process.platform === 'win32') {
+        spawnSync('taskkill', ['/PID', String(pid), '/T', '/F'], { stdio: 'ignore' })
+      } else {
+        try {
+          process.kill(pid, 'SIGTERM')
+        } catch {
+          // ignore
+        }
       }
     }
   } finally {

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowRight, BadgeCheck, FilterX, MapPin, MessageSquareQuote, Search, Sparkles, Star } from 'lucide-react'
+import { ArrowRight, BadgeCheck, FilterX, MapPin, MessageSquareQuote, Quote, Search, Sparkles } from 'lucide-react'
 
 import ProQuoteModal from '@/components/pro/ProQuoteModal'
 import { normalizeQuoteTemplate } from '@/components/pro/quoteTemplate'
@@ -51,11 +51,6 @@ function getDisplayName(pro: ProCardModel) {
   )
 }
 
-function formatRating(value?: number | null) {
-  const rating = Number(value ?? 0)
-  return Number.isFinite(rating) && rating > 0 ? rating.toFixed(1) : '0.0'
-}
-
 function formatDateLabel(value: string) {
   try {
     return new Intl.DateTimeFormat('fr-FR', {
@@ -88,7 +83,6 @@ function ProQuoteCard({
   onRequestQuote: () => void
 }) {
   const displayName = getDisplayName(pro)
-  const rating = Number(pro.avg_rating ?? 0)
   const reviewCount = Number(pro.review_count ?? 0)
   const listingCount = Number(pro.listing_count ?? 0)
 
@@ -128,8 +122,8 @@ function ProQuoteCard({
 
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-night/60">
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
-            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-            {formatRating(rating)} ({reviewCount} avis)
+            <MessageSquareQuote className="h-3.5 w-3.5 text-[#0A7EA4]" />
+            {reviewCount} avis clients
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
             <Sparkles className="h-3.5 w-3.5 text-[#0A7EA4]" />
@@ -416,10 +410,9 @@ export default function AppelsOffresClient() {
     setQuoteOpen(true)
   }
 
-  const avgRating = useMemo(() => {
+  const totalReviews = useMemo(() => {
     if (!filteredPros.length) return 0
-    const total = filteredPros.reduce((acc, pro) => acc + Number(pro.avg_rating ?? 0), 0)
-    return total / filteredPros.length
+    return filteredPros.reduce((acc, pro) => acc + Number(pro.review_count ?? 0), 0)
   }, [filteredPros])
 
   return (
@@ -465,10 +458,10 @@ export default function AppelsOffresClient() {
             <p className="mt-2 text-2xl font-bold text-night">{pros.length.toLocaleString('fr-FR')}</p>
           </div>
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Note moyenne</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Avis clients</p>
             <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-night">
-              <Star className="h-5 w-5 fill-amber-400 text-amber-400" />
-              {avgRating ? avgRating.toFixed(1) : '0.0'}
+              <Quote className="h-5 w-5 text-[#0A7EA4]" />
+              {totalReviews.toLocaleString('fr-FR')}
             </p>
           </div>
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">

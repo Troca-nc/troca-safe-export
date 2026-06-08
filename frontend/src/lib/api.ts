@@ -505,6 +505,14 @@ export const metaApi = {
   ),
 }
 
+export const searchApi = {
+  suggestions: (params: { q?: string; limit?: number } = {}) => cachedGet(
+    buildCacheKey('search.suggestions', '/search/suggestions', params),
+    () => api.get('/search/suggestions', { params }),
+    CACHE_TTL.short,
+  ),
+}
+
 export const statsApi = {
   getHome: () => cachedGet(
     buildCacheKey('stats.getHome', '/stats/home'),

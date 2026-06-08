@@ -74,7 +74,7 @@ const nextConfig = {
       "img-src 'self' data: blob: https: http://localhost:3000 http://127.0.0.1:3000 http://localhost:3001 http://127.0.0.1:3001",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
-      "connect-src 'self' http://localhost:3001 http://127.0.0.1:3001 https://troca.nc https://api.troca.nc",
+      "connect-src 'self' http://localhost:3001 http://127.0.0.1:3001 ws://localhost:3001 ws://127.0.0.1:3001 https://troca.nc https://api.troca.nc",
       "font-src 'self' data: https:",
     ].join('; ')
 

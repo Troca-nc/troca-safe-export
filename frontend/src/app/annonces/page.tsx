@@ -29,20 +29,31 @@ import { findCategoryPathById } from '../../../../shared/categoryTaxonomy'
 const AnnoncesMap = dynamic(() => import('@/components/annonces/AnnoncesMap'), { ssr: false })
 
 const SORT_OPTIONS = [
-  { value: 'date',       label: 'Plus recentes' },
+  { value: 'date',       label: 'Plus récentes' },
   { value: 'price_asc',  label: 'Prix croissant' },
-  { value: 'price_desc', label: 'Prix decroissant' },
+  { value: 'price_desc', label: 'Prix décroissant' },
 ]
 
 const CONDITION_OPTIONS = [
   { value: 'new',       label: 'Neuf' },
   { value: 'like_new',  label: 'Comme neuf' },
-  { value: 'good',      label: 'Bon etat' },
+  { value: 'good',      label: 'Bon état' },
   { value: 'fair',      label: 'Correct' },
-  { value: 'for_parts', label: 'Pour pieces' },
+  { value: 'for_parts', label: 'Pour pièces' },
 ]
 
 const RADIUS_OPTIONS = [5, 10, 20, 50, 100]
+
+function radiusToSliderIndex(radius: number) {
+  const target = Number.isFinite(radius) && radius > 0 ? radius : RADIUS_OPTIONS[0]
+  return RADIUS_OPTIONS.reduce((bestIndex, currentRadius, index) => (
+    Math.abs(currentRadius - target) < Math.abs(RADIUS_OPTIONS[bestIndex] - target) ? index : bestIndex
+  ), 0)
+}
+
+function sliderIndexToRadius(index: number) {
+  return RADIUS_OPTIONS[Math.min(Math.max(0, Math.round(index)), RADIUS_OPTIONS.length - 1)] ?? RADIUS_OPTIONS[0]
+}
 
 function getCategoryChildren(category: any) {
   return category?.children || category?.subcategories || []
@@ -328,8 +339,8 @@ function FilterSidebar({
                 Choisissez une province pour voir les communes.
               </div>
             ) : (
-              <div className="max-h-56 overflow-y-auto rounded-2xl border border-night/8 bg-white p-3">
-                <div className="flex flex-wrap gap-2">
+              <div className="max-h-72 overflow-y-auto rounded-2xl border border-night/8 bg-white p-3">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   <button
                     type="button"
                     onClick={() => updateFilter('commune_id', '')}
@@ -386,20 +397,24 @@ function FilterSidebar({
         </button>
         {!collapsedSections.radius ? (
           <>
-            <input
-              type="range"
-              min={RADIUS_OPTIONS[0]}
-              max={RADIUS_OPTIONS[RADIUS_OPTIONS.length - 1]}
-              step={1}
-              value={filters.radius}
-              onChange={(e) => updateFilter('radius', snapRadius(Number(e.target.value)))}
-              className="w-full accent-coral"
-              aria-label="Rayon de recherche en kilomètres"
-            />
-            <div className="flex justify-between text-[10px] text-night/35">
-              {RADIUS_OPTIONS.map((value) => (
-                <span key={value}>{value} km</span>
-              ))}
+            <div className="flex flex-wrap gap-2">
+              {RADIUS_OPTIONS.map((value) => {
+                const active = Number(filters.radius) === value
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => updateFilter('radius', value)}
+                    className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
+                      active
+                        ? 'border-coral bg-coral text-white shadow-sm'
+                        : 'border-night/10 bg-white text-night/60 hover:bg-sand'
+                    }`}
+                  >
+                    {value} km
+                  </button>
+                )
+              })}
             </div>
             <div className="flex flex-wrap gap-2 pt-1">
               <button
@@ -1091,8 +1106,8 @@ function ListingsPageContent() {
                 Choisissez une province pour voir les communes.
               </div>
             ) : (
-              <div className="max-h-56 overflow-y-auto rounded-2xl border border-night/8 bg-white p-3">
-                <div className="flex flex-wrap gap-2">
+              <div className="max-h-72 overflow-y-auto rounded-2xl border border-night/8 bg-white p-3">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   <button
                     type="button"
                     onClick={() => updateFilter('commune_id', '')}
@@ -1149,20 +1164,24 @@ function ListingsPageContent() {
         </button>
         {!collapsedSections.radius ? (
           <>
-            <input
-              type="range"
-              min={RADIUS_OPTIONS[0]}
-              max={RADIUS_OPTIONS[RADIUS_OPTIONS.length - 1]}
-              step={1}
-              value={filters.radius}
-              onChange={(e) => updateFilter('radius', snapRadius(Number(e.target.value)))}
-              className="w-full accent-coral"
-              aria-label="Rayon de recherche en kilomètres"
-            />
-            <div className="flex justify-between text-[10px] text-night/35">
-              {RADIUS_OPTIONS.map((value) => (
-                <span key={value}>{value} km</span>
-              ))}
+            <div className="flex flex-wrap gap-2">
+              {RADIUS_OPTIONS.map((value) => {
+                const active = Number(filters.radius) === value
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => updateFilter('radius', value)}
+                    className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
+                      active
+                        ? 'border-coral bg-coral text-white shadow-sm'
+                        : 'border-night/10 bg-white text-night/60 hover:bg-sand'
+                    }`}
+                  >
+                    {value} km
+                  </button>
+                )
+              })}
             </div>
             <div className="flex flex-wrap gap-2 pt-1">
               <button

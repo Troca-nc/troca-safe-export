@@ -23,6 +23,7 @@ import {
 
 import { CATEGORY_ICONS } from '@/constants/category-icons'
 import { FALLBACK_CATEGORIES, type CategoryNode } from '@/lib/categoryCatalog'
+import { getCategoryIcon } from '@/lib/categoryPresentation'
 
 type IconComponent = ComponentType<{ className?: string }>
 
@@ -113,8 +114,7 @@ function buildCategoryHref(categorySlug: string, subcategorySlug?: string) {
 
 function resolveCategoryIcon(category: CategoryNode) {
   if (ROOT_ICON_BY_SLUG[category.slug]) return ROOT_ICON_BY_SLUG[category.slug]
-  const iconKey = CATEGORY_ICONS[category.slug as keyof typeof CATEGORY_ICONS] || category.icon || ''
-  return ICON_COMPONENTS[iconKey] || ICON_COMPONENTS[category.icon || ''] || Package
+  return getCategoryIcon(category.slug, category.name, category.icon)
 }
 
 function CategorySubtree({
@@ -133,14 +133,16 @@ function CategorySubtree({
     <ul className={depth === 0 ? 'mt-2 space-y-1' : 'mt-1 space-y-1 pl-3 border-l border-[var(--color-border)]'}>
       {validNodes.slice(0, 8).map((node) => {
         const children = (node.children || node.subcategories || []).filter(Boolean)
+        const Icon = getCategoryIcon(node.slug, node.name, node.icon)
         return (
           <li key={String(node.id)}>
             <Link
               href={`/annonces?categorie=${rootSlug}&sous_categorie=${node.slug}`}
-              className={`block line-clamp-1 transition-colors hover:text-[#0A7EA4] ${
+              className={`flex items-center gap-1.5 line-clamp-1 transition-colors hover:text-[#0A7EA4] ${
                 depth === 0 ? 'text-sm text-night/70 hover:text-[#0A7EA4]' : 'text-xs text-night/50'
               }`}
             >
+              <Icon className="h-3.5 w-3.5 shrink-0 text-[#0A7EA4]" />
               {node.name}
             </Link>
             {depth === 0 && children.length > 0 ? (

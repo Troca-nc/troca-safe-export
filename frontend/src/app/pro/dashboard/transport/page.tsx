@@ -140,7 +140,7 @@ export default function ProDashboardTransportPage() {
         <StatCard label="Courses terminées" value={String(data?.rides_completed_count ?? 0)} helper="Depuis l’ouverture du compte" />
         <StatCard label="Revenu total" value={`${Number(data?.revenue_total_xpf ?? 0).toLocaleString('fr-FR')} XPF`} helper="Montants payés" />
         <StatCard label="Revenu 30 jours" value={`${Number(data?.revenue_30d_xpf ?? 0).toLocaleString('fr-FR')} XPF`} helper="Derniers encaissements" />
-        <StatCard label="Note moyenne" value={`${Number(data?.avg_rating ?? 0).toFixed(1)}/5`} helper="Avis clients" />
+        <StatCard label="Avis clients" value={`${Number(data?.avg_rating ?? 0).toFixed(1)}/5`} helper="Note sur 5" />
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">

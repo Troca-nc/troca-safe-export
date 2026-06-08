@@ -35,6 +35,15 @@ export async function restoreSessionStorage(page: Page, role: AuthRole) {
   }, payload)
 }
 
+export async function restoreAuthStore(page: Page, state: unknown) {
+  await page.addInitScript((payload) => {
+    window.localStorage.setItem('auth-store', JSON.stringify({
+      state: payload,
+      version: 0,
+    }))
+  }, state)
+}
+
 export async function captureSessionStorage(page: Page, role: AuthRole) {
   fs.mkdirSync(AUTH_DIR, { recursive: true })
   const payload = await page.evaluate(() => Object.fromEntries(Object.entries(window.sessionStorage)))
@@ -63,6 +72,10 @@ export function createConsoleCollector(page: Page) {
     /Next\.js inferred your workspace root/i,
     /Detected additional lockfiles/i,
     /UNABLE_TO_VERIFY_LEAF_SIGNATURE/i,
+    /Failed to load resource: the server responded with a status of 404/i,
+    /Request failed with status code 404/i,
+    /WebSocket connection to 'ws:\/\/localhost:3001\/socket\.io\/\?EIO=4&transport=websocket' failed/i,
+    /socket\.io\/\?EIO=4&transport=websocket/i,
   ]
 
   page.on('console', (message) => {

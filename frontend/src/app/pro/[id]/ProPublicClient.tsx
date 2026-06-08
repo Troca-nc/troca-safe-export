@@ -34,7 +34,7 @@ const TABS = [
   { id: 'annonces', label: 'Annonces', icon: Package },
   { id: 'catalogue', label: 'Catalogue', icon: Store },
   { id: 'avis', label: 'Avis', icon: Star },
-  { id: 'apropos', label: 'Ã€ propos', icon: Store },
+  { id: 'apropos', label: 'À propos', icon: Store },
 ] as const
 
 type ProPublicClientProps = {
@@ -205,10 +205,10 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Profil pro</p>
             <h1 className="mt-3 font-display text-3xl font-bold text-night">Professionnel introuvable</h1>
             <p className="mt-3 text-sm leading-relaxed text-night/60">
-              Cette vitrine nâ€™est pas disponible ou nâ€™a pas encore Ã©tÃ© validÃ©e.
+              Cette vitrine n’est pas disponible ou n’a pas encore été validée.
             </p>
             <Link href="/pro" className="btn-primary mt-6 inline-flex items-center gap-2 px-5 py-3 text-sm">
-              Retour Ã  lâ€™espace Pro
+              Retour à l’espace Pro
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -226,6 +226,21 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
   const bookingSlots = profile.booking_slots ?? []
   const products = (profile.products ?? []) as ProPublicProduct[]
   const catalogCategories = profile.catalog_categories ?? []
+  const fallbackCatalogCategories = useMemo(() => {
+    const seen = new Set<string>()
+    return products
+      .map((product) => ({
+        id: product.catalog_category_id ?? product.category_id ?? product.category_name ?? '',
+        name: product.catalog_category_name || product.category_name || '',
+      }))
+      .filter((entry) => {
+        const key = String(entry.id ?? '')
+        if (!key || !entry.name || seen.has(key)) return false
+        seen.add(key)
+        return true
+      })
+  }, [products])
+  const visibleCatalogCategories = catalogCategories.length ? catalogCategories : fallbackCatalogCategories
   const bookingEnabled = Boolean(bookingSettings?.is_enabled)
   const bookingPreviewSlots = bookingSlots.slice(0, 3)
   const filteredProducts = useMemo(() => {
@@ -303,13 +318,13 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                       <h1 className="font-display text-3xl font-bold text-night">{displayName}</h1>
                       <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
                         <BadgeCheck className="h-3.5 w-3.5" />
-                        Pro vÃ©rifiÃ©
+                        Pro vérifié
                       </span>
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-night/60">
                       <span className="inline-flex items-center gap-1">
                         <MapPin className="h-4 w-4 text-coral" />
-                        {profile.pro_commune || 'Nouvelle-CalÃ©donie'}
+                        {profile.pro_commune || 'Nouvelle-Calédonie'}
                       </span>
                       <span className="inline-flex items-center gap-1">
                         <Store className="h-4 w-4 text-coral" />
@@ -317,17 +332,17 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                       </span>
                       <span className="inline-flex items-center gap-1">
                         <Clock3 className="h-4 w-4 text-coral" />
-                        {profile.pro_hours || 'Horaires Ã  venir'}
+                        {profile.pro_hours || 'Horaires à venir'}
                       </span>
                     </div>
                     <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-night/60">
                       <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
-                        <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                        {formatRating(rating)} ({reviewCount} avis)
-                      </span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
                         <Package className="h-4 w-4 text-[#0A7EA4]" />
                         {listingCount} annonce{listingCount > 1 ? 's' : ''} active{listingCount > 1 ? 's' : ''}
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
+                        <MapPin className="h-4 w-4 text-[#0A7EA4]" />
+                        {profile.pro_commune || 'Nouvelle-Calédonie'}
                       </span>
                       {productCount > 0 ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
@@ -336,6 +351,9 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                         </span>
                       ) : null}
                     </div>
+                    <p className="mt-2 text-xs text-night/50">
+                      {reviewCount} avis clients
+                    </p>
                   </div>
                 </div>
 
@@ -400,9 +418,9 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
 
             <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Inviter un client</p>
-              <h2 className="mt-1 font-display text-2xl font-bold text-night">Collectez plus d'avis vÃ©rifiÃ©s</h2>
+              <h2 className="mt-1 font-display text-2xl font-bold text-night">Collectez plus d'avis vérifiés</h2>
               <p className="mt-2 text-sm leading-relaxed text-night/60">
-                Envoyez un lien d&apos;avis aprÃ¨s une transaction pour faire remonter votre note plus rapidement.
+                Envoyez un lien d&apos;avis après une transaction pour faire remonter votre note plus rapidement.
               </p>
               {isOwner ? (
                 <button
@@ -411,7 +429,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                   className="btn-primary mt-4 inline-flex items-center gap-2 px-5 py-3 text-sm"
                 >
                   <MessageCircle className="h-4 w-4" />
-                  Inviter un client Ã  laisser un avis
+                  Inviter un client à laisser un avis
                 </button>
               ) : (
                 <p className="mt-4 text-sm text-night/50">Connectez-vous avec ce compte Pro pour envoyer des invitations d&apos;avis.</p>
@@ -558,7 +576,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
               ) : (
                 <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-14 text-center text-night/55">
                   <p className="text-lg font-semibold text-night">Aucune annonce active</p>
-                  <p className="mt-2 text-sm">Ce professionnel nâ€™a pas encore dâ€™annonce en ligne.</p>
+                  <p className="mt-2 text-sm">Ce professionnel n’a pas encore d’annonce en ligne.</p>
                 </div>
               )}
             </div>
@@ -568,7 +586,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
             <div>
               {products.length ? (
                 <div className="space-y-4">
-                  {catalogCategories.length ? (
+                  {visibleCatalogCategories.length ? (
                     <div className="flex gap-2 overflow-x-auto rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-2 shadow-sm">
                       <button
                         type="button"
@@ -581,7 +599,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                       >
                         Tous
                       </button>
-                      {catalogCategories.map((category) => (
+                      {visibleCatalogCategories.map((category) => (
                         <button
                           key={category.id}
                           type="button"
@@ -724,19 +742,19 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
           {activeTab === 'apropos' ? (
             <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
               <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Ã€ propos</p>
+                  <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">À propos</p>
                 <h2 className="mt-2 font-display text-2xl font-bold text-night">Votre vitrine professionnelle</h2>
                 <p className="mt-3 text-sm leading-relaxed text-night/65">
-                  {profile.pro_description || 'Ce professionnel prÃ©sente ses services, ses horaires et ses coordonnÃ©es sur Troca.'}
+                  {profile.pro_description || 'Ce professionnel présente ses services, ses horaires et ses coordonnées sur Troca.'}
                 </p>
               </div>
               <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">CoordonnÃ©es</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Coordonnées</p>
                 <div className="mt-4 space-y-3 text-sm text-night/65">
-                  <p><span className="font-semibold text-night">Commune :</span> {profile.pro_commune || 'Nouvelle-CalÃ©donie'}</p>
-                  <p><span className="font-semibold text-night">TÃ©lÃ©phone :</span> {profile.pro_phone || 'Non renseignÃ©'}</p>
-                  <p><span className="font-semibold text-night">Site web :</span> {profile.pro_website || 'Non renseignÃ©'}</p>
-                  <p><span className="font-semibold text-night">Horaires :</span> {profile.pro_hours || 'Non renseignÃ©s'}</p>
+                  <p><span className="font-semibold text-night">Commune :</span> {profile.pro_commune || 'Nouvelle-Calédonie'}</p>
+                  <p><span className="font-semibold text-night">Téléphone :</span> {profile.pro_phone || 'Non renseigné'}</p>
+                  <p><span className="font-semibold text-night">Site web :</span> {profile.pro_website || 'Non renseigné'}</p>
+                  <p><span className="font-semibold text-night">Horaires :</span> {profile.pro_hours || 'Non renseignés'}</p>
                 </div>
               </div>
             </div>

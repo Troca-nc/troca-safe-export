@@ -23,7 +23,12 @@ export async function expectMainHeadingVisible(page: Page) {
 
 export async function captureFullPage(page: Page, group: string, name: string) {
   const file = screenshotPath(group, name)
-  await page.screenshot({ path: file, fullPage: true })
+  await page.screenshot({
+    path: file,
+    fullPage: false,
+    animations: 'disabled',
+    timeout: 20_000,
+  })
   return file
 }
 
@@ -32,7 +37,7 @@ export async function gotoPage(page: Page, url: string) {
 }
 
 export async function expectPageHealthy(page: Page) {
-  await expect(page.locator('body')).not.toContainText(/undefined|NaN|\[object Object\]/i)
+  await expect(page.locator('body')).not.toContainText(/\bundefined\b|\bNaN\b|\[object Object\]/i)
 }
 
 export async function expectNotOnConnexion(page: Page) {

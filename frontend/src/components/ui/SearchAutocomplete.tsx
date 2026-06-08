@@ -7,10 +7,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search, Clock, Grid, MapPin, TrendingUp, X } from 'lucide-react'
-import { listingsApi } from '@/lib/api'
+import { listingsApi, searchApi } from '@/lib/api'
+import { trackEvent } from '@/lib/analytics'
 
 interface Suggestion {
-  type:  'annonce' | 'categorie' | 'commune' | 'historique'
+  type:  'annonce' | 'categorie' | 'commune' | 'historique' | 'recherche'
   label: string
   sub?:  string
   href:  string
@@ -84,11 +85,44 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher…', clas
 
     debounceRef.current = setTimeout(async () => {
       try {
-        const { data } = await listingsApi.search({ q: q.trim(), limit: 5, sort: 'date' })
+        const [searchHintsResponse, listingsResponse] = await Promise.allSettled([
+          searchApi.suggestions({ q: q.trim(), limit: 5 }),
+          listingsApi.search({ q: q.trim(), limit: 5, sort: 'date' }),
+        ])
+
         const items: Suggestion[] = []
 
+        const serverSuggestions = searchHintsResponse.status === 'fulfilled' && Array.isArray(searchHintsResponse.value.data?.data?.suggestions)
+          ? searchHintsResponse.value.data.data.suggestions
+          : []
+
+        for (const item of serverSuggestions) {
+          const label = String(item?.label || '').trim()
+          if (!label) continue
+          items.push({
+            type: item?.kind === 'category'
+              ? 'categorie'
+              : item?.kind === 'commune'
+                ? 'commune'
+                : 'recherche',
+            label,
+            sub: item?.kind === 'category'
+              ? 'Suggestion populaire'
+              : item?.kind === 'commune'
+                ? 'Commune'
+                : item?.source === 'personal'
+                  ? 'Vos recherches'
+                  : 'Recherche populaire',
+            href: String(item?.href || `/annonces?q=${encodeURIComponent(label)}`),
+          })
+        }
+
         // Annonces
-        for (const l of data.data ?? []) {
+        const listings = listingsResponse.status === 'fulfilled' && Array.isArray(listingsResponse.value.data?.data)
+          ? listingsResponse.value.data.data
+          : []
+
+        for (const l of listings) {
           items.push({
             type:  'annonce',
             label:  l.titre,
@@ -106,7 +140,11 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher…', clas
           })
         }
 
-        setSuggestions(items)
+        const deduped = items.filter((item, index, array) =>
+          index === array.findIndex((candidate) => candidate.label.toLowerCase() === item.label.toLowerCase() && candidate.href === item.href)
+        )
+
+        setSuggestions(deduped)
         setOpen(true)
         setActiveIdx(-1)
       } catch {
@@ -136,17 +174,26 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher…', clas
     saveHistory(label)
     setOpen(false)
     setQ('')
+    void trackEvent('listing_search', {
+      query: label,
+      source: 'autocomplete_suggestion',
+    })
     if (onSearch) onSearch(label)
     else router.push(href)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!q.trim()) return
-    saveHistory(q.trim())
+    const term = q.trim()
+    if (!term) return
+    saveHistory(term)
     setOpen(false)
-    if (onSearch) onSearch(q.trim())
-    else router.push(`/annonces?q=${encodeURIComponent(q.trim())}`)
+    void trackEvent('listing_search', {
+      query: term,
+      source: 'autocomplete_submit',
+    })
+    if (onSearch) onSearch(term)
+    else router.push(`/annonces?q=${encodeURIComponent(term)}`)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -170,6 +217,7 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher…', clas
     annonce:    <TrendingUp size={14} className="text-coral shrink-0" />,
     categorie:  <Grid       size={14} className="text-blue-500 shrink-0" />,
     commune:    <MapPin     size={14} className="text-green-500 shrink-0" />,
+    recherche:  <Search     size={14} className="text-coral shrink-0" />,
     historique: <Clock      size={14} className="text-night/30 shrink-0" />,
   }
 

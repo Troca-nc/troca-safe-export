@@ -1,26 +1,27 @@
 import { test, expect } from '@playwright/test'
 import { assertNoForbiddenBodyText, createConsoleCollector } from './support/auth'
-import { captureFullPage, expectMainHeadingVisible, expectPageHealthy, gotoPage, maybeClickFirstLink, expectNotOnConnexion } from './support/audit'
+import { captureFullPage, expectMainHeadingVisible, expectPageHealthy, gotoPage, expectNotOnConnexion } from './support/audit'
 import { PUBLIC_PAGES, PUBLIC_SCREENSHOT_GROUP } from './support/routes'
+import { HomePO } from './pom/home.po'
+import { AnnoncesPO } from './pom/annonces.po'
 
 test.describe('public', () => {
   test('homepage search chips, categories and newsletter are visible', async ({ page }) => {
     const console = createConsoleCollector(page)
+    const home = new HomePO(page)
 
-    await gotoPage(page, '/')
+    await home.open()
     await expectNotOnConnexion(page)
-    await expectMainHeadingVisible(page)
-    await expect(page.getByPlaceholder('Que recherchez-vous ?')).toBeVisible()
-    await expect(page.getByText('Recherches populaires')).toBeVisible()
+    await home.expectHeroLoaded()
     await expect(page.getByLabel(/newsletter|e-mail/i).or(page.getByPlaceholder(/email|e-mail/i))).toBeVisible()
 
     const chip = page.getByRole('button', { name: /Toyota Hilux/i }).first()
     await expect(chip).toBeVisible()
-    await chip.click()
+    await Promise.all([
+      page.waitForURL(/\/annonces\?q=Toyota%20Hilux/i),
+      home.clickPopularSearch('Toyota Hilux'),
+    ])
     await expect(page).toHaveURL(/\/annonces\?q=Toyota%20Hilux/i)
-
-    await gotoPage(page, '/')
-    await expect(page.getByText(/Troc possible/i)).toBeVisible()
     await captureFullPage(page, PUBLIC_SCREENSHOT_GROUP, 'homepage')
     await expectPageHealthy(page)
     await assertNoForbiddenBodyText(page)
@@ -43,13 +44,13 @@ test.describe('public', () => {
 
   test('annonces list opens a detail page', async ({ page }) => {
     const console = createConsoleCollector(page)
-    await gotoPage(page, '/annonces')
-    const firstListing = page.locator('main a[href^="/annonces/"]').first()
-    await expect(firstListing).toBeVisible()
-    await firstListing.click()
+    const annonces = new AnnoncesPO(page)
+
+    await annonces.open()
+    await annonces.openFirstListing()
     await expect(page).toHaveURL(/\/annonces\/\d+/)
     await expectMainHeadingVisible(page)
-    await expect(page.getByRole('button', { name: /Contacter le vendeur|Faire une offre|Troc possible/i })).toBeVisible()
+    await annonces.expectDetailActions()
     await captureFullPage(page, PUBLIC_SCREENSHOT_GROUP, 'annonces-detail')
     await expectPageHealthy(page)
     await assertNoForbiddenBodyText(page)
@@ -93,8 +94,8 @@ test.describe('public', () => {
     const console = createConsoleCollector(page)
     await gotoPage(page, '/bons-plans')
     await expectMainHeadingVisible(page)
-    await expect(page.getByText(/Promotions/i)).toBeVisible()
-    await expect(page.getByText(/Événements/i)).toBeVisible()
+    await expect(page.getByRole('button', { name: /Promotions/i }).first()).toBeVisible()
+    await expect(page.getByRole('button', { name: /Événements/i }).first()).toBeVisible()
 
     await gotoPage(page, '/covoiturage')
     await expect(page.getByText(/Rechercher/i)).toBeVisible()

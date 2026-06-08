@@ -297,7 +297,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
               <div>
                 <h3 className="font-semibold text-night text-sm mb-3">Localisation</h3>
                 <div className="space-y-4">
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                     <button
                       type="button"
                       onClick={() => {
@@ -327,8 +327,8 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
                   </div>
 
                   {selectedProvince ? (
-                    <div className="max-h-56 overflow-y-auto rounded-2xl border border-night/8 bg-white p-3">
-                      <div className="flex flex-wrap gap-2">
+                    <div className="max-h-72 overflow-y-auto rounded-2xl border border-night/8 bg-white p-3">
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                         <button
                           type="button"
                           onClick={() => updateFilter('commune_id', '')}
@@ -378,16 +378,25 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
                     {filters.radius} km
                   </div>
                 </div>
-                <input
-                  type="range"
-                  min={RADIUS_OPTIONS[0]}
-                  max={RADIUS_OPTIONS[RADIUS_OPTIONS.length - 1]}
-                  step={1}
-                  value={filters.radius}
-                  onChange={(event) => updateFilter('radius', Number(event.target.value))}
-                  className="w-full accent-coral"
-                  aria-label="Rayon de recherche en kilomètres"
-                />
+                <div className="flex flex-wrap gap-2">
+                  {RADIUS_OPTIONS.map((value) => {
+                    const active = Number(filters.radius) === value
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => updateFilter('radius', value)}
+                        className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
+                          active
+                            ? 'border-coral bg-coral text-white shadow-sm'
+                            : 'border-night/10 bg-white text-night/60 hover:bg-sand'
+                        }`}
+                      >
+                        {value} km
+                      </button>
+                    )
+                  })}
+                </div>
                 <div className="flex justify-between text-[10px] text-night/35">
                   {RADIUS_OPTIONS.map((value) => <span key={value}>{value} km</span>)}
                 </div>

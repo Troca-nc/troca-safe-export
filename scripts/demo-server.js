@@ -6,6 +6,8 @@ const { randomUUID } = require('node:crypto');
 
 const PORT = Number(process.env.DEMO_API_PORT || process.env.PORT || 3001);
 const DEMO_PASSWORD = 'Demo1234!';
+const DEFAULT_ORIGIN = 'http://127.0.0.1:3000';
+const ALLOWED_HEADERS = 'Content-Type, Authorization, X-Internal-Token, X-Request-Id, X-CSRF-Token';
 
 function nowIso() {
   return new Date().toISOString();
@@ -47,8 +49,9 @@ function svgDataUri(title, subtitle, hue = 196) {
 function json(res, statusCode, payload, extraHeaders = {}) {
   res.writeHead(statusCode, {
     'Content-Type': 'application/json; charset=utf-8',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Internal-Token',
+    'Access-Control-Allow-Origin': extraHeaders['Access-Control-Allow-Origin'] || DEFAULT_ORIGIN,
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Allow-Headers': ALLOWED_HEADERS,
     'Access-Control-Allow-Methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
     ...extraHeaders,
   });
@@ -58,8 +61,9 @@ function json(res, statusCode, payload, extraHeaders = {}) {
 function text(res, statusCode, body, extraHeaders = {}) {
   res.writeHead(statusCode, {
     'Content-Type': 'text/plain; charset=utf-8',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Internal-Token',
+    'Access-Control-Allow-Origin': extraHeaders['Access-Control-Allow-Origin'] || DEFAULT_ORIGIN,
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Allow-Headers': ALLOWED_HEADERS,
     'Access-Control-Allow-Methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
     ...extraHeaders,
   });
@@ -93,52 +97,52 @@ function slugify(value) {
 }
 
 const CATEGORY_CATALOG = [
-  { id: 1, name: 'Emploi', slug: 'emploi', icon: '✦', subcategories: [
+  { id: 1, name: 'Emploi', slug: 'emploi', icon: 'âœ¦', subcategories: [
     { id: 11, name: "Offres d'emploi", slug: 'offres-emploi' },
     { id: 12, name: 'Formations professionnelles', slug: 'formations-professionnelles' },
   ]},
-  { id: 2, name: 'Véhicules', slug: 'vehicules', icon: '◢', subcategories: [
+  { id: 2, name: 'VÃ©hicules', slug: 'vehicules', icon: 'â—¢', subcategories: [
     { id: 21, name: 'Voitures', slug: 'voitures' },
     { id: 22, name: 'Motos', slug: 'motos' },
     { id: 23, name: 'Utilitaires', slug: 'utilitaires' },
     { id: 24, name: 'Nautisme', slug: 'nautisme' },
   ]},
-  { id: 3, name: 'Immobilier', slug: 'immobilier', icon: '⌂', subcategories: [
-    { id: 31, name: 'Ventes immobilières', slug: 'ventes-immobilieres' },
+  { id: 3, name: 'Immobilier', slug: 'immobilier', icon: 'âŒ‚', subcategories: [
+    { id: 31, name: 'Ventes immobiliÃ¨res', slug: 'ventes-immobilieres' },
     { id: 32, name: 'Locations', slug: 'locations' },
     { id: 33, name: 'Colocations', slug: 'colocations' },
   ]},
-  { id: 4, name: 'Électronique', slug: 'electronique', icon: '◼', subcategories: [
+  { id: 4, name: 'Ã‰lectronique', slug: 'electronique', icon: 'â—¼', subcategories: [
     { id: 41, name: 'Ordinateurs', slug: 'ordinateurs' },
-    { id: 42, name: 'Téléphones & Objets connectés', slug: 'telephones-objets-connectes' },
+    { id: 42, name: 'TÃ©lÃ©phones & Objets connectÃ©s', slug: 'telephones-objets-connectes' },
     { id: 43, name: 'Consoles', slug: 'consoles' },
-    { id: 44, name: 'Jeux vidéo', slug: 'jeux-video' },
+    { id: 44, name: 'Jeux vidÃ©o', slug: 'jeux-video' },
   ]},
-  { id: 5, name: 'Maison & Jardin', slug: 'maison-jardin', icon: '◫', subcategories: [
+  { id: 5, name: 'Maison & Jardin', slug: 'maison-jardin', icon: 'â—«', subcategories: [
     { id: 51, name: 'Ameublement', slug: 'ameublement' },
-    { id: 52, name: 'Électroménager', slug: 'electromenager' },
-    { id: 53, name: 'Décoration', slug: 'decoration' },
+    { id: 52, name: 'Ã‰lectromÃ©nager', slug: 'electromenager' },
+    { id: 53, name: 'DÃ©coration', slug: 'decoration' },
   ]},
-  { id: 6, name: 'Mode', slug: 'mode', icon: '◍', subcategories: [
-    { id: 61, name: 'Vêtements', slug: 'vetements' },
+  { id: 6, name: 'Mode', slug: 'mode', icon: 'â—', subcategories: [
+    { id: 61, name: 'VÃªtements', slug: 'vetements' },
     { id: 62, name: 'Chaussures', slug: 'chaussures' },
   ]},
-  { id: 7, name: 'Loisirs', slug: 'loisirs', icon: '◌', subcategories: [
+  { id: 7, name: 'Loisirs', slug: 'loisirs', icon: 'â—Œ', subcategories: [
     { id: 71, name: 'Livres', slug: 'livres' },
     { id: 72, name: 'Sport & Plein air', slug: 'sport-plein-air' },
-    { id: 73, name: 'Vélos', slug: 'velos' },
+    { id: 73, name: 'VÃ©los', slug: 'velos' },
   ]},
-  { id: 8, name: 'Services', slug: 'services', icon: '◐', subcategories: [
+  { id: 8, name: 'Services', slug: 'services', icon: 'â—', subcategories: [
     { id: 81, name: 'Baby-Sitting', slug: 'baby-sitting' },
     { id: 82, name: 'Cours particuliers', slug: 'cours-particuliers' },
-    { id: 83, name: 'Services à la personne', slug: 'services-a-la-personne' },
+    { id: 83, name: 'Services Ã  la personne', slug: 'services-a-la-personne' },
   ]},
-  { id: 9, name: 'Troc', slug: 'troc', icon: '⇄', subcategories: [
-    { id: 91, name: 'Échange', slug: 'echange' },
+  { id: 9, name: 'Troc', slug: 'troc', icon: 'â‡„', subcategories: [
+    { id: 91, name: 'Ã‰change', slug: 'echange' },
     { id: 92, name: 'Don', slug: 'don' },
     { id: 93, name: 'Contre-service', slug: 'contre-service' },
   ]},
-  { id: 10, name: 'Divers', slug: 'divers', icon: '⋯', subcategories: [
+  { id: 10, name: 'Divers', slug: 'divers', icon: 'â‹¯', subcategories: [
     { id: 101, name: 'Autres', slug: 'autres' },
   ]},
 ];
@@ -149,9 +153,9 @@ const PROVINCES = [
     name: 'Province Sud',
     code: 'S',
     communes: [
-      { id: 101, name: 'Nouméa', latitude: -22.2758, longitude: 166.458 },
-      { id: 102, name: 'Dumbéa', latitude: -22.15, longitude: 166.45 },
-      { id: 103, name: 'Païta', latitude: -22.133, longitude: 166.37 },
+      { id: 101, name: 'NoumÃ©a', latitude: -22.2758, longitude: 166.458 },
+      { id: 102, name: 'DumbÃ©a', latitude: -22.15, longitude: 166.45 },
+      { id: 103, name: 'PaÃ¯ta', latitude: -22.133, longitude: 166.37 },
       { id: 104, name: 'Mont-Dore', latitude: -22.214, longitude: 166.545 },
       { id: 105, name: 'Bourail', latitude: -21.5706, longitude: 165.493 },
     ],
@@ -161,7 +165,7 @@ const PROVINCES = [
     name: 'Province Nord',
     code: 'N',
     communes: [
-      { id: 201, name: 'Koné', latitude: -21.0667, longitude: 164.8667 },
+      { id: 201, name: 'KonÃ©', latitude: -21.0667, longitude: 164.8667 },
       { id: 202, name: 'Koumac', latitude: -20.567, longitude: 164.283 },
       { id: 203, name: 'Voh', latitude: -20.942, longitude: 164.685 },
       { id: 204, name: 'Houailou', latitude: -21.283, longitude: 165.617 },
@@ -170,12 +174,12 @@ const PROVINCES = [
   },
   {
     id: 3,
-    name: 'Province Îles',
+    name: 'Province ÃŽles',
     code: 'I',
     communes: [
       { id: 301, name: 'Lifou', latitude: -20.919, longitude: 167.263 },
-      { id: 302, name: 'Maré', latitude: -21.498, longitude: 167.988 },
-      { id: 303, name: 'Ouvéa', latitude: -20.64, longitude: 166.562 },
+      { id: 302, name: 'MarÃ©', latitude: -21.498, longitude: 167.988 },
+      { id: 303, name: 'OuvÃ©a', latitude: -20.64, longitude: 166.562 },
     ],
   },
 ];
@@ -209,7 +213,7 @@ function communeLabel(id) {
     const commune = province.communes.find((c) => String(c.id) === String(id));
     if (commune) return commune.name;
   }
-  return 'Nouméa';
+  return 'NoumÃ©a';
 }
 
 function provinceForCommuneId(id) {
@@ -220,12 +224,12 @@ const DEMO_PASSWORD_HASH = 'demo';
 
 function createUsers() {
   const base = [
-    { id: 1, email: 'admin@demo.troca', first_name: 'Ada', last_name: 'Admin', is_admin: true, is_pro: true, is_verified: true, rating: 5, commune_name: 'Nouméa', province_name: 'Province Sud', demo_role: 'admin', trust_score: 98, note_moyenne: 5, nb_avis: 18, nb_annonces: 5, telephone_verifie: true, bio: 'Administratrice locale de démonstration.' },
-    { id: 2, email: 'particulier@demo.troca', first_name: 'Emma', last_name: 'Martin', is_admin: false, is_pro: false, is_verified: true, rating: 4.8, commune_name: 'Nouméa', province_name: 'Province Sud', demo_role: 'particulier', trust_score: 91, note_moyenne: 4.8, nb_avis: 6, nb_annonces: 3, telephone_verifie: true, bio: 'Particulier actif, aime les bonnes affaires.' },
-    { id: 3, email: 'pro@demo.troca', first_name: 'Atelier', last_name: 'Kalo', is_admin: false, is_pro: true, is_verified: true, rating: 4.9, commune_name: 'Dumbéa', province_name: 'Province Sud', demo_role: 'pro', trust_score: 96, note_moyenne: 4.9, nb_avis: 14, nb_annonces: 9, telephone_verifie: true, bio: 'Comptes pro et service client réactif.' },
-    { id: 4, email: 'bonplan@demo.troca', first_name: 'Troca', last_name: 'Bon Plan', is_admin: false, is_pro: true, is_verified: true, rating: 5, commune_name: 'Nouméa', province_name: 'Province Sud', demo_role: 'bon_plan', trust_score: 99, note_moyenne: 5, nb_avis: 31, nb_annonces: 12, telephone_verifie: true, bio: 'Vendeur vedette avec historique solide.' },
-    { id: 5, email: 'loueur@demo.troca', first_name: 'Lucas', last_name: 'Bernier', is_admin: false, is_pro: false, is_verified: true, rating: 4.6, commune_name: 'Koné', province_name: 'Province Nord', demo_role: 'visitor', trust_score: 84, note_moyenne: 4.6, nb_avis: 4, nb_annonces: 2, telephone_verifie: false, bio: 'Location et troc entre particuliers.' },
-    { id: 6, email: 'marine@demo.troca', first_name: 'Marine', last_name: 'Dupont', is_admin: false, is_pro: false, is_verified: true, rating: 4.7, commune_name: 'Lifou', province_name: 'Province Îles', demo_role: 'visitor', trust_score: 88, note_moyenne: 4.7, nb_avis: 7, nb_annonces: 4, telephone_verifie: true, bio: 'Parcours mobile simple et fluide.' },
+    { id: 1, email: 'admin@demo.troca', first_name: 'Ada', last_name: 'Admin', is_admin: true, is_pro: true, is_verified: true, rating: 5, commune_name: 'NoumÃ©a', province_name: 'Province Sud', demo_role: 'admin', trust_score: 98, note_moyenne: 5, nb_avis: 18, nb_annonces: 5, telephone_verifie: true, bio: 'Administratrice locale de dÃ©monstration.' },
+    { id: 2, email: 'particulier@demo.troca', first_name: 'Emma', last_name: 'Martin', is_admin: false, is_pro: false, is_verified: true, rating: 4.8, commune_name: 'NoumÃ©a', province_name: 'Province Sud', demo_role: 'particulier', trust_score: 91, note_moyenne: 4.8, nb_avis: 6, nb_annonces: 3, telephone_verifie: true, bio: 'Particulier actif, aime les bonnes affaires.' },
+    { id: 3, email: 'pro@demo.troca', first_name: 'Entreprise', last_name: 'Test NC', is_admin: false, is_pro: true, is_verified: true, rating: 4.9, commune_name: 'DumbÃ©a', province_name: 'Province Sud', demo_role: 'pro', trust_score: 96, note_moyenne: 4.9, nb_avis: 14, nb_annonces: 9, telephone_verifie: true, bio: 'Compte professionnel de dÃ©monstration.', pro_referral_code: 'PW-PRO-2026' },
+    { id: 4, email: 'bonplan@demo.troca', first_name: 'Troca', last_name: 'Bon Plan', is_admin: false, is_pro: true, is_verified: true, rating: 5, commune_name: 'NoumÃ©a', province_name: 'Province Sud', demo_role: 'bon_plan', trust_score: 99, note_moyenne: 5, nb_avis: 31, nb_annonces: 12, telephone_verifie: true, bio: 'Vendeur vedette avec historique solide.' },
+    { id: 5, email: 'loueur@demo.troca', first_name: 'Lucas', last_name: 'Bernier', is_admin: false, is_pro: false, is_verified: true, rating: 4.6, commune_name: 'KonÃ©', province_name: 'Province Nord', demo_role: 'visitor', trust_score: 84, note_moyenne: 4.6, nb_avis: 4, nb_annonces: 2, telephone_verifie: false, bio: 'Location et troc entre particuliers.' },
+    { id: 6, email: 'marine@demo.troca', first_name: 'Marine', last_name: 'Dupont', is_admin: false, is_pro: false, is_verified: true, rating: 4.7, commune_name: 'Lifou', province_name: 'Province ÃŽles', demo_role: 'visitor', trust_score: 88, note_moyenne: 4.7, nb_avis: 7, nb_annonces: 4, telephone_verifie: true, bio: 'Parcours mobile simple et fluide.' },
   ];
 
   return base.map((user) => ({
@@ -243,22 +247,22 @@ function createListings(users) {
     svgDataUri('Troca', 'Annonce locale', 195),
     svgDataUri('Pro', 'Offre premium', 14),
     svgDataUri('Maison', 'Objet du quotidien', 25),
-    svgDataUri('Mobilité', 'Véhicule / service', 120),
+    svgDataUri('MobilitÃ©', 'VÃ©hicule / service', 120),
   ];
 
   const seed = [
-    [101, 2, 'iPhone 13 128 Go', 65000, 'electronique', 42, 'Nouméa', 'new', 'Très bon état, batterie 89%.', true, true, false],
-    [102, 3, 'Service de maintenance PC', 8000, 'services', 83, 'Dumbéa', 'good', 'Intervention à domicile ou en atelier.', false, false, true],
-    [103, 4, 'Vélo électrique reconditionné', 125000, 'loisirs', 73, 'Nouméa', 'like_new', 'Autonomie 65 km, révision complète.', true, false, true],
-    [104, 5, 'Canapé 3 places beige', 18000, 'maison-jardin', 51, 'Koné', 'good', 'A récupérer ce week-end.', false, false, false],
-    [105, 6, 'Pack bébé complet', 12000, 'famille', 999, 'Lifou', 'good', 'Lit, chaise haute, vêtements, lot complet.', false, false, false],
-    [106, 2, 'Cours de guitare débutant', 3500, 'services', 82, 'Nouméa', 'new', 'Cours en visio ou en présentiel.', false, true, false],
-    [107, 3, 'Skoda Octavia 2018', 1850000, 'vehicules', 21, 'Dumbéa', 'good', 'Entretien à jour, visible sur rendez-vous.', true, false, false],
+    [101, 2, 'Toyota Hilux 2019 4x4 diesel', 3500000, 'vehicules', 21, 'NoumÃ©a', 'good', 'VÃ©hicule entretenu, troc possible selon proposition.', true, true, false],
+    [102, 3, 'Service de maintenance PC', 8000, 'services', 83, 'DumbÃ©a', 'good', 'Intervention Ã  domicile ou en atelier.', false, false, true],
+    [103, 4, 'VÃ©lo Ã©lectrique reconditionnÃ©', 125000, 'loisirs', 73, 'NoumÃ©a', 'like_new', 'Autonomie 65 km, rÃ©vision complÃ¨te.', true, false, true],
+    [104, 5, 'CanapÃ© 3 places beige', 18000, 'maison-jardin', 51, 'KonÃ©', 'good', 'A rÃ©cupÃ©rer ce week-end.', false, false, false],
+    [105, 6, 'Pack bÃ©bÃ© complet', 12000, 'famille', 999, 'Lifou', 'good', 'Lit, chaise haute, vÃªtements, lot complet.', false, false, false],
+    [106, 2, 'MacBook Air M2 15 pouces', 180000, 'electronique', 42, 'NoumÃ©a', 'like_new', 'Chargeur et housse inclus.', false, true, false],
+    [107, 3, 'Skoda Octavia 2018', 1850000, 'vehicules', 21, 'DumbÃ©a', 'good', 'Entretien Ã  jour, visible sur rendez-vous.', true, false, false],
     [108, 4, 'Location villa week-end', 28000, 'location-vacances', 32, 'Bourail', 'new', 'Piscine et vue mer, 2 nuits minimum.', true, false, true],
-    [109, 5, 'Don: étagère métal', 0, 'troc', 92, 'Koné', 'fair', 'À donner contre enlèvement rapide.', false, false, false],
-    [110, 6, 'Baby-sitting soirée', 5000, 'services', 81, 'Lifou', 'new', 'Disponible vendredi et samedi.', false, false, false],
-    [111, 2, 'Console Switch OLED', 45000, 'electronique', 43, 'Mont-Dore', 'like_new', 'Boîte et accessoires inclus.', true, false, false],
-    [112, 4, 'Appartement F2 centre-ville', 85000, 'immobilier', 32, 'Nouméa', 'good', 'Disponible à partir du 15.', true, true, false],
+    [109, 5, 'Don: Ã©tagÃ¨re mÃ©tal', 0, 'troc', 92, 'KonÃ©', 'fair', 'Ã€ donner contre enlÃ¨vement rapide.', false, false, false],
+    [110, 6, 'Baby-sitting soirÃ©e', 5000, 'services', 81, 'Lifou', 'new', 'Disponible vendredi et samedi.', false, false, false],
+    [111, 2, 'Bon plan week-end musique live', 0, 'services', 82, 'Mont-Dore', 'new', 'EntrÃ©es gratuites pour deux personnes, troc possible.', true, false, true],
+    [112, 4, 'Appartement F2 centre-ville', 85000, 'immobilier', 32, 'NoumÃ©a', 'good', 'Disponible Ã  partir du 15.', true, true, false],
   ];
 
   return seed.map(([id, userId, title, price, categorySlug, categoryId, commune, condition, description, featured, urgent, free]) => {
@@ -287,11 +291,11 @@ function createListings(users) {
       category_id: categoryId,
       category_name: cat.name,
       category_slug: cat.slug,
-      category_icon: cat.icon || '◼',
+      category_icon: cat.icon || 'â—¼',
       published_at: new Date(Date.now() - id * 36 * 60 * 60 * 1000).toISOString(),
       created_at: new Date(Date.now() - id * 40 * 60 * 60 * 1000).toISOString(),
       updated_at: new Date(Date.now() - id * 30 * 60 * 60 * 1000).toISOString(),
-      contre_quoi: id % 3 === 0 ? 'À discuter' : null,
+      contre_quoi: id % 3 === 0 ? 'Ã€ discuter' : null,
       images: [
         { id: id * 10 + 1, url: cover, thumbnail_url: cover },
         { id: id * 10 + 2, url: svgDataUri(title, commune, 280), thumbnail_url: svgDataUri(title, commune, 280) },
@@ -324,7 +328,7 @@ function createListings(users) {
 
 function createReviews(users) {
   return [
-    { id: 1, user_id: 2, note: 5, commentaire: 'Très pro et réactif.', created_at: nowIso(), auteur_prenom: 'Emma', auteur_avatar: null },
+    { id: 1, user_id: 2, note: 5, commentaire: 'TrÃ¨s pro et rÃ©actif.', created_at: nowIso(), auteur_prenom: 'Emma', auteur_avatar: null },
     { id: 2, user_id: 2, note: 4, commentaire: 'Bonne transaction.', created_at: nowIso(), auteur_prenom: 'Lucas', auteur_avatar: null },
     { id: 3, user_id: 3, note: 5, commentaire: 'Service impeccable.', created_at: nowIso(), auteur_prenom: 'Marine', auteur_avatar: null },
   ];
@@ -332,9 +336,9 @@ function createReviews(users) {
 
 function createNotifications(listings, users) {
   return [
-    { id: 1, user_id: 2, title: 'Nouvelle réponse', body: 'Atelier Kalo a répondu à votre message.', href: '/messages?conv=1', is_read: false, created_at: nowIso() },
-    { id: 2, user_id: 2, title: 'Favori enregistré', body: 'Votre annonce favorite a baissé de prix.', href: `/annonces/${listings[0].id}`, is_read: true, created_at: nowIso() },
-    { id: 3, user_id: 3, title: 'Paiement validé', body: 'Votre abonnement de démonstration est actif.', href: '/parametres#factures', is_read: false, created_at: nowIso() },
+    { id: 1, user_id: 2, title: 'Nouvelle rÃ©ponse', body: 'Entreprise Test NC a rÃ©pondu Ã  votre message.', href: '/messages?conv=1', is_read: false, created_at: nowIso() },
+    { id: 2, user_id: 2, title: 'Favori enregistrÃ©', body: 'Votre annonce favorite a baissÃ© de prix.', href: `/annonces/${listings[0].id}`, is_read: true, created_at: nowIso() },
+    { id: 3, user_id: 3, title: 'Paiement validÃ©', body: 'Votre abonnement de dÃ©monstration est actif.', href: '/parametres#factures', is_read: false, created_at: nowIso() },
   ];
 }
 
@@ -386,13 +390,13 @@ function createBillingDocs(payments) {
 
 function createConversations(users, listings) {
   const messages1 = [
-    { id: 1, conv_id: 1, sender_id: 2, type: 'text', content: 'Bonjour, l’annonce est-elle toujours disponible ?', read_at: nowIso(), created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
-    { id: 2, conv_id: 1, sender_id: 3, type: 'text', content: 'Oui, elle est disponible et peut être retirée ce soir.', read_at: nowIso(), created_at: new Date(Date.now() - 90 * 60 * 1000).toISOString() },
+    { id: 1, conv_id: 1, sender_id: 2, type: 'text', content: 'Bonjour, lâ€™annonce est-elle toujours disponible ?', read_at: nowIso(), created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
+    { id: 2, conv_id: 1, sender_id: 3, type: 'text', content: 'Oui, elle est disponible et peut Ãªtre retirÃ©e ce soir.', read_at: nowIso(), created_at: new Date(Date.now() - 90 * 60 * 1000).toISOString() },
     { id: 3, conv_id: 1, sender_id: 2, type: 'offer', content: null, offer: { id: 1, amount_xpf: 62000, status: 'pending', expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() }, created_at: nowIso() },
   ];
   const messages2 = [
-    { id: 4, conv_id: 2, sender_id: 4, type: 'text', content: 'Le lot bébé est encore en vente ?', read_at: nowIso(), created_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString() },
-    { id: 5, conv_id: 2, sender_id: 6, type: 'photo', content: null, photo_url: svgDataUri('Photo', 'Objet à vendre', 18), created_at: nowIso() },
+    { id: 4, conv_id: 2, sender_id: 4, type: 'text', content: 'Le lot bÃ©bÃ© est encore en vente ?', read_at: nowIso(), created_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString() },
+    { id: 5, conv_id: 2, sender_id: 6, type: 'photo', content: null, photo_url: svgDataUri('Photo', 'Objet Ã  vendre', 18), created_at: nowIso() },
   ];
 
   return [
@@ -532,7 +536,7 @@ function getAuthUser(req) {
 function requireAuth(req, res) {
   const user = getAuthUser(req);
   if (!user) {
-    json(res, 401, { error: 'Non authentifié.' });
+    json(res, 401, { error: 'Non authentifiÃ©.' });
     return null;
   }
   return user;
@@ -542,7 +546,7 @@ function requireAdmin(req, res) {
   const user = requireAuth(req, res);
   if (!user) return null;
   if (!user.is_admin) {
-    json(res, 403, { error: 'Accès administrateur requis.' });
+    json(res, 403, { error: 'AccÃ¨s administrateur requis.' });
     return null;
   }
   return user;
@@ -640,6 +644,35 @@ function getHomeStats() {
   };
 }
 
+function toProCard(user) {
+  const reviews = state.reviews.filter((review) => String(review.user_id) === String(user.id));
+  return {
+    id: user.id,
+    prenom: user.first_name,
+    nom: user.last_name,
+    display_name: user.pro_company_name || `${user.first_name} ${user.last_name}`.trim(),
+    pro_company_name: user.pro_company_name || null,
+    pro_category: user.pro_category || 'Professionnel local',
+    pro_logo_url: user.avatar_url || null,
+    pro_banner_url: user.banner_url || null,
+    pro_description: user.bio || '',
+    pro_commune: user.commune_name || null,
+    pro_website: user.website || null,
+    pro_phone: user.phone || null,
+    pro_hours: user.pro_hours || null,
+    pro_quote_template: null,
+    avg_rating: reviews.length ? (reviews.reduce((sum, review) => sum + Number(review.note || 0), 0) / reviews.length) : (user.note_moyenne || user.rating || 0),
+    review_count: reviews.length || user.nb_avis || 0,
+    listing_count: state.listings.filter((listing) => String(listing.user.id) === String(user.id)).length || user.nb_annonces || 0,
+    is_pro: true,
+    pro_verified: !!user.is_verified,
+    latest_review_comment: reviews[0]?.commentaire || null,
+    latest_review_rating: reviews[0]?.note || null,
+    latest_review_prenom: reviews[0]?.auteur_prenom || null,
+    latest_review_created_at: reviews[0]?.created_at || null,
+  };
+}
+
 function ensureList(v) {
   return Array.isArray(v) ? v : [];
 }
@@ -650,8 +683,9 @@ async function handleRoute(req, res) {
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204, {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Internal-Token',
+      'Access-Control-Allow-Origin': DEFAULT_ORIGIN,
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Headers': ALLOWED_HEADERS,
       'Access-Control-Allow-Methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
     });
     res.end();
@@ -681,7 +715,7 @@ async function handleRoute(req, res) {
   if (pathname === '/api/demo/seed' && req.method === 'POST') {
     state = createDemoState();
     return json(res, 200, {
-      message: 'Jeu de données démo généré.',
+      message: 'Jeu de donnÃ©es dÃ©mo gÃ©nÃ©rÃ©.',
       data: {
         counts: {
           users: state.users.length,
@@ -702,7 +736,7 @@ async function handleRoute(req, res) {
     state.reviews = [];
     state.favorites = {};
     return json(res, 200, {
-      message: 'Jeu de données démo supprimé.',
+      message: 'Jeu de donnÃ©es dÃ©mo supprimÃ©.',
       data: { cleared: true },
     });
   }
@@ -717,6 +751,60 @@ async function handleRoute(req, res) {
 
   if (pathname === '/api/stats/home' && req.method === 'GET') {
     return json(res, 200, getHomeStats());
+  }
+
+  if (pathname === '/api/stats/platform' && req.method === 'GET') {
+    return json(res, 200, {
+      data: {
+        annonces_actives: state.listings.length,
+        utilisateurs_total: state.users.length,
+        comptes_pro: state.users.filter((u) => u.is_pro).length,
+        messages_total: state.conversations.reduce((sum, conv) => sum + conv.messages.length, 0),
+        vues_total: state.listings.reduce((sum, item) => sum + (item.nb_vues || 0), 0),
+        favoris_total: state.listings.reduce((sum, item) => sum + (item.nb_favoris || 0), 0),
+        categories_total: CATEGORY_CATALOG.length,
+      },
+    });
+  }
+
+  if (pathname === '/api/pros' && req.method === 'GET') {
+    const q = String(searchParams.get('q') || '').trim().toLowerCase();
+    const limit = Math.max(1, Number(searchParams.get('limit') || 20));
+    const category = String(searchParams.get('category') || '').trim().toLowerCase();
+    const commune = String(searchParams.get('commune') || '').trim().toLowerCase();
+    const minRating = Number(searchParams.get('minRating') || 0);
+    const items = state.users
+      .filter((user) => user.is_pro && !user.is_admin)
+      .map(toProCard)
+      .filter((pro) => {
+        const haystack = [
+          pro.display_name,
+          pro.pro_company_name,
+          pro.pro_category,
+          pro.pro_commune,
+          pro.pro_description,
+        ].join(' ').toLowerCase();
+        if (q && !haystack.includes(q)) return false;
+        if (category && String(pro.pro_category || '').toLowerCase() !== category) return false;
+        if (commune && String(pro.pro_commune || '').toLowerCase() !== commune) return false;
+        if (minRating > 0 && Number(pro.avg_rating || 0) < minRating) return false;
+        return true;
+      })
+      .slice(0, limit);
+    return json(res, 200, { data: items });
+  }
+
+  const proIdMatch = pathname.match(/^\/api\/pros\/([^/]+)$/);
+  if (proIdMatch && req.method === 'GET') {
+    const user = state.users.find((candidate) => String(candidate.id) === String(proIdMatch[1]) && candidate.is_pro);
+    if (!user) return json(res, 404, { error: 'Professionnel introuvable.' });
+    return json(res, 200, { data: toProCard(user) });
+  }
+
+  const proReviewsMatch = pathname.match(/^\/api\/pros\/([^/]+)\/reviews$/);
+  if (proReviewsMatch && req.method === 'GET') {
+    const reviews = state.reviews.filter((review) => String(review.user_id) === String(proReviewsMatch[1]));
+    return json(res, 200, { data: reviews });
   }
 
   if (pathname === '/api/stats/seller' && req.method === 'GET') {
@@ -742,13 +830,13 @@ async function handleRoute(req, res) {
       email: body.email,
       password: DEMO_PASSWORD_HASH,
       first_name: body.first_name || 'Utilisateur',
-      last_name: body.last_name || 'Démo',
+      last_name: body.last_name || 'DÃ©mo',
       avatar_url: null,
       is_verified: true,
       is_pro: !!body.is_pro,
       is_admin: false,
       rating: 4.8,
-      commune_name: body.commune || 'Nouméa',
+      commune_name: body.commune || 'NoumÃ©a',
       province_name: 'Province Sud',
       demo_role: null,
       trust_score: 90,
@@ -845,7 +933,7 @@ async function handleRoute(req, res) {
     const communeName = communeLabel(body.commune_id || 101);
     const listing = {
       id: nextId,
-      title: body.title || body.titre || 'Nouvelle annonce démo',
+      title: body.title || body.titre || 'Nouvelle annonce dÃ©mo',
       price: body.price ? Number(body.price) : 0,
       prix: body.price ? Number(body.price) : 0,
       price_negotiable: !!body.price_negotiable,
@@ -863,7 +951,7 @@ async function handleRoute(req, res) {
       category_id: cat.id,
       category_name: cat.name,
       category_slug: cat.slug,
-      category_icon: cat.icon || '◼',
+      category_icon: cat.icon || 'â—¼',
       published_at: nowIso(),
       created_at: nowIso(),
       updated_at: nowIso(),
@@ -936,7 +1024,7 @@ async function handleRoute(req, res) {
   if (pathname === '/api/upload/chat' && req.method === 'POST') {
     const user = requireAuth(req, res);
     if (!user) return;
-    return json(res, 200, { data: { url: svgDataUri('Chat', 'Photo envoyée', 33) } });
+    return json(res, 200, { data: { url: svgDataUri('Chat', 'Photo envoyÃ©e', 33) } });
   }
 
   const deleteImageMatch = pathname.match(/^\/api\/upload\/image\/([^/]+)$/);
@@ -1350,7 +1438,7 @@ async function handleRoute(req, res) {
     if (!user) return;
     user.email = `deleted-${user.id}@demo.troca`;
     user.first_name = 'Compte';
-    user.last_name = 'Supprimé';
+    user.last_name = 'SupprimÃ©';
     user.is_verified = false;
     user.is_pro = false;
     user.updated_at = nowIso();
@@ -1378,7 +1466,7 @@ async function handleRoute(req, res) {
     const body = await readJson(req);
     const listing = {
       id: state.listings.length + 1000,
-      title: body.title || body.description || 'Bon plan démo',
+      title: body.title || body.description || 'Bon plan dÃ©mo',
       description: body.description || '',
       price: body.price ? Number(body.price) : 0,
       prix: body.price ? Number(body.price) : 0,
@@ -1396,7 +1484,7 @@ async function handleRoute(req, res) {
       category_id: 9,
       category_name: 'Troc',
       category_slug: 'troc',
-      category_icon: '⇄',
+      category_icon: 'â‡„',
       published_at: nowIso(),
       created_at: nowIso(),
       updated_at: nowIso(),
@@ -1423,7 +1511,7 @@ async function handleRoute(req, res) {
   }
 
   if (pathname.startsWith('/api/')) {
-    return json(res, 404, { error: `Route démo non implémentée: ${pathname}` });
+    return json(res, 404, { error: `Route dÃ©mo non implÃ©mentÃ©e: ${pathname}` });
   }
 
   return text(res, 200, 'Troca demo server');
@@ -1432,7 +1520,7 @@ async function handleRoute(req, res) {
 const server = http.createServer((req, res) => {
   handleRoute(req, res).catch((err) => {
     console.error('[demo-server]', err);
-    json(res, 500, { error: 'Erreur serveur démo.' });
+    json(res, 500, { error: 'Erreur serveur dÃ©mo.' });
   });
 });
 

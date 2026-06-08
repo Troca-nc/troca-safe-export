@@ -719,7 +719,7 @@ function ServiceStatsSection({ services }: { services: any }) {
             <div className="rounded-xl bg-white px-3 py-2">Places réservées: {Number(bonPlans.ride_seats_reserved ?? 0).toLocaleString('fr-FR')}</div>
             <div className="rounded-xl bg-white px-3 py-2">Places totales: {Number(bonPlans.ride_seats_total ?? 0).toLocaleString('fr-FR')}</div>
             <div className="rounded-xl bg-white px-3 py-2">Prix moyen: {Number(bonPlans.ride_avg_price ?? 0).toLocaleString('fr-FR')} XPF</div>
-            <div className="rounded-xl bg-white px-3 py-2">Note moyenne: {Number(bonPlans.ride_avg_rating ?? 0).toFixed(1)}/5</div>
+            <div className="rounded-xl bg-white px-3 py-2">Avis clients: {Number(bonPlans.ride_avg_rating ?? 0).toFixed(1)}/5</div>
           </div>
         </div>
       </div>

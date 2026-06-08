@@ -105,9 +105,9 @@ export default function ProDashboardSettingsPage() {
   const previewProfile = useMemo(
     () => ({
       name: form.company_name || user?.first_name || 'Votre entreprise',
-      category: form.category || 'Cat?gorie',
+      category: form.category || 'Catégorie',
       description: form.description || 'Votre description appara?tra ici.',
-      commune: form.commune || 'Noum?a',
+      commune: form.commune || 'Nouméa',
       website: form.website || '',
       phone: form.phone || '',
       hours: form.hours || 'Horaires ? compl?ter',
@@ -271,7 +271,7 @@ export default function ProDashboardSettingsPage() {
                 }}
               className="inline-flex items-center gap-2 rounded-2xl border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-2 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10"
             >
-              Pr?visualiser ma vitrine
+              Prévisualiser ma vitrine
               <Eye className="h-4 w-4" />
             </button>
           </div>

@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import type { TouchEvent } from 'react'
-import { Search, MessageCircle, Plus, User, Menu, X, ChevronDown, LogOut, Heart, Home, Settings2, PlusCircle, Tag, Trophy, Car, PhoneCall, ArrowLeftRight, CalendarDays } from 'lucide-react'
+import { Search, MessageCircle, Plus, User, Menu, X, ChevronDown, LogOut, Heart, Home, Settings2, PlusCircle, Tag, Trophy, Car, PhoneCall, ArrowLeftRight, CalendarDays, ClipboardList } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useAuthActionStore } from '@/store/authActionStore'
 import { proApi } from '@/lib/api'
@@ -37,6 +37,7 @@ export function MobileBottomNav() {
   const drawerItems = [
     { href: '/troc', icon: ArrowLeftRight, label: 'Troc' },
     { href: '/pros', icon: Trophy, label: 'Pros' },
+    { href: '/appels-offres', icon: ClipboardList, label: "Appels d'offres" },
     { href: '/covoiturage', icon: Car, label: 'Covoit' },
     { href: '/favoris', icon: Heart, label: 'Favoris' },
     { href: '/bons-plans', icon: Tag, label: 'Bons plans' },
@@ -233,7 +234,7 @@ export default function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-        <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-4">
+        <div className="mx-auto flex h-14 max-w-[110rem] items-center gap-2 px-6 lg:px-10">
           <Link href="/" className="flex shrink-0 items-center gap-2">
             <span className="relative h-8 w-8 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_8px_24px_rgba(8,32,50,0.12)]">
               <Image src="/brand/troca-logo.png" alt="Troca" fill sizes="40px" className="object-cover" priority />
@@ -465,6 +466,9 @@ export default function Header() {
                 <Link href="/pro" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
                   Pros
                 </Link>
+                <Link href="/appels-offres" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
+                  Appels d'offres
+                </Link>
                 <Link href="/troc" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
                   Troc
                 </Link>
@@ -500,6 +504,9 @@ export default function Header() {
                 <Link href="/pro" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
                   Pros
                 </Link>
+                <Link href="/appels-offres" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
+                  Appels d'offres
+                </Link>
                 <Link href="/troc" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
                   Troc
                 </Link>
@@ -526,7 +533,7 @@ export default function Header() {
         ) : null}
 
         <div className="border-t border-[var(--color-border)] bg-[var(--color-background-secondary)] px-4 py-2">
-          <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-[110rem] px-6 lg:px-10">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <DemoModeSwitcher />
               {demoModeEnabled ? (

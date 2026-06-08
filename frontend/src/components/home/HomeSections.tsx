@@ -34,7 +34,8 @@ import ListingCard from '@/components/listings/ListingCard'
 import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
 import type { ListingFilters } from '@/hooks/useListingFilters'
 import type { CategoryNode } from '@/lib/categoryCatalog'
-import { SEARCH_ALERTS } from '@/lib/categoryPresentation'
+import { SEARCH_ALERTS, getCategoryIcon } from '@/lib/categoryPresentation'
+import { trackEvent } from '@/lib/analytics'
 
 function formatNumber(value: number | null) {
   if (value === null || Number.isNaN(value)) return '...'
@@ -45,24 +46,8 @@ function getCategoryChildren(category: CategoryNode) {
   return category.children || category.subcategories || []
 }
 
-function getHomepageCategoryIcon(category: Pick<CategoryNode, 'slug' | 'name'>) {
-  const value = `${category.slug} ${category.name}`.toLowerCase()
-  if (value.includes('vehic')) return Car
-  if (value.includes('pieces') || value.includes('equipement')) return Wrench
-  if (value.includes('naut') || value.includes('bateau') || value.includes('marine')) return Anchor
-  if (value.includes('immobili') || value.includes('logement')) return Home
-  if (value.includes('emploi') || value.includes('job')) return Briefcase
-  if (value.includes('mode') || value.includes('vetement') || value.includes('vêtement')) return Shirt
-  if (value.includes('maison') || value.includes('jardin') || value.includes('mobilier')) return Sofa
-  if (value.includes('bricol') || value.includes('outillage') || value.includes('outil')) return Wrench
-  if (value.includes('famille') || value.includes('puer') || value.includes('puér')) return Baby
-  if (value.includes('electron') || value.includes('électron') || value.includes('multim')) return Smartphone
-  if (value.includes('loisir')) return Gamepad2
-  if (value.includes('collection') || value.includes('antiqu')) return Archive
-  if (value.includes('animal')) return PawPrint
-  if (value.includes('service')) return HeartHandshake
-  if (value.includes('materiel') || value.includes('matériel') || value.includes('profession')) return HardHat
-  return Package
+function getHomepageCategoryIcon(category: Pick<CategoryNode, 'slug' | 'name' | 'icon'>) {
+  return getCategoryIcon(category.slug, category.name, category.icon)
 }
 
 type HomeHeroSectionProps = {
@@ -84,7 +69,6 @@ export function HomeHeroSection({
   const [activeIndex, setActiveIndex] = useState(0)
   const [searchAlertOpen, setSearchAlertOpen] = useState(false)
 
-  const normalizedQuery = q.trim().toLowerCase()
   const suggestionPool = useMemo(() => {
     const unique = new Map<string, string>()
     for (const suggestion of suggestions || []) {
@@ -96,34 +80,22 @@ export function HomeHeroSection({
     return Array.from(unique.values())
   }, [suggestions])
 
-  const filteredSuggestions = useMemo(() => {
-    const scored = suggestionPool
-      .filter((suggestion) => {
-        if (!normalizedQuery) return true
-        const haystack = suggestion.toLowerCase()
-        return haystack.includes(normalizedQuery)
-      })
-      .sort((a, b) => {
-        const aStarts = a.toLowerCase().startsWith(normalizedQuery) ? 1 : 0
-        const bStarts = b.toLowerCase().startsWith(normalizedQuery) ? 1 : 0
-        if (aStarts !== bStarts) return bStarts - aStarts
-        return a.localeCompare(b, 'fr')
-      })
-
-    return scored.slice(0, 7)
-  }, [normalizedQuery, suggestionPool])
+  const filteredSuggestions = useMemo(() => suggestionPool.slice(0, 7), [suggestionPool])
 
   const quickSuggestions = useMemo(() => {
-    if (normalizedQuery) return filteredSuggestions.slice(0, 4)
     return suggestionPool.slice(0, 4)
-  }, [filteredSuggestions, normalizedQuery, suggestionPool])
+  }, [suggestionPool])
 
-  const selectSuggestion = (value: string) => {
+  const selectSuggestion = (value: string, source: string = 'hero_suggestion') => {
     const nextValue = value.trim()
     if (!nextValue) return
     onQueryChange(nextValue)
     setIsFocused(false)
     setActiveIndex(0)
+    void trackEvent('listing_search', {
+      query: nextValue,
+      source,
+    })
     router.push(`/annonces?q=${encodeURIComponent(nextValue)}`)
   }
 
@@ -179,7 +151,7 @@ export function HomeHeroSection({
       setActiveIndex((current) => (current - 1 + filteredSuggestions.length) % filteredSuggestions.length)
     } else if (event.key === 'Enter' && isFocused && filteredSuggestions[activeIndex]) {
       event.preventDefault()
-      selectSuggestion(filteredSuggestions[activeIndex])
+      selectSuggestion(filteredSuggestions[activeIndex], 'hero_dropdown')
     } else if (event.key === 'Escape') {
       setIsFocused(false)
     }
@@ -187,7 +159,7 @@ export function HomeHeroSection({
 
   useEffect(() => {
     setActiveIndex(0)
-  }, [normalizedQuery])
+  }, [suggestionPool])
 
   return (
     <section className="relative overflow-hidden px-4 py-10 text-white md:py-14">
@@ -232,6 +204,7 @@ export function HomeHeroSection({
                   }}
                   onKeyDown={handleKeyDown}
                   placeholder="Que recherchez-vous ?"
+                  aria-label="Rechercher une annonce, un bon plan ou une catégorie"
                   className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 pl-11 text-sm text-white placeholder:text-white/50 shadow-sm outline-none ring-0 backdrop-blur-sm transition focus:border-white/30 focus:ring-4 focus:ring-white/10"
                   autoComplete="off"
                   aria-autocomplete="list"
@@ -270,7 +243,7 @@ export function HomeHeroSection({
                         key={suggestion}
                         type="button"
                         onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => selectSuggestion(suggestion)}
+                        onClick={() => selectSuggestion(suggestion, 'hero_dropdown')}
                         className={`flex w-full items-center justify-between gap-3 rounded-2xl px-3 py-2.5 text-left text-sm transition ${
                           index === activeIndex ? 'bg-white/12 text-white' : 'text-white/85 hover:bg-white/8'
                         }`}
@@ -291,14 +264,14 @@ export function HomeHeroSection({
             </p>
             <div className="mt-2 flex gap-2 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {quickSuggestions.map((suggestion) => (
-                <Link
+                <button
                   key={suggestion}
-                  href={`/annonces?q=${encodeURIComponent(suggestion)}`}
-                  onClick={() => selectSuggestion(suggestion)}
+                  type="button"
+                  onClick={() => selectSuggestion(suggestion, 'hero_chip')}
                   className="shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90 transition hover:bg-white/15"
                 >
                   {suggestion}
-                </Link>
+                </button>
               ))}
               <button
                 type="button"
@@ -938,7 +911,7 @@ export function BonPlanSection({
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-sable">Culture</p>
                 <h4 className="mt-1 text-2xl font-bold text-white">Les rendez-vous à venir</h4>
               </div>
-              <Link href="/annonces/nouvelle" className="text-sm font-semibold text-nc-sable hover:underline">
+              <Link href="/bons-plans/publier" className="text-sm font-semibold text-nc-sable hover:underline">
                 Créer un événement
               </Link>
             </div>

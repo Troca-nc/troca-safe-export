@@ -17,7 +17,8 @@ import {
 import CategoryTreeSection from '@/components/home/CategoryTreeSection'
 import ProCarousel from '@/components/pro/ProCarousel'
 import TrocListingsPreview from '@/components/home/TrocListingsPreview'
-import { API_ORIGIN, proApi } from '@/lib/api'
+import { API_ORIGIN, proApi, searchApi } from '@/lib/api'
+import { trackEvent } from '@/lib/analytics'
 import { useAuthStore } from '@/store/authStore'
 
 function buildHeroSearchSuggestions(listings: any[]) {
@@ -85,6 +86,7 @@ export default function HomePage() {
   const { user, hasHydrated } = useAuthStore()
   const [q, setQ] = useState('')
   const [recentSearches, setRecentSearches] = useState<string[]>([])
+  const [heroSearchSuggestions, setHeroSearchSuggestions] = useState<string[]>(() => buildHeroSearchSuggestions([]))
   const [listings, setListings] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [promoBonPlans, setPromoBonPlans] = useState<any[]>([])
@@ -97,7 +99,7 @@ export default function HomePage() {
   } | null>(null)
 
   const featuredListings = useMemo(() => listings.slice(0, 8), [listings])
-  const heroSearchSuggestions = useMemo(() => buildHeroSearchSuggestions(listings), [listings])
+  const heroFallbackSuggestions = useMemo(() => buildHeroSearchSuggestions(listings), [listings])
   const premiumListings = useMemo(
     () =>
       listings
@@ -115,6 +117,32 @@ export default function HomePage() {
       setRecentSearches([])
     }
   }, [])
+
+  useEffect(() => {
+    let alive = true
+    const term = q.trim()
+    const timer = window.setTimeout(async () => {
+      try {
+        const response = await searchApi.suggestions({ q: term, limit: 24 })
+        const suggestions = Array.isArray(response.data?.data?.suggestions)
+          ? response.data.data.suggestions
+              .map((item: any) => String(item?.label || '').trim())
+              .filter(Boolean)
+          : []
+
+        if (!alive) return
+        setHeroSearchSuggestions(suggestions.length > 0 ? suggestions : heroFallbackSuggestions)
+      } catch {
+        if (!alive) return
+        setHeroSearchSuggestions(heroFallbackSuggestions)
+      }
+    }, term ? 180 : 0)
+
+    return () => {
+      alive = false
+      window.clearTimeout(timer)
+    }
+  }, [heroFallbackSuggestions, q])
 
   useEffect(() => {
     let alive = true
@@ -197,7 +225,14 @@ export default function HomePage() {
 
   const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (q.trim()) router.push(`/annonces?q=${encodeURIComponent(q.trim())}`)
+    const term = q.trim()
+    if (term) {
+      void trackEvent('listing_search', {
+        query: term,
+        source: 'home_hero_submit',
+      })
+      router.push(`/annonces?q=${encodeURIComponent(term)}`)
+    }
     else router.push('/annonces')
   }
 

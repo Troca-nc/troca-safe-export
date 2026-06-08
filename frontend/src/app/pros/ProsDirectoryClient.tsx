@@ -2,10 +2,38 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowRight, FilterX, Search, Star } from 'lucide-react'
+import { ArrowRight, FilterX, Search } from 'lucide-react'
 
 import ProCard, { type ProCardModel } from '@/components/pro/ProCard'
 import { proApi } from '@/lib/api'
+
+const FALLBACK_CATEGORY_OPTIONS = [
+  'Services',
+  'Artisanat',
+  'Commerce',
+  'Restauration',
+  'Transport',
+  'Santé',
+  'Immobilier',
+  'Informatique',
+  'Événementiel',
+  'BTP',
+]
+
+const FALLBACK_COMMUNE_OPTIONS = [
+  'Nouméa',
+  'Dumbéa',
+  'Païta',
+  'Mont-Dore',
+  'Boulouparis',
+  'La Foa',
+  'Bourail',
+  'Koné',
+  'Koumac',
+  'Lifou',
+  'Maré',
+  'Ouvéa',
+]
 
 function getDisplayName(pro: ProCardModel) {
   return (
@@ -79,7 +107,8 @@ export default function ProsDirectoryClient() {
       const value = String(pro.pro_category ?? '').trim()
       if (value) values.add(value)
     })
-    return Array.from(values).sort((a, b) => a.localeCompare(b, 'fr'))
+    const options = Array.from(values).sort((a, b) => a.localeCompare(b, 'fr'))
+    return options.length ? options : FALLBACK_CATEGORY_OPTIONS
   }, [pros])
 
   const communeOptions = useMemo(() => {
@@ -88,7 +117,8 @@ export default function ProsDirectoryClient() {
       const value = String(pro.pro_commune ?? '').trim()
       if (value) values.add(value)
     })
-    return Array.from(values).sort((a, b) => a.localeCompare(b, 'fr'))
+    const options = Array.from(values).sort((a, b) => a.localeCompare(b, 'fr'))
+    return options.length ? options : FALLBACK_COMMUNE_OPTIONS
   }, [pros])
 
   const filteredPros = useMemo(() => {
@@ -124,12 +154,6 @@ export default function ProsDirectoryClient() {
         return getDisplayName(a).localeCompare(getDisplayName(b), 'fr')
       })
   }, [pros, query, category, commune, minRating])
-
-  const avgRating = useMemo(() => {
-    if (!filteredPros.length) return 0
-    const total = filteredPros.reduce((acc, pro) => acc + Number(pro.avg_rating ?? 0), 0)
-    return total / filteredPros.length
-  }, [filteredPros])
 
   const resetFilters = () => {
     setQuery('')
@@ -178,11 +202,8 @@ export default function ProsDirectoryClient() {
             <p className="mt-2 text-2xl font-bold text-night">{formatNumber(pros.length)}</p>
           </div>
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Note moyenne</p>
-            <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-night">
-              <Star className="h-5 w-5 fill-amber-400 text-amber-400" />
-              {avgRating ? avgRating.toFixed(1) : '0.0'}
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Communes couvertes</p>
+            <p className="mt-2 text-2xl font-bold text-night">{formatNumber(communeOptions.length)}</p>
           </div>
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Résultats affichés</p>

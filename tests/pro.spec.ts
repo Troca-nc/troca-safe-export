@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { assertNoForbiddenBodyText, createConsoleCollector, restoreSessionStorage } from './support/auth'
 import { captureFullPage, expectMainHeadingVisible, expectNotOnConnexion, expectPageHealthy, gotoPage } from './support/audit'
+import { ProPO } from './pom/pro.po'
 
 test.describe('pro', () => {
   test.beforeEach(async ({ page }) => {
@@ -9,10 +10,12 @@ test.describe('pro', () => {
 
   test('dashboard main exposes KPIs, trust score and onboarding', async ({ page }) => {
     const console = createConsoleCollector(page)
+    const pro = new ProPO(page)
 
-    await gotoPage(page, '/pro/dashboard')
+    await pro.openDashboard()
     await expectNotOnConnexion(page)
     await expectMainHeadingVisible(page)
+    await pro.expectDashboardLoaded()
     await expect(page.getByText(/Annonces actives/i)).toBeVisible()
     await expect(page.getByText(/Utilisateurs inscrits/i)).toBeVisible()
     await expect(page.getByText(/Signalements en attente/i)).toBeVisible()
@@ -21,7 +24,7 @@ test.describe('pro', () => {
     await expect(page.getByText(/Pack lancement/i)).toBeVisible()
     await captureFullPage(page, 'pro', 'dashboard')
 
-    await gotoPage(page, '/pro/dashboard/rdv')
+    await pro.openRdv()
     await expect(page.getByText(/Rendez-vous en ligne/i)).toBeVisible()
     await expect(page.getByText(/Créneaux publiés/i).or(page.getByText(/Creneaux publies/i))).toBeVisible()
     await expect(page.getByText(/Votre timeline du jour/i)).toBeVisible()
@@ -29,7 +32,7 @@ test.describe('pro', () => {
     await expect(page.getByText(/Indisponibilités/i).or(page.getByText(/Indisponibilites/i))).toBeVisible()
     await captureFullPage(page, 'pro', 'rdv')
 
-    await gotoPage(page, '/pro/dashboard/devis')
+    await pro.openDevis()
     await expect(page.getByRole('button', { name: /Nouveau devis/i })).toBeVisible()
     await page.getByRole('button', { name: /Nouveau devis/i }).click()
     await expect(page.getByText(/Nouveau devis pour Entreprise Test NC/i)).toBeVisible()
@@ -38,7 +41,7 @@ test.describe('pro', () => {
     await expect(page.getByRole('button', { name: /Envoyer le devis/i })).toBeVisible()
     await captureFullPage(page, 'pro', 'devis')
 
-    await gotoPage(page, '/pro/dashboard/catalogue')
+    await pro.openCatalogue()
     await expect(page.getByText(/Catalogue produits/i)).toBeVisible()
     await expect(page.getByRole('button', { name: /Ajouter un produit/i })).toBeVisible()
     await expect(page.getByText(/Aperçu en direct/i)).toBeVisible()
@@ -56,7 +59,7 @@ test.describe('pro', () => {
     await expect(page.getByRole('textbox').first()).toBeVisible()
     await captureFullPage(page, 'pro', 'auto-reply')
 
-    await gotoPage(page, '/pro/dashboard/pack-lancement')
+    await pro.openPack()
     await expect(page.getByText(/Checklist/i).or(page.getByText(/étapes/i)).or(page.getByText(/etapes/i))).toBeVisible()
     await expect(page.getByText(/Compléter le profil/i).or(page.getByText(/Completer le profil/i))).toBeVisible()
     await expect(page.getByText(/Publier une annonce/i)).toBeVisible()

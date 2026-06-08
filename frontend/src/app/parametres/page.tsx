@@ -86,7 +86,7 @@ function AbonnementSection() {
       setCancelled(true)
       setSub((prev: any) => ({ ...prev, cancel_at_period_end: true, cancel_at: data.cancel_at }))
     } catch (err: any) {
-      setError(err?.response?.data?.error ?? 'Erreur lors de l\'annulation')
+      setError(err?.response?.data?.error ?? "Erreur lors de l'annulation")
     } finally {
       setCancelling(false)
     }
@@ -102,7 +102,7 @@ function AbonnementSection() {
           <p className="text-night/60 text-sm mb-4">Vous n\'avez pas encore d\'abonnement Pro.</p>
           <Link href="/pro" className="btn-primary inline-flex items-center gap-2 py-2 px-6 text-sm">
             <Star className="w-4 h-4" />
-            Découvrir les offres Pro
+            D?couvrir les offres Pro
           </Link>
         </div>
       ) : (
@@ -213,7 +213,7 @@ function NewsletterSection() {
       })
       setEnabled((value) => !value)
     } catch {
-      setError('Impossible de mettre à jour vos préférences.')
+      setError('Impossible de mettre ? jour vos pr?f?rences.')
     } finally {
       setSaving(false)
     }
@@ -271,9 +271,9 @@ function FacturesSection() {
   if (!invoices.length) return null
 
   const labelFor = (inv: any) => {
-    if (inv.document_type === 'refund' || inv.status === 'refunded') return 'Remboursée'
-    if (inv.status === 'succeeded' || inv.status === 'paid') return 'Payée'
-    return 'Ã‰chouée'
+    if (inv.document_type === 'refund' || inv.status === 'refunded') return 'Rembours?e'
+    if (inv.status === 'succeeded' || inv.status === 'paid') return 'Pay?e'
+    return '?chou?e'
   }
 
   return (
@@ -497,22 +497,22 @@ function SuppressionSection() {
               <p className="font-semibold">Cette action est irréversible.</p>
               <p>• Vos annonces seront dépubliées immédiatement</p>
               <p>• Vos données personnelles seront anonymisées sous 30 jours</p>
-              <p>• Vous perdrez l'accès à votre compte et vos messages</p>
-              {user?.is_pro && <p className="font-medium">• Votre abonnement Pro sera résilié</p>}
+              <p>? Vous perdrez l'acc?s ? votre compte et vos messages</p>
+              {user?.is_pro && <p className="font-medium">? Votre abonnement Pro sera r?sili?</p>}
             </div>
           </div>
 
-          {/* Ã‰tape 1 : info */}
+          {/* ?tape 1 : info */}
           {step === 1 && (
             <div className="space-y-3">
               <p className="text-xs text-night/50">
-                Avant de supprimer votre compte, pensez à{' '}
+                Avant de supprimer votre compte, pensez ?{' '}
                 <button
                   type="button"
                   onClick={() => { void downloadRgpdExport().catch(() => {}) }}
                   className="text-coral underline"
                 >
-                  télécharger vos données
+                  t?l?charger vos donn?es
                 </button>.
               </p>
               <div className="flex gap-2">
@@ -529,7 +529,7 @@ function SuppressionSection() {
             </div>
           )}
 
-          {/* Ã‰tape 2 : confirmation */}
+          {/* ?tape 2 : confirmation */}
           {step === 2 && (
             <div className="space-y-3">
               <div>

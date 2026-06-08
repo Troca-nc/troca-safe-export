@@ -3,19 +3,24 @@ import path from 'node:path'
 import { spawn } from 'node:child_process'
 import { chromium, type FullConfig } from '@playwright/test'
 import { AUTH_DIR, captureSessionStorage, storageStatePath, type AuthRole } from './support/auth'
+import { loadDemoEnv } from '../scripts/loadDemoEnv'
 
 const ROOT = path.resolve(process.cwd())
 const PLAYWRIGHT_BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000'
-const BACKEND_HEALTH_URL = process.env.PLAYWRIGHT_BACKEND_URL || 'http://127.0.0.1:3001/api/health'
-const BACKEND_BASE_URL = BACKEND_HEALTH_URL.replace(/\/api\/health$/, '')
+const isExternalUrl = /^https?:\/\//i.test(PLAYWRIGHT_BASE_URL) && !/^(https?:\/\/)?(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(?::\d+)?/i.test(PLAYWRIGHT_BASE_URL)
+const BACKEND_BASE_URL = process.env.PLAYWRIGHT_BACKEND_URL || (isExternalUrl ? new URL(PLAYWRIGHT_BASE_URL).origin : 'http://127.0.0.1:3001')
+const BACKEND_HEALTH_URL = new URL('/api/health', BACKEND_BASE_URL).toString()
 const SERVER_STATE_FILE = path.join(ROOT, 'playwright', '.server.json')
+const USE_DEMO_SERVER = process.env.PLAYWRIGHT_USE_DEMO_SERVER !== 'false'
+const USE_LOCAL_SERVERS = process.env.PLAYWRIGHT_USE_LOCAL_SERVER !== 'false' && !isExternalUrl
+const NODE_EXE = process.env.NODE_EXE || 'C:\\Program Files\\nodejs\\node.exe'
 
 const AUTH_ACCOUNTS: Array<{ role: AuthRole; email: string; password: string }> = [
-  { role: 'particulier', email: 'particulier@playwright.troca.nc', password: 'Playwright123!' },
-  { role: 'vendeur', email: 'vendeur@playwright.troca.nc', password: 'Playwright123!' },
-  { role: 'pro', email: 'pro@playwright.troca.nc', password: 'Playwright123!' },
-  { role: 'conducteur', email: 'conducteur@playwright.troca.nc', password: 'Playwright123!' },
-  { role: 'admin', email: 'admin@playwright.troca.nc', password: 'Playwright123!' },
+  { role: 'particulier', email: 'particulier@demo.troca', password: 'Demo1234!' },
+  { role: 'vendeur', email: 'particulier@demo.troca', password: 'Demo1234!' },
+  { role: 'pro', email: 'pro@demo.troca', password: 'Demo1234!' },
+  { role: 'conducteur', email: 'loueur@demo.troca', password: 'Demo1234!' },
+  { role: 'admin', email: 'admin@demo.troca', password: 'Demo1234!' },
 ]
 
 async function waitForHealthy(url: string, timeoutMs = 120_000) {
@@ -39,18 +44,22 @@ async function ensureDevServerStarted() {
     return
   }
 
-  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm'
-  const child = spawn(npmCmd, ['run', 'dev'], {
+  if (!USE_LOCAL_SERVERS) {
+    await waitForHealthy(PLAYWRIGHT_BASE_URL)
+    await waitForHealthy(BACKEND_HEALTH_URL)
+    return
+  }
+
+  const child = spawn(NODE_EXE, ['playwright-launch-services.js'], {
     cwd: ROOT,
     detached: true,
     stdio: 'ignore',
-    shell: process.platform === 'win32',
     env: {
       ...process.env,
-      PORT: process.env.PORT || '3000',
-      FRONTEND_PORT: process.env.FRONTEND_PORT || '3000',
+      NODE_ENV: 'development',
+      NEXT_PUBLIC_ENABLE_MSW: process.env.PLAYWRIGHT_ENABLE_MSW === 'false' ? 'false' : 'true',
       BACKEND_PORT: process.env.BACKEND_PORT || '3001',
-      ADMIN_PORT: process.env.ADMIN_PORT || '3002',
+      FRONTEND_PORT: process.env.FRONTEND_PORT || '3000',
     },
   })
 
@@ -97,25 +106,37 @@ async function loginRole(page: import('@playwright/test').Page, role: AuthRole, 
 }
 
 export default async function globalSetup(_config: FullConfig) {
+  loadDemoEnv()
   fs.mkdirSync(AUTH_DIR, { recursive: true })
   fs.mkdirSync(path.join(ROOT, 'screenshots'), { recursive: true })
 
-  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm'
-  await new Promise<void>((resolve, reject) => {
-    const seed = spawn(npmCmd, ['run', 'seed:playwright'], {
-      cwd: ROOT,
-      stdio: 'inherit',
-      shell: process.platform === 'win32',
-      env: process.env,
-    })
-    seed.on('error', reject)
-    seed.on('exit', (code) => {
-      if (code === 0) resolve()
-      else reject(new Error(`seed:playwright failed with code ${code}`))
-    })
-  })
-
   await ensureDevServerStarted()
+
+  if (USE_DEMO_SERVER && USE_LOCAL_SERVERS) {
+    const response = await fetch('http://127.0.0.1:3001/api/demo/seed', {
+      method: 'POST',
+      cache: 'no-store',
+    })
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null)
+      throw new Error(`demo seed failed: ${payload?.message || response.statusText}`)
+    }
+  } else {
+    const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm'
+    await new Promise<void>((resolve, reject) => {
+      const seed = spawn(npmCmd, ['run', 'seed:playwright'], {
+        cwd: ROOT,
+        stdio: 'inherit',
+        shell: process.platform === 'win32',
+        env: process.env,
+      })
+      seed.on('error', reject)
+      seed.on('exit', (code) => {
+        if (code === 0) resolve()
+        else reject(new Error(`seed:playwright failed with code ${code}`))
+      })
+    })
+  }
 
   const browser = await chromium.launch({ headless: true })
   try {
