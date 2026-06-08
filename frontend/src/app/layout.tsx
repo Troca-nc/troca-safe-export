@@ -11,7 +11,6 @@ import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider'
 import PaymentFailureBanner from '@/components/PaymentFailureBanner'
 import AuthRequiredModal from '@/components/auth/AuthRequiredModal'
 import DemoBanner from '@/components/DemoBanner'
-import MswInitializer from '@/components/testing/MswInitializer'
 import ToastCenter from '@/components/ui/ToastCenter'
 import OnboardingWizard from '@/components/OnboardingWizard'
 import { SITE_URL } from '@/types/seo.types'
@@ -55,7 +54,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <JsonLd data={buildWebSiteSchema()} />
             <AnalyticsTracker />
             <DemoBanner />
-            <MswInitializer />
             <ToastCenter />
             <PaymentFailureBanner />
             <AuthRequiredModal />
