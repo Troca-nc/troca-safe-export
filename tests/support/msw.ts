@@ -1,1 +1,1 @@
-export { mswHandlers } from '../../frontend/src/lib/mswHandlers'
+export { mswHandlers } from './mswHandlers'
