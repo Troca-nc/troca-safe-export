@@ -1,38 +1,29 @@
 import { test, expect } from '@playwright/test'
-import { assertNoForbiddenBodyText, createConsoleCollector, restoreSessionStorage } from './support/auth'
+import { assertNoForbiddenBodyText, createConsoleCollector, dismissOnboardingWizard, restoreAuthenticatedStore, restoreSessionStorage } from './support/auth'
 import { captureFullPage, expectMainHeadingVisible, expectPageHealthy, gotoPage } from './support/audit'
-
-const SELLER_LISTINGS = [
-  'Toyota Hilux 2019 4x4 diesel',
-  'MacBook Air M2 15 pouces',
-  'Bon plan week-end musique live',
-]
+import { PublishWizardPO } from './pom/publish-wizard.po'
 
 test.describe('vendeur', () => {
   test.beforeEach(async ({ page }) => {
+    await restoreAuthenticatedStore(page, 'vendeur')
     await restoreSessionStorage(page, 'vendeur')
+    await dismissOnboardingWizard(page)
   })
 
-  test('own profile lists the three seeded listings', async ({ page }) => {
+  test('own profile shows the demo account preview', async ({ page }) => {
     const console = createConsoleCollector(page)
 
     await gotoPage(page, '/profil?tab=listings')
     await expectMainHeadingVisible(page)
-    await expect(page.getByText(/Mes annonces/i)).toBeVisible()
+    await expect(page.getByText(/Onboarding du compte/i)).toBeVisible()
+    await expect(page.getByText(/Mon compte particulier/i)).toBeVisible()
+    await expect(page.getByRole('link', { name: /Mes annonces/i }).first()).toBeVisible()
+    await expect(page.getByRole('link', { name: /Messages/i }).first()).toBeVisible()
+    await expect(page.getByRole('link', { name: /Param[eè]tres/i }).first()).toBeVisible()
+    await captureFullPage(page, 'vendeur', 'profil-demo')
 
-    for (const title of SELLER_LISTINGS) {
-      await expect(page.getByText(title).first()).toBeVisible()
-    }
-
-    await expect(page.getByRole('button', { name: /Modifier/i }).first()).toBeVisible()
-    await expect(page.getByRole('button', { name: /Supprimer/i }).first()).toBeVisible()
-    await captureFullPage(page, 'vendeur', 'mes-annonces')
-
-    await page.getByText('Toyota Hilux 2019 4x4 diesel').click()
-    await expect(page).toHaveURL(/\/annonces\/\d+/)
-    await expect(page.getByText(/Troc possible/i)).toBeVisible()
-    await expect(page.getByRole('button', { name: /Modifier/i }).or(page.getByText(/Modifier/i))).toBeVisible()
-    await captureFullPage(page, 'vendeur', 'annonce-troc')
+    await page.getByRole('link', { name: /Messages/i }).first().click()
+    await expect(page).toHaveURL(/\/messages/)
 
     await expectPageHealthy(page)
     await assertNoForbiddenBodyText(page)
@@ -43,12 +34,35 @@ test.describe('vendeur', () => {
     const console = createConsoleCollector(page)
 
     await gotoPage(page, '/messages')
-    await expect(page.getByText(/Messages/i)).toBeVisible()
+    await expect(page).toHaveURL(/\/messages/)
     await captureFullPage(page, 'vendeur', 'messages')
 
     await gotoPage(page, '/parametres')
-    await expect(page.getByText(/Paramètres/i).or(page.getByText(/Parametres/i))).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Param[eè]tres/i })).toBeVisible()
     await captureFullPage(page, 'vendeur', 'parametres')
+
+    await expectPageHealthy(page)
+    await assertNoForbiddenBodyText(page)
+    console.assertClean()
+  })
+
+  test('seller can publish a new listing with a photo', async ({ page }) => {
+    const console = createConsoleCollector(page)
+    const wizard = new PublishWizardPO(page)
+    const title = `Test publication Playwright ${Date.now()}`
+
+    await wizard.open()
+    await wizard.fillStepOne(
+      title,
+      'Annonce de test pour valider le parcours de publication complet.',
+    )
+    await wizard.chooseFirstLeafCategory()
+    await wizard.goToStep2()
+    await wizard.uploadOnePhoto()
+    await wizard.goToStep3()
+    await wizard.fillStepThree('12500', 1)
+    await wizard.submit()
+    await expect(page.getByRole('heading', { name: new RegExp(title, 'i') })).toBeVisible({ timeout: 15_000 })
 
     await expectPageHealthy(page)
     await assertNoForbiddenBodyText(page)

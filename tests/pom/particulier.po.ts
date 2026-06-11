@@ -21,12 +21,12 @@ export class ParticulierPO extends BasePO {
 
   async openProfile() {
     await super.open('/profil')
-    await expect(this.page.getByRole('heading', { name: /Ajouter une photo de profil/i })).toBeVisible({ timeout: 15_000 })
+    await expect(this.page.getByText(/Mon compte particulier/i)).toBeVisible({ timeout: 15_000 })
   }
 
   async openSettings() {
     await super.open('/parametres')
-    await expect(this.page.getByRole('heading', { name: /^Paramètres$/i })).toBeVisible({ timeout: 15_000 })
+    await expect(this.page.getByRole('heading', { name: /Param[eè]tres/i })).toBeVisible({ timeout: 15_000 })
   }
 
   async expectPublishWizardReady() {

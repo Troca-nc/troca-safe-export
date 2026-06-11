@@ -11,7 +11,7 @@ export class ProsPO extends BasePO {
   }
 
   async search(term: string) {
-    const input = this.page.getByPlaceholder(/Nom, entreprise, spécialité/i)
+    const input = this.page.getByLabel(/^Recherche$/i)
     await expect(input).toBeVisible()
     await input.fill(term)
   }

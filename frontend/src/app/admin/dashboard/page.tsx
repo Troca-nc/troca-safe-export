@@ -771,14 +771,14 @@ export default function AdminDashboardPage() {
         <div className="mb-6 grid grid-cols-4 gap-4">
           <KpiCard
             label="Annonces actives"
-            value={stats?.annonces_actives.toLocaleString('fr-FR') ?? '—'}
+            value={stats?.annonces_actives?.toLocaleString('fr-FR') ?? '—'}
             delta={stats?.annonces_delta_semaine}
             deltaLabel="cette semaine"
             icon={<FileText size={14} />}
           />
           <KpiCard
             label="Utilisateurs inscrits"
-            value={stats?.utilisateurs_total.toLocaleString('fr-FR') ?? '—'}
+            value={stats?.utilisateurs_total?.toLocaleString('fr-FR') ?? '—'}
             delta={stats?.utilisateurs_delta_mois}
             deltaLabel="ce mois"
             icon={<Users size={14} />}
@@ -793,7 +793,7 @@ export default function AdminDashboardPage() {
           />
           <KpiCard
             label="Messages echanges"
-            value={stats?.messages_total.toLocaleString('fr-FR') ?? '—'}
+            value={stats?.messages_total?.toLocaleString('fr-FR') ?? '—'}
             delta={stats?.messages_delta_pct}
             deltaLabel="% cette semaine"
             icon={<MessageCircle size={14} />}

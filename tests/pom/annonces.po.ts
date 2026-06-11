@@ -10,13 +10,22 @@ export class AnnoncesPO extends BasePO {
     await super.open('/annonces')
   }
 
-  async openFirstListing() {
-    const firstListing = this.page
-      .locator('a[href^="/annonces/"]')
-      .filter({ has: this.page.locator('h3') })
-      .first()
-    await expect(firstListing).toBeVisible()
-    const href = await firstListing.getAttribute('href')
+  async openFirstListing(title?: string) {
+    const listingLink = title
+      ? this.page.getByRole('link', { name: new RegExp(title, 'i') }).first()
+      : this.page
+          .locator('a[href^="/annonces/"]')
+          .filter({ has: this.page.locator('h3') })
+          .first()
+
+    await expect(listingLink).toBeVisible({ timeout: 15_000 })
+
+    if (title) {
+      await listingLink.click()
+      return
+    }
+
+    const href = await listingLink.getAttribute('href')
     expect(href, 'first listing href').toMatch(/^\/annonces\/\d+$/)
     await this.page.goto(href!, { waitUntil: 'domcontentloaded' })
   }

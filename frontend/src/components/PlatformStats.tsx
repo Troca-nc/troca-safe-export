@@ -53,12 +53,12 @@ function StatsSkeleton({ variant }: { variant: 'light' | 'dark' }) {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-3 md:grid-cols-3 md:gap-4">
       {metrics.map((metric) => (
-        <div key={metric.key} className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5 shadow-sm">
+        <div key={metric.key} className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4 shadow-sm md:p-5">
           <div className="h-5 w-5 skeleton rounded-full" />
-          <div className="mt-4 h-8 w-20 skeleton rounded-md" />
-          <div className="mt-3 h-4 w-28 skeleton rounded-md" />
+          <div className="mt-3 h-7 w-20 skeleton rounded-md md:mt-4 md:h-8" />
+          <div className="mt-2 h-3.5 w-28 skeleton rounded-md md:mt-3 md:h-4" />
         </div>
       ))}
     </div>
@@ -171,17 +171,17 @@ export default function PlatformStats({ variant = 'light' }: PlatformStatsProps)
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-3 md:grid-cols-3 md:gap-4">
       {metrics.map((metric, index) => {
         const Icon = metric.icon
         return (
           <article
             key={metric.key}
-            className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5 shadow-sm transition-colors"
+            className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4 shadow-sm transition-colors md:rounded-[1.75rem] md:p-5"
           >
             <Icon className={`h-5 w-5 ${metricToneClasses[metric.key]}`} />
-            <p className={`mt-4 text-[28px] font-semibold leading-none ${metricToneClasses[metric.key]}`}>{formattedValues[index]}</p>
-            <p className="mt-3 text-[13px] font-medium text-[var(--color-text-secondary)]">{metric.label}</p>
+            <p className={`mt-3 text-[24px] font-semibold leading-none md:mt-4 md:text-[28px] ${metricToneClasses[metric.key]}`}>{formattedValues[index]}</p>
+            <p className="mt-2 text-[12px] font-medium text-[var(--color-text-secondary)] md:mt-3 md:text-[13px]">{metric.label}</p>
           </article>
         )
       })}

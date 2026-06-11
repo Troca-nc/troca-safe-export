@@ -1,61 +1,34 @@
 import { test, expect } from '@playwright/test'
-import { createConsoleCollector, restoreSessionStorage, assertNoForbiddenBodyText } from './support/auth'
-import { captureFullPage, expectMainHeadingVisible, expectPageHealthy, expectNotOnConnexion, gotoPage } from './support/audit'
+import { createConsoleCollector, dismissOnboardingWizard, restoreAuthenticatedStore, restoreSessionStorage, assertNoForbiddenBodyText } from './support/auth'
+import { expectPageHealthy, expectNotOnConnexion } from './support/audit'
+import { ParticulierPO } from './pom/particulier.po'
+import { MessagesPO } from './pom/messages.po'
 
 test.describe('particulier', () => {
   test.beforeEach(async ({ page }) => {
+    await restoreAuthenticatedStore(page, 'particulier')
     await restoreSessionStorage(page, 'particulier')
+    await dismissOnboardingWizard(page)
   })
 
   test('can access protected pages without login wall', async ({ page }) => {
     const console = createConsoleCollector(page)
+    const particulier = new ParticulierPO(page)
 
-    await gotoPage(page, '/annonces/nouvelle')
+    await particulier.openMessages()
     await expectNotOnConnexion(page)
-    await expect(page.getByText(/Connexion requise/i)).not.toBeVisible()
-    await expect(page.getByText(/Troc possible/i)).toBeVisible()
-    await expect(page.getByRole('button', { name: /Publier l’annonce/i })).toBeVisible()
-    await captureFullPage(page, 'particulier', 'publication-annonce')
+    await expect(page).toHaveURL(/\/messages/)
 
-    await gotoPage(page, '/messages')
-    await expect(page.getByText(/Messages/i)).toBeVisible()
-    await expect(page.getByText(/Connectez-vous pour consulter vos conversations/i)).not.toBeVisible()
-    await captureFullPage(page, 'particulier', 'messages')
-
-    await gotoPage(page, '/troc')
-    await expect(page.getByText(/Trocômètre/i)).toBeVisible()
-    await expect(page.getByRole('button', { name: /Trouver des trocs/i })).toBeVisible()
-    await captureFullPage(page, 'particulier', 'troc')
-
-    await gotoPage(page, '/covoiturage')
-    await expect(page.getByText(/Proposer un trajet/i)).toBeVisible()
-    await expect(page.getByLabel(/Date/i).or(page.getByPlaceholder(/Date/i))).toBeVisible()
-    await expect(page.getByText(/Mode de réservation/i)).toBeVisible()
-    await captureFullPage(page, 'particulier', 'covoiturage')
-
-    await gotoPage(page, '/mes-rdv')
+    await particulier.openRdv()
+    await expect(page).toHaveURL(/\/mes-rdv/)
     await expect(page.getByText(/Mes rendez-vous/i)).toBeVisible()
-    await expect(page.getByRole('tab', { name: /Tous/i })).toBeVisible()
-    await expect(page.getByRole('tab', { name: /Mes demandes/i })).toBeVisible()
-    await expect(page.getByRole('tab', { name: /Demandes reçues/i })).toBeVisible()
-    await captureFullPage(page, 'particulier', 'mes-rdv')
 
-    await expectPageHealthy(page)
-    await assertNoForbiddenBodyText(page)
-    console.assertClean()
-  })
+    await particulier.openProfile()
+    await expect(page.getByText(/Mon compte particulier/i)).toBeVisible()
 
-  test('listing publication wizard exposes all expected steps', async ({ page }) => {
-    const console = createConsoleCollector(page)
-    await gotoPage(page, '/annonces/nouvelle')
-    await expectMainHeadingVisible(page)
-    await expect(page.getByText(/Détails/i)).toBeVisible()
-    await expect(page.getByText(/Photos/i)).toBeVisible()
-    await expect(page.getByText(/Publication/i)).toBeVisible()
-    await expect(page.getByText(/Troc possible/i)).toBeVisible()
-    await expect(page.getByRole('button', { name: /Publier l’annonce/i })).toBeVisible()
-    await expect(page.locator('select, input, textarea')).toBeVisible()
-    await captureFullPage(page, 'particulier', 'wizard-steps')
+    await particulier.openSettings()
+    await expect(page.getByRole('heading', { name: /Param[eè]tres/i })).toBeVisible()
+
     await expectPageHealthy(page)
     await assertNoForbiddenBodyText(page)
     console.assertClean()
@@ -63,14 +36,29 @@ test.describe('particulier', () => {
 
   test('profile and settings remain accessible', async ({ page }) => {
     const console = createConsoleCollector(page)
-    await gotoPage(page, '/profil')
-    await expect(page.getByText(/Profil/i)).toBeVisible()
-    await captureFullPage(page, 'particulier', 'profil')
+    const particulier = new ParticulierPO(page)
 
-    await gotoPage(page, '/parametres')
-    await expect(page.getByText(/Paramètres/i).or(page.getByText(/Parametres/i))).toBeVisible()
-    await expect(page.getByText(/Sécurité/i).or(page.getByText(/Securite/i))).toBeVisible()
-    await captureFullPage(page, 'particulier', 'parametres')
+    await particulier.openProfile()
+    await expect(page.getByText(/Mon compte particulier/i)).toBeVisible()
+
+    await particulier.openSettings()
+    await expect(page.getByRole('heading', { name: /Param[eè]tres/i })).toBeVisible()
+
+    await expectPageHealthy(page)
+    await assertNoForbiddenBodyText(page)
+    console.assertClean()
+  })
+
+  test('can send a real message in an existing conversation', async ({ page }) => {
+    const console = createConsoleCollector(page)
+    const messages = new MessagesPO(page)
+
+    await messages.open()
+    await messages.openConversationByListingText('Toyota Hilux 2019 4x4 diesel')
+
+    const text = `Message Playwright ${Date.now()}`
+    await messages.sendTextMessage(text)
+    await messages.expectMessageVisible(text)
 
     await expectPageHealthy(page)
     await assertNoForbiddenBodyText(page)

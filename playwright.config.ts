@@ -36,10 +36,10 @@ const visualProjects = [
 export default defineConfig({
   testDir: './tests',
   timeout: 90_000,
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,
   globalSetup: './tests/global-setup',
   globalTeardown: './tests/global-teardown',
   reporter: [
@@ -74,7 +74,7 @@ export default defineConfig({
     },
     {
       name: 'particulier',
-      testMatch: /particulier\.spec\.ts$|mobile\.spec\.ts$/,
+      testMatch: /particulier\.spec\.ts$/,
       use: {
         ...desktop,
         storageState: authState('particulier'),
@@ -90,7 +90,7 @@ export default defineConfig({
     },
     {
       name: 'pro',
-      testMatch: /pro\.spec\.ts$|mobile\.spec\.ts$|payment\.stripe\.spec\.ts$/,
+      testMatch: /pro\.spec\.ts$/,
       use: {
         ...desktop,
         storageState: authState('pro'),

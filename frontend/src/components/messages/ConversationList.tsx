@@ -2,7 +2,7 @@
 
 import { formatDistanceToNow, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { ArrowLeftRight, FileText, ShieldCheck, Star } from 'lucide-react'
+import { ArrowLeftRight, FileText, MessageCircle, ShieldCheck, Star } from 'lucide-react'
 import type { Conversation } from '@/types/messaging.types'
 
 interface ConversationListProps {
@@ -81,7 +81,7 @@ export default function ConversationList({ conversations, activeId, onSelect, lo
     return (
       <div className="flex flex-col gap-2 p-3">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="flex gap-3 p-3 animate-pulse">
+          <div key={index} className="flex gap-3 rounded-2xl p-3 animate-pulse">
             <div className="h-11 w-11 shrink-0 rounded-full bg-sand" />
             <div className="flex-1 space-y-2">
               <div className="h-3 w-3/4 rounded bg-sand" />
@@ -95,12 +95,19 @@ export default function ConversationList({ conversations, activeId, onSelect, lo
 
   if (conversations.length === 0) {
     return (
-      <div className="flex h-48 flex-col items-center justify-center px-4 text-center">
-        <p className="mb-2 text-2xl">💬</p>
-        <p className="text-sm font-medium text-night/60">Aucun message</p>
-        <p className="mt-1 text-xs text-night/40">
-          Contactez un vendeur depuis une annonce
+      <div className="flex h-56 flex-col items-center justify-center px-5 py-8 text-center">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-nc-lagonLight to-nc-emeraudeLight text-nc-lagonText shadow-sm">
+          <MessageCircle className="h-6 w-6" />
+        </div>
+        <p className="text-sm font-semibold text-night">Votre messagerie est vide</p>
+        <p className="mt-2 max-w-xs text-sm leading-relaxed text-night/50">
+          Dès qu’un acheteur ou un vendeur vous contacte depuis une annonce, la conversation apparaîtra ici.
         </p>
+        <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <span className="rounded-full bg-sand px-3 py-1 text-[11px] font-medium text-night/60">Réponses rapides</span>
+          <span className="rounded-full bg-sand px-3 py-1 text-[11px] font-medium text-night/60">Pièces jointes</span>
+          <span className="rounded-full bg-sand px-3 py-1 text-[11px] font-medium text-night/60">Offres de prix</span>
+        </div>
       </div>
     )
   }

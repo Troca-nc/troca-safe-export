@@ -188,8 +188,8 @@ export function HomeHeroSection({
           </p>
 
           <div className="mt-5 w-full max-w-[560px]">
-            <form onSubmit={onSubmit} className="relative flex w-full gap-2">
-              <div className="relative flex-1">
+            <form onSubmit={onSubmit} className="relative flex w-full flex-col gap-2 sm:flex-row">
+              <div className="relative min-w-0 flex-1">
                 <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/45" />
                 <input
                   ref={inputRef}
@@ -212,22 +212,24 @@ export function HomeHeroSection({
                   aria-controls="hero-search-suggestions"
                 />
               </div>
-              <button
-                type="submit"
-                className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-nc-lagon shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/15"
-              >
-                Rechercher
-              </button>
-              <button
-                type="button"
-                onClick={() => setSearchAlertOpen(true)}
-                disabled={!q.trim()}
-                className="inline-flex items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
-                title="Créer une alerte sur cette recherche"
-                aria-label="Créer une alerte sur cette recherche"
-              >
-                <Bell className="h-4 w-4" />
-              </button>
+              <div className="grid grid-cols-2 gap-2 sm:flex">
+                <button
+                  type="submit"
+                  className="w-full rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-nc-lagon shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/15 sm:w-auto"
+                >
+                  Rechercher
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSearchAlertOpen(true)}
+                  disabled={!q.trim()}
+                  className="inline-flex w-full items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                  title="Créer une alerte sur cette recherche"
+                  aria-label="Créer une alerte sur cette recherche"
+                >
+                  <Bell className="h-4 w-4" />
+                </button>
+              </div>
 
               {isFocused && filteredSuggestions.length > 0 ? (
                 <div
@@ -262,7 +264,7 @@ export function HomeHeroSection({
             <p className="mt-4 text-xs uppercase tracking-[0.18em] text-white/50">
               Recherches populaires
             </p>
-            <div className="mt-2 flex gap-2 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="mt-2 flex flex-wrap gap-2 pb-1 sm:flex-nowrap sm:overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {quickSuggestions.map((suggestion) => (
                 <button
                   key={suggestion}
@@ -388,9 +390,9 @@ export function FeaturedListingsSection({
 
       <div className="rounded-[2rem] border border-[var(--color-border)] border-l-4 border-l-nc-lagon bg-[var(--color-surface)] p-4 shadow-sm md:p-5">
         {loading ? (
-          <ListingSkeletonGrid count={8} className="grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" />
+          <ListingSkeletonGrid count={8} className="grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4" />
         ) : listings.length > 0 ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {listings.map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
@@ -415,7 +417,7 @@ export function SearchAlertsSection() {
   return (
     <section className="mx-auto max-w-7xl px-4 pb-10">
       <div className="grid gap-5 overflow-hidden rounded-[2rem] border border-[var(--color-border)] border-b-4 border-b-nc-corail bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.18))] px-6 py-8 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)] lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-        <div>
+        <div className="min-w-0">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-lagon">
             <Sparkles className="h-3.5 w-3.5" />
             Coups de cœur
@@ -426,7 +428,7 @@ export function SearchAlertsSection() {
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
             Les utilisateurs peuvent enregistrer des mots-clés pour suivre ce qui compte vraiment: un modèle précis, une commune, une gamme de prix ou une catégorie.
           </p>
-          <div className="mt-5 flex gap-2 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="mt-5 flex flex-wrap gap-2 pb-1 sm:flex-nowrap sm:overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {SEARCH_ALERTS.map((term) => (
               <span
                 key={term}
@@ -438,7 +440,7 @@ export function SearchAlertsSection() {
           </div>
         </div>
 
-        <div className="rounded-[1.75rem] border border-white/10 bg-white/8 p-5">
+        <div className="min-w-0 rounded-[1.75rem] border border-white/10 bg-white/8 p-5">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Exemple d&apos;alerte</p>
           <div className="mt-4 space-y-3">
             <div className="rounded-2xl bg-white/10 p-4">

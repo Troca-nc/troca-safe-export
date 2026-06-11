@@ -76,12 +76,12 @@ export function MobileBottomNav() {
       className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] md:hidden"
       aria-label="Navigation principale"
     >
-      <div className="flex items-center justify-around px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)]">
+      <div className="flex items-center justify-around px-1 pt-2 pb-[max(env(safe-area-inset-bottom),8px)]">
         {items.map(({ href, icon: Icon, label, isCta, isDrawer }) =>
           isCta ? (
             isAuthenticated ? (
-              <Link key={href} href={href} className="mt-[-1.25rem] flex flex-col items-center gap-0.5">
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-coral shadow-lg shadow-coral/30 ring-4 ring-white">
+              <Link key={href} href={href} className="mt-[-1rem] flex flex-col items-center gap-0.5">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-coral shadow-lg shadow-coral/30 ring-4 ring-white">
                   <Icon className="h-4 w-4 text-white" strokeWidth={2.5} />
                 </span>
                 <span className="text-[10px] font-semibold text-coral">{label}</span>
@@ -96,9 +96,9 @@ export function MobileBottomNav() {
                     redirectTo: '/annonces/nouvelle',
                   })
                 }
-                className="mt-[-1.25rem] flex flex-col items-center gap-0.5"
+                className="mt-[-1rem] flex flex-col items-center gap-0.5"
               >
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-coral shadow-lg shadow-coral/30 ring-4 ring-white">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-coral shadow-lg shadow-coral/30 ring-4 ring-white">
                   <Icon className="h-4 w-4 text-white" strokeWidth={2.5} />
                 </span>
                 <span className="text-[10px] font-semibold text-coral">{label}</span>
@@ -109,7 +109,7 @@ export function MobileBottomNav() {
               key={href}
               type="button"
               onClick={() => setMoreOpen((value) => !value)}
-              className={`flex flex-col items-center gap-0.5 rounded-xl px-3 py-1 transition-colors ${
+              className={`flex flex-col items-center gap-0.5 rounded-xl px-2 py-1 transition-colors ${
                 moreOpen ? 'bg-sand/70 text-night' : 'text-night/70 hover:bg-sand/60 hover:text-night'
               }`}
             >
@@ -120,7 +120,7 @@ export function MobileBottomNav() {
             <Link
               key={href}
               href={href}
-              className={`flex flex-col items-center gap-0.5 rounded-xl px-3 py-1 transition-colors ${
+              className={`flex flex-col items-center gap-0.5 rounded-xl px-2 py-1 transition-colors ${
                 isActive(href) ? 'bg-sand/70 text-night' : 'text-night/70 hover:bg-sand/60 hover:text-night'
               }`}
             >
@@ -137,7 +137,7 @@ export function MobileBottomNav() {
         <>
           <div className="fixed inset-0 z-40 bg-black/40" onClick={closeDrawer} />
           <div
-            className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl bg-[var(--color-surface)] p-5 shadow-[0_-18px_60px_rgba(8,32,50,0.18)]"
+            className="fixed inset-x-0 bottom-0 z-50 max-h-[calc(100dvh-4.5rem)] overflow-y-auto rounded-t-3xl bg-[var(--color-surface)] p-5 shadow-[0_-18px_60px_rgba(8,32,50,0.18)] overscroll-contain"
             style={{
               transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : 'translateY(0)',
               transition: dragOffset > 0 ? 'none' : 'transform 250ms ease',
@@ -148,7 +148,7 @@ export function MobileBottomNav() {
           >
             <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-night/10" />
             <p className="mb-3 text-xs uppercase tracking-wide text-night/40">Navigation</p>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {drawerItems.map(({ href, icon: Icon, label }) => (
                 <Link
                   key={href}
@@ -234,7 +234,7 @@ export default function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-        <div className="mx-auto flex h-14 max-w-[110rem] items-center gap-2 px-6 lg:px-10">
+        <div className="mx-auto flex h-16 max-w-[120rem] items-center gap-3 px-6 lg:px-10">
           <Link href="/" className="flex shrink-0 items-center gap-2">
             <span className="relative h-8 w-8 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_8px_24px_rgba(8,32,50,0.12)]">
               <Image src="/brand/troca-logo.png" alt="Troca" fill sizes="40px" className="object-cover" priority />
@@ -454,7 +454,7 @@ export default function Header() {
         </div>
 
         {menuOpen ? (
-          <div id="mobile-secondary-menu" role="menu" aria-label="Menu mobile secondaire" className="md:hidden flex flex-col gap-1 border-t border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 animate-slide-up">
+          <div id="mobile-secondary-menu" role="menu" aria-label="Menu mobile secondaire" className="md:hidden flex max-h-[calc(100dvh-4rem)] flex-col gap-1 overflow-y-auto overscroll-contain border-t border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 animate-slide-up">
             {isAuthenticated ? (
               <>
                 <Link href="/profil?tab=listings" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
@@ -533,7 +533,7 @@ export default function Header() {
         ) : null}
 
         <div className="border-t border-[var(--color-border)] bg-[var(--color-background-secondary)] px-4 py-2">
-        <div className="mx-auto max-w-[110rem] px-6 lg:px-10">
+        <div className="mx-auto max-w-[120rem] px-6 lg:px-10">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <DemoModeSwitcher />
               {demoModeEnabled ? (
@@ -554,7 +554,6 @@ export default function Header() {
         </div>
       </header>
 
-      <MobileBottomNav />
     </>
   )
 }

@@ -1375,9 +1375,9 @@ function ListingsPageContent() {
       <div className="max-w-7xl mx-auto px-4 py-6">
 
         {/* Barre superieure */}
-        <div className="mb-6 flex items-center gap-3 rounded-[2rem] border border-night/8 border-l-4 border-l-nc-lagon bg-white/90 p-4 shadow-sm">
+        <div className="mb-6 flex flex-col gap-3 rounded-[2rem] border border-night/8 border-l-4 border-l-nc-lagon bg-white/90 p-4 shadow-sm lg:flex-row lg:items-center">
           {/* Recherche */}
-          <div className="relative flex-1 max-w-md">
+          <div className="relative w-full lg:max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-night/35 w-4 h-4" />
             <input
               type="text"
@@ -1385,82 +1385,83 @@ function ListingsPageContent() {
               onChange={(e) => updateFilter('q', e.target.value)}
               placeholder="Rechercher..."
               aria-label="Rechercher dans les annonces"
-              className="input pl-9 text-sm"
+              className="input w-full pl-9 text-sm"
             />
           </div>
 
-          {/* Toggle Annonces / Troc */}
-          <div className="flex shrink-0 items-center rounded-2xl border border-night/12 bg-[var(--color-surface)] p-1 shadow-sm">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center lg:ml-auto">
+            {/* Toggle Annonces / Troc */}
+            <div className="flex w-full items-center rounded-2xl border border-night/12 bg-[var(--color-surface)] p-1 shadow-sm sm:w-auto">
+              <button
+                type="button"
+                onClick={() => updateFilter('troc', '')}
+                className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition sm:flex-none ${
+                  filters.troc === 'true'
+                    ? 'text-night/60 hover:bg-[var(--color-surface-raised)] hover:text-night'
+                    : 'bg-nc-lagon text-white shadow-sm shadow-nc-lagon/25'
+                }`}
+                aria-pressed={filters.troc !== 'true'}
+                aria-label="Afficher les annonces classiques"
+              >
+                Annonces
+              </button>
+              <button
+                type="button"
+                onClick={() => updateFilter('troc', 'true')}
+                className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition sm:flex-none ${
+                  filters.troc === 'true'
+                    ? 'bg-nc-corail text-white shadow-sm shadow-nc-corail/25'
+                    : 'text-night/60 hover:bg-[var(--color-surface-raised)] hover:text-night'
+                }`}
+                aria-pressed={filters.troc === 'true'}
+                aria-label="Afficher uniquement les annonces avec troc"
+              >
+                Troc
+              </button>
+            </div>
+
+            {/* Tri */}
+            <div className="relative w-full sm:w-auto">
+              <select
+                value={filters.sort}
+                onChange={(e) => updateFilter('sort', e.target.value)}
+                aria-label="Trier les annonces"
+                className="input w-full appearance-none pr-8 text-sm cursor-pointer sm:w-auto"
+              >
+                {SORT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-night/40" />
+            </div>
+
             <button
               type="button"
-              onClick={() => updateFilter('troc', '')}
-              className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
-                filters.troc === 'true'
-                  ? 'text-night/60 hover:bg-[var(--color-surface-raised)] hover:text-night'
-                  : 'bg-nc-lagon text-white shadow-sm shadow-nc-lagon/25'
-              }`}
-              aria-pressed={filters.troc !== 'true'}
-              aria-label="Afficher les annonces classiques"
+              onClick={handleCreateSearchAlert}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-coral/20 bg-coral/6 px-3 py-2 text-sm font-semibold text-coral transition hover:border-coral/30 hover:bg-coral/10 sm:w-auto"
             >
-              Annonces
+              <Bell className="h-4 w-4" />
+              Créer une alerte
             </button>
+
+            {/* Bouton filtres mobile */}
             <button
-              type="button"
-              onClick={() => updateFilter('troc', 'true')}
-              className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
-                filters.troc === 'true'
-                  ? 'bg-nc-corail text-white shadow-sm shadow-nc-corail/25'
-                  : 'text-night/60 hover:bg-[var(--color-surface-raised)] hover:text-night'
-              }`}
-              aria-pressed={filters.troc === 'true'}
-              aria-label="Afficher uniquement les annonces avec troc"
+              onClick={() => setFiltersOpen(!filtersOpen)}
+              className="relative inline-flex w-full items-center justify-center gap-2 rounded-xl border border-night/12 bg-white px-3 py-2 text-sm font-semibold text-night shadow-sm lg:hidden"
+              aria-expanded={filtersOpen}
+              aria-controls="mobile-filters-drawer"
+              aria-haspopup="dialog"
             >
-              Troc
+              <SlidersHorizontal className="h-4 w-4" />
+              Filtres
+              {activeFilterCount > 0 && (
+                <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-coral text-[10px] font-bold text-white">
+                  {activeFilterCount}
+                </span>
+              )}
             </button>
-          </div>
 
-          {/* Tri */}
-          <div className="relative">
-            <select
-              value={filters.sort}
-              onChange={(e) => updateFilter('sort', e.target.value)}
-              aria-label="Trier les annonces"
-              className="input text-sm appearance-none pr-8 cursor-pointer"
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-night/40 pointer-events-none" />
-          </div>
-
-          <button
-            type="button"
-            onClick={handleCreateSearchAlert}
-            className="inline-flex items-center gap-2 rounded-xl border border-coral/20 bg-coral/6 px-3 py-2 text-sm font-semibold text-coral transition hover:border-coral/30 hover:bg-coral/10"
-          >
-            <Bell className="h-4 w-4" />
-            Créer une alerte
-          </button>
-
-          {/* Bouton filtres mobile */}
-          <button
-            onClick={() => setFiltersOpen(!filtersOpen)}
-            className="lg:hidden btn-secondary text-sm relative"
-            aria-expanded={filtersOpen}
-            aria-controls="mobile-filters-drawer"
-            aria-haspopup="dialog"
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            Filtres
-            {activeFilterCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-coral text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
-
-          <div className="hidden lg:flex items-center rounded-xl border border-night/12 bg-white p-1">
+            <div className="hidden items-center rounded-xl border border-night/12 bg-white p-1 lg:flex">
             <button
               type="button"
               onClick={() => setViewMode('list')}
@@ -1483,6 +1484,7 @@ function ListingsPageContent() {
               <Map className="h-4 w-4" />
               Carte
             </button>
+          </div>
           </div>
         </div>
 
@@ -1521,7 +1523,7 @@ function ListingsPageContent() {
           {filtersOpen && (
             <div className="lg:hidden fixed inset-0 z-50 flex">
               <div className="absolute inset-0 bg-black/40" onClick={() => setFiltersOpen(false)} />
-              <div id="mobile-filters-drawer" role="dialog" aria-modal="true" aria-label="Filtres de recherche" className="relative ml-auto w-80 border-l-4 border-l-nc-lagon bg-white h-full overflow-y-auto p-6 shadow-modal animate-slide-up">
+              <div id="mobile-filters-drawer" role="dialog" aria-modal="true" aria-label="Filtres de recherche" className="relative ml-auto h-full w-[min(100vw,24rem)] overflow-y-auto border-l-4 border-l-nc-lagon bg-white p-5 shadow-modal animate-slide-up sm:w-80 sm:p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="font-display font-bold text-lg">Filtres</h2>
                   <button type="button" onClick={() => setFiltersOpen(false)} aria-label="Fermer les filtres">
@@ -1596,17 +1598,17 @@ function ListingsPageContent() {
 
             {/* TODO: test E2E sur le chargement initial et la pagination sans perte de contexte. */}
             {isInitialLoading ? (
-              <ListingSkeletonGrid count={6} className="grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4" />
+              <ListingSkeletonGrid count={6} className="grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4" />
             ) : displayedListings.length === 0 ? (
-                            <div className="text-center py-20">
+              <div className="rounded-[2rem] border border-night/8 bg-white/85 px-6 py-16 text-center shadow-sm">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-nc-lagonLight text-nc-lagonText" aria-hidden="true">
                   <Search className="h-7 w-7" />
                 </div>
                 <h3 className="mt-4 font-display text-xl font-bold text-night mb-2">
-                  Aucune annonce trouv?e pour ces crit?res
+                  Aucune annonce trouvée pour ces critères
                 </h3>
                 <p className="text-night/50 text-sm mb-6">
-                  Essayez d??largir votre recherche ou de changer de cat?gorie.
+                  Essayez d’élargir votre recherche ou de changer de catégorie.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <button onClick={clearFilters} className="btn-secondary">
@@ -1621,7 +1623,7 @@ function ListingsPageContent() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                   {displayedListings.map((listing) => (
                     <ListingCard
                       key={String((listing as { id?: string | number }).id ?? '')}
@@ -1632,7 +1634,7 @@ function ListingsPageContent() {
 
                 {isLoadingMore ? (
                   <div className="mt-4">
-                    <ListingSkeletonGrid count={2} className="grid-cols-2 md:grid-cols-2 xl:grid-cols-2 gap-4" />
+                    <ListingSkeletonGrid count={2} className="grid-cols-1 sm:grid-cols-2 gap-4" />
                   </div>
                 ) : null}
 

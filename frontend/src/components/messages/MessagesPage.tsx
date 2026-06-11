@@ -328,13 +328,13 @@ function MobileTabs({
 }) {
   return (
     <div className="sticky top-0 z-20 border-b border-night/10 bg-surface/95 backdrop-blur xl:hidden">
-      <div className="flex items-center gap-2 px-3 py-3">
-        <button type="button" onClick={onOpenConversations} className="btn-ghost px-3 py-2 text-xs">
+      <div className="grid gap-2 px-3 py-3 sm:flex sm:items-center">
+        <button type="button" onClick={onOpenConversations} className="btn-ghost justify-center px-3 py-2 text-xs sm:self-start">
           <Users className="mr-1 h-3.5 w-3.5" />
           Discussions
         </button>
 
-        <div className="ml-auto flex items-center gap-1 rounded-full border border-night/10 bg-sand p-1">
+        <div className="grid grid-cols-3 items-center gap-1 rounded-[1.35rem] border border-night/10 bg-sand p-1 sm:ml-auto">
           {[
             { id: 'chat', label: 'Chat' },
             { id: 'media', label: 'Médias' },
@@ -344,7 +344,7 @@ function MobileTabs({
               key={item.id}
               type="button"
               onClick={() => setPanel(item.id as MobilePanel)}
-              className={`rounded-full px-3 py-2 text-xs font-medium transition-colors ${
+              className={`rounded-[1.1rem] px-2.5 py-2 text-[11px] font-medium transition-colors sm:px-3 ${
                 panel === item.id ? 'bg-coral text-white shadow-sm' : 'text-night/60 hover:bg-white'
               }`}
             >
@@ -534,28 +534,44 @@ export default function MessagesPage() {
   const renderChat = () => {
     if (!activeConversation) {
       return (
-        <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-sand">
-            <MessageCircle className="h-8 w-8 text-coral" />
+        <div className="flex h-full min-h-[58vh] items-center justify-center px-4 py-6 text-center">
+          <div className="w-full max-w-md rounded-[2rem] border border-night/10 bg-surface px-5 py-8 shadow-card">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[1.75rem] bg-gradient-to-br from-nc-lagonLight to-nc-emeraudeLight text-nc-lagonText shadow-sm">
+              <MessageCircle className="h-8 w-8" />
+            </div>
+            <h2 className="font-display text-2xl font-bold text-night">
+              {convs.length === 0 ? 'Aucune conversation pour le moment' : 'Sélectionnez une conversation'}
+            </h2>
+            <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-night/55">
+              {convs.length === 0
+                ? 'Dès qu’un acheteur ou un vendeur vous écrira depuis une annonce, l’historique apparaîtra ici avec les photos, offres et documents partagés.'
+                : 'Ouvrez une discussion depuis le tiroir pour suivre vos échanges, envoyer un message et retrouver les pièces jointes.'}
+            </p>
+            <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
+              <button
+                type="button"
+                onClick={() => setConversationDrawerOpen(true)}
+                className="btn-primary px-4 py-2.5"
+              >
+                Ouvrir les conversations
+              </button>
+              <Link href="/annonces" className="btn-secondary px-4 py-2.5">
+                Voir les annonces
+              </Link>
+            </div>
+            <div className="mt-5 flex flex-wrap justify-center gap-2">
+              <span className="rounded-full bg-sand px-3 py-1 text-[11px] font-medium text-night/60">Messages sécurisés</span>
+              <span className="rounded-full bg-sand px-3 py-1 text-[11px] font-medium text-night/60">Offres de troc</span>
+              <span className="rounded-full bg-sand px-3 py-1 text-[11px] font-medium text-night/60">Photos et documents</span>
+            </div>
           </div>
-          <h2 className="font-semibold text-night">Sélectionnez une conversation</h2>
-          <p className="mt-2 max-w-sm text-sm text-night/50">
-            Ouvrez une discussion depuis le tiroir pour suivre vos échanges.
-          </p>
-          <button
-            type="button"
-            onClick={() => setConversationDrawerOpen(true)}
-            className="btn-primary mt-5 px-4 py-2.5"
-          >
-            Ouvrir les conversations
-          </button>
         </div>
       )
     }
 
     return (
       <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[28px] border border-night/10 bg-surface shadow-card">
-        <div className="flex items-center gap-3 border-b border-night/8 px-4 py-4">
+        <div className="flex items-start gap-3 border-b border-night/8 px-4 py-4 sm:items-center">
           <button
             type="button"
             onClick={() => setConversationDrawerOpen(true)}
@@ -618,7 +634,7 @@ export default function MessagesPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className={`text-xs ${connected ? 'text-emerald-600' : 'text-night/30'}`}>
+            <span className={`text-[11px] ${connected ? 'text-emerald-600' : 'text-night/30'}`}>
               {connected
                 ? 'Connecté'
                 : connectionState === 'reconnecting'
@@ -661,7 +677,7 @@ export default function MessagesPage() {
             {msgsLoading ? (
               Array.from({ length: 5 }).map((_, index) => (
                 <div key={index} className={`flex ${index % 2 ? 'justify-end' : 'justify-start'}`}>
-                  <div className="h-10 w-48 animate-pulse rounded-2xl bg-sand" />
+                  <div className={`h-10 animate-pulse rounded-2xl bg-sand ${index % 2 ? 'w-44 sm:w-56' : 'w-52 sm:w-64'}`} />
                 </div>
               ))
             ) : (
@@ -702,7 +718,7 @@ export default function MessagesPage() {
   }
 
   const renderMobilePanel = () => {
-    if (panel === 'media') {
+  if (panel === 'media') {
       return (
         <div className="xl:hidden flex-1 overflow-y-auto px-4 py-4">
           <div className="rounded-[28px] border border-night/10 bg-surface p-4 shadow-card">
@@ -830,7 +846,7 @@ export default function MessagesPage() {
         loading={convsLoading}
       />
 
-      <div className="mx-auto flex min-h-[calc(100vh-64px)] w-full max-w-[1700px] gap-4 px-3 py-3 md:px-4">
+      <div className="mx-auto flex min-h-[calc(100vh-64px)] w-full max-w-[1700px] gap-3 px-2 py-2 sm:px-3 sm:py-3 md:px-4">
         <MediaSidebar
           attachments={attachments}
           onOpenConversations={() => setConversationDrawerOpen(true)}

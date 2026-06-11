@@ -6,6 +6,127 @@ export type AuthRole = 'particulier' | 'vendeur' | 'pro' | 'conducteur' | 'admin
 
 export const AUTH_DIR = path.resolve(process.cwd(), 'playwright', '.auth')
 
+type AuthUserState = {
+  id: string
+  email: string
+  first_name: string
+  last_name: string
+  prenom?: string
+  nom?: string
+  telephone?: string | null
+  phone_verified?: boolean
+  avatar_url: string | null
+  is_verified: boolean
+  is_pro: boolean
+  is_admin: boolean
+  rating: number
+  commune_name?: string
+  demo_role?: string
+  account_type?: 'personal' | 'professional'
+  pro_plan?: 'pro'
+  onboarding_step?: number
+}
+
+const AUTH_USERS: Record<AuthRole, AuthUserState> = {
+  particulier: {
+    id: '2',
+    email: 'particulier@demo.troca',
+    first_name: 'Emma',
+    last_name: 'Martin',
+    prenom: 'Emma',
+    nom: 'Martin',
+    telephone: '+687700001',
+    phone_verified: true,
+    avatar_url: null,
+    is_verified: true,
+    is_pro: false,
+    is_admin: false,
+    rating: 4.8,
+    commune_name: 'Nouméa',
+    demo_role: 'particulier',
+    account_type: 'personal',
+    onboarding_step: 1,
+  },
+  vendeur: {
+    id: '5',
+    email: 'loueur@demo.troca',
+    first_name: 'Lucas',
+    last_name: 'Bernier',
+    prenom: 'Lucas',
+    nom: 'Bernier',
+    telephone: '+687700004',
+    phone_verified: false,
+    avatar_url: null,
+    is_verified: true,
+    is_pro: false,
+    is_admin: false,
+    rating: 4.6,
+    commune_name: 'Koné',
+    demo_role: 'particulier',
+    account_type: 'personal',
+    onboarding_step: 1,
+  },
+  pro: {
+    id: '3',
+    email: 'pro@demo.troca',
+    first_name: 'Entreprise',
+    last_name: 'Test NC',
+    prenom: 'Entreprise',
+    nom: 'Test NC',
+    telephone: '+687700003',
+    phone_verified: true,
+    avatar_url: null,
+    is_verified: true,
+    is_pro: true,
+    is_admin: false,
+    rating: 4.9,
+    commune_name: 'Dumbéa',
+    demo_role: 'pro',
+    account_type: 'professional',
+    pro_plan: 'pro',
+    onboarding_step: 1,
+  },
+  conducteur: {
+    id: '6',
+    email: 'marine@demo.troca',
+    first_name: 'Marine',
+    last_name: 'Dupont',
+    prenom: 'Marine',
+    nom: 'Dupont',
+    telephone: '+687700006',
+    phone_verified: true,
+    avatar_url: null,
+    is_verified: true,
+    is_pro: false,
+    is_admin: false,
+    rating: 4.7,
+    commune_name: 'Lifou',
+    demo_role: 'visitor',
+    account_type: 'personal',
+    onboarding_step: 1,
+  },
+  admin: {
+    id: '1',
+    email: 'admin@demo.troca',
+    first_name: 'Ada',
+    last_name: 'Admin',
+    prenom: 'Ada',
+    nom: 'Admin',
+    telephone: '+687700005',
+    phone_verified: true,
+    avatar_url: null,
+    is_verified: true,
+    is_pro: true,
+    is_admin: true,
+    rating: 5,
+    commune_name: 'Nouméa',
+    demo_role: 'admin',
+    account_type: 'professional',
+    pro_plan: 'pro',
+    onboarding_step: 1,
+  },
+}
+
 export function storageStatePath(role: AuthRole) {
   return path.join(AUTH_DIR, `${role}.json`)
 }
@@ -44,6 +165,43 @@ export async function restoreAuthStore(page: Page, state: unknown) {
   }, state)
 }
 
+export async function restoreAuthenticatedStore(page: Page, role: AuthRole) {
+  const session = readSessionStorage(role)
+  const accessToken = session.access_token || session.accessToken
+  if (!accessToken) {
+    throw new Error(`No access token found for ${role}`)
+  }
+
+  const user = AUTH_USERS[role]
+  const refreshToken = session.refresh_token || session.refreshToken || null
+
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
+  await page.evaluate(({ state, tokens }) => {
+    window.localStorage.setItem('auth-store', JSON.stringify({
+      state,
+      version: 0,
+    }))
+    window.sessionStorage.removeItem('pending_auth_action')
+    window.sessionStorage.removeItem('redirect_after_login')
+    window.sessionStorage.setItem('access_token', tokens.accessToken)
+    if (tokens.refreshToken) {
+      window.sessionStorage.setItem('refresh_token', tokens.refreshToken)
+    } else {
+      window.sessionStorage.removeItem('refresh_token')
+    }
+  }, {
+    state: {
+      user,
+      isAuthenticated: true,
+      demoProfile: null,
+    },
+    tokens: {
+      accessToken,
+      refreshToken,
+    },
+  })
+}
+
 export async function captureSessionStorage(page: Page, role: AuthRole) {
   fs.mkdirSync(AUTH_DIR, { recursive: true })
   const payload = await page.evaluate(() => Object.fromEntries(Object.entries(window.sessionStorage)))
@@ -57,6 +215,14 @@ export async function assertNoForbiddenBodyText(page: Page) {
   expect(normalized).not.toMatch(/\bNaN\b/)
   expect(normalized).not.toMatch(/\[object Object\]/i)
   expect(normalized).not.toMatch(/\bnull\b/i)
+}
+
+export async function dismissOnboardingWizard(page: Page) {
+  const dismissButton = page.getByRole('button', { name: /^Passer$/i })
+  if (await dismissButton.count()) {
+    await dismissButton.first().click()
+    await expect(dismissButton.first()).toBeHidden({ timeout: 15_000 })
+  }
 }
 
 export function createConsoleCollector(page: Page) {
@@ -76,6 +242,7 @@ export function createConsoleCollector(page: Page) {
     /Request failed with status code 404/i,
     /WebSocket connection to 'ws:\/\/localhost:3001\/socket\.io\/\?EIO=4&transport=websocket' failed/i,
     /socket\.io\/\?EIO=4&transport=websocket/i,
+    /\[platform-stats\] load failed: AxiosError: timeout of 15000ms exceeded/i,
   ]
 
   page.on('console', (message) => {

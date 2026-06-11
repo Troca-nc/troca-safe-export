@@ -31,6 +31,11 @@ function countFiles(dir: string) {
 
 export default class ConsolidatedReport implements Reporter {
   private readonly results: RecordedResult[] = []
+  private discoveredTests = 0
+
+  onBegin(_config: unknown, suite: { allTests(): Array<unknown> }) {
+    this.discoveredTests = suite.allTests().length
+  }
 
   onTestEnd(test: TestCase, result: TestResult) {
     this.results.push({
@@ -44,6 +49,10 @@ export default class ConsolidatedReport implements Reporter {
   }
 
   async onEnd(result: FullResult) {
+    if (this.results.length === 0) {
+      return
+    }
+
     const reportDir = path.resolve(process.cwd(), 'playwright-report')
     fs.mkdirSync(reportDir, { recursive: true })
 
@@ -58,6 +67,8 @@ export default class ConsolidatedReport implements Reporter {
     lines.push('# Troca Playwright Consolidated Report')
     lines.push('')
     lines.push(`- Status global: **${result.status}**`)
+    lines.push(`- Tests découverts: **${this.discoveredTests}**`)
+    lines.push(`- Tests exécutés: **${this.results.length}**`)
     lines.push(`- Total tests: **${this.results.length}**`)
     lines.push(`- Passed: **${this.results.filter((r) => r.status === 'passed').length}**`)
     lines.push(`- Failed: **${this.results.filter((r) => r.status === 'failed').length}**`)

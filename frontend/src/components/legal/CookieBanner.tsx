@@ -60,34 +60,34 @@ export default function CookieBanner() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-[100] border-t border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
-      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex min-w-0 items-start gap-3">
-            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-coral/10 text-coral">
+      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-3 py-3 sm:px-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex min-w-0 items-start gap-2.5">
+            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-coral/10 text-coral">
               <Cookie className="h-4 w-4" />
             </span>
-          <p className="text-sm leading-6 text-night/80">
+          <p className="text-[13px] leading-5 text-night/80 sm:text-sm sm:leading-6">
             Nous utilisons des cookies essentiels pour faire fonctionner Troca. Vous pouvez accepter, refuser ou personnaliser vos choix.
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="grid grid-cols-2 gap-2 sm:flex">
           <button
             type="button"
             onClick={() => handleChoice({ analytics: false, marketing: false })}
-            className="btn-ghost justify-center rounded-2xl px-4 py-2.5"
+            className="btn-ghost justify-center rounded-2xl px-3 py-2.5 text-sm sm:px-4"
           >
             Refuser
           </button>
           <button
             type="button"
             onClick={() => handleChoice({ analytics: true, marketing: true })}
-            className="btn-primary justify-center rounded-2xl px-4 py-2.5"
+            className="btn-primary justify-center rounded-2xl px-3 py-2.5 text-sm sm:px-4"
           >
             Accepter
           </button>
           <Link
             href="/politique-cookies#preferences"
-            className="btn-secondary inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5"
+            className="btn-secondary col-span-2 inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm sm:col-span-1"
           >
             <ShieldCheck className="h-4 w-4" />
             Personnaliser

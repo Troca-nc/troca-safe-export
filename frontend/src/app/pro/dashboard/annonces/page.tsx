@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -46,8 +46,8 @@ type Filter = 'all' | 'active' | 'expired' | 'boosted'
 const FILTERS: Array<{ id: Filter; label: string }> = [
   { id: 'all', label: 'Toutes' },
   { id: 'active', label: 'Actives' },
-  { id: 'expired', label: 'Expirées' },
-  { id: 'boosted', label: 'Boostées' },
+  { id: 'expired', label: 'ExpirÃ©es' },
+  { id: 'boosted', label: 'BoostÃ©es' },
 ]
 
 function formatPrice(value?: number | null) {
@@ -66,7 +66,7 @@ function getStatusLabel(status?: string | null) {
   const normalized = String(status || '').toLowerCase()
   if (normalized === 'draft') return { label: 'Brouillon', tone: 'bg-sand text-night/65' }
   if (normalized === 'inactive' || normalized === 'sold' || normalized === 'expired') {
-    return { label: 'Expirée', tone: 'bg-amber-50 text-amber-700' }
+    return { label: 'ExpirÃ©e', tone: 'bg-amber-50 text-amber-700' }
   }
   return { label: 'Actif', tone: 'bg-emerald-50 text-emerald-700' }
 }
@@ -147,7 +147,7 @@ export default function ProDashboardListingsPage() {
   }
 
   const handleDelete = async (listingId: string | number) => {
-    if (!window.confirm('Supprimer définitivement cette annonce ?')) return
+    if (!window.confirm('Supprimer dÃ©finitivement cette annonce ?')) return
     setDeletingId(listingId)
     setActionError('')
     try {
@@ -164,20 +164,20 @@ export default function ProDashboardListingsPage() {
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <div className="h-20 animate-pulse rounded-[2rem] bg-sand/70" />
-        <div className="h-96 animate-pulse rounded-[2rem] bg-sand/70" />
+      <div className="space-y-4 sm:space-y-6">
+        <div className="h-20 animate-pulse rounded-[2rem] bg-sand/70 sm:h-24" />
+        <div className="h-80 animate-pulse rounded-[2rem] bg-sand/70 sm:h-96" />
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+    <div className="space-y-4 sm:space-y-6">
+      <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Mes annonces</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-night">Gérez vos annonces en un coup d'œil</h1>
+            <h1 className="mt-2 font-display text-3xl font-bold text-night">GÃ©rez vos annonces en un coup d'Å“il</h1>
             <p className="mt-2 text-sm text-night/60">Filtrez, renouvelez, boostez et supprimez vos annonces depuis votre espace Pro.</p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-nc-lagonLight px-3 py-1.5 text-sm font-semibold text-nc-lagon">
@@ -187,7 +187,7 @@ export default function ProDashboardListingsPage() {
         </div>
       </section>
 
-      <section className="flex flex-wrap gap-2 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-2 shadow-sm">
+      <section className="-mx-1 flex gap-2 overflow-x-auto rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-2 shadow-sm sm:mx-0 sm:flex-wrap sm:overflow-visible">
         {FILTERS.map((item) => {
           const active = filter === item.id
           return (
@@ -195,7 +195,7 @@ export default function ProDashboardListingsPage() {
               key={item.id}
               type="button"
               onClick={() => setFilter(item.id)}
-              className={`rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
+              className={`shrink-0 rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
                 active
                   ? 'bg-[#0A7EA4] text-white shadow-sm'
                   : 'text-night/60 hover:bg-[var(--color-background-secondary)] hover:text-night'
@@ -219,10 +219,10 @@ export default function ProDashboardListingsPage() {
             const status = getStatusLabel(listing.status)
             const boosted = Boolean(listing.is_boosted || (listing.boost_expires_at && new Date(listing.boost_expires_at) > new Date()))
             return (
-              <article key={listing.id} className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
+              <article key={listing.id} className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-sm sm:p-4">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-                  <div className="flex min-w-0 flex-1 gap-4">
-                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-sand">
+                  <div className="flex min-w-0 flex-1 flex-col gap-4 sm:flex-row">
+                    <div className="h-20 w-full shrink-0 overflow-hidden rounded-2xl bg-sand sm:w-20">
                       {listing.cover_image ? (
                         <Image src={listing.cover_image} alt={listing.title} width={80} height={80} className="h-full w-full object-cover" />
                       ) : (
@@ -237,33 +237,33 @@ export default function ProDashboardListingsPage() {
                         <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${status.tone}`}>{status.label}</span>
                         {boosted ? (
                           <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
-                            ⚡ Boostée
+                            âš¡ BoostÃ©e
                           </span>
                         ) : null}
                       </div>
                       <p className="mt-1 text-sm text-night/60">
-                        {listing.category_name || 'Catégorie'} · {formatPrice(listing.price ?? listing.prix)}
+                        {listing.category_name || 'CatÃ©gorie'} Â· {formatPrice(listing.price ?? listing.prix)}
                       </p>
                       <p className="mt-1 text-xs text-night/45">
-                        {listing.commune_name || 'Nouvelle-Calédonie'} · publiée le {formatDate(listing.created_at || listing.published_at)}
+                        {listing.commune_name || 'Nouvelle-CalÃ©donie'} Â· publiÃ©e le {formatDate(listing.created_at || listing.published_at)}
                       </p>
                       <p className="mt-2 text-sm text-night/60">
-                        👁 {Number(listing.total_views ?? 0)} · 💬 {Number(listing.total_contacts ?? 0)} · {Number(listing.conversion_rate ?? 0).toFixed(1)}%
+                        ðŸ‘ {Number(listing.total_views ?? 0)} Â· ðŸ’¬ {Number(listing.total_contacts ?? 0)} Â· {Number(listing.conversion_rate ?? 0).toFixed(1)}%
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex shrink-0 flex-wrap gap-2">
+                  <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                     <Link
                       href={`/annonces/nouvelle?edit=${listing.id}`}
-                      className="rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
+                      className="inline-flex items-center justify-center rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
                     >
                       Modifier
                     </Link>
                     <button
                       type="button"
                       onClick={() => setBoostTarget(listing)}
-                      className="inline-flex items-center gap-2 rounded-xl bg-[#0A7EA4] px-3 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0A7EA4] px-3 py-2 text-sm font-semibold text-white transition hover:opacity-90"
                     >
                       <Sparkles className="h-4 w-4" />
                       Booster
@@ -273,7 +273,7 @@ export default function ProDashboardListingsPage() {
                         type="button"
                         onClick={() => handleRenew(listing.id)}
                         disabled={refreshingId === listing.id}
-                        className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-60"
+                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-60"
                       >
                         {refreshingId === listing.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                         Renouveler
@@ -283,7 +283,7 @@ export default function ProDashboardListingsPage() {
                       type="button"
                       onClick={() => handleDelete(listing.id)}
                       disabled={deletingId === listing.id}
-                      className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
                     >
                       {deletingId === listing.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                       Supprimer
@@ -294,16 +294,16 @@ export default function ProDashboardListingsPage() {
             )
           })
         ) : (
-          <div className="rounded-[2rem] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-14 text-center text-night/55">
+          <div className="rounded-[2rem] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-12 text-center text-night/55 sm:px-6">
             <Search className="mx-auto h-8 w-8 text-night/25" />
             <p className="mt-3 text-lg font-semibold text-night">Aucune annonce pour ce filtre</p>
-            <p className="mt-2 text-sm">Essayez une autre catégorie ou créez une nouvelle annonce.</p>
+            <p className="mt-2 text-sm">Essayez une autre catÃ©gorie ou crÃ©ez une nouvelle annonce.</p>
           </div>
         )}
       </section>
 
       {totalPages > 1 ? (
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-2">
           <button
             type="button"
             onClick={() => setPage((value) => Math.max(1, value - 1))}
@@ -311,9 +311,9 @@ export default function ProDashboardListingsPage() {
             className="inline-flex items-center gap-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)] disabled:opacity-50"
           >
             <ChevronLeft className="h-4 w-4" />
-            Précédent
+            PrÃ©cÃ©dent
           </button>
-          <span className="text-sm text-night/55">
+          <span className="w-full text-center text-sm text-night/55 sm:w-auto">
             Page {currentPage} / {totalPages}
           </span>
           <button
@@ -345,3 +345,4 @@ export default function ProDashboardListingsPage() {
     </div>
   )
 }
+

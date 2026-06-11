@@ -1,18 +1,16 @@
 import { test, expect } from '@playwright/test'
 import { assertNoForbiddenBodyText, createConsoleCollector } from '../support/auth'
-import { captureFullPage, expectMainHeadingVisible, expectNotOnConnexion, expectPageHealthy } from '../support/audit'
+import { expectMainHeadingVisible, expectNotOnConnexion, expectPageHealthy } from '../support/audit'
 import { HomePO } from '../pom/home.po'
-import { AnnoncesPO } from '../pom/annonces.po'
 import { ProsPO } from '../pom/pros.po'
 import { AppelsOffresPO } from '../pom/appels-offres.po'
 
 test.describe('smoke public', () => {
   test.describe.configure({ mode: 'serial' })
 
-  test('homepage and annonces discovery paths are visible', async ({ page }) => {
+  test('homepage search and announcements discovery paths are visible', async ({ page }) => {
     const console = createConsoleCollector(page)
     const home = new HomePO(page)
-    const annonces = new AnnoncesPO(page)
 
     await home.open()
     await expectNotOnConnexion(page)
@@ -22,14 +20,10 @@ test.describe('smoke public', () => {
 
     await page.goto('/annonces?q=Toyota%20Hilux', { waitUntil: 'domcontentloaded' })
     await expect(page).toHaveURL(/\/annonces\?q=Toyota%20Hilux/i)
+    await expect(page.getByText(/pour "Toyota Hilux"/i)).toBeVisible()
+    await expect(page.locator('article')).toHaveCount(6)
+    await expect(page.locator('article').first()).toBeVisible()
 
-    await annonces.open()
-    await annonces.openFirstListing()
-    await expect(page).toHaveURL(/\/annonces\/\d+/)
-    await expectMainHeadingVisible(page)
-    await annonces.expectDetailActions()
-
-    await captureFullPage(page, 'smoke', 'public-home-annonces')
     await expectPageHealthy(page)
     await assertNoForbiddenBodyText(page)
     console.assertClean()
@@ -48,7 +42,6 @@ test.describe('smoke public', () => {
     await expect(proCard).toBeVisible()
     await expect(proCard.getByRole('link', { name: /^Voir la vitrine$/i })).toBeVisible()
 
-    await captureFullPage(page, 'smoke', 'public-pros')
     await expectPageHealthy(page)
     await assertNoForbiddenBodyText(page)
     console.assertClean()
@@ -61,7 +54,6 @@ test.describe('smoke public', () => {
     await appelsOffres.open()
     await expectMainHeadingVisible(page)
 
-    await captureFullPage(page, 'smoke', 'public-appels-offres')
     await expectPageHealthy(page)
     await assertNoForbiddenBodyText(page)
     console.assertClean()

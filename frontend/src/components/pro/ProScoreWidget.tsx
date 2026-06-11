@@ -202,17 +202,17 @@ export default function ProScoreWidget({
   )
 
   return (
-    <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+    <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-2xl">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Pilotage</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">Score de performance de votre vitrine</h2>
+          <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Score de performance de votre vitrine</h2>
           <p className="mt-2 text-sm leading-relaxed text-night/60">
             Ce score synthétique vous indique si votre vitrine avance bien et quelles actions peuvent encore faire progresser vos resultats.
           </p>
         </div>
 
-        <div className={`rounded-3xl border px-4 py-3 ${label.className}`}>
+        <div className={`rounded-3xl border px-4 py-3 self-start ${label.className}`}>
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/70">
               <Gauge className="h-6 w-6" />
@@ -247,7 +247,7 @@ export default function ProScoreWidget({
           <span className="text-xs font-medium text-night/45">{suggestions.length} conseil{suggestions.length > 1 ? 's' : ''}</span>
         </div>
 
-        <div className="grid gap-3 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {suggestions.map((suggestion) => {
             const Icon = suggestion.icon
             const toneClasses = {
@@ -274,7 +274,7 @@ export default function ProScoreWidget({
 
                 <Link
                   href={suggestion.href}
-                  className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-[var(--color-surface)]"
+                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-[var(--color-surface)] sm:w-auto"
                 >
                   {suggestion.cta}
                   <ArrowRight className="h-4 w-4" />
@@ -284,7 +284,7 @@ export default function ProScoreWidget({
           })}
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-medium text-night/55">
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] font-medium text-night/55 sm:text-xs">
           <AlertCircle className="h-3.5 w-3.5 text-amber-600" />
           Ces recommandations s&apos;appuient sur vos vues, contacts, messages et boosts en cours.
         </div>

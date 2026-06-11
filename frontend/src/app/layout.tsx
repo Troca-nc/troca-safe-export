@@ -47,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       {/* pb-16 : compense la barre de nav fixe en bas sur mobile */}
-      <body className="bg-[var(--color-bg-page)] text-[var(--color-text-primary)] font-body antialiased pb-16 pt-14 md:pb-0 md:pt-14">
+      <body className="bg-[var(--color-bg-page)] text-[var(--color-text-primary)] font-body antialiased overflow-x-clip pb-[calc(5rem+env(safe-area-inset-bottom))] pt-14 md:overflow-x-visible md:pb-0 md:pt-14">
         <ThemeProvider>
           <ReactQueryProvider>
             <JsonLd data={buildOrganizationSchema()} />

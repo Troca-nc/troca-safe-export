@@ -52,15 +52,15 @@ export default function ProCarousel() {
   if (!loading && pros.length === 0) return null
 
   return (
-    <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm md:p-5">
+    <div className="min-w-0 max-w-full overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm md:p-5">
       {loading ? (
-        <div className="grid auto-cols-[minmax(82vw,1fr)] grid-flow-col gap-4 overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] md:auto-cols-auto md:grid-flow-row md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:overflow-visible">
+        <div className="grid w-full min-w-0 max-w-full auto-cols-[minmax(82vw,1fr)] grid-flow-col gap-4 overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] md:auto-cols-auto md:grid-flow-row md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:overflow-visible">
           {Array.from({ length: 4 }).map((_, index) => (
             <ProCardSkeleton key={index} />
           ))}
         </div>
       ) : (
-        <div className="grid auto-cols-[minmax(82vw,1fr)] grid-flow-col gap-4 overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] md:auto-cols-auto md:grid-flow-row md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:overflow-visible">
+        <div className="grid w-full min-w-0 max-w-full auto-cols-[minmax(82vw,1fr)] grid-flow-col gap-4 overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] md:auto-cols-auto md:grid-flow-row md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:overflow-visible">
           {pros.map((pro) => (
             <ProCard key={pro.id} pro={pro} />
           ))}

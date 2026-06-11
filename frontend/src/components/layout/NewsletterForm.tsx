@@ -34,14 +34,14 @@ export default function NewsletterForm() {
   }
 
   return (
-    <div className="mt-3 flex gap-2">
+    <div className="mt-3 flex flex-col gap-2 sm:flex-row">
       <input
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="votre@email.com"
         className="flex-1 rounded-2xl border border-[var(--color-border)]
-          bg-[var(--color-background)] px-4 py-2.5 text-sm
+          bg-[var(--color-background)] px-4 py-2.5 text-sm min-w-0
           text-[var(--color-text-primary)] placeholder:text-night/40
           outline-none focus:border-[#0A7EA4]
           focus:ring-2 focus:ring-[#0A7EA4]/20 transition"

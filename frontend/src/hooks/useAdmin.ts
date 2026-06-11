@@ -6,7 +6,7 @@ import { getStoredAccessToken } from '@/lib/tokenStorage'
 import type { ActionModeration } from '@/types/admin.types'
 
 function useStaticResource<T>(initialData: T) {
-  const [data, setData] = useState(initialData)
+  const [data] = useState(initialData)
   const [loading, setLoading] = useState(false)
 
   const refetch = async () => {
@@ -14,10 +14,6 @@ function useStaticResource<T>(initialData: T) {
     setLoading(false)
     return data
   }
-
-  useEffect(() => {
-    setData(initialData)
-  }, [initialData])
 
   return { data, loading, refetch }
 }

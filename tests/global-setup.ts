@@ -17,9 +17,9 @@ const NODE_EXE = process.env.NODE_EXE || 'C:\\Program Files\\nodejs\\node.exe'
 
 const AUTH_ACCOUNTS: Array<{ role: AuthRole; email: string; password: string }> = [
   { role: 'particulier', email: 'particulier@demo.troca', password: 'Demo1234!' },
-  { role: 'vendeur', email: 'particulier@demo.troca', password: 'Demo1234!' },
+  { role: 'vendeur', email: 'loueur@demo.troca', password: 'Demo1234!' },
   { role: 'pro', email: 'pro@demo.troca', password: 'Demo1234!' },
-  { role: 'conducteur', email: 'loueur@demo.troca', password: 'Demo1234!' },
+  { role: 'conducteur', email: 'marine@demo.troca', password: 'Demo1234!' },
   { role: 'admin', email: 'admin@demo.troca', password: 'Demo1234!' },
 ]
 

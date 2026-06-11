@@ -8,7 +8,9 @@ export class ProPO extends BasePO {
 
   async openDashboard() {
     await super.open('/pro/dashboard')
-    await expect(this.page.getByText(/Vues totales/i)).toBeVisible({ timeout: 20_000 })
+    await expect(this.page.getByText(/Bonjour/i)).toBeVisible({ timeout: 20_000 })
+    await expect(this.page.getByText(/Voici les performances de votre vitrine/i)).toBeVisible({ timeout: 20_000 })
+    await expect(this.page.getByRole('link', { name: /Ouvrir le pack/i })).toBeVisible({ timeout: 20_000 })
   }
 
   async openRdv() {
@@ -40,8 +42,8 @@ export class ProPO extends BasePO {
   }
 
   async expectDashboardLoaded() {
-    await expect(this.page.getByText(/Pack de lancement/i)).toBeVisible({ timeout: 15_000 })
-    await expect(this.page.getByText(/Vues totales/i)).toBeVisible({ timeout: 15_000 })
+    await expect(this.page.getByText(/Bonjour/i)).toBeVisible({ timeout: 15_000 })
+    await expect(this.page.getByText(/Voici les performances de votre vitrine/i)).toBeVisible({ timeout: 15_000 })
     await expect(this.page.getByRole('link', { name: /Ouvrir le pack/i })).toBeVisible({ timeout: 15_000 })
   }
 }

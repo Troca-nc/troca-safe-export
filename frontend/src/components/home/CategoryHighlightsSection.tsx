@@ -50,8 +50,8 @@ function FeedRail({
   children: React.ReactNode
 }) {
   return (
-    <div className="overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] md:overflow-visible md:pb-0">
-      <div className="grid auto-cols-[minmax(78vw,1fr)] grid-flow-col gap-3 snap-x snap-mandatory md:auto-cols-auto md:grid-flow-row md:grid-cols-3 md:gap-4">
+    <div className="min-w-0 max-w-full overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] md:overflow-visible md:pb-0">
+      <div className="grid w-full min-w-0 max-w-full auto-cols-[minmax(78vw,1fr)] grid-flow-col gap-3 snap-x snap-mandatory md:auto-cols-auto md:grid-flow-row md:grid-cols-3 md:gap-4">
         {children}
       </div>
       <style jsx>{`

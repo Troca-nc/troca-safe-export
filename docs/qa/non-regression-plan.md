@@ -8,6 +8,7 @@ Ce document regroupe la stratégie d'exécution des tests pour les environnement
 - `tests/smoke/public.smoke.spec.ts`
 - `tests/smoke/particulier.smoke.spec.ts`
 - `tests/smoke/pro.smoke.spec.ts`
+- `tests/smoke/admin.smoke.spec.ts`
 
 ### Visuel
 - `tests/visual/home-hero.spec.ts`
@@ -30,7 +31,7 @@ npx playwright test tests/visual/home-hero.spec.ts
 ```
 
 Critères de sortie:
-- 0 échec sur les smoke
+- 0 échec sur les smoke public, particulier, pro et admin
 - 0 différence screenshot non approuvée
 - aucun log console bloquant
 

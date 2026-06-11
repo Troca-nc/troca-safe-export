@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -99,14 +99,14 @@ function KpiCard({
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-6">
-      <div className="h-28 animate-pulse rounded-[2rem] bg-sand/70" />
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="h-24 animate-pulse rounded-[2rem] bg-sand/70 sm:h-28" />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="h-36 animate-pulse rounded-2xl bg-sand/70" />
+          <div key={index} className="h-32 animate-pulse rounded-2xl bg-sand/70 sm:h-36" />
         ))}
       </div>
-      <div className="h-80 animate-pulse rounded-[2rem] bg-sand/70" />
+      <div className="h-64 animate-pulse rounded-[2rem] bg-sand/70 sm:h-80" />
     </div>
   )
 }
@@ -168,14 +168,14 @@ export default function ProDashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <ProOnboardingGuide />
 
-      <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+      <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Bonjour</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-night">
+            <h1 className="mt-2 font-display text-2xl font-bold text-night sm:text-3xl">
               {user?.first_name || user?.prenom || 'Professionnel'} 👋
             </h1>
             <p className="mt-2 text-sm text-night/60">Voici les performances de votre vitrine.</p>
@@ -187,16 +187,16 @@ export default function ProDashboardPage() {
         </div>
       </section>
 
-      <section className="rounded-[2rem] border border-[#0A7EA4]/15 bg-gradient-to-br from-nc-lagonLight via-white to-nc-emeraudeLight p-6 shadow-sm">
+      <section className="rounded-[2rem] border border-[#0A7EA4]/15 bg-gradient-to-br from-nc-lagonLight via-white to-nc-emeraudeLight p-4 shadow-sm sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Pack de lancement</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Accélérez votre démarrage Pro avec un parcours guidé</h2>
+            <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Accélérez votre démarrage Pro avec un parcours guidé</h2>
             <p className="mt-2 text-sm text-night/65">
               Retrouvez vos étapes prioritaires, de la vitrine à la première annonce, en passant par le catalogue, les rendez-vous et les devis.
             </p>
           </div>
-          <Link href="/pro/dashboard/pack-lancement" className="btn-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm">
+          <Link href="/pro/dashboard/pack-lancement" className="btn-primary inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm sm:w-auto">
             Ouvrir le pack
             <ArrowRight className="h-4 w-4" />
           </Link>
@@ -214,7 +214,7 @@ export default function ProDashboardPage() {
         recentContactsCount={data?.recent_contacts?.length ?? 0}
       />
 
-      <section id="stats" className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section id="stats" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           icon={Eye}
           title="Vues totales"
@@ -245,7 +245,7 @@ export default function ProDashboardPage() {
         />
       </section>
 
-      <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+      <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-start gap-3">
             <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
@@ -253,13 +253,13 @@ export default function ProDashboardPage() {
             </div>
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Catalogue produit</p>
-              <h2 className="mt-1 font-display text-2xl font-bold text-night">Créez votre vitrine de produits</h2>
+              <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Créez votre vitrine de produits</h2>
               <p className="mt-2 text-sm text-night/60">
                 Centralisez vos fiches produits fixes, suivez le stock et publiez une annonce ponctuelle quand vous voulez booster une référence.
               </p>
             </div>
           </div>
-          <Link href="/pro/dashboard/produits" className="inline-flex items-center gap-2 rounded-2xl border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10">
+          <Link href="/pro/dashboard/produits" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10 sm:w-auto">
             Ouvrir le catalogue
             <ArrowRight className="h-4 w-4" />
           </Link>
@@ -267,19 +267,19 @@ export default function ProDashboardPage() {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
-        <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+        <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-5">
           <div className="mb-4 flex items-end justify-between gap-3">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Performance</p>
-              <h2 className="mt-1 font-display text-2xl font-bold text-night">Vues et contacts sur 30 jours</h2>
+              <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Vues et contacts sur 30 jours</h2>
             </div>
           </div>
-          <div className="h-80">
+          <div className="h-64 sm:h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(8,32,50,0.08)" />
-                <XAxis dataKey="label" tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                <XAxis dataKey="label" tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+                <YAxis tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} width={28} />
                 <Tooltip
                   contentStyle={{ borderRadius: 16, border: '1px solid rgba(8,32,50,0.08)' }}
                   labelStyle={{ fontWeight: 700 }}
@@ -292,11 +292,11 @@ export default function ProDashboardPage() {
         </article>
 
         <aside className="space-y-4">
-          <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+          <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-5">
             <div className="flex items-end justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Annonces</p>
-                <h2 className="mt-1 font-display text-2xl font-bold text-night">Vos chiffres clés</h2>
+                <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Vos chiffres clés</h2>
               </div>
               <span className="rounded-full bg-nc-lagonLight px-3 py-1 text-xs font-semibold text-nc-lagon">
                 {listings.active}/{listings.total} actives
@@ -314,11 +314,11 @@ export default function ProDashboardPage() {
             </div>
           </article>
 
-          <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+          <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-5">
             <div className="mb-3 flex items-end justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Boosts actifs</p>
-                <h2 className="mt-1 font-display text-xl font-bold text-night">En cours</h2>
+                <h2 className="mt-1 font-display text-lg font-bold text-night sm:text-xl">En cours</h2>
               </div>
             </div>
             {data?.boosts_active?.length ? (
@@ -368,33 +368,33 @@ export default function ProDashboardPage() {
         </aside>
       </section>
 
-      <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+      <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Messages à traiter</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Vos messages non lus</h2>
+            <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Vos messages non lus</h2>
             <p className="mt-2 text-sm text-night/60">
               Vue consolidée des messages en attente, avec les clients à rappeler en priorité.
             </p>
           </div>
-          <Link href="/messages" className="inline-flex items-center gap-2 rounded-2xl border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10">
+          <Link href="/messages" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10 sm:w-auto">
             Ouvrir la messagerie
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="mt-5 grid gap-4 md:grid-cols-3">
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <article className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
             <p className="text-sm font-semibold text-night/55">Messages non lus</p>
-            <p className="mt-2 text-3xl font-bold text-night">{unreadMessages.toLocaleString('fr-FR')}</p>
+            <p className="mt-2 text-2xl font-bold text-night sm:text-3xl">{unreadMessages.toLocaleString('fr-FR')}</p>
           </article>
           <article className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
             <p className="text-sm font-semibold text-night/55">Clients différents</p>
-            <p className="mt-2 text-3xl font-bold text-night">{unreadClients.toLocaleString('fr-FR')}</p>
+            <p className="mt-2 text-2xl font-bold text-night sm:text-3xl">{unreadClients.toLocaleString('fr-FR')}</p>
           </article>
           <article className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
             <p className="text-sm font-semibold text-night/55">Conversations en attente</p>
-            <p className="mt-2 text-3xl font-bold text-night">{unreadConversations.toLocaleString('fr-FR')}</p>
+            <p className="mt-2 text-2xl font-bold text-night sm:text-3xl">{unreadConversations.toLocaleString('fr-FR')}</p>
           </article>
         </div>
 
@@ -416,7 +416,7 @@ export default function ProDashboardPage() {
                   .slice(0, 2) || 'C'
 
                 return (
-                  <div key={thread.conversation_id} className="flex flex-col gap-3 rounded-2xl border border-[var(--color-border)] p-4 md:flex-row md:items-center md:justify-between">
+                  <div key={thread.conversation_id} className="flex flex-col gap-3 rounded-2xl border border-[var(--color-border)] p-3 sm:p-4 md:flex-row md:items-center md:justify-between">
                     <div className="flex items-start gap-3">
                       <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-nc-lagonLight text-sm font-bold text-[#0A7EA4]">
                         {thread.buyer_avatar_url ? (
@@ -461,11 +461,11 @@ export default function ProDashboardPage() {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
-        <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+        <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-5">
           <div className="mb-4 flex items-end justify-between gap-3">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Top annonces</p>
-              <h2 className="mt-1 font-display text-2xl font-bold text-night">Vos meilleures annonces</h2>
+              <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Vos meilleures annonces</h2>
             </div>
             <Link href="/pro/dashboard/annonces" className="hidden items-center gap-1 text-sm font-semibold text-coral hover:underline md:inline-flex">
               Gérer les annonces <ArrowRight className="h-4 w-4" />
@@ -508,10 +508,10 @@ export default function ProDashboardPage() {
           )}
         </article>
 
-        <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+        <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-5">
           <div className="mb-4">
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Contacts récents</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Derniers contacts reçus</h2>
+            <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Derniers contacts reçus</h2>
           </div>
           {data?.recent_contacts?.length ? (
             <div className="space-y-3">

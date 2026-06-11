@@ -48,7 +48,7 @@ export function ListingSkeleton({ className = '' }: ListingSkeletonProps) {
 
 export function ListingSkeletonList({ count = 6, className = '' }: ListingSkeletonListProps) {
   return (
-    <div className={`grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 ${className}`}>
+    <div className={`grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 ${className}`}>
       {Array.from({ length: count }).map((_, index) => (
         <ListingSkeleton key={index} />
       ))}
@@ -58,7 +58,7 @@ export function ListingSkeletonList({ count = 6, className = '' }: ListingSkelet
 
 export function ListingSkeletonRail({ count = 2, className = '' }: ListingSkeletonListProps) {
   return (
-    <div className={`grid grid-cols-2 gap-3 ${className}`}>
+    <div className={`grid grid-cols-1 gap-3 ${className}`}>
       {Array.from({ length: count }).map((_, index) => (
         <ListingSkeleton key={index} />
       ))}
