@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # ============================================================
 # Troca — Sauvegarde automatique PostgreSQL
 # Exécuté chaque nuit à 2h00

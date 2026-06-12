@@ -50,14 +50,16 @@ jobs:
         run: cd frontend && npm ci
 
       - name: Security scan - dependencies
-        uses: snyk/actions/node@master
+        if: ${{ secrets.SNYK_TOKEN != '' }}
+        uses: snyk/actions/node@v1.0.0
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --all-projects --severity-threshold=high
 
       - name: Security scan - code
-        run: npx --yes snyk@latest code test --severity-threshold=high .
+        if: ${{ secrets.SNYK_TOKEN != '' }}
+        run: npx --yes snyk@1 code test --severity-threshold=high .
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
