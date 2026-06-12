@@ -5,7 +5,6 @@
 //  Centralise tous les envois transactionnels du backend
 // ============================================================
 
-const nodemailer = require('nodemailer');
 const { isConfiguredValue } = require('../config/env');
 const { ensureNotificationPreferences } = require('./notificationPreferencesService');
 
@@ -15,6 +14,8 @@ let _transporter = null;
 
 function getTransporter() {
   if (_transporter) return _transporter;
+
+  const nodemailer = require('nodemailer');
 
   if (!isConfiguredValue(process.env.SMTP_HOST) || !isConfiguredValue(process.env.SMTP_USER) || !isConfiguredValue(process.env.SMTP_PASS)) {
     console.warn('[email] Variables SMTP manquantes â€” emails dÃ©sactivÃ©s');

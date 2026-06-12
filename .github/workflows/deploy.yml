@@ -166,6 +166,15 @@ jobs:
           tags: ${{ env.IMAGE_FRONTEND }}:latest,${{ env.IMAGE_FRONTEND }}:${{ github.sha }}
           build-args: |
             NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_STRIPE_PK=${{ secrets.NEXT_PUBLIC_STRIPE_PK }}
+            NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
+            NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY=${{ secrets.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY }}
+            NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY=${{ secrets.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY }}
+            NEXT_PUBLIC_PAYPLUG_PLAN_PRO_MONTHLY=${{ secrets.NEXT_PUBLIC_PAYPLUG_PLAN_PRO_MONTHLY }}
+            NEXT_PUBLIC_PAYPLUG_PLAN_PRO_YEARLY=${{ secrets.NEXT_PUBLIC_PAYPLUG_PLAN_PRO_YEARLY }}
+            NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+            NEXT_PUBLIC_DEMO_MODE=${{ secrets.NEXT_PUBLIC_DEMO_MODE }}
+            NEXT_PUBLIC_SHOW_DEMO_BAR=${{ secrets.NEXT_PUBLIC_SHOW_DEMO_BAR }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

@@ -1,5 +1,25 @@
 const assert = require('assert');
 
+require.cache[require.resolve('../config/database')] = {
+  id: require.resolve('../config/database'),
+  filename: require.resolve('../config/database'),
+  loaded: true,
+  exports: {
+    query: async () => ({ rows: [], rowCount: 0 }),
+    withTransaction: async (fn) => fn({ query: async () => ({ rows: [], rowCount: 0 }) }),
+    checkConnection: async () => new Date().toISOString(),
+  },
+};
+
+require.cache[require.resolve('../services/authAccountService')] = {
+  id: require.resolve('../services/authAccountService'),
+  filename: require.resolve('../services/authAccountService'),
+  loaded: true,
+  exports: {
+    isAccessTokenBlacklisted: async () => false,
+  },
+};
+
 const { authenticate, optionalAuth, requireAdmin } = require('../middleware/auth');
 const { apiLimiter, authLimiter, uploadLimiter } = require('../middleware/rateLimit');
 

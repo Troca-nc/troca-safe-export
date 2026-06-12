@@ -7,8 +7,8 @@ WORKDIR /app
 
 # Dépendances
 FROM base AS deps
-COPY package.json ./
-RUN npm install --omit=dev && npm cache clean --force
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
 
 # Build
 FROM base AS runner
