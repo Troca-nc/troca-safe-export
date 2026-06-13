@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
+    "test": "echo 'No test suite configured' && exit 0",
     "start": "next start"
   },
   "dependencies": {

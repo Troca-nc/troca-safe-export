@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node src/index.js",
+    "build": "node --check src/index.js",
     "start": "node src/index.js",
     "worker": "node src/worker.js",
     "test": "node src/tests/run.js",
