@@ -1,6 +1,6 @@
 {
   "name": "troca-backend",
-  "version": "1.0.0",
+  "version": "1.0.0-rc1",
   "private": true,
   "scripts": {
     "dev": "node src/index.js",
