@@ -1,0 +1,17 @@
+.git
+node_modules
+**/node_modules
+**/.next
+**/dist
+**/build
+.env*
+!.env.example
+screenshots/
+**/screenshots/
+**/__screenshots__/
+*.screenshot.png
+*.screenshot.jpg
+playwright-report/
+test-results/
+cypress/screenshots/
+cypress/videos/

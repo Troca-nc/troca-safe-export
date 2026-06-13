@@ -63,3 +63,12 @@ Thumbs.db
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# QA screenshots / artifacts
+screenshots/
+**/screenshots/
+**/__screenshots__/
+*.screenshot.png
+*.screenshot.jpg
+cypress/screenshots/
+cypress/videos/
