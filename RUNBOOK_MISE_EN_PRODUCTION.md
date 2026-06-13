@@ -85,8 +85,8 @@ curl http://localhost:3000
   - `JWT_EXPIRES_IN`
   - `JWT_REFRESH_EXPIRES_IN`
 - Docker images:
-  - `BACKEND_IMAGE=ghcr.io/quidammm/troca/backend:latest`
-  - `FRONTEND_IMAGE=ghcr.io/quidammm/troca/frontend:latest`
+  - `BACKEND_IMAGE=ghcr.io/Troca-nc/troca-safe-export/backend:latest`
+  - `FRONTEND_IMAGE=ghcr.io/Troca-nc/troca-safe-export/frontend:latest`
 - Frontend public:
   - `NEXT_PUBLIC_API_URL=https://troca.nc/api`
   - `NEXT_PUBLIC_STRIPE_PK`
