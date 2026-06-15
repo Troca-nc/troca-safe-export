@@ -1,6 +1,6 @@
 'use client'
 // ============================================================
-//  Troca — Gestion du thème (clair / sombre)
+//  Kalico — Gestion du thème (clair / sombre)
 // ============================================================
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
@@ -14,7 +14,7 @@ interface ThemeCtx {
 }
 
 const THEME_KEY = 'theme'
-const LEGACY_THEME_KEY = 'troca-theme'
+const LEGACY_THEME_KEY = 'kalico-theme'
 
 const ThemeContext = createContext<ThemeCtx>({
   theme: 'light',

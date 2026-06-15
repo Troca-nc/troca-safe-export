@@ -135,10 +135,10 @@ export default function ReviewInvitePage() {
   }, [hasHydrated, user?.email, user?.first_name, user?.prenom])
 
   const displayName = useMemo(() => {
-    if (!invite) return 'Professionnel Troca'
+    if (!invite) return 'Professionnel Kalico'
     return invite.pro.pro_company_name
       || [invite.pro.prenom, invite.pro.nom].filter(Boolean).join(' ').trim()
-      || 'Professionnel Troca'
+      || 'Professionnel Kalico'
   }, [invite])
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -263,7 +263,7 @@ export default function ReviewInvitePage() {
                   <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Votre avis</p>
                   <h2 className="mt-1 font-display text-2xl font-bold text-night">Partagez votre expérience</h2>
                   <p className="mt-1 text-sm text-night/55">
-                    Votre avis vérifié aide la communauté Troca à faire le bon choix.
+                    Votre avis vérifié aide la communauté Kalico à faire le bon choix.
                   </p>
                 </div>
 

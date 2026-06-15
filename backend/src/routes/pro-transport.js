@@ -135,7 +135,7 @@ function buildTransporterDisplayName(row) {
   return row.company_name
     || row.pro_company_name
     || [row.prenom, row.nom].filter(Boolean).join(' ').trim()
-    || 'Transporteur Troca';
+    || 'Transporteur Kalico';
 }
 
 function mapTransporterRow(row) {
@@ -533,7 +533,7 @@ router.post('/apply', authenticate, async (req, res, next) => {
         to: adminEmail,
         subject: 'Nouvelle demande transport pro',
         html: `
-          <p>Une nouvelle demande transport pro a été soumise sur Troca.</p>
+          <p>Une nouvelle demande transport pro a été soumise sur Kalico.</p>
           <ul>
             <li><strong>Entreprise :</strong> ${transporter.company_name}</li>
             <li><strong>Transport :</strong> ${transporter.transport_type.map(getTransportTypeLabel).join(', ')}</li>
@@ -812,10 +812,10 @@ router.post('/rides', authenticate, async (req, res, next) => {
 
     await sendMail({
       to: transporter.email,
-      subject: 'Nouvelle demande de course sur Troca',
+      subject: 'Nouvelle demande de course sur Kalico',
       html: `
         <p>Bonjour ${transporter.prenom || 'Transporteur'},</p>
-        <p>Une nouvelle demande de course a été envoyée sur Troca :</p>
+        <p>Une nouvelle demande de course a été envoyée sur Kalico :</p>
         <p><strong>${value.departure}</strong> → <strong>${value.destination}</strong><br>
         Date : ${value.ride_date} à ${normalizeTimeLabel(value.ride_time)}<br>
         Passagers : ${value.passengers}<br>
@@ -906,7 +906,7 @@ router.post('/rides/:id/confirm', authenticate, async (req, res, next) => {
 
     await sendMail({
       to: result.client_email,
-      subject: 'Votre course a été confirmée sur Troca',
+      subject: 'Votre course a été confirmée sur Kalico',
       html: `
         <p>Bonjour ${result.client_prenom || 'Client'},</p>
         <p><strong>${result.transporter_prenom || 'Votre transporteur'}</strong> a confirmé votre course.</p>

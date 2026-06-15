@@ -110,7 +110,7 @@ export default function HomePage() {
 
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem('troca_search_history')
+      const raw = window.localStorage.getItem('kalico_search_history')
       const parsed = raw ? JSON.parse(raw) : []
       setRecentSearches(Array.isArray(parsed) ? parsed.slice(0, 5).filter((value) => typeof value === 'string' && value.trim()) : [])
     } catch {

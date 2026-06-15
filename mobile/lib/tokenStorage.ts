@@ -1,8 +1,8 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-const KEY_ACCESS = 'troca_access_token';
-const KEY_REFRESH = 'troca_refresh_token';
+const KEY_ACCESS = 'kalico_access_token';
+const KEY_REFRESH = 'kalico_refresh_token';
 
 export const tokenStorage = {
   getAccess: async () => {

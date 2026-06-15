@@ -51,7 +51,7 @@ function filterMessage(content) {
 function maskPhoneNumbers(content) {
   return content.replace(
     /(\+687|00687)?[\s.-]?[0-9]{2}[\s.-]?[0-9]{2}[\s.-]?[0-9]{2}/g,
-    '[numÃ©ro masquÃ© â€” Ã©changez via Troca]'
+    '[numÃ©ro masquÃ© â€” Ã©changez via Kalico]'
   );
 }
 

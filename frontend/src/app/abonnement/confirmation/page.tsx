@@ -28,7 +28,7 @@ interface StoredConfirmation {
   storedAt: string
 }
 
-const STORAGE_PREFIX = 'troca_subscription_confirmation:'
+const STORAGE_PREFIX = 'kalico_subscription_confirmation:'
 
 function buildStorageKey(sessionId: string | null, paymentId: string | null) {
   const identifier = sessionId || paymentId || 'unknown'

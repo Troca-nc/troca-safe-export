@@ -78,7 +78,7 @@ function createStorage(): StorageAdapter {
       delete: (key: string) => void
     }
   }
-  const mmkv = new MMKV({ id: 'troca-mobile-cache' })
+  const mmkv = new MMKV({ id: 'kalico-mobile-cache' })
   return {
     getString: (key) => mmkv.getString(key) ?? null,
     setString: (key, value) => {
@@ -169,7 +169,7 @@ export const queryClient = new QueryClient({
 
 const persister = createAsyncStoragePersister({
   storage: AsyncStorage,
-  key: 'troca-mobile-react-query-cache',
+  key: 'kalico-mobile-react-query-cache',
   throttleTime: 1000,
 })
 
@@ -177,7 +177,7 @@ void persistQueryClient({
   queryClient,
   persister,
   maxAge: LISTING_CACHE_TTL_MS,
-  buster: 'troca-mobile-listing-cache-v1',
+  buster: 'kalico-mobile-listing-cache-v1',
 })
 
 export function useOfflineStatus() {

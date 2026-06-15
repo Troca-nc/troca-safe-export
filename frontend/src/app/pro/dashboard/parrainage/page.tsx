@@ -35,7 +35,7 @@ export default function ProDashboardReferralPage() {
 
   const displayCode = useMemo(() => {
     const raw = String(referralInfo?.referral_code || '').trim()
-    if (!raw) return 'TROCA-PRO'
+    if (!raw) return 'KALICO-PRO'
     return raw.toUpperCase()
   }, [referralInfo?.referral_code])
 
@@ -87,8 +87,8 @@ export default function ProDashboardReferralPage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Troca - Parrainage Pro',
-          text: 'Rejoignez Troca et developpez votre activite avec une vitrine Pro.',
+          title: 'Kalico - Parrainage Pro',
+          text: 'Rejoignez Kalico et developpez votre activite avec une vitrine Pro.',
           url,
         })
         return
@@ -107,7 +107,7 @@ export default function ProDashboardReferralPage() {
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Parrainage</p>
             <h1 className="mt-2 font-display text-3xl font-bold text-night">Invitez d&apos;autres pros et developpez votre reseau</h1>
             <p className="mt-3 text-sm leading-relaxed text-night/60 sm:text-base">
-              Partagez votre lien de parrainage pour faire decouvrir Troca a d&apos;autres professionnels. Le code est maintenant genere et conserve cote serveur.
+              Partagez votre lien de parrainage pour faire decouvrir Kalico a d&apos;autres professionnels. Le code est maintenant genere et conserve cote serveur.
             </p>
           </div>
           <div className="rounded-3xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800">
@@ -179,7 +179,7 @@ export default function ProDashboardReferralPage() {
                 1. Partagez votre lien a un autre professionnel ou partenaire local.
               </p>
               <p>
-                2. Facilitez sa creation de compte et son inscription dans l&apos;ecosysteme Troca.
+                2. Facilitez sa creation de compte et son inscription dans l&apos;ecosysteme Kalico.
               </p>
               <p>
                 3. Gardez un espace dedie pour suivre les benefices du parrainage quand le suivi automatise sera active.

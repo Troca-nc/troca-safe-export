@@ -18,7 +18,7 @@ require.cache[require.resolve('../services/phoneOtpService')] = {
       return {
         message: preferChannel === 'email' ? 'Code envoyé par email' : 'Code SMS envoyé',
         channel: preferChannel,
-        masked: preferChannel === 'email' ? 't***@troca.nc' : '+687••••34',
+        masked: preferChannel === 'email' ? 't***@kalico.nc' : '+687••••34',
         expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
         cooldown: 60,
       };

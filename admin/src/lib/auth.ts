@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken'
 import { createOtpAuthUrl, verifyTotpToken } from './totp'
 import { buildQrLikeDataUrl } from './qr'
 
-export const ADMIN_SESSION_COOKIE = 'troca_admin_session'
+export const ADMIN_SESSION_COOKIE = 'kalico_admin_session'
 const SETUP_FLAG_PATH = path.join(process.cwd(), '.totp-configured')
 const DEMO_TOTP_CODE = '123456'
 
@@ -23,7 +23,7 @@ export function markTotpConfigured() {
 }
 
 export function getAdminEmail() {
-  return readEnv(process.env.ADMIN_EMAIL, 'admin@troca.nc')
+  return readEnv(process.env.ADMIN_EMAIL, 'admin@kalico.nc')
 }
 
 export function getAdminPasswordHash() {
@@ -43,14 +43,14 @@ export function getBackendUrl() {
 }
 
 export function getAdminBaseUrl() {
-  return readEnv(process.env.NEXTAUTH_URL, 'https://admin.troca.nc')
+  return readEnv(process.env.NEXTAUTH_URL, 'https://admin.kalico.nc')
 }
 
 export async function buildSetupQrDataUrl() {
   const uri = createOtpAuthUrl({
     secret: getAdminTotpSecret(),
-    label: `Troca Admin (${getAdminEmail()})`,
-    issuer: 'Troca',
+    label: `Kalico Admin (${getAdminEmail()})`,
+    issuer: 'Kalico',
   })
 
   return buildQrLikeDataUrl(uri)

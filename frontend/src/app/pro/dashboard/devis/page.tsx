@@ -540,7 +540,7 @@ export default function ProDashboardDevisPage() {
           open={builderOpen}
           onClose={closeBuilder}
           proId={builderRequest?.proId || requests[0]?.proId || 'current'}
-          proName={builderRequest?.proName || requests[0]?.proName || 'Professionnel Troca'}
+          proName={builderRequest?.proName || requests[0]?.proName || 'Professionnel Kalico'}
           initialRequest={builderRequest || null}
           onFinished={loadData}
         />

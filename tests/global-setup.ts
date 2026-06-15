@@ -16,11 +16,11 @@ const USE_LOCAL_SERVERS = process.env.PLAYWRIGHT_USE_LOCAL_SERVER !== 'false' &&
 const NODE_EXE = process.env.NODE_EXE || 'C:\\Program Files\\nodejs\\node.exe'
 
 const AUTH_ACCOUNTS: Array<{ role: AuthRole; email: string; password: string }> = [
-  { role: 'particulier', email: 'particulier@demo.troca', password: 'Demo1234!' },
-  { role: 'vendeur', email: 'loueur@demo.troca', password: 'Demo1234!' },
-  { role: 'pro', email: 'pro@demo.troca', password: 'Demo1234!' },
-  { role: 'conducteur', email: 'marine@demo.troca', password: 'Demo1234!' },
-  { role: 'admin', email: 'admin@demo.troca', password: 'Demo1234!' },
+  { role: 'particulier', email: 'particulier@demo.kalico', password: 'Demo1234!' },
+  { role: 'vendeur', email: 'loueur@demo.kalico', password: 'Demo1234!' },
+  { role: 'pro', email: 'pro@demo.kalico', password: 'Demo1234!' },
+  { role: 'conducteur', email: 'marine@demo.kalico', password: 'Demo1234!' },
+  { role: 'admin', email: 'admin@demo.kalico', password: 'Demo1234!' },
 ]
 
 async function waitForHealthy(url: string, timeoutMs = 120_000) {

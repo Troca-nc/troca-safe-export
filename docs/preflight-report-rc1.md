@@ -45,7 +45,7 @@ cd backend && npm run build 2>&1 | Select-Object -Last 20
 
 Résultat:
 ```text
-> troca-backend@1.0.0-rc1 build
+> kalico-backend@1.0.0-rc1 build
 > node --check src/index.js
 ```
 
@@ -108,7 +108,7 @@ Conclusion:
 
 Commande exécutée:
 ```powershell
-$tmp = Join-Path $env:TEMP 'troca-preflight-rc1.env.production.local'
+$tmp = Join-Path $env:TEMP 'kalico-preflight-rc1.env.production.local'
 Copy-Item .env.example $tmp -Force
 bash scripts/preflight.sh $tmp
 ```

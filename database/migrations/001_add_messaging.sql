@@ -1,4 +1,4 @@
--- ── Migration SQL — Messagerie Troca ─────────────────────────────────────────
+-- ── Migration SQL — Messagerie Kalico ─────────────────────────────────────────
 
 -- ── Conversations ─────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS conversations (

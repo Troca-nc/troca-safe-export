@@ -1,7 +1,7 @@
 'use strict';
 
 // ============================================================
-//  Troca — Service de création de notifications in-app
+//  Kalico — Service de création de notifications in-app
 //  Appelé depuis messages.js, scheduler.js, etc.
 // ============================================================
 

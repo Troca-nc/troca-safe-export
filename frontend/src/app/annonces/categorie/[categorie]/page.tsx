@@ -36,7 +36,7 @@ export async function generateMetadata(
   const { categorie } = await params
   const { commune } = await searchParams
   const cat = CATEGORIES_SEO[categorie]
-  if (!cat) return { title: 'Categorie introuvable | Troca' }
+  if (!cat) return { title: 'Categorie introuvable | Kalico' }
 
   const stats = await getCategoryStats(categorie, commune)
   return generateCategoryMetadata(categorie, stats.nb_annonces, commune)

@@ -19,13 +19,13 @@ export async function GET(request: NextRequest) {
     return new NextResponse(csv, {
       headers: {
         'content-type': 'text/csv; charset=utf-8',
-        'content-disposition': `attachment; filename="troca-report-${month}.csv"`,
+        'content-disposition': `attachment; filename="kalico-report-${month}.csv"`,
       },
     })
   }
 
   const lines = [
-    'Rapport mensuel Troca NC',
+    'Rapport mensuel Kalico NC',
     `Mois: ${month}`,
     '',
     'Faits marquants',
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
   return new NextResponse(buffer, {
     headers: {
       'content-type': 'application/pdf',
-      'content-disposition': `attachment; filename="troca-report-${month}.pdf"`,
+      'content-disposition': `attachment; filename="kalico-report-${month}.pdf"`,
     },
   })
 }

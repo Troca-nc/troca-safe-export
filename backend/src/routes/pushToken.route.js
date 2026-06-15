@@ -1,7 +1,7 @@
 'use strict';
 
 // ============================================================
-//  Troca — Route push tokens
+//  Kalico — Route push tokens
 //  POST /api/users/push-token   — Enregistrer / mettre à jour
 //  DELETE /api/users/push-token — Supprimer (déconnexion)
 // ============================================================

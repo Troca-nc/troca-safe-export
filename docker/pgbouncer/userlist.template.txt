@@ -1,1 +1,1 @@
-"troca" "md5REPLACE_ME"
+"kalico" "md5REPLACE_ME"

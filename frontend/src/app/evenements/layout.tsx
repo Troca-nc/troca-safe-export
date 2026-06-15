@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Événements & culture - Troca',
-  description: 'Concerts, festivals, marches, expositions et evenements locaux en Nouvelle-Calédonie sur Troca.',
+  title: 'Événements & culture - Kalico',
+  description: 'Concerts, festivals, marches, expositions et evenements locaux en Nouvelle-Calédonie sur Kalico.',
 }
 
 export default function EvenementsLayout({ children }: { children: React.ReactNode }) {

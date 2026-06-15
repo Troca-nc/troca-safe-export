@@ -19,8 +19,8 @@ import { rgpdApi } from '@/lib/api'
 import { newsletterApi } from '@/lib/api'
 import { getStoredAccessToken } from '@/lib/tokenStorage'
 import { useAuthSessionSync } from '@/hooks/useAuthSessionSync'
-const COOKIE_STORAGE_KEY = 'troca-cookie-consent'
-const COOKIE_BANNER_EVENT = 'troca-cookie-banner-open'
+const COOKIE_STORAGE_KEY = 'kalico-cookie-consent'
+const COOKIE_BANNER_EVENT = 'kalico-cookie-banner-open'
 
 type CookieConsentState = {
   analytics?: boolean
@@ -33,7 +33,7 @@ async function downloadRgpdExport() {
   const url = URL.createObjectURL(res.data)
   const link = document.createElement('a')
   link.href = url
-  link.download = `troca-mes-donnees-${Date.now()}.zip`
+  link.download = `kalico-mes-donnees-${Date.now()}.zip`
   link.click()
   URL.revokeObjectURL(url)
 }
@@ -657,7 +657,7 @@ export default function ParametresPage() {
             <span>·</span>
             <Link href="/politique-de-confidentialite" className="hover:text-night/60">Politique de confidentialité</Link>
             <span>·</span>
-            <a href="mailto:privacy@troca.nc" className="hover:text-night/60">Contact DPO</a>
+            <a href="mailto:privacy@kalico.nc" className="hover:text-night/60">Contact DPO</a>
           </div>
         </div>
       </div>

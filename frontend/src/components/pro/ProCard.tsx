@@ -35,7 +35,7 @@ function getDisplayName(pro: ProCardModel) {
     pro.display_name
     || pro.pro_company_name
     || [pro.prenom, pro.nom].filter(Boolean).join(' ').trim()
-    || 'Professionnel Troca'
+    || 'Professionnel Kalico'
   )
 }
 
@@ -120,7 +120,7 @@ export default function ProCard({ pro }: { pro: ProCardModel }) {
             Vitrine locale
           </p>
           <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-night/65">
-            {pro.pro_description || 'Découvrez ce professionnel local sur Troca.'}
+            {pro.pro_description || 'Découvrez ce professionnel local sur Kalico.'}
           </p>
           <div className="mt-3 flex items-center justify-between gap-3 text-xs text-night/55">
             <span>{listingCount} annonce{listingCount > 1 ? 's' : ''} active{listingCount > 1 ? 's' : ''}</span>

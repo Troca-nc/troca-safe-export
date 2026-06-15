@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Root Layout
+//  Kalico Mobile - Root Layout
 // ============================================================
 
 import { useEffect } from 'react';

@@ -96,7 +96,7 @@ export default function ContactForm() {
       showToast({
         tone: 'success',
         title: 'Message envoyé',
-        message: 'Votre demande de support a bien été transmise à l’équipe Troca.',
+        message: 'Votre demande de support a bien été transmise à l’équipe Kalico.',
       })
       setForm((current) => ({
         ...INITIAL_STATE,
@@ -208,7 +208,7 @@ export default function ContactForm() {
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-night/50">
-            En envoyant ce formulaire, vous acceptez que l’équipe Troca traite votre demande pour vous répondre.
+            En envoyant ce formulaire, vous acceptez que l’équipe Kalico traite votre demande pour vous répondre.
           </p>
           <button
             type="submit"
@@ -236,12 +236,12 @@ export default function ContactForm() {
       <div className="mt-6 grid gap-3 md:grid-cols-3">
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
           <Mail className="h-5 w-5 text-[#0A7EA4]" />
-          <p className="mt-2 text-sm font-semibold text-night">contact@troca.nc</p>
+          <p className="mt-2 text-sm font-semibold text-night">contact@kalico.nc</p>
           <p className="mt-1 text-xs text-night/55">Support général et questions produit.</p>
         </div>
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
           <ShieldCheck className="h-5 w-5 text-nc-emeraude" />
-          <p className="mt-2 text-sm font-semibold text-night">privacy@troca.nc</p>
+          <p className="mt-2 text-sm font-semibold text-night">privacy@kalico.nc</p>
           <p className="mt-1 text-xs text-night/55">Demandes RGPD et confidentialité.</p>
         </div>
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">

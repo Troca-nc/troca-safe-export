@@ -1,4 +1,4 @@
-// jest.config.js — Troca Mobile
+// jest.config.js — Kalico Mobile
 module.exports = {
   preset:                 'jest-expo',
   testEnvironment:        'jsdom',

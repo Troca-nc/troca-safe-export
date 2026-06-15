@@ -1,7 +1,7 @@
 'use strict';
 
 // ============================================================
-//  Troca — Routes notifications in-app et préférences
+//  Kalico — Routes notifications in-app et préférences
 //  GET  /api/users/notifications                 — Liste
 //  GET  /api/users/notifications/preferences     — Préférences
 //  PUT  /api/users/notifications/preferences     — Mise à jour
@@ -50,16 +50,16 @@ function renderUnsubscribeResult(title, message, status = 'success') {
 <body style="margin:0;padding:32px;background:#f8fafc;font-family:Arial,sans-serif;color:#0f172a;">
   <div style="max-width:640px;margin:0 auto;background:#fff;border:1px solid ${border};border-radius:20px;overflow:hidden;box-shadow:0 18px 45px rgba(15,23,42,.08)">
     <div style="padding:28px 30px;background:${background};border-bottom:1px solid ${border}">
-      <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:${accent};">Troca</p>
+      <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:${accent};">Kalico</p>
       <h1 style="margin:0;font-size:26px;line-height:1.2;">${title}</h1>
     </div>
     <div style="padding:28px 30px;font-size:16px;line-height:1.7;">
       <p style="margin:0 0 16px;">${message}</p>
       <p style="margin:0;color:#64748b;font-size:13px;">
-        Vous pouvez ajuster vos préférences depuis votre compte Troca si vous souhaitez réactiver certaines notifications.
+        Vous pouvez ajuster vos préférences depuis votre compte Kalico si vous souhaitez réactiver certaines notifications.
       </p>
       <p style="margin:24px 0 0;">
-        <a href="${process.env.BASE_URL || 'https://troca.nc'}/parametres/notifications"
+        <a href="${process.env.BASE_URL || 'https://kalico.nc'}/parametres/notifications"
            style="display:inline-block;background:#0a7ea4;color:#fff;text-decoration:none;padding:12px 20px;border-radius:999px;font-weight:700;">
           Gérer mes notifications
         </a>

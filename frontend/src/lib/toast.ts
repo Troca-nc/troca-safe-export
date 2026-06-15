@@ -8,7 +8,7 @@ export type ToastPayload = {
   title?: string
 }
 
-export const TOAST_EVENT = 'troca:toast'
+export const TOAST_EVENT = 'kalico:toast'
 
 export function showToast(payload: ToastPayload | string, tone: ToastTone = 'info') {
   if (typeof window === 'undefined') return

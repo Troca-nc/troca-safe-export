@@ -21,9 +21,9 @@ function buildShareContent(annonce: ShareButtonProps['annonce']) {
   return {
     kind: 'annonce' as const,
     itemId: annonce.id,
-    title: `${annonce.titre} | Troca`,
+    title: `${annonce.titre} | Kalico`,
     description: [price, location].filter(Boolean).join(' • '),
-    url: `https://troca.nc/annonces/${annonce.id}`,
+    url: `https://kalico.nc/annonces/${annonce.id}`,
     imageUrl: annonce.image_url ?? null,
   }
 }

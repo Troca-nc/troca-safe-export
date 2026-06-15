@@ -10,7 +10,7 @@ async function main() {
   }
 
   const summary = await seedDemoDataset();
-  console.log('\n=== Troca demo seed ===');
+  console.log('\n=== Kalico demo seed ===');
   console.log(JSON.stringify(summary, null, 2));
 }
 

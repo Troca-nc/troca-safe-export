@@ -47,13 +47,13 @@ export default function PublicProfilePage() {
     ? {
         kind: 'profil' as const,
         itemId: id,
-        title: `${profile.prenom} ${profile.nom} | Troca`,
+        title: `${profile.prenom} ${profile.nom} | Kalico`,
         description: [
           profile.commune_name ? `Basé à ${profile.commune_name}` : null,
           profile.is_pro ? 'Compte professionnel' : 'Profil particulier',
           profile.nb_annonces ? `${profile.nb_annonces} annonce${profile.nb_annonces > 1 ? 's' : ''}` : null,
         ].filter(Boolean).join(' • '),
-        url: `https://troca.nc/profil/${id}`,
+        url: `https://kalico.nc/profil/${id}`,
         imageUrl: null,
       }
     : null

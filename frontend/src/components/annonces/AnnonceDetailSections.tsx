@@ -608,7 +608,7 @@ export function SecurityTipsCard() {
       <ul className="space-y-2 text-sm text-amber-900/80 leading-6">
         <li>- N'envoyez jamais d'argent avant d'avoir verifie l'annonce et le vendeur.</li>
         <li>- Preferez l'echange en personne dans un lieu public.</li>
-        <li>- Gardez toutes les discussions dans Troca pour faciliter la moderation.</li>
+        <li>- Gardez toutes les discussions dans Kalico pour faciliter la moderation.</li>
       </ul>
     </div>
   )

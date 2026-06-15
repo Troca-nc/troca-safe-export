@@ -40,7 +40,7 @@ function getDisplayName(pro: ProCardModel) {
     pro.display_name
     || pro.pro_company_name
     || [pro.prenom, pro.nom].filter(Boolean).join(' ').trim()
-    || 'Professionnel Troca'
+    || 'Professionnel Kalico'
   )
 }
 
@@ -174,7 +174,7 @@ export default function ProsDirectoryClient() {
               Les professionnels vérifiés de Nouvelle-Calédonie
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-night/60 sm:text-base">
-              Parcourez les pros certifiés par Troca, comparez leur note, leur commune et leur spécialité, puis
+              Parcourez les pros certifiés par Kalico, comparez leur note, leur commune et leur spécialité, puis
               contactez la bonne vitrine en quelques clics.
             </p>
           </div>

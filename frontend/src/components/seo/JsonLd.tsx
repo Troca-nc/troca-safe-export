@@ -21,9 +21,9 @@ export function buildOrganizationSchema() {
   return {
     '@context': 'https://schema.org',
     '@type':    'Organization',
-    name:       'Troca',
-    url:        'https://troca.nc',
-    logo:       'https://troca.nc/logo.png',
+    name:       'Kalico',
+    url:        'https://kalico.nc',
+    logo:       'https://kalico.nc/logo.png',
     description: 'Plateforme de petites annonces en Nouvelle-Calédonie',
     address: {
       '@type':          'PostalAddress',
@@ -34,12 +34,12 @@ export function buildOrganizationSchema() {
     contactPoint: {
       '@type':       'ContactPoint',
       contactType:   'customer support',
-      email:         'contact@troca.nc',
+      email:         'contact@kalico.nc',
       availableLanguage: 'French',
     },
     sameAs: [
-      'https://www.facebook.com/TrocaNC',
-      'https://www.instagram.com/TrocaNC',
+      'https://www.facebook.com/KalicoNC',
+      'https://www.instagram.com/KalicoNC',
     ],
   }
 }
@@ -48,14 +48,14 @@ export function buildWebSiteSchema() {
   return {
     '@context': 'https://schema.org',
     '@type':    'WebSite',
-    name:       'Troca',
-    url:        'https://troca.nc',
+    name:       'Kalico',
+    url:        'https://kalico.nc',
     description: 'Petites annonces Nouvelle-Calédonie',
     potentialAction: {
       '@type':       'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: 'https://troca.nc/annonces?q={search_term_string}',
+        urlTemplate: 'https://kalico.nc/annonces?q={search_term_string}',
       },
       'query-input': 'required name=search_term_string',
     },
@@ -78,7 +78,7 @@ export function buildProductSchema(annonce: {
     name:       annonce.titre,
     description: annonce.description.slice(0, 500),
     image:      annonce.images.slice(0, 4).map(i => i.url),
-    url:        `https://troca.nc/annonces/${annonce.id}`,
+    url:        `https://kalico.nc/annonces/${annonce.id}`,
     ...(annonce.prix && {
       offers: {
         '@type':       'Offer',

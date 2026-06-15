@@ -36,8 +36,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <aside className="border-b border-white/10 bg-slate-950/80 px-4 py-4 backdrop-blur lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.25em] text-emerald-300/80">Troca admin</p>
-            <h1 className="mt-1 text-xl font-semibold">admin.troca.nc</h1>
+            <p className="text-xs uppercase tracking-[0.25em] text-emerald-300/80">Kalico admin</p>
+            <h1 className="mt-1 text-xl font-semibold">admin.kalico.nc</h1>
           </div>
           <button className="lg:hidden rounded-xl border border-white/10 p-2 text-slate-200">
             <Menu className="h-5 w-5" />

@@ -83,7 +83,7 @@ export default function BoostModal({
             <CheckCircle2 className="h-14 w-14 text-emerald-600" />
             <h3 className="mt-4 font-display text-2xl font-bold text-night">Boost activé !</h3>
             <p className="mt-2 max-w-md text-sm text-night/60">
-              Votre annonce est maintenant mise en avant sur Troca.
+              Votre annonce est maintenant mise en avant sur Kalico.
             </p>
             <button
               type="button"

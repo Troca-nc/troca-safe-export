@@ -108,7 +108,7 @@ async function checkAdminAlerts() {
         if (targetEmail) {
           await sendMail({
             to: targetEmail,
-            subject: `🔴 Alerte critique Troca — ${criticalAlerts[0].message}`,
+            subject: `🔴 Alerte critique Kalico — ${criticalAlerts[0].message}`,
             html: `<p>${criticalAlerts.map((alert) => alert.message).join('<br/>')}</p>`,
           }).catch(() => {});
           await redis.setEx(CRITICAL_EMAIL_KEY, 1800, String(Date.now())).catch(() => {});

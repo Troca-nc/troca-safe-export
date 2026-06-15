@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -295,7 +295,7 @@ export default function ListingCard({ listing, className = '' }: Props) {
 
   const sellerName =
     [listing.seller_prenom, listing.seller_nom].filter(Boolean).join(' ').trim() ||
-    'Vendeur Troca'
+    'Vendeur Kalico'
 
   const isConditionVisible = Boolean(listing.condition && CONDITION_LABELS[listing.condition])
   const locationText = listing.commune_name || 'Nouvelle-CalÃ©donie'

@@ -9,7 +9,7 @@ const STRIPE_E2E_ENABLED = process.env.STRIPE_E2E_ENABLED === 'true'
 const PRO_AUTH_STATE = {
   user: {
     id: 'demo-pro',
-    email: 'pro@demo.troca.nc',
+    email: 'pro@demo.kalico.nc',
     first_name: 'Atelier',
     last_name: 'Kalo',
     avatar_url: null,

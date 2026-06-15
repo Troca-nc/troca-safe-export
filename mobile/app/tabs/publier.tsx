@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Onglet Publier une annonce
+//  Kalico Mobile - Onglet Publier une annonce
 // ============================================================
 
 import { useEffect, useMemo, useState } from 'react'

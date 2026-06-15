@@ -36,7 +36,7 @@ export function AppProviders({ children }: AppProvidersProps) {
 
   const STRIPE_PK = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.EXPO_PUBLIC_STRIPE_PK ?? '';
   return (
-    <StripeProvider publishableKey={STRIPE_PK} merchantIdentifier="merchant.nc.troca.app">
+    <StripeProvider publishableKey={STRIPE_PK} merchantIdentifier="merchant.nc.kalico.app">
       {content}
     </StripeProvider>
   );

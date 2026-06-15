@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile — Hook authentification sociale
+//  Kalico Mobile — Hook authentification sociale
 //  Google Sign-In via expo-auth-session
 //  Apple Sign-In via expo-apple-authentication
 // ============================================================
@@ -25,7 +25,7 @@ export function useGoogleSignIn() {
   const [pendingResponse, setPendingResponse] = useState(false);
   const googleDiscovery = SOCIAL_AUTH_ENABLED ? AuthSession.useAutoDiscovery('https://accounts.google.com') : null;
 
-  const redirectUri = AuthSession.makeRedirectUri({ scheme: 'troca', path: 'auth/google' });
+  const redirectUri = AuthSession.makeRedirectUri({ scheme: 'kalico', path: 'auth/google' });
 
   const authRequest = SOCIAL_AUTH_ENABLED
     ? AuthSession.useAuthRequest(

@@ -40,7 +40,7 @@ function svgDataUri(title, subtitle, hue = 196) {
       <rect x="72" y="250" width="520" height="420" rx="40" fill="rgba(255,255,255,0.12)"/>
       <rect x="636" y="250" width="492" height="180" rx="40" fill="rgba(255,255,255,0.12)"/>
       <rect x="636" y="450" width="492" height="220" rx="40" fill="rgba(255,255,255,0.12)"/>
-      <text x="110" y="470" fill="white" font-size="120" font-family="Arial, sans-serif" font-weight="700">Troca</text>
+      <text x="110" y="470" fill="white" font-size="120" font-family="Arial, sans-serif" font-weight="700">Kalico</text>
     </svg>
   `;
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
@@ -224,12 +224,12 @@ const DEMO_PASSWORD_HASH = 'demo';
 
 function createUsers() {
   const base = [
-    { id: 1, email: 'admin@demo.troca', first_name: 'Ada', last_name: 'Admin', is_admin: true, is_pro: true, is_verified: true, rating: 5, commune_name: 'NoumÃ©a', province_name: 'Province Sud', demo_role: 'admin', trust_score: 98, note_moyenne: 5, nb_avis: 18, nb_annonces: 5, telephone_verifie: true, bio: 'Administratrice locale de dÃ©monstration.' },
-    { id: 2, email: 'particulier@demo.troca', first_name: 'Emma', last_name: 'Martin', is_admin: false, is_pro: false, is_verified: true, rating: 4.8, commune_name: 'NoumÃ©a', province_name: 'Province Sud', demo_role: 'particulier', trust_score: 91, note_moyenne: 4.8, nb_avis: 6, nb_annonces: 3, telephone_verifie: true, bio: 'Particulier actif, aime les bonnes affaires.' },
-    { id: 3, email: 'pro@demo.troca', first_name: 'Entreprise', last_name: 'Test NC', is_admin: false, is_pro: true, is_verified: true, rating: 4.9, commune_name: 'DumbÃ©a', province_name: 'Province Sud', demo_role: 'pro', trust_score: 96, note_moyenne: 4.9, nb_avis: 14, nb_annonces: 9, telephone_verifie: true, bio: 'Compte professionnel de dÃ©monstration.', pro_referral_code: 'PW-PRO-2026' },
-    { id: 4, email: 'bonplan@demo.troca', first_name: 'Troca', last_name: 'Bon Plan', is_admin: false, is_pro: true, is_verified: true, rating: 5, commune_name: 'NoumÃ©a', province_name: 'Province Sud', demo_role: 'bon_plan', trust_score: 99, note_moyenne: 5, nb_avis: 31, nb_annonces: 12, telephone_verifie: true, bio: 'Vendeur vedette avec historique solide.' },
-    { id: 5, email: 'loueur@demo.troca', first_name: 'Lucas', last_name: 'Bernier', is_admin: false, is_pro: false, is_verified: true, rating: 4.6, commune_name: 'KonÃ©', province_name: 'Province Nord', demo_role: 'visitor', trust_score: 84, note_moyenne: 4.6, nb_avis: 4, nb_annonces: 2, telephone_verifie: false, bio: 'Location et troc entre particuliers.' },
-    { id: 6, email: 'marine@demo.troca', first_name: 'Marine', last_name: 'Dupont', is_admin: false, is_pro: false, is_verified: true, rating: 4.7, commune_name: 'Lifou', province_name: 'Province ÃŽles', demo_role: 'visitor', trust_score: 88, note_moyenne: 4.7, nb_avis: 7, nb_annonces: 4, telephone_verifie: true, bio: 'Parcours mobile simple et fluide.' },
+    { id: 1, email: 'admin@demo.kalico', first_name: 'Ada', last_name: 'Admin', is_admin: true, is_pro: true, is_verified: true, rating: 5, commune_name: 'NoumÃ©a', province_name: 'Province Sud', demo_role: 'admin', trust_score: 98, note_moyenne: 5, nb_avis: 18, nb_annonces: 5, telephone_verifie: true, bio: 'Administratrice locale de dÃ©monstration.' },
+    { id: 2, email: 'particulier@demo.kalico', first_name: 'Emma', last_name: 'Martin', is_admin: false, is_pro: false, is_verified: true, rating: 4.8, commune_name: 'NoumÃ©a', province_name: 'Province Sud', demo_role: 'particulier', trust_score: 91, note_moyenne: 4.8, nb_avis: 6, nb_annonces: 3, telephone_verifie: true, bio: 'Particulier actif, aime les bonnes affaires.' },
+    { id: 3, email: 'pro@demo.kalico', first_name: 'Entreprise', last_name: 'Test NC', is_admin: false, is_pro: true, is_verified: true, rating: 4.9, commune_name: 'DumbÃ©a', province_name: 'Province Sud', demo_role: 'pro', trust_score: 96, note_moyenne: 4.9, nb_avis: 14, nb_annonces: 9, telephone_verifie: true, bio: 'Compte professionnel de dÃ©monstration.', pro_referral_code: 'PW-PRO-2026' },
+    { id: 4, email: 'bonplan@demo.kalico', first_name: 'Kalico', last_name: 'Bon Plan', is_admin: false, is_pro: true, is_verified: true, rating: 5, commune_name: 'NoumÃ©a', province_name: 'Province Sud', demo_role: 'bon_plan', trust_score: 99, note_moyenne: 5, nb_avis: 31, nb_annonces: 12, telephone_verifie: true, bio: 'Vendeur vedette avec historique solide.' },
+    { id: 5, email: 'loueur@demo.kalico', first_name: 'Lucas', last_name: 'Bernier', is_admin: false, is_pro: false, is_verified: true, rating: 4.6, commune_name: 'KonÃ©', province_name: 'Province Nord', demo_role: 'visitor', trust_score: 84, note_moyenne: 4.6, nb_avis: 4, nb_annonces: 2, telephone_verifie: false, bio: 'Location et troc entre particuliers.' },
+    { id: 6, email: 'marine@demo.kalico', first_name: 'Marine', last_name: 'Dupont', is_admin: false, is_pro: false, is_verified: true, rating: 4.7, commune_name: 'Lifou', province_name: 'Province ÃŽles', demo_role: 'visitor', trust_score: 88, note_moyenne: 4.7, nb_avis: 7, nb_annonces: 4, telephone_verifie: true, bio: 'Parcours mobile simple et fluide.' },
   ];
 
   return base.map((user) => ({
@@ -244,7 +244,7 @@ function createUsers() {
 
 function createListings(users) {
   const demoImgs = [
-    svgDataUri('Troca', 'Annonce locale', 195),
+    svgDataUri('Kalico', 'Annonce locale', 195),
     svgDataUri('Pro', 'Offre premium', 14),
     svgDataUri('Maison', 'Objet du quotidien', 25),
     svgDataUri('MobilitÃ©', 'VÃ©hicule / service', 120),
@@ -693,7 +693,7 @@ async function handleRoute(req, res) {
   }
 
   if (pathname === '/health' || pathname === '/api/health') {
-    return json(res, 200, { ok: true, service: 'troca-demo-api', now: nowIso(), demo: true });
+    return json(res, 200, { ok: true, service: 'kalico-demo-api', now: nowIso(), demo: true });
   }
 
   if (pathname === '/api/demo/status') {
@@ -900,12 +900,12 @@ async function handleRoute(req, res) {
   }
 
   if (pathname === '/api/auth/google' && req.method === 'POST') {
-    const user = state.users.find((u) => u.email === 'particulier@demo.troca') || state.users[1];
+    const user = state.users.find((u) => u.email === 'particulier@demo.kalico') || state.users[1];
     return json(res, 200, { data: buildAuthResponse(user) });
   }
 
   if (pathname === '/api/auth/apple' && req.method === 'POST') {
-    const user = state.users.find((u) => u.email === 'pro@demo.troca') || state.users[2];
+    const user = state.users.find((u) => u.email === 'pro@demo.kalico') || state.users[2];
     return json(res, 200, { data: buildAuthResponse(user) });
   }
 
@@ -1436,7 +1436,7 @@ async function handleRoute(req, res) {
   if (pathname === '/api/rgpd/supprimer-compte' && req.method === 'POST') {
     const user = requireAuth(req, res);
     if (!user) return;
-    user.email = `deleted-${user.id}@demo.troca`;
+    user.email = `deleted-${user.id}@demo.kalico`;
     user.first_name = 'Compte';
     user.last_name = 'SupprimÃ©';
     user.is_verified = false;
@@ -1514,7 +1514,7 @@ async function handleRoute(req, res) {
     return json(res, 404, { error: `Route dÃ©mo non implÃ©mentÃ©e: ${pathname}` });
   }
 
-  return text(res, 200, 'Troca demo server');
+  return text(res, 200, 'Kalico demo server');
 }
 
 const server = http.createServer((req, res) => {
@@ -1525,5 +1525,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`[demo-server] Troca demo API listening on http://localhost:${PORT}`);
+  console.log(`[demo-server] Kalico demo API listening on http://localhost:${PORT}`);
 });

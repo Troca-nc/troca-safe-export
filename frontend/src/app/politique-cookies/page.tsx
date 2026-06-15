@@ -4,8 +4,8 @@ import LegalLayout from '@/components/legal/LegalLayout'
 import CookieManager from '@/components/legal/CookieManager'
 
 export const metadata: Metadata = {
-  title: 'Cookies - Troca',
-  description: 'Gestion simple des cookies et des préférences de consentement de Troca.',
+  title: 'Cookies - Kalico',
+  description: 'Gestion simple des cookies et des préférences de consentement de Kalico.',
 }
 
 const LAST_UPDATE = '25 mai 2026'
@@ -21,7 +21,7 @@ export default function PolitiqueCookiesPage() {
 
         <h2>1. Ce qui reste actif</h2>
         <p>
-          Troca utilise des cookies essentiels au fonctionnement du site. Ils gèrent notamment la session, la sécurité et vos préférences de base.
+          Kalico utilise des cookies essentiels au fonctionnement du site. Ils gèrent notamment la session, la sécurité et vos préférences de base.
         </p>
 
         <h2>2. Les options que vous pouvez choisir</h2>

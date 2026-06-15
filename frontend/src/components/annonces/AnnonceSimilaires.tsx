@@ -1,6 +1,6 @@
 'use client'
 // ============================================================
-//  Troca — Composant "Annonces similaires"
+//  Kalico — Composant "Annonces similaires"
 //  Affiché en bas de la fiche annonce
 //  Même catégorie + même commune en priorité, sinon même catégorie
 // ============================================================

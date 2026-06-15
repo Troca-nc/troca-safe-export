@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -237,10 +237,10 @@ export default function Header() {
         <div className="mx-auto flex h-16 max-w-[120rem] items-center gap-3 px-6 lg:px-10">
           <Link href="/" className="flex shrink-0 items-center gap-2">
             <span className="relative h-8 w-8 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_8px_24px_rgba(8,32,50,0.12)]">
-              <Image src="/brand/troca-logo.png" alt="Troca" fill sizes="40px" className="object-cover" priority />
+              <Image src="/brand/kalico-logo.png" alt="Kalico" fill sizes="40px" className="object-cover" priority />
             </span>
             <span className="hidden sm:block">
-              <span className="block font-display text-lg font-bold text-night">Troca</span>
+              <span className="block font-display text-lg font-bold text-night">Kalico</span>
               <span className="block text-[10px] font-semibold uppercase tracking-[0.22em] text-coral/80">
                 Nouvelle-Calédonie
               </span>
@@ -249,7 +249,7 @@ export default function Header() {
 
           <form onSubmit={handleSearch} className="mx-auto hidden w-full max-w-lg md:block">
             <label htmlFor="header-search" className="sr-only">
-              Rechercher sur Troca
+              Rechercher sur Kalico
             </label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-night/35" />
@@ -258,8 +258,8 @@ export default function Header() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Rechercher sur Troca…"
-                aria-label="Rechercher sur Troca"
+                placeholder="Rechercher sur Kalico…"
+                aria-label="Rechercher sur Kalico"
                 className="input py-1.5 pl-9 pr-4 text-sm"
               />
             </div>

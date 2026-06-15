@@ -158,7 +158,7 @@ function serializeBonPlan(row) {
   return {
     id: row.id,
     business_id: row.business_id ?? null,
-    business_name: cleanDisplayText(row.business_name, cleanDisplayText(row.title, 'Troca')),
+    business_name: cleanDisplayText(row.business_name, cleanDisplayText(row.title, 'Kalico')),
     business_logo_url: row.business_logo_url ?? null,
     business_badge: row.business_badge || row.badge || 'none',
     business_review_avg: row.business_review_avg ?? row.review_avg ?? 0,
@@ -400,7 +400,7 @@ async function createPaymentForBonPlan({ user, bonPlan, provider, amountXpf, amo
       description: `${bonPlan.title} — ${bonPlan.business_name}`,
       email: user.email,
       first_name: user.prenom || 'Client',
-      last_name: user.nom || 'Troca',
+      last_name: user.nom || 'Kalico',
       return_url: `${baseUrl}/bons-plans/publier?payment_id={PAYPLUG_PAYMENT_ID}&provider=payplug`,
       cancel_url: `${baseUrl}/bons-plans/publier?cancelled=1`,
       metadata,

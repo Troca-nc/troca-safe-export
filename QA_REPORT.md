@@ -1,6 +1,6 @@
-# QA Report - Troca NC
+# QA Report - Kalico NC
 
-Audit realise sur la base du code local du depot `troca-safe-export`, du schema SQL, des fichiers d'environnement, des routes backend, des ecrans web/mobile/admin, et de quelques verifications runtime locales sur la stack de demo.
+Audit realise sur la base du code local du depot `kalico-safe-export`, du schema SQL, des fichiers d'environnement, des routes backend, des ecrans web/mobile/admin, et de quelques verifications runtime locales sur la stack de demo.
 
 Verifications runtime effectuees pendant l'audit:
 - `GET http://localhost:3001/api/health` -> 200
@@ -526,7 +526,7 @@ Chemins testes :
 | Cas d'erreur gérés | ✅ | Etat vide et chargement sont couverts. |
 
 Problemes identifies :
-- [MINEUR] Le badge `Vérifié Troca` et `Actif` doit rester cohérent visuellement entre cards et detail.
+- [MINEUR] Le badge `Vérifié Kalico` et `Actif` doit rester cohérent visuellement entre cards et detail.
 
 Chemins testes :
 - ✅ Chemin heureux : feed bon plans.

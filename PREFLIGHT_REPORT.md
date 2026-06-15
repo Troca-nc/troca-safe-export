@@ -1,4 +1,4 @@
-# Rapport pré-vol Troca — 2026-05-24
+# Rapport pré-vol Kalico — 2026-05-24
 
 ## Statut global
 

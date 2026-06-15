@@ -107,7 +107,7 @@ export default function ProDashboardInvoicesPage() {
                 <tr key={invoice.id}>
                   <td className="px-4 py-3 font-semibold text-night">{invoice.invoice_number}</td>
                   <td className="px-4 py-3 text-night/70">{formatDate(invoice.created_at)}</td>
-                  <td className="px-4 py-3 text-night/70">{invoice.description || 'Paiement Troca'}</td>
+                  <td className="px-4 py-3 text-night/70">{invoice.description || 'Paiement Kalico'}</td>
                   <td className="px-4 py-3 text-night/70">{Number(invoice.amount_xpf).toLocaleString('fr-FR')} XPF</td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${

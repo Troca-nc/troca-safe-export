@@ -82,7 +82,7 @@ export default function AbonnementPage() {
     <div className="min-h-screen bg-sand-light">
       <section className="bg-night px-4 py-16 text-center text-white">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-coral/20 px-3 py-1.5 text-xs font-medium text-coral">
-          <Star size={12} /> Developpez votre activite sur Troca
+          <Star size={12} /> Developpez votre activite sur Kalico
         </div>
         <h1 className="font-display text-4xl font-bold leading-tight md:text-5xl">
           La plateforme des professionnels
@@ -307,7 +307,7 @@ export default function AbonnementPage() {
           <div className="mb-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">
-                Ils font confiance a Troca Pro
+                Ils font confiance a Kalico Pro
               </p>
               <h2 className="mt-1 text-2xl font-bold text-night">Logos clients a venir</h2>
             </div>

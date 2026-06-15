@@ -13,7 +13,7 @@ function buildDisplayName(profile: NonNullable<Awaited<ReturnType<typeof fetchPr
     profile.display_name
     || profile.pro_company_name
     || [profile.prenom, profile.nom].filter(Boolean).join(' ').trim()
-    || 'Professionnel Troca'
+    || 'Professionnel Kalico'
   )
 }
 
@@ -25,7 +25,7 @@ function buildDescription(profile: NonNullable<Awaited<ReturnType<typeof fetchPr
     profile.pro_description ? profile.pro_description.replace(/\s+/g, ' ').trim() : null,
   ].filter(Boolean)
 
-  const base = `${displayName} sur Troca.`
+  const base = `${displayName} sur Kalico.`
   const description = parts.length > 0
     ? `${base} ${parts.join(' • ')}`
     : `${base} Découvrez sa vitrine professionnelle, ses annonces et ses avis.`
@@ -44,7 +44,7 @@ export async function generateMetadata(
   }
 
   const displayName = buildDisplayName(profile)
-  const title = `${displayName} — Vitrine Pro | Troca`
+  const title = `${displayName} — Vitrine Pro | Kalico`
   const description = buildDescription(profile, displayName)
   const canonical = `${SITE_URL}/pro/${id}`
 
@@ -59,7 +59,7 @@ export async function generateMetadata(
       title,
       description,
       url: canonical,
-      siteName: 'Troca',
+      siteName: 'Kalico',
       locale: 'fr_NC',
       type: 'profile',
     },

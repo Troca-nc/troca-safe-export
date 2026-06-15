@@ -1,5 +1,5 @@
 -- ============================================================
--- Troca - Phase 4 Pro : avis vérifiés, auto-réponse, newsletter
+-- Kalico - Phase 4 Pro : avis vérifiés, auto-réponse, newsletter
 -- ============================================================
 
 ALTER TABLE users ADD COLUMN IF NOT EXISTS

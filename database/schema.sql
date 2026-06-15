@@ -1,5 +1,5 @@
 -- ============================================================
--- Troca — Schéma principal PostgreSQL
+-- Kalico — Schéma principal PostgreSQL
 -- À placer dans database/schema.sql
 -- Monté automatiquement par docker-compose au 1er démarrage
 -- ============================================================
@@ -1284,7 +1284,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_pro_bookings_access_token
   ON pro_bookings (booking_access_token);
 
 -- ── PURGE AUTOMATIQUE DES TOKENS EXPIRÉS (appelé par pg_cron ou un cron job) ─
--- Exemple de cron job à ajouter : 0 3 * * * psql -U troca -d troca_prod -c "SELECT cleanup_expired_tokens();"
+-- Exemple de cron job à ajouter : 0 3 * * * psql -U kalico -d kalico_prod -c "SELECT cleanup_expired_tokens();"
 CREATE OR REPLACE FUNCTION cleanup_expired_tokens() RETURNS void AS $$
 BEGIN
   DELETE FROM refresh_tokens WHERE expires_at < NOW();

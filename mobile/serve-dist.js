@@ -58,7 +58,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(port, '0.0.0.0', () => {
-  console.log(`Troca mobile web ready at http://localhost:${port}`);
+  console.log(`Kalico mobile web ready at http://localhost:${port}`);
 });
 
 setInterval(() => {}, 60_000);

@@ -1,5 +1,5 @@
 -- ============================================================
--- Troca - Phase 3 Espace Pro Transport
+-- Kalico - Phase 3 Espace Pro Transport
 -- Transporteurs pro, disponibilités, courses et paiements
 -- ============================================================
 

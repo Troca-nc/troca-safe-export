@@ -47,7 +47,7 @@ export default function LoginPage() {
           </div>
           <div>
             <p className="text-sm text-slate-400">Admin sécurisé</p>
-            <h1 className="text-2xl font-semibold">Connexion Troca</h1>
+            <h1 className="text-2xl font-semibold">Connexion Kalico</h1>
           </div>
         </div>
 
@@ -55,7 +55,7 @@ export default function LoginPage() {
           <div className="mt-5 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4 text-sm text-amber-50">
             <p className="font-semibold text-amber-200">Mode démo admin</p>
             <p className="mt-1 text-amber-50/80">
-              Account: <span className="font-semibold">admin@troca.nc</span> | Password:{' '}
+              Account: <span className="font-semibold">admin@kalico.nc</span> | Password:{' '}
               <span className="font-semibold">admin1234</span> | TOTP:{' '}
               <span className="font-semibold">123456</span>
             </p>

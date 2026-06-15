@@ -1,6 +1,6 @@
 'use client'
 // ============================================================
-//  Troca - Centre de notifications in-app (Header web)
+//  Kalico - Centre de notifications in-app (Header web)
 // ============================================================
 
 import { useState, useEffect, useRef, useCallback } from 'react'

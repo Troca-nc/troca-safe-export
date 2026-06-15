@@ -5,7 +5,7 @@ const { describe, it, makeReq, makeRes, makeQueryMock, assertStatus } = require(
 
 const queryMock = makeQueryMock((sql) => {
   if (sql.includes('FROM users WHERE id = $1')) {
-    return { rows: [{ id: 12, email: 'demo@troca.nc', prenom: 'Demo' }] };
+    return { rows: [{ id: 12, email: 'demo@kalico.nc', prenom: 'Demo' }] };
   }
   if (sql.includes('FROM annonces WHERE user_id = $1')) return { rows: [{ id: 1, titre: 'Annonce', created_at: new Date().toISOString() }] };
   if (sql.includes('FROM annonce_images')) return { rows: [{ id: 10, annonce_id: 1 }] };
@@ -40,7 +40,7 @@ require.cache[require.resolve('../middleware/auth')] = {
   loaded: true,
   exports: {
     authenticate: (req, _res, next) => {
-      req.user = req.user || { id: 12, email: 'demo@troca.nc', prenom: 'Demo' };
+      req.user = req.user || { id: 12, email: 'demo@kalico.nc', prenom: 'Demo' };
       next();
     },
   },
@@ -87,12 +87,12 @@ describe('legal routes', () => {
     const res = await invoke(makeReq({
       method: 'GET',
       url: '/users/me/export',
-      user: { id: 12, email: 'demo@troca.nc', prenom: 'Demo' },
+      user: { id: 12, email: 'demo@kalico.nc', prenom: 'Demo' },
     }));
     assertStatus(res, 200);
     assert.strictEqual(res._headers['Content-Type'], 'application/json; charset=utf-8');
-    assert.ok(res._headers['Content-Disposition'].includes('troca-mes-donnees-12.json'));
-    assert.strictEqual(res._payload.user.email, 'demo@troca.nc');
+    assert.ok(res._headers['Content-Disposition'].includes('kalico-mes-donnees-12.json'));
+    assert.strictEqual(res._payload.user.email, 'demo@kalico.nc');
     assert.strictEqual(res._payload.listings.length, 1);
     assert.strictEqual(res._payload.messages.length, 1);
   });
@@ -102,11 +102,11 @@ describe('legal routes', () => {
     const res = await invoke(makeReq({
       method: 'DELETE',
       url: '/users/me',
-      body: { confirmation_email: 'demo@troca.nc' },
-      user: { id: 12, email: 'demo@troca.nc', prenom: 'Demo' },
+      body: { confirmation_email: 'demo@kalico.nc' },
+      user: { id: 12, email: 'demo@kalico.nc', prenom: 'Demo' },
     }));
     assertStatus(res, 200);
     assert.strictEqual(res._payload.success, true);
-    assert.strictEqual(sentEmail.subject, 'Votre compte Troca a été supprimé');
+    assert.strictEqual(sentEmail.subject, 'Votre compte Kalico a été supprimé');
   });
 });

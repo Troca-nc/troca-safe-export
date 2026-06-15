@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile — Édition du profil
+//  Kalico Mobile — Édition du profil
 //  /app/profil/edit.tsx
 // ============================================================
 

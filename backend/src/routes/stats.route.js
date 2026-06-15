@@ -1,7 +1,7 @@
 'use strict';
 
 // ============================================================
-//  Troca — Route statistiques vendeur
+//  Kalico — Route statistiques vendeur
 //  GET /api/stats/seller — Dashboard Pro (vues, favoris, messages)
 // ============================================================
 

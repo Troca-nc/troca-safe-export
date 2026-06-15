@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -148,12 +148,12 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
   }, [initialProfile, proId])
 
   const displayName = useMemo(() => {
-    if (!profile) return 'Professionnel Troca'
+    if (!profile) return 'Professionnel Kalico'
     return (
       profile.display_name
       || profile.pro_company_name
       || [profile.prenom, profile.nom].filter(Boolean).join(' ').trim()
-      || 'Professionnel Troca'
+      || 'Professionnel Kalico'
     )
   }, [profile])
 
@@ -745,7 +745,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                   <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">À propos</p>
                 <h2 className="mt-2 font-display text-2xl font-bold text-night">Votre vitrine professionnelle</h2>
                 <p className="mt-3 text-sm leading-relaxed text-night/65">
-                  {profile.pro_description || 'Ce professionnel présente ses services, ses horaires et ses coordonnées sur Troca.'}
+                  {profile.pro_description || 'Ce professionnel présente ses services, ses horaires et ses coordonnées sur Kalico.'}
                 </p>
               </div>
               <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">

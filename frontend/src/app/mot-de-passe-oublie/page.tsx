@@ -126,7 +126,7 @@ export default function ForgotPasswordPage() {
               </div>
               <h2 className="font-display font-bold text-xl text-night mb-2">Message envoyé !</h2>
               <p className="text-night/55 text-sm mb-6 leading-relaxed">
-                Si un compte Troca est associé à <strong>{getValues('identifier')}</strong>, vous recevrez un lien de réinitialisation par SMS ou par email selon vos coordonnées vérifiées.
+                Si un compte Kalico est associé à <strong>{getValues('identifier')}</strong>, vous recevrez un lien de réinitialisation par SMS ou par email selon vos coordonnées vérifiées.
               </p>
               <p className="text-xs text-night/35 mb-6">
                 Vérifiez vos spams si vous ne recevez rien. Le lien expire dans 1 heure.

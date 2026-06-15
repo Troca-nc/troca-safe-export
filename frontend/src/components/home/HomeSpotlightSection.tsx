@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
@@ -257,7 +257,7 @@ export function HomeSpotlightSection({
         : active.key === 'promos'
           ? {
               title: 'Les meilleures promos apparaîtront ici',
-              subtitle: 'Publiez un bon plan pour le mettre en avant sur Troca.',
+              subtitle: 'Publiez un bon plan pour le mettre en avant sur Kalico.',
               cta: 'Publier une promo',
               href: '/annonces/nouvelle',
             }
@@ -285,7 +285,7 @@ export function HomeSpotlightSection({
               Rappels interactifs
             </div>
             <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
-              Le meilleur de Troca, en direct, sans rien manquer.
+              Le meilleur de Kalico, en direct, sans rien manquer.
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
               Suivez les dernières annonces, les contenus premium, les promotions, les événements et le covoiturage depuis un seul espace rapide et cliquable.

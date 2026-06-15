@@ -6,7 +6,7 @@ import { CheckCircle2, ChevronRight, X } from 'lucide-react'
 import { api } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 
-const DISMISS_KEY_PREFIX = 'troca_onboarding_dismissed:'
+const DISMISS_KEY_PREFIX = 'kalico_onboarding_dismissed:'
 
 function getDismissKey(userId?: string | number | null) {
   return `${DISMISS_KEY_PREFIX}${String(userId ?? 'guest')}`
@@ -98,7 +98,7 @@ export default function OnboardingWizard() {
             Bienvenue, {user.first_name ?? user.prenom ?? 'vous'}.
           </h2>
           <p className="mt-2 text-sm leading-6 text-night/60 dark:text-white/65">
-            Trois petites étapes pour démarrer plus vite et profiter du plein potentiel de Troca.
+            Trois petites étapes pour démarrer plus vite et profiter du plein potentiel de Kalico.
           </p>
           <div className="mt-5 flex items-center justify-center gap-2">
             {steps.map((step) => {

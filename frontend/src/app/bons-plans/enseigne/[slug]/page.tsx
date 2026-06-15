@@ -122,7 +122,7 @@ export default function BusinessProfilePage() {
                   {business?.badge === 'verified' ? (
                     <span className="inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-coral">
                       <Check className="h-3 w-3" />
-                      Vérifié Troca
+                      Vérifié Kalico
                     </span>
                   ) : business?.badge === 'active' ? (
                     <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-lagoon">
@@ -170,7 +170,7 @@ export default function BusinessProfilePage() {
               <div className="mb-4 flex items-end justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.2em] text-coral/80">Avis clients</p>
-                  <h2 className="mt-1 text-2xl font-bold text-night">La parole aux utilisateurs Troca</h2>
+                  <h2 className="mt-1 text-2xl font-bold text-night">La parole aux utilisateurs Kalico</h2>
                 </div>
               </div>
 
@@ -181,7 +181,7 @@ export default function BusinessProfilePage() {
                       <article key={review.id} className="rounded-[1.25rem] border border-night/8 bg-white p-4 shadow-sm">
                         <div className="flex items-center justify-between gap-3">
                           <div>
-                            <p className="font-semibold text-night">{review.user_prenom || 'Utilisateur Troca'}</p>
+                            <p className="font-semibold text-night">{review.user_prenom || 'Utilisateur Kalico'}</p>
                             <p className="text-xs text-night/45">{review.created_at ? new Date(review.created_at).toLocaleDateString('fr-FR') : ''}</p>
                           </div>
                           <div className="flex items-center gap-1 text-amber-500">

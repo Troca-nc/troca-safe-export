@@ -202,9 +202,9 @@ export default function AnnonceDetail() {
     return {
       kind: 'annonce',
       itemId: annonce.id,
-      title: `${listingTitle} | Troca`,
+      title: `${listingTitle} | Kalico`,
       description: [listingPrice ? money(listingPrice) : null, location || 'Nouvelle-Caledonie'].filter(Boolean).join(' • '),
-      url: `https://troca.nc/annonces/${annonce.id}`,
+      url: `https://kalico.nc/annonces/${annonce.id}`,
     };
   }, [annonce, listingPrice, listingTitle]);
   const shareLinks = useMemo(() => (shareContent ? buildMobileShareLinks(shareContent) : null), [shareContent]);
@@ -264,7 +264,7 @@ export default function AnnonceDetail() {
 
       const payload = data.data ?? data;
       const { error: initError } = await initPaymentSheet({
-        merchantDisplayName: 'Troca NC',
+        merchantDisplayName: 'Kalico NC',
         paymentIntentClientSecret: payload.client_secret,
         customerId: payload.customer_id,
         customerEphemeralKeySecret: payload.ephemeral_key,

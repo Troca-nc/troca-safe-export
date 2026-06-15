@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile — Client WebSocket fiable (socket.io)
+//  Kalico Mobile — Client WebSocket fiable (socket.io)
 // ============================================================
 
 import NetInfo from '@react-native-community/netinfo'

@@ -116,7 +116,7 @@ export default function RideReviewModal({
             <FeedbackAlert tone="success" title="Avis publié">
               <p>Merci, votre avis a été publié !</p>
               <p className="mt-1 text-sm text-emerald-700/80">
-                {driverName} et la communauté Troca vous remercient.
+                {driverName} et la communauté Kalico vous remercient.
               </p>
             </FeedbackAlert>
           </div>

@@ -121,7 +121,7 @@ export const useFavorisStore = create<FavorisState>()(
       clear: () => set({ ids: new Set(), items: [], loading: new Set() }),
     }),
     {
-      name: 'troca-favoris',
+      name: 'kalico-favoris',
       // Sérialiser/désérialiser le Set car JSON ne le supporte pas nativement
       storage: {
         getItem: (key) => {

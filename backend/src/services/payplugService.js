@@ -1,7 +1,7 @@
 'use strict';
 
 // ============================================================
-//  Troca - Service PayPlug (API REST v1)
+//  Kalico - Service PayPlug (API REST v1)
 //  Implémentation native sans SDK (dépendances obsolètes)
 //  Docs : https://docs.payplug.com/api
 //
@@ -84,7 +84,7 @@ async function createPayment({
   metadata = {},
 }) {
   const amount_cents = xpfToEurCents(amount_xpf, 100);
-  const notif_url = `${process.env.BASE_URL || 'https://troca.nc'}/api/payment/webhooks/payplug`;
+  const notif_url = `${process.env.BASE_URL || 'https://kalico.nc'}/api/payment/webhooks/payplug`;
 
   const payload = {
     amount: amount_cents,
@@ -147,7 +147,7 @@ async function createSubscription({
   const planConfig = PAYPLUG_SUBSCRIPTION_PLANS[plan];
   if (!planConfig) throw new Error(`Plan PayPlug inconnu: ${plan}`);
 
-  const notif_url = `${process.env.BASE_URL || 'https://troca.nc'}/api/payment/webhooks/payplug`;
+  const notif_url = `${process.env.BASE_URL || 'https://kalico.nc'}/api/payment/webhooks/payplug`;
 
   const payload = {
     amount: planConfig.amount_cents,

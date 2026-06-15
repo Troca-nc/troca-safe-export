@@ -285,7 +285,7 @@ export default function TrocCyclePage() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Action</p>
               <h2 className="mt-2 text-xl font-bold text-night">Confirmer votre participation</h2>
               <p className="mt-2 text-sm leading-6 text-night/60">
-                En confirmant, vous acceptez d’organiser l’échange avec les autres participants. Troca n’assure pas la remise des objets.
+                En confirmant, vous acceptez d’organiser l’échange avec les autres participants. Kalico n’assure pas la remise des objets.
               </p>
               <button
                 type="button"

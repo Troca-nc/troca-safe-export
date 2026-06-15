@@ -1,5 +1,5 @@
 -- ============================================================
--- Troca - Phase 2 Espace Pro
+-- Kalico - Phase 2 Espace Pro
 -- Stats annonces, boosts, factures et vue agrégée
 -- ============================================================
 

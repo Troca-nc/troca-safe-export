@@ -1,6 +1,6 @@
 'use client'
 // ============================================================
-//  Troca Web — Page réinitialisation mot de passe
+//  Kalico Web — Page réinitialisation mot de passe
 //  URL : /mot-de-passe-oublie/reset?token=xxx
 // ============================================================
 

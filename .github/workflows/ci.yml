@@ -26,7 +26,7 @@ jobs:
       PLAYWRIGHT_ENABLE_MSW: 'false'
       NODE_EXE: node
       K6_BASE_URL: http://127.0.0.1:3000
-      K6_USERNAME: pro@demo.troca
+      K6_USERNAME: pro@demo.kalico
       K6_PASSWORD: Demo1234!
       STRIPE_E2E_ENABLED: ${{ secrets.STRIPE_E2E_ENABLED }}
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}

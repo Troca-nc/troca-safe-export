@@ -77,7 +77,7 @@ async function main() {
     return { applied: pending.length, total: files.length };
   });
 
-  console.log('\n=== Migrations Troca ===');
+  console.log('\n=== Migrations Kalico ===');
   console.log(JSON.stringify(result, null, 2));
 }
 

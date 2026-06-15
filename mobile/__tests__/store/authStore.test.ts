@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile — Tests authStore (Zustand)
+//  Kalico Mobile — Tests authStore (Zustand)
 // ============================================================
 
 import { act, renderHook } from '@testing-library/react-hooks';
@@ -24,7 +24,7 @@ jest.mock('../../lib/api', () => ({
 import { api, tokenStorage } from '../../lib/api';
 
 const mockUser = {
-  id: 1, email: 'test@troca.nc',
+  id: 1, email: 'test@kalico.nc',
   prenom: 'Jean', nom: 'Test',
   is_admin: false, is_pro: false,
 };
@@ -84,7 +84,7 @@ describe('authStore — login', () => {
     const { result } = renderHook(() => useAuthStore());
 
     await act(async () => {
-      await result.current.login('test@troca.nc', 'password123');
+      await result.current.login('test@kalico.nc', 'password123');
     });
 
     expect(result.current.user).toEqual(mockUser);

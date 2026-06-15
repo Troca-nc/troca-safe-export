@@ -1,4 +1,4 @@
-# Runbook de mise en production - Troca
+# Runbook de mise en production - Kalico
 
 Ce runbook suit la stack corrigee:
 - `docker-compose.prod.yml` pour l'orchestration
@@ -39,8 +39,8 @@ The backend now fails closed when critical secrets are missing, and the UI disab
 ### Démarrage local hors ligne
 
 ```bash
-docker build -t troca/backend:offline ./backend
-docker build -t troca/frontend:offline ./frontend
+docker build -t kalico/backend:offline ./backend
+docker build -t kalico/frontend:offline ./frontend
 docker compose -f docker-compose.prod.yml --env-file .env.production.local up -d postgres redis backend frontend
 ```
 
@@ -59,7 +59,7 @@ curl http://localhost:3000
 
 ## 1. Pre-requis
 
-- Domaine `troca.nc` et `www.troca.nc` pointes vers le VPS
+- Domaine `kalico.nc` et `www.kalico.nc` pointes vers le VPS
 - Ports `80` et `443` ouverts
 - Docker et Docker Compose installes
 - Acces SSH au serveur
@@ -74,7 +74,7 @@ curl http://localhost:3000
 ### Variables indispensables dans `.env.production.local`
 
 - Base:
-  - `BASE_URL=https://troca.nc`
+  - `BASE_URL=https://kalico.nc`
   - `DB_NAME`
   - `DB_USER`
   - `DB_PASSWORD`
@@ -85,10 +85,10 @@ curl http://localhost:3000
   - `JWT_EXPIRES_IN`
   - `JWT_REFRESH_EXPIRES_IN`
 - Docker images:
-  - `BACKEND_IMAGE=ghcr.io/Troca-nc/troca-safe-export/backend:latest`
-  - `FRONTEND_IMAGE=ghcr.io/Troca-nc/troca-safe-export/frontend:latest`
+  - `BACKEND_IMAGE=ghcr.io/Kalico-nc/kalico-safe-export/backend:latest`
+  - `FRONTEND_IMAGE=ghcr.io/Kalico-nc/kalico-safe-export/frontend:latest`
 - Frontend public:
-  - `NEXT_PUBLIC_API_URL=https://troca.nc/api`
+  - `NEXT_PUBLIC_API_URL=https://kalico.nc/api`
   - `NEXT_PUBLIC_STRIPE_PK`
   - `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
   - `NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY`
@@ -127,7 +127,7 @@ curl http://localhost:3000
 ### Variables mobile
 
 Dans `mobile/.env` et dans les profiles EAS:
-- `EXPO_PUBLIC_API_URL=https://troca.nc/api`
+- `EXPO_PUBLIC_API_URL=https://kalico.nc/api`
 - `EXPO_PUBLIC_STRIPE_PK`
 - `EXPO_PUBLIC_GOOGLE_CLIENT_ID`
 
@@ -170,7 +170,7 @@ Si le script echoue:
 Pour un lancement complet en une seule commande de controle:
 
 ```bash
-bash scripts/launch-day.sh .env.production.local https://troca.nc
+bash scripts/launch-day.sh .env.production.local https://kalico.nc
 ```
 
 ### 4.1 Certificat SSL
@@ -178,7 +178,7 @@ bash scripts/launch-day.sh .env.production.local https://troca.nc
 Depuis le repertoire de deploiement:
 
 ```bash
-bash scripts/init-ssl.sh troca.nc admin@troca.nc
+bash scripts/init-ssl.sh kalico.nc admin@kalico.nc
 ```
 
 Ce script:
@@ -209,12 +209,12 @@ Sinon, appliquer les migrations manuellement:
 set -a
 . ./.env.production.local
 set +a
-docker exec -i troca_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/schema.sql
-docker exec -i troca_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/001_add_messaging.sql
-docker exec -i troca_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/002_add_monetisation.sql
-docker exec -i troca_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/003_add_phone_verification.sql
-docker exec -i troca_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/004_add_search_alerts.sql
-docker exec -i troca_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/005_add_push_tokens.sql
+docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/schema.sql
+docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/001_add_messaging.sql
+docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/002_add_monetisation.sql
+docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/003_add_phone_verification.sql
+docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/004_add_search_alerts.sql
+docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/005_add_push_tokens.sql
 ```
 
 ### 4.5 Creer le compte admin
@@ -223,7 +223,7 @@ docker exec -i troca_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrat
 set -a
 . ./.env.production.local
 set +a
-docker exec -i troca_postgres psql -U "$DB_USER" -d "$DB_NAME" -c "UPDATE users SET is_admin = TRUE WHERE email = 'admin@troca.nc';"
+docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" -c "UPDATE users SET is_admin = TRUE WHERE email = 'admin@kalico.nc';"
 ```
 
 ## 5. Checks de mise en prod
@@ -232,12 +232,12 @@ docker exec -i troca_postgres psql -U "$DB_USER" -d "$DB_NAME" -c "UPDATE users 
 
 ```bash
 curl http://localhost:3001/api/health
-curl https://troca.nc/api/health
+curl https://kalico.nc/api/health
 ```
 
 ### Navigateur
 
-- Ouvrir `https://troca.nc`
+- Ouvrir `https://kalico.nc`
 - Verifier l'affichage du home
 - Ouvrir une annonce
 - Se connecter
@@ -248,7 +248,7 @@ curl https://troca.nc/api/health
 Depuis le repertoire de deploiement:
 
 ```bash
-bash scripts/smoke-test.sh https://troca.nc
+bash scripts/smoke-test.sh https://kalico.nc
 ```
 
 Ce script verifie:
@@ -263,7 +263,7 @@ Ce script verifie:
 ### Upload
 
 - Televerser une image sur une annonce de test
-- Verifier que l'image est bien servie via `https://troca.nc/uploads/...`
+- Verifier que l'image est bien servie via `https://kalico.nc/uploads/...`
 
 ### Messagerie
 
@@ -342,14 +342,14 @@ docker compose -f docker-compose.prod.yml --env-file .env.production.local up -d
 ### Test manuel
 
 ```bash
-docker exec troca_backup /backup.sh
+docker exec kalico_backup /backup.sh
 ```
 
 ### Verification
 
 - Le fichier `.sql.gz` doit apparaitre dans le volume `/backups`
 - L'upload S3 doit apparaitre dans le bucket
-- Les logs du conteneur `troca_backup` doivent montrer la planification cron a 2h00
+- Les logs du conteneur `kalico_backup` doivent montrer la planification cron a 2h00
 
 ## 8. Restauration
 
@@ -357,7 +357,7 @@ docker exec troca_backup /backup.sh
 set -a
 . ./.env.production.local
 set +a
-gunzip -c backup.sql.gz | docker exec -i troca_postgres psql -U "$DB_USER" -d "$DB_NAME"
+gunzip -c backup.sql.gz | docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME"
 ```
 
 Avant restauration:
@@ -371,8 +371,8 @@ Si un deploy casse la prod:
 
 1. Identifier le SHA precedent qui marchait.
 2. Dans `.env.production.local`, remplacer:
-   - `BACKEND_IMAGE=ghcr.io/quidammm/troca/backend:<sha>`
-   - `FRONTEND_IMAGE=ghcr.io/quidammm/troca/frontend:<sha>`
+   - `BACKEND_IMAGE=ghcr.io/quidammm/kalico/backend:<sha>`
+   - `FRONTEND_IMAGE=ghcr.io/quidammm/kalico/frontend:<sha>`
 3. Redemarrer:
 
 ```bash

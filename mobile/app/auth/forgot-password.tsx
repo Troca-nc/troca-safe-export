@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile — Mot de passe oublié
+//  Kalico Mobile — Mot de passe oublié
 // ============================================================
 
 import { useState } from 'react';

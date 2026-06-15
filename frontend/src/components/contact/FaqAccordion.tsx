@@ -88,9 +88,9 @@ const FAQ_GROUPS: FaqGroup[] = [
           'Privilégiez toujours les échanges en personne, ne payez jamais par virement avant de voir l’objet, méfiez-vous des prix anormalement bas. En cas de doute, signalez l’annonce.',
       },
       {
-        question: 'Troca garantit-il les transactions ?',
+        question: 'Kalico garantit-il les transactions ?',
         answer:
-          'Troca est une plateforme de mise en relation. Nous ne garantissons pas les transactions entre particuliers. Nous vous incitons à la prudence et à rencontrer les vendeurs en lieu public.',
+          'Kalico est une plateforme de mise en relation. Nous ne garantissons pas les transactions entre particuliers. Nous vous incitons à la prudence et à rencontrer les vendeurs en lieu public.',
       },
       {
         question: 'Un vendeur me demande de payer par virement, est-ce sûr ?',

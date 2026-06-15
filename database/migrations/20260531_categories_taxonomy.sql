@@ -1,5 +1,5 @@
 -- ============================================================
--- Troca — catégories hiérarchiques / positionnement
+-- Kalico — catégories hiérarchiques / positionnement
 -- ============================================================
 
 ALTER TABLE categories

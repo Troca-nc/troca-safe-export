@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Paramètres de notification
+//  Kalico Mobile - Paramètres de notification
 // ============================================================
 
 import type { ReactNode } from 'react'
@@ -449,7 +449,7 @@ export default function NotificationSettingsScreen() {
             >
               <SwitchRow
                 title="Toutes les nouvelles promos"
-                description="Recevoir chaque bon plan publié sur Troca."
+                description="Recevoir chaque bon plan publié sur Kalico."
                 value={bonPlanPrefs.notify_all}
                 onValueChange={(next) => updateBonPlan('notify_all', next)}
                 tone="emerald"

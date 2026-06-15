@@ -2,15 +2,15 @@
 # ============================================================
 # init-ssl.sh — Obtenir le certificat SSL Let's Encrypt
 # À exécuter UNE SEULE FOIS avant docker compose up
-# Usage : bash scripts/init-ssl.sh troca.nc admin@troca.nc
+# Usage : bash scripts/init-ssl.sh kalico.nc admin@kalico.nc
 # ============================================================
 
 set -eu
 
-DOMAIN="${1:-troca.nc}"
-EMAIL="${2:-admin@troca.nc}"
-CERTBOT_WWW="troca_certbot_www"
-CERTBOT_CONF="troca_certbot_conf"
+DOMAIN="${1:-kalico.nc}"
+EMAIL="${2:-admin@kalico.nc}"
+CERTBOT_WWW="kalico_certbot_www"
+CERTBOT_CONF="kalico_certbot_conf"
 
 echo "🔐 Initialisation SSL pour $DOMAIN..."
 

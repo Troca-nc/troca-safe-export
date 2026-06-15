@@ -13,7 +13,7 @@ const { socialAuthLimiter } = require('../middleware/rateLimit')
 const { logger } = require('../utils/logger')
 
 const router       = express.Router()
-const REFRESH_COOKIE_NAME = 'troca_refresh_token'
+const REFRESH_COOKIE_NAME = 'kalico_refresh_token'
 const googleClientId = isConfiguredValue(process.env.GOOGLE_CLIENT_ID) ? process.env.GOOGLE_CLIENT_ID.trim() : ''
 const appleClientId = isConfiguredValue(process.env.APPLE_CLIENT_ID) ? process.env.APPLE_CLIENT_ID.trim() : ''
 const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null

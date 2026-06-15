@@ -308,14 +308,14 @@ router.post('/invite', authenticate, async (req, res, next) => {
       await sendReviewInviteEmail(value.reviewer_email, 'Bonjour', {
         token,
         proName: pro.pro_company_name || `${pro.prenom} ${pro.nom}`.trim(),
-        reviewUrl: `${process.env.BASE_URL || 'https://troca.nc'}/avis/${token}`,
+        reviewUrl: `${process.env.BASE_URL || 'https://kalico.nc'}/avis/${token}`,
       }).catch(() => {});
     }
 
     return res.status(201).json({
       data: {
         token,
-        review_url: `${process.env.BASE_URL || 'https://troca.nc'}/avis/${token}`,
+        review_url: `${process.env.BASE_URL || 'https://kalico.nc'}/avis/${token}`,
         expires_at: inserted.rows[0].expires_at,
       },
     });

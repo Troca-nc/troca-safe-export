@@ -18,7 +18,7 @@
       "distribution": "internal",
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://troca.nc/api",
+        "EXPO_PUBLIC_API_URL": "https://kalico.nc/api",
         "EXPO_PUBLIC_STRIPE_PK": "pk_test_REPLACE_WITH_STRIPE_PUBLIC_KEY",
         "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "REPLACE_WITH_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
       },
@@ -32,7 +32,7 @@
     "production": {
       "channel": "production",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://troca.nc/api",
+        "EXPO_PUBLIC_API_URL": "https://kalico.nc/api",
         "EXPO_PUBLIC_STRIPE_PK": "pk_live_REPLACE_WITH_STRIPE_PUBLIC_KEY",
         "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "REPLACE_WITH_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
       },

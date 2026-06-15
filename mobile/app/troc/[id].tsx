@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Détail Troc
+//  Kalico Mobile - Détail Troc
 // ============================================================
 
 import { useMemo, useState } from 'react'

@@ -31,8 +31,8 @@ function renderAccountDeletedEmail({ name }) {
   const html = fs.readFileSync(templatePath, 'utf8');
   return html
     .replace(/{{\s*name\s*}}/g, name || 'Utilisateur')
-    .replace(/{{\s*support_email\s*}}/g, 'privacy@troca.nc')
-    .replace(/{{\s*home_url\s*}}/g, process.env.BASE_URL || 'https://troca.nc');
+    .replace(/{{\s*support_email\s*}}/g, 'privacy@kalico.nc')
+    .replace(/{{\s*home_url\s*}}/g, process.env.BASE_URL || 'https://kalico.nc');
 }
 
 router.get('/legal/versions', (_req, res) => {
@@ -206,7 +206,7 @@ router.get('/users/me/export', authenticate, async (req, res, next) => {
     };
 
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="troca-mes-donnees-${userId}.json"`);
+    res.setHeader('Content-Disposition', `attachment; filename="kalico-mes-donnees-${userId}.json"`);
     return res.json(exportData);
   } catch (err) {
     next(err);
@@ -262,7 +262,7 @@ router.delete('/users/me', authenticate, verifyCsrf, async (req, res, next) => {
 
     await sendMail({
       to: user.email,
-      subject: 'Votre compte Troca a été supprimé',
+      subject: 'Votre compte Kalico a été supprimé',
       html,
     }).catch(() => {});
 

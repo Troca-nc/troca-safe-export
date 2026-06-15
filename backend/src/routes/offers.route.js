@@ -1,7 +1,7 @@
 'use strict';
 
 // ============================================================
-//  Troca — Routes offres de prix (message_offers)
+//  Kalico — Routes offres de prix (message_offers)
 //  POST /api/messages/offers           — Créer une offre
 //  POST /api/messages/offers/:id/respond — Accepter / Refuser / Contre-offre
 //  GET  /api/messages/conversations/:id/offers — Offres d'une conversation

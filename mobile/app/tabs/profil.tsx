@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Onglet Profil
+//  Kalico Mobile - Onglet Profil
 // ============================================================
 
 import { useEffect, useState } from 'react';
@@ -300,7 +300,7 @@ export default function ProfilTab() {
         </View>
       ))}
 
-      <Text style={styles.version}>Troca v1.0.0 - Nouvelle-Calédonie</Text>
+      <Text style={styles.version}>Kalico v1.0.0 - Nouvelle-Calédonie</Text>
     </ScrollView>
   );
 }

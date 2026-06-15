@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Alertes trajet covoiturage
+//  Kalico Mobile - Alertes trajet covoiturage
 // ============================================================
 
 import { useCallback, useEffect, useMemo, useState } from 'react'

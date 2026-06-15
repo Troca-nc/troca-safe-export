@@ -13,7 +13,7 @@ const PASSWORD_HASH = bcrypt.hashSync(PASSWORD, 10);
 
 const USERS = [
   {
-    email: 'particulier@playwright.troca.nc',
+    email: 'particulier@playwright.kalico.nc',
     prenom: 'Emma',
     nom: 'Test',
     telephone: '+687700001',
@@ -29,7 +29,7 @@ const USERS = [
     nb_avis: 2,
   },
   {
-    email: 'vendeur@playwright.troca.nc',
+    email: 'vendeur@playwright.kalico.nc',
     prenom: 'Victor',
     nom: 'Vendeur',
     telephone: '+687700002',
@@ -45,7 +45,7 @@ const USERS = [
     nb_avis: 4,
   },
   {
-    email: 'pro@playwright.troca.nc',
+    email: 'pro@playwright.kalico.nc',
     prenom: 'Entreprise',
     nom: 'Test NC',
     telephone: '+687700003',
@@ -71,7 +71,7 @@ const USERS = [
     nb_avis: 12,
   },
   {
-    email: 'conducteur@playwright.troca.nc',
+    email: 'conducteur@playwright.kalico.nc',
     prenom: 'Claude',
     nom: 'Conducteur',
     telephone: '+687700004',
@@ -87,7 +87,7 @@ const USERS = [
     nb_avis: 3,
   },
   {
-    email: 'admin@playwright.troca.nc',
+    email: 'admin@playwright.kalico.nc',
     prenom: 'Ada',
     nom: 'Admin',
     telephone: '+687700005',
@@ -98,7 +98,7 @@ const USERS = [
     is_pro: true,
     pro_plan: 'pro',
     pro_verified: true,
-    pro_company_name: 'Troca Admin Test',
+    pro_company_name: 'Kalico Admin Test',
     pro_category: 'Plateforme',
     pro_description: 'Compte d’administration pour les tests E2E.',
     pro_phone: '+687700005',
@@ -538,8 +538,8 @@ async function insertListing(client, { userId, categoryId, communeId, title, des
 }
 
 async function seedSellerContent(client, ids) {
-  const sellerId = ids.byEmail.get('vendeur@playwright.troca.nc');
-  const particulierId = ids.byEmail.get('particulier@playwright.troca.nc');
+  const sellerId = ids.byEmail.get('vendeur@playwright.kalico.nc');
+  const particulierId = ids.byEmail.get('particulier@playwright.kalico.nc');
   const communeNoumea = ids.communes.get('noumea');
   const communeDumbea = ids.communes.get('dumbea');
   const communePaita = ids.communes.get('paita');
@@ -630,8 +630,8 @@ async function seedSellerContent(client, ids) {
 }
 
 async function seedProContent(client, ids) {
-  const proId = ids.byEmail.get('pro@playwright.troca.nc');
-  const particulierId = ids.byEmail.get('particulier@playwright.troca.nc');
+  const proId = ids.byEmail.get('pro@playwright.kalico.nc');
+  const particulierId = ids.byEmail.get('particulier@playwright.kalico.nc');
   const communId = ids.communes.get('noumea');
   const servicesCategory = (await client.query(`SELECT id FROM categories WHERE slug = 'services'`)).rows[0]?.id;
   const vehiculesCategory = (await client.query(`SELECT id FROM categories WHERE slug = 'vehicules'`)).rows[0]?.id;
@@ -735,7 +735,7 @@ async function seedProContent(client, ids) {
       proId,
       particulierId,
       'Emma Test',
-      'particulier@playwright.troca.nc',
+      'particulier@playwright.kalico.nc',
       '+687700001',
       'Rénovation cuisine',
       'Nouméa',
@@ -783,7 +783,7 @@ async function seedProContent(client, ids) {
       'PW-2026-0001',
       'pw-quote-token-1',
       'Emma Test',
-      'particulier@playwright.troca.nc',
+      'particulier@playwright.kalico.nc',
       '+687700001',
       'Nouméa',
       'Rénovation cuisine',
@@ -877,7 +877,7 @@ async function seedProContent(client, ids) {
       15000,
       30,
       'Emma Test',
-      'particulier@playwright.troca.nc',
+      'particulier@playwright.kalico.nc',
       '+687700001',
       'Nouméa',
       'Demande de rendez-vous',
@@ -902,7 +902,7 @@ async function seedProContent(client, ids) {
       0,
       45,
       'Emma Test',
-      'particulier@playwright.troca.nc',
+      'particulier@playwright.kalico.nc',
       '+687700001',
       'Nouméa',
       'Rendez-vous terminé',
@@ -914,8 +914,8 @@ async function seedProContent(client, ids) {
 }
 
 async function seedDriverContent(client, ids) {
-  const driverId = ids.byEmail.get('conducteur@playwright.troca.nc');
-  const passengerId = ids.byEmail.get('particulier@playwright.troca.nc');
+  const driverId = ids.byEmail.get('conducteur@playwright.kalico.nc');
+  const passengerId = ids.byEmail.get('particulier@playwright.kalico.nc');
   const communeNoumea = ids.communes.get('noumea');
   const communePaita = ids.communes.get('paita');
 
@@ -975,11 +975,11 @@ async function main() {
     await seedProContent(client, users);
     await seedDriverContent(client, users);
 
-    const proId = users.byEmail.get('pro@playwright.troca.nc');
-    const particulierId = users.byEmail.get('particulier@playwright.troca.nc');
-    const vendeurId = users.byEmail.get('vendeur@playwright.troca.nc');
-    const conducteurId = users.byEmail.get('conducteur@playwright.troca.nc');
-    const adminId = users.byEmail.get('admin@playwright.troca.nc');
+    const proId = users.byEmail.get('pro@playwright.kalico.nc');
+    const particulierId = users.byEmail.get('particulier@playwright.kalico.nc');
+    const vendeurId = users.byEmail.get('vendeur@playwright.kalico.nc');
+    const conducteurId = users.byEmail.get('conducteur@playwright.kalico.nc');
+    const adminId = users.byEmail.get('admin@playwright.kalico.nc');
 
     await client.query(
       `INSERT INTO notifications (user_id, type, title, body, href, is_read, created_at)
@@ -995,11 +995,11 @@ async function main() {
 
     return {
       users: [
-        'particulier@playwright.troca.nc',
-        'vendeur@playwright.troca.nc',
-        'pro@playwright.troca.nc',
-        'conducteur@playwright.troca.nc',
-        'admin@playwright.troca.nc',
+        'particulier@playwright.kalico.nc',
+        'vendeur@playwright.kalico.nc',
+        'pro@playwright.kalico.nc',
+        'conducteur@playwright.kalico.nc',
+        'admin@playwright.kalico.nc',
       ],
       password: PASSWORD,
       proCompany: 'Entreprise Test NC',

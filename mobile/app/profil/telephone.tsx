@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Verification telephone
+//  Kalico Mobile - Verification telephone
 //  /app/profil/telephone.tsx
 // ============================================================
 

@@ -13,7 +13,7 @@ const {
 process.env.JWT_SECRET = 'test_jwt_secret_minimum_64_chars_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
 // Mock du module database AVANT de charger auth.js
-const fakeUser = { id: 1, email: 'test@troca.nc', prenom: 'Jean', nom: 'Test', is_admin: false, is_pro: false, deleted_at: null };
+const fakeUser = { id: 1, email: 'test@kalico.nc', prenom: 'Jean', nom: 'Test', is_admin: false, is_pro: false, deleted_at: null };
 let mockRows = [fakeUser];
 const blacklistedTokens = new Set();
 

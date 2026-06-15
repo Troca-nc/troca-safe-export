@@ -1,6 +1,6 @@
 'use client'
 // ============================================================
-//  Troca — Page paiement/succes
+//  Kalico — Page paiement/succes
 //  FIX 5 : Vérifie le statut réel via session_id Stripe
 // ============================================================
 

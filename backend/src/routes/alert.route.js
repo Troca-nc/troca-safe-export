@@ -1,7 +1,7 @@
 'use strict';
 
 // ============================================================
-//  Troca — Routes alertes de recherche
+//  Kalico — Routes alertes de recherche
 //  GET    /api/alerts              — Mes alertes
 //  POST   /api/alerts              — Créer une alerte
 //  PATCH  /api/alerts/:id          — Modifier (pause/reprendre)
@@ -19,7 +19,7 @@ const { buildListingSearchContext } = require('../services/listingsQuery');
 const { sendMail } = require('../services/emailService');
 
 const router = Router();
-const BASE_URL = process.env.BASE_URL || 'https://troca.nc';
+const BASE_URL = process.env.BASE_URL || 'https://kalico.nc';
 
 function normalizeAlertFilters(filters) {
   if (!filters || typeof filters !== 'object') return {};
@@ -115,7 +115,7 @@ async function sendConfirmationEmail({ email, prenom, label, filters, frequency,
 
   await sendMail({
     to: email,
-    subject: '[Troca] Votre alerte de recherche est active',
+    subject: '[Kalico] Votre alerte de recherche est active',
     html: `
       <p>Bonjour ${prenom || 'bonjour'},</p>
       <p>Votre alerte <strong>${label}</strong> a bien été créée.</p>
@@ -157,12 +157,12 @@ router.get('/unsubscribe/:token', async (req, res) => {
 
   return res.send(`
     <!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
-    <title>Désabonnement — Troca</title>
+    <title>Désabonnement — Kalico</title>
     <style>body{font-family:sans-serif;max-width:500px;margin:80px auto;text-align:center;color:#1f2937;}
     h1{color:#2563eb;}a{color:#2563eb;}</style></head><body>
     <h1>✅ Désabonné</h1>
     <p>Vous ne recevrez plus d'emails pour l'alerte <strong>"${result.rows[0].label}"</strong>.</p>
-    <p><a href="${process.env.BASE_URL || 'https://troca.nc'}">Retour sur Troca</a></p>
+    <p><a href="${process.env.BASE_URL || 'https://kalico.nc'}">Retour sur Kalico</a></p>
     </body></html>
   `);
 });

@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Onglet Annonces
+//  Kalico Mobile - Onglet Annonces
 // ============================================================
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';

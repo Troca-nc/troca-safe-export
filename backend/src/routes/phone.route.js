@@ -1,7 +1,7 @@
 'use strict';
 
 // ============================================================
-//  Troca - Route verification telephone
+//  Kalico - Route verification telephone
 //  POST /api/phone/send      - Envoyer le code
 //  POST /api/phone/verify    - Verifier le code
 //  POST /api/phone/resend    - Renvoyer le code

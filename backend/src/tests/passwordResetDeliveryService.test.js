@@ -47,7 +47,7 @@ describe('passwordResetDeliveryService', () => {
 
     const result = await deliverPasswordReset({
       user: {
-        email: 'vendeur@demo.troca.nc',
+        email: 'vendeur@demo.kalico.nc',
         prenom: 'Ana',
         telephone: '+687701234',
         phone_verified: true,
@@ -68,7 +68,7 @@ describe('passwordResetDeliveryService', () => {
 
     const result = await deliverPasswordReset({
       user: {
-        email: 'particulier@demo.troca.nc',
+        email: 'particulier@demo.kalico.nc',
         prenom: 'Paul',
         telephone: '+687721234',
         phone_verified: false,
@@ -79,7 +79,7 @@ describe('passwordResetDeliveryService', () => {
     assert.strictEqual(result.channel, 'email');
     assert.strictEqual(twilioMessages.length, 0);
     assert.strictEqual(emailCalls.length, 1);
-    assert.strictEqual(emailCalls[0].to, 'particulier@demo.troca.nc');
+    assert.strictEqual(emailCalls[0].to, 'particulier@demo.kalico.nc');
     assert.strictEqual(emailCalls[0].token, 'reset-token-456');
   });
 });

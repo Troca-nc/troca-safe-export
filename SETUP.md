@@ -1,4 +1,4 @@
-# Troca - Guide de mise en production
+# Kalico - Guide de mise en production
 
 ## Mode hors ligne
 
@@ -21,8 +21,8 @@ Leave payment, SMS, email, OAuth, AWS and Expo secrets blank to disable those fl
 Build the local images first, then start the stack with the local env file:
 
 ```bash
-docker build -t troca/backend:offline ./backend
-docker build -t troca/frontend:offline ./frontend
+docker build -t kalico/backend:offline ./backend
+docker build -t kalico/frontend:offline ./frontend
 docker compose -f docker-compose.prod.yml --env-file .env.production.local up -d postgres redis backend frontend
 ```
 
@@ -74,7 +74,7 @@ Rappels:
 
 - VPS Ubuntu 22.04+ ou 24.04
 - Docker + Docker Compose installes
-- Domaine `troca.nc` pointant vers l'IP du serveur
+- Domaine `kalico.nc` pointant vers l'IP du serveur
 - Ports 80 et 443 ouverts
 
 ---
@@ -121,7 +121,7 @@ La premiere fois seulement:
 
 ```bash
 chmod +x scripts/init-ssl.sh
-bash scripts/init-ssl.sh troca.nc admin@troca.nc
+bash scripts/init-ssl.sh kalico.nc admin@kalico.nc
 ```
 
 Ce script genere le certificat Let's Encrypt dans les volumes nommes utilises par la stack.
@@ -158,18 +158,18 @@ Le schema est monte automatiquement au premier demarrage de PostgreSQL.
 Vérification:
 
 ```bash
-docker exec -it troca_postgres psql -U troca -d troca_prod -c "\dt"
+docker exec -it kalico_postgres psql -U kalico -d kalico_prod -c "\dt"
 ```
 
 Si besoin, appliquer manuellement les scripts SQL:
 
 ```bash
-docker exec -i troca_postgres psql -U troca -d troca_prod < database/schema.sql
-docker exec -i troca_postgres psql -U troca -d troca_prod < database/migrations/001_add_messaging.sql
-docker exec -i troca_postgres psql -U troca -d troca_prod < database/migrations/002_add_monetisation.sql
-docker exec -i troca_postgres psql -U troca -d troca_prod < database/migrations/003_add_phone_verification.sql
-docker exec -i troca_postgres psql -U troca -d troca_prod < database/migrations/004_add_search_alerts.sql
-docker exec -i troca_postgres psql -U troca -d troca_prod < database/migrations/005_add_push_tokens.sql
+docker exec -i kalico_postgres psql -U kalico -d kalico_prod < database/schema.sql
+docker exec -i kalico_postgres psql -U kalico -d kalico_prod < database/migrations/001_add_messaging.sql
+docker exec -i kalico_postgres psql -U kalico -d kalico_prod < database/migrations/002_add_monetisation.sql
+docker exec -i kalico_postgres psql -U kalico -d kalico_prod < database/migrations/003_add_phone_verification.sql
+docker exec -i kalico_postgres psql -U kalico -d kalico_prod < database/migrations/004_add_search_alerts.sql
+docker exec -i kalico_postgres psql -U kalico -d kalico_prod < database/migrations/005_add_push_tokens.sql
 ```
 
 ---
@@ -177,8 +177,8 @@ docker exec -i troca_postgres psql -U troca -d troca_prod < database/migrations/
 ## Etape 5 - Compte admin
 
 ```bash
-docker exec -it troca_postgres psql -U troca -d troca_prod -c \
-  "UPDATE users SET is_admin = TRUE WHERE email = 'admin@troca.nc';"
+docker exec -it kalico_postgres psql -U kalico -d kalico_prod -c \
+  "UPDATE users SET is_admin = TRUE WHERE email = 'admin@kalico.nc';"
 ```
 
 ---
@@ -189,7 +189,7 @@ docker exec -it troca_postgres psql -U troca -d troca_prod -c \
 
 Configurer le webhook:
 
-- Endpoint: `https://troca.nc/api/payment/webhooks/stripe`
+- Endpoint: `https://kalico.nc/api/payment/webhooks/stripe`
 - Evenements:
   - `checkout.session.completed`
   - `customer.subscription.updated`
@@ -200,7 +200,7 @@ Configurer le webhook:
 
 Configurer:
 
-- Endpoint: `https://troca.nc/api/payment/webhooks/payplug`
+- Endpoint: `https://kalico.nc/api/payment/webhooks/payplug`
 - Clé secrète: `PAYPLUG_SECRET_KEY`
 - Clé publique: `PAYPLUG_PUBLIC_KEY`
 
@@ -209,13 +209,13 @@ Configurer:
 ## Etape 7 - Verification finale
 
 ```bash
-curl https://troca.nc/api/health
+curl https://kalico.nc/api/health
 ```
 
 Reponse attendue:
 
 ```json
-{"ok":true,"service":"troca-backend","db":"2026-..."}
+{"ok":true,"service":"kalico-backend","db":"2026-..."}
 ```
 
 ---
@@ -227,7 +227,7 @@ docker compose -f docker-compose.prod.yml logs -f
 docker compose -f docker-compose.prod.yml restart backend
 docker compose -f docker-compose.prod.yml restart frontend
 docker compose -f docker-compose.prod.yml restart nginx
-docker exec troca_backup /backup.sh
+docker exec kalico_backup /backup.sh
 docker compose -f docker-compose.prod.yml --env-file .env.production.local pull backend frontend
 docker compose -f docker-compose.prod.yml --env-file .env.production.local up -d --build --no-deps backend frontend
 ```
@@ -239,5 +239,5 @@ docker compose -f docker-compose.prod.yml --env-file .env.production.local up -d
 La tache cron ajoutee par `scripts/install.sh` execute chaque jour:
 
 ```bash
-cd /opt/troca && docker compose -f docker-compose.prod.yml --env-file .env.production.local exec -T certbot certbot renew --quiet && docker compose -f docker-compose.prod.yml --env-file .env.production.local restart nginx
+cd /opt/kalico && docker compose -f docker-compose.prod.yml --env-file .env.production.local exec -T certbot certbot renew --quiet && docker compose -f docker-compose.prod.yml --env-file .env.production.local restart nginx
 ```

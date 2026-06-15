@@ -1,5 +1,5 @@
 -- ============================================================
--- Troca - Réservations covoiturage auto / manuel + profils
+-- Kalico - Réservations covoiturage auto / manuel + profils
 -- ============================================================
 
 ALTER TABLE users

@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Onglet Messages (liste des conversations)
+//  Kalico Mobile - Onglet Messages (liste des conversations)
 // ============================================================
 
 import {

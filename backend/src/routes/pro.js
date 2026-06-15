@@ -166,7 +166,7 @@ function requirePro(req, res) {
 }
 
 function formatCompanyName(row) {
-  return row.pro_company_name || [row.prenom, row.nom].filter(Boolean).join(' ').trim() || 'Professionnel Troca';
+  return row.pro_company_name || [row.prenom, row.nom].filter(Boolean).join(' ').trim() || 'Professionnel Kalico';
 }
 
 async function refreshProStats() {
@@ -236,13 +236,13 @@ function buildSimplePdfBuffer(lines) {
 }
 
 function buildQuotePdfBuffer(quote) {
-  const proName = quote.pro_name || 'Professionnel Troca';
+  const proName = quote.pro_name || 'Professionnel Kalico';
   const requesterName = quote.requester_name || 'Client';
   const requesterContact = [quote.requester_email, quote.requester_phone].filter(Boolean).join(' · ') || 'Non renseigné';
   const budgetLabel = formatBudgetXpf(quote.budget_xpf);
   const dateLabel = quote.desired_date || 'Non précisée';
   const lines = [
-    'TROCA NC',
+    'KALICO NC',
     `DEMANDE DE DEVIS N° ${quote.id}`,
     `Date de génération : ${new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' }).format(new Date(quote.created_at))}`,
     '',
@@ -260,7 +260,7 @@ function buildQuotePdfBuffer(quote) {
     'Détails :',
     quote.details ? String(quote.details).split('\n').filter(Boolean).join(' | ') : 'Aucun détail supplémentaire',
     '',
-    'Ce document a été généré par Troca.',
+    'Ce document a été généré par Kalico.',
   ];
   return buildSimplePdfBuffer(lines);
 }
@@ -813,10 +813,10 @@ router.post('/:id/quote', optionalAuth, async (req, res, next) => {
       ]
     );
 
-    const proLabel = pro.pro_company_name || [pro.prenom, pro.nom].filter(Boolean).join(' ').trim() || 'Professionnel Troca';
+    const proLabel = pro.pro_company_name || [pro.prenom, pro.nom].filter(Boolean).join(' ').trim() || 'Professionnel Kalico';
     const budgetLabel = formatBudgetXpf(budgetXpf);
     const subject = `Nouvelle demande de devis pour ${needType}`;
-    const dashboardLink = `${process.env.BASE_URL || 'https://troca.nc'}/pro/dashboard`;
+    const dashboardLink = `${process.env.BASE_URL || 'https://kalico.nc'}/pro/dashboard`;
     const intro = `${requesterName} vous a envoyé une demande de devis pour ${needType}.`;
     const meta = `
       <div style="border:1px solid #e5e7eb;border-radius:14px;padding:16px 18px;margin:18px 0;background:#f8fafc;">
@@ -837,7 +837,7 @@ router.post('/:id/quote', optionalAuth, async (req, res, next) => {
         html: `<!DOCTYPE html>
 <html lang="fr"><body style="font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:0;">
   <div style="max-width:560px;margin:32px auto;background:#fff;border-radius:16px;overflow:hidden">
-    <div style="background:#0A7EA4;padding:24px 28px;color:#fff;font-weight:700;font-size:20px;">Troca</div>
+    <div style="background:#0A7EA4;padding:24px 28px;color:#fff;font-weight:700;font-size:20px;">Kalico</div>
     <div style="padding:28px;color:#1f2937;line-height:1.6;">
       <p>Bonjour ${proLabel},</p>
       <p>${intro}</p>
@@ -1696,10 +1696,10 @@ router.get('/invoices/:id/pdf', authenticate, async (req, res, next) => {
     }
 
     const lines = [
-      'TROCA NC',
+      'KALICO NC',
       `FACTURE N° ${invoice.invoice_number}`,
       `Date: ${new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' }).format(new Date(invoice.created_at))}`,
-      `Nom pro: ${invoice.pro_company_name || [invoice.prenom, invoice.nom].filter(Boolean).join(' ').trim() || 'Professionnel Troca'}`,
+      `Nom pro: ${invoice.pro_company_name || [invoice.prenom, invoice.nom].filter(Boolean).join(' ').trim() || 'Professionnel Kalico'}`,
       `RIDET: ${invoice.pro_siret || 'Non renseigné'}`,
       '',
       'Description | Montant XPF',
@@ -1707,7 +1707,7 @@ router.get('/invoices/:id/pdf', authenticate, async (req, res, next) => {
       '',
       `Total TTC: ${Number(invoice.amount_xpf ?? 0).toLocaleString('fr-FR')} XPF`,
       '',
-      'Mentions légales Troca NC',
+      'Mentions légales Kalico NC',
     ];
 
     const pdfBuffer = buildSimplePdfBuffer(lines);
@@ -1871,7 +1871,7 @@ router.post('/apply', authenticate, async (req, res, next) => {
         to: adminEmail,
         subject: 'Nouvelle demande compte pro',
         html: `
-          <p>Une nouvelle demande de compte pro a été envoyée sur Troca.</p>
+          <p>Une nouvelle demande de compte pro a été envoyée sur Kalico.</p>
           <ul>
             <li><strong>Utilisateur :</strong> ${payload.prenom} ${payload.nom} (${payload.email})</li>
             <li><strong>Entreprise :</strong> ${updates.pro_company_name || 'Non renseignée'}</li>

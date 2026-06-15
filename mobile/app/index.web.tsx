@@ -11,10 +11,10 @@ const cards = [
 export default function WebLanding() {
   return (
     <ScrollView contentContainerStyle={styles.root}>
-      <Text style={styles.kicker}>Troca mobile web</Text>
+      <Text style={styles.kicker}>Kalico mobile web</Text>
       <Text style={styles.title}>Version de prévisualisation mobile</Text>
       <Text style={styles.subtitle}>
-        Cette version web sert à tester rapidement l'ergonomie de Troca avant l'app native.
+        Cette version web sert à tester rapidement l'ergonomie de Kalico avant l'app native.
       </Text>
 
       <View style={styles.grid}>

@@ -2,9 +2,9 @@
 set -euo pipefail
 
 ENV_FILE="${1:-.env.production.local}"
-BASE_URL="${2:-${BASE_URL:-https://troca.nc}}"
+BASE_URL="${2:-${BASE_URL:-https://kalico.nc}}"
 
-echo "Troca launch day checklist"
+echo "Kalico launch day checklist"
 echo "Environment: ${ENV_FILE}"
 echo "Base URL: ${BASE_URL}"
 echo

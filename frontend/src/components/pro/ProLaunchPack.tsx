@@ -498,7 +498,7 @@ export default function ProLaunchPack() {
             </div>
 
             <p className="mt-3 text-sm leading-relaxed text-night/60">
-              Réservez un créneau pour faire le point avec l'équipe Troca et accélérer votre démarrage.
+              Réservez un créneau pour faire le point avec l'équipe Kalico et accélérer votre démarrage.
             </p>
 
             <div className="mt-4 space-y-3">

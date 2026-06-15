@@ -36,7 +36,7 @@ export function useProActivatedListener() {
       if (notif?.type === 'pro_activated') {
         api.get('/auth/me').then(({ data }) => {
           const detail = data?.data ?? data
-          window.dispatchEvent(new CustomEvent('troca:pro_activated', { detail }))
+          window.dispatchEvent(new CustomEvent('kalico:pro_activated', { detail }))
         }).catch(() => {})
       }
     }

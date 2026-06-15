@@ -25,7 +25,7 @@ export function normalizeShareUrl(url: string) {
   const parsed = new URL(safe)
   parsed.searchParams.set('utm_source', 'share')
   parsed.searchParams.set('utm_medium', 'social')
-  parsed.searchParams.set('utm_campaign', 'troca_share')
+  parsed.searchParams.set('utm_campaign', 'kalico_share')
   return parsed.toString()
 }
 

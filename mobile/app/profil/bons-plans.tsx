@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Prefs Bons Plans
+//  Kalico Mobile - Prefs Bons Plans
 // ============================================================
 
 import { useEffect, useMemo, useState } from 'react'
@@ -123,7 +123,7 @@ export default function BonPlansPrefsScreen() {
               <View style={styles.row}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.sectionTitle}>Toutes les promos</Text>
-                  <Text style={styles.helper}>Recevoir chaque bon plan publié sur Troca.</Text>
+                  <Text style={styles.helper}>Recevoir chaque bon plan publié sur Kalico.</Text>
                 </View>
                 <Switch
                   value={prefs.notify_all}

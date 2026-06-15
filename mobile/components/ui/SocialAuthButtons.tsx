@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile — Boutons de connexion sociale
+//  Kalico Mobile — Boutons de connexion sociale
 // ============================================================
 
 import {

@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Onglet Accueil
+//  Kalico Mobile - Onglet Accueil
 // ============================================================
 
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react'
@@ -315,7 +315,7 @@ export default function AccueilScreen() {
         <View style={styles.sectionTitleRow}>
           <View>
             <Text style={styles.sectionKicker}>Rappels interactifs</Text>
-            <Text style={styles.sectionTitle}>Le meilleur de Troca, en direct</Text>
+            <Text style={styles.sectionTitle}>Le meilleur de Kalico, en direct</Text>
           </View>
           <TouchableOpacity onPress={() => router.push('/bons-plans')} hitSlop={8}>
             <Text style={styles.sectionLink}>Voir tout</Text>

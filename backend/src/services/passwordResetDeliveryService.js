@@ -6,7 +6,7 @@ const { sendResetEmail } = require('./emailService');
 const { maskPhoneNumber, normalizePhoneNumber } = require('./phoneOtpService');
 
 function getBaseUrl() {
-  return process.env.BASE_URL || 'https://troca.nc';
+  return process.env.BASE_URL || 'https://kalico.nc';
 }
 
 function buildTwilioClient() {
@@ -50,7 +50,7 @@ async function sendPasswordResetSms({ telephone, prenom, token }) {
 
   const link = buildResetLink(token);
   const greeting = prenom ? `Bonjour ${prenom}, ` : 'Bonjour, ';
-  const body = `${greeting}réinitialisez votre mot de passe Troca ici : ${link}. Ce lien est valable 1 heure. Si vous n’êtes pas à l’origine de cette demande, ignorez ce message.`;
+  const body = `${greeting}réinitialisez votre mot de passe Kalico ici : ${link}. Ce lien est valable 1 heure. Si vous n’êtes pas à l’origine de cette demande, ignorez ce message.`;
 
   await twilioClient.messages.create({
     from,

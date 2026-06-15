@@ -1,5 +1,5 @@
 -- ============================================================
--- Troca â€” CatÃ©gories v2 / metadata listings
+-- Kalico â€” CatÃ©gories v2 / metadata listings
 -- ============================================================
 
 ALTER TABLE annonces

@@ -70,7 +70,7 @@ function buildBonPlanEmailHtml({ bonPlan, business, baseUrl }) {
       ${bonPlan.original_price_xpf ? `<p style="margin:0 0 4px;color:#64748b;text-decoration:line-through;">${formatXpf(bonPlan.original_price_xpf)}</p>` : ''}
       ${bonPlan.promo_price_xpf ? `<p style="margin:0 0 18px;font-size:22px;font-weight:700;color:#0f172a;">${formatXpf(bonPlan.promo_price_xpf)}</p>` : ''}
       <a href="${link}" style="display:inline-block;background:#0a7ea4;color:#fff;text-decoration:none;padding:12px 22px;border-radius:999px;font-weight:700;">${safe(bonPlan.cta_label || 'En profiter')}</a>
-      <p style="margin:22px 0 0;font-size:12px;color:#94a3b8;">Vous recevez cet email car vous suivez une categorie ou une enseigne sur Troca.</p>
+      <p style="margin:22px 0 0;font-size:12px;color:#94a3b8;">Vous recevez cet email car vous suivez une categorie ou une enseigne sur Kalico.</p>
     </div>
   </div>
 </body>
@@ -195,7 +195,7 @@ async function notifyBonPlanUsers(db, bonPlan, business) {
   const recipients = await matchBonPlanNotificationRecipients(db, bonPlan);
   if (!recipients.length) return;
 
-  const baseUrl = process.env.BASE_URL || 'https://troca.nc';
+  const baseUrl = process.env.BASE_URL || 'https://kalico.nc';
   const payload = {
     title: `🏷️ Bon Plan — ${business?.name || bonPlan.business_name}`,
     body: bonPlan.title,

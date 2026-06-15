@@ -57,7 +57,7 @@ export default function TransporterCard({
   detailHref?: string
   quoteHref?: string
 }) {
-  const displayName = transporter.display_name || transporter.company_name || 'Transporteur Troca'
+  const displayName = transporter.display_name || transporter.company_name || 'Transporteur Kalico'
   const initials = getInitials(displayName)
   const labels = transporter.transport_type_labels || transporter.transport_type || []
 

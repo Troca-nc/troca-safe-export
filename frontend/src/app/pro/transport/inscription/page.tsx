@@ -128,7 +128,7 @@ export default function ProTransportInscriptionPage() {
             <BadgeCheck className="h-3.5 w-3.5" />
             Espace Transport Pro
           </div>
-          <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl">Devenez transporteur partenaire sur Troca</h1>
+          <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl">Devenez transporteur partenaire sur Kalico</h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/75 md:text-base">
             Déposez votre demande, présentez votre activité et commencez à recevoir des réservations de clients calédoniens.
           </p>

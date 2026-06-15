@@ -10,8 +10,8 @@ export async function GET() {
   const qrDataUrl = await buildSetupQrDataUrl()
   const otpAuthUrl = createOtpAuthUrl({
     secret: getAdminTotpSecret(),
-    label: `Troca Admin (${getAdminEmail()})`,
-    issuer: 'Troca',
+    label: `Kalico Admin (${getAdminEmail()})`,
+    issuer: 'Kalico',
   })
 
   return NextResponse.json({

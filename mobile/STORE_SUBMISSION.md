@@ -1,4 +1,4 @@
-# Troca Mobile - Guide de soumission App Store and Google Play
+# Kalico Mobile - Guide de soumission App Store and Google Play
 
 This guide summarizes the last steps before a mobile submission. It complements `app.json`, `eas.json`, and the mobile README.
 
@@ -42,8 +42,8 @@ Simple rule:
 
 ### Useful metadata
 
-- App name: `Troca`
-- Bundle ID: `nc.troca.app`
+- App name: `Kalico`
+- Bundle ID: `nc.kalico.app`
 - Category: `Shopping`
 - Subtitle: `Acheter, vendre, troquer en NC`
 
@@ -77,8 +77,8 @@ eas submit --platform ios --profile production
 
 ### Useful metadata
 
-- App name: `Troca`
-- Package: `nc.troca.app`
+- App name: `Kalico`
+- Package: `nc.kalico.app`
 - Category: `Shopping`
 
 ### Check before submission

@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile — Confidentialité, RGPD et cookies
+//  Kalico Mobile — Confidentialité, RGPD et cookies
 //  /app/profil/confidentialite.tsx
 // ============================================================
 
@@ -17,7 +17,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '@/constants/theme';
 
-const WEB_URL = 'https://troca.nc';
+const WEB_URL = 'https://kalico.nc';
 
 function openUrl(url: string) {
   return WebBrowser.openBrowserAsync(url).catch(() => Linking.openURL(url).catch(() => {}));
@@ -60,7 +60,7 @@ export default function ConfidentialiteScreen() {
   const openCgu = useCallback(() => openUrl(`${WEB_URL}/cgu`), []);
   const openLegal = useCallback(() => openUrl(`${WEB_URL}/mentions-legales`), []);
   const openCookies = useCallback(() => openUrl(`${WEB_URL}/parametres#cookies`), []);
-  const openSupport = useCallback(() => Linking.openURL('mailto:dpo@troca.nc').catch(() => {}), []);
+  const openSupport = useCallback(() => Linking.openURL('mailto:dpo@kalico.nc').catch(() => {}), []);
 
   return (
     <>
@@ -80,7 +80,7 @@ export default function ConfidentialiteScreen() {
           <Text style={styles.heroTitle}>Vos données et vos droits</Text>
           <Text style={styles.heroText}>
             Retrouvez ici les informations essentielles sur les données collectées, les cookies,
-            la confidentialité et les documents juridiques de Troca.
+            la confidentialité et les documents juridiques de Kalico.
           </Text>
         </View>
 
@@ -132,7 +132,7 @@ export default function ConfidentialiteScreen() {
             <View style={{ flex: 1 }}>
               <Text style={styles.cardTitle}>Contact vie privée</Text>
               <Text style={styles.cardDesc}>
-                Pour toute question sur vos données personnelles, écrivez à dpo@troca.nc.
+                Pour toute question sur vos données personnelles, écrivez à dpo@kalico.nc.
               </Text>
             </View>
           </View>

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE_URL="${1:-${BASE_URL:-https://troca.nc}}"
+BASE_URL="${1:-${BASE_URL:-https://kalico.nc}}"
 
 check() {
   local url="$1"
@@ -10,7 +10,7 @@ check() {
   curl -fsS "${url}" >/dev/null
 }
 
-echo "Troca smoke test"
+echo "Kalico smoke test"
 echo "Base URL: ${BASE_URL}"
 
 check "${BASE_URL}/api/health" "API health"

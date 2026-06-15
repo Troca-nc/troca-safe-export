@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 // src/app/annonces/page.tsx
 
 import { Suspense, useState, useEffect, useCallback, useMemo, useRef } from 'react'
@@ -819,7 +819,7 @@ function ListingsPageContent() {
   useEffect(() => {
     if (typeof window === 'undefined') return
     try {
-      const raw = window.localStorage.getItem('troca-listings-filters-sections')
+      const raw = window.localStorage.getItem('kalico-listings-filters-sections')
       if (!raw) return
       const parsed = JSON.parse(raw)
       setCollapsedSections({
@@ -835,7 +835,7 @@ function ListingsPageContent() {
     setCollapsedSections((current) => {
       const next = { ...current, [key]: !current[key] }
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem('troca-listings-filters-sections', JSON.stringify(next))
+        window.localStorage.setItem('kalico-listings-filters-sections', JSON.stringify(next))
       }
       return next
     })

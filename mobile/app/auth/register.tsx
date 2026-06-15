@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile — Écran d'inscription
+//  Kalico Mobile — Écran d'inscription
 // ============================================================
 
 import {
@@ -65,7 +65,7 @@ export default function RegisterScreen() {
       >
         <View style={styles.logoWrap}>
           <Text style={styles.logo}>🔁</Text>
-          <Text style={styles.brand}>Troca</Text>
+          <Text style={styles.brand}>Kalico</Text>
         </View>
 
         <View style={styles.card}>

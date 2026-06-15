@@ -46,7 +46,7 @@ const {
 const { addToTokenBlacklist } = require('../services/tokenService');
 
 const router = express.Router();
-const REFRESH_COOKIE_NAME = 'troca_refresh_token';
+const REFRESH_COOKIE_NAME = 'kalico_refresh_token';
 
 const registerSchema = Joi.object({
   email: Joi.string().email().max(255).required(),

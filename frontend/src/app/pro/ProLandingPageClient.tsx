@@ -261,7 +261,7 @@ export default function ProLandingPage() {
                 Espace Professionnel
               </div>
               <h1 className="mt-4 font-display text-3xl font-bold leading-tight sm:text-4xl md:text-6xl">
-                Développez votre activité sur Troca
+                Développez votre activité sur Kalico
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/78 md:text-base">
                 La première plateforme d’annonces calédonienne ouvre ses portes aux professionnels. Vitrine locale, clients ciblés, outils simples.
@@ -376,7 +376,7 @@ export default function ProLandingPage() {
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/75">Créer mon compte Pro</p>
                 <h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">Gratuit pour commencer</h2>
                 <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/75">
-                  Remplissez votre demande, notre équipe valide votre compte sous 48h et vous aide à démarrer sur Troca.
+                  Remplissez votre demande, notre équipe valide votre compte sous 48h et vous aide à démarrer sur Kalico.
                 </p>
 
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">

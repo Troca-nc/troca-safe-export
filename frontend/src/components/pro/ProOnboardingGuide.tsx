@@ -77,7 +77,7 @@ const steps: OnboardingStep[] = [
   },
 ]
 
-const STORAGE_KEY = 'troca-pro-onboarding-progress'
+const STORAGE_KEY = 'kalico-pro-onboarding-progress'
 
 export default function ProOnboardingGuide() {
   const [completedSteps, setCompletedSteps] = useState<string[]>(['1'])

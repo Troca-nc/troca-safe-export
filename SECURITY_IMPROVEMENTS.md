@@ -1,4 +1,4 @@
-# Améliorations de Sécurité - Troca
+# Améliorations de Sécurité - Kalico
 
 Dernière mise à jour : 2026-05-25
 
@@ -20,8 +20,8 @@ Dernière mise à jour : 2026-05-25
 
 ## Améliorations supplémentaires
 
-- CSRF double-submit activé via `backend/src/middleware/csrf.js` et cookie `troca_csrf`.
+- CSRF double-submit activé via `backend/src/middleware/csrf.js` et cookie `kalico_csrf`.
 - Cookies sécurisés centralisés via `backend/src/config/cookies.js`.
 - Limitation de taille des uploads déjà présente sur les routes d'upload.
-- Headers de sécurité Nginx présents sur le vhost public `nginx/sites/troca.nc.conf`.
+- Headers de sécurité Nginx présents sur le vhost public `nginx/sites/kalico.nc.conf`.
 - Scan Trivy ajouté en CI via `.github/workflows/security-scan.yml`.

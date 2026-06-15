@@ -1,7 +1,7 @@
 'use strict';
 
 // ============================================================
-//  Troca — Service WebSocket (socket.io)
+//  Kalico — Service WebSocket (socket.io)
 //  Gère la messagerie temps réel et les notifications
 // ============================================================
 

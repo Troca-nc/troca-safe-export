@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile — Écran de connexion
+//  Kalico Mobile — Écran de connexion
 // ============================================================
 
 import {
@@ -63,7 +63,7 @@ export default function LoginScreen() {
         {/* Logo */}
         <View style={styles.logoWrap}>
           <Text style={styles.logo}>🔁</Text>
-          <Text style={styles.brand}>Troca</Text>
+          <Text style={styles.brand}>Kalico</Text>
           <Text style={styles.tagline}>Petites annonces Nouvelle-Calédonie</Text>
         </View>
 

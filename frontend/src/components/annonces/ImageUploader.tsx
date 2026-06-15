@@ -1,7 +1,7 @@
 'use client'
 
 // ============================================================
-//  Troca - Uploader d'images d'annonce
+//  Kalico - Uploader d'images d'annonce
 //  Upload par image, progression individuelle, retry et reorder
 // ============================================================
 

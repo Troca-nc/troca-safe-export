@@ -1,4 +1,4 @@
-﻿// src/app/layout.tsx
+// src/app/layout.tsx
 import type { Metadata } from 'next'
 import './globals.css'
 import { MobileBottomNav } from '@/components/layout/Header'
@@ -17,11 +17,11 @@ import { SITE_URL } from '@/types/seo.types'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'Troca — Petites annonces Nouvelle-Calédonie',
+  title: 'Kalico — Petites annonces Nouvelle-Calédonie',
   description: 'La première plateforme de petites annonces dédiée à la Nouvelle-Calédonie. Achetez, vendez, louez en toute confiance.',
   keywords: 'annonces, nouvelle-calédonie, noumea, vente, achat, immobilier, véhicules',
   openGraph: {
-    title: 'Troca',
+    title: 'Kalico',
     description: 'Petites annonces Nouvelle-Calédonie',
     url: SITE_URL,
     locale: 'fr_FR',
@@ -42,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var k='theme';var legacy='troca-theme';var saved=localStorage.getItem(k)||localStorage.getItem(legacy);var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var theme=(saved==='dark'||saved==='light')?saved:(prefersDark?'dark':'light');var root=document.documentElement;root.classList.toggle('dark',theme==='dark');root.dataset.theme=theme;root.style.colorScheme=theme;}catch(e){}})();`,
+            __html: `(function(){try{var k='theme';var legacy='kalico-theme';var saved=localStorage.getItem(k)||localStorage.getItem(legacy);var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var theme=(saved==='dark'||saved==='light')?saved:(prefersDark?'dark':'light');var root=document.documentElement;root.classList.toggle('dark',theme==='dark');root.dataset.theme=theme;root.style.colorScheme=theme;}catch(e){}})();`,
           }}
         />
       </head>

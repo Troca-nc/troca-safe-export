@@ -64,7 +64,7 @@ export default class ConsolidatedReport implements Reporter {
     }
 
     const lines: string[] = []
-    lines.push('# Troca Playwright Consolidated Report')
+    lines.push('# Kalico Playwright Consolidated Report')
     lines.push('')
     lines.push(`- Status global: **${result.status}**`)
     lines.push(`- Tests découverts: **${this.discoveredTests}**`)

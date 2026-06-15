@@ -46,8 +46,8 @@ export const CATEGORIES_SEO: Record<string, { label: string; description: string
   'autres':         { label: 'Autres',            description: 'Toutes les autres annonces en NC',                      emoji: '📦' },
 }
 
-export const SITE_URL     = 'https://troca.nc'
-export const SITE_NAME    = 'Troca'
+export const SITE_URL     = 'https://kalico.nc'
+export const SITE_NAME    = 'Kalico'
 export const SITE_LOCALE  = 'fr_NC'
-export const SITE_TWITTER = '@TrocaNC'
+export const SITE_TWITTER = '@KalicoNC'
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.jpg`

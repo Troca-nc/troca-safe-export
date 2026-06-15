@@ -30,7 +30,7 @@ type AuthUserState = {
 const AUTH_USERS: Record<AuthRole, AuthUserState> = {
   particulier: {
     id: '2',
-    email: 'particulier@demo.troca',
+    email: 'particulier@demo.kalico',
     first_name: 'Emma',
     last_name: 'Martin',
     prenom: 'Emma',
@@ -49,7 +49,7 @@ const AUTH_USERS: Record<AuthRole, AuthUserState> = {
   },
   vendeur: {
     id: '5',
-    email: 'loueur@demo.troca',
+    email: 'loueur@demo.kalico',
     first_name: 'Lucas',
     last_name: 'Bernier',
     prenom: 'Lucas',
@@ -68,7 +68,7 @@ const AUTH_USERS: Record<AuthRole, AuthUserState> = {
   },
   pro: {
     id: '3',
-    email: 'pro@demo.troca',
+    email: 'pro@demo.kalico',
     first_name: 'Entreprise',
     last_name: 'Test NC',
     prenom: 'Entreprise',
@@ -88,7 +88,7 @@ const AUTH_USERS: Record<AuthRole, AuthUserState> = {
   },
   conducteur: {
     id: '6',
-    email: 'marine@demo.troca',
+    email: 'marine@demo.kalico',
     first_name: 'Marine',
     last_name: 'Dupont',
     prenom: 'Marine',
@@ -107,7 +107,7 @@ const AUTH_USERS: Record<AuthRole, AuthUserState> = {
   },
   admin: {
     id: '1',
-    email: 'admin@demo.troca',
+    email: 'admin@demo.kalico',
     first_name: 'Ada',
     last_name: 'Admin',
     prenom: 'Ada',

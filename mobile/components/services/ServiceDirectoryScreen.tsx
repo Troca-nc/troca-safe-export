@@ -79,7 +79,7 @@ function ServiceCard({
   const handleShare = async () => {
     const payload = {
       title: item.title,
-      message: `${item.title}\n${item.description}\n${item.link_url || item.website_url || 'Troca'}`,
+      message: `${item.title}\n${item.description}\n${item.link_url || item.website_url || 'Kalico'}`,
     };
     try {
       await Share.share(payload);

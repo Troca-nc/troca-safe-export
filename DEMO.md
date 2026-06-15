@@ -1,4 +1,4 @@
-# Lancer la demo Troca NC
+# Lancer la demo Kalico NC
 
 ## Demarrage rapide
 
@@ -45,11 +45,11 @@ npx expo start
 
 | Role | Email | Mot de passe |
 |------|-------|--------------|
-| Particulier | `particulier@demo.troca.nc` | `Demo1234!` |
-| Pro | `pro@demo.troca.nc` | `Demo1234!` |
-| Bon plan | `bonplan@demo.troca.nc` | `Demo1234!` |
-| Admin demo web/mobile | `admin@demo.troca.nc` | `Demo1234!` |
-| Admin back-office | `admin@troca.nc` | `admin1234` |
+| Particulier | `particulier@demo.kalico.nc` | `Demo1234!` |
+| Pro | `pro@demo.kalico.nc` | `Demo1234!` |
+| Bon plan | `bonplan@demo.kalico.nc` | `Demo1234!` |
+| Admin demo web/mobile | `admin@demo.kalico.nc` | `Demo1234!` |
+| Admin back-office | `admin@kalico.nc` | `admin1234` |
 
 Code SMS universel : `123456`
 Code TOTP admin : `123456`

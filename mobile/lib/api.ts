@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Client API
+//  Kalico Mobile - Client API
 //  Cache GET leger + gestion automatique du token JWT
 // ============================================================
 

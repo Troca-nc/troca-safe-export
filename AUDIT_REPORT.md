@@ -1,4 +1,4 @@
-# Audit Troca — 2026-05-27
+# Audit Kalico — 2026-05-27
 
 ## Résumé exécutif
 

@@ -166,7 +166,7 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
     const method = String(config.method || 'get').toUpperCase()
     if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-      const csrfToken = getCookieValue('troca_csrf')
+      const csrfToken = getCookieValue('kalico_csrf')
       if (csrfToken) {
         const headers = config.headers as Record<string, string> & { set?: (key: string, value: string) => void }
         if (typeof headers.set === 'function') {

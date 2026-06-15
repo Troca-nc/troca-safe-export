@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca — Backend Express (point d'entrée)
+//  Kalico — Backend Express (point d'entrée)
 // ============================================================
 
 'use strict';
@@ -143,7 +143,7 @@ app.get('/api/health', async (_req, res) => {
     const dbTime = await checkConnection();
     res.json({
       ok: true,
-      service: 'troca-backend',
+      service: 'kalico-backend',
       db: dbTime,
       request_id: _req.requestId ?? null,
     });
@@ -161,7 +161,7 @@ app.get('/api/internal/observability', internalAuth, async (_req, res) => {
   const snapshot = await getSnapshot();
   res.json({
     ok: true,
-    service: 'troca-backend',
+    service: 'kalico-backend',
     request_id: _req.requestId ?? null,
     data: snapshot,
   });

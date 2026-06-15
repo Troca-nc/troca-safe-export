@@ -1,6 +1,6 @@
-# Troca
+# Kalico
 
-Troca is a marketplace-style platform with:
+Kalico is a marketplace-style platform with:
 - web frontend
 - mobile app
 - backend API

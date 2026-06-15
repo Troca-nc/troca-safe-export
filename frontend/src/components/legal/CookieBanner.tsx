@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { Cookie, ShieldCheck } from 'lucide-react'
 import { rgpdApi } from '@/lib/api'
 
-const STORAGE_KEY = 'troca-cookie-consent'
-const OPEN_EVENT = 'troca-cookie-banner-open'
+const STORAGE_KEY = 'kalico-cookie-consent'
+const OPEN_EVENT = 'kalico-cookie-banner-open'
 
 interface ConsentState {
   analytics: boolean
@@ -27,7 +27,7 @@ function readConsent(): ConsentState | null {
 function saveConsent(choice: { analytics: boolean; marketing: boolean }) {
   const state: ConsentState = { ...choice, decidedAt: new Date().toISOString() }
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-  window.dispatchEvent(new CustomEvent('troca-cookie-consent-changed', { detail: state }))
+  window.dispatchEvent(new CustomEvent('kalico-cookie-consent-changed', { detail: state }))
 }
 
 async function syncConsent(choice: { analytics: boolean; marketing: boolean }) {
@@ -66,7 +66,7 @@ export default function CookieBanner() {
               <Cookie className="h-4 w-4" />
             </span>
           <p className="text-[13px] leading-5 text-night/80 sm:text-sm sm:leading-6">
-            Nous utilisons des cookies essentiels pour faire fonctionner Troca. Vous pouvez accepter, refuser ou personnaliser vos choix.
+            Nous utilisons des cookies essentiels pour faire fonctionner Kalico. Vous pouvez accepter, refuser ou personnaliser vos choix.
           </p>
         </div>
 

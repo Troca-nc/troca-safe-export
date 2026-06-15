@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Abonnement Pro (Stripe / PayPlug)
+//  Kalico Mobile - Abonnement Pro (Stripe / PayPlug)
 //  /app/profil/abonnement.tsx
 // ============================================================
 
@@ -95,13 +95,13 @@ export default function AbonnementScreen() {
     const { data } = await api.post('/payment/subscribe/mobile', { plan: selectedPlan })
 
     const { error: initError } = await initPaymentSheet({
-      merchantDisplayName: 'Troca NC',
+      merchantDisplayName: 'Kalico NC',
       paymentIntentClientSecret: data.data.client_secret,
       customerId: data.data.customer_id,
       customerEphemeralKeySecret: data.data.ephemeral_key,
       defaultBillingDetails: { name: `${user?.prenom ?? ''} ${user?.nom ?? ''}`.trim() },
       allowsDelayedPaymentMethods: false,
-      returnURL: 'troca://payment-return',
+      returnURL: 'kalico://payment-return',
     })
 
     if (initError) throw new Error(initError.message)
@@ -225,7 +225,7 @@ export default function AbonnementScreen() {
             <Ionicons name="star" size={24} color={Colors.warning} />
             <View>
               <Text style={styles.alreadyProTitle}>Vous êtes déjà Pro ⭐</Text>
-              <Text style={styles.alreadyProSub}>Gérez votre abonnement sur troca.nc</Text>
+              <Text style={styles.alreadyProSub}>Gérez votre abonnement sur kalico.nc</Text>
             </View>
           </View>
         )}
@@ -315,7 +315,7 @@ export default function AbonnementScreen() {
 
         <Text style={styles.legal}>
           Paiement sécurisé par Stripe ou PayPlug. Résiliation possible à tout moment depuis votre
-          espace client sur troca.nc. Conformément aux CGU, aucun remboursement n&apos;est effectué
+          espace client sur kalico.nc. Conformément aux CGU, aucun remboursement n&apos;est effectué
           pour la période en cours.
         </Text>
       </ScrollView>

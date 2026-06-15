@@ -13,8 +13,8 @@ function redactParams(params) {
 const pool = new Pool({
   host:     process.env.DB_HOST     || 'localhost',
   port:     parseInt(process.env.DB_PORT || '5432', 10),
-  database: process.env.DB_NAME     || 'troca_dev',
-  user:     process.env.DB_USER     || 'troca',
+  database: process.env.DB_NAME     || 'kalico_dev',
+  user:     process.env.DB_USER     || 'kalico',
   password: process.env.DB_PASSWORD || '',
   max: parseInt(process.env.DB_POOL_MAX || '10', 10),
   idleTimeoutMillis: 30000,

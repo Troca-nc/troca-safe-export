@@ -38,7 +38,7 @@ jobs:
       postgres:
         image: postgis/postgis:16-3.4
         env:
-          POSTGRES_DB: troca_test
+          POSTGRES_DB: kalico_test
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
         ports: ['5432:5432']
@@ -72,7 +72,7 @@ jobs:
           NODE_ENV: test
           DB_HOST: localhost
           DB_PORT: 5432
-          DB_NAME: troca_test
+          DB_NAME: kalico_test
           DB_USER: test
           DB_PASSWORD: test
           JWT_SECRET: test_secret_ci

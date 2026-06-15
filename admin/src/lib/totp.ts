@@ -36,7 +36,7 @@ function generateHotp(secret: string, counter: number) {
 export function createOtpAuthUrl({
   secret,
   label,
-  issuer = 'Troca',
+  issuer = 'Kalico',
 }: {
   secret: string
   label: string

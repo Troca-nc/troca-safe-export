@@ -10,8 +10,8 @@ export default function NotFound() {
       <div className="max-w-lg mx-auto px-4 py-24 text-center">
         <div className="mx-auto mb-5 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-night/10 bg-white shadow-[0_12px_30px_rgba(8,32,50,0.12)]">
           <Image
-            src="/brand/troca-logo.png"
-            alt="Troca"
+            src="/brand/kalico-logo.png"
+            alt="Kalico"
             width={96}
             height={96}
             className="h-full w-full object-cover"

@@ -207,20 +207,20 @@ async function sendFallbackEmailOtp({ user, telephone, code, reason }) {
   const maskedEmail = maskEmail(user.email);
   const maskedPhone = maskPhoneNumber(telephone);
   const subject = reason === 'resend'
-    ? 'Votre code de vérification Troca'
-    : 'Votre code de vérification Troca';
+    ? 'Votre code de vérification Kalico'
+    : 'Votre code de vérification Kalico';
 
   await sendMail({
     to: user.email,
     subject,
     html: `
       <p>Bonjour ${user.prenom || 'utilisateur'},</p>
-      <p>Voici votre code de vérification Troca : <strong>${code}</strong></p>
+      <p>Voici votre code de vérification Kalico : <strong>${code}</strong></p>
       <p>Ce code est valable pendant <strong>10 minutes</strong>.</p>
       <p>Nous l'avons envoyé en secours par email au compte <strong>${maskedEmail}</strong> pour le numéro <strong>${maskedPhone}</strong>.</p>
       <p>Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer ce message.</p>
     `,
-    text: `Votre code de vérification Troca est ${code}. Il est valable 10 minutes. Email destinataire: ${maskedEmail}. Numero: ${maskedPhone}.`,
+    text: `Votre code de vérification Kalico est ${code}. Il est valable 10 minutes. Email destinataire: ${maskedEmail}. Numero: ${maskedPhone}.`,
   });
 
   return {

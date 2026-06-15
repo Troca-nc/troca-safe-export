@@ -1,7 +1,7 @@
 import { expect, type Page } from '@playwright/test'
 
 const STRIPE_TEXT_FIELDS: Array<{ label: RegExp; value: string }> = [
-  { label: /email/i, value: process.env.STRIPE_TEST_EMAIL || 'qa@troca.nc' },
+  { label: /email/i, value: process.env.STRIPE_TEST_EMAIL || 'qa@kalico.nc' },
   { label: /card number|numero de carte|num[ée]ro de carte/i, value: '4242 4242 4242 4242' },
   { label: /expiration|expiry/i, value: '12 / 34' },
   { label: /cvc|cvv|security code/i, value: '123' },

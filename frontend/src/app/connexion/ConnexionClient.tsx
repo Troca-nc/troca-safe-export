@@ -111,10 +111,10 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
         <div className="w-full max-w-[380px]">
           <Link href="/" className="inline-flex items-center gap-3">
             <span className="relative h-12 w-12 overflow-hidden rounded-2xl border border-night/10 bg-white shadow-[0_8px_24px_rgba(8,32,50,0.08)]">
-              <Image src="/brand/troca-logo.png" alt="Troca" fill sizes="48px" className="object-cover" priority />
+              <Image src="/brand/kalico-logo.png" alt="Kalico" fill sizes="48px" className="object-cover" priority />
             </span>
             <span>
-              <span className="block font-display text-2xl font-bold text-night">Troca</span>
+              <span className="block font-display text-2xl font-bold text-night">Kalico</span>
               <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-coral/80">
                 Nouvelle-Calédonie
               </span>
@@ -123,7 +123,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
 
           <div className="mt-10">
             <h1 className="text-[24px] font-semibold leading-tight text-night">
-              Connectez-vous ou créez votre compte Troca
+              Connectez-vous ou créez votre compte Kalico
             </h1>
             <p className="mt-1.5 text-sm text-night/60">Annonces entre Calédoniens.</p>
           </div>
@@ -223,7 +223,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
                 Se connecter en mode démo
               </button>
               <p className="mt-2 text-[11px] text-night/45">
-                Email: {demoProfile === 'particulier' ? 'particulier@demo.troca.nc' : demoProfile === 'pro' ? 'pro@demo.troca.nc' : 'bonplan@demo.troca.nc'}
+                Email: {demoProfile === 'particulier' ? 'particulier@demo.kalico.nc' : demoProfile === 'pro' ? 'pro@demo.kalico.nc' : 'bonplan@demo.kalico.nc'}
               </p>
             </div>
           ) : null}

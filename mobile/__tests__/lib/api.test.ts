@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile — Tests lib/api.ts (client Axios + refresh JWT)
+//  Kalico Mobile — Tests lib/api.ts (client Axios + refresh JWT)
 // ============================================================
 
 import axios from 'axios';
@@ -30,21 +30,21 @@ describe('tokenStorage', () => {
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue('my_token');
     const { tokenStorage } = require('../../lib/api');
     const token = await tokenStorage.getAccess();
-    expect(SecureStore.getItemAsync).toHaveBeenCalledWith('troca_access_token');
+    expect(SecureStore.getItemAsync).toHaveBeenCalledWith('kalico_access_token');
     expect(token).toBe('my_token');
   });
 
   test('setAccess sauvegarde dans SecureStore', async () => {
     const { tokenStorage } = require('../../lib/api');
     await tokenStorage.setAccess('new_token');
-    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('troca_access_token', 'new_token');
+    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('kalico_access_token', 'new_token');
   });
 
   test('clear supprime les deux tokens', async () => {
     const { tokenStorage } = require('../../lib/api');
     await tokenStorage.clear();
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledTimes(2);
-    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith('troca_access_token');
-    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith('troca_refresh_token');
+    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith('kalico_access_token');
+    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith('kalico_refresh_token');
   });
 });

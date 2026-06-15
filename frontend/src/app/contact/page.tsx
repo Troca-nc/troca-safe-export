@@ -7,8 +7,8 @@ import FaqAccordion from '@/components/contact/FaqAccordion'
 import ContactForm from '@/components/contact/ContactForm'
 
 export const metadata: Metadata = {
-  title: 'Contact — Troca',
-  description: 'Contactez l’équipe Troca pour le support, les demandes juridiques et les signalements.',
+  title: 'Contact — Kalico',
+  description: 'Contactez l’équipe Kalico pour le support, les demandes juridiques et les signalements.',
 }
 
 function Card({ title, children }: { title: string; children: ReactNode }) {
@@ -39,8 +39,8 @@ export default function ContactPage() {
               paiements.
             </p>
             <p>
-              <a href="mailto:contact@troca.nc" className="text-coral underline">
-                contact@troca.nc
+              <a href="mailto:contact@kalico.nc" className="text-coral underline">
+                contact@kalico.nc
               </a>
             </p>
           </Card>
@@ -51,8 +51,8 @@ export default function ContactPage() {
               traitement.
             </p>
             <p>
-              <a href="mailto:privacy@troca.nc" className="text-coral underline">
-                privacy@troca.nc
+              <a href="mailto:privacy@kalico.nc" className="text-coral underline">
+                privacy@kalico.nc
               </a>
             </p>
           </Card>
@@ -63,8 +63,8 @@ export default function ContactPage() {
               relatives aux CGU.
             </p>
             <p>
-              <a href="mailto:legal@troca.nc" className="text-coral underline">
-                legal@troca.nc
+              <a href="mailto:legal@kalico.nc" className="text-coral underline">
+                legal@kalico.nc
               </a>
             </p>
           </Card>

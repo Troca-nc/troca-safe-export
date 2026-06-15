@@ -290,7 +290,7 @@ async function sendTrocProposalNotifications(db, proposal, listing, recipient, a
       html: `<p>Bonjour ${recipientName},</p>
         <p>Vous avez reçu une proposition de troc pour <strong>${listingTitle}</strong>.</p>
         <p><strong>${actorName}</strong> propose: ${summary}</p>
-        <p><a href="${process.env.BASE_URL || 'https://troca.nc'}/troc/${listing.id}">Voir la proposition</a></p>`,
+        <p><a href="${process.env.BASE_URL || 'https://kalico.nc'}/troc/${listing.id}">Voir la proposition</a></p>`,
     }).catch(() => {});
   }
 }
@@ -530,7 +530,7 @@ async function acceptTrocProposal(db, { proposalId, actorId }) {
       subject: '✅ Votre proposition de troc a ete acceptee',
       html: `<p>Bonjour ${formatName(otherUser.prenom, otherUser.nom)},</p>
         <p>Bonne nouvelle ! Votre proposition de troc a ete acceptee.</p>
-        <p><a href="${process.env.BASE_URL || 'https://troca.nc'}/messages/${result.conversation.id}">Discuter maintenant</a></p>`,
+        <p><a href="${process.env.BASE_URL || 'https://kalico.nc'}/messages/${result.conversation.id}">Discuter maintenant</a></p>`,
     }).catch(() => {});
   }
 
@@ -672,7 +672,7 @@ async function counterTrocProposal(db, { proposalId, actorId, counterData }) {
       subject: '↩️ Contre-proposition recue',
       html: `<p>Bonjour ${formatName(proposer.rows[0]?.prenom, proposer.rows[0]?.nom)},</p>
         <p>${formatName(owner.rows[0]?.prenom, owner.rows[0]?.nom)} vous a fait une contre-proposition pour votre troc.</p>
-        <p><a href="${process.env.BASE_URL || 'https://troca.nc'}/troc/${original.listing_id}">Voir la contre-proposition</a></p>`,
+        <p><a href="${process.env.BASE_URL || 'https://kalico.nc'}/troc/${original.listing_id}">Voir la contre-proposition</a></p>`,
     }).catch(() => {});
   }
 

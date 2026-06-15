@@ -400,8 +400,8 @@ async function appendConversationMessage(userId, conversationId, payload) {
     const { blocked, reason } = filterMessage(content);
     if (blocked) {
       const message = reason === 'lien_externe'
-        ? 'Les liens externes ne sont pas autorisés dans les messages pour votre sécurité. Échangez directement via Troca.'
-        : 'Ce message a été bloqué car il contient du contenu potentiellement frauduleux. Échangez directement via Troca.';
+        ? 'Les liens externes ne sont pas autorisés dans les messages pour votre sécurité. Échangez directement via Kalico.'
+        : 'Ce message a été bloqué car il contient du contenu potentiellement frauduleux. Échangez directement via Kalico.';
       const err = createHttpError(422, message);
       err.reason = reason;
       throw err;

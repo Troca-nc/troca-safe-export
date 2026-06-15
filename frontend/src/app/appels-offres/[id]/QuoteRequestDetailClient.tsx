@@ -215,7 +215,7 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Professionnel</p>
                 <h2 className="mt-1 font-display text-xl font-bold text-night">{data.proName}</h2>
-                <p className="mt-1 text-sm text-night/60">{data.proCategory || 'Professionnel Troca'}</p>
+                <p className="mt-1 text-sm text-night/60">{data.proCategory || 'Professionnel Kalico'}</p>
               </div>
             </div>
 

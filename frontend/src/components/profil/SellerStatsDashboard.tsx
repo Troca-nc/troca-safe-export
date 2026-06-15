@@ -1,6 +1,6 @@
 'use client'
 // ============================================================
-//  Troca — Dashboard statistiques vendeur (Pro)
+//  Kalico — Dashboard statistiques vendeur (Pro)
 //  Affiché dans /profil quand l'utilisateur est Pro
 // ============================================================
 

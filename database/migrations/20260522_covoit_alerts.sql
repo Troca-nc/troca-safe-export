@@ -1,5 +1,5 @@
 -- ============================================================
--- Troca â€” Alertes trajet covoiturage
+-- Kalico â€” Alertes trajet covoiturage
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS covoit_alerts (

@@ -9,8 +9,8 @@ const { sendMail } = require('../services/emailService');
 
 const router = Router();
 
-const SUPPORT_EMAIL = process.env.CONTACT_EMAIL || process.env.ADMIN_ALERT_EMAIL || process.env.ADMIN_EMAIL || 'contact@troca.nc';
-const BASE_URL = process.env.BASE_URL || 'https://troca.nc';
+const SUPPORT_EMAIL = process.env.CONTACT_EMAIL || process.env.ADMIN_ALERT_EMAIL || process.env.ADMIN_EMAIL || 'contact@kalico.nc';
+const BASE_URL = process.env.BASE_URL || 'https://kalico.nc';
 
 const contactSchema = {
   body: Joi.object({
@@ -50,10 +50,10 @@ router.post('/', optionalAuth, validate(contactSchema), async (req, res, next) =
     await sendMail({
       to: SUPPORT_EMAIL,
       replyTo: email,
-      subject: `[Troca] ${subject}`,
+      subject: `[Kalico] ${subject}`,
       html: `
         <p>Bonjour,</p>
-        <p>Un nouveau message a été envoyé depuis le formulaire de contact Troca.</p>
+        <p>Un nouveau message a été envoyé depuis le formulaire de contact Kalico.</p>
         <ul>
           <li><strong>Nom :</strong> ${displayName}</li>
           <li><strong>Email :</strong> ${email}</li>
@@ -70,7 +70,7 @@ router.post('/', optionalAuth, validate(contactSchema), async (req, res, next) =
           Répondre directement à cet email permettra de contacter ${displayName}.
         </p>
         <p style="color:#9ca3af;font-size:12px;margin-top:20px;">
-          Support: ${SUPPORT_EMAIL} · Troca NC · ${BASE_URL}
+          Support: ${SUPPORT_EMAIL} · Kalico NC · ${BASE_URL}
         </p>
       `,
       text: [
@@ -91,13 +91,13 @@ router.post('/', optionalAuth, validate(contactSchema), async (req, res, next) =
     if (email.toLowerCase() !== SUPPORT_EMAIL.toLowerCase()) {
       await sendMail({
         to: email,
-        subject: '[Troca] Votre message a bien été envoyé',
+        subject: '[Kalico] Votre message a bien été envoyé',
         html: `
           <p>Bonjour ${name},</p>
           <p>Nous avons bien reçu votre message concernant <strong>${subject}</strong>.</p>
           <p>Notre équipe reviendra vers vous sous 24 à 48 heures ouvrées.</p>
           <p style="color:#6b7280;font-size:13px;">Catégorie: ${categoryLabel(category)}</p>
-          <p style="color:#9ca3af;font-size:12px;">Troca NC · ${BASE_URL}</p>
+          <p style="color:#9ca3af;font-size:12px;">Kalico NC · ${BASE_URL}</p>
         `,
       });
     }

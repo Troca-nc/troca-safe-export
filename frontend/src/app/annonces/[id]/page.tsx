@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca — Page détail annonce
+//  Kalico — Page détail annonce
 //  Server Component pour generateMetadata + Open Graph
 //  Le rendu interactif est délégué à AnnonceDetail (client)
 // ============================================================
@@ -36,7 +36,7 @@ export async function generateMetadata(
   const annonce = await fetchAnnonce(id)
   if (!annonce) {
     return {
-      title: 'Annonce introuvable | Troca',
+      title: 'Annonce introuvable | Kalico',
       robots: { index: false },
     }
   }
@@ -71,7 +71,7 @@ export default async function ListingDetailPage(
       name:        annonce.titre,
       description: annonce.description?.slice(0, 300),
       image:       annonce.images?.map((i: any) => i.url) ?? [],
-      url:         `https://troca.nc/annonces/${annonce.id}`,
+      url:         `https://kalico.nc/annonces/${annonce.id}`,
       ...(annonce.prix && {
         offers: {
           '@type':       'Offer',
@@ -89,9 +89,9 @@ export default async function ListingDetailPage(
       '@context': 'https://schema.org',
       '@type':    'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Accueil',    item: 'https://troca.nc' },
-        { '@type': 'ListItem', position: 2, name: 'Annonces',   item: 'https://troca.nc/annonces' },
-        { '@type': 'ListItem', position: 3, name: annonce.titre, item: `https://troca.nc/annonces/${annonce.id}` },
+        { '@type': 'ListItem', position: 1, name: 'Accueil',    item: 'https://kalico.nc' },
+        { '@type': 'ListItem', position: 2, name: 'Annonces',   item: 'https://kalico.nc/annonces' },
+        { '@type': 'ListItem', position: 3, name: annonce.titre, item: `https://kalico.nc/annonces/${annonce.id}` },
       ],
     },
   ]

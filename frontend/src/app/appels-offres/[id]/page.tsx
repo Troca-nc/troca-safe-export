@@ -6,7 +6,7 @@ type PageProps = {
 }
 
 export const metadata = {
-  title: "Détail de la demande â€” Troca NC",
+  title: "Détail de la demande â€” Kalico NC",
   description: "Consultez le détail d'une demande d'appel d'offres et accédez rapidement au devis ou à la vitrine du professionnel.",
 }
 

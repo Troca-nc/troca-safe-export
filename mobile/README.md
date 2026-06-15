@@ -1,4 +1,4 @@
-# Troca Mobile — Guide de démarrage
+# Kalico Mobile — Guide de démarrage
 
 ## Mode local
 

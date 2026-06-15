@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import {
@@ -174,7 +174,7 @@ export default function ProfileDemoPreview({
               </div>
               <div className="flex items-center gap-2 rounded-xl bg-night/5 px-3 py-2 text-sm text-night">
                 <Megaphone className="h-4 w-4 text-night/55" />
-                {activeProfile === 'pro' ? 'Boost et mise en avant visibles' : 'Diffusion standard sur Troca'}
+                {activeProfile === 'pro' ? 'Boost et mise en avant visibles' : 'Diffusion standard sur Kalico'}
               </div>
             </div>
           </div>

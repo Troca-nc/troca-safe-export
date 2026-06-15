@@ -2,8 +2,8 @@
 
 import { api } from '@/lib/api'
 
-const CONSENT_KEY = 'troca-cookie-consent'
-const SESSION_KEY = 'troca-analytics-session'
+const CONSENT_KEY = 'kalico-cookie-consent'
+const SESSION_KEY = 'kalico-analytics-session'
 
 type ConsentState = {
   analytics?: boolean

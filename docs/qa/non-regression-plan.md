@@ -1,4 +1,4 @@
-# Troca QA Non-Regression Plan
+# Kalico QA Non-Regression Plan
 
 Ce document regroupe la stratégie d'exécution des tests pour les environnements locaux, preview Vercel et production.
 

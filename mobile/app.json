@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Troca",
-    "slug": "troca",
+    "name": "Kalico",
+    "slug": "kalico",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "troca",
+    "scheme": "kalico",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -17,17 +17,17 @@
     ],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "nc.troca.app",
+      "bundleIdentifier": "nc.kalico.app",
       "buildNumber": "1",
       "associatedDomains": [
-        "applinks:troca.nc"
+        "applinks:kalico.nc"
       ],
       "infoPlist": {
-        "NSCameraUsageDescription": "Troca utilise votre caméra pour prendre des photos de vos annonces.",
-        "NSPhotoLibraryUsageDescription": "Troca accède à vos photos pour illustrer vos annonces.",
-        "NSMicrophoneUsageDescription": "Troca utilise votre micro pour envoyer des messages vocaux.",
-        "NSLocationWhenInUseUsageDescription": "Troca utilise votre position pour afficher les annonces proches.",
-        "NSUserNotificationsUsageDescription": "Troca vous envoie des notifications pour vos messages et annonces.",
+        "NSCameraUsageDescription": "Kalico utilise votre caméra pour prendre des photos de vos annonces.",
+        "NSPhotoLibraryUsageDescription": "Kalico accède à vos photos pour illustrer vos annonces.",
+        "NSMicrophoneUsageDescription": "Kalico utilise votre micro pour envoyer des messages vocaux.",
+        "NSLocationWhenInUseUsageDescription": "Kalico utilise votre position pour afficher les annonces proches.",
+        "NSUserNotificationsUsageDescription": "Kalico vous envoie des notifications pour vos messages et annonces.",
         "UIBackgroundModes": [
           "remote-notification"
         ]
@@ -38,7 +38,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0A7EA4"
       },
-      "package": "nc.troca.app",
+      "package": "nc.kalico.app",
       "versionCode": 1,
       "intentFilters": [
         {
@@ -47,7 +47,7 @@
           "data": [
             {
               "scheme": "https",
-              "host": "troca.nc",
+              "host": "kalico.nc",
               "pathPrefix": "/"
             }
           ],
@@ -85,13 +85,13 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Troca accède à vos photos pour illustrer vos annonces."
+          "photosPermission": "Kalico accède à vos photos pour illustrer vos annonces."
         }
       ],
       [
         "@stripe/stripe-react-native",
         {
-          "merchantIdentifier": "merchant.nc.troca.app",
+          "merchantIdentifier": "merchant.nc.kalico.app",
           "enableGooglePay": true
         }
       ],

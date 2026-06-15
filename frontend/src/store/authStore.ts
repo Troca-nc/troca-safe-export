@@ -35,7 +35,7 @@ const REDIRECT_AFTER_LOGIN_KEY = 'redirect_after_login'
 const DEMO_USERS: Record<Exclude<DemoProfileKey, 'visitor'>, User> = {
   particulier: {
     id: 'demo-particulier',
-    email: 'particulier@demo.troca.nc',
+    email: 'particulier@demo.kalico.nc',
     first_name: 'Emma',
     last_name: 'Martin',
     avatar_url: null,
@@ -48,7 +48,7 @@ const DEMO_USERS: Record<Exclude<DemoProfileKey, 'visitor'>, User> = {
   },
   pro: {
     id: 'demo-pro',
-    email: 'pro@demo.troca.nc',
+    email: 'pro@demo.kalico.nc',
     first_name: 'Atelier',
     last_name: 'Kalo',
     avatar_url: null,
@@ -61,8 +61,8 @@ const DEMO_USERS: Record<Exclude<DemoProfileKey, 'visitor'>, User> = {
   },
   bon_plan: {
     id: 'demo-bon-plan',
-    email: 'bonplan@demo.troca.nc',
-    first_name: 'Troca',
+    email: 'bonplan@demo.kalico.nc',
+    first_name: 'Kalico',
     last_name: 'Bon Plan',
     avatar_url: null,
     is_verified: true,

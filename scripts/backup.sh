@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# Troca — Sauvegarde automatique PostgreSQL
+# Kalico — Sauvegarde automatique PostgreSQL
 # Exécuté chaque nuit à 2h00
 # Conserve 30 jours de sauvegardes locales
 # Upload vers AWS S3 pour archivage long terme
@@ -16,7 +16,7 @@ set -eu
 
 DATE=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR="/backups"
-FILENAME="troca_${DATE}.sql.gz"
+FILENAME="kalico_${DATE}.sql.gz"
 FILEPATH="${BACKUP_DIR}/${FILENAME}"
 AWS_REGION="${AWS_REGION:-ap-southeast-2}"
 

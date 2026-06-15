@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Check, Shield, Sparkles, ToggleLeft, ToggleRight } from 'lucide-react'
 import { rgpdApi } from '@/lib/api'
 
-const STORAGE_KEY = 'troca-cookie-consent'
+const STORAGE_KEY = 'kalico-cookie-consent'
 
 interface ConsentState {
   analytics: boolean
@@ -24,7 +24,7 @@ function readStoredConsent(): ConsentState | null {
 
 function saveConsent(state: ConsentState) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-  window.dispatchEvent(new CustomEvent('troca-cookie-consent-changed', { detail: state }))
+  window.dispatchEvent(new CustomEvent('kalico-cookie-consent-changed', { detail: state }))
 }
 
 async function persistToServer(choice: { analytics: boolean; marketing: boolean }) {

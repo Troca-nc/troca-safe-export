@@ -45,8 +45,8 @@ type BonPlanPrefs = {
   via_email: boolean
 }
 
-const STORAGE_PREFIX = 'troca-demo-notification-prefs'
-const BON_PLANS_STORAGE_PREFIX = 'troca-demo-bon-plan-prefs'
+const STORAGE_PREFIX = 'kalico-demo-notification-prefs'
+const BON_PLANS_STORAGE_PREFIX = 'kalico-demo-bon-plan-prefs'
 
 const BON_PLAN_CATEGORIES = [
   { value: 'alimentation', label: 'Alimentation' },
@@ -590,7 +590,7 @@ export default function NotificationPreferencesPage() {
               <div className="space-y-4">
                 <ToggleRow
                   title="Toutes les nouvelles promos"
-                  description="Recevoir chaque bon plan publié sur Troca."
+                  description="Recevoir chaque bon plan publié sur Kalico."
                   checked={bonPlanPrefs.notify_all}
                   onChange={(checked) => updateBonPlanPrefs('notify_all', checked)}
                   icon={Tag}

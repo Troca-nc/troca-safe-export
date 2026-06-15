@@ -36,7 +36,7 @@ export default function DemoQaPage() {
   const [message, setMessage] = useState('')
 
   const demoEmail = user?.email ?? ''
-  const demoBadge = useMemo(() => demoEmail.endsWith('@demo.troca') ? 'Compte démo actif' : 'Mode réel', [demoEmail])
+  const demoBadge = useMemo(() => demoEmail.endsWith('@demo.kalico') ? 'Compte démo actif' : 'Mode réel', [demoEmail])
 
   const loadStatus = async () => {
     try {
@@ -102,7 +102,7 @@ export default function DemoQaPage() {
                   Demo / QA local
                 </div>
                 <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl">
-                  Environnement visuel complet pour tester Troca sans friction.
+                  Environnement visuel complet pour tester Kalico sans friction.
                 </h1>
                 <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/72 md:text-base">
                   Générez les données locales, ouvrez les rôles instantanés, puis naviguez dans toutes les pages critiques

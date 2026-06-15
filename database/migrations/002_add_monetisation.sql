@@ -1,4 +1,4 @@
--- ── Migration SQL — Monétisation Troca ───────────────────────────────────────
+-- ── Migration SQL — Monétisation Kalico ───────────────────────────────────────
 
 -- ── Table des paiements ───────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS payments (

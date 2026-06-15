@@ -1,6 +1,6 @@
 'use client'
 // ============================================================
-//  Troca — Barre de recherche avec autocomplete
+//  Kalico — Barre de recherche avec autocomplete
 //  Suggestions : annonces récentes + catégories + communes
 // ============================================================
 
@@ -26,7 +26,7 @@ interface Props {
 }
 
 // Historique local (localStorage)
-const HISTORY_KEY = 'troca_search_history'
+const HISTORY_KEY = 'kalico_search_history'
 const MAX_HISTORY = 5
 
 function getHistory(): string[] {
@@ -51,7 +51,7 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher…', clas
   const router    = useRouter()
   const inputRef  = useRef<HTMLInputElement>(null)
   const boxRef    = useRef<HTMLDivElement>(null)
-  const listboxId = 'troca-search-suggestions'
+  const listboxId = 'kalico-search-suggestions'
 
   const [q,           setQ]           = useState('')
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])

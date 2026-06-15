@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Service Notifications Push (Expo)
+//  Kalico Mobile - Service Notifications Push (Expo)
 //  Registration token + reception handling
 // ============================================================
 
@@ -107,7 +107,7 @@ export async function registerPushToken(options: RegisterPushTokenOptions = {}):
 
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {
-      name: 'Troca',
+      name: 'Kalico',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#0A7EA4',

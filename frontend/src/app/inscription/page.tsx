@@ -309,7 +309,7 @@ export default function RegisterPage() {
               <Sparkles className="h-5 w-5 text-coral" />
             </span>
             <div>
-              <p className="font-display text-3xl font-bold text-night">Troca</p>
+              <p className="font-display text-3xl font-bold text-night">Kalico</p>
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-coral/80">Nouvelle-Calédonie</p>
             </div>
           </Link>
@@ -320,7 +320,7 @@ export default function RegisterPage() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="max-w-2xl">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Inscription progressive</p>
-              <h1 className="mt-2 font-display text-4xl font-bold text-night md:text-5xl">Rejoindre Troca</h1>
+              <h1 className="mt-2 font-display text-4xl font-bold text-night md:text-5xl">Rejoindre Kalico</h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-night/60 md:text-base">
                 Commencez avec votre compte, complétez votre profil, puis choisissez votre formule au bon moment.
               </p>

@@ -1,7 +1,7 @@
 'use strict';
 
 // ============================================================
-//  Troca — Jobs planifiés (node-cron)
+//  Kalico — Jobs planifiés (node-cron)
 //  • Expiration des boosts payés
 //  • Envoi des alertes de recherche (daily + weekly)
 //  • Matching immediate des nouvelles annonces
@@ -79,7 +79,7 @@ function getPerformancePeriodLabel(frequency, startDate) {
 }
 
 function getTrocBaseUrl() {
-  return process.env.BASE_URL || 'https://troca.nc';
+  return process.env.BASE_URL || 'https://kalico.nc';
 }
 
 async function loadOpenTrocListingsByIds(ids = []) {
@@ -1083,21 +1083,21 @@ function startReviewReminderJob() {
         `);
 
         const emailService = require('../services/emailService');
-        const baseUrl = process.env.BASE_URL || 'https://troca.nc';
+        const baseUrl = process.env.BASE_URL || 'https://kalico.nc';
 
         for (const row of result.rows) {
           await emailService.sendMail({
             to:      row.buyer_email,
-            subject: "Retour sur votre transaction - Troca",
+            subject: "Retour sur votre transaction - Kalico",
             html: '<p>Bonjour ' + row.buyer_prenom + ',</p>'
                 + '<p>Vous avez échangé avec <strong>' + row.seller_prenom + '</strong>'
                 + ' à propos de "<strong>' + row.annonce_titre + '</strong>".</p>'
-                + '<p>Partagez votre expérience en laissant un avis — cela aide la communauté Troca !</p>'
+                + '<p>Partagez votre expérience en laissant un avis — cela aide la communauté Kalico !</p>'
                 + '<p><a href="' + baseUrl + '/profil/' + row.seller_id + '?review=1"'
                 + ' style="background:#2563eb;color:#fff;padding:12px 24px;border-radius:8px;'
                 + 'text-decoration:none;font-weight:bold;display:inline-block;">'
                 + 'Laisser un avis</a></p>'
-                + '<p style="color:#9ca3af;font-size:12px;">Email automatique Troca.</p>',
+                + '<p style="color:#9ca3af;font-size:12px;">Email automatique Kalico.</p>',
           }).catch(() => {});
         }
 

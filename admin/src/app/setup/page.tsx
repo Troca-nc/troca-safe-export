@@ -10,8 +10,8 @@ export default async function SetupPage() {
 
   const otpAuthUrl = createOtpAuthUrl({
     secret: getAdminTotpSecret(),
-    label: `Troca Admin (${getAdminEmail()})`,
-    issuer: 'Troca',
+    label: `Kalico Admin (${getAdminEmail()})`,
+    issuer: 'Kalico',
   })
 
   return (

@@ -1,5 +1,5 @@
 // src/app/securite/page.tsx
-// ── Conseils de sécurité — Troca ─────────────────────────────────────────────
+// ── Conseils de sécurité — Kalico ─────────────────────────────────────────────
 
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -16,9 +16,9 @@ import {
 } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Conseils de sécurité — Troca',
+  title: 'Conseils de sécurité — Kalico',
   description:
-    'Recommandations pratiques pour acheter et vendre en sécurité sur Troca en Nouvelle-Calédonie.',
+    'Recommandations pratiques pour acheter et vendre en sécurité sur Kalico en Nouvelle-Calédonie.',
 }
 
 const GOOD_PRACTICES = [
@@ -40,7 +40,7 @@ const GOOD_PRACTICES = [
   },
   {
     icon: MessageCircle,
-    text: 'Conservez les échanges dans la messagerie Troca afin de disposer d’un historique en cas de litige.',
+    text: 'Conservez les échanges dans la messagerie Kalico afin de disposer d’un historique en cas de litige.',
   },
   {
     icon: CheckCircle2,
@@ -53,7 +53,7 @@ const WARNING_SIGNS = [
   'Refus de rencontre physique ou pression pour conclure immédiatement.',
   'Demande de paiement par un moyen difficilement traçable ou irréversible.',
   'Compte récent, absence d’avis ou score de confiance très faible.',
-  'Invitation à poursuivre la conversation en dehors de Troca sans raison légitime.',
+  'Invitation à poursuivre la conversation en dehors de Kalico sans raison légitime.',
   'Demande d’acompte avant toute vérification du bien.',
   'Description vague, incohérente ou photos manifestement réutilisées.',
 ]
@@ -97,7 +97,7 @@ export default function SecuritePage() {
             Achetez et vendez en sécurité
           </h1>
           <p className="text-night/55 text-base max-w-2xl mx-auto leading-relaxed">
-            Troca met en place des mécanismes de modération et de confiance. Cette page rappelle
+            Kalico met en place des mécanismes de modération et de confiance. Cette page rappelle
             les réflexes essentiels pour limiter les risques d’arnaque et sécuriser vos échanges.
           </p>
         </div>
@@ -161,14 +161,14 @@ export default function SecuritePage() {
             <Link href="/annonces" className="btn-primary px-6">
               Consulter les annonces
             </Link>
-            <a href="mailto:securite@troca.nc" className="btn-ghost px-6">
+            <a href="mailto:securite@kalico.nc" className="btn-ghost px-6">
               Contacter la sécurité
             </a>
           </div>
         </section>
 
         <p className="text-center text-xs text-night/30 mt-8 leading-relaxed">
-          Troca agit comme intermédiaire technique et ne peut garantir l’absence totale de risque
+          Kalico agit comme intermédiaire technique et ne peut garantir l’absence totale de risque
           lors d’une transaction entre utilisateurs. En cas de litige, privilégiez les recours
           appropriés et, si nécessaire, les autorités compétentes.
         </p>

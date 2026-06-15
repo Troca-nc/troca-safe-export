@@ -93,7 +93,7 @@ function requirePro(req, res) {
 function formatDisplayName(row) {
   return row.pro_company_name
     || [row.prenom, row.nom].filter(Boolean).join(' ').trim()
-    || 'Professionnel Troca';
+    || 'Professionnel Kalico';
 }
 
 function parseJsonArray(value) {
@@ -478,7 +478,7 @@ async function notifyBookingCreated(bookingRow) {
     subject: `Nouveau rendez-vous demandé - ${proName}`,
     html: `
       <p>Bonjour ${escapeHtml(proName)},</p>
-      <p>Une nouvelle demande de rendez-vous vient d’être créée sur Troca.</p>
+      <p>Une nouvelle demande de rendez-vous vient d’être créée sur Kalico.</p>
       <ul>
         <li><strong>Client :</strong> ${escapeHtml(bookingRow.requester_name)}</li>
         <li><strong>Créneau :</strong> ${escapeHtml(when)}</li>

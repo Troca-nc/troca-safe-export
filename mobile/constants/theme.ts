@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Tokens de design
+//  Kalico Mobile - Tokens de design
 //  Couleurs, typographie, espacements, ombres
 // ============================================================
 

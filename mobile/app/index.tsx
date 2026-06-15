@@ -14,7 +14,7 @@ export default function HomeRedirect() {
   if (!isHydrated) {
     return (
       <View style={styles.root}>
-        <Text style={styles.brand}>Troca mobile web</Text>
+        <Text style={styles.brand}>Kalico mobile web</Text>
         <Text style={styles.text}>Préparation de votre espace...</Text>
         <ActivityIndicator color={Colors.primary} />
       </View>

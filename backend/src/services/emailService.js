@@ -1,7 +1,7 @@
-﻿'use strict';
+'use strict';
 
 // ============================================================
-//  Troca â€” Service Email (nodemailer)
+//  Kalico â€” Service Email (nodemailer)
 //  Centralise tous les envois transactionnels du backend
 // ============================================================
 
@@ -45,7 +45,7 @@ async function sendMail({ to, subject, html, text, replyTo, cc, bcc }) {
   }
 
   return transporter.sendMail({
-    from:    `"Troca" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+    from:    `"Kalico" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
     to,
     subject,
     html,
@@ -58,7 +58,7 @@ async function sendMail({ to, subject, html, text, replyTo, cc, bcc }) {
 
 // â”€â”€ Templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-const BASE_URL = () => process.env.BASE_URL || 'https://troca.nc';
+const BASE_URL = () => process.env.BASE_URL || 'https://kalico.nc';
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -144,7 +144,7 @@ function baseTemplate(content) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Troca</title>
+  <title>Kalico</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
     .wrapper { max-width: 560px; margin: 40px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
@@ -159,10 +159,10 @@ function baseTemplate(content) {
 </head>
 <body>
   <div class="wrapper">
-    <div class="header"><h1>ðŸ” Troca</h1></div>
+    <div class="header"><h1>ðŸ” Kalico</h1></div>
     <div class="body">${content}</div>
     <div class="footer">
-      Troca â€” La plateforme de petites annonces de Nouvelle-CalÃ©donie<br>
+      Kalico â€” La plateforme de petites annonces de Nouvelle-CalÃ©donie<br>
       <a href="${BASE_URL()}/politique-de-confidentialite">ConfidentialitÃ©</a> Â·
       <a href="${BASE_URL()}/cgu">CGU</a>
     </div>
@@ -180,7 +180,7 @@ async function sendResetEmail(to, token) {
   const link = `${BASE_URL()}/mot-de-passe-oublie/reset?token=${token}`;
   return sendMail({
     to,
-    subject: 'RÃ©initialisation de votre mot de passe Troca',
+    subject: 'RÃ©initialisation de votre mot de passe Kalico',
     html: baseTemplate(`
       <p>Bonjour,</p>
       <p>Vous avez demandÃ© Ã  rÃ©initialiser votre mot de passe. Cliquez sur le bouton ci-dessous â€” ce lien est valable <strong>1 heure</strong>.</p>
@@ -197,10 +197,10 @@ async function sendResetEmail(to, token) {
 async function sendWelcomeEmail(to, prenom) {
   return sendMail({
     to,
-    subject: `Bienvenue sur Troca, ${prenom} ! ðŸŽ‰`,
+    subject: `Bienvenue sur Kalico, ${prenom} ! ðŸŽ‰`,
     html: baseTemplate(`
       <p>Bonjour ${prenom},</p>
-      <p>Votre compte Troca est crÃ©Ã© ! Vous pouvez dÃ¨s maintenant publier des annonces, contacter des vendeurs et troquer sur toute la Nouvelle-CalÃ©donie.</p>
+      <p>Votre compte Kalico est crÃ©Ã© ! Vous pouvez dÃ¨s maintenant publier des annonces, contacter des vendeurs et troquer sur toute la Nouvelle-CalÃ©donie.</p>
       <a class="btn" href="${BASE_URL()}/annonces/nouvelle">Publier ma premiÃ¨re annonce</a>
       <p>Des questions ? Consultez notre <a href="${BASE_URL()}/cgu">guide d'utilisation</a> ou rÃ©pondez simplement Ã  cet email.</p>
     `),
@@ -214,10 +214,10 @@ async function sendVerificationEmail(to, prenom, token) {
   const link = `${BASE_URL()}/verification-email?token=${token}`;
   return sendMail({
     to,
-    subject: 'Confirmez votre email Troca',
+    subject: 'Confirmez votre email Kalico',
     html: baseTemplate(`
       <p>Bonjour ${prenom},</p>
-      <p>Merci pour votre inscription sur Troca. Pour activer votre compte et valider votre email, cliquez sur le bouton ci-dessous.</p>
+      <p>Merci pour votre inscription sur Kalico. Pour activer votre compte et valider votre email, cliquez sur le bouton ci-dessous.</p>
       <a class="btn" href="${link}">Confirmer mon email</a>
       <p>Ce lien est valable pendant <strong>24 heures</strong>.</p>
       <p style="color:#6b7280;font-size:13px;">Lien : <a href="${link}">${link}</a></p>
@@ -270,12 +270,12 @@ async function sendNewMessageEmail(to, prenom, senderName, annonceTitle, convId,
     : null;
   return sendMail({
     to,
-    subject: `${escapeHtml(senderName)} vous a envoyÃ© un message sur Troca`,
+    subject: `${escapeHtml(senderName)} vous a envoyÃ© un message sur Kalico`,
     html: baseTemplate(`
       <p>Bonjour ${prenom},</p>
       <p><strong>${escapeHtml(senderName)}</strong> vous a envoyÃ© un message concernant l'annonce <strong>"${escapeHtml(annonceTitle)}"</strong>.</p>
       <a class="btn" href="${link}">Lire le message</a>
-      <p style="color:#6b7280;font-size:13px;">Vous recevez cet email car vous avez une conversation active sur Troca.</p>
+      <p style="color:#6b7280;font-size:13px;">Vous recevez cet email car vous avez une conversation active sur Kalico.</p>
       ${buildNotificationFooter({
         manageUrl: `${BASE_URL()}/parametres/notifications`,
         unsubscribeUrl: unsubLink,
@@ -293,8 +293,8 @@ async function sendPerformanceReportEmail({ to, prenom, report, recipientUserId 
 
   const isPro = Boolean(report?.is_pro);
   const title = isPro
-    ? 'Votre rapport business Troca'
-    : 'Votre rapport dâ€™activitÃ© Troca';
+    ? 'Votre rapport business Kalico'
+    : 'Votre rapport dâ€™activitÃ© Kalico';
   const sections = (report?.listings || []).slice(0, isPro ? 5 : 3).map((item) => `
     <tr>
       <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;">${escapeHtml(item.title || 'Annonce')}</td>
@@ -327,12 +327,12 @@ async function sendPerformanceReportEmail({ to, prenom, report, recipientUserId 
 
   return sendMail({
     to,
-    subject: isPro ? 'ðŸ“ˆ Votre rapport business Troca' : 'ðŸ“Š Votre rapport Troca',
+    subject: isPro ? 'ðŸ“ˆ Votre rapport business Kalico' : 'ðŸ“Š Votre rapport Kalico',
     html: baseTemplate(`
       <p>Bonjour ${escapeHtml(prenom)},</p>
       <p>${isPro
         ? 'Voici le suivi de vos annonces pour cette pÃ©riode. Vous pouvez adapter la rÃ©currence dans votre dashboard.'
-        : 'Voici un aperÃ§u simple de la performance de vos annonces publiÃ©es sur Troca.'}
+        : 'Voici un aperÃ§u simple de la performance de vos annonces publiÃ©es sur Kalico.'}
       </p>
       ${summaryCards}
       <div style="margin-top:22px;">
@@ -369,9 +369,9 @@ async function sendBoostActivatedEmail(to, prenom, details = {}, recipientUserId
 
   const payload = buildListingEmail({
     prenom,
-    subject: '[Troca] Votre boost est activÃ©',
+    subject: '[Kalico] Votre boost est activÃ©',
     headline: 'Boost activÃ©',
-    intro: `Votre boost <strong>${escapeHtml(details.boostLabel || 'Boost')}</strong> est maintenant actif sur Troca.`,
+    intro: `Votre boost <strong>${escapeHtml(details.boostLabel || 'Boost')}</strong> est maintenant actif sur Kalico.`,
     listingTitle: details.annonceTitle || 'Votre annonce',
     listingMeta: 'Votre annonce gagne en visibilitÃ© et commence Ã  remonter dans les classements.',
     ctaLabel: 'GÃ©rer mon annonce boostÃ©e',
@@ -397,9 +397,9 @@ async function sendOfferReceivedEmail(to, prenom, details = {}, recipientUserId)
 
   const payload = buildListingEmail({
     prenom,
-    subject: `[Troca] Nouvelle offre reÃ§ue pour "${details.annonceTitle || 'votre annonce'}"`,
+    subject: `[Kalico] Nouvelle offre reÃ§ue pour "${details.annonceTitle || 'votre annonce'}"`,
     headline: 'Offre de prix reÃ§ue',
-    intro: `<strong>${escapeHtml(details.buyerName || 'Un acheteur')}</strong> vous a envoyÃ© une offre sur la messagerie Troca.`,
+    intro: `<strong>${escapeHtml(details.buyerName || 'Un acheteur')}</strong> vous a envoyÃ© une offre sur la messagerie Kalico.`,
     listingTitle: details.annonceTitle || 'Annonce',
     listingMeta: amountXpf
       ? `Montant proposÃ© : <strong>${amountXpf.toLocaleString('fr-FR')} XPF</strong>`
@@ -430,9 +430,9 @@ async function sendListingExpiringEmail(to, prenom, details = {}, recipientUserI
 
   const payload = buildListingEmail({
     prenom,
-    subject: `[Troca] Votre annonce expire dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''}`,
+    subject: `[Kalico] Votre annonce expire dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''}`,
     headline: 'Annonce bientÃ´t expirÃ©e',
-    intro: `Votre annonce <strong>${escapeHtml(details.annonceTitle || 'Troca')}</strong> arrive Ã  Ã©chÃ©ance dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''}.`,
+    intro: `Votre annonce <strong>${escapeHtml(details.annonceTitle || 'Kalico')}</strong> arrive Ã  Ã©chÃ©ance dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''}.`,
     listingTitle: details.annonceTitle || 'Annonce',
     listingMeta: `Il vous reste environ <strong>${daysLeft} jour${daysLeft > 1 ? 's' : ''}</strong> avant l'expiration.`,
     unsubscribeUrl,
@@ -468,9 +468,9 @@ async function sendListingExpiredEmail(to, prenom, details = {}, recipientUserId
 
   const payload = buildListingEmail({
     prenom,
-    subject: '[Troca] Votre annonce est expirÃ©e',
+    subject: '[Kalico] Votre annonce est expirÃ©e',
     headline: 'Annonce expirÃ©e',
-    intro: `Votre annonce <strong>${escapeHtml(details.annonceTitle || 'Troca')}</strong> vient dâ€™arriver Ã  expiration.`,
+    intro: `Votre annonce <strong>${escapeHtml(details.annonceTitle || 'Kalico')}</strong> vient dâ€™arriver Ã  expiration.`,
     listingTitle: details.annonceTitle || 'Annonce',
     listingMeta: 'Vous pouvez la republier ou la rÃ©activer depuis votre espace annonces.',
     ctaLabel: 'RÃ©activer mon annonce',
@@ -507,13 +507,13 @@ async function sendNewsletterEmail(to, prenom, newsletter = {}, recipientUserId 
 
   return sendMail({
     to,
-    subject: newsletter.subject || 'ðŸ“° La newsletter locale Troca',
+    subject: newsletter.subject || 'ðŸ“° La newsletter locale Kalico',
     html: baseTemplate(`
       <p>Bonjour ${escapeHtml(prenom)},</p>
-      <p>${escapeHtml(newsletter.intro || 'Voici une sÃ©lection locale de nouveautÃ©s publiÃ©es sur Troca.')}</p>
+      <p>${escapeHtml(newsletter.intro || 'Voici une sÃ©lection locale de nouveautÃ©s publiÃ©es sur Kalico.')}</p>
       ${items.length ? buildNewsletterItemsHtml(items) : '<p>Aucun contenu Ã  afficher pour le moment.</p>'}
       ${summary.total ? `<p style="margin-top:18px;color:#475569;font-size:14px;">${escapeHtml(summary.total)} contenu${summary.total > 1 ? 's' : ''} sÃ©lectionnÃ©${summary.total > 1 ? 's' : ''} cette semaine.</p>` : ''}
-      <a class="btn" href="${newsletter.ctaUrl || `${BASE_URL()}/`}">${escapeHtml(newsletter.ctaLabel || 'Voir sur Troca')}</a>
+      <a class="btn" href="${newsletter.ctaUrl || `${BASE_URL()}/`}">${escapeHtml(newsletter.ctaLabel || 'Voir sur Kalico')}</a>
       ${buildNotificationFooter({
         manageUrl: `${BASE_URL()}/parametres/notifications`,
         unsubscribeUrl,
@@ -527,7 +527,7 @@ async function sendReviewInviteEmail(to, prenom, details = {}) {
   const link = details.reviewUrl || `${BASE_URL()}/avis/${details.token}`;
   return sendMail({
     to,
-    subject: details.subject || 'Votre avis vÃ©rifiÃ© sur Troca',
+    subject: details.subject || 'Votre avis vÃ©rifiÃ© sur Kalico',
     html: baseTemplate(`
       <p>Bonjour ${escapeHtml(prenom)},</p>
       <p>Merci pour votre Ã©change. Vous pouvez maintenant partager votre avis vÃ©rifiÃ© sur <strong>${escapeHtml(details.proName || 'ce professionnel')}</strong>.</p>
@@ -584,7 +584,7 @@ async function sendRideAutoBookingPassengerEmail(to, prenom, details = {}, recip
       <p>Votre place est confirmÃ©e !</p>
       ${buildRideSummary(details)}
       <a class="btn" href="${link}">Voir mes rÃ©servations</a>
-      <p>Retrouvez les dÃ©tails de ce trajet sur Troca.</p>
+      <p>Retrouvez les dÃ©tails de ce trajet sur Kalico.</p>
     `),
   });
 }
@@ -680,7 +680,7 @@ async function sendProBookingReminderEmail(to, prenom, details = {}, recipientUs
         Pensez à vérifier vos disponibilités, vos documents et le lieu du rendez-vous pour arriver prêt le jour J.
       </p>
       <a class="btn" href="${bookingUrl}">Voir mes rendez-vous</a>
-      <p style="color:#6b7280;font-size:13px;">Vous pouvez aussi suivre l&apos;échange dans la messagerie Troca si besoin.</p>
+      <p style="color:#6b7280;font-size:13px;">Vous pouvez aussi suivre l&apos;échange dans la messagerie Kalico si besoin.</p>
     `),
   });
 }

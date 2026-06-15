@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile — Store Auth (Zustand)
+//  Kalico Mobile — Store Auth (Zustand)
 // ============================================================
 
 import { create } from 'zustand';

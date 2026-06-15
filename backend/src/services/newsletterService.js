@@ -175,12 +175,12 @@ async function listActiveSubscribers() {
 async function sendNewsletterToSubscription(row, options = {}) {
   const preview = await buildNewsletterPreview(row.user_id);
   const payload = {
-    subject: options.subject || '📰 La newsletter locale Troca',
-    intro: options.intro || 'Voici une sélection locale de nouveautés publiées sur Troca.',
+    subject: options.subject || '📰 La newsletter locale Kalico',
+    intro: options.intro || 'Voici une sélection locale de nouveautés publiées sur Kalico.',
     items: preview?.items || [],
     summary: preview?.summary || { total: 0 },
-    ctaUrl: options.ctaUrl || `${process.env.BASE_URL || 'https://troca.nc'}/`,
-    ctaLabel: options.ctaLabel || 'Voir sur Troca',
+    ctaUrl: options.ctaUrl || `${process.env.BASE_URL || 'https://kalico.nc'}/`,
+    ctaLabel: options.ctaLabel || 'Voir sur Kalico',
     unsubscribeToken: row.unsubscribe_token,
   };
 

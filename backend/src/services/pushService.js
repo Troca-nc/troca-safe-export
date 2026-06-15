@@ -1,7 +1,7 @@
 'use strict';
 
 // ============================================================
-//  Troca — Service Push Notifications (Expo Push API)
+//  Kalico — Service Push Notifications (Expo Push API)
 //  Envoie des notifications push aux tokens enregistrés
 // ============================================================
 

@@ -1,4 +1,4 @@
-﻿import { Alert, Clipboard, Linking, Platform, Share } from 'react-native';
+import { Alert, Clipboard, Linking, Platform, Share } from 'react-native';
 
 export type MobileShareContent = {
   kind: 'annonce' | 'profil' | 'content';
@@ -10,10 +10,10 @@ export type MobileShareContent = {
 
 function normalizeShareUrl(url: string) {
   try {
-    const parsed = new URL(url, 'https://troca.nc');
+    const parsed = new URL(url, 'https://kalico.nc');
     return parsed.toString();
   } catch {
-    return 'https://troca.nc';
+    return 'https://kalico.nc';
   }
 }
 

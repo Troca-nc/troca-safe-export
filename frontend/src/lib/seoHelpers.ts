@@ -21,13 +21,13 @@ function formatXPF(price: number): string {
 // ── Page d'accueil ────────────────────────────────────────────────────────────
 
 export function generateHomeMetadata(): Metadata {
-  const title       = 'Troca — Petites annonces Nouvelle-Calédonie'
+  const title       = 'Kalico — Petites annonces Nouvelle-Calédonie'
   const description = 'La plateforme de petites annonces dédiée à la Nouvelle-Calédonie. Achetez, vendez, louez : véhicules, immobilier, électronique, emploi et plus encore à Nouméa et en NC.'
 
   return {
     title,
     description,
-    keywords: ['annonces', 'petites annonces', 'Nouvelle-Calédonie', 'Nouméa', 'vente', 'achat', 'NC', 'troca'],
+    keywords: ['annonces', 'petites annonces', 'Nouvelle-Calédonie', 'Nouméa', 'vente', 'achat', 'NC', 'kalico'],
     alternates: { canonical: SITE_URL },
     openGraph: {
       title,
@@ -36,7 +36,7 @@ export function generateHomeMetadata(): Metadata {
       siteName:  SITE_NAME,
       locale:    SITE_LOCALE,
       type:      'website',
-      images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: 'Troca — Petites annonces NC' }],
+      images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: 'Kalico — Petites annonces NC' }],
     },
     twitter: {
       card:        'summary_large_image',
@@ -59,9 +59,9 @@ export function generateCategoryMetadata(
   const label = cat?.label ?? slug
 
   const location = commune ? ` à ${commune}` : ' en Nouvelle-Calédonie'
-  const title     = `${label}${location} — ${nb_annonces} annonces | Troca`
+  const title     = `${label}${location} — ${nb_annonces} annonces | Kalico`
   const description = truncate(
-    `${nb_annonces} annonces de ${label.toLowerCase()}${location}. ${cat?.description ?? ''} Troca, la plateforme de petites annonces NC.`,
+    `${nb_annonces} annonces de ${label.toLowerCase()}${location}. ${cat?.description ?? ''} Kalico, la plateforme de petites annonces NC.`,
     160,
   )
   const url = `${SITE_URL}/annonces/categorie/${slug}${commune ? `?commune=${encodeURIComponent(commune)}` : ''}`
@@ -69,7 +69,7 @@ export function generateCategoryMetadata(
   return {
     title,
     description,
-    keywords: [label, 'annonces', 'Nouvelle-Calédonie', slug, commune ?? 'NC', 'Troca'].filter(Boolean),
+    keywords: [label, 'annonces', 'Nouvelle-Calédonie', slug, commune ?? 'NC', 'Kalico'].filter(Boolean),
     alternates: { canonical: url },
     openGraph: {
       title,
@@ -112,7 +112,7 @@ export function generateAnnonceMetadata(annonce: AnnonceMetaInput): Metadata {
   const lieu_str  = annonce.commune ? ` à ${annonce.commune}` : ' en NC'
   const cat       = CATEGORIES_SEO[annonce.categorie]
 
-  const title       = truncate(`${annonce.titre}${prix_str}${lieu_str} | Troca`, 60)
+  const title       = truncate(`${annonce.titre}${prix_str}${lieu_str} | Kalico`, 60)
   const description = truncate(
     annonce.description.replace(/\n+/g, ' ').trim() ||
     `${annonce.titre} en vente${lieu_str}. ${cat?.description ?? ''}`,
@@ -160,7 +160,7 @@ export function generateAnnonceMetadata(annonce: AnnonceMetaInput): Metadata {
       cat?.label ?? annonce.categorie,
       annonce.commune ?? 'NC',
       'Nouvelle-Calédonie',
-      'Troca',
+      'Kalico',
       annonce.prix ? formatXPF(annonce.prix) : null,
     ].filter(Boolean) as string[],
     alternates: { canonical: url },
@@ -203,8 +203,8 @@ export function generateProfilMetadata(user: {
   prenom: string; nom: string; nb_annonces: number; commune?: string
 }, profileUrl: string = `${SITE_URL}/profil`): Metadata {
   const name  = `${user.prenom} ${user.nom}`
-  const title = `${name} — ${user.nb_annonces} annonce${user.nb_annonces > 1 ? 's' : ''} sur Troca`
-  const description = `Consultez les ${user.nb_annonces} annonce${user.nb_annonces > 1 ? 's' : ''} de ${name}${user.commune ? ` à ${user.commune}` : ''} sur Troca, la plateforme de petites annonces NC.`
+  const title = `${name} — ${user.nb_annonces} annonce${user.nb_annonces > 1 ? 's' : ''} sur Kalico`
+  const description = `Consultez les ${user.nb_annonces} annonce${user.nb_annonces > 1 ? 's' : ''} de ${name}${user.commune ? ` à ${user.commune}` : ''} sur Kalico, la plateforme de petites annonces NC.`
 
   return {
     title,
@@ -234,7 +234,7 @@ export function generateProfilMetadata(user: {
 
 export function generateNoindexMetadata(title: string): Metadata {
   return {
-    title: `${title} | Troca`,
+    title: `${title} | Kalico`,
     robots: { index: false, follow: false },
   }
 }

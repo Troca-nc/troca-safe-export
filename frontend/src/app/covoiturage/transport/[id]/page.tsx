@@ -315,7 +315,7 @@ export default function TransporterDetailPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <CalendarDays className="h-4 w-4 text-[#0A7EA4]" />
-                  Réservez un trajet directement depuis Troca
+                  Réservez un trajet directement depuis Kalico
                 </div>
               </div>
             </article>

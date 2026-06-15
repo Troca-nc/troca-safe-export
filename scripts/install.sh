@@ -1,23 +1,23 @@
 #!/bin/bash
 # ============================================================
-# Troca - Script de deploiement initial
+# Kalico - Script de deploiement initial
 # A executer UNE SEULE FOIS sur le serveur AWS
 # Ubuntu 24.04 LTS - ap-southeast-2 (Sydney)
 # ============================================================
 
 set -eu
 
-DEPLOY_PATH="${DEPLOY_PATH:-/opt/troca}"
-DOMAIN="${DOMAIN:-troca.nc}"
+DEPLOY_PATH="${DEPLOY_PATH:-/opt/kalico}"
+DOMAIN="${DOMAIN:-kalico.nc}"
 ADMIN_EMAIL="${ADMIN_EMAIL:-}"
 
 if [ -z "$ADMIN_EMAIL" ]; then
   echo "ERROR: Definissez ADMIN_EMAIL avant de lancer ce script."
-  echo "Exemple: ADMIN_EMAIL=admin@troca.nc DOMAIN=troca.nc bash scripts/install.sh"
+  echo "Exemple: ADMIN_EMAIL=admin@kalico.nc DOMAIN=kalico.nc bash scripts/install.sh"
   exit 1
 fi
 
-echo "Installation de Troca sur le serveur..."
+echo "Installation de Kalico sur le serveur..."
 echo "Chemin : $DEPLOY_PATH"
 echo "Domaine : $DOMAIN"
 
@@ -51,7 +51,7 @@ mkdir -p "${DEPLOY_PATH}/nginx/logs"
 cd "${DEPLOY_PATH}"
 
 # 6. Cloner le repo
-REPO_URL="${REPO_URL:-https://github.com/Troca-nc/troca-safe-export.git}"
+REPO_URL="${REPO_URL:-https://github.com/Kalico-nc/kalico-safe-export.git}"
 if [ ! -d .git ]; then
   git clone "$REPO_URL" .
   echo "Code clone"
@@ -86,7 +86,7 @@ echo "Services demarres"
 sleep 20
 if curl -sf "https://${DOMAIN}/api/health"; then
   echo ""
-  echo "Troca est en ligne sur https://${DOMAIN}"
+  echo "Kalico est en ligne sur https://${DOMAIN}"
 else
   echo "Probleme detecte. Verifiez les logs : docker compose logs"
   exit 1
@@ -103,7 +103,7 @@ echo "Renouvellement SSL automatique configure"
 
 echo ""
 echo "=============================================="
-echo "Troca deploye avec succes !"
+echo "Kalico deploye avec succes !"
 echo "Site  : https://${DOMAIN}"
 echo "Admin : https://${DOMAIN}/admin"
 echo "Logs  : docker compose logs -f"

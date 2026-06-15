@@ -4,26 +4,26 @@ import ProLandingPageClient from './ProLandingPageClient'
 import { SITE_URL } from '@/types/seo.types'
 
 export const metadata: Metadata = {
-  title: 'Espace Professionnel — Troca NC',
+  title: 'Espace Professionnel — Kalico NC',
   description:
-    'Développez votre activité en Nouvelle-Calédonie avec Troca Pro. Vitrine locale, annonces prioritaires, statistiques et clients ciblés.',
+    'Développez votre activité en Nouvelle-Calédonie avec Kalico Pro. Vitrine locale, annonces prioritaires, statistiques et clients ciblés.',
   alternates: {
     canonical: `${SITE_URL}/pro`,
   },
   openGraph: {
-    title: 'Espace Professionnel — Troca NC',
+    title: 'Espace Professionnel — Kalico NC',
     description:
-      'Développez votre activité en Nouvelle-Calédonie avec Troca Pro. Vitrine locale, annonces prioritaires, statistiques et clients ciblés.',
+      'Développez votre activité en Nouvelle-Calédonie avec Kalico Pro. Vitrine locale, annonces prioritaires, statistiques et clients ciblés.',
     url: `${SITE_URL}/pro`,
-    siteName: 'Troca',
+    siteName: 'Kalico',
     locale: 'fr_NC',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Espace Professionnel — Troca NC',
+    title: 'Espace Professionnel — Kalico NC',
     description:
-      'Développez votre activité en Nouvelle-Calédonie avec Troca Pro. Vitrine locale, annonces prioritaires, statistiques et clients ciblés.',
+      'Développez votre activité en Nouvelle-Calédonie avec Kalico Pro. Vitrine locale, annonces prioritaires, statistiques et clients ciblés.',
   },
 }
 

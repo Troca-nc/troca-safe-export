@@ -3,8 +3,8 @@ import Header from '@/components/layout/Header'
 import LegalLayout from '@/components/legal/LegalLayout'
 
 export const metadata: Metadata = {
-  title: 'CGV — Troca',
-  description: 'Conditions générales de vente de Troca.',
+  title: 'CGV — Kalico',
+  description: 'Conditions générales de vente de Kalico.',
 }
 
 const LAST_UPDATE = '25 mai 2026'
@@ -16,7 +16,7 @@ export default function CgvPage() {
       <LegalLayout title="Conditions générales de vente" lastUpdated={LAST_UPDATE}>
         <h2>1. Services payants</h2>
         <p>
-          Troca commercialise des abonnements Pro, des boosts d’annonces, la publication de Bons Plans et le badge Conducteur Vérifié.
+          Kalico commercialise des abonnements Pro, des boosts d’annonces, la publication de Bons Plans et le badge Conducteur Vérifié.
         </p>
 
         <h2>2. Tarifs</h2>
@@ -43,7 +43,7 @@ export default function CgvPage() {
 
         <h2>3. Paiement</h2>
         <p>
-          Les paiements sont traités par Stripe ou PayPlug selon le moyen choisi. Troca ne stocke jamais les données complètes de carte.
+          Les paiements sont traités par Stripe ou PayPlug selon le moyen choisi. Kalico ne stocke jamais les données complètes de carte.
         </p>
 
         <h2>4. Renouvellement et remboursement</h2>

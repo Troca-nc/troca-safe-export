@@ -1,5 +1,5 @@
 -- ============================================================
--- Troca - Espace Pro (landing, profils et avis pro)
+-- Kalico - Espace Pro (landing, profils et avis pro)
 -- ============================================================
 
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_pro BOOLEAN DEFAULT FALSE;

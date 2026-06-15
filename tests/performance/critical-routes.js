@@ -2,7 +2,7 @@ import http from 'k6/http'
 import { check, sleep } from 'k6'
 
 const BASE_URL = (__ENV.K6_BASE_URL || 'http://127.0.0.1:3000').replace(/\/$/, '')
-const USERNAME = __ENV.K6_USERNAME || 'pro@demo.troca'
+const USERNAME = __ENV.K6_USERNAME || 'pro@demo.kalico'
 const PASSWORD = __ENV.K6_PASSWORD || 'Demo1234!'
 
 export const options = {

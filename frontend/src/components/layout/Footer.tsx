@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -18,7 +18,7 @@ const links = [
 
 export default function Footer() {
   const openCookieBanner = useCallback(() => {
-    window.dispatchEvent(new Event('troca-cookie-banner-open'))
+    window.dispatchEvent(new Event('kalico-cookie-banner-open'))
   }, [])
 
   return (
@@ -29,15 +29,15 @@ export default function Footer() {
             <div className="mb-3 flex items-center gap-3">
               <span className="relative h-12 w-12 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_8px_24px_rgba(8,32,50,0.12)]">
                 <Image
-                  src="/brand/troca-logo.png"
-                  alt="Troca"
+                  src="/brand/kalico-logo.png"
+                  alt="Kalico"
                   fill
                   sizes="48px"
                   className="object-cover"
                 />
               </span>
               <div>
-                <span className="block font-display text-lg font-bold text-night">Troca</span>
+                <span className="block font-display text-lg font-bold text-night">Kalico</span>
                 <span className="block text-[10px] font-semibold uppercase tracking-[0.22em] text-coral/80">
                   Nouvelle-Calédonie
                 </span>
@@ -70,11 +70,11 @@ export default function Footer() {
                 Gérer mes cookies
               </button>
               <a
-                href="mailto:contact@troca.nc"
+                href="mailto:contact@kalico.nc"
                 className="inline-flex items-center gap-2 text-sm text-night/60 transition-colors hover:text-coral"
               >
                 <Mail className="h-4 w-4" />
-                contact@troca.nc
+                contact@kalico.nc
               </a>
             </div>
           </div>
@@ -99,7 +99,7 @@ export default function Footer() {
           </div>
         </section>
         <div className="mt-8 flex flex-col gap-2 border-t border-[var(--color-border)] pt-4 text-xs text-night/40 sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 Troca. Tous droits réservés.</p>
+          <p>© 2026 Kalico. Tous droits réservés.</p>
           <p>Nouvelle-Calédonie.</p>
         </div>
       </div>

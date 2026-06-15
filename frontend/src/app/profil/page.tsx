@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 // src/app/profil/page.tsx  (mon profil)
 // src/app/profil/[id]/page.tsx  (profil public)
 
@@ -88,10 +88,10 @@ function ProfilePageContent() {
   const demoKey = (demoProfile || me?.demo_role || inferDemoAccount(me?.email) || 'particulier') as 'particulier' | 'pro' | 'bon_plan'
   const demoProfileEmail =
     demoKey === 'particulier'
-      ? 'particulier@demo.troca.nc'
+      ? 'particulier@demo.kalico.nc'
       : demoKey === 'pro'
-        ? 'pro@demo.troca.nc'
-        : 'bonplan@demo.troca.nc'
+        ? 'pro@demo.kalico.nc'
+        : 'bonplan@demo.kalico.nc'
   const activeTab = searchParams.get('tab')
 
   const [profile,   setProfile]   = useState<any>(null)
@@ -215,7 +215,7 @@ function ProfilePageContent() {
             <p className="mt-3 text-sm leading-relaxed text-night/60">
               {profileId
                 ? 'Votre espace personnel est en cours de chargement. Si la page reste vide, reconnectez-vous pour réinitialiser la session.'
-                : 'Vous devez être connecté pour consulter ou modifier votre profil. Utilisez votre compte Troca pour accéder à cet espace.'}
+                : 'Vous devez être connecté pour consulter ou modifier votre profil. Utilisez votre compte Kalico pour accéder à cet espace.'}
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link href="/connexion" className="btn-primary px-4 py-2 text-sm">

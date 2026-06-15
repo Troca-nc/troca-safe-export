@@ -44,10 +44,10 @@ export default function LegalLayout({ title, lastUpdated, children }: LegalLayou
 
       <div className="mt-12 rounded-2xl border border-night/10 bg-white/80 p-4 text-sm text-night/70 shadow-sm">
         <p>
-          Pour toute question juridique : <a href="mailto:legal@troca.nc">legal@troca.nc</a>
+          Pour toute question juridique : <a href="mailto:legal@kalico.nc">legal@kalico.nc</a>
         </p>
         <p className="mt-2">
-          Pour exercer vos droits RGPD : <a href="mailto:privacy@troca.nc">privacy@troca.nc</a>
+          Pour exercer vos droits RGPD : <a href="mailto:privacy@kalico.nc">privacy@kalico.nc</a>
         </p>
       </div>
     </main>

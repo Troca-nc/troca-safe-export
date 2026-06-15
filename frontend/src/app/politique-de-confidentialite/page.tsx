@@ -3,8 +3,8 @@ import Header from '@/components/layout/Header'
 import LegalLayout from '@/components/legal/LegalLayout'
 
 export const metadata: Metadata = {
-  title: 'Politique de confidentialité — Troca',
-  description: 'Politique de confidentialité et protection des données personnelles de Troca.',
+  title: 'Politique de confidentialité — Kalico',
+  description: 'Politique de confidentialité et protection des données personnelles de Kalico.',
 }
 
 const LAST_UPDATE = '25 mai 2026'
@@ -38,15 +38,15 @@ export default function PolitiqueConfidentialitePage() {
       <Header />
       <LegalLayout title="Politique de confidentialité" lastUpdated={LAST_UPDATE}>
         <p>
-          Troca collecte et traite uniquement les données nécessaires à la fourniture, à la sécurité et à l’amélioration du service.
+          Kalico collecte et traite uniquement les données nécessaires à la fourniture, à la sécurité et à l’amélioration du service.
         </p>
 
         <h2>1. Responsable de traitement</h2>
         <p>
-          Troca (forme juridique et RIDET à renseigner avant publication) est responsable du traitement de vos données personnelles.
+          Kalico (forme juridique et RIDET à renseigner avant publication) est responsable du traitement de vos données personnelles.
         </p>
         <p>
-          Contact vie privée : <a href="mailto:privacy@troca.nc">privacy@troca.nc</a>
+          Contact vie privée : <a href="mailto:privacy@kalico.nc">privacy@kalico.nc</a>
         </p>
 
         <h2>2. Données collectées</h2>
@@ -76,7 +76,7 @@ export default function PolitiqueConfidentialitePage() {
         </ul>
 
         <h2>4. Partage des données</h2>
-        <p>Troca ne vend pas vos données. Elles peuvent être partagées avec les prestataires indispensables au service :</p>
+        <p>Kalico ne vend pas vos données. Elles peuvent être partagées avec les prestataires indispensables au service :</p>
         <ul>
           <li>Stripe et PayPlug pour les paiements.</li>
           <li>Twilio pour les vérifications SMS.</li>
@@ -87,7 +87,7 @@ export default function PolitiqueConfidentialitePage() {
         <h2>5. Vos droits</h2>
         <p>
           Vous disposez des droits d’accès, rectification, effacement, portabilité, opposition et limitation. Pour les exercer, écrivez à
-          <a href="mailto:privacy@troca.nc"> privacy@troca.nc</a>.
+          <a href="mailto:privacy@kalico.nc"> privacy@kalico.nc</a>.
         </p>
 
         <h2>6. Sécurité</h2>
@@ -102,7 +102,7 @@ export default function PolitiqueConfidentialitePage() {
 
         <h2>8. Notifications, emails et push</h2>
         <p>
-          Troca envoie des notifications transactionnelles lorsque cela est nécessaire au fonctionnement du service
+          Kalico envoie des notifications transactionnelles lorsque cela est nécessaire au fonctionnement du service
           (nouveau message, réponse à une annonce, sécurité du compte). Ces messages relèvent de l’exécution du contrat.
         </p>
         <p>

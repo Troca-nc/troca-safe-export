@@ -191,7 +191,7 @@ async function processStripeWebhookEvent({
       amountXpf: Number(meta.amount_xpf ?? payment.metadata?.amount_xpf ?? 0) || 0,
       description: payment.type === 'subscription'
         ? `Abonnement Pro — ${meta.billing_period || 'mensuel'}`
-        : `Boost annonce — ${meta.boost_type || 'Troca'}`,
+        : `Boost annonce — ${meta.boost_type || 'Kalico'}`,
       stripePaymentId: paymentRef,
       invoiceNumber: buildInvoiceNumber('ST', paymentRef),
       paidAt: new Date(),
@@ -375,7 +375,7 @@ async function processStripeWebhookEvent({
         await upsertInvoiceRecord(query, {
           userId: payment.user_id,
           amountXpf: Number(meta.amount_xpf ?? payment.metadata?.amount_xpf ?? 0) || 0,
-          description: `Boost annonce — ${boostType || 'Troca'}`,
+          description: `Boost annonce — ${boostType || 'Kalico'}`,
           stripePaymentId: session.id,
           invoiceNumber: buildInvoiceNumber('ST', session.id),
           paidAt: new Date(),
@@ -439,9 +439,9 @@ async function processStripeWebhookEvent({
           const amountXpf = getWebPlan(planId, billingPeriod)?.amount_xpf ?? 0;
           await sendMail({
             to: userRows[0].email,
-            subject: `[Troca] Votre abonnement ${planLabel} est activé !`,
+            subject: `[Kalico] Votre abonnement ${planLabel} est activé !`,
             html: `<p>Bonjour ${userRows[0].prenom},</p>
-                   <p>Votre abonnement <strong>Troca ${planLabel} ${periodLabel}</strong> est maintenant actif.</p>
+                   <p>Votre abonnement <strong>Kalico ${planLabel} ${periodLabel}</strong> est maintenant actif.</p>
                    <p>Montant : <strong>${formatXpfEur(amountXpf)}</strong></p>
                    <p>Prochain renouvellement : ${periodEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                    <p>Gérez votre abonnement depuis <a href="${baseUrl}/parametres">vos paramètres</a>.</p>`,
@@ -558,9 +558,9 @@ async function processStripeWebhookEvent({
         }).catch(() => {});
         await sendMail({
           to: userRows[0].email,
-          subject: '[Troca] Renouvellement de votre abonnement Pro confirmé',
+          subject: '[Kalico] Renouvellement de votre abonnement Pro confirmé',
           html: `<p>Bonjour ${userRows[0].prenom},</p>
-                 <p>Votre abonnement Troca Pro a été renouvelé avec succès.</p>
+                 <p>Votre abonnement Kalico Pro a été renouvelé avec succès.</p>
                  <p>Montant débité : <strong>${amountXpf} XPF (${amountEur} €)</strong></p>
                  <p>Prochain renouvellement : ${periodEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                  <p><a href="${baseUrl}/parametres#factures">Télécharger la facture</a></p>`,
@@ -604,9 +604,9 @@ async function processStripeWebhookEvent({
         }).catch(() => {});
         await sendMail({
           to: rows[0].email,
-          subject: '[Troca] Échec du renouvellement de votre abonnement',
+          subject: '[Kalico] Échec du renouvellement de votre abonnement',
           html: `<p>Bonjour ${rows[0].prenom},</p>
-                 <p>Le renouvellement de votre abonnement Troca Pro a échoué.</p>
+                 <p>Le renouvellement de votre abonnement Kalico Pro a échoué.</p>
                  <p>Veuillez mettre à jour votre moyen de paiement depuis <a href="${baseUrl}/parametres">vos paramètres</a> pour ne pas perdre vos avantages Pro.</p>`,
         }).catch(() => {});
       }
@@ -752,7 +752,7 @@ async function processPayplugWebhook({
       amountXpf: expectedAmountXpf || providerAmountXpf || Number(payment.amount_xpf ?? 0) || 0,
       description: meta.payment_type === 'subscription'
         ? `Abonnement Pro — ${meta.billing_period || 'mensuel'}`
-        : `Boost annonce — ${meta.boost_type || 'Troca'}`,
+        : `Boost annonce — ${meta.boost_type || 'Kalico'}`,
       stripePaymentId: resourceId,
       invoiceNumber: buildInvoiceNumber('PP', resourceId),
       paidAt: new Date(),
@@ -955,9 +955,9 @@ async function processPayplugWebhook({
 
         await sendMail({
           to: userRows[0].email,
-          subject: `[Troca] Votre abonnement ${planLabel} est activé !`,
+          subject: `[Kalico] Votre abonnement ${planLabel} est activé !`,
           html: `<p>Bonjour ${userRows[0].prenom},</p>
-                 <p>Votre abonnement <strong>Troca ${planLabel} ${periodLabel}</strong> via PayPlug est activé.</p>
+                 <p>Votre abonnement <strong>Kalico ${planLabel} ${periodLabel}</strong> via PayPlug est activé.</p>
                  <p>Montant : <strong>${payplug.formatXpfEur(xpf)}</strong></p>
                  <p>Prochain renouvellement : ${periodEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                  <p>Gérez votre abonnement depuis <a href="${baseUrl}/parametres">vos paramètres</a>.</p>`,

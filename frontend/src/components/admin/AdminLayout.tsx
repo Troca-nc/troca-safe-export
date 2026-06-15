@@ -107,8 +107,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <Link href="/" className="flex items-center gap-2">
             <span className="relative h-10 w-10 overflow-hidden rounded-full border border-night/10 bg-white shadow-[0_8px_24px_rgba(8,32,50,0.12)]">
               <Image
-                src="/brand/troca-logo.png"
-                alt="Troca"
+                src="/brand/kalico-logo.png"
+                alt="Kalico"
                 fill
                 sizes="40px"
                 className="object-cover"
@@ -116,7 +116,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               />
             </span>
             <div>
-              <p className="font-display font-bold text-coral leading-none">Troca</p>
+              <p className="font-display font-bold text-coral leading-none">Kalico</p>
               <p className="text-[10px] text-night/40 mt-0.5">Administration</p>
             </div>
           </Link>

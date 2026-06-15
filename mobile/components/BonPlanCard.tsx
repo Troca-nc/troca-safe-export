@@ -44,7 +44,7 @@ export default function BonPlanCard({
       : Colors.lagoon
 
   const openTarget = async () => {
-    const target = bonPlan.cta_url || `https://troca.nc/bons-plans/${bonPlan.id}`
+    const target = bonPlan.cta_url || `https://kalico.nc/bons-plans/${bonPlan.id}`
     try {
       await Linking.openURL(target)
     } catch {}
@@ -73,7 +73,7 @@ export default function BonPlanCard({
           ) : null}
         </View>
         {bonPlan.business_badge === 'verified' ? (
-          <Text style={styles.businessBadge}>Vérifié Troca</Text>
+          <Text style={styles.businessBadge}>Vérifié Kalico</Text>
         ) : bonPlan.business_badge === 'active' ? (
           <Text style={styles.businessBadgeSoft}>Actif</Text>
         ) : null}

@@ -1,6 +1,6 @@
 'use client'
 // ============================================================
-//  Troca — Carte des annonces (Leaflet)
+//  Kalico — Carte des annonces (Leaflet)
 //  Affiche les annonces sur une carte avec clustering
 //  Filtre "près de moi" par rayon kilométrique
 // ============================================================
@@ -96,7 +96,7 @@ export default function AnnoncesMap({ listings, onBoundsChange }: Props) {
       markersRef.current.forEach(m => m.remove())
       markersRef.current = []
 
-      // Créer icône custom Troca
+      // Créer icône custom Kalico
       const icon = L.divIcon({
         className: '',
         html: `<div style="
@@ -114,7 +114,7 @@ export default function AnnoncesMap({ listings, onBoundsChange }: Props) {
       listings.forEach(l => {
         if (!l.lat || !l.lng) return
 
-        const popup = L.popup({ maxWidth: 220, className: 'troca-popup' }).setContent(`
+        const popup = L.popup({ maxWidth: 220, className: 'kalico-popup' }).setContent(`
           <a href="/annonces/${l.id}" style="text-decoration:none;color:inherit;">
             ${l.cover_url ? `<img src="${l.cover_url}" style="width:100%;height:100px;object-fit:cover;border-radius:8px 8px 0 0;display:block;">` : ''}
             <div style="padding: 10px 12px;">

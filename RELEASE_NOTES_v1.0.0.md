@@ -1,6 +1,6 @@
-# Troca v1.0.0
+# Kalico v1.0.0
 
-Public baseline and stable release for Troca.
+Public baseline and stable release for Kalico.
 
 ## Highlights
 

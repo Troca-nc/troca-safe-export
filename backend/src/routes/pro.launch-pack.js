@@ -47,11 +47,11 @@ function escapeHtml(value) {
 }
 
 function formatCompanyName(row) {
-  return row.pro_company_name || [row.prenom, row.nom].filter(Boolean).join(' ').trim() || 'Professionnel Troca';
+  return row.pro_company_name || [row.prenom, row.nom].filter(Boolean).join(' ').trim() || 'Professionnel Kalico';
 }
 
 function getBaseUrl() {
-  return (process.env.BASE_URL || 'https://troca.nc').replace(/\/+$/, '');
+  return (process.env.BASE_URL || 'https://kalico.nc').replace(/\/+$/, '');
 }
 
 function formatDateTime(iso) {
@@ -428,11 +428,11 @@ async function notifyCompletion(snapshot, payload) {
   await Promise.all([
     sendMail({
       to: snapshot.profile.email,
-      subject: '🎉 Votre pack de lancement Troca est terminé',
+      subject: '🎉 Votre pack de lancement Kalico est terminé',
       html: `<!DOCTYPE html>
 <html lang="fr"><body style="font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:0;">
   <div style="max-width:600px;margin:32px auto;background:#fff;border-radius:16px;overflow:hidden">
-    <div style="background:#0A7EA4;padding:24px 28px;color:#fff;font-weight:700;font-size:20px;">Troca</div>
+    <div style="background:#0A7EA4;padding:24px 28px;color:#fff;font-weight:700;font-size:20px;">Kalico</div>
     <div style="padding:28px;color:#1f2937;line-height:1.6;">
       <p>Bonjour ${escapeHtml(proLabel)},</p>
       <p>Bravo, votre pack de lancement est terminé. Votre vitrine Pro est prête à convertir.</p>
@@ -582,11 +582,11 @@ router.post('/launch-pack/schedule-call', authenticate, async (req, res, next) =
     await Promise.all([
       sendMail({
         to: result.snapshot.profile.email,
-        subject: 'Votre appel onboarding Troca est planifié',
+        subject: 'Votre appel onboarding Kalico est planifié',
         html: `<!DOCTYPE html>
 <html lang="fr"><body style="font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:0;">
   <div style="max-width:600px;margin:32px auto;background:#fff;border-radius:16px;overflow:hidden">
-    <div style="background:#0A7EA4;padding:24px 28px;color:#fff;font-weight:700;font-size:20px;">Troca</div>
+    <div style="background:#0A7EA4;padding:24px 28px;color:#fff;font-weight:700;font-size:20px;">Kalico</div>
     <div style="padding:28px;color:#1f2937;line-height:1.6;">
       <p>Bonjour ${escapeHtml(proLabel)},</p>
       <p>Votre appel onboarding a bien été enregistré.</p>

@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Alertes de recherche
+//  Kalico Mobile - Alertes de recherche
 // ============================================================
 
 import {

@@ -1,11 +1,11 @@
-# DESIGN AUDIT - Troca NC
+# DESIGN AUDIT - Kalico NC
 
 Date: 2026-05-27
 Scope: `frontend/src/app/`, `frontend/src/components/`, `frontend/src/styles/` (none found), `frontend/tailwind.config.js`
 
 ## 1. Synthese rapide
 
-L'interface Troca repose deja sur une base visuelle cohérente, mais elle mélange plusieurs niveaux de densité et plusieurs styles de composants. Le produit a une identité forte, avec une palette claire inspirée de la mer et de la NC, mais les écrans les plus importants restent plus denses qu'ils ne devraient l'être pour une expérience moderne et fluide.
+L'interface Kalico repose deja sur une base visuelle cohérente, mais elle mélange plusieurs niveaux de densité et plusieurs styles de composants. Le produit a une identité forte, avec une palette claire inspirée de la mer et de la NC, mais les écrans les plus importants restent plus denses qu'ils ne devraient l'être pour une expérience moderne et fluide.
 
 Ce qui fonctionne deja:
 - palette de couleurs bien identifiée et globalement stable

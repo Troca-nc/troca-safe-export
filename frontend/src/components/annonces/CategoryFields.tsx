@@ -1,6 +1,6 @@
 'use client'
 // ============================================================
-//  Troca — Champs dynamiques par catégorie
+//  Kalico — Champs dynamiques par catégorie
 //  Apparaissent dans le formulaire de publication selon la catégorie choisie
 // ============================================================
 

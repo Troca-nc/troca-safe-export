@@ -43,7 +43,7 @@ router.post('/supprimer-compte', verifyCsrf, async (req, res) => {
       // 2. Anonymiser toutes les données personnelles (RGPD : pseudonymisation)
       await client.query(`
         UPDATE users SET
-          email          = 'deleted_' || id || '@troca.supprime',
+          email          = 'deleted_' || id || '@kalico.supprime',
           password_hash  = NULL,
           prenom         = 'Utilisateur',
           nom            = 'Supprimé',
@@ -143,7 +143,7 @@ router.get('/exporter-donnees', async (req, res) => {
 
     const exportData = {
       export_date:  new Date().toISOString(),
-      export_for:   `Troca — Export RGPD Art. 20`,
+      export_for:   `Kalico — Export RGPD Art. 20`,
       profil:       userRes.rows[0],
       annonces:     annoncesRes.rows,
       messages:     messagesRes.rows,
@@ -163,7 +163,7 @@ router.get('/exporter-donnees', async (req, res) => {
 
     // Envoyer en ZIP avec un JSON lisible
     res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', `attachment; filename="troca-donnees-${userId}-${Date.now()}.zip"`);
+    res.setHeader('Content-Disposition', `attachment; filename="kalico-donnees-${userId}-${Date.now()}.zip"`);
 
     const archive = archiver('zip', { zlib: { level: 9 } });
     archive.pipe(res);
@@ -172,7 +172,7 @@ router.get('/exporter-donnees', async (req, res) => {
     archive.append(JSON.stringify(exportData, null, 2), { name: 'mes-donnees.json' });
 
     // README lisible
-    archive.append(`# Export de vos données Troca
+    archive.append(`# Export de vos données Kalico
 
 Date d'export : ${new Date().toLocaleDateString('fr-FR')}
 
@@ -190,13 +190,13 @@ Date d'export : ${new Date().toLocaleDateString('fr-FR')}
 ## Vos droits
 
 Conformément au RGPD, vous pouvez :
-- Demander la correction de vos données : privacy@troca.nc
+- Demander la correction de vos données : privacy@kalico.nc
 - Demander la suppression de votre compte : depuis Paramètres > Mon compte
-- Contacter notre DPO : dpo@troca.nc
+- Contacter notre DPO : dpo@kalico.nc
 
 ## Contact
 
-Troca — privacy@troca.nc
+Kalico — privacy@kalico.nc
 `, { name: 'README.txt' });
 
     archive.finalize();

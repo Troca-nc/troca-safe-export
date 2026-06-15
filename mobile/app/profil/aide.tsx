@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile — Aide & contact
+//  Kalico Mobile — Aide & contact
 //  /app/profil/aide.tsx
 // ============================================================
 
@@ -16,7 +16,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Radius, FontSize, FontWeight, Shadow } from '@/constants/theme';
 
-const WEB_URL = 'https://troca.nc';
+const WEB_URL = 'https://kalico.nc';
 
 function openUrl(url: string) {
   return WebBrowser.openBrowserAsync(url).catch(() => Linking.openURL(url).catch(() => {}));
@@ -55,8 +55,8 @@ function ActionCard({
 }
 
 export default function AideScreen() {
-  const contactEmail = () => Linking.openURL('mailto:contact@troca.nc').catch(() => {});
-  const contactSecurity = () => Linking.openURL('mailto:securite@troca.nc').catch(() => {});
+  const contactEmail = () => Linking.openURL('mailto:contact@kalico.nc').catch(() => {});
+  const contactSecurity = () => Linking.openURL('mailto:securite@kalico.nc').catch(() => {});
   const openHelpWeb = () => openUrl(`${WEB_URL}/contact`);
   const openPrivacy = () => openUrl(`${WEB_URL}/profil/confidentialite`);
   const openSupport = () => openUrl(WEB_URL);
@@ -129,7 +129,7 @@ export default function AideScreen() {
             </View>
           </View>
           <TouchableOpacity style={styles.mailBtn} onPress={openSupport} activeOpacity={0.85}>
-            <Text style={styles.mailBtnText}>Retour à Troca</Text>
+            <Text style={styles.mailBtnText}>Retour à Kalico</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

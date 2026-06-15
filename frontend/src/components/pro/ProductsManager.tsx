@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -198,7 +198,7 @@ function ProductSteps() {
     {
       icon: ArrowRight,
       title: '2. Publiez en annonce',
-      text: 'Transformez un produit en annonce visible dans le flux Troca.',
+      text: 'Transformez un produit en annonce visible dans le flux Kalico.',
     },
     {
       icon: Sparkles,

@@ -80,7 +80,7 @@ function formatMoney(value) {
 function formatDisplayName(row) {
   return row.pro_company_name
     || [row.pro_prenom, row.pro_nom].filter(Boolean).join(' ').trim()
-    || 'Professionnel Troca';
+    || 'Professionnel Kalico';
 }
 
 function normalizeQuoteItems(items) {
@@ -159,9 +159,9 @@ function buildSimplePdfBuffer(lines) {
 function buildQuotePdfBuffer(quote) {
   const items = Array.isArray(quote.items) ? quote.items : [];
   const lines = [
-    'TROCA NC',
+    'KALICO NC',
     `DEVIS ${quote.quote_number || quote.id}`,
-    `Professionnel : ${quote.pro_name || 'Professionnel Troca'}`,
+    `Professionnel : ${quote.pro_name || 'Professionnel Kalico'}`,
     `Client : ${quote.requester_name || 'Client'}`,
     `Email : ${quote.requester_email || 'Non renseigné'}`,
     `Téléphone : ${quote.requester_phone || 'Non renseigné'}`,
@@ -185,7 +185,7 @@ function buildQuotePdfBuffer(quote) {
   lines.push(`TVA (${Number(quote.tax_rate || 0)} %) : ${formatMoney(quote.tax_amount_xpf)}`);
   lines.push(`Total : ${formatMoney(quote.total_xpf)}`);
   lines.push('');
-  lines.push('Document généré par Troca.');
+  lines.push('Document généré par Kalico.');
 
   return buildSimplePdfBuffer(lines);
 }
@@ -293,7 +293,7 @@ async function sendQuoteSentEmails(quote) {
   const html = `<!DOCTYPE html>
   <html lang="fr"><body style="font-family:Arial,sans-serif;background:#f5f7fb;margin:0;padding:0;">
     <div style="max-width:720px;margin:32px auto;background:#fff;border-radius:18px;overflow:hidden">
-      <div style="background:#0A7EA4;padding:24px 28px;color:#fff;font-size:22px;font-weight:700">Troca</div>
+      <div style="background:#0A7EA4;padding:24px 28px;color:#fff;font-size:22px;font-weight:700">Kalico</div>
       <div style="padding:28px;color:#1f2937;line-height:1.6;">
         <p>Bonjour ${escapeHtml(quote.requester_name)},</p>
         <p>Le professionnel ${escapeHtml(quote.pro.display_name)} vous a envoyé un devis.</p>
@@ -335,7 +335,7 @@ async function sendQuoteDecisionEmails(quote, decision, reason) {
   const subject = `Votre devis a été ${label} - ${quote.pro.display_name}`;
   const html = `<!DOCTYPE html><html lang="fr"><body style="font-family:Arial,sans-serif;background:#f5f7fb;margin:0;padding:0;">
     <div style="max-width:680px;margin:32px auto;background:#fff;border-radius:18px;overflow:hidden">
-      <div style="background:#0A7EA4;padding:24px 28px;color:#fff;font-size:22px;font-weight:700">Troca</div>
+      <div style="background:#0A7EA4;padding:24px 28px;color:#fff;font-size:22px;font-weight:700">Kalico</div>
       <div style="padding:28px;color:#1f2937;line-height:1.6;">
         <p>Bonjour ${escapeHtml(quote.requester_name)},</p>
         <p>Votre devis ${escapeHtml(quote.quote_number)} a été <strong>${label}</strong>.</p>

@@ -4,11 +4,11 @@ const bcrypt = require('bcryptjs');
 const { withTransaction } = require('../config/database');
 const { buildCategoryTreeFromFlatRows } = require('../../../shared/categoryTaxonomy');
 
-const DEMO_DOMAIN = '@demo.troca.nc';
+const DEMO_DOMAIN = '@demo.kalico.nc';
 const DEMO_PASSWORD = 'Demo1234!';
 
 function normalizeDemoEmail(email) {
-  return String(email).replace('@demo.troca', '@demo.troca.nc');
+  return String(email).replace('@demo.kalico', '@demo.kalico.nc');
 }
 
 function isDemoRuntimeEnabled() {
@@ -17,19 +17,19 @@ function isDemoRuntimeEnabled() {
 
 const DEMO_USERS = [
   {
-    email: 'admin@demo.troca',
+    email: 'admin@demo.kalico',
     prenom: 'Ari',
     nom: 'Admin',
     is_admin: true,
     is_pro: true,
     pro_plan: 'pro',
     pro_verified: true,
-    pro_company_name: 'Troca Demo Admin',
+    pro_company_name: 'Kalico Demo Admin',
     pro_category: 'Plateforme',
     pro_description: 'Compte d’administration utilisé pour les démonstrations, la modération et le QA.',
     pro_logo_url: null,
     pro_banner_url: null,
-    pro_website: 'https://troca.nc',
+    pro_website: 'https://kalico.nc',
     pro_phone: '+687999000',
     pro_hours: 'Lun - Ven : 08h - 17h',
     pro_commune: 'Nouméa',
@@ -43,7 +43,7 @@ const DEMO_USERS = [
     trust_level: 'excellent',
   },
   {
-    email: 'particulier@demo.troca',
+    email: 'particulier@demo.kalico',
     prenom: 'Emma',
     nom: 'Martin',
     is_pro: false,
@@ -56,7 +56,7 @@ const DEMO_USERS = [
     trust_level: 'excellent',
   },
   {
-    email: 'pro@demo.troca',
+    email: 'pro@demo.kalico',
     prenom: 'Atelier',
     nom: 'Kalo',
     is_pro: true,
@@ -67,7 +67,7 @@ const DEMO_USERS = [
     pro_description: 'Atelier polyvalent pour la maintenance, le bricolage et les chantiers locaux.',
     pro_logo_url: null,
     pro_banner_url: null,
-    pro_website: 'https://atelier-kalo.demo.troca.nc',
+    pro_website: 'https://atelier-kalo.demo.kalico.nc',
     pro_phone: '+687990123',
     pro_hours: 'Lun - Sam : 07h30 - 18h',
     pro_commune: 'Dumbéa',
@@ -81,18 +81,18 @@ const DEMO_USERS = [
     trust_level: 'excellent',
   },
   {
-    email: 'bonplan@demo.troca',
-    prenom: 'Troca',
+    email: 'bonplan@demo.kalico',
+    prenom: 'Kalico',
     nom: 'BonPlan',
     is_pro: true,
     pro_plan: 'pro',
     pro_verified: true,
-    pro_company_name: 'Troca Bon Plans',
+    pro_company_name: 'Kalico Bon Plans',
     pro_category: 'Bon plans & événements',
-    pro_description: 'Promos locales, événements culturels et offres temporaires mises en avant sur Troca.',
+    pro_description: 'Promos locales, événements culturels et offres temporaires mises en avant sur Kalico.',
     pro_logo_url: null,
     pro_banner_url: null,
-    pro_website: 'https://troca.nc/bons-plans',
+    pro_website: 'https://kalico.nc/bons-plans',
     pro_phone: '+687990456',
     pro_hours: 'Lun - Sam : 09h - 18h',
     pro_commune: 'Nouméa',
@@ -106,7 +106,7 @@ const DEMO_USERS = [
     trust_level: 'excellent',
   },
   {
-    email: 'loueur@demo.troca',
+    email: 'loueur@demo.kalico',
     prenom: 'Lou',
     nom: 'Bourail',
     is_pro: false,
@@ -119,7 +119,7 @@ const DEMO_USERS = [
     trust_level: 'bon',
   },
   {
-    email: 'marine@demo.troca',
+    email: 'marine@demo.kalico',
     prenom: 'Marine',
     nom: 'Voh',
     is_pro: false,
@@ -135,7 +135,7 @@ const DEMO_USERS = [
 
 const DEMO_LISTINGS = [
   {
-    seller: 'pro@demo.troca',
+    seller: 'pro@demo.kalico',
     category_slug: 'vehicules',
     commune_slug: 'dumbea',
     titre: 'Toyota Hilux 2019 4x4 diesel',
@@ -148,7 +148,7 @@ const DEMO_LISTINGS = [
     tags: ['vehicule', '4x4', 'diesel'],
   },
   {
-    seller: 'particulier@demo.troca',
+    seller: 'particulier@demo.kalico',
     category_slug: 'immobilier',
     commune_slug: 'noumea',
     titre: 'Studio rénové avec vue mer',
@@ -159,7 +159,7 @@ const DEMO_LISTINGS = [
     tags: ['immobilier', 'studio', 'vue mer'],
   },
   {
-    seller: 'bonplan@demo.troca',
+    seller: 'bonplan@demo.kalico',
     category_slug: 'divers',
     commune_slug: 'noumea',
     titre: 'Bon plan week-end musique live',
@@ -172,7 +172,7 @@ const DEMO_LISTINGS = [
     tags: ['evenement', 'concert', 'promo'],
   },
   {
-    seller: 'particulier@demo.troca',
+    seller: 'particulier@demo.kalico',
     category_slug: 'nautisme',
     commune_slug: 'paita',
     titre: 'Kayak de mer 2 places avec pagaies',
@@ -183,7 +183,7 @@ const DEMO_LISTINGS = [
     tags: ['nautisme', 'sport', 'plein air'],
   },
   {
-    seller: 'pro@demo.troca',
+    seller: 'pro@demo.kalico',
     category_slug: 'multimedia',
     commune_slug: 'noumea',
     titre: 'MacBook Air M2 15 pouces',
@@ -194,7 +194,7 @@ const DEMO_LISTINGS = [
     tags: ['ordinateur', 'apple', 'portable'],
   },
   {
-    seller: 'marine@demo.troca',
+    seller: 'marine@demo.kalico',
     category_slug: 'divers',
     commune_slug: 'voh',
     titre: 'Canapé 3 places tissu beige',
@@ -205,7 +205,7 @@ const DEMO_LISTINGS = [
     tags: ['maison', 'mobilier', 'salon'],
   },
   {
-    seller: 'loueur@demo.troca',
+    seller: 'loueur@demo.kalico',
     category_slug: 'sports-loisirs',
     commune_slug: 'bourail',
     titre: 'VTT tout suspendu taille L',
@@ -216,7 +216,7 @@ const DEMO_LISTINGS = [
     tags: ['velo', 'sport', 'loisirs'],
   },
   {
-    seller: 'pro@demo.troca',
+    seller: 'pro@demo.kalico',
     category_slug: 'emploi',
     commune_slug: 'dumbea',
     titre: 'Offre emploi vendeur terrain',
@@ -233,8 +233,8 @@ const DEMO_LISTINGS = [
 const DEMO_MESSAGES = [
   {
     annonce_title: 'Toyota Hilux 2019 4x4 diesel',
-    buyer: 'particulier@demo.troca',
-    seller: 'pro@demo.troca',
+    buyer: 'particulier@demo.kalico',
+    seller: 'pro@demo.kalico',
     subject: 'Bonsoir, le véhicule est-il encore disponible ?',
     replies: [
       'Oui, il est toujours disponible et visible sur le tableau de bord local.',
@@ -244,8 +244,8 @@ const DEMO_MESSAGES = [
   },
   {
     annonce_title: 'Studio rénové avec vue mer',
-    buyer: 'loueur@demo.troca',
-    seller: 'particulier@demo.troca',
+    buyer: 'loueur@demo.kalico',
+    seller: 'particulier@demo.kalico',
     subject: 'Bonjour, le studio est-il proche des services ?',
     replies: [
       'Oui, marché, pharmacie et arrêt de bus à moins de 5 minutes.',
@@ -257,7 +257,7 @@ const DEMO_MESSAGES = [
 
 const DEMO_PAYMENTS = [
   {
-    email: 'pro@demo.troca',
+    email: 'pro@demo.kalico',
     type: 'subscription',
     provider: 'stripe',
     provider_ref: 'demo-subscription-001',
@@ -267,7 +267,7 @@ const DEMO_PAYMENTS = [
     document_type: 'invoice',
   },
   {
-    email: 'pro@demo.troca',
+    email: 'pro@demo.kalico',
     type: 'boost',
     provider: 'payplug',
     provider_ref: 'demo-boost-001',
@@ -277,7 +277,7 @@ const DEMO_PAYMENTS = [
     document_type: 'receipt',
   },
   {
-    email: 'bonplan@demo.troca',
+    email: 'bonplan@demo.kalico',
     type: 'boost',
     provider: 'stripe',
     provider_ref: 'demo-boost-002',
@@ -397,9 +397,9 @@ function buildListingTags(path, variantKey) {
 
 function buildDemoListingSeeds(categoryTree, communes) {
   const leaves = collectLeafCategoryContexts(categoryTree);
-  const particularSellers = ['particulier@demo.troca', 'loueur@demo.troca', 'marine@demo.troca'];
-  const proSellers = ['pro@demo.troca', 'bonplan@demo.troca'];
-  const boostSellers = ['pro@demo.troca', 'particulier@demo.troca', 'bonplan@demo.troca'];
+  const particularSellers = ['particulier@demo.kalico', 'loueur@demo.kalico', 'marine@demo.kalico'];
+  const proSellers = ['pro@demo.kalico', 'bonplan@demo.kalico'];
+  const boostSellers = ['pro@demo.kalico', 'particulier@demo.kalico', 'bonplan@demo.kalico'];
   const boostTypes = ['une', 'photos', 'urgent', 'remonte'];
   const boostDurations = [3, 7, 14, 30];
 
@@ -468,8 +468,8 @@ function buildDemoBonPlanSeeds(communes) {
   };
 
   const kindCycle = ['promo', 'event', 'concert'];
-  const proSellers = ['pro@demo.troca', 'bonplan@demo.troca'];
-  const particulierSellers = ['particulier@demo.troca', 'loueur@demo.troca', 'marine@demo.troca'];
+  const proSellers = ['pro@demo.kalico', 'bonplan@demo.kalico'];
+  const particulierSellers = ['particulier@demo.kalico', 'loueur@demo.kalico', 'marine@demo.kalico'];
   const communeCycle = communes.length > 0 ? communes : [{ slug: 'noumea', name: 'Nouméa' }];
 
   const seeds = [];
@@ -500,8 +500,8 @@ function buildDemoBonPlanSeeds(communes) {
       conditions: 'Offre démo, conditions indicatives.',
       contact_name: 'Equipe Pro Démo',
       contact_phone: '+687990000',
-      contact_email: 'pro@demo.troca.nc',
-      website_url: 'https://demo.troca.local',
+      contact_email: 'pro@demo.kalico.nc',
+      website_url: 'https://demo.kalico.local',
       opening_hours: 'Lun - Sam : 08h - 18h',
       photos: JSON.stringify([
         buildSvgDataUri({ seed: `${category}-pro-${index}-1`, size: '1200/900' }),
@@ -536,7 +536,7 @@ function buildDemoBonPlanSeeds(communes) {
       conditions: 'Annonce démo sous réserve de disponibilité.',
       contact_name: 'Particulier Démo',
       contact_phone: '+687980000',
-      contact_email: 'particulier@demo.troca.nc',
+      contact_email: 'particulier@demo.kalico.nc',
       website_url: null,
       opening_hours: 'Sur rendez-vous',
       photos: JSON.stringify([
@@ -560,14 +560,14 @@ function buildDemoRideSeeds(communes) {
   const communeBySlug = new Map(communes.map((commune) => [commune.slug, commune]));
   const fallbackCommune = communes.find(Boolean) || null;
   const pairs = [
-    { driver: 'pro@demo.troca', departure: 'noumea', destination: 'bourail', boosted: true, trust: 97, seats_total: 3, price_xpf: 1800, vehicle: 'SUV climatisé', comfort: 'Bagages acceptés, arrêt photo possible', description: 'Trajet interurbain confortable, départ centre-ville avec retour en fin de journée.' },
-    { driver: 'particulier@demo.troca', departure: 'dumbea', destination: 'noumea', boosted: true, trust: 91, seats_total: 4, price_xpf: 700, vehicle: 'Citadine propre', comfort: 'Non-fumeur, petit bagage, échange facile', description: 'Covoiturage quotidien pour les trajets domicile-travail avec profil de confiance.' },
-    { driver: 'bonplan@demo.troca', departure: 'paita', destination: 'noumea', boosted: true, trust: 89, seats_total: 2, price_xpf: 900, vehicle: 'Berline', comfort: 'Animaux de petite taille acceptés', description: 'Trajet de retour avec conducteur vérifié, idéal pour tester la réservation rapide.' },
-    { driver: 'pro@demo.troca', departure: 'noumea', destination: 'kone', boosted: true, trust: 94, seats_total: 3, price_xpf: 2200, vehicle: 'SUV premium', comfort: 'Boissons, musique douce, sièges spacieux', description: 'Long trajet vers le Nord avec conducteur expérimenté et annonces boostées.' },
-    { driver: 'particulier@demo.troca', departure: 'voh', destination: 'dumbea', boosted: true, trust: 86, seats_total: 3, price_xpf: 1600, vehicle: 'Break familial', comfort: 'Climatisation, pause café possible', description: 'Trajet régulier pour visualiser les cartes de covoiturage boostées.' },
-    { driver: 'loueur@demo.troca', departure: 'bourail', destination: 'noumea', boosted: false, trust: 74, seats_total: 4, price_xpf: 1200, vehicle: 'Compacte', comfort: 'Petit bagage, musique au choix', description: 'Trajet simple pour illustrer une annonce normale et un tarif doux.' },
-    { driver: 'marine@demo.troca', departure: 'paita', destination: 'dumbea', boosted: false, trust: 70, seats_total: 3, price_xpf: 500, vehicle: 'Citadine', comfort: 'Non-fumeur', description: 'Trajet de proximité, utile pour comparer les offres normales de la démo.' },
-    { driver: 'particulier@demo.troca', departure: 'noumea', destination: 'voh', boosted: false, trust: 68, seats_total: 4, price_xpf: 2100, vehicle: 'SUV', comfort: 'Arrêts sur la route possibles', description: 'Trajet normal pour compléter les listes du module covoiturage.' },
+    { driver: 'pro@demo.kalico', departure: 'noumea', destination: 'bourail', boosted: true, trust: 97, seats_total: 3, price_xpf: 1800, vehicle: 'SUV climatisé', comfort: 'Bagages acceptés, arrêt photo possible', description: 'Trajet interurbain confortable, départ centre-ville avec retour en fin de journée.' },
+    { driver: 'particulier@demo.kalico', departure: 'dumbea', destination: 'noumea', boosted: true, trust: 91, seats_total: 4, price_xpf: 700, vehicle: 'Citadine propre', comfort: 'Non-fumeur, petit bagage, échange facile', description: 'Covoiturage quotidien pour les trajets domicile-travail avec profil de confiance.' },
+    { driver: 'bonplan@demo.kalico', departure: 'paita', destination: 'noumea', boosted: true, trust: 89, seats_total: 2, price_xpf: 900, vehicle: 'Berline', comfort: 'Animaux de petite taille acceptés', description: 'Trajet de retour avec conducteur vérifié, idéal pour tester la réservation rapide.' },
+    { driver: 'pro@demo.kalico', departure: 'noumea', destination: 'kone', boosted: true, trust: 94, seats_total: 3, price_xpf: 2200, vehicle: 'SUV premium', comfort: 'Boissons, musique douce, sièges spacieux', description: 'Long trajet vers le Nord avec conducteur expérimenté et annonces boostées.' },
+    { driver: 'particulier@demo.kalico', departure: 'voh', destination: 'dumbea', boosted: true, trust: 86, seats_total: 3, price_xpf: 1600, vehicle: 'Break familial', comfort: 'Climatisation, pause café possible', description: 'Trajet régulier pour visualiser les cartes de covoiturage boostées.' },
+    { driver: 'loueur@demo.kalico', departure: 'bourail', destination: 'noumea', boosted: false, trust: 74, seats_total: 4, price_xpf: 1200, vehicle: 'Compacte', comfort: 'Petit bagage, musique au choix', description: 'Trajet simple pour illustrer une annonce normale et un tarif doux.' },
+    { driver: 'marine@demo.kalico', departure: 'paita', destination: 'dumbea', boosted: false, trust: 70, seats_total: 3, price_xpf: 500, vehicle: 'Citadine', comfort: 'Non-fumeur', description: 'Trajet de proximité, utile pour comparer les offres normales de la démo.' },
+    { driver: 'particulier@demo.kalico', departure: 'noumea', destination: 'voh', boosted: false, trust: 68, seats_total: 4, price_xpf: 2100, vehicle: 'SUV', comfort: 'Arrêts sur la route possibles', description: 'Trajet normal pour compléter les listes du module covoiturage.' },
   ];
 
   return pairs.map((pair, index) => {
@@ -596,11 +596,11 @@ function buildDemoRideSeeds(communes) {
       seed_key: `${pair.driver}-${index}`,
       reviews: pair.boosted
         ? [
-            { reviewer: 'particulier@demo.troca', rating: 5, comment: 'Trajet parfait, très fluide et rassurant.' },
-            { reviewer: 'loueur@demo.troca', rating: 4, comment: 'Ponctuel et très pro.' },
+            { reviewer: 'particulier@demo.kalico', rating: 5, comment: 'Trajet parfait, très fluide et rassurant.' },
+            { reviewer: 'loueur@demo.kalico', rating: 4, comment: 'Ponctuel et très pro.' },
           ]
         : [
-            { reviewer: 'marine@demo.troca', rating: 4, comment: 'Trajet simple et agréable.' },
+            { reviewer: 'marine@demo.kalico', rating: 4, comment: 'Trajet simple et agréable.' },
           ],
     };
   });
@@ -741,7 +741,7 @@ async function seedDemoDataset() {
           passwordHash,
           seedUser.prenom,
           seedUser.nom,
-          seedUser.email === 'admin@demo.troca' ? '+687999000' : null,
+          seedUser.email === 'admin@demo.kalico' ? '+687999000' : null,
           null,
           commune?.id ?? null,
           seedUser.bio,
@@ -749,7 +749,7 @@ async function seedDemoDataset() {
           seedUser.is_pro ?? false,
           seedUser.pro_plan ?? null,
           seedUser.is_pro ? new Date(Date.now() + 1000 * 60 * 60 * 24 * 45) : null,
-          seedUser.email === 'bonplan@demo.troca' ? new Date() : null,
+          seedUser.email === 'bonplan@demo.kalico' ? new Date() : null,
           seedUser.pro_verified ?? seedUser.is_pro ?? false,
           seedUser.is_pro ? new Date(Date.now() - 1000 * 60 * 60 * 24 * 7) : null,
           seedUser.pro_company_name ?? null,
@@ -776,10 +776,10 @@ async function seedDemoDataset() {
     }
 
     const proReviewSeeds = [
-      { pro: 'pro@demo.troca', reviewer: 'particulier@demo.troca', rating: 5, comment: 'Service rapide et très pro, réponses claires.' },
-      { pro: 'pro@demo.troca', reviewer: 'loueur@demo.troca', rating: 4, comment: 'Très bon suivi et annonces bien présentées.' },
-      { pro: 'bonplan@demo.troca', reviewer: 'marine@demo.troca', rating: 5, comment: 'Les promos locales sont toujours bien mises en avant.' },
-      { pro: 'bonplan@demo.troca', reviewer: 'particulier@demo.troca', rating: 5, comment: 'Parfait pour découvrir des événements du coin.' },
+      { pro: 'pro@demo.kalico', reviewer: 'particulier@demo.kalico', rating: 5, comment: 'Service rapide et très pro, réponses claires.' },
+      { pro: 'pro@demo.kalico', reviewer: 'loueur@demo.kalico', rating: 4, comment: 'Très bon suivi et annonces bien présentées.' },
+      { pro: 'bonplan@demo.kalico', reviewer: 'marine@demo.kalico', rating: 5, comment: 'Les promos locales sont toujours bien mises en avant.' },
+      { pro: 'bonplan@demo.kalico', reviewer: 'particulier@demo.kalico', rating: 5, comment: 'Parfait pour découvrir des événements du coin.' },
     ];
 
     for (const reviewSeed of proReviewSeeds) {
@@ -794,7 +794,7 @@ async function seedDemoDataset() {
       ).catch(() => {});
     }
 
-    for (const proEmail of ['admin@demo.troca', 'pro@demo.troca', 'bonplan@demo.troca']) {
+    for (const proEmail of ['admin@demo.kalico', 'pro@demo.kalico', 'bonplan@demo.kalico']) {
       const pro = usersByEmail.get(proEmail);
       if (!pro) continue;
       const stats = await client.query(
@@ -914,7 +914,7 @@ async function seedDemoDataset() {
           seedBonPlan.normal_price_xpf ?? null,
           seedBonPlan.promo_price_xpf ?? priceXpf,
           'En profiter',
-          seedBonPlan.cta_url || 'https://demo.troca.local',
+          seedBonPlan.cta_url || 'https://demo.kalico.local',
           seedBonPlan.category,
           null,
           null,
@@ -955,11 +955,11 @@ async function seedDemoDataset() {
     }
 
     const favorites = [
-      ['particulier@demo.troca', 'Toyota Hilux 2019 4x4 diesel'],
-      ['particulier@demo.troca', 'Studio rénové avec vue mer'],
-      ['loueur@demo.troca', 'MacBook Air M2 15 pouces'],
-      ['marine@demo.troca', 'Bon plan week-end musique live'],
-      ['marine@demo.troca', 'VTT tout suspendu taille L'],
+      ['particulier@demo.kalico', 'Toyota Hilux 2019 4x4 diesel'],
+      ['particulier@demo.kalico', 'Studio rénové avec vue mer'],
+      ['loueur@demo.kalico', 'MacBook Air M2 15 pouces'],
+      ['marine@demo.kalico', 'Bon plan week-end musique live'],
+      ['marine@demo.kalico', 'VTT tout suspendu taille L'],
     ];
 
     for (const [email, title] of favorites) {
@@ -974,17 +974,17 @@ async function seedDemoDataset() {
 
     const alerts = [
       {
-        email: 'particulier@demo.troca',
+        email: 'particulier@demo.kalico',
         label: 'Voiture familiale',
         filters: { category: 'vehicules', commune_id: lookupBySlug(communes, 'noumea')?.id ?? null, price_max: 3500000 },
       },
       {
-        email: 'loueur@demo.troca',
+        email: 'loueur@demo.kalico',
         label: 'Studio location',
         filters: { category: 'immobilier', commune_id: lookupBySlug(communes, 'noumea')?.id ?? null, price_max: 150000 },
       },
       {
-        email: 'marine@demo.troca',
+        email: 'marine@demo.kalico',
         label: 'Matériel multimédia',
         filters: { category: 'multimedia', price_max: 250000 },
       },
@@ -1001,9 +1001,9 @@ async function seedDemoDataset() {
     }
 
     for (const review of [
-      { author: 'particulier@demo.troca', target: 'pro@demo.troca', note: 5, commentaire: 'Réponse rapide et très propre.' },
-      { author: 'marine@demo.troca', target: 'particulier@demo.troca', note: 4, commentaire: 'Bonne communication et photos fidèles.' },
-      { author: 'loueur@demo.troca', target: 'pro@demo.troca', note: 5, commentaire: 'Expérience très pro, parfait pour tester le dashboard.' },
+      { author: 'particulier@demo.kalico', target: 'pro@demo.kalico', note: 5, commentaire: 'Réponse rapide et très propre.' },
+      { author: 'marine@demo.kalico', target: 'particulier@demo.kalico', note: 4, commentaire: 'Bonne communication et photos fidèles.' },
+      { author: 'loueur@demo.kalico', target: 'pro@demo.kalico', note: 5, commentaire: 'Expérience très pro, parfait pour tester le dashboard.' },
     ]) {
       const author = usersByEmail.get(review.author);
       const target = usersByEmail.get(review.target);
@@ -1017,9 +1017,9 @@ async function seedDemoDataset() {
     }
 
     for (const [email, extra] of [
-      ['particulier@demo.troca', { type: 'ios', suffix: '001' }],
-      ['pro@demo.troca', { type: 'android', suffix: '002' }],
-      ['bonplan@demo.troca', { type: 'ios', suffix: '003' }],
+      ['particulier@demo.kalico', { type: 'ios', suffix: '001' }],
+      ['pro@demo.kalico', { type: 'android', suffix: '002' }],
+      ['bonplan@demo.kalico', { type: 'ios', suffix: '003' }],
     ]) {
       const user = usersByEmail.get(email);
       if (!user) continue;
@@ -1065,8 +1065,8 @@ async function seedDemoDataset() {
             paymentSeed.provider_ref,
             paymentSeed.document_type,
             paymentSeed.amount_xpf,
-            `data:text/plain;base64,${Buffer.from(`Troca demo ${paymentSeed.provider_ref}`).toString('base64')}`,
-            `https://demo.troca.local/${paymentSeed.provider}/${paymentSeed.provider_ref}`,
+            `data:text/plain;base64,${Buffer.from(`Kalico demo ${paymentSeed.provider_ref}`).toString('base64')}`,
+            `https://demo.kalico.local/${paymentSeed.provider}/${paymentSeed.provider_ref}`,
             JSON.stringify({ demo: true, ...paymentSeed.metadata }),
           ]
         );
@@ -1076,8 +1076,8 @@ async function seedDemoDataset() {
     const conversationSeeds = [
       {
         listing_title: 'Toyota Hilux 2019 4x4 diesel',
-        buyer: 'particulier@demo.troca',
-        seller: 'pro@demo.troca',
+        buyer: 'particulier@demo.kalico',
+        seller: 'pro@demo.kalico',
         subject: 'Bonjour, le véhicule est-il toujours disponible ?',
         replies: [
           'Oui, il est toujours disponible et visible pour le QA local.',
@@ -1087,8 +1087,8 @@ async function seedDemoDataset() {
       },
       {
         listing_title: 'Studio rénové avec vue mer',
-        buyer: 'loueur@demo.troca',
-        seller: 'particulier@demo.troca',
+        buyer: 'loueur@demo.kalico',
+        seller: 'particulier@demo.kalico',
         subject: 'Bonsoir, pouvez-vous m’envoyer la surface exacte ?',
         replies: [
           'Le studio fait 32 m², avec balcon et place de parking.',
@@ -1183,11 +1183,11 @@ async function seedDemoDataset() {
     }
 
     const rideBookings = [
-      { ride_key: 'pro@demo.troca-0', passenger: 'particulier@demo.troca', seats: 1 },
-      { ride_key: 'particulier@demo.troca-1', passenger: 'loueur@demo.troca', seats: 2 },
-      { ride_key: 'bonplan@demo.troca-2', passenger: 'marine@demo.troca', seats: 1 },
-      { ride_key: 'pro@demo.troca-3', passenger: 'marine@demo.troca', seats: 1 },
-      { ride_key: 'particulier@demo.troca-4', passenger: 'pro@demo.troca', seats: 1 },
+      { ride_key: 'pro@demo.kalico-0', passenger: 'particulier@demo.kalico', seats: 1 },
+      { ride_key: 'particulier@demo.kalico-1', passenger: 'loueur@demo.kalico', seats: 2 },
+      { ride_key: 'bonplan@demo.kalico-2', passenger: 'marine@demo.kalico', seats: 1 },
+      { ride_key: 'pro@demo.kalico-3', passenger: 'marine@demo.kalico', seats: 1 },
+      { ride_key: 'particulier@demo.kalico-4', passenger: 'pro@demo.kalico', seats: 1 },
     ];
 
     for (const bookingSeed of rideBookings) {
@@ -1243,12 +1243,12 @@ async function seedDemoDataset() {
     }
 
     for (const [userKey, eventName, pagePath, deviceType] of [
-      ['particulier@demo.troca', 'page_view', '/', 'web'],
-      ['particulier@demo.troca', 'listing_view', '/annonces/1', 'web'],
-      ['pro@demo.troca', 'checkout_start', '/pro', 'web'],
-      ['pro@demo.troca', 'checkout_success', '/paiement/succes', 'web'],
-      ['bonplan@demo.troca', 'page_view', '/annonces/nouvelle', 'mobile'],
-      ['loueur@demo.troca', 'favorite_add', '/annonces', 'mobile'],
+      ['particulier@demo.kalico', 'page_view', '/', 'web'],
+      ['particulier@demo.kalico', 'listing_view', '/annonces/1', 'web'],
+      ['pro@demo.kalico', 'checkout_start', '/pro', 'web'],
+      ['pro@demo.kalico', 'checkout_success', '/paiement/succes', 'web'],
+      ['bonplan@demo.kalico', 'page_view', '/annonces/nouvelle', 'mobile'],
+      ['loueur@demo.kalico', 'favorite_add', '/annonces', 'mobile'],
     ]) {
       const user = usersByEmail.get(userKey);
       if (!user) continue;
@@ -1288,11 +1288,11 @@ async function seedDemoDataset() {
       },
       users: DEMO_USERS.map((user) => ({
         email: normalizeDemoEmail(user.email),
-        role: user.email === 'admin@demo.troca'
+        role: user.email === 'admin@demo.kalico'
           ? 'admin'
-          : user.email === 'pro@demo.troca'
+          : user.email === 'pro@demo.kalico'
             ? 'pro'
-            : user.email === 'bonplan@demo.troca'
+            : user.email === 'bonplan@demo.kalico'
               ? 'bon_plan'
               : 'particulier',
       })),

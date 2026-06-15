@@ -47,7 +47,7 @@ function getDisplayName(pro: ProCardModel) {
     pro.display_name
     || pro.pro_company_name
     || [pro.prenom, pro.nom].filter(Boolean).join(' ').trim()
-    || 'Professionnel Troca'
+    || 'Professionnel Kalico'
   )
 }
 

@@ -22,7 +22,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  const session = request.cookies.get('troca_admin_session')?.value
+  const session = request.cookies.get('kalico_admin_session')?.value
 
   if (!session && !PUBLIC_PATHS.some((prefix) => pathname.startsWith(prefix))) {
     const url = request.nextUrl.clone()

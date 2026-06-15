@@ -8,7 +8,7 @@ import QuotePublicClient from './QuotePublicClient'
 import { fetchPublicQuote } from '../publicQuoteData'
 
 export async function generateMetadata(): Promise<Metadata> {
-  return generateNoindexMetadata('Devis Troca')
+  return generateNoindexMetadata('Devis Kalico')
 }
 
 export default async function QuotePublicPage(

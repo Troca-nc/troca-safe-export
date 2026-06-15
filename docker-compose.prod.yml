@@ -48,7 +48,7 @@ x-backend-env: &backend-env
 services:
   nginx:
     image: nginx:1.27-alpine
-    container_name: troca_nginx
+    container_name: kalico_nginx
     restart: unless-stopped
     ports:
       - '80:80'
@@ -66,11 +66,11 @@ services:
       - frontend
     networks:
       - app_net
-      - troca_internal
+      - kalico_internal
 
   certbot:
     image: certbot/certbot:v3.0.1
-    container_name: troca_certbot
+    container_name: kalico_certbot
     restart: unless-stopped
     volumes:
       - certbot_www:/var/www/certbot
@@ -82,7 +82,7 @@ services:
 
   postgres:
     image: postgis/postgis:16-3.4
-    container_name: troca_postgres
+    container_name: kalico_postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_NAME}
@@ -101,7 +101,7 @@ services:
 
   redis:
     image: redis:7.2-alpine
-    container_name: troca_redis
+    container_name: kalico_redis
     restart: unless-stopped
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
@@ -158,7 +158,7 @@ services:
       - db_net
       - cache_net
       - app_net
-      - troca_internal
+      - kalico_internal
 
   worker:
     image: ${BACKEND_IMAGE}
@@ -203,7 +203,7 @@ services:
     build:
       context: ./admin
       dockerfile: Dockerfile
-    container_name: troca_admin
+    container_name: kalico_admin
     restart: unless-stopped
     environment:
       ADMIN_EMAIL: ${ADMIN_EMAIL}
@@ -213,12 +213,12 @@ services:
       BACKEND_URL: http://backend:3001
       ADMIN_TOTP_SECRET: ${ADMIN_TOTP_SECRET}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://admin.troca.nc}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://admin.kalico.nc}
       NODE_ENV: production
     depends_on:
       - backend
     networks:
-      - troca_internal
+      - kalico_internal
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3002/api/health']
       interval: 30s
@@ -229,7 +229,7 @@ services:
     build:
       context: ./
       dockerfile: backup/Dockerfile
-    container_name: troca_backup
+    container_name: kalico_backup
     restart: unless-stopped
     environment:
       PGHOST: postgres
@@ -256,20 +256,20 @@ networks:
     driver: bridge
   app_net:
     driver: bridge
-  troca_internal:
+  kalico_internal:
     driver: bridge
     internal: true
 
 volumes:
   postgres_data:
-    name: troca_postgres_data
+    name: kalico_postgres_data
   redis_data:
-    name: troca_redis_data
+    name: kalico_redis_data
   certbot_www:
-    name: troca_certbot_www
+    name: kalico_certbot_www
   certbot_conf:
-    name: troca_certbot_conf
+    name: kalico_certbot_conf
   uploads_data:
-    name: troca_uploads_data
+    name: kalico_uploads_data
   backups_data:
-    name: troca_backups_data
+    name: kalico_backups_data

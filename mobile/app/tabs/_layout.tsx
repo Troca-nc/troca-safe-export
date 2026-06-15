@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile — Navigation par onglets
+//  Kalico Mobile — Navigation par onglets
 // ============================================================
 
 import { Tabs }       from 'expo-router';

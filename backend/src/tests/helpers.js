@@ -1,7 +1,7 @@
 'use strict';
 
 // ============================================================
-//  Troca Tests — Helpers & mocks réutilisables
+//  Kalico Tests — Helpers & mocks réutilisables
 // ============================================================
 
 const assert = require('assert');
@@ -81,14 +81,14 @@ function makeAccessToken(userId = 1, extra = {}) {
 
 function makeAuthReq(userId = 1, overrides = {}) {
   return makeReq({
-    user:    { id: userId, email: 'test@troca.nc', prenom: 'Test', nom: 'User', is_admin: false, is_pro: false },
+    user:    { id: userId, email: 'test@kalico.nc', prenom: 'Test', nom: 'User', is_admin: false, is_pro: false },
     headers: { authorization: `Bearer ${makeAccessToken(userId)}` },
     ...overrides,
   });
 }
 
 function makeAdminReq(userId = 99) {
-  return makeAuthReq(userId, { user: { id: userId, email: 'admin@troca.nc', prenom: 'Admin', nom: 'Troca', is_admin: true, is_pro: true } });
+  return makeAuthReq(userId, { user: { id: userId, email: 'admin@kalico.nc', prenom: 'Admin', nom: 'Kalico', is_admin: true, is_pro: true } });
 }
 
 // ── Mock DB query ─────────────────────────────────────────────

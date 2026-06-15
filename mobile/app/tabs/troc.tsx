@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Onglet Troc
+//  Kalico Mobile - Onglet Troc
 // ============================================================
 
 import { useEffect, useMemo, useState } from 'react'

@@ -1,7 +1,7 @@
 'use strict';
 
 // ============================================================
-//  Troca - Routes paiement
+//  Kalico - Routes paiement
 //  Boost, abonnements Pro, webhooks Stripe et PayPlug
 // ============================================================
 
@@ -316,7 +316,7 @@ router.post('/boost', authenticate, paymentLimiter, validate(boostSchema), async
         description: `${boost.label} — ${annonceRows[0].titre}`,
         email: req.user.email,
         first_name: req.user.prenom || 'Client',
-        last_name: req.user.nom || 'Troca',
+        last_name: req.user.nom || 'Kalico',
         return_url: `${baseUrl}/paiement/succes?type=boost&pp_payment_id={PAYPLUG_PAYMENT_ID}`,
         cancel_url: `${baseUrl}/paiement/annule?provider=payplug`,
         metadata: {
@@ -459,7 +459,7 @@ router.post('/subscription', authenticate, paymentLimiter, validate(subscription
         plan: planSlug,
         email: req.user.email,
         first_name: req.user.prenom || 'Client',
-        last_name: req.user.nom || 'Troca',
+        last_name: req.user.nom || 'Kalico',
         return_url: `${baseUrl}/abonnement/confirmation?payment_id={PAYPLUG_SUBSCRIPTION_ID}&provider=payplug`,
         cancel_url: `${baseUrl}/paiement/annule?provider=payplug`,
         metadata: {
@@ -681,7 +681,7 @@ router.post('/cancel', authenticate, paymentLimiter, async (req, res) => {
 
     await sendMail({
       to: email,
-      subject: "[Troca] Confirmation d'annulation de votre abonnement Pro",
+      subject: "[Kalico] Confirmation d'annulation de votre abonnement Pro",
       html: `<p>Bonjour ${prenom},</p>
              <p>Votre annulation a bien été prise en compte.</p>
              <p>Votre abonnement Pro reste actif jusqu'au <strong>${periodEndStr}</strong>.<br>
@@ -1050,9 +1050,9 @@ router.post('/webhooks/stripe', async (req, res) => {
             const amountXpf = getWebPlan(planId, billingPeriod)?.amount_xpf ?? 0;
             await sendMail({
               to: userRows[0].email,
-              subject: `[Troca] Votre abonnement ${planLabel} est activé !`,
+              subject: `[Kalico] Votre abonnement ${planLabel} est activé !`,
               html: `<p>Bonjour ${userRows[0].prenom},</p>
-                     <p>Votre abonnement <strong>Troca ${planLabel} ${periodLabel}</strong> est maintenant actif.</p>
+                     <p>Votre abonnement <strong>Kalico ${planLabel} ${periodLabel}</strong> est maintenant actif.</p>
                      <p>Montant : <strong>${formatXpfEur(amountXpf)}</strong></p>
                      <p>Prochain renouvellement : ${periodEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                      <p>Gérez votre abonnement depuis <a href="${baseUrl}/parametres">vos paramètres</a>.</p>`,
@@ -1139,9 +1139,9 @@ router.post('/webhooks/stripe', async (req, res) => {
           const amountXpf = Math.round((inv.amount_paid / 100) * XPF_PER_EUR).toLocaleString('fr-FR');
           await sendMail({
             to: userRows[0].email,
-            subject: '[Troca] Renouvellement de votre abonnement Pro confirmé',
+            subject: '[Kalico] Renouvellement de votre abonnement Pro confirmé',
             html: `<p>Bonjour ${userRows[0].prenom},</p>
-                   <p>Votre abonnement Troca Pro a été renouvelé avec succès.</p>
+                   <p>Votre abonnement Kalico Pro a été renouvelé avec succès.</p>
                    <p>Montant débité : <strong>${amountXpf} XPF (${amountEur} €)</strong></p>
                    <p>Prochain renouvellement : ${periodEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                    <p><a href="${baseUrl}/parametres#factures">Télécharger la facture</a></p>`,
@@ -1166,9 +1166,9 @@ router.post('/webhooks/stripe', async (req, res) => {
         if (rows[0]) {
           await sendMail({
             to: rows[0].email,
-            subject: '[Troca] Échec du renouvellement de votre abonnement',
+            subject: '[Kalico] Échec du renouvellement de votre abonnement',
             html: `<p>Bonjour ${rows[0].prenom},</p>
-                   <p>Le renouvellement de votre abonnement Troca Pro a échoué.</p>
+                   <p>Le renouvellement de votre abonnement Kalico Pro a échoué.</p>
                    <p>Veuillez mettre à jour votre moyen de paiement depuis <a href="${baseUrl}/parametres">vos paramètres</a> pour ne pas perdre vos avantages Pro.</p>`,
           }).catch(() => {});
         }
@@ -1400,9 +1400,9 @@ router.post('/webhooks/payplug', async (req, res) => {
 
           await sendMail({
             to: userRows[0].email,
-            subject: `[Troca] Votre abonnement ${planLabel} est activé !`,
+            subject: `[Kalico] Votre abonnement ${planLabel} est activé !`,
             html: `<p>Bonjour ${userRows[0].prenom},</p>
-                   <p>Votre abonnement <strong>Troca ${planLabel} ${periodLabel}</strong> via PayPlug est activé.</p>
+                   <p>Votre abonnement <strong>Kalico ${planLabel} ${periodLabel}</strong> via PayPlug est activé.</p>
                    <p>Montant : <strong>${payplug.formatXpfEur(xpf)}</strong></p>
                    <p>Prochain renouvellement : ${periodEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                    <p>Gérez votre abonnement depuis <a href="${baseUrl}/parametres">vos paramètres</a>.</p>`,

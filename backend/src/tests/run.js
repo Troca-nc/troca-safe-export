@@ -1,7 +1,7 @@
 'use strict';
 
 // ============================================================
-//  Troca Backend — Test runner
+//  Kalico Backend — Test runner
 //  Usage : node src/tests/run.js
 // ============================================================
 
@@ -25,7 +25,7 @@ const SUITES = [
 
 async function run() {
   const { flushTests } = require('./helpers');
-  console.log('\n🧪 Troca Backend — Suite de tests\n' + '─'.repeat(48));
+  console.log('\n🧪 Kalico Backend — Suite de tests\n' + '─'.repeat(48));
   const start = Date.now();
 
   const promises = [];

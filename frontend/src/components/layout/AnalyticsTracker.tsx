@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { refreshAnalyticsSession, trackPageView } from '@/lib/analytics'
 
-const CONSENT_EVENT = 'troca-cookie-consent-changed'
+const CONSENT_EVENT = 'kalico-cookie-consent-changed'
 
 export default function AnalyticsTracker() {
   const pathname = usePathname()

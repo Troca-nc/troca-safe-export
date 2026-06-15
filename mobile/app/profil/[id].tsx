@@ -1,5 +1,5 @@
 // ============================================================
-//  Troca Mobile - Profil public vendeur
+//  Kalico Mobile - Profil public vendeur
 // ============================================================
 
 import { useEffect, useMemo, useState } from 'react';
@@ -39,13 +39,13 @@ export default function PublicSellerProfileMobile() {
     return {
       kind: 'profil',
       itemId: profile.id,
-      title: `${fullName} | Troca`,
+      title: `${fullName} | Kalico`,
       description: [
         profile.commune_name ? `Basé à ${profile.commune_name}` : null,
         profile.is_pro ? 'Compte professionnel' : 'Profil particulier',
         profile.active_listings_count != null ? `${profile.active_listings_count} annonce${profile.active_listings_count > 1 ? 's' : ''}` : null,
       ].filter(Boolean).join(' • '),
-      url: `https://troca.nc/profil/${profile.id}`,
+      url: `https://kalico.nc/profil/${profile.id}`,
     };
   }, [profile]);
   const shareLinks = useMemo(() => (shareContent ? buildMobileShareLinks(shareContent) : null), [shareContent]);

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { Suspense } from 'react'
 import Link from 'next/link'
@@ -17,7 +17,7 @@ const CONFIG: Record<Role, {
   badge: string
 }> = {
   particulier: {
-    title: 'Bienvenue chez Troca',
+    title: 'Bienvenue chez Kalico',
     subtitle: 'Votre compte particulier est prêt. Vous pouvez déjà publier, chercher et discuter.',
     icon: UserRound,
     cta: { label: 'Déposer ma première annonce', href: '/annonces/nouvelle' },

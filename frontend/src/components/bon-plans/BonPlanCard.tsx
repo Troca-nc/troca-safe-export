@@ -120,7 +120,7 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
           {business?.badge === 'verified' ? (
             <span className="badge badge-emeraude inline-flex items-center gap-1 text-[11px] shadow-sm">
               <Check className="h-3 w-3" />
-              Vérifié Troca
+              Vérifié Kalico
             </span>
           ) : business?.badge === 'active' ? (
             <span className="badge badge-emeraude inline-flex items-center gap-1 text-[11px] shadow-sm">

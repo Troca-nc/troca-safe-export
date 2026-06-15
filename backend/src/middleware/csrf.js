@@ -3,7 +3,7 @@
 const crypto = require('crypto');
 const { setSecureCookie } = require('../config/cookies');
 
-const CSRF_COOKIE_NAME = 'troca_csrf';
+const CSRF_COOKIE_NAME = 'kalico_csrf';
 const CSRF_HEADER_NAME = 'x-csrf-token';
 
 function generateCsrfToken() {

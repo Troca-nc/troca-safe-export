@@ -1,6 +1,6 @@
 'use client'
 
-export const DEMO_TOAST_EVENT = 'troca:demo-toast'
+export const DEMO_TOAST_EVENT = 'kalico:demo-toast'
 
 export function isDemoMode() {
   return process.env.NEXT_PUBLIC_DEMO_MODE === 'true'

@@ -22,10 +22,10 @@ require.cache[require.resolve('nodemailer')] = {
 
 // Fixer les env vars SMTP pour activer le transporter
 process.env.SMTP_HOST = 'smtp.test.com';
-process.env.SMTP_USER = 'test@troca.nc';
+process.env.SMTP_USER = 'test@kalico.nc';
 process.env.SMTP_PASS = 'testpass';
-process.env.SMTP_FROM = 'noreply@troca.nc';
-process.env.BASE_URL  = 'https://troca.nc';
+process.env.SMTP_FROM = 'noreply@kalico.nc';
+process.env.BASE_URL  = 'https://kalico.nc';
 
 const {
   sendMail,
@@ -42,7 +42,7 @@ describe('emailService — sendMail', () => {
     assert.strictEqual(sentEmails.length, 1);
     assert.strictEqual(sentEmails[0].to, 'dest@test.nc');
     assert.strictEqual(sentEmails[0].subject, 'Test');
-    assert.ok(sentEmails[0].from.includes('Troca'));
+    assert.ok(sentEmails[0].from.includes('Kalico'));
   });
 });
 
@@ -54,7 +54,7 @@ describe('emailService — sendResetEmail', () => {
     assert.ok(sentEmails[0].subject.toLowerCase().includes('mot de passe'));
     assert.ok(sentEmails[0].html.includes('abc123token'));
     assert.ok(sentEmails[0].html.includes('/mot-de-passe-oublie/reset'));
-    assert.ok(sentEmails[0].html.includes('https://troca.nc'));
+    assert.ok(sentEmails[0].html.includes('https://kalico.nc'));
   });
 });
 
