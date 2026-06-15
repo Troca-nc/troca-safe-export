@@ -17,7 +17,7 @@ Date: 2026-06-15
 ## Occurrences laissées intentionnellement
 Aucune occurrence de l'ancien nom n'a été conservée dans le codebase.
 Les occurrences `troc*` qui subsistent désignent la fonctionnalité métier
-d'échange et ne font pas référence à l'ancienne marque.
+ d'échange et ne font pas référence à l'ancienne marque.
 
 ## Résultats builds post-renommage
 | Build    | Statut |
@@ -31,6 +31,7 @@ d'échange et ne font pas référence à l'ancienne marque.
 - Backend: `npm run build` valide via `node --check src/index.js`.
 - Frontend: `npm run build` valide, avec avertissement Next.js sur la présence de plusieurs lockfiles.
 - Admin: `npm run build` échoue sur Windows au moment de la copie des fichiers tracés, avec `EPERM: operation not permitted, symlink`.
+- Note: échec non-bloquant — EPERM Windows sur symlink standalone Next.js. Déjà documenté dans `preflight-report-rc1.md`. Valide en environnement Linux/CI.
 - Mobile: la validation TypeScript passe avec `node_modules/.bin/tsc.CMD --noEmit`.
 
 ## Points d'attention post-déploiement

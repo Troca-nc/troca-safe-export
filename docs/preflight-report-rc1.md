@@ -1,4 +1,4 @@
-# Pre-deployment Validation Report — v1.0.0-rc1
+# Pre-deployment Validation Report — Kalico v1.0.0-rc1
 Date: 2026-06-14
 
 ## Summary
