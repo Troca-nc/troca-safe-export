@@ -9,7 +9,7 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, AlertTriangle, FileText,
-  Users, Star, LogOut, ShieldAlert, Store,
+  Users, Star, LogOut, ShieldAlert, Store, FileCheck2,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useAdminSignalements } from '@/hooks/useAdmin'
@@ -68,6 +68,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { href: '/admin/annonces',    label: 'Annonces',       icon: <FileText size={16} /> },
     { href: '/admin/enseignes',   label: 'Enseignes',      icon: <Store size={16} /> },
     { href: '/admin/utilisateurs',label: 'Utilisateurs',   icon: <Users size={16} /> },
+    { href: '/admin/pro-documents', label: 'Justificatifs Pro', icon: <FileCheck2 size={16} /> },
     { href: '/admin/moderation',  label: 'File de modération', icon: <Star size={16} /> },
   ]
 

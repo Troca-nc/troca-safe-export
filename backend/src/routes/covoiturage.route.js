@@ -36,6 +36,7 @@ const createSchema = Joi.object({
   music_allowed: Joi.boolean().default(true),
   no_smoking: Joi.boolean().default(true),
   animals_allowed: Joi.boolean().default(false),
+  women_only: Joi.boolean().default(false),
   description: Joi.string().min(10).max(1500).required(),
   departure_commune_id: Joi.number().integer().allow(null),
   destination_commune_id: Joi.number().integer().allow(null),
@@ -262,6 +263,10 @@ router.get('/', optionalAuth, async (req, res, next) => {
       filters.push(`c.status = $${params.length}`);
     }
 
+    if (String(req.query.women_only) === 'true') {
+      filters.push(`COALESCE(c.women_only, FALSE) = TRUE`);
+    }
+
     const where = `WHERE ${filters.join(' AND ')}`;
     params.push(limit);
 
@@ -290,6 +295,7 @@ router.get('/', optionalAuth, async (req, res, next) => {
          c.music_allowed,
          c.no_smoking,
          c.animals_allowed,
+         c.women_only,
          c.description,
          c.status,
          c.departure_commune_id,
@@ -614,9 +620,9 @@ router.post('/', authenticate, async (req, res, next) => {
              (user_id, departure, destination, stops, ride_date, ride_time, seats_total, seats_reserved,
               seats_remaining, booking_mode, recurrence_type, recurrence_days, recurrence_until, recurrence_count,
               recurrence_parent_id, price_xpf, vehicle, comfort, luggage_allowed, music_allowed, no_smoking, animals_allowed,
-              description, status, departure_commune_id, destination_commune_id, trust_score,
+              women_only, description, status, departure_commune_id, destination_commune_id, trust_score,
               is_verified_driver, expires_at)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,0,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,'published',$22,$23,$24,$25,$26)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,0,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,'published',$23,$24,$25,$26,$27)
            RETURNING *`,
           [
             req.user.id,
@@ -639,6 +645,7 @@ router.post('/', authenticate, async (req, res, next) => {
             value.music_allowed,
             value.no_smoking,
             value.animals_allowed,
+            Boolean(value.women_only),
             value.description.trim(),
             value.departure_commune_id || null,
             value.destination_commune_id || null,

@@ -25,6 +25,16 @@ interface BoostPayload {
   provider: 'stripe' | 'payplug'
 }
 
+export interface SavedCard {
+  id: string
+  brand: string
+  last4: string
+  exp_month?: number | null
+  exp_year?: number | null
+  funding?: string | null
+  holder_name?: string | null
+}
+
 export function useBoostPayment() {
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState<string | null>(null)
@@ -65,7 +75,80 @@ export function useBoostPayment() {
     }
   }
 
-  return { initiateBoost, loading, error }
+  const loadSavedCards = async () => {
+    setError(null)
+    try {
+      if (isDemoMode()) {
+        return {
+          ok: true,
+          cards: [
+            {
+              id: 'demo_card_1',
+              brand: 'visa',
+              last4: '4242',
+              exp_month: 12,
+              exp_year: 2030,
+              funding: 'credit',
+              holder_name: 'Client',
+            },
+          ] as SavedCard[],
+        }
+      }
+
+      const { data } = await axios.get(`${API_ORIGIN}/api/payment/saved-cards`, { headers: authHeaders() })
+      const cards = Array.isArray(data?.data) ? data.data : []
+      return { ok: true, cards }
+    } catch (err: any) {
+      const msg = err?.response?.data?.error ?? 'Impossible de charger les cartes enregistrées'
+      setError(msg)
+      return { ok: false, error: msg, cards: [] as SavedCard[] }
+    }
+  }
+
+  const initiateBoostOneClick = async (payload: {
+    annonce_id: number
+    boost_type: string
+    boost_duration: number
+    payment_method_id: string
+  }) => {
+    setLoading(true)
+    setError(null)
+    try {
+      if (isDemoMode()) {
+        showDemoToast('DÃ©sactivÃ© en mode dÃ©mo')
+        return { ok: true, demo: true }
+      }
+
+      void trackEvent('checkout_start', {
+        offer_type: 'boost',
+        boost_type: payload.boost_type,
+        provider: 'stripe',
+        duration_days: payload.boost_duration,
+        payment_mode: 'saved_card',
+      })
+
+      const { data } = await axios.post(
+        `${API_ORIGIN}/api/payment/boost-one-click`,
+        payload,
+        { headers: authHeaders() }
+      )
+
+      return { ok: true, data: data?.data ?? data }
+    } catch (err: any) {
+      const msg = err?.response?.data?.error ?? 'Erreur lors du paiement'
+      setError(msg)
+      return {
+        ok: false,
+        error: msg,
+        requires_action: Boolean(err?.response?.data?.requires_action),
+        client_secret: err?.response?.data?.client_secret ?? null,
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { initiateBoost, initiateBoostOneClick, loadSavedCards, loading, error }
 }
 
 // ── useSubscription ───────────────────────────────────────────────────────────

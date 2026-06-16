@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
+import DocumentUploader from '@/components/pro/DocumentUploader'
 import { proApi } from '@/lib/api'
 import { useAuthActionStore } from '@/store/authActionStore'
 import { useAuthStore } from '@/store/authStore'
@@ -118,7 +119,7 @@ function AdvantageCard({
 }
 
 export default function ProLandingPage() {
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, user } = useAuthStore()
   const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
   const formRef = useRef<HTMLElement | null>(null)
 
@@ -536,6 +537,12 @@ export default function ProLandingPage() {
             </div>
           </div>
         </section>
+
+        {user?.is_pro ? (
+          <section className="mx-auto max-w-7xl px-4 pb-16">
+            <DocumentUploader compact />
+          </section>
+        ) : null}
       </main>
     </div>
   )

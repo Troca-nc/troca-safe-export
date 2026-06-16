@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { Send, Image as ImageIcon, TrendingUp, X, Loader2, Mic, Square, Paperclip, FileText, Trash2 } from 'lucide-react'
 import { uploadApi } from '@/lib/api'
+import { compressImage } from '@/lib/imageCompressor'
 
 interface ChatInputProps {
   onSendText: (text: string) => Promise<void>
@@ -160,7 +161,8 @@ export default function ChatInput({
     if (!file) return
     setUploading(true)
     try {
-      const res = await uploadApi.uploadChatPhoto(file)
+      const optimizedFile = file.type.startsWith('image/') ? await compressImage(file) : file
+      const res = await uploadApi.uploadChatPhoto(optimizedFile)
       const url = res.data?.data?.url
       if (url) {
         await onSendPhoto(url)
@@ -176,11 +178,12 @@ export default function ChatInput({
   const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    const optimizedFile = file.type.startsWith('image/') ? await compressImage(file) : file
     setPendingDocument({
-      file,
-      name: file.name || 'document',
-      mimeType: file.type || 'application/octet-stream',
-      sizeBytes: file.size || 0,
+      file: optimizedFile,
+      name: optimizedFile.name || file.name || 'document',
+      mimeType: optimizedFile.type || file.type || 'application/octet-stream',
+      sizeBytes: optimizedFile.size || file.size || 0,
     })
     if (documentInputRef.current) documentInputRef.current.value = ''
   }

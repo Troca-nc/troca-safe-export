@@ -27,6 +27,8 @@ const {
 } = require('../services/listingsPresentation');
 const { getUserPresence, getPresenceLabel } = require('../services/presenceService');
 const { getSellerResponseTime } = require('../services/sellerInsightsService');
+const { createNotification } = require('../services/notificationService');
+const { sendPushToUser } = require('../services/pushService');
 const {
   isDonCategory,
   validateListingMetadata,
@@ -221,7 +223,7 @@ const updateSchema = baseListingSchema.fork(
   (f) => f.optional()
 );
 const updateSchemaWithStatus = updateSchema.keys({
-  status: Joi.string().valid('active', 'inactive', 'sold').optional(),
+  status: Joi.string().valid('active', 'reserved', 'inactive', 'sold').optional(),
 });
 
 const signalerSchema = Joi.object({
@@ -877,6 +879,86 @@ router.patch('/:id/mark-given', authenticate, async (req, res, next) => {
     next(err);
   }
 });
+
+router.patch('/:id/status', authenticate, async (req, res, next) => {
+  try {
+    const nextStatus = String(req.body?.status || '').trim().toLowerCase();
+    if (!['active', 'reserved', 'sold'].includes(nextStatus)) {
+      return res.status(400).json({ error: 'Statut invalide. Utilisez active, reserved ou sold.' });
+    }
+
+    const listingResult = await query(
+      `SELECT a.id, a.user_id, a.status, a.titre, a.metadata, a.deleted_at,
+              u.prenom, u.nom, u.email
+       FROM annonces a
+       JOIN users u ON u.id = a.user_id
+       WHERE a.id = $1 AND a.deleted_at IS NULL
+       LIMIT 1`,
+      [req.params.id]
+    );
+
+    const listing = listingResult.rows[0];
+    if (!listing) {
+      return res.status(404).json({ error: 'Annonce introuvable.' });
+    }
+    if (listing.user_id !== req.user.id && !req.user.is_admin) {
+      return res.status(403).json({ error: 'Vous ne pouvez modifier que vos propres annonces.' });
+    }
+
+    const updated = await query(
+      `UPDATE annonces
+       SET status = $2,
+           updated_at = NOW(),
+           metadata = COALESCE(metadata, '{}'::jsonb) || jsonb_build_object('status_updated_at', NOW()::text)
+       WHERE id = $1
+       RETURNING *`,
+      [req.params.id, nextStatus]
+    );
+
+    const conversationRows = await query(
+      `SELECT id, buyer_id
+       FROM conversations
+       WHERE annonce_id = $1`,
+      [req.params.id]
+    );
+
+    const systemMessage = nextStatus === 'reserved'
+      ? `📌 L'annonce « ${listing.titre} » est maintenant réservée.`
+      : `✅ L'annonce « ${listing.titre} » est marquée comme vendue.`
+
+    await Promise.all(
+      conversationRows.rows.map(async (conversation) => {
+        const recipientId = Number(conversation.buyer_id)
+        if (!Number.isFinite(recipientId) || recipientId <= 0) return
+
+        await query(
+          `INSERT INTO messages (conv_id, sender_id, type, content)
+           VALUES ($1, $2, 'system', $3)`,
+          [conversation.id, req.user.id, systemMessage]
+        ).catch(() => {})
+
+        await Promise.all([
+          createNotification(recipientId, {
+            type: 'system',
+            title: nextStatus === 'reserved' ? 'Annonce réservée' : 'Annonce vendue',
+            body: systemMessage,
+            href: `/messages/${conversation.id}`,
+          }),
+          sendPushToUser(recipientId, {
+            title: nextStatus === 'reserved' ? 'Annonce réservée' : 'Annonce vendue',
+            body: systemMessage,
+            data: { type: 'listing_status_update', listing_id: Number(req.params.id), conversation_id: conversation.id, status: nextStatus },
+          }).catch(() => {}),
+        ])
+      })
+    )
+
+    void clearListCache();
+    return res.json({ data: updated.rows[0] })
+  } catch (err) {
+    next(err)
+  }
+})
 
 router.get('/user/:userId', optionalAuth, async (req, res, next) => {
   try {

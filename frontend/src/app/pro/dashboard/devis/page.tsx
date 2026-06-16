@@ -27,6 +27,8 @@ type QuoteRequest = {
   proCategory?: string | null
   requesterUserId?: number | null
   createdAt: string
+  visibleFreeAt?: string | null
+  isLockedForFree?: boolean
   request: {
     requester_name: string
     requester_email: string
@@ -95,8 +97,20 @@ export default function ProDashboardDevisPage() {
       setQuotes([])
     } finally {
       setLoading(false)
-    }
   }
+}
+
+function formatDelayLabel(value?: string | null) {
+  if (!value) return '24h'
+  const target = new Date(value).getTime()
+  if (Number.isNaN(target)) return '24h'
+  const diff = Math.max(0, target - Date.now())
+  const hours = Math.floor(diff / (1000 * 60 * 60))
+  const minutes = Math.ceil((diff % (1000 * 60 * 60)) / (1000 * 60))
+  if (hours <= 0) return `${minutes} min`
+  if (minutes <= 0) return `${hours} h`
+  return `${hours} h ${minutes} min`
+}
 
   useEffect(() => {
     let alive = true
@@ -218,6 +232,11 @@ export default function ProDashboardDevisPage() {
     return quotes.filter((quote) => String(quote.status || '').toLowerCase() === quoteStatusFilter)
   }, [quoteStatusFilter, quotes])
 
+  const lockedRequests = useMemo(
+    () => requests.filter((request) => Boolean(request.isLockedForFree)),
+    [requests]
+  )
+
   const quoteStatusFilters = [
     { id: 'all', label: 'Tous' },
     { id: 'draft', label: 'Brouillons' },
@@ -280,6 +299,23 @@ export default function ProDashboardDevisPage() {
           ))}
         </div>
       </section>
+
+      {lockedRequests.length > 0 ? (
+        <section className="rounded-[2rem] border border-amber-200 bg-amber-50 px-5 py-4 text-amber-900 shadow-sm">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-700">Verrouillage 24h</p>
+              <p className="mt-1 text-sm leading-relaxed text-amber-900/80">
+                {lockedRequests.length} demande{lockedRequests.length > 1 ? 's' : ''} sont visibles immédiatement pour les comptes Pro Premium.
+                Pour les comptes gratuits, elles restent masquées pendant encore {formatDelayLabel(lockedRequests[0]?.visibleFreeAt)}.
+              </p>
+            </div>
+            <span className="inline-flex items-center rounded-full border border-amber-200 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800">
+              Disponible plus tard
+            </span>
+          </div>
+        </section>
+      ) : null}
 
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -350,8 +386,20 @@ export default function ProDashboardDevisPage() {
       {filteredRequests.length > 0 ? (
         <div className="grid gap-4">
           {filteredRequests.map((request) => (
-            <article key={request.id} className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <article key={request.id} className={`relative overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm ${request.isLockedForFree ? 'ring-2 ring-amber-200' : ''}`}>
+              {request.isLockedForFree ? (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-[linear-gradient(180deg,rgba(255,251,235,0.45),rgba(255,251,235,0.92))] p-5 backdrop-blur-[1px]">
+                  <div className="max-w-md rounded-[1.5rem] border border-amber-200 bg-white/95 p-5 text-center shadow-lg">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-700">Bloqué 24h</p>
+                    <h3 className="mt-2 text-xl font-semibold text-night">Disponible dans {formatDelayLabel(request.visibleFreeAt)}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-night/65">
+                      Les comptes gratuits voient cette demande après 24h. Passez en Pro Premium pour accéder immédiatement aux nouveaux appels d'offres.
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+
+              <div className={`flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between ${request.isLockedForFree ? 'blur-[1px] pointer-events-none select-none' : ''}`}>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="rounded-full bg-nc-lagonLight px-3 py-1 text-xs font-semibold text-nc-lagon">

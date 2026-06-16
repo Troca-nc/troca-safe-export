@@ -62,6 +62,7 @@ export type ProPublicProduct = {
   price_xpf: number
   compare_at_price_xpf?: number | null
   stock_quantity?: number | null
+  is_available?: boolean
   is_featured?: boolean
   sku?: string | null
   brand?: string | null
@@ -103,6 +104,7 @@ export type ProPublicProfile = {
   pro_website?: string | null
   pro_phone?: string | null
   pro_hours?: string | null
+  pro_portfolio_photos?: string[] | null
   pro_quote_template?: unknown
   avg_rating?: number | null
   review_count?: number | null

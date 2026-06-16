@@ -128,6 +128,7 @@ export function HomeHeroSection({
       category: '',
       commune_id: '',
       province_id: '',
+      quartier_zone: '',
       price_min: '',
       price_max: '',
       condition: '',

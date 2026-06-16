@@ -75,6 +75,7 @@ const profileUpdateSchema = Joi.object({
   siret: Joi.string().trim().max(60).allow('', null).optional(),
   logo_url: Joi.string().trim().uri().allow('', null).optional(),
   banner_url: Joi.string().trim().uri().allow('', null).optional(),
+  portfolio_photos: Joi.array().items(Joi.string().trim().uri()).max(12).optional(),
   quote_template: quoteTemplateSchema,
 });
 
@@ -163,6 +164,14 @@ function requirePro(req, res) {
     return false;
   }
   return true;
+}
+
+function isPremiumProAccount(user) {
+  if (!user) return false;
+  const plan = String(user.pro_plan || '').trim().toLowerCase();
+  if (plan !== 'pro') return false;
+  if (!user.pro_expires_at) return true;
+  return new Date(user.pro_expires_at).getTime() > Date.now();
 }
 
 function formatCompanyName(row) {
@@ -295,6 +304,7 @@ function mapProsRow(row) {
     pro_phone: row.pro_phone ?? null,
     pro_hours: row.pro_hours ?? null,
     pro_siret: row.pro_siret ?? null,
+    pro_portfolio_photos: Array.isArray(row.pro_portfolio_photos) ? row.pro_portfolio_photos : [],
     pro_quote_template: normalizeQuoteTemplate(row.pro_quote_template),
     avg_rating: Number(row.avg_rating ?? 0),
     review_count: Number(row.review_count ?? 0),
@@ -326,6 +336,7 @@ async function loadProProfile(proId) {
        u.pro_phone,
        u.pro_hours,
        u.pro_siret,
+       u.pro_portfolio_photos,
        u.pro_quote_template,
        COALESCE(ROUND((
          SELECT AVG(r.rating)::numeric
@@ -351,6 +362,7 @@ async function loadProProfile(proId) {
          FROM products p
          WHERE p.owner_id = u.id
            AND p.is_active = TRUE
+           AND COALESCE(p.is_available, TRUE) = TRUE
            AND p.archived_at IS NULL
        ), 0) AS product_count,
        (
@@ -487,6 +499,7 @@ async function loadProProfile(proId) {
          p.price_xpf,
          p.compare_at_price_xpf,
          p.stock_quantity,
+         p.is_available,
          p.sku,
          p.brand,
          p.category_id,
@@ -531,6 +544,7 @@ async function loadProProfile(proId) {
        LEFT JOIN communes com ON com.id = p.commune_id
        WHERE p.owner_id = $1
          AND p.is_active = TRUE
+         AND COALESCE(p.is_available, TRUE) = TRUE
          AND p.archived_at IS NULL
        ORDER BY p.is_featured DESC, p.updated_at DESC, p.created_at DESC
        LIMIT 12`,
@@ -634,6 +648,7 @@ async function loadProProfile(proId) {
       price_xpf: Number(row.price_xpf ?? 0),
       compare_at_price_xpf: row.compare_at_price_xpf == null ? null : Number(row.compare_at_price_xpf),
       stock_quantity: row.stock_quantity == null ? null : Number(row.stock_quantity),
+      is_available: Boolean(row.is_available ?? true),
       sku: row.sku ?? null,
       brand: row.brand ?? null,
       category_id: row.category_id == null ? null : Number(row.category_id),
@@ -761,7 +776,7 @@ router.post('/:id/quote', optionalAuth, async (req, res, next) => {
     }
 
     const proRes = await query(
-      `SELECT id, prenom, nom, email, pro_company_name, pro_verified, is_pro, pro_expires_at
+      `SELECT id, prenom, nom, email, pro_company_name, pro_verified, is_pro, pro_plan, pro_expires_at
        FROM users
        WHERE id = $1
          AND is_pro = TRUE
@@ -794,10 +809,14 @@ router.post('/:id/quote', optionalAuth, async (req, res, next) => {
     const desiredDate = value.desired_date ? String(value.desired_date).trim() : null;
     const details = value.details ? String(value.details).trim() : null;
 
+    const visibleFreeAtSql = isPremiumProAccount(pro)
+      ? 'NOW()'
+      : "(NOW() + INTERVAL '24 hours')";
+
     const saved = await query(
       `INSERT INTO pro_quote_requests
-         (pro_id, requester_user_id, requester_name, requester_email, requester_phone, need_type, commune, budget_xpf, desired_date, details)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+         (pro_id, requester_user_id, requester_name, requester_email, requester_phone, need_type, commune, budget_xpf, desired_date, details, visible_free_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10, ${visibleFreeAtSql})
        RETURNING id, created_at`,
       [
         proId,
@@ -948,6 +967,7 @@ router.get('/quote-requests', authenticate, async (req, res, next) => {
          q.budget_xpf,
          q.desired_date,
          q.details,
+         q.visible_free_at,
          q.created_at,
          u.pro_company_name,
          u.pro_commune,
@@ -969,6 +989,7 @@ router.get('/quote-requests', authenticate, async (req, res, next) => {
         proCategory: row.pro_category ?? null,
         requesterUserId: row.requester_user_id == null ? null : Number(row.requester_user_id),
         createdAt: row.created_at,
+        visibleFreeAt: row.visible_free_at ?? null,
         request: {
           requester_name: row.requester_name ?? '',
           requester_email: row.requester_email ?? '',
@@ -979,6 +1000,7 @@ router.get('/quote-requests', authenticate, async (req, res, next) => {
           desired_date: row.desired_date ?? '',
           details: row.details ?? '',
         },
+        isLockedForFree: Boolean(row.visible_free_at && new Date(row.visible_free_at).getTime() > Date.now() && !isPremiumProAccount(req.user)),
       })),
     });
   } catch (err) {
@@ -1130,13 +1152,20 @@ router.patch('/me', authenticate, async (req, res, next) => {
       siret: 'pro_siret',
       logo_url: 'pro_logo_url',
       banner_url: 'pro_banner_url',
+      portfolio_photos: 'pro_portfolio_photos',
       quote_template: 'pro_quote_template',
     };
 
     for (const [key, column] of Object.entries(mapping)) {
       if (Object.prototype.hasOwnProperty.call(value, key)) {
         fields.push(`${column} = $${p}`);
-        params.push(key === 'quote_template' ? JSON.stringify(normalizeQuoteTemplate(value[key])) : normalizeMaybeText(value[key]));
+        if (key === 'quote_template') {
+          params.push(JSON.stringify(normalizeQuoteTemplate(value[key])));
+        } else if (key === 'portfolio_photos') {
+          params.push(JSON.stringify(Array.isArray(value[key]) ? value[key] : []));
+        } else {
+          params.push(normalizeMaybeText(value[key]));
+        }
         p += 1;
       }
     }
@@ -1170,6 +1199,7 @@ router.patch('/me', authenticate, async (req, res, next) => {
          u.pro_phone,
          u.pro_hours,
          u.pro_siret,
+         u.pro_portfolio_photos,
          u.pro_quote_template,
          COALESCE(ROUND((SELECT AVG(r.rating)::numeric FROM pro_reviews r WHERE r.pro_id = u.id), 1), 0) AS avg_rating,
          COALESCE((SELECT COUNT(*)::int FROM pro_reviews r WHERE r.pro_id = u.id), 0) AS review_count,
@@ -1705,7 +1735,7 @@ router.get('/invoices/:id/pdf', authenticate, async (req, res, next) => {
       'Description | Montant XPF',
       `${invoice.description || 'Prestation'} | ${Number(invoice.amount_xpf ?? 0).toLocaleString('fr-FR')} XPF`,
       '',
-      `Total TTC: ${Number(invoice.amount_xpf ?? 0).toLocaleString('fr-FR')} XPF`,
+      `Total TGC: ${Number(invoice.amount_xpf ?? 0).toLocaleString('fr-FR')} XPF`,
       '',
       'Mentions légales Kalico NC',
     ];

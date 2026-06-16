@@ -298,7 +298,10 @@ export default function ListingCard({ listing, className = '' }: Props) {
     'Vendeur Kalico'
 
   const isConditionVisible = Boolean(listing.condition && CONDITION_LABELS[listing.condition])
-  const locationText = listing.commune_name || 'Nouvelle-CalÃ©donie'
+  const locationZone = typeof listing.metadata?.quartier_zone === 'string' ? String(listing.metadata.quartier_zone).trim() : ''
+  const locationText = listing.commune_name
+    ? `${listing.commune_name}${locationZone ? ` · ${locationZone}` : ''}`
+    : 'Nouvelle-Calédonie'
   const isProVerified = Boolean(
     (listing.author?.is_pro && listing.author?.pro_verified)
     || (listing.is_pro && listing.seller_pro_verified)

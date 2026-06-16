@@ -201,6 +201,9 @@ type FilterSidebarProps = {
   communes: any[]
   selectedProvince: any
   selectedProvinceCommunes: any[]
+  selectedCommune: any
+  zoneOptions: string[]
+  zoneLoading: boolean
   sortedProvinces: any[]
   handleUseLocation: () => void
   clearLocation: () => void
@@ -224,6 +227,9 @@ function FilterSidebar({
   toggleCategoryNode,
   selectedProvince,
   selectedProvinceCommunes,
+  selectedCommune,
+  zoneOptions,
+  zoneLoading,
   sortedProvinces,
   handleUseLocation,
   clearLocation,
@@ -286,7 +292,7 @@ function FilterSidebar({
         <div className="mb-3">
           <h3 className="text-sm font-semibold text-night">Localisation</h3>
           <p className="mt-1 text-xs text-night/45">
-            Choisissez d'abord une province, puis une commune.
+            Choisissez d'abord une province, puis une commune. Le quartier reste optionnel.
           </p>
         </div>
 
@@ -366,6 +372,53 @@ function FilterSidebar({
                       {c.name}
                     </button>
                   ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-night/40">
+              Quartier / Zone
+            </label>
+            {!selectedCommune ? (
+              <div className="rounded-xl border border-dashed border-night/15 bg-sand/30 px-3 py-3 text-sm text-night/45">
+                Choisissez une commune pour voir les quartiers.
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-night/8 bg-white p-3">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => updateFilter('quartier_zone', '')}
+                    className={`rounded-full border px-3 py-2 text-sm transition-colors ${
+                      !filters.quartier_zone
+                        ? 'border-nc-lagon bg-nc-lagon text-white'
+                        : 'border-night/12 bg-white text-night/65 hover:bg-sand'
+                    }`}
+                  >
+                    Aucune préférence
+                  </button>
+                  {zoneLoading ? (
+                    <span className="rounded-full border border-night/10 bg-sand/30 px-3 py-2 text-sm text-night/45">
+                      Chargement...
+                    </span>
+                  ) : (
+                    zoneOptions.map((zone) => (
+                      <button
+                        key={zone}
+                        type="button"
+                        onClick={() => updateFilter('quartier_zone', zone)}
+                        className={`rounded-full border px-3 py-2 text-sm transition-colors ${
+                          String(filters.quartier_zone) === String(zone)
+                            ? 'border-nc-lagon bg-nc-lagon text-white'
+                            : 'border-night/12 bg-white text-night/65 hover:bg-sand'
+                        }`}
+                      >
+                        {zone}
+                      </button>
+                    ))
+                  )}
                 </div>
               </div>
             )}
@@ -679,6 +732,8 @@ const FALLBACK_PROVINCES = [
 function ListingsPageContent() {
   const [categories,  setCategories]  = useState<any[]>([])
   const [communes,    setCommunes]    = useState<any[]>([])
+  const [zoneOptions, setZoneOptions] = useState<string[]>([])
+  const [zoneLoading, setZoneLoading] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [viewMode,    setViewMode]    = useState<'list' | 'map'>('list')
   const [geoLoading, setGeoLoading] = useState(false)
@@ -706,6 +761,7 @@ function ListingsPageContent() {
     category: filters.category,
     commune_id: filters.commune_id,
     province_id: filters.province_id,
+    quartier_zone: filters.quartier_zone,
     price_min: filters.price_min,
     price_max: filters.price_max,
     condition: filters.condition,
@@ -963,6 +1019,45 @@ function ListingsPageContent() {
 
   const selectedProvince = communes.find((province: any) => String(province.id) === String(filters.province_id))
   const selectedProvinceCommunes = selectedProvince?.communes || []
+  const selectedCommune = useMemo(() => {
+    for (const province of communes) {
+      const commune = (province.communes || []).find((item: any) => String(item.id) === String(filters.commune_id))
+      if (commune) return commune
+    }
+    return null
+  }, [communes, filters.commune_id])
+
+  useEffect(() => {
+    let alive = true
+
+    if (!selectedCommune?.slug) {
+      setZoneOptions([])
+      setZoneLoading(false)
+      return () => {
+        alive = false
+      }
+    }
+
+    setZoneLoading(true)
+    metaApi.getZones(selectedCommune.slug)
+      .then((response) => {
+        if (!alive) return
+        const zones = Array.isArray(response.data?.data?.zones) ? response.data.data.zones : []
+        setZoneOptions(zones.filter(Boolean))
+      })
+      .catch(() => {
+        if (!alive) return
+        setZoneOptions([])
+      })
+      .finally(() => {
+        if (alive) setZoneLoading(false)
+      })
+
+    return () => {
+      alive = false
+    }
+  }, [selectedCommune?.slug])
+
   const selectedCategoryLabel = useMemo(() => {
     if (!filters.category) return null
     const path = findCategoryPathBySlug(visibleCategories, filters.category)
@@ -1503,6 +1598,9 @@ function ListingsPageContent() {
                 communes={communes}
                 selectedProvince={selectedProvince}
                 selectedProvinceCommunes={selectedProvinceCommunes}
+                selectedCommune={selectedCommune}
+                zoneOptions={zoneOptions}
+                zoneLoading={zoneLoading}
                 sortedProvinces={sortedProvinces}
                 handleUseLocation={handleUseLocation}
                 clearLocation={clearLocation}
@@ -1540,6 +1638,9 @@ function ListingsPageContent() {
                   communes={communes}
                   selectedProvince={selectedProvince}
                   selectedProvinceCommunes={selectedProvinceCommunes}
+                  selectedCommune={selectedCommune}
+                  zoneOptions={zoneOptions}
+                  zoneLoading={zoneLoading}
                   sortedProvinces={sortedProvinces}
                   handleUseLocation={handleUseLocation}
                   clearLocation={clearLocation}

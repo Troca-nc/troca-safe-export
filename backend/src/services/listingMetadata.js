@@ -35,6 +35,8 @@ const IMMOBILIER_CONDITIONS = ['neuf', 'bon', 'a_renover'];
 const IMMOBILIER_DPE = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'NC'];
 const IMMOBILIER_EXPOSURES = ['nord', 'sud', 'est', 'ouest', 'nord_est', 'nord_ouest', 'sud_est', 'sud_ouest'];
 
+const LOCATION_ZONE_FIELD = Joi.string().max(160).allow('', null).default('');
+
 function normalizeCategorySlug(value) {
   const slug = String(value || '').trim().toLowerCase();
   if (slug === 'locations') return 'location_courte_duree';
@@ -57,6 +59,7 @@ function buildLocationSchema() {
     animaux_acceptes: Joi.boolean().default(false),
     fumeurs_acceptes: Joi.boolean().default(false),
     localisation_precise: Joi.string().max(255).allow('', null).default(''),
+    quartier_zone: LOCATION_ZONE_FIELD,
   }).custom((value, helpers) => {
     if (value.prix_semaine_xpf == null && Number.isFinite(Number(value.prix_nuit_xpf))) {
       return value;
@@ -82,6 +85,7 @@ function buildServicesSchema() {
     disponibilite: Joi.string().valid(...SERVICE_AVAILABILITY).default('les_deux'),
     experience_annees: Joi.number().integer().min(0).max(80).optional(),
     diplome_certifie: Joi.boolean().default(false),
+    quartier_zone: LOCATION_ZONE_FIELD,
   }).custom((value, helpers) => {
     if (value.tarif_type !== 'a_negocier' && value.tarif_xpf == null) {
       return helpers.error('any.custom', { message: 'Le tarif est requis pour un prix horaire ou forfaitaire.' });
@@ -109,6 +113,7 @@ function buildDonSchema() {
     raison_don: Joi.string().valid('demenagement', 'surplus', 'upgrade', 'autre').default('autre'),
     remise_en_main_propre: Joi.boolean().default(true),
     commune_remise: Joi.string().max(120).required(),
+    quartier_zone: LOCATION_ZONE_FIELD,
   });
 }
 
@@ -133,6 +138,7 @@ function buildImmobilierSchema() {
     disponible_le: Joi.date().iso().optional(),
     equipements: Joi.array().items(Joi.string().min(1).max(50)).default([]),
     exposition: Joi.string().valid(...IMMOBILIER_EXPOSURES).optional(),
+    quartier_zone: LOCATION_ZONE_FIELD,
   });
 }
 

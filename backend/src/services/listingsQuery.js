@@ -108,6 +108,7 @@ function buildListingSearchContext(rawQuery = {}) {
     type_bien,
     type_service,
     etat,
+    quartier_zone,
     lat,
     lng,
     radius,
@@ -206,6 +207,12 @@ function buildListingSearchContext(rawQuery = {}) {
   if (etat) {
     conditions.push(`COALESCE(a.metadata->>'etat', '') = $${p}`)
     params.push(String(etat))
+    p += 1
+  }
+
+  if (quartier_zone) {
+    conditions.push(`COALESCE(a.metadata->>'quartier_zone', '') = $${p}`)
+    params.push(String(quartier_zone))
     p += 1
   }
 

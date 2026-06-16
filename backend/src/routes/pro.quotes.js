@@ -29,7 +29,8 @@ const quoteCreateSchema = Joi.object({
   subject: Joi.string().trim().min(2).max(160).required(),
   client_note: Joi.string().trim().max(1200).allow('', null).optional(),
   items: Joi.array().items(quoteItemSchema).min(1).required(),
-  tax_rate: Joi.number().min(0).max(50).default(0),
+  tgc_rate: Joi.number().min(0).max(50).default(0),
+  tax_rate: Joi.number().min(0).max(50).optional(),
   validity_days: Joi.number().integer().min(1).max(365).default(30),
   source_quote_request_id: Joi.number().integer().positive().allow(null).optional(),
 });
@@ -42,6 +43,7 @@ const quoteUpdateSchema = Joi.object({
   subject: Joi.string().trim().min(2).max(160).optional(),
   client_note: Joi.string().trim().max(1200).allow('', null).optional(),
   items: Joi.array().items(quoteItemSchema).min(1).optional(),
+  tgc_rate: Joi.number().min(0).max(50).optional(),
   tax_rate: Joi.number().min(0).max(50).optional(),
   validity_days: Joi.number().integer().min(1).max(365).optional(),
 });
@@ -98,13 +100,16 @@ function normalizeQuoteItems(items) {
   });
 }
 
-function computeQuoteTotals(items, taxRate) {
+function computeQuoteTotals(items, tgcRate) {
   const subtotal = normalizeQuoteItems(items).reduce((sum, item) => sum + item.total_xpf, 0);
-  const tax = Math.round((subtotal * Number(taxRate || 0)) / 100);
+  const rate = Number(tgcRate || 0);
+  const tax = Math.round((subtotal * rate) / 100);
   return {
     subtotal_xpf: subtotal,
-    tax_rate: Number(taxRate || 0),
+    tax_rate: rate,
+    tgc_rate: rate,
     tax_amount_xpf: tax,
+    tgc_amount_xpf: tax,
     total_xpf: subtotal + tax,
   };
 }
@@ -182,7 +187,8 @@ function buildQuotePdfBuffer(quote) {
 
   lines.push('');
   lines.push(`Sous-total : ${formatMoney(quote.subtotal_xpf)}`);
-  lines.push(`TVA (${Number(quote.tax_rate || 0)} %) : ${formatMoney(quote.tax_amount_xpf)}`);
+  const tgcRate = Number(quote.tgc_rate ?? quote.tax_rate ?? 0);
+  lines.push(`TGC (${tgcRate} %) : ${formatMoney(quote.tgc_amount_xpf ?? quote.tax_amount_xpf)}`);
   lines.push(`Total : ${formatMoney(quote.total_xpf)}`);
   lines.push('');
   lines.push('Document généré par Kalico.');
@@ -207,7 +213,9 @@ function parseQuoteRow(row) {
     items,
     subtotal_xpf: Number(row.subtotal_xpf ?? 0),
     tax_rate: Number(row.tax_rate ?? 0),
+    tgc_rate: Number(row.tgc_rate ?? row.tax_rate ?? 0),
     tax_amount_xpf: Number(row.tax_amount_xpf ?? 0),
+    tgc_amount_xpf: Number(row.tgc_amount_xpf ?? row.tax_amount_xpf ?? 0),
     total_xpf: Number(row.total_xpf ?? 0),
     validity_days: Number(row.validity_days ?? 30),
     status: row.status,
@@ -311,7 +319,7 @@ async function sendQuoteSentEmails(quote) {
           <tbody>${htmlItems}</tbody>
         </table>
         <p><strong>Sous-total :</strong> ${formatMoney(quote.subtotal_xpf)}</p>
-        <p><strong>TVA :</strong> ${formatMoney(quote.tax_amount_xpf)}</p>
+        <p><strong>TGC :</strong> ${formatMoney(quote.tgc_amount_xpf ?? quote.tax_amount_xpf)}</p>
         <p><strong>Total :</strong> ${formatMoney(quote.total_xpf)}</p>
         <p style="margin-top:24px;"><a href="${link}" style="display:inline-block;background:#0A7EA4;color:#fff;text-decoration:none;padding:12px 18px;border-radius:12px;font-weight:700;">Voir mon devis</a></p>
       </div>
@@ -355,7 +363,8 @@ router.post('/', authenticate, async (req, res, next) => {
     }
 
     const items = normalizeQuoteItems(value.items);
-    const totals = computeQuoteTotals(items, value.tax_rate);
+    const tgcRate = value.tgc_rate ?? value.tax_rate ?? 0;
+    const totals = computeQuoteTotals(items, tgcRate);
 
     const result = await withTransaction(async (client) => {
       const quoteNumber = await loadNextQuoteNumber(client);
@@ -387,7 +396,7 @@ router.post('/', authenticate, async (req, res, next) => {
           value.client_note ? value.client_note.trim() : null,
           JSON.stringify(items),
           totals.subtotal_xpf,
-          totals.tax_rate,
+          totals.tgc_rate,
           totals.tax_amount_xpf,
           totals.total_xpf,
           value.validity_days,
@@ -476,7 +485,7 @@ router.put('/:id', authenticate, async (req, res, next) => {
     }
 
     const items = value.items ? normalizeQuoteItems(value.items) : normalizeQuoteItems(quote.items);
-    const taxRate = value.tax_rate ?? Number(quote.tax_rate ?? 0);
+    const taxRate = value.tgc_rate ?? value.tax_rate ?? Number(quote.tgc_rate ?? quote.tax_rate ?? 0);
     const totals = computeQuoteTotals(items, taxRate);
 
     const updated = await query(
@@ -504,7 +513,7 @@ router.put('/:id', authenticate, async (req, res, next) => {
         value.client_note !== undefined ? normalizeMaybeText(value.client_note) : null,
         JSON.stringify(items),
         totals.subtotal_xpf,
-        totals.tax_rate,
+        totals.tgc_rate,
         totals.tax_amount_xpf,
         totals.total_xpf,
         value.validity_days ?? null,

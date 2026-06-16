@@ -65,6 +65,7 @@ function formatDate(value?: string | null) {
 function getStatusLabel(status?: string | null) {
   const normalized = String(status || '').toLowerCase()
   if (normalized === 'draft') return { label: 'Brouillon', tone: 'bg-sand text-night/65' }
+  if (normalized === 'reserved') return { label: 'Réservée', tone: 'bg-amber-50 text-amber-700' }
   if (normalized === 'inactive' || normalized === 'sold' || normalized === 'expired') {
     return { label: 'ExpirÃ©e', tone: 'bg-amber-50 text-amber-700' }
   }

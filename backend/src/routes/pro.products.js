@@ -50,6 +50,10 @@ const updateSchema = Joi.object({
   is_featured: Joi.boolean().optional(),
 });
 
+const stockUpdateSchema = Joi.object({
+  stock_quantity: Joi.alternatives().try(Joi.number().integer().min(0), Joi.valid(null)).required(),
+});
+
 const catalogCategoryCreateSchema = Joi.object({
   name: Joi.string().trim().min(2).max(120).required(),
   position: Joi.number().integer().min(0).optional(),
@@ -82,6 +86,11 @@ function normalizeUrls(value) {
   return value.map((item) => String(item || '').trim()).filter(Boolean);
 }
 
+function deriveAvailability(stockQuantity) {
+  if (stockQuantity == null) return true;
+  return Number(stockQuantity) > 0;
+}
+
 async function clearListCache() {
   await deletePrefix(LIST_CACHE_PREFIX).catch(() => {});
 }
@@ -97,6 +106,7 @@ function mapProductRow(row) {
     price_xpf: Number(row.price_xpf ?? 0),
     compare_at_price_xpf: row.compare_at_price_xpf == null ? null : Number(row.compare_at_price_xpf),
     stock_quantity: row.stock_quantity == null ? null : Number(row.stock_quantity),
+    is_available: Boolean(row.is_available ?? true),
     sku: row.sku ?? null,
     brand: row.brand ?? null,
     category_id: row.category_id == null ? null : Number(row.category_id),
@@ -425,8 +435,8 @@ router.post('/', async (req, res, next) => {
       const inserted = await client.query(
         `INSERT INTO products
            (owner_id, title, slug, description, price_type, price_xpf, compare_at_price_xpf, stock_quantity,
-            sku, brand, category_id, catalog_category_id, commune_id, unit_label, cover_image_url, is_featured)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+            is_available, sku, brand, category_id, catalog_category_id, commune_id, unit_label, cover_image_url, is_featured)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
          RETURNING *`,
         [
           req.user.id,
@@ -437,6 +447,7 @@ router.post('/', async (req, res, next) => {
           value.price_xpf == null ? 0 : Number(value.price_xpf ?? 0),
           value.compare_at_price_xpf == null ? null : Number(value.compare_at_price_xpf),
           value.stock_quantity == null ? null : Number(value.stock_quantity ?? 0),
+          deriveAvailability(value.stock_quantity == null ? null : Number(value.stock_quantity ?? 0)),
           normalizeText(value.sku),
           normalizeText(value.brand),
           Number(value.category_id),
@@ -515,7 +526,11 @@ router.put('/:id', async (req, res, next) => {
       if (Object.prototype.hasOwnProperty.call(value, 'price_type')) push('price_type', value.price_type || 'fixed');
       if (Object.prototype.hasOwnProperty.call(value, 'price_xpf')) push('price_xpf', Number(value.price_xpf ?? 0));
       if (Object.prototype.hasOwnProperty.call(value, 'compare_at_price_xpf')) push('compare_at_price_xpf', value.compare_at_price_xpf == null ? null : Number(value.compare_at_price_xpf));
-      if (Object.prototype.hasOwnProperty.call(value, 'stock_quantity')) push('stock_quantity', value.stock_quantity == null ? null : Number(value.stock_quantity ?? 0));
+      if (Object.prototype.hasOwnProperty.call(value, 'stock_quantity')) {
+        const nextStock = value.stock_quantity == null ? null : Number(value.stock_quantity ?? 0);
+        push('stock_quantity', nextStock);
+        push('is_available', deriveAvailability(nextStock));
+      }
       if (Object.prototype.hasOwnProperty.call(value, 'sku')) push('sku', normalizeText(value.sku));
       if (Object.prototype.hasOwnProperty.call(value, 'brand')) push('brand', normalizeText(value.brand));
       if (Object.prototype.hasOwnProperty.call(value, 'category_id')) push('category_id', Number(value.category_id));
@@ -552,6 +567,37 @@ router.put('/:id', async (req, res, next) => {
       }
     });
 
+    const updated = await loadProductOr404(productId, req.user.id);
+    return res.json({ data: updated });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch('/:id/stock', async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+
+    const productId = Number(req.params.id);
+    if (!Number.isFinite(productId) || productId <= 0) {
+      return res.status(400).json({ error: 'Produit invalide.' });
+    }
+
+    const { error, value } = stockUpdateSchema.validate(req.body, { abortEarly: true });
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
+    const nextStock = value.stock_quantity == null ? null : Number(value.stock_quantity ?? 0);
+    const result = await query(
+      `UPDATE products
+       SET stock_quantity = $1,
+           is_available = $2,
+           updated_at = NOW()
+       WHERE id = $3 AND owner_id = $4
+       RETURNING *`,
+      [nextStock, deriveAvailability(nextStock), productId, req.user.id]
+    );
+
+    if (!result.rows[0]) return res.status(404).json({ error: 'Produit introuvable.' });
     const updated = await loadProductOr404(productId, req.user.id);
     return res.json({ data: updated });
   } catch (err) {

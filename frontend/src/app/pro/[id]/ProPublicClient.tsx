@@ -16,6 +16,7 @@ import {
   Store,
   Clock3,
   Package,
+  Sparkles,
 } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
@@ -33,6 +34,7 @@ import type { ProPublicProfile, ProPublicProduct, ProPublicReview } from '@/app/
 const TABS = [
   { id: 'annonces', label: 'Annonces', icon: Package },
   { id: 'catalogue', label: 'Catalogue', icon: Store },
+  { id: 'realisations', label: 'RÃ©alisations', icon: Sparkles },
   { id: 'avis', label: 'Avis', icon: Star },
   { id: 'apropos', label: 'À propos', icon: Store },
 ] as const
@@ -88,6 +90,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
   const initialTab = useMemo(() => {
     const requestedTab = searchParams.get('tab')
     if (requestedTab === 'catalogue') return 'catalogue'
+    if (requestedTab === 'realisations') return 'realisations'
     if (requestedTab === 'avis') return 'avis'
     if (requestedTab === 'apropos') return 'apropos'
     return 'annonces'
@@ -225,6 +228,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
   const bookingSettings = profile.booking_settings
   const bookingSlots = profile.booking_slots ?? []
   const products = (profile.products ?? []) as ProPublicProduct[]
+  const portfolioPhotos = Array.isArray(profile.pro_portfolio_photos) ? profile.pro_portfolio_photos.filter(Boolean) : []
   const catalogCategories = profile.catalog_categories ?? []
   const fallbackCatalogCategories = useMemo(() => {
     const seen = new Set<string>()
@@ -722,6 +726,39 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                 <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-14 text-center text-night/55">
                   <p className="text-lg font-semibold text-night">Aucun produit actif</p>
                   <p className="mt-2 text-sm">Ce professionnel n&apos;a pas encore publié de catalogue visible.</p>
+                </div>
+              )}
+            </div>
+          ) : null}
+
+          {activeTab === 'realisations' ? (
+            <div>
+              {portfolioPhotos.length ? (
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {portfolioPhotos.map((photo, index) => (
+                    <a
+                      key={`${photo}-${index}`}
+                      href={photo}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                    >
+                      <div className="relative aspect-[4/3] bg-sand">
+                        <Image
+                          src={photo}
+                          alt={`RÃ©alisation ${index + 1} de ${displayName}`}
+                          fill
+                          sizes="(max-width: 640px) 100vw, 33vw"
+                          className="object-cover transition duration-500 group-hover:scale-105"
+                        />
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-14 text-center text-night/55">
+                  <p className="text-lg font-semibold text-night">Aucune réalisation publiée</p>
+                  <p className="mt-2 text-sm">Ce professionnel n’a pas encore partagé de portfolio.</p>
                 </div>
               )}
             </div>

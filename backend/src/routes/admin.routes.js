@@ -12,6 +12,9 @@ const { getSnapshot } = require('../services/observability')
 const { ensureLaunchPack } = require('./pro.launch-pack')
 const { ensureProReferralCode } = require('../services/referralCodeService')
 const { refreshTrustScore } = require('../services/trustService')
+const { createNotification } = require('../services/notificationService')
+const { sendPushToUser } = require('../services/pushService')
+const { sendMail } = require('../services/emailService')
 
 const router = express.Router()
 router.use(adminRateLimit, requireAdminToken)
@@ -61,6 +64,24 @@ function getAdminActorId(req) {
   return Number(req?.user?.id || 0)
 }
 
+const DOCUMENT_TYPE_LABELS = {
+  rc_pro: 'RC Professionnelle',
+  assurance_decennale: 'Assurance Décennale',
+  certification: 'Certification',
+  diplome: 'Diplôme',
+  extrait_ridet: 'Extrait RIDET',
+  autre: 'Autre',
+}
+
+function formatDocumentTypeLabel(value) {
+  const normalized = String(value || '').trim().toLowerCase()
+  return DOCUMENT_TYPE_LABELS[normalized] || 'Document'
+}
+
+function getBaseUrl() {
+  return (process.env.BASE_URL || 'http://localhost:3000').replace(/\/$/, '')
+}
+
 async function logAdminAction(req, action, targetType, targetId, metadata = {}) {
   const adminId = Number(req?.user?.id || 0)
   if (!adminId) return
@@ -70,6 +91,158 @@ async function logAdminAction(req, action, targetType, targetId, metadata = {}) 
     [adminId, action, targetType, String(targetId), JSON.stringify(metadata)]
   ).catch(() => {})
 }
+
+router.get('/pro-documents', async (_req, res, next) => {
+  try {
+    const result = await query(
+      `SELECT
+         d.id,
+         d.pro_id,
+         d.document_type,
+         d.label,
+         d.file_url,
+         d.file_name,
+         d.file_size,
+         d.status,
+         d.rejection_reason,
+         d.uploaded_at,
+         d.validated_at,
+         d.validated_by,
+         u.prenom,
+         u.nom,
+         u.email,
+         u.pro_company_name,
+         u.pro_commune
+       FROM pro_documents d
+       JOIN users u ON u.id = d.pro_id
+       ORDER BY d.uploaded_at DESC, d.id DESC
+       LIMIT 200`
+    )
+
+    return res.json({
+      data: result.rows.map((row) => ({
+        id: Number(row.id),
+        pro_id: Number(row.pro_id),
+        pro_name: row.pro_company_name || [row.prenom, row.nom].filter(Boolean).join(' ').trim() || row.email,
+        pro_email: row.email,
+        pro_commune: row.pro_commune ?? null,
+        document_type: row.document_type,
+        document_type_label: formatDocumentTypeLabel(row.document_type),
+        label: row.label ?? null,
+        file_url: row.file_url,
+        file_name: row.file_name ?? null,
+        file_size: row.file_size == null ? null : Number(row.file_size),
+        status: row.status,
+        rejection_reason: row.rejection_reason ?? null,
+        uploaded_at: row.uploaded_at,
+        validated_at: row.validated_at ?? null,
+        validated_by: row.validated_by == null ? null : Number(row.validated_by),
+      })),
+    })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.post('/pro-documents/:id/validate', async (req, res, next) => {
+  try {
+    const documentId = Number(req.params.id)
+    if (!Number.isFinite(documentId) || documentId <= 0) {
+      return res.status(400).json({ error: 'Document invalide.' })
+    }
+
+    const status = String(req.body?.status || '').trim().toLowerCase()
+    if (!['validated', 'rejected'].includes(status)) {
+      return res.status(400).json({ error: 'Statut de validation invalide.' })
+    }
+
+    const rejectionReason = String(req.body?.rejection_reason || '').trim()
+
+    const result = await query(
+      `SELECT d.id, d.pro_id, d.document_type, d.label, d.file_url, d.file_name, d.status,
+              u.email, u.prenom, u.nom, u.pro_company_name
+       FROM pro_documents d
+       JOIN users u ON u.id = d.pro_id
+       WHERE d.id = $1
+       LIMIT 1`,
+      [documentId]
+    )
+
+    const doc = result.rows[0]
+    if (!doc) {
+      return res.status(404).json({ error: 'Document introuvable.' })
+    }
+
+    const updated = await query(
+      `UPDATE pro_documents
+       SET status = $1,
+           rejection_reason = $2,
+           validated_at = NOW(),
+           validated_by = $3
+       WHERE id = $4
+       RETURNING id, status, rejection_reason, validated_at, validated_by`,
+      [
+        status,
+        status === 'rejected' ? (rejectionReason || 'Document refusé') : null,
+        getAdminActorId(req) || null,
+        documentId,
+      ]
+    )
+
+    const proName = doc.pro_company_name || [doc.prenom, doc.nom].filter(Boolean).join(' ').trim() || doc.email
+    const documentLabel = doc.label || formatDocumentTypeLabel(doc.document_type)
+    const subject = status === 'validated'
+      ? `Votre justificatif ${documentLabel} a été validé`
+      : `Votre justificatif ${documentLabel} a été refusé`
+    const body = status === 'validated'
+      ? `✅ Votre ${documentLabel} a été validé.`
+      : `❌ Votre ${documentLabel} a été refusé. Raison : ${rejectionReason || 'Non précisée'}`
+
+    await Promise.all([
+      sendMail({
+        to: doc.email,
+        subject,
+        html: `
+          <p>Bonjour ${proName},</p>
+          <p>${body}</p>
+          ${status === 'rejected' ? `<p><strong>Raison :</strong> ${rejectionReason || 'Non précisée'}</p>` : ''}
+          <p>Connectez-vous à votre espace Pro pour suivre vos justificatifs.</p>
+        `,
+      }).catch(() => {}),
+      createNotification(doc.pro_id, {
+        type: 'system',
+        title: status === 'validated' ? 'Justificatif validé' : 'Justificatif refusé',
+        body: status === 'validated'
+          ? `Votre ${documentLabel} a été validé.`
+          : `Votre ${documentLabel} a été refusé.`,
+        href: '/pro/dashboard/parametres',
+      }),
+      sendPushToUser(doc.pro_id, {
+        title: status === 'validated' ? 'Justificatif validé' : 'Justificatif refusé',
+        body: status === 'validated'
+          ? `Votre ${documentLabel} a été validé.`
+          : `Votre ${documentLabel} a été refusé.`,
+        data: { type: 'pro_document_validation', documentId, status },
+      }).catch(() => {}),
+      logAdminAction(req, `pro_document_${status}`, 'pro_document', documentId, {
+        pro_id: doc.pro_id,
+        rejection_reason: status === 'rejected' ? rejectionReason || null : null,
+      }),
+    ])
+
+    return res.json({
+      data: {
+        id: Number(updated.rows[0].id),
+        status: updated.rows[0].status,
+        rejection_reason: updated.rows[0].rejection_reason ?? null,
+        validated_at: updated.rows[0].validated_at,
+        validated_by: updated.rows[0].validated_by == null ? null : Number(updated.rows[0].validated_by),
+      },
+    })
+  } catch (err) {
+    next(err)
+  }
+})
 
 function assertSafeSqlIdentifier(value, label) {
   if (typeof value !== 'string' || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(value)) {

@@ -30,6 +30,7 @@ type ProductItem = {
   price_xpf: number
   compare_at_price_xpf: number | null
   stock_quantity: number | null
+  is_available: boolean
   sku: string | null
   brand: string | null
   category_id: number | null
@@ -506,6 +507,28 @@ export default function ProductsManager() {
       setError(err?.response?.data?.error || 'Impossible de publier ce produit en annonce.')
     } finally {
       setPublishingId(null)
+    }
+  }
+
+  const handleRestock = async (product: ProductItem) => {
+    const nextValue = window.prompt(`Nouvelle quantité pour ${product.title}`, String(Math.max(1, product.stock_quantity ?? 1)))
+    if (nextValue == null) return
+    const quantity = Number(nextValue)
+    if (!Number.isFinite(quantity) || quantity < 0) {
+      setError('La quantité saisie est invalide.')
+      return
+    }
+
+    setSaving(true)
+    setError('')
+    try {
+      await proApi.updateProduct(product.id, { stock_quantity: quantity })
+      await loadProducts()
+      setSuccess({ title: quantity > 0 ? 'Stock mis à jour.' : 'Produit masqué car stock nul.' })
+    } catch (err: any) {
+      setError(err?.response?.data?.error || 'Impossible de mettre à jour le stock.')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -1200,6 +1223,9 @@ export default function ProductsManager() {
                         ) : (
                           <span className="rounded-full bg-sand px-2.5 py-1 text-[11px] font-semibold text-night/60">Archivé</span>
                         )}
+                        {!product.is_available ? (
+                          <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">Masqué stock nul</span>
+                        ) : null}
                       </div>
                       <p className="mt-1 text-sm text-night/60">
                         {product.category_name || 'Catégorie'} · {product.catalog_category_name || 'Catalogue'} · {product.commune_name || 'Commune'} · {formatProductPrice(product)}
@@ -1233,6 +1259,14 @@ export default function ProductsManager() {
                     >
                       {publishingId === product.id ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Store className="h-4 w-4" />}
                       Publier en annonce
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleRestock(product)}
+                      className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      Réapprovisionner
                     </button>
                     <button
                       type="button"

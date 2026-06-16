@@ -162,6 +162,7 @@ export default function TrocPage() {
       category: marketCategory,
       commune_id: marketCommune,
       province_id: '',
+      quartier_zone: '',
       price_min: '',
       price_max: marketPriceMax,
       condition: '',

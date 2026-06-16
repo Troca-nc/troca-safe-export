@@ -6,6 +6,8 @@ import { ArrowRight, BadgeCheck, Clock3, Eye, Globe, Loader2, MapPin, Package, P
 
 import { proApi, uploadApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
+import DocumentUploader from '@/components/pro/DocumentUploader'
+import { compressImage } from '@/lib/imageCompressor'
 import {
   DEFAULT_QUOTE_TEMPLATE,
   formatBudgetPresetInput,
@@ -59,6 +61,7 @@ type FormState = {
   siret: string
   logo_url: string
   banner_url: string
+  portfolio_photos: string[]
 }
 
 type ProProfileResponse = FormState & {
@@ -72,6 +75,7 @@ type ProProfileResponse = FormState & {
   pro_siret?: string | null
   pro_logo_url?: string | null
   pro_banner_url?: string | null
+  pro_portfolio_photos?: string[] | null
   pro_quote_template?: QuoteTemplate | null
 }
 
@@ -86,6 +90,7 @@ const INITIAL_FORM: FormState = {
   siret: '',
   logo_url: '',
   banner_url: '',
+  portfolio_photos: [],
 }
 
 export default function ProDashboardSettingsPage() {
@@ -94,11 +99,12 @@ export default function ProDashboardSettingsPage() {
   const [quoteTemplate, setQuoteTemplate] = useState<QuoteTemplate>(DEFAULT_QUOTE_TEMPLATE)
   const [loading, setLoading] = useState(false)
   const [pageLoading, setPageLoading] = useState(true)
-  const [uploading, setUploading] = useState<'logo' | 'banner' | null>(null)
+  const [uploading, setUploading] = useState<'logo' | 'banner' | 'portfolio' | null>(null)
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
   const [logoPreview, setLogoPreview] = useState('')
   const [bannerPreview, setBannerPreview] = useState('')
+  const [portfolioPhotos, setPortfolioPhotos] = useState<string[]>([])
   const [showPreview, setShowPreview] = useState(false)
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop')
   const previewRef = useRef<HTMLElement | null>(null)
@@ -113,8 +119,9 @@ export default function ProDashboardSettingsPage() {
       hours: form.hours || 'Horaires ? compl?ter',
       logo: logoPreview || '',
       banner: bannerPreview || '',
+      portfolio: portfolioPhotos,
     }),
-    [bannerPreview, form.category, form.company_name, form.description, form.hours, form.phone, form.commune, form.website, logoPreview, user?.first_name],
+    [bannerPreview, form.category, form.company_name, form.description, form.hours, form.phone, form.commune, form.website, logoPreview, portfolioPhotos, user?.first_name],
   )
 
   const descriptionCount = useMemo(() => form.description.length, [form.description])
@@ -146,10 +153,12 @@ export default function ProDashboardSettingsPage() {
           siret: profile.pro_siret || '',
           logo_url: profile.pro_logo_url || '',
           banner_url: profile.pro_banner_url || '',
+          portfolio_photos: Array.isArray(profile.pro_portfolio_photos) ? profile.pro_portfolio_photos.filter(Boolean) : [],
         })
         setQuoteTemplate(normalizeQuoteTemplate(profile.pro_quote_template))
         setLogoPreview(profile.pro_logo_url || '')
         setBannerPreview(profile.pro_banner_url || '')
+        setPortfolioPhotos(Array.isArray(profile.pro_portfolio_photos) ? profile.pro_portfolio_photos.filter(Boolean) : [])
       } catch {
         // Keep defaults if the profile cannot be loaded.
       } finally {
@@ -198,7 +207,8 @@ export default function ProDashboardSettingsPage() {
     setError('')
     setSuccess('')
     try {
-      const response = await uploadApi.uploadChatPhoto(file)
+      const optimizedFile = file.type.startsWith('image/') ? await compressImage(file) : file
+      const response = await uploadApi.uploadChatPhoto(optimizedFile)
       const url = response.data?.data?.url || ''
       if (kind === 'logo') {
         setForm((current) => ({ ...current, logo_url: url }))
@@ -209,6 +219,33 @@ export default function ProDashboardSettingsPage() {
       }
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Impossible de téléverser l’image.')
+    } finally {
+      setUploading(null)
+      event.target.value = ''
+    }
+  }
+
+  const uploadPortfolioPhotos = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || [])
+    if (!files.length) return
+
+    setUploading('portfolio')
+    setError('')
+    setSuccess('')
+    try {
+      const uploadedUrls: string[] = []
+      for (const file of files) {
+        const optimizedFile = file.type.startsWith('image/') ? await compressImage(file) : file
+        const response = await uploadApi.uploadChatPhoto(optimizedFile)
+        const url = response.data?.data?.url || ''
+        if (url) uploadedUrls.push(url)
+      }
+
+      if (uploadedUrls.length) {
+        setPortfolioPhotos((current) => Array.from(new Set([...current, ...uploadedUrls])))
+      }
+    } catch (err: any) {
+      setError(err?.response?.data?.error || 'Impossible de tÃ©lÃ©verser ces photos de portfolio.')
     } finally {
       setUploading(null)
       event.target.value = ''
@@ -233,6 +270,7 @@ export default function ProDashboardSettingsPage() {
         siret: form.siret.trim(),
         logo_url: form.logo_url.trim(),
         banner_url: form.banner_url.trim(),
+        portfolio_photos: portfolioPhotos,
         quote_template: quoteTemplate,
       })
       setSuccess('✅ Paramètres enregistrés avec succès.')
@@ -708,15 +746,70 @@ export default function ProDashboardSettingsPage() {
               {uploading === 'logo' ? <p className="text-xs text-night/55">Téléversement du logo...</p> : null}
             </label>
 
+          <label className="block space-y-2">
+            <span className="text-sm font-semibold text-night">Bannière</span>
+            <input type="file" accept="image/*" onChange={(e) => uploadImage('banner', e)} className="block w-full text-sm text-night/65 file:mr-4 file:rounded-xl file:border-0 file:bg-nc-lagonLight file:px-4 file:py-2 file:text-sm file:font-semibold file:text-nc-lagon hover:file:bg-[#d7eef3]" />
+            {uploading === 'banner' ? <p className="text-xs text-night/55">Téléversement de la bannière...</p> : null}
+          </label>
+
+          <div className="space-y-3 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Portfolio</p>
+                <h3 className="mt-1 font-display text-xl font-bold text-night">Photos de réalisations</h3>
+                <p className="mt-1 text-sm text-night/60">Ajoutez quelques images pour renforcer votre vitrine Pro.</p>
+              </div>
+              {portfolioPhotos.length ? (
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-night/60 shadow-sm">
+                  {portfolioPhotos.length} photo{portfolioPhotos.length > 1 ? 's' : ''}
+                </span>
+              ) : null}
+            </div>
+
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-night">Bannière</span>
-              <input type="file" accept="image/*" onChange={(e) => uploadImage('banner', e)} className="block w-full text-sm text-night/65 file:mr-4 file:rounded-xl file:border-0 file:bg-nc-lagonLight file:px-4 file:py-2 file:text-sm file:font-semibold file:text-nc-lagon hover:file:bg-[#d7eef3]" />
-              {uploading === 'banner' ? <p className="text-xs text-night/55">Téléversement de la bannière...</p> : null}
+              <span className="text-sm font-semibold text-night">Ajouter des photos</span>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={uploadPortfolioPhotos}
+                className="block w-full text-sm text-night/65 file:mr-4 file:rounded-xl file:border-0 file:bg-nc-lagonLight file:px-4 file:py-2 file:text-sm file:font-semibold file:text-nc-lagon hover:file:bg-[#d7eef3]"
+              />
+              {uploading === 'portfolio' ? <p className="text-xs text-night/55">Téléversement des photos de portfolio...</p> : null}
             </label>
+
+            {portfolioPhotos.length ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {portfolioPhotos.map((photo, index) => (
+                  <div key={`${photo}-${index}`} className="group overflow-hidden rounded-2xl border border-white/80 bg-white shadow-sm">
+                    <div className="relative aspect-[4/3] bg-sand">
+                      <Image src={photo} alt={`Portfolio ${index + 1}`} fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover" />
+                    </div>
+                    <div className="flex items-center justify-between gap-2 px-3 py-2">
+                      <p className="text-xs text-night/55">Photo {index + 1}</p>
+                      <button
+                        type="button"
+                        onClick={() => setPortfolioPhotos((current) => current.filter((item) => item !== photo))}
+                        className="rounded-full border border-red-100 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+                      >
+                        Retirer
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-6 text-sm text-night/55">
+                Aucun visuel de portfolio pour le moment.
+              </p>
+            )}
           </div>
         </div>
+      </div>
 
       </form>
+
+      <DocumentUploader />
 
       {showPreview ? (
         <div

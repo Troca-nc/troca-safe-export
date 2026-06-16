@@ -58,6 +58,15 @@ const boostSchema = {
   }),
 };
 
+const boostOneClickSchema = {
+  body: Joi.object({
+    annonce_id: Joi.number().integer().positive().required(),
+    boost_type: Joi.string().valid('une', 'urgent', 'remonte', 'photos').required(),
+    boost_duration: Joi.number().integer().valid(3, 7, 14, 30).required(),
+    payment_method_id: Joi.string().trim().min(3).required(),
+  }),
+};
+
 const subscriptionSchema = {
   body: Joi.object({
     plan_id: Joi.string().valid('pro').required(),
@@ -186,6 +195,50 @@ async function verifyPayplugSubscriptionStatus(paymentId, userId) {
       provider: 'payplug',
     },
   };
+}
+
+async function applyBoostPayment({ annonceId, boost, provider, paymentRef, userId, metadata = {} }) {
+  const expiresAt = new Date(Date.now() + Number(boost.duration || 0) * 24 * 60 * 60 * 1000);
+  return withTransaction(async (client) => {
+    const paymentResult = await client.query(
+      `INSERT INTO payments (user_id, type, provider, provider_ref, amount_xpf, status, metadata)
+       VALUES ($1, 'boost', $2, $3, $4, 'succeeded', $5)
+       RETURNING id`,
+      [
+        userId,
+        provider,
+        paymentRef,
+        boost.price_xpf,
+        JSON.stringify({
+          ...metadata,
+          boost_type: boost.type,
+          duration: boost.duration,
+          amount_xpf: boost.price_xpf,
+        }),
+      ]
+    );
+
+    await client.query(
+      `UPDATE annonces
+       SET is_boosted = TRUE,
+           boost_type = $1,
+           boost_expires_at = $2,
+           updated_at = NOW()
+       WHERE id = $3`,
+      [boost.type, expiresAt.toISOString(), annonceId]
+    );
+
+    await client.query(
+      `INSERT INTO annonce_boosts (annonce_id, type, expires_at, payment_id)
+       VALUES ($1, $2, $3, $4)`,
+      [annonceId, boost.type, expiresAt.toISOString(), paymentResult.rows[0].id]
+    );
+
+    return {
+      payment_id: paymentResult.rows[0].id,
+      expires_at: expiresAt.toISOString(),
+    };
+  });
 }
 
 router.post('/boost/mobile', authenticate, paymentLimiter, validate(boostSchema), async (req, res) => {
@@ -421,6 +474,134 @@ router.post('/boost', authenticate, paymentLimiter, validate(boostSchema), async
   } catch (err) {
     console.error('[payment] boost error:', err.message);
     return res.status(500).json({ error: 'Erreur création boost' });
+  }
+});
+
+router.get('/saved-cards', authenticate, async (req, res) => {
+  if (demoModeEnabled) {
+    return res.json({
+      data: [
+        {
+          id: 'demo_card_1',
+          brand: 'visa',
+          last4: '4242',
+          exp_month: 12,
+          exp_year: 2030,
+          funding: 'credit',
+          holder_name: req.user.prenom || req.user.email || 'Client',
+        },
+      ],
+    });
+  }
+
+  if (!ensureStripe(res)) return;
+
+  try {
+    const customerId = await getOrCreateStripeCustomer(stripe, req.user.id, req.user.email);
+    const paymentMethods = await stripe.paymentMethods.list({
+      customer: customerId,
+      type: 'card',
+      limit: 20,
+    });
+
+    return res.json({
+      data: paymentMethods.data.map((method) => ({
+        id: method.id,
+        brand: method.card?.brand || 'card',
+        last4: method.card?.last4 || '----',
+        exp_month: method.card?.exp_month ?? null,
+        exp_year: method.card?.exp_year ?? null,
+        funding: method.card?.funding ?? null,
+        holder_name: method.billing_details?.name ?? req.user.prenom ?? req.user.email ?? null,
+      })),
+    });
+  } catch (err) {
+    console.error('[payment] saved cards error:', err.message);
+    return res.status(500).json({ error: 'Impossible de charger les cartes enregistrées' });
+  }
+});
+
+router.post('/boost-one-click', authenticate, paymentLimiter, validate(boostOneClickSchema), async (req, res) => {
+  if (!ensureStripe(res)) return;
+
+  const { annonce_id, boost_type, boost_duration, payment_method_id } = req.body;
+  const boost = findBoost(boost_type, boost_duration);
+  if (!boost) return res.status(400).json({ error: 'Boost introuvable' });
+
+  const { rows: annonceRows } = await query(
+    `SELECT a.id, a.titre, cat.slug AS category_slug
+     FROM annonces a
+     LEFT JOIN categories cat ON cat.id = a.category_id
+     WHERE a.id = $1 AND a.user_id = $2 AND a.status = 'active'`,
+    [annonce_id, req.user.id]
+  );
+  if (!annonceRows[0]) return res.status(403).json({ error: 'Annonce introuvable ou non autorisée' });
+  if ((annonceRows[0].category_slug || '').toLowerCase() === 'dons' || (annonceRows[0].category_slug || '').toLowerCase() === 'don') {
+    return res.status(400).json({ error: 'Les dons ne peuvent pas être boostés.' });
+  }
+
+  try {
+    const customerId = await getOrCreateStripeCustomer(stripe, req.user.id, req.user.email);
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: xpfToEurCents(boost.price_xpf),
+      currency: 'eur',
+      customer: customerId,
+      payment_method: payment_method_id,
+      confirm: true,
+      off_session: true,
+      description: `${boost.label} — ${annonceRows[0].titre}`,
+      metadata: {
+        payment_type: 'boost',
+        user_id: String(req.user.id),
+        annonce_id: String(annonce_id),
+        boost_type,
+        duration: String(boost_duration),
+        amount_xpf: String(boost.price_xpf),
+        payment_mode: 'one_click',
+      },
+    });
+
+    if (paymentIntent.status !== 'succeeded') {
+      return res.status(402).json({
+        error: 'Validation bancaire requise pour cette carte.',
+        requires_action: true,
+        client_secret: paymentIntent.client_secret || null,
+        payment_intent_id: paymentIntent.id,
+      });
+    }
+
+    const activation = await applyBoostPayment({
+      annonceId: annonce_id,
+      boost,
+      provider: 'stripe',
+      paymentRef: paymentIntent.id,
+      userId: req.user.id,
+      metadata: {
+        payment_mode: 'one_click',
+        payment_method_id,
+      },
+    });
+
+    return res.json({
+      data: {
+        boost,
+        payment_intent_id: paymentIntent.id,
+        payment_id: activation.payment_id,
+        expires_at: activation.expires_at,
+        amount_display: formatXpfEur(boost.price_xpf),
+      },
+    });
+  } catch (err) {
+    const code = err?.code || err?.type;
+    if (code === 'StripeCardError' || code === 'card_error' || err?.decline_code) {
+      return res.status(402).json({
+        error: err.message || 'Carte refusée.',
+        requires_action: Boolean(err.payment_intent?.client_secret),
+        client_secret: err.payment_intent?.client_secret || null,
+      });
+    }
+    console.error('[payment] boost one-click error:', err.message);
+    return res.status(500).json({ error: 'Impossible de lancer le boost en un clic' });
   }
 });
 

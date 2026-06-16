@@ -28,9 +28,10 @@ const TRANSPORT_TYPE_LABELS = {
   scolaire: 'Transport scolaire',
   chauffeur: 'Location avec chauffeur',
   location: 'Location avec chauffeur',
+  fret: 'Fret',
 };
 
-const TRANSPORT_TYPES = ['taxi', 'navette', 'aeroport', 'excursion', 'scolaire', 'chauffeur', 'location'];
+const TRANSPORT_TYPES = ['taxi', 'navette', 'aeroport', 'excursion', 'scolaire', 'chauffeur', 'location', 'fret'];
 
 const applySchema = Joi.object({
   company_name: Joi.string().trim().min(2).max(200).required(),
@@ -47,6 +48,12 @@ const applySchema = Joi.object({
   pro_website: Joi.string().trim().uri().allow('', null).optional(),
   pro_hours: Joi.string().trim().max(500).allow('', null).optional(),
   pro_siret: Joi.string().trim().max(120).allow('', null).optional(),
+  has_fret: Joi.boolean().optional(),
+  fret_volume_m3: Joi.number().min(0).max(999.99).allow(null).optional(),
+  fret_max_weight_kg: Joi.number().integer().min(0).allow(null).optional(),
+  fret_vehicle_type: Joi.string().valid('fourgon', 'camion', 'plateau', 'remorque', 'pick-up', 'autre').allow('', null).optional(),
+  fret_description: Joi.string().trim().max(1000).allow('', null).optional(),
+  fret_price_per_m3_xpf: Joi.number().integer().min(0).allow(null).optional(),
   base_price_xpf: Joi.number().integer().min(0).default(0),
   price_per_km_xpf: Joi.number().integer().min(0).default(0),
   service_zones: Joi.alternatives().try(
@@ -159,6 +166,12 @@ function mapTransporterRow(row) {
     pro_siret: row.pro_siret ?? null,
     base_price_xpf: Number(row.base_price_xpf ?? 0),
     price_per_km_xpf: Number(row.price_per_km_xpf ?? 0),
+    has_fret: Boolean(row.has_fret),
+    fret_volume_m3: row.fret_volume_m3 == null ? null : Number(row.fret_volume_m3),
+    fret_max_weight_kg: row.fret_max_weight_kg == null ? null : Number(row.fret_max_weight_kg),
+    fret_vehicle_type: row.fret_vehicle_type ?? null,
+    fret_description: row.fret_description ?? null,
+    fret_price_per_m3_xpf: row.fret_price_per_m3_xpf == null ? null : Number(row.fret_price_per_m3_xpf),
     service_zones: asArray(row.service_zones),
     is_verified: Boolean(row.is_verified),
     is_available: Boolean(row.is_available),
@@ -419,6 +432,14 @@ router.post('/apply', authenticate, async (req, res, next) => {
 
       const transportTypes = normalizeTransportTypes(value.transport_type);
       const serviceZones = asArray(value.service_zones);
+      const freightValues = {
+        has_fret: Boolean(value.has_fret),
+        fret_volume_m3: value.fret_volume_m3 == null ? null : Number(value.fret_volume_m3),
+        fret_max_weight_kg: value.fret_max_weight_kg == null ? null : Number(value.fret_max_weight_kg),
+        fret_vehicle_type: normalizeMaybeText(value.fret_vehicle_type),
+        fret_description: normalizeMaybeText(value.fret_description),
+        fret_price_per_m3_xpf: value.fret_price_per_m3_xpf == null ? null : Number(value.fret_price_per_m3_xpf),
+      };
 
       let transporterIdLocal = existingRes.rows[0]?.id ?? null;
       if (transporterIdLocal) {
@@ -438,6 +459,12 @@ router.post('/apply', authenticate, async (req, res, next) => {
                base_price_xpf = $13,
                price_per_km_xpf = $14,
                service_zones = $15,
+               has_fret = $16,
+               fret_volume_m3 = $17,
+               fret_max_weight_kg = $18,
+               fret_vehicle_type = $19,
+               fret_description = $20,
+               fret_price_per_m3_xpf = $21,
                is_available = TRUE
            WHERE id = $1`,
           [
@@ -456,6 +483,12 @@ router.post('/apply', authenticate, async (req, res, next) => {
             Number(value.base_price_xpf ?? 0),
             Number(value.price_per_km_xpf ?? 0),
             serviceZones,
+            freightValues.has_fret,
+            freightValues.fret_volume_m3,
+            freightValues.fret_max_weight_kg,
+            freightValues.fret_vehicle_type,
+            freightValues.fret_description,
+            freightValues.fret_price_per_m3_xpf,
           ]
         );
       } else {
@@ -463,8 +496,10 @@ router.post('/apply', authenticate, async (req, res, next) => {
           `INSERT INTO pro_transporters
              (user_id, company_name, transport_type, vehicle_description, vehicle_capacity,
               vehicle_photo_url, license_number, insurance_number, pro_phone, pro_website,
-              pro_hours, pro_siret, base_price_xpf, price_per_km_xpf, service_zones, is_verified, is_available)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, FALSE, TRUE)
+              pro_hours, pro_siret, base_price_xpf, price_per_km_xpf, service_zones,
+              has_fret, fret_volume_m3, fret_max_weight_kg, fret_vehicle_type, fret_description, fret_price_per_m3_xpf,
+              is_verified, is_available)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, FALSE, TRUE)
            RETURNING id`,
           [
             req.user.id,
@@ -482,6 +517,12 @@ router.post('/apply', authenticate, async (req, res, next) => {
             Number(value.base_price_xpf ?? 0),
             Number(value.price_per_km_xpf ?? 0),
             serviceZones,
+            freightValues.has_fret,
+            freightValues.fret_volume_m3,
+            freightValues.fret_max_weight_kg,
+            freightValues.fret_vehicle_type,
+            freightValues.fret_description,
+            freightValues.fret_price_per_m3_xpf,
           ]
         );
         transporterIdLocal = insertRes.rows[0].id;

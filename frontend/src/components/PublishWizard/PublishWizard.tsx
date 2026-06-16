@@ -24,12 +24,22 @@ import CategoryFields from '@/components/annonces/CategoryFields'
 import ListingCoachCard from '@/components/annonces/ListingCoachCard'
 import { FALLBACK_CATEGORIES } from '@/lib/categoryCatalog'
 import { getCategoryIcon } from '@/lib/categoryPresentation'
+import { compressImage } from '@/lib/imageCompressor'
 import { findCategoryNodeById, findCategoryPathById } from '../../../../shared/categoryTaxonomy'
 
 type CommuneOption = {
   id: number
   name: string
   province_name?: string | null
+  slug?: string
+}
+
+type ProvinceOption = {
+  id: number
+  name: string
+  slug: string
+  code?: string
+  communes: CommuneOption[]
 }
 
 type CategoryOption = {
@@ -48,6 +58,7 @@ type WizardDraft = {
   description: string
   price: string
   commune_id: string
+  quartier_zone: string
   duration_days: string
   condition: 'new' | 'like_new' | 'good' | 'fair' | 'for_parts'
   price_negotiable: boolean
@@ -70,6 +81,7 @@ const INITIAL_DRAFT: WizardDraft = {
   description: '',
   price: '',
   commune_id: '',
+  quartier_zone: '',
   duration_days: '30',
   condition: 'good',
   price_negotiable: false,
@@ -97,6 +109,17 @@ function moveItem<T>(items: T[], from: number, to: number) {
 
 function getCategoryChildren(category?: CategoryOption | null) {
   return category?.children || category?.subcategories || []
+}
+
+function flattenCommunes(provinces: ProvinceOption[]) {
+  return provinces.flatMap((province) => (
+    province.communes.map((commune) => ({
+      ...commune,
+      province_id: province.id,
+      province_name: province.name,
+      province_slug: province.slug,
+    }))
+  ))
 }
 
 function isLeafCategory(category?: CategoryOption | null) {
@@ -156,7 +179,7 @@ function PhotoGrid({
   onMove,
 }: {
   photos: PhotoItem[]
-  onAddFiles: (files: FileList | File[]) => void
+  onAddFiles: (files: FileList | File[]) => void | Promise<void>
   onRemove: (index: number) => void
   onMove: (from: number, to: number) => void
 }) {
@@ -179,7 +202,7 @@ function PhotoGrid({
           event.preventDefault()
           setDragOver(false)
           if (event.dataTransfer.files.length) {
-            onAddFiles(event.dataTransfer.files)
+            void onAddFiles(event.dataTransfer.files)
           }
         }}
         onClick={() => inputRef.current?.click()}
@@ -210,7 +233,7 @@ function PhotoGrid({
         className="hidden"
         onChange={(event) => {
           if (event.target.files?.length) {
-            onAddFiles(event.target.files)
+            void onAddFiles(event.target.files)
           }
           event.target.value = ''
         }}
@@ -264,7 +287,9 @@ export default function PublishWizard() {
   const [draft, setDraft] = useState<WizardDraft>(INITIAL_DRAFT)
   const [photos, setPhotos] = useState<PhotoItem[]>([])
   const [loadingMeta, setLoadingMeta] = useState(true)
-  const [communces, setCommunces] = useState<CommuneOption[]>([])
+  const [communces, setCommunces] = useState<ProvinceOption[]>([])
+  const [zoneOptions, setZoneOptions] = useState<string[]>([])
+  const [zoneLoading, setZoneLoading] = useState(false)
   const [categories, setCategories] = useState<CategoryOption[]>([])
   const [categoryTrailIds, setCategoryTrailIds] = useState<number[]>([])
   const [error, setError] = useState('')
@@ -368,9 +393,40 @@ export default function PublishWizard() {
   }, [photos])
 
   const selectedCommune = useMemo(
-    () => communces.find((item) => String(item.id) === draft.commune_id),
+    () => flattenCommunes(communces).find((item) => String(item.id) === draft.commune_id),
     [communces, draft.commune_id]
   )
+
+  useEffect(() => {
+    let alive = true
+
+    if (!selectedCommune?.slug) {
+      setZoneOptions([])
+      setZoneLoading(false)
+      return () => {
+        alive = false
+      }
+    }
+
+    setZoneLoading(true)
+    metaApi.getZones(selectedCommune.slug)
+      .then((response) => {
+        if (!alive) return
+        const zones = Array.isArray(response.data?.data?.zones) ? response.data.data.zones : []
+        setZoneOptions(zones.filter(Boolean))
+      })
+      .catch(() => {
+        if (!alive) return
+        setZoneOptions([])
+      })
+      .finally(() => {
+        if (alive) setZoneLoading(false)
+      })
+
+    return () => {
+      alive = false
+    }
+  }, [selectedCommune?.slug])
 
   const selectedCategory = useMemo(
     () => findCategoryNodeById((isDemoMode ? FALLBACK_CATEGORIES : categories) as any, draft.category_id),
@@ -484,13 +540,24 @@ export default function PublishWizard() {
     }
   }
 
-  const addPhotos = (files: FileList | File[]) => {
+  const addPhotos = async (files: FileList | File[]) => {
     const incoming = Array.from(files)
     if (!incoming.length) return
 
+    const optimizedFiles = await Promise.all(
+      incoming.slice(0, 8).map(async (file) => {
+        if (!file.type.startsWith('image/')) return file
+        try {
+          return await compressImage(file)
+        } catch {
+          return file
+        }
+      })
+    )
+
     setPhotos((current) => {
       const combined = [...current]
-      for (const file of incoming) {
+      for (const file of optimizedFiles) {
         if (combined.length >= 8) break
         combined.push({
           id: makeId(),
@@ -541,6 +608,7 @@ export default function PublishWizard() {
       },
       category_name: selectedCategory?.name ?? null,
       commune_name: selectedCommune?.name ?? null,
+      quartier_zone: draft.quartier_zone || null,
       photos: photos.map((photo, index) => ({
         id: photo.id,
         name: photo.file.name,
@@ -635,7 +703,10 @@ export default function PublishWizard() {
         price_negotiable: draft.price_negotiable,
         is_negotiable: draft.price_negotiable,
         duration_days: Number(draft.duration_days),
-        metadata: normalizedMetadata,
+        metadata: {
+          ...normalizedMetadata,
+          quartier_zone: draft.quartier_zone || null,
+        },
       }
 
       const response = await listingsApi.create(payload)
@@ -933,18 +1004,55 @@ export default function PublishWizard() {
                     <span className="text-sm font-semibold text-night">Localisation *</span>
                     <select
                       value={draft.commune_id}
-                      onChange={(event) => setDraft((current) => ({ ...current, commune_id: event.target.value }))}
+                      onChange={(event) => setDraft((current) => ({
+                        ...current,
+                        commune_id: event.target.value,
+                        quartier_zone: '',
+                      }))}
                       disabled={loadingMeta}
                       className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/20 disabled:opacity-60"
                     >
                       <option value="">{loadingMeta ? 'Chargement...' : 'Choisir une commune'}</option>
-                      {communces.map((commune) => (
-                        <option key={commune.id} value={commune.id}>
-                          {commune.name}
+                      {communces.map((province) => (
+                        <optgroup key={province.slug} label={province.name}>
+                          {province.communes.map((commune) => (
+                            <option key={commune.id} value={commune.id}>
+                              {commune.name}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <label className="block space-y-2">
+                    <span className="text-sm font-semibold text-night">Quartier / Zone</span>
+                    <select
+                      value={draft.quartier_zone}
+                      onChange={(event) => setDraft((current) => ({ ...current, quartier_zone: event.target.value }))}
+                      disabled={!draft.commune_id || zoneLoading}
+                      className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/20 disabled:opacity-60"
+                    >
+                      <option value="">
+                        {!draft.commune_id
+                          ? 'Choisissez une commune'
+                          : zoneLoading
+                            ? 'Chargement...'
+                            : 'Aucune préférence'}
+                      </option>
+                      {zoneOptions.map((zone) => (
+                        <option key={zone} value={zone}>
+                          {zone}
                         </option>
                       ))}
                     </select>
                   </label>
+
+                  <div className="rounded-2xl border border-dashed border-night/10 bg-white px-4 py-3 text-xs text-night/55">
+                    Optionnel : vous pouvez préciser un quartier, une tribu ou laisser “Aucune préférence”.
+                  </div>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">

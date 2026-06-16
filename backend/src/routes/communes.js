@@ -4,6 +4,7 @@
 
 const express = require('express');
 const { query } = require('../config/database');
+const { getCommuneBySlug, getZonesForCommune } = require('../../../shared/geoData');
 const router = express.Router();
 
 function provinceCodeFromSlug(slug) {
@@ -57,6 +58,32 @@ router.get('/', async (req, res, next) => {
     }, []);
 
     res.json({ data: grouped });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/communes/:communeSlug/zones — Quartiers / tribus d'une commune
+router.get('/:communeSlug/zones', async (req, res, next) => {
+  try {
+    const match = getCommuneBySlug(req.params.communeSlug);
+    if (!match) {
+      return res.status(404).json({ error: 'Commune introuvable.' });
+    }
+
+    return res.json({
+      data: {
+        province: {
+          name: match.province.name,
+          slug: match.province.slug,
+        },
+        commune: {
+          name: match.commune.name,
+          slug: match.commune.slug,
+        },
+        zones: getZonesForCommune(req.params.communeSlug),
+      },
+    });
   } catch (err) {
     next(err);
   }

@@ -44,6 +44,7 @@ type Ride = {
   music_allowed?: boolean
   no_smoking?: boolean
   animals_allowed?: boolean
+  women_only?: boolean
 }
 
 type Transporter = {
@@ -216,6 +217,11 @@ function RideCard({
             Conducteur vérifié
           </span>
         ) : null}
+        {ride.women_only ? (
+          <span className="rounded-full border border-fuchsia-200 bg-fuchsia-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-fuchsia-700">
+            Réservé aux femmes
+          </span>
+        ) : null}
         <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text-secondary)]">
           {formatDateLabel(ride.ride_date)}
         </span>
@@ -276,6 +282,7 @@ export default function CovoituragePage() {
   const [rides, setRides] = useState<Ride[]>([])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({ departure: '', destination: '', ride_date: '' })
+  const [womenOnlyFilter, setWomenOnlyFilter] = useState(false)
   const [sortBy, setSortBy] = useState<'time' | 'city' | 'rating' | 'price_asc' | 'price_desc'>('time')
   const [transporters, setTransporters] = useState<Transporter[]>([])
   const [transportLoading, setTransportLoading] = useState(false)
@@ -297,6 +304,7 @@ export default function CovoituragePage() {
     vehicle: '',
     description: '',
     booking_mode: 'auto' as 'auto' | 'manual',
+    women_only: false,
     recurrence_enabled: false,
     recurrence_type: 'weekly' as 'daily' | 'weekly',
     recurrence_days: [1, 2, 3, 4, 5] as number[],
@@ -335,8 +343,8 @@ export default function CovoituragePage() {
   }, [publishNotice])
 
   const hasFilters = useMemo(
-    () => Boolean(filters.departure || filters.destination || filters.ride_date),
-    [filters],
+    () => Boolean(filters.departure || filters.destination || filters.ride_date || womenOnlyFilter),
+    [filters, womenOnlyFilter],
   )
 
   const visibleRides = useMemo(() => {
@@ -383,6 +391,7 @@ export default function CovoituragePage() {
       params.set('limit', '12')
       if (filters.departure) params.set('departure', filters.departure)
       if (filters.destination) params.set('destination', filters.destination)
+      if (womenOnlyFilter) params.set('women_only', 'true')
 
       const response = await fetch(`${API_ORIGIN}/api/covoiturage?${params.toString()}`, { credentials: 'include' })
       const json = await response.json()
@@ -421,7 +430,7 @@ export default function CovoituragePage() {
   useEffect(() => {
     void refreshRides()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.departure, filters.destination])
+  }, [filters.departure, filters.destination, womenOnlyFilter])
 
   useEffect(() => {
     if (activeTab === 'transport') {
@@ -454,6 +463,7 @@ export default function CovoituragePage() {
         music_allowed: true,
         no_smoking: true,
         animals_allowed: false,
+        women_only: form.women_only,
       })
       setForm({
         departure: '',
@@ -465,6 +475,7 @@ export default function CovoituragePage() {
         vehicle: '',
         description: '',
         booking_mode: 'auto',
+        women_only: false,
         recurrence_enabled: false,
         recurrence_type: 'weekly',
         recurrence_days: [1, 2, 3, 4, 5],
@@ -603,6 +614,15 @@ export default function CovoituragePage() {
                       onChange={(e) => setFilters((prev) => ({ ...prev, ride_date: e.target.value }))}
                       className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none"
                     />
+                  </label>
+                  <label className="md:col-span-2 flex items-center gap-3 rounded-2xl border border-night/10 bg-[var(--color-background-secondary)] px-4 py-3 text-sm text-night/70">
+                    <input
+                      type="checkbox"
+                      checked={womenOnlyFilter}
+                      onChange={(e) => setWomenOnlyFilter(e.target.checked)}
+                      className="h-4 w-4 rounded border-night/20 text-coral"
+                    />
+                    <span>Afficher seulement les trajets réservés aux femmes</span>
                   </label>
                   <div className="md:col-span-2">
                     <div className="flex flex-wrap gap-3">
@@ -831,6 +851,15 @@ export default function CovoituragePage() {
                       ))}
                     </div>
                   </div>
+                  <label className="md:col-span-2 flex items-center gap-3 rounded-2xl border border-night/10 bg-[var(--color-background-secondary)] px-4 py-3 text-sm text-night/70">
+                    <input
+                      type="checkbox"
+                      checked={form.women_only}
+                      onChange={(e) => setForm((prev) => ({ ...prev, women_only: e.target.checked }))}
+                      className="h-4 w-4 rounded border-night/20 text-coral"
+                    />
+                    <span>Réserver ce trajet aux femmes</span>
+                  </label>
                   <div className="md:col-span-2 rounded-3xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
@@ -969,6 +998,7 @@ export default function CovoituragePage() {
           vehicle: '',
           description: '',
           booking_mode: 'auto',
+          women_only: false,
           recurrence_enabled: false,
           recurrence_type: 'weekly',
           recurrence_days: [1, 2, 3, 4, 5],

@@ -175,7 +175,7 @@ export default function QuotePublicClient({ quote, token }: QuotePublicClientPro
                   <span className="font-semibold text-night">{formatMoney(quote.subtotal_xpf)}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm text-night/65">
-                  <span>TVA ({quote.tax_rate || 0}%)</span>
+                  <span>TGC ({quote.tax_rate || 0}%)</span>
                   <span className="font-semibold text-night">{formatMoney(quote.tax_amount_xpf)}</span>
                 </div>
                 <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-3 text-base font-bold text-night">

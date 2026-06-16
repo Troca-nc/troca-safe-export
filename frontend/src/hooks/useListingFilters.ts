@@ -10,6 +10,7 @@ export interface ListingFilters {
   category: string
   commune_id: string
   province_id: string
+  quartier_zone: string
   price_min: string
   price_max: string
   condition: string
@@ -26,6 +27,7 @@ const DEFAULT_FILTERS: ListingFilters = {
   category: '',
   commune_id: '',
   province_id: '',
+  quartier_zone: '',
   price_min: '',
   price_max: '',
   condition: '',
@@ -37,10 +39,11 @@ const DEFAULT_FILTERS: ListingFilters = {
   page: 1,
 }
 
-function decodeLocationToken(token: string): Pick<ListingFilters, 'province_id' | 'commune_id' | 'condition' | 'troc'> {
+function decodeLocationToken(token: string): Pick<ListingFilters, 'province_id' | 'commune_id' | 'quartier_zone' | 'condition' | 'troc'> {
   const next = {
     province_id: '',
     commune_id: '',
+    quartier_zone: '',
     condition: '',
     troc: '',
   }
@@ -56,6 +59,8 @@ function decodeLocationToken(token: string): Pick<ListingFilters, 'province_id' 
       next.province_id = value
     } else if (key === 'commune' || key === 'comm' || key === 'c') {
       next.commune_id = value
+    } else if (key === 'zone' || key === 'quartier' || key === 'qz') {
+      next.quartier_zone = value
     } else if (key === 'condition' || key === 'cond') {
       next.condition = value
     } else if (key === 'troc' || key === 'swap') {
@@ -73,6 +78,10 @@ function encodeLocationToken(filters: ListingFilters) {
     parts.push(`commune:${filters.commune_id}`)
   } else if (filters.province_id) {
     parts.push(`province:${filters.province_id}`)
+  }
+
+  if (filters.quartier_zone) {
+    parts.push(`zone:${filters.quartier_zone}`)
   }
 
   if (filters.condition) {
@@ -100,6 +109,7 @@ function fromSearchParams(searchParams: Pick<URLSearchParams, 'get'>): ListingFi
   const legacyLocation = {
     commune_id: searchParams.get('commune_id') ?? '',
     province_id: searchParams.get('province_id') ?? '',
+    quartier_zone: searchParams.get('quartier_zone') ?? '',
     condition: searchParams.get('condition') ?? '',
     troc: searchParams.get('troc') === 'true' ? 'true' : '',
   }
@@ -111,6 +121,7 @@ function fromSearchParams(searchParams: Pick<URLSearchParams, 'get'>): ListingFi
     category: searchParams.get('cat') ?? searchParams.get('category') ?? '',
     commune_id: location.commune_id || legacyLocation.commune_id,
     province_id: location.province_id || legacyLocation.province_id,
+    quartier_zone: location.quartier_zone || legacyLocation.quartier_zone,
     price_min: searchParams.get('min') ?? searchParams.get('price_min') ?? '',
     price_max: searchParams.get('max') ?? searchParams.get('price_max') ?? '',
     condition: location.condition || legacyLocation.condition,
@@ -174,8 +185,13 @@ export function useListingFilters() {
         next.page = 1
       }
 
-      if (key === 'province_id' && value) {
+      if (key === 'province_id') {
         next.commune_id = ''
+        next.quartier_zone = ''
+      }
+
+      if (key === 'commune_id') {
+        next.quartier_zone = ''
       }
 
       return next
@@ -213,7 +229,7 @@ export function useListingFilters() {
 
   const activeFilterCount = useMemo(() => {
     const geoActive = filters.lat && filters.lng ? 1 : 0
-    const locationActive = filters.commune_id || filters.province_id ? 1 : 0
+    const locationActive = filters.commune_id || filters.province_id || filters.quartier_zone ? 1 : 0
 
     return [
       filters.q,

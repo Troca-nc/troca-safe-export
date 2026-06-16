@@ -165,7 +165,7 @@ export default function QuoteBuilder({
         subject: form.subject.trim(),
         client_note: form.client_note.trim() || null,
         items: normalizedItems,
-        tax_rate: Number(form.tax_rate || 0),
+        tgc_rate: Number(form.tax_rate || 0),
         validity_days: Number(form.validity_days || 30),
         source_quote_request_id: initialRequest?.id ? Number(initialRequest.id) : null,
       })
@@ -288,7 +288,7 @@ export default function QuoteBuilder({
 
               <div className="grid gap-4 sm:grid-cols-3">
                 <label className="space-y-2">
-                  <span className="text-sm font-semibold text-night">TVA</span>
+                  <span className="text-sm font-semibold text-night">TGC</span>
                   <select
                     value={form.tax_rate}
                     onChange={(event) => setForm((current) => ({ ...current, tax_rate: event.target.value }))}
@@ -434,7 +434,7 @@ export default function QuoteBuilder({
                   <span className="font-semibold text-night">{formatMoney(totals.subtotal)}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm text-night/65">
-                  <span>TVA ({form.tax_rate || '0'}%)</span>
+                  <span>TGC ({form.tax_rate || '0'}%)</span>
                   <span className="font-semibold text-night">{formatMoney(totals.tax)}</span>
                 </div>
                 <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-3 text-base font-bold text-night">

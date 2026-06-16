@@ -315,6 +315,12 @@ export const listingsApi = {
     invalidateApiCache('stats.')
     return res
   },
+  updateStatus: async (id: string | number, data: { status: 'active' | 'reserved' | 'sold' }) => {
+    const res = await api.patch(`/listings/${id}/status`, data)
+    invalidateApiCache('listings.')
+    invalidateApiCache('messages.')
+    return res
+  },
   delete: async (id: string, reason = 'other') => {
     const res = await api.delete(`/listings/${id}`, { data: { reason } })
     invalidateApiCache('listings.')
@@ -496,6 +502,11 @@ export const metaApi = {
   getCommunes: () => cachedGet(
     buildCacheKey('meta.getCommunes', '/communes'),
     () => api.get('/communes'),
+    CACHE_TTL.static,
+  ),
+  getZones: (communeSlug: string) => cachedGet(
+    buildCacheKey('meta.getZones', `/communes/${communeSlug}/zones`),
+    () => api.get(`/communes/${communeSlug}/zones`),
     CACHE_TTL.static,
   ),
   getCategories: () => cachedGet(
@@ -695,6 +706,83 @@ export const proApi = {
   ),
   updateAutoReply: async (data: object) => {
     const res = await api.put('/pro/auto-reply', data)
+    invalidateApiCache('pro.')
+    return res
+  },
+}
+
+export const paymentApi = {
+  getSavedCards: () => cachedGet(
+    buildCacheKey('payment.savedCards', '/payment/saved-cards'),
+    () => api.get('/payment/saved-cards'),
+    CACHE_TTL.short,
+  ),
+  boostOneClick: async (data: object) => {
+    const res = await api.post('/payment/boost-one-click', data)
+    invalidateApiCache('payment.')
+    invalidateApiCache('pro.')
+    invalidateApiCache('listings.')
+    invalidateApiCache('stats.')
+    return res
+  },
+}
+
+export const proDocumentsApi = {
+  list: () => cachedGet(
+    buildCacheKey('proDocuments.list', '/pro/documents'),
+    () => api.get('/pro/documents'),
+    CACHE_TTL.short,
+  ),
+  upload: async (data: { file: File; document_type: string; label?: string }) => {
+    const form = new FormData()
+    form.append('file', data.file)
+    form.append('document_type', data.document_type)
+    if (data.label) {
+      form.append('label', data.label)
+    }
+    const res = await api.post('/pro/documents', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    invalidateApiCache('proDocuments.')
+    invalidateApiCache('pro.')
+    return res
+  },
+  delete: async (id: string | number) => {
+    const res = await api.delete(`/pro/documents/${id}`)
+    invalidateApiCache('proDocuments.')
+    invalidateApiCache('pro.')
+    return res
+  },
+}
+
+export const fretApi = {
+  estimate: (params: object = {}) => cachedGet(
+    buildCacheKey('fret.estimate', '/fret/estimate', params),
+    () => api.get('/fret/estimate', { params }),
+    CACHE_TTL.short,
+  ),
+  createRequest: async (data: object) => {
+    const res = await api.post('/fret/requests', data)
+    invalidateApiCache('fret.')
+    return res
+  },
+  getMine: () => cachedGet(
+    buildCacheKey('fret.mine', '/fret/requests/mine'),
+    () => api.get('/fret/requests/mine'),
+    CACHE_TTL.short,
+  ),
+}
+
+export const adminApi = {
+  listProDocuments: () => cachedGet(
+    buildCacheKey('admin.proDocuments.list', '/admin/pro-documents'),
+    () => api.get('/admin/pro-documents'),
+    CACHE_TTL.short,
+  ),
+  validateProDocument: async (id: string | number, data: { status: 'validated' | 'rejected'; rejection_reason?: string }) => {
+    const res = await api.post(`/admin/pro-documents/${id}/validate`, data)
+    invalidateApiCache('admin.proDocuments.')
+    invalidateApiCache('proDocuments.')
     invalidateApiCache('pro.')
     return res
   },
