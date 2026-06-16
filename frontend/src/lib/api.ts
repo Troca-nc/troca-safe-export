@@ -568,6 +568,41 @@ export const bonPlansApi = {
   },
 }
 
+export const eventsApi = {
+  list: (params: object = {}) => cachedGet(
+    buildCacheKey('events.list', '/events', params),
+    () => api.get('/events', { params }),
+    CACHE_TTL.short,
+  ),
+  getById: (id: string | number) => cachedGet(
+    buildCacheKey('events.getById', `/events/${id}`),
+    () => api.get(`/events/${id}`),
+    CACHE_TTL.short,
+  ),
+  create: async (data: object) => {
+    const res = await api.post('/events', data)
+    invalidateApiCache('events.')
+    invalidateApiCache('bonPlans.')
+    invalidateApiCache('stats.')
+    return res
+  },
+  reserveTickets: async (id: string | number, data: object) => {
+    const res = await api.post(`/events/${id}/reservations`, data)
+    invalidateApiCache('events.')
+    return res
+  },
+  getTicket: (token: string) => cachedGet(
+    buildCacheKey('events.ticket', `/events/tickets/${token}`),
+    () => api.get(`/events/tickets/${token}`),
+    CACHE_TTL.short,
+  ),
+  scanTicket: async (token: string, data: object = {}) => {
+    const res = await api.post(`/events/tickets/${token}/scan`, data)
+    invalidateApiCache('events.ticket.')
+    return res
+  },
+}
+
 export const proApi = {
   list: (params: object = {}) => cachedGet(
     buildCacheKey('pro.list', '/pros', params),

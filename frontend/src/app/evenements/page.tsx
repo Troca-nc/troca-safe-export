@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight, CalendarDays, Clock3, MapPin, Sparkles } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
-import { bonPlansApi } from '@/lib/api'
+import { eventsApi } from '@/lib/api'
 
 type EventItem = {
   id: number | string
@@ -19,6 +19,15 @@ type EventItem = {
   price_xpf?: number | null
   author_is_pro?: boolean | null
   kind?: string | null
+  has_ticketing?: boolean | null
+  ticket_types?: Array<{
+    id: number | string
+    name: string
+    price_xpf: number
+    quantity_total: number
+    quantity_sold?: number
+    quantity_reserved?: number
+  }>
 }
 
 function formatDateLabel(value?: string | null) {
@@ -57,10 +66,12 @@ export default function EvenementsPage() {
   useEffect(() => {
     let alive = true
     setLoading(true)
-    bonPlansApi.list({
-      limit: 48,
-      kind: 'event,concert',
-    })
+
+    eventsApi
+      .list({
+        limit: 48,
+        category: 'concert,festival,sport,marche,conference,exposition,cinema,spectacle,autre',
+      })
       .then((response) => {
         if (!alive) return
         setEvents(Array.isArray(response.data?.data) ? response.data.data : [])
@@ -85,6 +96,7 @@ export default function EvenementsPage() {
   }, [monthOffset])
 
   const calendarCells = useMemo(() => buildCalendarCells(currentMonth), [currentMonth])
+
   const eventsByDay = useMemo(() => {
     const map = new Map<string, EventItem[]>()
     for (const event of events) {
@@ -168,7 +180,9 @@ export default function EvenementsPage() {
 
             <div className="mt-5 grid grid-cols-7 gap-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-night/45">
               {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day) => (
-                <div key={day} className="py-2">{day}</div>
+                <div key={day} className="py-2">
+                  {day}
+                </div>
               ))}
             </div>
 
@@ -178,6 +192,7 @@ export default function EvenementsPage() {
                 const inMonth = day.getMonth() === currentMonth.getMonth()
                 const isToday = dayKey === toDayKey(new Date())
                 const dayEvents = eventsByDay.get(dayKey) || []
+
                 return (
                   <div
                     key={dayKey}
@@ -188,15 +203,14 @@ export default function EvenementsPage() {
                     } ${isToday ? 'ring-2 ring-[#0A7EA4]/20' : ''}`}
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <span className={`text-sm font-semibold ${inMonth ? 'text-night' : 'text-night/35'}`}>
-                        {day.getDate()}
-                      </span>
+                      <span className={`text-sm font-semibold ${inMonth ? 'text-night' : 'text-night/35'}`}>{day.getDate()}</span>
                       {dayEvents.length ? (
                         <span className="rounded-full bg-nc-lagonLight px-2 py-0.5 text-[10px] font-semibold text-nc-lagon">
                           {dayEvents.length}
                         </span>
                       ) : null}
                     </div>
+
                     <div className="mt-2 space-y-1">
                       {dayEvents.slice(0, 2).map((event) => (
                         <div key={event.id} className="rounded-xl bg-white px-2.5 py-2 text-left shadow-sm">
@@ -250,7 +264,7 @@ export default function EvenementsPage() {
 
                       <div className="mt-4">
                         <a
-                          href={event.link_url || event.website_url || '#'}
+                          href={event.link_url || event.website_url || `/evenements/${event.id}`}
                           target={event.link_url || event.website_url ? '_blank' : undefined}
                           rel={event.link_url || event.website_url ? 'noreferrer' : undefined}
                           className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
@@ -266,6 +280,16 @@ export default function EvenementsPage() {
                     Aucun événement n’est publié pour ce mois.
                   </p>
                 )}
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <Link href="/evenements/publier" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white">
+                  Publier un événement
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link href="/scan" className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-2.5 text-sm font-semibold text-night">
+                  Scanner un billet
+                </Link>
               </div>
             </div>
 

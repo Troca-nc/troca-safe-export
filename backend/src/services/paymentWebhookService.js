@@ -1,7 +1,8 @@
 'use strict';
 
 const { activateBonPlanFromPayment } = require('./bonPlansService');
-const { sendBoostActivatedEmail } = require('./emailService');
+const { sendBoostActivatedEmail, sendTicketEmail } = require('./emailService');
+const { finalizeEventTicketPayment } = require('./eventTicketingService');
 
 async function setSubscriptionPaymentStatus(query, providerSubId, paymentStatus) {
   if (!providerSubId) return;
@@ -382,6 +383,14 @@ async function processStripeWebhookEvent({
         }).catch(() => {});
       }
     }
+    }
+
+    if (paymentType === 'event_ticket') {
+      const finalized = await finalizeEventTicketPayment({ providerRef: session.id, paymentStatus: 'succeeded' });
+      if (finalized?.order && Array.isArray(finalized.tickets)) {
+        await sendTicketEmail(finalized.order, finalized.tickets).catch(() => {});
+      }
+      return;
     }
 
     if (paymentType === 'subscription') {

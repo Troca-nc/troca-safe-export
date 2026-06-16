@@ -6,7 +6,9 @@
 // ============================================================
 
 const { isConfiguredValue } = require('../config/env');
+const { query } = require('../config/database');
 const { ensureNotificationPreferences } = require('./notificationPreferencesService');
+const { generateQrCode } = require('./qrCodeService');
 
 // â”€â”€ Transporter SMTP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -685,6 +687,147 @@ async function sendProBookingReminderEmail(to, prenom, details = {}, recipientUs
   });
 }
 
+function formatEventDateTime(eventDate, eventTime) {
+  const date = eventDate ? new Date(eventDate) : null;
+  const validDate = date && !Number.isNaN(date.getTime());
+  return {
+    dateLabel: validDate
+      ? new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date)
+      : 'Date à confirmer',
+    timeLabel: String(eventTime || '').trim().slice(0, 5) || 'Heure à confirmer',
+  };
+}
+
+async function loadTicketEmailEvent(order, tickets = []) {
+  const eventId = Number(order?.event_id || tickets[0]?.event_id || 0);
+  if (!eventId) return null;
+
+  const { rows } = await query(
+    `SELECT e.id, e.title, e.event_date, e.event_time, e.venue_name, e.venue_address,
+            c.name AS commune_name, e.cover_image_url
+       FROM events e
+       LEFT JOIN communes c ON c.id = e.commune_id
+      WHERE e.id = $1
+      LIMIT 1`,
+    [eventId]
+  );
+
+  return rows[0] || null;
+}
+
+function buildKalicoEmailHeader() {
+  return `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+      <div style="width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,#0A7EA4,#082032);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;letter-spacing:-0.04em;">K</div>
+      <div>
+        <div style="font-size:20px;font-weight:800;color:#0f172a;line-height:1;">Kalico</div>
+        <div style="font-size:12px;color:#64748b;margin-top:2px;">Nouvelle-Calédonie</div>
+      </div>
+    </div>
+  `;
+}
+
+async function buildTicketCardHtml(ticket, index) {
+  const holderName = ticket.holder_name || ticket.buyer_name || ticket.buyer || ticket.order_buyer_name || 'Porteur du billet';
+  const ticketType = ticket.ticket_type_name || ticket.ticketTypeName || 'Billet';
+  const priceXpf = Number(ticket.ticket_price_xpf ?? ticket.price_xpf ?? 0);
+  const token = String(ticket.token || '').trim();
+  const truncatedToken = token.length > 12 ? `${token.slice(0, 12)}…` : token;
+  const qrData = ticket.qr_code_data || ticket.qr_code_base64 || (token ? await generateQrCode(token) : '');
+
+  return `
+    <div style="border:1px solid #e5e7eb;border-radius:18px;padding:18px;margin:0 0 14px;background:#ffffff;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <p style="margin:0;font-size:14px;font-weight:800;color:#0f172a;">Billet ${index + 1}</p>
+        <span style="display:inline-block;border-radius:999px;background:#e0f2fe;color:#0369a1;padding:6px 10px;font-size:12px;font-weight:700;">${escapeHtml(ticketType)}</span>
+      </div>
+      <p style="margin:10px 0 0;color:#475569;font-size:14px;"><strong>Porteur :</strong> ${escapeHtml(holderName)}</p>
+      <p style="margin:6px 0 0;color:#475569;font-size:14px;"><strong>Prix :</strong> ${priceXpf > 0 ? `${priceXpf.toLocaleString('fr-FR')} XPF` : 'Gratuit'}</p>
+      ${qrData ? `<img src="${qrData}" alt="QR code du billet" style="width:168px;height:168px;border-radius:20px;border:1px solid #e5e7eb;display:block;margin:16px auto 12px;object-fit:contain;background:#fff;" />` : ''}
+      <p style="margin:0;color:#64748b;font-size:13px;text-align:center;">QR Code intégré</p>
+      <p style="margin:12px 0 0;color:#475569;font-size:14px;text-align:center;"><strong>Billet n°</strong> ${escapeHtml(truncatedToken)}</p>
+    </div>
+  `;
+}
+
+async function sendTicketEmail(order, tickets = []) {
+  const buyerEmail = order?.buyer_email || order?.buyerEmail || order?.email || null;
+  if (!buyerEmail) return null;
+
+  const eventTitle = escapeHtml(order?.event_title || order?.eventTitle || tickets[0]?.event_title || order?.title || 'Votre événement');
+  const ticketCards = tickets.slice(0, 12).map((ticket, index) => `
+    <div style="border:1px solid #e5e7eb;border-radius:14px;padding:14px 16px;margin:0 0 10px;background:#f8fafc;">
+      <p style="margin:0;font-weight:700;color:#0f172a;">Billet ${index + 1}</p>
+      <p style="margin:6px 0 0;color:#475569;font-size:14px;">Token : <strong>${escapeHtml(ticket.token)}</strong></p>
+      ${ticket.qr_code_url ? `<p style="margin:6px 0 0;color:#475569;font-size:14px;">QR : <a href="${escapeHtml(ticket.qr_code_url)}">${escapeHtml(ticket.qr_code_url)}</a></p>` : ''}
+    </div>
+  `).join('');
+
+  return sendMail({
+    to: buyerEmail,
+    subject: `Vos billets Kalico — ${eventTitle}`,
+    html: baseTemplate(`
+      <p>Bonjour ${escapeHtml(order?.buyer_name || order?.buyerName || 'Participant')},</p>
+      <p>Votre commande pour <strong>${eventTitle}</strong> est confirmée.</p>
+      <div style="border:1px solid #e5e7eb;border-radius:14px;padding:16px 18px;margin:18px 0;background:#f8fafc;">
+        <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;">Commande</p>
+        <p style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">${escapeHtml(String(order?.id || ''))}</p>
+        <p style="margin:6px 0 0;color:#475569;font-size:14px;">Total : ${Number(order?.total_xpf || 0).toLocaleString('fr-FR')} XPF</p>
+      </div>
+      ${ticketCards}
+      <p>Présentez ce QR code à l’entrée. En cas de contrôle, l’équipe pourra le scanner depuis l’URL de validation Kalico.</p>
+    `),
+  });
+}
+
+async function sendTicketEmailV2(order, tickets = []) {
+  const buyerEmail = order?.buyer_email || order?.buyerEmail || order?.email || null;
+  if (!buyerEmail) return null;
+
+  const event = await loadTicketEmailEvent(order, tickets).catch(() => null);
+  const eventTitleRaw = event?.title || order?.event_title || order?.eventTitle || tickets[0]?.event_title || order?.title || 'Votre événement';
+  const eventTitle = escapeHtml(eventTitleRaw);
+  const { dateLabel, timeLabel } = formatEventDateTime(event?.event_date || order?.event_date, event?.event_time || order?.event_time);
+  const venueName = escapeHtml(event?.venue_name || order?.venue_name || 'Lieu à confirmer');
+  const venueAddress = escapeHtml(event?.venue_address || order?.venue_address || '');
+  const communeName = escapeHtml(event?.commune_name || order?.commune_name || '');
+  const eventUrl = `${BASE_URL()}/evenements/${encodeURIComponent(String(event?.id || order?.event_id || tickets[0]?.event_id || ''))}`;
+
+  const ticketCards = [];
+  for (const [index, ticket] of tickets.slice(0, 12).entries()) {
+    ticketCards.push(await buildTicketCardHtml(ticket, index));
+  }
+
+  return sendMail({
+    to: buyerEmail,
+    subject: `🎟️ Vos billets — ${String(eventTitleRaw)}`,
+    html: baseTemplate(`
+      ${buildKalicoEmailHeader()}
+      <p style="font-size:18px;font-weight:800;color:#0f172a;margin:0 0 8px;">Votre commande est confirmée !</p>
+      <p>Bonjour ${escapeHtml(order?.buyer_name || order?.buyerName || 'Participant')},</p>
+      <p>Nous vous remercions pour votre réservation sur Kalico. Voici le récapitulatif de vos billets.</p>
+
+      <div style="border:1px solid #e5e7eb;border-radius:18px;padding:18px;margin:18px 0;background:linear-gradient(135deg,#f8fafc,#ffffff);">
+        <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;">Détails événement</p>
+        <p style="margin:0;font-size:20px;font-weight:800;color:#0f172a;">${eventTitle}</p>
+        <p style="margin:8px 0 0;color:#475569;font-size:14px;">${escapeHtml(dateLabel)} · ${escapeHtml(timeLabel)}</p>
+        <p style="margin:6px 0 0;color:#475569;font-size:14px;">${venueName}${communeName ? ` · ${communeName}` : ''}</p>
+        ${venueAddress ? `<p style="margin:6px 0 0;color:#64748b;font-size:13px;">${venueAddress}</p>` : ''}
+      </div>
+
+      ${ticketCards.join('')}
+
+      <div style="margin-top:16px;padding:16px 18px;border-radius:16px;background:#f8fafc;border:1px solid #e5e7eb;">
+        <p style="margin:0;color:#0f172a;font-size:14px;line-height:1.7;">
+          Présentez ce QR Code à l’entrée.<br>
+          Chaque billet est nominatif et à usage unique.
+        </p>
+        <p style="margin:12px 0 0;"><a href="${eventUrl}" style="color:#0A7EA4;font-weight:700;text-decoration:none;">Voir la page de l’événement</a></p>
+      </div>
+    `),
+  });
+}
+
 module.exports = {
   sendMail,
   sendResetEmail,
@@ -705,6 +848,7 @@ module.exports = {
   sendRideBookingAcceptedDriverEmail,
   sendRideReviewReminderEmail,
   sendProBookingReminderEmail,
+  sendTicketEmail: sendTicketEmailV2,
   sendPerformanceReportEmail,
 };
 
