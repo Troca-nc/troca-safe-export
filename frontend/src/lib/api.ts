@@ -746,6 +746,36 @@ export const proApi = {
   },
 }
 
+export const importApi = {
+  fields: () => cachedGet(
+    buildCacheKey('import.fields', '/import/fields'),
+    () => api.get('/import/fields'),
+    CACHE_TTL.static,
+  ),
+  upload: async (file: File) => {
+    const form = new FormData()
+    form.append('file', file)
+    const res = await api.post('/import/upload', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    invalidateApiCache('import.')
+    return res
+  },
+  saveMapping: async (jobId: string | number, mapping: Record<string, string>) => {
+    const res = await api.post(`/import/${jobId}/mapping`, { mapping })
+    invalidateApiCache('import.')
+    invalidateApiCache('pro.')
+    return res
+  },
+  status: (jobId: string | number) => api.get(`/import/${jobId}/status`),
+  report: (jobId: string | number) => api.get(`/import/${jobId}/report`),
+  history: () => cachedGet(
+    buildCacheKey('import.history', '/import/history'),
+    () => api.get('/import/history'),
+    CACHE_TTL.short,
+  ),
+}
+
 export const paymentApi = {
   getSavedCards: () => cachedGet(
     buildCacheKey('payment.savedCards', '/payment/saved-cards'),

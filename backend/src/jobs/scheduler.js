@@ -35,7 +35,7 @@ const { flushBonPlanViews } = require('../services/bonPlansService');
 const { checkAdminAlerts } = require('../services/adminAlerts');
 const { ensureNotificationPreferences } = require('../services/notificationPreferencesService');
 const { sendNewsletterBatch } = require('../services/newsletterService');
-const { ticketExpiry } = require('../cron');
+const { ticketExpiry, importCleanup } = require('../cron');
 
 async function runSingletonJob(lockName, ttlMs, task) {
   const started = await withLock(lockName, ttlMs, async () => {
@@ -1459,6 +1459,7 @@ function startAllJobs() {
   startPerformanceReportsJob();
   startAnalyticsPurgeJob();
   ticketExpiry.startTicketExpiryJob();
+  importCleanup.startImportCleanupJob();
 }
 
 module.exports = { startAllJobs, matchImmediateAlerts, expireTrocProposals, expireTrocCycles, processTrocMatchingQueue };

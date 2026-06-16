@@ -1,5 +1,6 @@
 'use strict';
 
 const ticketExpiry = require('./ticketExpiry');
+const importCleanup = require('./importCleanup');
 
-module.exports = { ticketExpiry };
+module.exports = { ticketExpiry, importCleanup };

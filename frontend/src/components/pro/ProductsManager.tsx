@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowDown, ArrowRight, ArrowUp, Archive, BadgeCheck, Layers3, Package, PencilLine, PlusCircle, RefreshCw, Save, Sparkles, Store, Trash2, X } from 'lucide-react'
+import { ArrowDown, ArrowRight, ArrowUp, Archive, BadgeCheck, Layers3, Package, PencilLine, PlusCircle, RefreshCw, Save, Sparkles, Store, Trash2, Upload, X } from 'lucide-react'
 
 import { metaApi, proApi, uploadApi } from '@/lib/api'
 import type { CategoryNode } from '@/lib/categoryCatalog'
@@ -636,9 +636,18 @@ export default function ProductsManager() {
               Créez une fiche produit durable, suivez votre stock et publiez une annonce ponctuelle quand vous voulez la mettre en avant.
             </p>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-nc-lagonLight px-3 py-1.5 text-sm font-semibold text-nc-lagon">
-            <BadgeCheck className="h-4 w-4" />
-            {products.length} produit{products.length > 1 ? 's' : ''}
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/pro/dashboard/import"
+              className="inline-flex items-center gap-2 rounded-full border border-[#0A7EA4]/15 bg-white px-4 py-2 text-sm font-semibold text-[#0A7EA4] transition hover:bg-nc-lagonLight"
+            >
+              <Upload className="h-4 w-4" />
+              Import en masse
+            </Link>
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-nc-lagonLight px-3 py-1.5 text-sm font-semibold text-nc-lagon">
+              <BadgeCheck className="h-4 w-4" />
+              {products.length} produit{products.length > 1 ? 's' : ''}
+            </div>
           </div>
         </div>
       </section>
