@@ -76,7 +76,6 @@ function getCookieValue(name: string) {
 function redirectToLoginAfterAuthFailure() {
   if (typeof window === 'undefined') return
 
-  // TODO: test E2E for auth expiry redirect and draft save flow.
   requestDraftSave()
   rememberRedirectAfterLogin()
   clearTokens()

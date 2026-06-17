@@ -89,7 +89,6 @@ export default function PaymentFailureBanner() {
       ? 'border-red-200 bg-red-600 text-white shadow-lg'
       : 'border-amber-200 bg-amber-400 text-night shadow-lg'
 
-  // TODO: test E2E sur les bannières abonnement actif/expire bientôt/paiement échoué.
   return (
     <div className={`sticky top-0 z-[60] border-b px-4 py-3 ${toneStyles}`}>
       <div className="mx-auto flex max-w-7xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

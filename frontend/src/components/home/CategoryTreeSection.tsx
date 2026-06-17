@@ -179,9 +179,6 @@ export default function CategoryTreeSection() {
         {FALLBACK_CATEGORIES.map((cat) => {
           const Icon = resolveCategoryIcon(cat)
           const subcats = (cat.children || cat.subcategories || []).filter(Boolean)
-          if (typeof window !== 'undefined') {
-            console.log('CAT:', cat.name, 'subcats:', subcats.length)
-          }
 
           return (
             <article

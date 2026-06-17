@@ -33,7 +33,6 @@ export function useFavorite() {
   const isSaved = useFavorisStore((state) => state.isSaved)
   const loading = useFavorisStore((state) => state.loading)
 
-  // TODO: test E2E sur le toggle favori optimiste et le rollback en cas d'échec réseau.
   const mutation = useMutation<FavoriteListing, unknown, FavoriteListing, { snapshot: FavoriteSnapshot; wasSaved: boolean; listing: FavoriteListing }>({
     mutationFn: async (listing: FavoriteListing) => {
       if (!useAuthStore.getState().isAuthenticated) {

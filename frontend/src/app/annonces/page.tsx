@@ -990,7 +990,6 @@ function ListingsPageContent() {
   }, [])
 
   const handleUseLocation = useCallback(() => {
-    // TODO: test E2E sur la géolocalisation manuelle et le rayon de recherche.
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
       window.alert('La géolocalisation n’est pas disponible dans ce navigateur.')
       return
@@ -1697,7 +1696,6 @@ function ListingsPageContent() {
               )}
             </div>
 
-            {/* TODO: test E2E sur le chargement initial et la pagination sans perte de contexte. */}
             {isInitialLoading ? (
               <ListingSkeletonGrid count={6} className="grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4" />
             ) : displayedListings.length === 0 ? (

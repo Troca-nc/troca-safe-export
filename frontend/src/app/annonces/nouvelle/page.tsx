@@ -301,7 +301,6 @@ function SimpleBonPlanPage() {
 
         {autosave.pendingDraft ? (
           <div className="mb-6 rounded-[1.5rem] border border-lagoon/20 bg-lagoon/8 p-4 text-night shadow-sm">
-            {/* TODO: test E2E */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-semibold">Brouillon restaure</p>

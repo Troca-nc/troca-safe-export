@@ -148,7 +148,6 @@ export default function SearchAlertModal({
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-night/55 px-4 py-6 backdrop-blur-sm">
       <div className="absolute inset-0" onClick={saving ? undefined : onClose} />
       <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-[2rem] border border-night/10 bg-white shadow-[0_24px_80px_rgba(8,32,50,0.22)]">
-        {/* TODO: test E2E sur la création d’alerte, le compteur et la confirmation email. */}
         <div className="flex items-start justify-between gap-4 border-b border-night/8 px-5 py-4 md:px-6">
           <div className="flex items-start gap-3">
             <div className="mt-0.5 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-coral/10 text-coral">

@@ -626,7 +626,6 @@ export default function PublishWizard() {
     }
   }
 
-  // TODO: test E2E sur le wizard de publication, l'autosave et le mode simple.
   const validateStep = () => {
     if (draft.step === 1) {
       if (!draft.title.trim()) return 'Le titre est requis.'

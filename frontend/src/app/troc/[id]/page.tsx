@@ -50,7 +50,6 @@ type TrocDetailListing = {
 }
 
 function TrocDetailPageContent() {
-  // TODO: test E2E sur le détail Troc, la compatibilité et l'envoi de proposition.
   const params = useParams<{ id: string }>()
   const { isAuthenticated } = useAuthStore()
   const listingId = params?.id

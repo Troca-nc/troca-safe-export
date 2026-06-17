@@ -1,7 +1,6 @@
 'use client'
 // ============================================================
 //  Kalico Web — Page réinitialisation mot de passe
-//  URL : /mot-de-passe-oublie/reset?token=xxx
 // ============================================================
 
 import { Suspense, useState, useEffect } from 'react'

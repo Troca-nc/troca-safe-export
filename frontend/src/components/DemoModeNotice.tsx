@@ -12,7 +12,6 @@ export default function DemoModeNotice({ className = '' }: DemoModeNoticeProps) 
   if (!isDemoMode() || !showDemoBar) return null
 
   return (
-    // TODO: test E2E sur le bandeau mode démo avant confirmation paiement.
     <div
       className={`flex items-start gap-3 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-amber-950 ${className}`}
       role="status"

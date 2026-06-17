@@ -379,7 +379,6 @@ export default function AbonnementPage() {
           </Link>
         </div>
 
-        {/* TODO: test E2E sur le comparatif pricing, le toggle mensuel/annuel et les CTA paiement. */}
       </main>
     </div>
   )

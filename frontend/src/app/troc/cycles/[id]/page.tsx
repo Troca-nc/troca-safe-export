@@ -34,7 +34,6 @@ function formatTimeRemaining(expiresAt?: string | null) {
 }
 
 export default function TrocCyclePage() {
-  // TODO: test E2E sur le détail de cycle, la confirmation et la redirection vers le chat.
   const params = useParams<{ id: string }>()
   const router = useRouter()
   const { isAuthenticated } = useAuthStore()

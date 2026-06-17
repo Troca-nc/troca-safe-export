@@ -35,7 +35,6 @@ export default function TrocProposalForm({ listingId, listingTitle }: Props) {
     }
 
     if (!isAuthenticated) {
-      // TODO: test E2E sur la reprise du formulaire de proposition après connexion.
       openAuthModal({
         type: 'troc_proposal',
         listingId: String(listingId),

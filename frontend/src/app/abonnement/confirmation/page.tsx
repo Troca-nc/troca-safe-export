@@ -1,6 +1,5 @@
 'use client'
 
-// TODO: test E2E for subscription confirmation reload and polling flow.
 
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
@@ -80,7 +79,6 @@ function ConfirmationContent() {
   const [attempts, setAttempts] = useState(0)
 
   useEffect(() => {
-    // TODO: test E2E for subscription confirmation reload and polling flow.
     const stored = readStoredConfirmation(storageKey)
     if (stored?.confirmed && stored.payload.status !== 'loading' && stored.payload.status !== 'pending') {
       setResult(stored.payload)

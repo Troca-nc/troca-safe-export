@@ -161,7 +161,6 @@ export function useListingFilters() {
   const [filters, setFilters] = useState<ListingFilters>(urlFilters)
   const lastAppliedSignatureRef = useRef(urlSignature)
 
-  // TODO: test E2E sur la synchronisation des filtres URL et le retour arrière navigateur.
   useEffect(() => {
     if (urlSignature === lastAppliedSignatureRef.current) return
 

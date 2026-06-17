@@ -72,7 +72,6 @@ export function usePhoneVerification(onVerified?: (telephone: string) => void) {
     return () => window.clearInterval(timer)
   }, [state.cooldown, state.step])
 
-  // TODO: test E2E for OTP resend and email fallback flow.
   const sendOtp = async (telephone: string) => {
     setState((current) => ({
       ...current,

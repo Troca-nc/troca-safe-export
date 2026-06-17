@@ -168,7 +168,6 @@ export default function ImageUploader({ annonce_id, initial = [], onChange, clas
     onChange?.(images)
   }, [images, onChange])
 
-  // TODO: test E2E sur le flux upload d'images, retry individuel et réordonnancement.
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(false)
