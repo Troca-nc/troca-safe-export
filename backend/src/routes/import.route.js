@@ -6,6 +6,7 @@ const path = require('path');
 
 const { query } = require('../config/database');
 const { authenticate } = require('../middleware/auth');
+const { uploadLimiter } = require('../middleware/rateLimit');
 const { saveImportFile, parseFile, processImport, TARGET_FIELDS } = require('../services/importService');
 
 const router = express.Router();
@@ -115,6 +116,7 @@ async function loadJobOr404(jobId, proId) {
 }
 
 router.use(authenticate);
+router.use(uploadLimiter);
 
 router.get('/fields', async (req, res) => {
   if (!requirePro(req, res)) return;

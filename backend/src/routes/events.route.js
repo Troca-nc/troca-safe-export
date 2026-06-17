@@ -3,6 +3,7 @@
 const express = require('express');
 const { Joi, validate } = require('../middleware/validate');
 const { authenticate, optionalAuth } = require('../middleware/auth');
+const { scanLimiter } = require('../middleware/rateLimit');
 const { sendTicketEmail } = require('../services/emailService');
 const {
   createEventAndBonPlan,
@@ -173,7 +174,7 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-router.post('/tickets/:token/scan', authenticate, validate(scanSchema), async (req, res, next) => {
+router.post('/tickets/:token/scan', authenticate, scanLimiter, validate(scanSchema), async (req, res, next) => {
   try {
     if (!req.user?.id) {
       return res.status(401).json({ error: 'Connexion requise.' });

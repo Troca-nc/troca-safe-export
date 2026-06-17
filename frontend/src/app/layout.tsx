@@ -13,7 +13,7 @@ import AuthRequiredModal from '@/components/auth/AuthRequiredModal'
 import DemoBanner from '@/components/DemoBanner'
 import ToastCenter from '@/components/ui/ToastCenter'
 import OnboardingWizard from '@/components/OnboardingWizard'
-import { SITE_URL } from '@/types/seo.types'
+import { DEFAULT_OG_IMAGE, SITE_LOCALE, SITE_NAME, SITE_TWITTER, SITE_URL } from '@/types/seo.types'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -21,14 +21,22 @@ export const metadata: Metadata = {
   description: 'La première plateforme de petites annonces dédiée à la Nouvelle-Calédonie. Achetez, vendez, louez en toute confiance.',
   keywords: 'annonces, nouvelle-calédonie, noumea, vente, achat, immobilier, véhicules',
   openGraph: {
-    title: 'Kalico',
+    title: SITE_NAME,
     description: 'Petites annonces Nouvelle-Calédonie',
     url: SITE_URL,
-    locale: 'fr_FR',
+    locale: SITE_LOCALE,
     type: 'website',
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: SITE_NAME }],
   },
   alternates: {
     canonical: SITE_URL,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: SITE_NAME,
+    description: 'Petites annonces Nouvelle-Calédonie',
+    images: [DEFAULT_OG_IMAGE],
+    site: SITE_TWITTER,
   },
 }
 

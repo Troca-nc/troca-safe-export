@@ -1,36 +1,25 @@
-// src/app/robots.ts
-// ── robots.txt dynamique Next.js 14 ──────────────────────────────────────────
-
 import type { MetadataRoute } from 'next'
+
 import { SITE_URL } from '@/types/seo.types'
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
-        // Autoriser tous les robots sur le contenu public
         userAgent: '*',
-        allow:     ['/', '/annonces/', '/annonces/*'],
-        disallow:  [
+        allow: ['/'],
+        disallow: [
+          '/pro/dashboard/',
           '/admin/',
-          '/api/',
-          '/profil/',
-          '/profil/',
           '/messages/',
-          '/favoris/',
+          '/mes-',
+          '/parametres/',
           '/connexion',
           '/inscription',
-          '/parametres/',
-          '/*?*',      // bloquer toutes les URLs avec query params (évite le duplicate content)
+          '/scan/',
         ],
-      },
-      {
-        // Bloquer les scrapers connus
-        userAgent: ['GPTBot', 'ChatGPT-User', 'CCBot', 'anthropic-ai'],
-        disallow:  ['/'],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
-    host:    SITE_URL,
   }
 }

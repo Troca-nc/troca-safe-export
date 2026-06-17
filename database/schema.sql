@@ -301,7 +301,7 @@ CREATE TABLE IF NOT EXISTS conversations (
 CREATE TABLE IF NOT EXISTS messages (
   id          SERIAL PRIMARY KEY,
   conv_id     INTEGER     NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
-  sender_id   INTEGER     NOT NULL REFERENCES users(id)         ON DELETE CASCADE,
+  sender_id   INTEGER     DEFAULT NULL REFERENCES users(id)     ON DELETE SET NULL,
   type        VARCHAR(20) NOT NULL DEFAULT 'text'
                 CHECK (type IN ('text','offer','photo','audio','document','system')),
   content     TEXT        DEFAULT NULL,

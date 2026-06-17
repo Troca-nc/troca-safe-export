@@ -22,7 +22,7 @@ function formatXPF(price: number): string {
 
 export function generateHomeMetadata(): Metadata {
   const title       = 'Kalico — Petites annonces Nouvelle-Calédonie'
-  const description = 'La plateforme de petites annonces dédiée à la Nouvelle-Calédonie. Achetez, vendez, louez : véhicules, immobilier, électronique, emploi et plus encore à Nouméa et en NC.'
+  const description = 'Achetez, vendez, échangez et troquez en Nouvelle-Calédonie. La première plateforme d’annonces 100% calédonienne.'
 
   return {
     title,

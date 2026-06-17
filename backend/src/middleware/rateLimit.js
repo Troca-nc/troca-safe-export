@@ -42,7 +42,14 @@ const createRateLimit = ({ windowMs = 15 * 60 * 1000, max = 100, message, prefix
   })
 
 // Limiteur général pour toutes les routes /api/
-const apiLimiter = createRateLimit({ windowMs: 15 * 60 * 1000, max: 300, prefix: 'api' })
+const apiLimiter = createRateLimit({ windowMs: 15 * 60 * 1000, max: 100, prefix: 'api' })
+
+const authLimiter = createRateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  prefix: 'auth',
+  message: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.',
+})
 
 // Limiteur strict pour les routes d'authentification (anti brute-force)
 const loginLimiter = createRateLimit({
@@ -93,11 +100,11 @@ const socialAuthLimiter = createRateLimit({
 })
 
 const phoneLimiter = createRateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: 60 * 60 * 1000,
   max: 5,
   prefix: 'phone',
-  keyGenerator: keyByUserOrIp,
-  message: 'Trop de demandes de vérification téléphone. Réessayez dans 15 minutes.',
+  keyGenerator: keyByFields(['telephone']),
+  message: 'Trop de demandes de vérification téléphone. Réessayez dans 1 heure.',
 })
 
 const paymentLimiter = createRateLimit({
@@ -116,15 +123,22 @@ const messageLimiter = createRateLimit({
   message: 'Trop d’actions de messagerie. Réessayez dans 1 minute.',
 })
 
-// Limiteur upload
-const uploadLimiter = createRateLimit({
+const scanLimiter = createRateLimit({
   windowMs: 60 * 1000,
-  max: 10,
-  prefix: 'upload',
+  max: 60,
+  prefix: 'ticket-scan',
   keyGenerator: keyByUserOrIp,
+  message: 'Trop de scans de billets. Réessayez dans 1 minute.',
 })
 
-const authLimiter = loginLimiter
+// Limiteur upload
+const uploadLimiter = createRateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 20,
+  prefix: 'upload',
+  keyGenerator: keyByUserOrIp,
+  message: 'Trop de téléversements. Réessayez dans 1 heure.',
+})
 
 module.exports = {
   rateLimit: createRateLimit,
@@ -137,6 +151,7 @@ module.exports = {
   refreshLimiter,
   socialAuthLimiter,
   phoneLimiter,
+  scanLimiter,
   paymentLimiter,
   messageLimiter,
   uploadLimiter,

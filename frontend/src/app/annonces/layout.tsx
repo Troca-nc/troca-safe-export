@@ -1,24 +1,11 @@
 import type { Metadata } from 'next'
-import { SITE_NAME, SITE_URL } from '@/types/seo.types'
+import { buildPageMetadata } from '@/lib/pageMetadata'
 
-export const metadata: Metadata = {
-  title: {
-    default: 'Annonces | Kalico',
-    template: '%s | Kalico',
-  },
-  description: 'Parcourez les petites annonces de Nouvelle-Calédonie sur Kalico.',
-  alternates: {
-    canonical: `${SITE_URL}/annonces`,
-  },
-  openGraph: {
-    title: 'Annonces | Kalico',
-    description: 'Parcourez les petites annonces de Nouvelle-Calédonie sur Kalico.',
-    url: `${SITE_URL}/annonces`,
-    siteName: SITE_NAME,
-    locale: 'fr_NC',
-    type: 'website',
-  },
-}
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Annonces — Kalico NC',
+  description: 'Parcourez les petites annonces de Nouvelle-Calédonie : véhicules, immobilier, emploi, électronique et bien plus.',
+  path: '/annonces',
+})
 
 export default function AnnoncesLayout({ children }: { children: React.ReactNode }) {
   return children

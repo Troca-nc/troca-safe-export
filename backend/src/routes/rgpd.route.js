@@ -43,20 +43,38 @@ router.post('/supprimer-compte', verifyCsrf, async (req, res) => {
       // 2. Anonymiser toutes les données personnelles (RGPD : pseudonymisation)
       await client.query(`
         UPDATE users SET
-          email          = 'deleted_' || id || '@kalico.supprime',
-          password_hash  = NULL,
-          prenom         = 'Utilisateur',
-          nom            = 'Supprimé',
-          telephone      = NULL,
-          phone_verified = FALSE,
-          avatar_url     = NULL,
-          bio            = NULL,
-          google_id      = NULL,
-          apple_id       = NULL,
+          email              = 'deleted_' || id || '@kalico.supprime',
+          password_hash      = NULL,
+          prenom             = 'Utilisateur',
+          nom                = 'Supprimé',
+          telephone          = NULL,
+          phone_verified     = FALSE,
+          avatar_url         = NULL,
+          bio                = NULL,
+          google_id          = NULL,
+          apple_id           = NULL,
+          account_type       = 'personal',
+          is_pro             = FALSE,
+          pro_plan           = NULL,
+          pro_expires_at     = NULL,
+          pro_verified       = FALSE,
+          pro_verified_at    = NULL,
+          pro_company_name   = NULL,
+          pro_category       = NULL,
+          pro_description    = NULL,
+          pro_logo_url       = NULL,
+          pro_banner_url     = NULL,
+          pro_website        = NULL,
+          pro_phone          = NULL,
+          pro_hours          = NULL,
+          pro_commune        = NULL,
+          pro_siret          = NULL,
+          pro_referral_code  = NULL,
+          pro_quote_template = '{}'::jsonb,
           stripe_customer_id = NULL,
-          commune_id     = NULL,
-          deleted_at     = NOW(),
-          updated_at     = NOW()
+          commune_id         = NULL,
+          deleted_at         = NOW(),
+          updated_at         = NOW()
         WHERE id = $1`, [userId]
       );
 
@@ -68,6 +86,9 @@ router.post('/supprimer-compte', verifyCsrf, async (req, res) => {
 
       // 4. Supprimer les tokens push (ne plus notifier)
       await client.query(`DELETE FROM push_tokens WHERE user_id = $1`, [userId]);
+      await client.query(`DELETE FROM refresh_tokens WHERE user_id = $1`, [userId]);
+      await client.query(`DELETE FROM password_reset_tokens WHERE user_id = $1`, [userId]);
+      await client.query(`DELETE FROM email_verification_tokens WHERE user_id = $1`, [userId]);
 
       // 5. Supprimer les alertes de recherche
       await client.query(`DELETE FROM search_alerts WHERE user_id = $1`, [userId]);
@@ -81,8 +102,15 @@ router.post('/supprimer-compte', verifyCsrf, async (req, res) => {
 
       // 6. Archiver les messages (garder pour l'autre partie, anonymiser l'expéditeur)
       await client.query(`
-        UPDATE messages SET content = '[Message supprimé]', photo_url = NULL
-        WHERE sender_id = $1 AND created_at > NOW() - INTERVAL '30 days'`, [userId]
+        UPDATE messages
+           SET sender_id = NULL,
+               content = '[Message supprimé]',
+               photo_url = NULL,
+               attachment_url = NULL,
+               attachment_name = NULL,
+               attachment_mime_type = NULL,
+               attachment_size_bytes = NULL
+         WHERE sender_id = $1`, [userId]
       );
 
       // 7. Logger la suppression pour la traçabilité

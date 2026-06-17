@@ -8,12 +8,13 @@ const express     = require('express');
 const http        = require('http');
 const path        = require('path');
 const cors        = require('cors');
+const helmet      = require('helmet');
 const { checkConnection }   = require('./config/database');
 const errorHandler          = require('./middleware/errorHandler');
 const { requestContext }    = require('./middleware/requestContext');
 const { requestLogger }     = require('./middleware/requestLogger');
 const { internalAuth }      = require('./middleware/internalAuth');
-const { apiLimiter }        = require('./middleware/rateLimit');
+const { apiLimiter, authLimiter }        = require('./middleware/rateLimit');
 const { csrfMiddleware }    = require('./middleware/csrf');
 const { initSocket, shutdownWebsocketBridge }        = require('./services/websocketServer');
 const { startAllJobs }      = require('./jobs/scheduler');
@@ -114,6 +115,26 @@ app.use(cors({
   credentials: true,
 }));
 
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      connectSrc: ["'self'", 'https://api.stripe.com'],
+      frameSrc: ["'none'"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
+  noSniff: true,
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+}));
+
 app.use(express.json({
   limit: '10mb',
   verify: (req, _res, buf) => { req.rawBody = buf; },
@@ -174,7 +195,7 @@ app.get('/api/internal/observability', internalAuth, async (_req, res) => {
 
 // ── Routes API ────────────────────────────────────────────────
 
-app.use('/api/auth',       authRouter);
+app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/listings',   annoncesRouter);
 app.use('/api/users/notifications', notificationsRouter);
 app.use('/api/users',      usersRouter);

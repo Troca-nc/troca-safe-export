@@ -22,6 +22,7 @@ const {
 
 const router = express.Router();
 router.use(authenticate);
+router.use(uploadLimiter);
 
 // ── Configuration Multer (stockage en mémoire) ──────────────
 

@@ -26,7 +26,7 @@ CREATE INDEX IF NOT EXISTS idx_conv_updated   ON conversations (updated_at DESC)
 CREATE TABLE IF NOT EXISTS messages (
   id          SERIAL PRIMARY KEY,
   conv_id     INTEGER     NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
-  sender_id   INTEGER     NOT NULL REFERENCES users(id)         ON DELETE CASCADE,
+  sender_id   INTEGER     DEFAULT NULL REFERENCES users(id)     ON DELETE SET NULL,
   type        VARCHAR(20) NOT NULL DEFAULT 'text'
                 CHECK (type IN ('text', 'offer', 'photo', 'system')),
   content     TEXT        DEFAULT NULL,
@@ -87,6 +87,7 @@ SELECT
 FROM messages m
 JOIN conversations c ON c.id = m.conv_id
 WHERE m.read_at IS NULL
+  AND m.sender_id IS NOT NULL
 GROUP BY 1, 2;
 
 -- ── Expiration des offres (à appeler via cron) ────────────────────────────────

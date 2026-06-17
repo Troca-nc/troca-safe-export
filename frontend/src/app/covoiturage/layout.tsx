@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
+import { buildPageMetadata } from '@/lib/pageMetadata'
 
-export const metadata: Metadata = {
-  title: 'Covoiturage - Kalico',
-  description: 'Trouvez, publiez et réservez des trajets de covoiturage sécurisés en Nouvelle-Calédonie sur Kalico.',
-}
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Covoiturage NC — Trajets Nouvelle-Calédonie',
+  description: 'Trouvez ou proposez un trajet en covoiturage partout en Nouvelle-Calédonie. Simple, local, entre Calédoniens.',
+  path: '/covoiturage',
+})
 
 export default function CovoiturageLayout({ children }: { children: React.ReactNode }) {
   return children

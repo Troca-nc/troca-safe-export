@@ -5,11 +5,13 @@ import type { ReactNode } from 'react'
 import Header from '@/components/layout/Header'
 import FaqAccordion from '@/components/contact/FaqAccordion'
 import ContactForm from '@/components/contact/ContactForm'
+import { buildPageMetadata } from '@/lib/pageMetadata'
 
-export const metadata: Metadata = {
-  title: 'Contact — Kalico',
-  description: 'Contactez l’équipe Kalico pour le support, les demandes juridiques et les signalements.',
-}
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Contact & FAQ — Kalico NC',
+  description: "Une question ? Consultez notre FAQ ou contactez l'équipe Kalico.",
+  path: '/contact',
+})
 
 function Card({ title, children }: { title: string; children: ReactNode }) {
   return (

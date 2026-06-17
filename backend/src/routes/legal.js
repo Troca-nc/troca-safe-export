@@ -247,7 +247,18 @@ router.delete('/users/me', authenticate, verifyCsrf, async (req, res, next) => {
       'DELETE FROM business_reviews WHERE user_id = $1',
       'DELETE FROM bon_plan_notification_prefs WHERE user_id = $1',
       'DELETE FROM bon_plans WHERE user_id = $1',
-      'DELETE FROM messages WHERE sender_id = $1',
+      `UPDATE messages
+       SET sender_id = NULL,
+           content = '[Message supprimé]',
+           photo_url = NULL,
+           attachment_url = NULL,
+           attachment_name = NULL,
+           attachment_mime_type = NULL,
+           attachment_size_bytes = NULL
+       WHERE sender_id = $1`,
+      'DELETE FROM refresh_tokens WHERE user_id = $1',
+      'DELETE FROM password_reset_tokens WHERE user_id = $1',
+      'DELETE FROM email_verification_tokens WHERE user_id = $1',
       'DELETE FROM annonces WHERE user_id = $1',
       'DELETE FROM users WHERE id = $1',
     ];

@@ -1,11 +1,12 @@
 import Header from '@/components/layout/Header'
 import AppelsOffresClient from '@/app/appels-offres/AppelsOffresClient'
+import { buildPageMetadata } from '@/lib/pageMetadata'
 
-export const metadata = {
+export const metadata = buildPageMetadata({
   title: "Appels d'offres — Kalico NC",
-  description:
-    'Trouvez un professionnel vérifié en Nouvelle-Calédonie, comparez les avis et envoyez une demande de devis rapide.',
-}
+  description: 'Publiez votre besoin en 2 minutes. Les pros calédoniens vérifiés vous répondent.',
+  path: '/appels-offres',
+})
 
 export default function AppelsOffresPage() {
   return (

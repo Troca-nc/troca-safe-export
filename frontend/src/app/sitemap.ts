@@ -1,34 +1,20 @@
-// src/app/sitemap.ts
-// ── Sitemap.xml dynamique Next.js 14 ─────────────────────────────────────────
-// Généré à la demande + revalidé toutes les heures via ISR
-// Google indexe automatiquement /sitemap.xml
-
 import type { MetadataRoute } from 'next'
-import { SITE_URL, CATEGORIES_SEO } from '@/types/seo.types'
-import { normalizeApiBase } from '@/lib/apiBase'
 
-// Revalidation ISR : le sitemap est recalculé toutes les heures max
+import { normalizeApiBase } from '@/lib/apiBase'
+import { SITE_URL } from '@/types/seo.types'
+
 export const revalidate = 3600
 
-// ── Fetch des annonces actives depuis l'API ───────────────────────────────────
-// On récupère seulement les champs nécessaires pour le sitemap (léger)
-
-interface AnnonceSitemapRow {
-  id:         number
-  updated_at: string
-  categorie:  string
-  images:     { url: string }[]
-  titre:      string
+type SitemapRow = {
+  id: number | string
+  updated_at?: string | null
 }
 
-async function fetchAnnoncesForSitemap(): Promise<AnnonceSitemapRow[]> {
+async function fetchRows(url: string): Promise<SitemapRow[]> {
   try {
-    const apiBase = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? `${SITE_URL}/api`)
-    const res = await fetch(`${apiBase}/annonces/sitemap`, {
-      next: { revalidate: 3600 },
-    })
-    if (!res.ok) return []
-    const payload = await res.json()
+    const response = await fetch(url, { next: { revalidate: 3600 } })
+    if (!response.ok) return []
+    const payload = await response.json()
     if (Array.isArray(payload)) return payload
     if (Array.isArray(payload?.data)) return payload.data
     return []
@@ -37,97 +23,54 @@ async function fetchAnnoncesForSitemap(): Promise<AnnonceSitemapRow[]> {
   }
 }
 
-// ── Sitemap principal ─────────────────────────────────────────────────────────
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now      = new Date().toISOString()
-  const annonces = await fetchAnnoncesForSitemap()
+  const apiBase = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? `${SITE_URL}/api`)
+  const [listings, pros, events] = await Promise.all([
+    fetchRows(`${apiBase}/listings?limit=1000&status=active`),
+    fetchRows(`${apiBase}/pros?limit=1000`),
+    fetchRows(`${apiBase}/events?status=published&limit=1000`),
+  ])
 
-  // ── Pages statiques ───────────────────────────────────────────────────────
+  const now = new Date().toISOString()
   const staticPages: MetadataRoute.Sitemap = [
-    {
-      url:        SITE_URL,
-      lastModified: now,
-      changeFrequency: 'daily',
-      priority:   1.0,
-    },
-    {
-      url:        `${SITE_URL}/annonces`,
-      lastModified: now,
-      changeFrequency: 'hourly',
-      priority:   0.9,
-    },
-    {
-      url:        `${SITE_URL}/annonces/nouvelle`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority:   0.8,
-    },
-    {
-      url:        `${SITE_URL}/pro`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority:   0.7,
-    },
-    {
-      url:        `${SITE_URL}/bons-plans`,
-      lastModified: now,
-      changeFrequency: 'daily',
-      priority:   0.8,
-    },
-    {
-      url:        `${SITE_URL}/evenements`,
-      lastModified: now,
-      changeFrequency: 'daily',
-      priority:   0.8,
-    },
-    {
-      url:        `${SITE_URL}/covoiturage`,
-      lastModified: now,
-      changeFrequency: 'daily',
-      priority:   0.8,
-    },
-    {
-      url:        `${SITE_URL}/connexion`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority:   0.3,
-    },
-    {
-      url:        `${SITE_URL}/inscription`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority:   0.4,
-    },
-    {
-      url:        `${SITE_URL}/mentions-legales`,
-      lastModified: now,
-      changeFrequency: 'yearly',
-      priority:   0.2,
-    },
-    {
-      url:        `${SITE_URL}/contact`,
-      lastModified: now,
-      changeFrequency: 'yearly',
-      priority:   0.3,
-    },
+    { url: SITE_URL, lastModified: now, changeFrequency: 'daily', priority: 1 },
+    { url: `${SITE_URL}/annonces`, lastModified: now, changeFrequency: 'hourly', priority: 0.9 },
+    { url: `${SITE_URL}/troc`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
+    { url: `${SITE_URL}/covoiturage`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
+    { url: `${SITE_URL}/bons-plans`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
+    { url: `${SITE_URL}/evenements`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
+    { url: `${SITE_URL}/pro`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${SITE_URL}/pros`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${SITE_URL}/appels-offres`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${SITE_URL}/fret`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${SITE_URL}/contact`, lastModified: now, changeFrequency: 'monthly', priority: 0.3 },
+    { url: `${SITE_URL}/mentions-legales`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${SITE_URL}/cgu`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${SITE_URL}/cgv`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${SITE_URL}/politique-cookies`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${SITE_URL}/politique-de-confidentialite`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
   ]
 
-  // ── Pages catégories ──────────────────────────────────────────────────────
-  const categoryPages: MetadataRoute.Sitemap = Object.keys(CATEGORIES_SEO).map(slug => ({
-    url:        `${SITE_URL}/annonces/categorie/${slug}`,
-    lastModified: now,
-    changeFrequency: 'hourly' as const,
-    priority:   0.8,
+  const listingPages: MetadataRoute.Sitemap = listings.map((item) => ({
+    url: `${SITE_URL}/annonces/${item.id}`,
+    lastModified: item.updated_at ?? now,
+    changeFrequency: 'weekly',
+    priority: 0.6,
   }))
 
-  // ── Pages annonces individuelles ──────────────────────────────────────────
-  const annoncesPages: MetadataRoute.Sitemap = annonces.map(a => ({
-    url:        `${SITE_URL}/annonces/${a.id}`,
-    lastModified: a.updated_at,
-    changeFrequency: 'weekly' as const,
-    priority:   0.6,
+  const proPages: MetadataRoute.Sitemap = pros.map((item) => ({
+    url: `${SITE_URL}/pros/${item.id}`,
+    lastModified: item.updated_at ?? now,
+    changeFrequency: 'weekly',
+    priority: 0.6,
   }))
 
-  return [...staticPages, ...categoryPages, ...annoncesPages]
+  const eventPages: MetadataRoute.Sitemap = events.map((item) => ({
+    url: `${SITE_URL}/evenements/${item.id}`,
+    lastModified: item.updated_at ?? now,
+    changeFrequency: 'weekly',
+    priority: 0.6,
+  }))
+
+  return [...staticPages, ...listingPages, ...proPages, ...eventPages]
 }
