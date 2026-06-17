@@ -99,6 +99,7 @@ export type ProPublicProfile = {
   pro_category?: string | null
   pro_logo_url?: string | null
   pro_banner_url?: string | null
+  pro_catalog_pdf_url?: string | null
   pro_description?: string | null
   pro_commune?: string | null
   pro_website?: string | null

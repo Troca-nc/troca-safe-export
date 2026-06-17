@@ -8,6 +8,7 @@ const { logger } = require('../utils/logger');
 const { triggerCovoiturageAlerts } = require('../services/covoitAlertService');
 const { createNotification } = require('../services/notificationService');
 const { sendPushToUser } = require('../services/pushService');
+const { getRouteCompatibility, isOnRoute, getRouteStopsBetween, normalizeRouteText } = require('../../../shared/routesNC');
 const {
   sendRideAutoBookingPassengerEmail,
   sendRideAutoBookingDriverEmail,
@@ -171,6 +172,19 @@ function mapRide(item) {
   };
 }
 
+function enhanceRideForSearch(ride, searchFrom, searchTo) {
+  const compatibility = getRouteCompatibility(ride.departure, ride.destination, searchFrom, searchTo);
+  return {
+    ...ride,
+    is_direct: Boolean(searchFrom && searchTo)
+      ? normalizeRouteText(ride.departure) === normalizeRouteText(searchFrom)
+        && normalizeRouteText(ride.destination) === normalizeRouteText(searchTo)
+      : true,
+    via_stops: compatibility.via_stops,
+    route_name: compatibility.route_name,
+  };
+}
+
 function buildRideLabel(ride) {
   return `${ride.departure} → ${ride.destination}`;
 }
@@ -232,18 +246,20 @@ function mapBookingRow(row, currentUserId) {
 router.get('/', optionalAuth, async (req, res, next) => {
   try {
     const limit = Math.min(24, Math.max(1, Number(req.query.limit || 8)));
+    const searchFrom = String(req.query.departure || '').trim();
+    const searchTo = String(req.query.destination || '').trim();
     const filters = [];
     const params = [];
 
     filters.push(`c.status IN ('published', 'full')`);
     filters.push(`c.expires_at > NOW()`);
 
-    if (req.query.departure) {
+    if (searchFrom && !searchTo) {
       params.push(`%${String(req.query.departure).trim()}%`);
       filters.push(`(c.departure ILIKE $${params.length} OR co_dep.name ILIKE $${params.length})`);
     }
 
-    if (req.query.destination) {
+    if (searchTo && !searchFrom) {
       params.push(`%${String(req.query.destination).trim()}%`);
       filters.push(`(c.destination ILIKE $${params.length} OR co_dest.name ILIKE $${params.length})`);
     }
@@ -337,7 +353,20 @@ router.get('/', optionalAuth, async (req, res, next) => {
       params
     );
 
-    return res.json({ data: result.rows.map(mapRide) });
+    let rides = result.rows.map(mapRide);
+    if (searchFrom && searchTo) {
+      rides = rides.filter((ride) => isOnRoute(ride.departure, ride.destination, searchFrom, searchTo));
+      rides = rides
+        .map((ride) => enhanceRideForSearch(ride, searchFrom, searchTo))
+        .sort((a, b) => {
+          if (a.is_direct !== b.is_direct) return a.is_direct ? -1 : 1;
+          return Number(new Date(`${a.ride_date || ''}T${a.ride_time || '00:00'}`)) - Number(new Date(`${b.ride_date || ''}T${b.ride_time || '00:00'}`));
+        });
+    } else {
+      rides = rides.map((ride) => enhanceRideForSearch(ride, searchFrom, searchTo));
+    }
+
+    return res.json({ data: rides });
   } catch (err) {
     next(err);
   }

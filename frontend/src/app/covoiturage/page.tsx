@@ -45,6 +45,8 @@ type Ride = {
   no_smoking?: boolean
   animals_allowed?: boolean
   women_only?: boolean
+  is_direct?: boolean
+  via_stops?: string[] | null
 }
 
 type Transporter = {
@@ -244,6 +246,11 @@ function RideCard({
         <span className="rounded-full bg-[var(--color-background-secondary)] px-2.5 py-1">Départ: {ride.departure}</span>
         <span className="rounded-full bg-[var(--color-background-secondary)] px-2.5 py-1">Arrivée: {ride.destination}</span>
         <span className="rounded-full bg-[var(--color-background-secondary)] px-2.5 py-1">Note {rating > 0 ? `${rating.toFixed(1)}/5` : '—'}</span>
+        {ride.is_direct === false ? (
+          <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-700">
+            🚏 Via {Array.isArray(ride.via_stops) && ride.via_stops.length ? ride.via_stops.slice(0, 3).join(', ') : 'route compatible'}
+          </span>
+        ) : null}
       </div>
 
       <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-[var(--color-text-secondary)]">{ride.description}</p>

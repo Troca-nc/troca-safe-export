@@ -13,6 +13,15 @@ const nextConfig = {
   // Standalone uniquement quand on le demande explicitement (Docker)
   output: process.env.NEXT_STANDALONE === '1' ? 'standalone' : undefined,
 
+  webpack: (config) => {
+    config.resolve = config.resolve || {}
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      'pdfjs-dist': 'pdfjs-dist/legacy/build/pdf',
+    }
+    return config
+  },
+
   // Variables d'environnement publiques exposées au client
   env: {
     NEXT_PUBLIC_API_URL:    process.env.NEXT_PUBLIC_API_URL    || 'http://localhost:3001',

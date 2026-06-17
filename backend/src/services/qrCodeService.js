@@ -23,6 +23,10 @@ function generateTicketToken() {
 
 async function generateQrCode(token) {
   const url = `${getBaseUrl()}/scan/${encodeURIComponent(token)}`;
+  return generateQrCodeFromUrl(url);
+}
+
+async function generateQrCodeFromUrl(url) {
   return QRCode.toDataURL(url, {
     errorCorrectionLevel: 'H',
     margin: 2,
@@ -54,5 +58,6 @@ async function saveQrCodeToStorage(token, base64Data) {
 module.exports = {
   generateTicketToken,
   generateQrCode,
+  generateQrCodeFromUrl,
   saveQrCodeToStorage,
 };

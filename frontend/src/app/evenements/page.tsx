@@ -17,9 +17,16 @@ type EventItem = {
   link_url?: string | null
   website_url?: string | null
   price_xpf?: number | null
+  category?: string | null
   author_is_pro?: boolean | null
   kind?: string | null
   has_ticketing?: boolean | null
+  booking_url?: string | null
+  room?: string | null
+  version?: string | null
+  is_3d?: boolean | null
+  price_normal_xpf?: number | null
+  price_reduced_xpf?: number | null
   ticket_types?: Array<{
     id: number | string
     name: string
@@ -56,6 +63,32 @@ function buildCalendarCells(baseDate: Date) {
     date.setDate(start.getDate() + index)
     return date
   })
+}
+
+function CinemaCard({ event }: { event: EventItem }) {
+  const href = event.booking_url || event.link_url || event.website_url || `/evenements/${event.id}`
+  const external = Boolean(event.booking_url || event.link_url || event.website_url)
+  return (
+    <article className="rounded-2xl border border-[var(--color-border)] bg-[linear-gradient(180deg,_#ffffff,_#f8fbfd)] p-4 shadow-sm">
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-nc-emeraude">🎬 Cinéma</p>
+      <h3 className="mt-2 text-base font-bold text-night">{event.title}</h3>
+      <p className="mt-1 text-sm text-night/60">{event.commune_name || event.location_name || 'Nouvelle-Calédonie'}</p>
+      <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-night/65">
+        <span className="rounded-full bg-white px-2.5 py-1">{formatDateLabel(event.event_date)}</span>
+        {event.version ? <span className="rounded-full bg-white px-2.5 py-1">{event.version}</span> : null}
+        {event.is_3d ? <span className="rounded-full bg-white px-2.5 py-1">3D</span> : null}
+        {event.room ? <span className="rounded-full bg-white px-2.5 py-1">Salle {event.room}</span> : null}
+      </div>
+      <a
+        href={href}
+        target={external ? '_blank' : undefined}
+        rel={external ? 'noreferrer' : undefined}
+        className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white"
+      >
+        Réserver
+      </a>
+    </article>
+  )
 }
 
 export default function EvenementsPage() {
@@ -213,10 +246,17 @@ export default function EvenementsPage() {
 
                     <div className="mt-2 space-y-1">
                       {dayEvents.slice(0, 2).map((event) => (
-                        <div key={event.id} className="rounded-xl bg-white px-2.5 py-2 text-left shadow-sm">
-                          <p className="line-clamp-1 text-xs font-semibold text-night">{event.title}</p>
-                          <p className="mt-0.5 text-[11px] text-night/50">{event.commune_name || event.location_name || 'Nouvelle-Calédonie'}</p>
-                        </div>
+                        event.category === 'cinema' ? (
+                          <div key={event.id} className="rounded-xl bg-white px-2.5 py-2 text-left shadow-sm">
+                            <p className="line-clamp-1 text-xs font-semibold text-night">🎬 {event.title}</p>
+                            <p className="mt-0.5 text-[11px] text-night/50">{event.commune_name || event.location_name || 'Nouvelle-Calédonie'}</p>
+                          </div>
+                        ) : (
+                          <div key={event.id} className="rounded-xl bg-white px-2.5 py-2 text-left shadow-sm">
+                            <p className="line-clamp-1 text-xs font-semibold text-night">{event.title}</p>
+                            <p className="mt-0.5 text-[11px] text-night/50">{event.commune_name || event.location_name || 'Nouvelle-Calédonie'}</p>
+                          </div>
+                        )
                       ))}
                     </div>
                   </div>
@@ -236,6 +276,9 @@ export default function EvenementsPage() {
                   </div>
                 ) : visibleEvents.length ? (
                   visibleEvents.slice(0, 8).map((event) => (
+                    event.category === 'cinema' ? (
+                      <CinemaCard key={event.id} event={event} />
+                    ) : (
                     <article key={event.id} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div>
@@ -274,6 +317,7 @@ export default function EvenementsPage() {
                         </a>
                       </div>
                     </article>
+                    )
                   ))
                 ) : (
                   <p className="rounded-2xl border border-dashed border-[var(--color-border)] px-4 py-8 text-sm text-night/55">

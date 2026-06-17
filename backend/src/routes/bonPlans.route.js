@@ -48,6 +48,8 @@ const CATEGORY_VALUES = [
 const createSchema = Joi.object({
   business_name: Joi.string().min(2).max(255).optional().allow('', null),
   business_logo_url: Joi.string().uri().optional().allow('', null),
+  catalog_pdf_url: Joi.string().uri().optional().allow('', null),
+  catalog_pdf_pages: Joi.number().integer().min(1).optional().allow(null),
   title: Joi.string().min(3).max(150).required(),
   description: Joi.string().min(10).max(500).required(),
   image_url: Joi.string().uri().optional().allow('', null),
@@ -160,6 +162,8 @@ function serializeBonPlan(row) {
     business_id: row.business_id ?? null,
     business_name: cleanDisplayText(row.business_name, cleanDisplayText(row.title, 'Kalico')),
     business_logo_url: row.business_logo_url ?? null,
+    catalog_pdf_url: row.catalog_pdf_url ?? null,
+    catalog_pdf_pages: row.catalog_pdf_pages == null ? null : Number(row.catalog_pdf_pages),
     business_badge: row.business_badge || row.badge || 'none',
     business_review_avg: row.business_review_avg ?? row.review_avg ?? 0,
     business_review_count: row.business_review_count ?? row.review_count ?? 0,
@@ -286,6 +290,8 @@ async function queryBonPlans(filters = {}) {
       bp.business_id,
       bp.business_name,
       bp.business_logo_url,
+      bp.catalog_pdf_url,
+      bp.catalog_pdf_pages,
       bp.title,
       bp.description,
       bp.image_url,
@@ -603,9 +609,11 @@ router.get('/:id', optionalAuth, async (req, res, next) => {
          bp.id,
          bp.user_id,
          bp.business_id,
-         bp.business_name,
-         bp.business_logo_url,
-         bp.title,
+      bp.business_name,
+      bp.business_logo_url,
+      bp.catalog_pdf_url,
+      bp.catalog_pdf_pages,
+      bp.title,
          bp.description,
          bp.image_url,
          bp.promo_label,
@@ -743,18 +751,20 @@ router.post('/', authenticate, paymentLimiter, validate({ body: createSchema }),
     const created = await withTransaction(async (client) => {
       const inserted = await client.query(
         `INSERT INTO bon_plans
-           (user_id, business_name, business_logo_url, title, description, image_url, promo_label, original_price_xpf, promo_price_xpf, cta_label, cta_url,
+           (user_id, business_name, business_logo_url, catalog_pdf_url, catalog_pdf_pages, title, description, image_url, promo_label, original_price_xpf, promo_price_xpf, cta_label, cta_url,
             category, promo_valid_from, promo_valid_until, commune_id, location_name, event_date, duration_days, payment_provider, contact_name, contact_phone,
             contact_email, website_url, conditions, opening_hours, photos, social_links, status, published_from, published_until, amount_xpf, amount_eur)
          VALUES
            ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,
             $12,$13,$14,$15,$16,$17,$18,$19,$20,$21,
-            $22,$23,$24,$25,$26::jsonb,$27::jsonb,$28,$29,$30,$31,$32)
+            $22,$23,$24,$25,$26,$27::jsonb,$28::jsonb,$29,$30,$31,$32,$33,$34)
          RETURNING *`,
         [
           payload.user_id,
           payload.business_name,
           payload.business_logo_url,
+          payload.catalog_pdf_url,
+          payload.catalog_pdf_pages,
           payload.title,
           payload.description,
           payload.image_url,

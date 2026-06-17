@@ -71,6 +71,13 @@ function serializeEventRow(row, ticketTypes = []) {
     cover_image_url: row.cover_image_url ?? null,
     photos: Array.isArray(row.photos) ? row.photos : [],
     category: row.category ?? 'autre',
+    booking_url: row.booking_url ?? null,
+    room: row.room ?? null,
+    version: row.version ?? null,
+    is_3d: Boolean(row.is_3d),
+    price_normal_xpf: row.price_normal_xpf == null ? null : Number(row.price_normal_xpf),
+    price_reduced_xpf: row.price_reduced_xpf == null ? null : Number(row.price_reduced_xpf),
+    external_id: row.external_id ?? null,
     status: row.status ?? 'draft',
     has_ticketing: Boolean(row.has_ticketing),
     max_capacity: row.max_capacity == null ? null : Number(row.max_capacity),
@@ -190,9 +197,9 @@ async function createEventAndBonPlan({ user, payload }) {
       `INSERT INTO events
          (bon_plan_id, organizer_id, title, description, venue_name, venue_address, commune_id, event_date, event_time,
           end_time, cover_image_url, photos, category, status, has_ticketing, max_capacity, tickets_sold, is_free,
-          organizer_name, organizer_email, organizer_phone)
+          organizer_name, organizer_email, organizer_phone, booking_url, room, version, is_3d, price_normal_xpf, price_reduced_xpf)
        VALUES
-         ($1, $2, $3, $4, $5, $6, $7, $8::date, $9::time, $10::time, $11, $12::jsonb, $13, $14, $15, $16, 0, $17, $18, $19, $20)
+         ($1, $2, $3, $4, $5, $6, $7, $8::date, $9::time, $10::time, $11, $12::jsonb, $13, $14, $15, $16, 0, $17, $18, $19, $20, $21, $22, $23, $24, $25)
        RETURNING *`,
       [
         bonPlanId,
@@ -215,6 +222,12 @@ async function createEventAndBonPlan({ user, payload }) {
         payload.organizer_name || `${user.prenom || ''} ${user.nom || ''}`.trim() || null,
         payload.organizer_email || user.email || null,
         payload.organizer_phone || null,
+        payload.booking_url || null,
+        payload.room || null,
+        payload.version || null,
+        Boolean(payload.is_3d),
+        payload.price_normal_xpf == null ? null : Number(payload.price_normal_xpf),
+        payload.price_reduced_xpf == null ? null : Number(payload.price_reduced_xpf),
       ]
     );
 

@@ -20,6 +20,7 @@ import {
   Users2,
   FileSignature,
   X,
+  QrCode,
 } from 'lucide-react'
 
 import { useAuthStore } from '@/store/authStore'
@@ -33,6 +34,7 @@ const NAV_ITEMS = [
   { href: '/pro/dashboard/boosts', label: 'Boosts', icon: Bell },
   { href: '/pro/dashboard/factures', label: 'Factures', icon: FileText },
   { href: '/pro/dashboard/devis', label: 'Devis', icon: FileSignature },
+  { href: '/pro/dashboard/coupons', label: 'Coupons', icon: QrCode },
   { href: '/pro/dashboard/parrainage', label: 'Parrainage', icon: Users2 },
   { href: '/pro/dashboard/pack-lancement', label: 'Pack lancement', icon: Rocket },
   { href: '/pro/dashboard/auto-reply', label: 'Réponse auto', icon: MessageCircle },

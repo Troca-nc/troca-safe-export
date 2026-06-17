@@ -33,6 +33,7 @@ export type BonPlanCardModel = {
   business_review_avg?: number | null
   business_review_count?: number | null
   business?: BonPlanBusiness | null
+  catalog_pdf_url?: string | null
 }
 
 type Props = {
@@ -104,6 +105,11 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
           {bonPlan.category ? (
             <span className={`badge text-[11px] uppercase tracking-[0.18em] ${getCategoryTone(bonPlan)}`}>
               {bonPlan.category.replace('_', ' ')}
+            </span>
+          ) : null}
+          {bonPlan.catalog_pdf_url ? (
+            <span className="badge badge-emeraude text-[11px] uppercase tracking-[0.18em]">
+              Catalogue PDF
             </span>
           ) : null}
           <span className="badge badge-corail text-[11px] uppercase tracking-[0.18em]">
@@ -181,6 +187,16 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
           {bonPlan.cta_label || 'En profiter'}
           <ExternalLink className="h-4 w-4" />
         </a>
+        {bonPlan.catalog_pdf_url ? (
+          <a
+            href={bonPlan.catalog_pdf_url}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
+          >
+            Voir le catalogue
+          </a>
+        ) : null}
       </div>
     </article>
   )

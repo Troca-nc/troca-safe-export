@@ -603,6 +603,34 @@ export const eventsApi = {
   },
 }
 
+export const couponsApi = {
+  listMine: () => cachedGet(
+    buildCacheKey('coupons.mine', '/coupons/mine'),
+    () => api.get('/coupons/mine'),
+    CACHE_TTL.short,
+  ),
+  getByCode: (code: string) => cachedGet(
+    buildCacheKey('coupons.getByCode', `/coupons/${code}`),
+    () => api.get(`/coupons/${encodeURIComponent(code)}`),
+    CACHE_TTL.short,
+  ),
+  create: async (data: object) => {
+    const res = await api.post('/coupons', data)
+    invalidateApiCache('coupons.')
+    return res
+  },
+  useCoupon: async (code: string, data: object = {}) => {
+    const res = await api.post(`/coupons/${encodeURIComponent(code)}/use`, data)
+    invalidateApiCache('coupons.')
+    return res
+  },
+  deactivate: async (id: string | number) => {
+    const res = await api.delete(`/coupons/${id}`)
+    invalidateApiCache('coupons.')
+    return res
+  },
+}
+
 export const proApi = {
   list: (params: object = {}) => cachedGet(
     buildCacheKey('pro.list', '/pros', params),
@@ -846,12 +874,17 @@ export const adminApi = {
   ),
   validateProDocument: async (id: string | number, data: { status: 'validated' | 'rejected'; rejection_reason?: string }) => {
     const res = await api.post(`/admin/pro-documents/${id}/validate`, data)
-    invalidateApiCache('admin.proDocuments.')
-    invalidateApiCache('proDocuments.')
-    invalidateApiCache('pro.')
-    return res
-  },
-}
+      invalidateApiCache('admin.proDocuments.')
+      invalidateApiCache('proDocuments.')
+      invalidateApiCache('pro.')
+      return res
+    },
+    runCinemaScraper: async () => {
+      const res = await api.post('/admin/cinema/scrape')
+      invalidateApiCache('events.')
+      return res
+    },
+  }
 
 export const proLaunchPackApi = {
   get: () => cachedGet(

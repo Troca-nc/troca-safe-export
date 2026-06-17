@@ -62,6 +62,7 @@ const fretRouter           = require('./routes/fret');
 const eventsRouter         = require('./routes/events.route');
 const importRouter         = require('./routes/import.route');
 const covoiturageRouter    = require('./routes/covoiturage.route');
+const couponsRouter        = require('./routes/coupons.route');
 const proProductsRouter    = require('./routes/pro.products');
 const demoRouter           = require('./routes/demo.route');
 const trocRouter           = require('./routes/troc');
@@ -213,6 +214,7 @@ app.use('/api/fret', fretRouter);
 app.use('/api/events', eventsRouter);
 app.use('/api/import', importRouter);
 app.use('/api/covoiturage', covoiturageRouter);
+app.use('/api/coupons', couponsRouter);
 app.use('/api/demo',       demoRouter);
 app.use('/api/troc',       trocRouter);
 

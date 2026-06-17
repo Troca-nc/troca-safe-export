@@ -15,6 +15,7 @@ const { refreshTrustScore } = require('../services/trustService')
 const { createNotification } = require('../services/notificationService')
 const { sendPushToUser } = require('../services/pushService')
 const { sendMail } = require('../services/emailService')
+const { runCinemaScraper } = require('../services/cinemaScraperService')
 
 const router = express.Router()
 router.use(adminRateLimit, requireAdminToken)
@@ -239,6 +240,15 @@ router.post('/pro-documents/:id/validate', async (req, res, next) => {
         validated_by: updated.rows[0].validated_by == null ? null : Number(updated.rows[0].validated_by),
       },
     })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.post('/cinema/scrape', async (_req, res, next) => {
+  try {
+    const report = await runCinemaScraper()
+    return res.json({ data: report })
   } catch (err) {
     next(err)
   }

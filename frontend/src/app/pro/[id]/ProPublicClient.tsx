@@ -8,6 +8,7 @@ import {
   ArrowRight,
   BadgeCheck,
   CalendarDays,
+  FileText,
   Globe,
   MapPin,
   MessageCircle,
@@ -25,6 +26,7 @@ import ReviewCard from '@/components/reviews/ReviewCard'
 import ReviewSummary from '@/components/reviews/ReviewSummary'
 import ProBookingModal from '@/components/pro/ProBookingModal'
 import ProQuoteModal from '@/components/pro/ProQuoteModal'
+import PdfViewer from '@/components/ui/PdfViewer'
 import { normalizeQuoteTemplate } from '@/components/pro/quoteTemplate'
 import { proApi } from '@/lib/api'
 import { reviewsApi } from '@/lib/api'
@@ -117,6 +119,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
   }> | null>(null)
   const [bookingOpen, setBookingOpen] = useState(false)
   const [activeCatalogCategory, setActiveCatalogCategory] = useState<string>('all')
+  const [catalogPreviewOpen, setCatalogPreviewOpen] = useState(false)
 
   useEffect(() => {
     if (!proId || initialProfile) {
@@ -229,6 +232,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
   const bookingSlots = profile.booking_slots ?? []
   const products = (profile.products ?? []) as ProPublicProduct[]
   const portfolioPhotos = Array.isArray(profile.pro_portfolio_photos) ? profile.pro_portfolio_photos.filter(Boolean) : []
+  const catalogPdfUrl = profile.pro_catalog_pdf_url || ''
   const catalogCategories = profile.catalog_categories ?? []
   const fallbackCatalogCategories = useMemo(() => {
     const seen = new Set<string>()
@@ -778,13 +782,23 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
           ) : null}
           {activeTab === 'apropos' ? (
             <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-              <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
-                  <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">À propos</p>
-                <h2 className="mt-2 font-display text-2xl font-bold text-night">Votre vitrine professionnelle</h2>
-                <p className="mt-3 text-sm leading-relaxed text-night/65">
-                  {profile.pro_description || 'Ce professionnel présente ses services, ses horaires et ses coordonnées sur Kalico.'}
-                </p>
-              </div>
+                <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+                    <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">À propos</p>
+                  <h2 className="mt-2 font-display text-2xl font-bold text-night">Votre vitrine professionnelle</h2>
+                  <p className="mt-3 text-sm leading-relaxed text-night/65">
+                    {profile.pro_description || 'Ce professionnel présente ses services, ses horaires et ses coordonnées sur Kalico.'}
+                  </p>
+                  {catalogPdfUrl ? (
+                    <button
+                      type="button"
+                      onClick={() => setCatalogPreviewOpen(true)}
+                      className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
+                    >
+                      <FileText className="h-4 w-4" />
+                      Feuilleter le catalogue
+                    </button>
+                  ) : null}
+                </div>
               <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Coordonnées</p>
                 <div className="mt-4 space-y-3 text-sm text-night/65">
@@ -903,6 +917,13 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
         onClose={() => setBookingOpen(false)}
         settings={bookingSettings}
       />
+      {catalogPreviewOpen && catalogPdfUrl ? (
+        <div className="fixed inset-0 z-50 bg-night/75 p-4 backdrop-blur-sm">
+          <div className="mx-auto h-full max-w-6xl">
+            <PdfViewer url={catalogPdfUrl} onClose={() => setCatalogPreviewOpen(false)} title="Catalogue du professionnel" />
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

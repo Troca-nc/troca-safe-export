@@ -2,11 +2,12 @@
 
 import Image from 'next/image'
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowRight, BadgeCheck, Clock3, Eye, Globe, Loader2, MapPin, Package, Phone, Star, Store, Upload } from 'lucide-react'
+import { ArrowRight, BadgeCheck, Clock3, Eye, Globe, Loader2, MapPin, Package, Phone, PlayCircle, Star, Store, Upload } from 'lucide-react'
 
 import { proApi, uploadApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import DocumentUploader from '@/components/pro/DocumentUploader'
+import PdfViewer from '@/components/ui/PdfViewer'
 import { compressImage } from '@/lib/imageCompressor'
 import {
   DEFAULT_QUOTE_TEMPLATE,
@@ -61,6 +62,7 @@ type FormState = {
   siret: string
   logo_url: string
   banner_url: string
+  catalog_pdf_url: string
   portfolio_photos: string[]
 }
 
@@ -75,6 +77,7 @@ type ProProfileResponse = FormState & {
   pro_siret?: string | null
   pro_logo_url?: string | null
   pro_banner_url?: string | null
+  pro_catalog_pdf_url?: string | null
   pro_portfolio_photos?: string[] | null
   pro_quote_template?: QuoteTemplate | null
 }
@@ -90,6 +93,7 @@ const INITIAL_FORM: FormState = {
   siret: '',
   logo_url: '',
   banner_url: '',
+  catalog_pdf_url: '',
   portfolio_photos: [],
 }
 
@@ -99,11 +103,14 @@ export default function ProDashboardSettingsPage() {
   const [quoteTemplate, setQuoteTemplate] = useState<QuoteTemplate>(DEFAULT_QUOTE_TEMPLATE)
   const [loading, setLoading] = useState(false)
   const [pageLoading, setPageLoading] = useState(true)
-  const [uploading, setUploading] = useState<'logo' | 'banner' | 'portfolio' | null>(null)
+  const [uploading, setUploading] = useState<'logo' | 'banner' | 'portfolio' | 'catalog' | null>(null)
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
   const [logoPreview, setLogoPreview] = useState('')
   const [bannerPreview, setBannerPreview] = useState('')
+  const [catalogPdfUrl, setCatalogPdfUrl] = useState('')
+  const [catalogPdfName, setCatalogPdfName] = useState('')
+  const [catalogPreviewOpen, setCatalogPreviewOpen] = useState(false)
   const [portfolioPhotos, setPortfolioPhotos] = useState<string[]>([])
   const [showPreview, setShowPreview] = useState(false)
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop')
@@ -119,9 +126,10 @@ export default function ProDashboardSettingsPage() {
       hours: form.hours || 'Horaires ? compl?ter',
       logo: logoPreview || '',
       banner: bannerPreview || '',
+      catalogPdfUrl,
       portfolio: portfolioPhotos,
     }),
-    [bannerPreview, form.category, form.company_name, form.description, form.hours, form.phone, form.commune, form.website, logoPreview, portfolioPhotos, user?.first_name],
+    [bannerPreview, catalogPdfUrl, form.category, form.company_name, form.description, form.hours, form.phone, form.commune, form.website, logoPreview, portfolioPhotos, user?.first_name],
   )
 
   const descriptionCount = useMemo(() => form.description.length, [form.description])
@@ -153,11 +161,13 @@ export default function ProDashboardSettingsPage() {
           siret: profile.pro_siret || '',
           logo_url: profile.pro_logo_url || '',
           banner_url: profile.pro_banner_url || '',
+          catalog_pdf_url: profile.pro_catalog_pdf_url || '',
           portfolio_photos: Array.isArray(profile.pro_portfolio_photos) ? profile.pro_portfolio_photos.filter(Boolean) : [],
         })
         setQuoteTemplate(normalizeQuoteTemplate(profile.pro_quote_template))
         setLogoPreview(profile.pro_logo_url || '')
         setBannerPreview(profile.pro_banner_url || '')
+        setCatalogPdfUrl(profile.pro_catalog_pdf_url || '')
         setPortfolioPhotos(Array.isArray(profile.pro_portfolio_photos) ? profile.pro_portfolio_photos.filter(Boolean) : [])
       } catch {
         // Keep defaults if the profile cannot be loaded.
@@ -252,6 +262,32 @@ export default function ProDashboardSettingsPage() {
     }
   }
 
+  const uploadCatalogPdf = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    if (file.type !== 'application/pdf') {
+      setError('Le catalogue doit être un PDF.')
+      event.target.value = ''
+      return
+    }
+
+    setUploading('catalog')
+    setError('')
+    setSuccess('')
+    try {
+      const response = await uploadApi.uploadChatDocument(file)
+      const url = response.data?.data?.url || ''
+      setForm((current) => ({ ...current, catalog_pdf_url: url }))
+      setCatalogPdfUrl(url)
+      setCatalogPdfName(file.name)
+    } catch (err: any) {
+      setError(err?.response?.data?.error || 'Impossible de téléverser le PDF.')
+    } finally {
+      setUploading(null)
+      event.target.value = ''
+    }
+  }
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setLoading(true)
@@ -270,6 +306,7 @@ export default function ProDashboardSettingsPage() {
         siret: form.siret.trim(),
         logo_url: form.logo_url.trim(),
         banner_url: form.banner_url.trim(),
+        catalog_pdf_url: form.catalog_pdf_url.trim(),
         portfolio_photos: portfolioPhotos,
         quote_template: quoteTemplate,
       })
@@ -377,6 +414,41 @@ export default function ProDashboardSettingsPage() {
             <span className="text-sm font-semibold text-night">Horaires</span>
             <textarea value={form.hours} onChange={(e) => handleChange('hours', e.target.value)} rows={3} className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm" />
           </label>
+
+          <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Catalogue PDF</p>
+                <h3 className="mt-1 font-display text-xl font-bold text-night">Votre catalogue professionnel</h3>
+                <p className="mt-1 text-sm text-night/60">Ajoutez un PDF feuilletable depuis votre vitrine publique.</p>
+              </div>
+              {catalogPdfUrl ? (
+                <button
+                  type="button"
+                  onClick={() => setCatalogPreviewOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-[#0A7EA4]/15 bg-white px-3 py-2 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10"
+                >
+                  <PlayCircle className="h-4 w-4" />
+                  Prévisualiser
+                </button>
+              ) : null}
+            </div>
+            <label className="mt-4 block space-y-2">
+              <span className="text-sm font-semibold text-night">PDF du catalogue</span>
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={(event) => void uploadCatalogPdf(event)}
+                className="block w-full rounded-2xl border border-dashed border-[var(--color-border)] bg-white px-4 py-3 text-sm file:mr-4 file:rounded-full file:border-0 file:bg-[#0A7EA4] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-[#065f7a]"
+              />
+            </label>
+            {catalogPdfUrl ? (
+              <div className="mt-4 rounded-2xl border border-white/60 bg-white px-4 py-3 text-sm text-night/70">
+                <p className="font-semibold text-night">{catalogPdfName || 'Catalogue PDF téléversé'}</p>
+                <p className="mt-1 text-xs text-night/45 break-all">{catalogPdfUrl}</p>
+              </div>
+            ) : null}
+          </div>
 
           <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
             <div className="flex items-start justify-between gap-3">
@@ -808,6 +880,16 @@ export default function ProDashboardSettingsPage() {
       </div>
 
       </form>
+
+      {catalogPreviewOpen && catalogPdfUrl ? (
+        <div className="fixed inset-0 z-50 bg-night/70 p-4 backdrop-blur-sm">
+          <div className="mx-auto flex h-full max-w-6xl items-center justify-center">
+            <div className="h-[92vh] w-full overflow-hidden rounded-[2rem] bg-white">
+              <PdfViewer url={catalogPdfUrl} onClose={() => setCatalogPreviewOpen(false)} title="Aperçu du catalogue" />
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <DocumentUploader />
 

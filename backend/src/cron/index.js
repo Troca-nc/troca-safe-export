@@ -2,5 +2,12 @@
 
 const ticketExpiry = require('./ticketExpiry');
 const importCleanup = require('./importCleanup');
+const { startCinemaScraperJob } = require('./cinemaScraper');
 
-module.exports = { ticketExpiry, importCleanup };
+function startCronJobs() {
+  ticketExpiry.startTicketExpiryJob?.();
+  importCleanup.startImportCleanupJob?.();
+  startCinemaScraperJob();
+}
+
+module.exports = { ticketExpiry, importCleanup, startCinemaScraperJob, startCronJobs };

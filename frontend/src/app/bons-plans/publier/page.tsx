@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { ArrowRight, Check, CircleDollarSign, ExternalLink, Upload } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
-import { bonPlansApi } from '@/lib/api'
+import { bonPlansApi, uploadApi } from '@/lib/api'
 import { useAuthActionStore } from '@/store/authActionStore'
 import { useAuthStore } from '@/store/authStore'
 
@@ -45,6 +45,7 @@ export default function PublishBonPlanPage() {
     cta_url: '',
     promo_valid_from: '',
     promo_valid_until: '',
+    catalog_pdf_url: '',
   })
 
   const baseAmount = durationDays === 7 ? 2900 : 7900
@@ -97,6 +98,23 @@ export default function PublishBonPlanPage() {
     setForm((current) => ({ ...current, [key]: value }))
   }
 
+  const uploadCatalogPdf = async (file: File | null) => {
+    if (!file) return
+    if (file.type !== 'application/pdf') {
+      window.alert('Le catalogue doit être un fichier PDF.')
+      return
+    }
+    try {
+      const response = await uploadApi.uploadChatDocument(file)
+      const url = response.data?.data?.url || ''
+      if (url) {
+        setForm((current) => ({ ...current, catalog_pdf_url: url }))
+      }
+    } catch {
+      window.alert('Impossible de téléverser le PDF.')
+    }
+  }
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     if (!isAuthenticated) {
@@ -119,6 +137,7 @@ export default function PublishBonPlanPage() {
         contact_email: form.contact_email.trim(),
         cta_label: form.cta_label.trim() || 'En profiter',
         category: form.category,
+        catalog_pdf_url: form.catalog_pdf_url || undefined,
       })
       const checkoutUrl = data?.data?.payment_url || data?.data?.checkout_url
       if (checkoutUrl) {
@@ -196,6 +215,20 @@ export default function PublishBonPlanPage() {
                     <label className="space-y-1 md:col-span-2">
                       <span className="text-sm font-semibold">Image (URL)</span>
                       <input value={form.image_url} onChange={(e) => handleChange('image_url', e.target.value)} placeholder="https://..." className="input w-full" />
+                    </label>
+                    <label className="space-y-1 md:col-span-2">
+                      <span className="text-sm font-semibold">Catalogue promotionnel PDF</span>
+                      <input
+                        type="file"
+                        accept="application/pdf"
+                        onChange={(e) => void uploadCatalogPdf(e.target.files?.[0] ?? null)}
+                        className="input w-full file:mr-4 file:rounded-full file:border-0 file:bg-[#0A7EA4] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
+                      />
+                      {form.catalog_pdf_url ? (
+                        <p className="text-xs text-emerald-700">PDF prêt à être publié.</p>
+                      ) : (
+                        <p className="text-xs text-night/45">PDF uniquement. Il sera visible sur la fiche du bon plan.</p>
+                      )}
                     </label>
                     <label className="space-y-1">
                       <span className="text-sm font-semibold">Label promo</span>
