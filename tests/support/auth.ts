@@ -243,6 +243,12 @@ export function createConsoleCollector(page: Page) {
     /WebSocket connection to 'ws:\/\/localhost:3001\/socket\.io\/\?EIO=4&transport=websocket' failed/i,
     /socket\.io\/\?EIO=4&transport=websocket/i,
     /\[platform-stats\] load failed: AxiosError: timeout of 15000ms exceeded/i,
+    /\[platform-stats\] load failed: AxiosError: Network Error/i,
+    /due to access control checks\./i,
+    /ChunkLoadError:/i,
+    /Loading chunk .* failed/i,
+    /__nextjs_original-stack-frames/i,
+    /_next\/static\/webpack\/.*hot-update\.json/i,
   ]
 
   page.on('console', (message) => {

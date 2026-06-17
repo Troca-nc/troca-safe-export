@@ -1,5 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 import { BasePO } from './base.po'
+import { navigateTo } from '../e2e/mobile/helpers'
 
 export class ProsPO extends BasePO {
   constructor(page: Page) {
@@ -25,7 +26,7 @@ export class ProsPO extends BasePO {
     await expect(openStorefront).toBeVisible()
     const href = await openStorefront.getAttribute('href')
     expect(href, 'storefront href').toMatch(/^\/pro\/\d+$/)
-    await this.page.goto(href!, { waitUntil: 'domcontentloaded' })
+    await navigateTo(this.page, href!)
   }
 
   async expectStorefrontTabs() {

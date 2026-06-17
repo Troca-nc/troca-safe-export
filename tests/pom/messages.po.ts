@@ -1,5 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 import { BasePO } from './base.po'
+import { navigateTo } from '../e2e/mobile/helpers'
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -44,7 +45,7 @@ export class MessagesPO extends BasePO {
       throw new Error(`Aucune conversation trouvée pour "${text}"`)
     }
 
-    await this.page.goto(`/messages?conv=${conversationId}`, { waitUntil: 'domcontentloaded' })
+    await navigateTo(this.page, `/messages?conv=${conversationId}`)
     await expect(this.page.getByRole('button', { name: /Envoyer le message/i })).toBeVisible({ timeout: 15_000 })
   }
 

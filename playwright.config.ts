@@ -5,6 +5,8 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000'
 const isExternalUrl = /^https?:\/\//i.test(baseURL) && !/^(https?:\/\/)?(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(?::\d+)?/i.test(baseURL)
 const desktop = { ...devices['Desktop Chrome'] }
 const iPhone13 = { ...devices['iPhone 13'] }
+const mobileChrome = { ...devices['Pixel 7'] }
+const mobileSafari = { ...devices['iPhone 14'] }
 const samsungGalaxyS22 = {
   viewport: { width: 360, height: 780 },
   deviceScaleFactor: 3,
@@ -58,6 +60,22 @@ export default defineConfig({
   },
   projects: [
     ...visualProjects,
+    {
+      name: 'mobile-chrome',
+      testMatch: /e2e\/mobile\/.*\.spec\.ts$/,
+      use: {
+        browserName: 'chromium',
+        ...mobileChrome,
+      },
+    },
+    {
+      name: 'mobile-safari',
+      testMatch: /e2e\/mobile\/.*\.spec\.ts$/,
+      use: {
+        browserName: 'webkit',
+        ...mobileSafari,
+      },
+    },
     {
       name: 'smoke',
       testMatch: /smoke\/.*\.spec\.ts$/,

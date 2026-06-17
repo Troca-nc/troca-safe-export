@@ -537,6 +537,91 @@ async function insertListing(client, { userId, categoryId, communeId, title, des
   return annonceId;
 }
 
+async function insertEvent(client, {
+  organizerId,
+  communeId,
+  title,
+  description,
+  venueName,
+  venueAddress,
+  eventDate,
+  eventTime,
+  category,
+  ticketTypes,
+  coverImageUrl,
+}) {
+  const bonPlanResult = await client.query(
+    `INSERT INTO bon_plans (
+      user_id, title, description, kind, target_audience, commune_id, location_name, event_date,
+      duration_days, price_xpf, is_free_included, contact_name, contact_phone, contact_email,
+      website_url, photos, status, expires_at
+    ) VALUES (
+      $1, $2, $3, 'event', 'particulier', $4, $5, $6::date,
+      7, 0, TRUE, NULL, NULL, NULL,
+      NULL, $7::jsonb, 'active', NOW() + INTERVAL '365 days'
+    ) RETURNING id`,
+    [
+      organizerId,
+      title,
+      description || null,
+      communeId || null,
+      venueName || null,
+      eventDate,
+      JSON.stringify(coverImageUrl ? [coverImageUrl] : []),
+    ]
+  );
+
+  const bonPlanId = bonPlanResult.rows[0]?.id || null;
+  const eventResult = await client.query(
+    `INSERT INTO events (
+      bon_plan_id, organizer_id, title, description, venue_name, venue_address, commune_id, event_date, event_time,
+      end_time, cover_image_url, photos, category, status, has_ticketing, max_capacity, tickets_sold, is_free,
+      organizer_name, organizer_email, organizer_phone, booking_url, room, version, is_3d, price_normal_xpf, price_reduced_xpf
+    ) VALUES (
+      $1, $2, $3, $4, $5, $6, $7, $8::date, $9::time,
+      NULL, $10, $11::jsonb, $12, 'published', TRUE, $13, 0, TRUE,
+      NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, NULL
+    ) RETURNING id`,
+    [
+      bonPlanId,
+      organizerId,
+      title,
+      description || null,
+      venueName || null,
+      venueAddress || null,
+      communeId || null,
+      eventDate,
+      eventTime,
+      coverImageUrl || null,
+      JSON.stringify(coverImageUrl ? [coverImageUrl] : []),
+      category || 'autre',
+      Math.max(1, ticketTypes.reduce((sum, ticket) => sum + Number(ticket.quantity_total || 0), 0) || 1),
+    ]
+  );
+
+  const eventId = eventResult.rows[0]?.id;
+  for (const [index, ticketType] of ticketTypes.entries()) {
+    await client.query(
+      `INSERT INTO ticket_types (
+        event_id, name, description, price_xpf, quantity_total, quantity_sold, quantity_reserved,
+        sale_starts_at, sale_ends_at, is_active, position
+      ) VALUES (
+        $1, $2, $3, $4, $5, 0, 0, NULL, NULL, TRUE, $6
+      )`,
+      [
+        eventId,
+        ticketType.name,
+        ticketType.description || null,
+        ticketType.price_xpf,
+        ticketType.quantity_total,
+        Number.isFinite(Number(ticketType.position)) ? Number(ticketType.position) : index,
+      ]
+    );
+  }
+
+  return eventId;
+}
+
 async function seedSellerContent(client, ids) {
   const sellerId = ids.byEmail.get('vendeur@playwright.kalico.nc');
   const particulierId = ids.byEmail.get('particulier@playwright.kalico.nc');
@@ -639,20 +724,84 @@ async function seedProContent(client, ids) {
   if (!proId || !particulierId || !servicesCategory || !vehiculesCategory) return;
 
   await resetUserListings(client, proId);
-  const proListingId = await insertListing(client, {
+  const proListingIds = [];
+  proListingIds.push(await insertListing(client, {
     userId: proId,
     categoryId: servicesCategory,
     communeId: communId,
-    title: 'Entreprise Test NC - Diagnostic rapide',
-    description: 'Annonce de service pour la vitrine publique et le catalogue pro.',
-    prix: 15000,
+    title: 'Prestation peinture intérieure',
+    description: 'Peinture murale et plafonds pour les particuliers et les petites surfaces pro.',
+    prix: 45000,
     condition: 'new',
     isTroc: false,
     wants: [],
     acceptsComplement: false,
     complementMax: 0,
-    slugSuffix: 'service',
+    slugSuffix: 'peinture',
     boostType: 'photos',
+  }));
+  proListingIds.push(await insertListing(client, {
+    userId: proId,
+    categoryId: servicesCategory,
+    communeId: communId,
+    title: 'Rénovation salle d’eau',
+    description: 'Douche, étanchéité et finitions pour test des devis détaillés.',
+    prix: 45000,
+    condition: 'new',
+    isTroc: false,
+    wants: [],
+    acceptsComplement: false,
+    complementMax: 0,
+    slugSuffix: 'salle-d-eau',
+    boostType: null,
+  }));
+  proListingIds.push(await insertListing(client, {
+    userId: proId,
+    categoryId: vehiculesCategory,
+    communeId: communId,
+    title: 'Entretien toiture et façade',
+    description: 'Contrôle, nettoyage et traitement pour les parcours pro et portfolio.',
+    prix: 65000,
+    condition: 'used_fair',
+    isTroc: false,
+    wants: [],
+    acceptsComplement: false,
+    complementMax: 0,
+    slugSuffix: 'toiture-facade',
+    boostType: 'urgent',
+  }));
+
+  await client.query(
+    `UPDATE users SET nb_annonces = 3, updated_at = NOW() WHERE id = $1`,
+    [proId]
+  );
+
+  await client.query(
+    `DELETE FROM ticket_types WHERE event_id IN (SELECT id FROM events WHERE organizer_id = $1)`,
+    [proId]
+  );
+  await client.query(`DELETE FROM events WHERE organizer_id = $1`, [proId]);
+  await client.query(`DELETE FROM bon_plans WHERE user_id = $1 AND kind = 'event'`, [proId]);
+  await insertEvent(client, {
+    organizerId: proId,
+    communeId: communId,
+    title: 'Marché de Nouméa — Test',
+    description: 'Événement gratuit avec billetterie pour valider le parcours d’achat mobile.',
+    venueName: 'Place des Cocotiers',
+    venueAddress: 'Centre-ville de Nouméa',
+    eventDate: new Date().toISOString().slice(0, 10),
+    eventTime: '06:30:00',
+    category: 'marche',
+    ticketTypes: [
+      {
+        name: 'Entrée libre',
+        description: 'Billet gratuit de démonstration.',
+        price_xpf: 0,
+        quantity_total: 500,
+        position: 0,
+      },
+    ],
+    coverImageUrl: 'https://picsum.photos/seed/marche-de-noumea-test/1200/900',
   });
 
   await client.query(
@@ -910,7 +1059,7 @@ async function seedProContent(client, ids) {
     ]
   );
 
-  await client.query(`UPDATE users SET nb_annonces = COALESCE(nb_annonces, 0) + 1, updated_at = NOW() WHERE id = $1`, [proId]);
+  await client.query(`UPDATE users SET nb_annonces = 3, updated_at = NOW() WHERE id = $1`, [proId]);
 }
 
 async function seedDriverContent(client, ids) {

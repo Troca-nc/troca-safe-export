@@ -1,5 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 import { BasePO } from './base.po'
+import { navigateTo } from '../e2e/mobile/helpers'
 
 export class AnnoncesPO extends BasePO {
   constructor(page: Page) {
@@ -27,7 +28,7 @@ export class AnnoncesPO extends BasePO {
 
     const href = await listingLink.getAttribute('href')
     expect(href, 'first listing href').toMatch(/^\/annonces\/\d+$/)
-    await this.page.goto(href!, { waitUntil: 'domcontentloaded' })
+    await navigateTo(this.page, href!)
   }
 
   async expectDetailActions() {
