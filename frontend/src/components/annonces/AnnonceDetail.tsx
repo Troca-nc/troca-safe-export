@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { formatDistanceToNow, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { ArrowLeft, BadgeDollarSign, Flag, Heart, X } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, BadgeDollarSign, Heart, X } from 'lucide-react'
 import { listingsApi, messagesApi, usersApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import { consumePendingAuthAction, peekPendingAuthAction } from '@/lib/authAction'
@@ -786,7 +786,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
 
             <div className="flex items-start gap-3 pr-10">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-                <Flag className="h-5 w-5" />
+                <AlertTriangle className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-red-600/80">Signalement</p>

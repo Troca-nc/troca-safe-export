@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, Loader2, Star, X } from 'lucide-react'
+import { BadgeCheck, CheckCircle2, Loader2, X } from 'lucide-react'
 
 import { usersApi } from '@/lib/api'
 
@@ -217,9 +217,9 @@ export default function PassengerProfileModal({
                     <div key={`${review.created_at || index}`} className="rounded-2xl bg-white p-3">
                       <div className="flex items-center gap-1">
                         {Array.from({ length: 5 }).map((_, starIndex) => (
-                          <Star
+                          <BadgeCheck
                             key={starIndex}
-                            className={`h-3.5 w-3.5 ${starIndex < Number(review.rating || 0) ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`}
+                            className={`h-3.5 w-3.5 ${starIndex < Number(review.rating || 0) ? 'text-amber-500' : 'text-slate-200'}`}
                           />
                         ))}
                       </div>

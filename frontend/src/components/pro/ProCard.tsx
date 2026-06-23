@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { BadgeCheck, MapPin, Quote, Star, Store, ArrowRight } from 'lucide-react'
+import { BadgeCheck, MapPin, Quote, Store, ArrowRight } from 'lucide-react'
 
 export type ProCardModel = {
   id: string | number
@@ -109,7 +109,7 @@ export default function ProCard({ pro }: { pro: ProCardModel }) {
             {pro.pro_commune || 'Nouvelle-Calédonie'}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
-            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+            <BadgeCheck className="h-3.5 w-3.5 text-amber-500" />
             {formatRating(rating)} ({reviewCount} avis)
           </span>
         </div>

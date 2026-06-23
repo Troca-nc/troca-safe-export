@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, BadgeCheck, MapPin, Star, Users } from 'lucide-react'
+import { ArrowRight, BadgeCheck, MapPin, Users } from 'lucide-react'
 
 export type TransporterCardModel = {
   id: string | number
@@ -108,7 +108,7 @@ export default function TransporterCard({
             {transporter.pro_commune || transporter.service_zones?.[0] || 'Nouvelle-Calédonie'}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
-            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+            <BadgeCheck className="h-3.5 w-3.5 text-amber-500" />
             {formatRating(transporter.avg_rating)} ({Number(transporter.total_rides ?? transporter.rides_completed ?? 0)} courses)
           </span>
         </div>

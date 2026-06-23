@@ -11,7 +11,6 @@ import {
   Clock3,
   MapPin,
   MessageCircle,
-  Star,
   Users,
 } from 'lucide-react'
 
@@ -248,7 +247,7 @@ export default function DriverPublicProfilePage() {
                       {profile.commune_name || profile.province_name || 'Nouvelle-Calédonie'}
                     </span>
                     <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 ${getTrustTone(score)}`}>
-                      <Star className="h-3.5 w-3.5 fill-current" />
+                      <BadgeCheck className="h-3.5 w-3.5" />
                       Confiance {Math.round(score)}/100
                     </span>
                     <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
@@ -414,7 +413,7 @@ export default function DriverPublicProfilePage() {
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-lagon">Avis</p>
                   <h2 className="mt-1 font-display text-2xl font-bold text-night">Ce que disent les passagers</h2>
                 </div>
-                <Star className="h-6 w-6 text-amber-400" />
+                <BadgeCheck className="h-6 w-6 text-amber-500" />
               </div>
 
               <div className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
@@ -444,9 +443,9 @@ export default function DriverPublicProfilePage() {
                         </div>
                         <div className="inline-flex items-center gap-1 text-amber-500">
                           {Array.from({ length: 5 }).map((_, index) => (
-                            <Star
+                            <BadgeCheck
                               key={`${review.id}-${index}`}
-                              className={`h-3.5 w-3.5 ${index < review.rating ? 'fill-current' : 'text-amber-200'}`}
+                              className={`h-3.5 w-3.5 ${index < review.rating ? 'text-amber-500' : 'text-amber-200'}`}
                             />
                           ))}
                         </div>

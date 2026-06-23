@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { CheckCircle2, Eye, Shield, Star, Store, Trash2, AlertTriangle } from 'lucide-react'
+import { CheckCircle2, Eye, Shield, BadgeCheck, Store, Trash2, AlertTriangle } from 'lucide-react'
 import AdminLayout from '@/components/admin/AdminLayout'
 import { adminBusinessesApi } from '@/lib/api'
 import { useQuery } from '@tanstack/react-query'
@@ -154,7 +154,7 @@ export default function AdminBusinessesPage() {
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
-                      <Star className="h-3.5 w-3.5" />
+                      <BadgeCheck className="h-3.5 w-3.5" />
                       {Number(business.review_avg ?? 0).toFixed(1)}
                     </span>
                     {business.badge === 'verified' ? (

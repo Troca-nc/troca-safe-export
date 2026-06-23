@@ -5,7 +5,7 @@
 // ============================================================
 
 import { useEffect, useState } from 'react'
-import { BarChart2, Eye, Heart, MessageCircle, Star, TrendingUp, Award, Clock } from 'lucide-react'
+import { BarChart2, Eye, Heart, MessageCircle, BadgeCheck, TrendingUp, Award, Clock } from 'lucide-react'
 import { statsApi } from '@/lib/api'
 import PlanBadge from '@/components/PlanBadge'
 
@@ -135,13 +135,13 @@ export default function SellerStatsDashboard() {
         {avis.total_avis !== '0' && (
           <>
             <StatCard
-              icon={Star} label="Note moyenne"
+              icon={BadgeCheck} label="Note moyenne"
               value={avis.note_moyenne ? `${avis.note_moyenne}/5` : '—'}
               sub={`${avis.total_avis} avis`}
               color="text-amber-400"
             />
             <StatCard
-              icon={Star} label="Avis 5 étoiles"
+              icon={BadgeCheck} label="Avis 5 étoiles"
               value={avis.cinq_etoiles ?? '0'}
               sub={`${avis.une_etoile} avis 1 étoile`}
               color="text-amber-400"
@@ -215,7 +215,7 @@ export default function SellerStatsDashboard() {
       {!stats.is_pro && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center">
           <p className="text-sm font-medium text-amber-800 mb-2">
-            ⭐ Passez Pro pour accéder à toutes vos statistiques
+            Passez Pro pour accéder à toutes vos statistiques
           </p>
           <a href="/pro" className="text-xs text-amber-700 underline">Découvrir les offres Pro →</a>
         </div>

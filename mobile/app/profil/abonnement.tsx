@@ -222,16 +222,16 @@ export default function AbonnementScreen() {
       <ScrollView style={styles.root} contentContainerStyle={styles.content}>
         {user?.is_pro && (
           <View style={styles.alreadyPro}>
-            <Ionicons name="star" size={24} color={Colors.warning} />
+            <Ionicons name="trophy-outline" size={24} color={Colors.warning} />
             <View>
-              <Text style={styles.alreadyProTitle}>Vous êtes déjà Pro ⭐</Text>
+              <Text style={styles.alreadyProTitle}>Vous êtes déjà Pro</Text>
               <Text style={styles.alreadyProSub}>Gérez votre abonnement sur kalico.nc</Text>
             </View>
           </View>
         )}
 
         <View style={styles.hero}>
-          <Text style={styles.heroEmoji}>⭐</Text>
+          <Text style={styles.heroEmoji}>PRO</Text>
           <Text style={styles.heroTitle}>Passez Pro</Text>
           <Text style={styles.heroSub}>
             Vendez plus vite avec des fonctionnalités exclusives adaptées aux particuliers et

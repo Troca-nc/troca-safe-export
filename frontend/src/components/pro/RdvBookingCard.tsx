@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { CalendarDays, CheckCircle2, Clock3, MessageCircle, MapPin, Star, UserRound, XCircle } from 'lucide-react'
+import { BadgeCheck, CalendarDays, CheckCircle2, Clock3, MessageCircle, MapPin, UserRound, XCircle } from 'lucide-react'
 
 export type RdvBookingItem = {
   id: number | string
@@ -286,7 +286,7 @@ export default function RdvBookingCard({
             onClick={() => onReview(booking.id)}
             className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-700 transition hover:bg-amber-100"
           >
-            <Star className="h-4 w-4" />
+            <BadgeCheck className="h-4 w-4" />
             Laisser un avis
           </button>
         ) : null}

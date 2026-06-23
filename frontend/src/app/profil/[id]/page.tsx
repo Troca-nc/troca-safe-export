@@ -3,7 +3,7 @@
 
 import { useEffect, useState, type ElementType } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Star, MapPin, Calendar, Package, MailCheck, Phone, Eye, Heart, TrendingUp, Award, ShieldCheck, LocateFixed, Navigation2, Compass, Clock3 } from 'lucide-react'
+import { BadgeCheck, MapPin, Calendar, Package, MailCheck, Phone, Eye, Heart, TrendingUp, Award, ShieldCheck, LocateFixed, Navigation2, Compass, Clock3 } from 'lucide-react'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import Header from '@/components/layout/Header'
@@ -145,7 +145,7 @@ export default function PublicProfilePage() {
               )}
               {profile.note_moyenne && (
                 <span className="flex items-center gap-1 text-amber-600 font-medium">
-                  <Star className="w-4 h-4 fill-amber-400 stroke-amber-400" />
+                  <BadgeCheck className="w-4 h-4 text-amber-500" />
                   {Number(profile.note_moyenne).toFixed(1)}
                   <span className="text-night/40 font-normal">({profile.nb_avis} avis)</span>
                 </span>
@@ -376,7 +376,7 @@ export default function PublicProfilePage() {
                     <span className="text-sm font-medium text-night">{r.auteur_prenom}</span>
                     <div className="flex ml-auto">
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={i} className={`w-3.5 h-3.5 ${i < r.note ? 'fill-amber-400 stroke-amber-400' : 'stroke-night/20'}`} />
+                        <BadgeCheck key={i} className={`w-3.5 h-3.5 ${i < r.note ? 'text-amber-500' : 'text-night/20'}`} />
                       ))}
                     </div>
                   </div>

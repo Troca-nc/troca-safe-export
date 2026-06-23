@@ -170,7 +170,8 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
         <div className="flex flex-wrap items-center gap-2 text-xs text-night/55">
           {business?.review_count ? (
             <span className="rounded-full bg-sand px-2.5 py-1 font-medium">
-              ⭐ {Number(business.review_avg || 0).toFixed(1)} ({Number(business.review_count)})
+              <Check className="mr-1 inline-block h-3.5 w-3.5 text-amber-500" />
+              {Number(business.review_avg || 0).toFixed(1)} ({Number(business.review_count)})
             </span>
           ) : null}
           {cleanText(bonPlan.promo_label, '') ? (

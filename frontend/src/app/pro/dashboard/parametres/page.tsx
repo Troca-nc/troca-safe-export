@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowRight, BadgeCheck, Clock3, Eye, Globe, Loader2, MapPin, Package, Phone, PlayCircle, Star, Store, Upload } from 'lucide-react'
+import { ArrowRight, BadgeCheck, Clock3, Eye, Globe, Loader2, MapPin, Package, Phone, PlayCircle, Store, Upload } from 'lucide-react'
 
 import { proApi, uploadApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
@@ -985,7 +985,7 @@ export default function ProDashboardSettingsPage() {
                       </div>
                       <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-night/60">
                         <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
-                          <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                          <BadgeCheck className="h-4 w-4 text-amber-500" />
                           0.0 (0 avis)
                         </span>
                         <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">

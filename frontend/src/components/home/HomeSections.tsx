@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { type FormEvent, type KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -175,18 +176,28 @@ export function HomeHeroSection({
       </svg>
       <div className="relative mx-auto max-w-7xl">
         <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/90 backdrop-blur-sm">
-            <Sparkles className="h-3.5 w-3.5" />
-            🇳🇨 Nouvelle-Calédonie
+          <div className="flex flex-col items-center">
+            <span className="relative h-20 w-20 overflow-hidden rounded-full border border-white/15 bg-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.16)] backdrop-blur-sm md:h-24 md:w-24">
+              <Image
+                src="/brand/kalico1.svg"
+                alt="Kalico"
+                fill
+                sizes="96px"
+                className="object-cover"
+                priority
+              />
+            </span>
+            <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/65">
+              Nouvelle-Calédonie
+            </p>
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/85 md:text-base">
+              La place locale des annonces, du troc et des bons plans en Nouvelle-Calédonie.
+            </p>
           </div>
 
           <h1 className="mt-4 max-w-4xl font-display text-4xl font-bold leading-tight text-white md:text-6xl">
             Achetez, vendez, troquez en NC
           </h1>
-
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/80 md:text-base">
-            La première plateforme d&apos;annonces 100% calédonienne.
-          </p>
 
           <div className="mt-5 w-full max-w-[560px]">
             <form onSubmit={onSubmit} className="relative flex w-full flex-col gap-2 sm:flex-row">

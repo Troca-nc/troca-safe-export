@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { AlertCircle, Camera, Loader2, Sparkles, Star, TrendingUp, X, Zap } from 'lucide-react'
+import { AlertCircle, Camera, CreditCard, Globe, Loader2, TrendingUp, X, Zap } from 'lucide-react'
 
 import DemoModeNotice from '@/components/DemoModeNotice'
 import { useBoostPayment, type SavedCard } from '@/hooks/usePayment'
@@ -9,7 +9,7 @@ import { BOOST_CATALOG, formatXPF } from '@/types/monetisation.types'
 import type { BoostDuration, BoostOption, BoostType, PaymentProvider } from '@/types/monetisation.types'
 
 const BOOST_ICONS: Record<BoostType, ReactNode> = {
-  une: <Star size={18} className="text-amber-500" />,
+  une: <TrendingUp size={18} className="text-amber-500" />,
   urgent: <Zap size={18} className="text-red-500" />,
   remonte: <TrendingUp size={18} className="text-blue-500" />,
   photos: <Camera size={18} className="text-emerald-500" />,
@@ -27,8 +27,8 @@ function ProviderSelector({
       <p className="mb-2 text-xs text-night/50">Moyen de paiement</p>
       <div className="grid grid-cols-2 gap-2">
         {[
-          { value: 'stripe', label: 'Carte bancaire', sub: 'Via Stripe', emoji: '💳' },
-          { value: 'payplug', label: 'Carte FR/NC', sub: 'Via PayPlug', emoji: '🇳🇨' },
+          { value: 'stripe', label: 'Carte bancaire', sub: 'Via Stripe', icon: CreditCard },
+          { value: 'payplug', label: 'Paiement local', sub: 'Via PayPlug', icon: Globe },
         ].map((option) => (
           <button
             key={option.value}
@@ -38,7 +38,7 @@ function ProviderSelector({
               value === option.value ? 'border-coral bg-coral/8' : 'border-night/10 hover:border-night/25'
             }`}
           >
-            <span className="text-lg">{option.emoji}</span>
+            <option.icon className="h-5 w-5 text-night/60" />
             <span className="text-xs font-medium text-night">{option.label}</span>
             <span className="text-[10px] text-night/40">{option.sub}</span>
           </button>

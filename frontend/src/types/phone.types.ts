@@ -39,9 +39,9 @@ export interface PhoneVerificationState {
 
 // Préfixes téléphoniques Nouvelle-Calédonie
 export const NC_PHONE_PREFIXES = [
-  { label: 'NC +687', value: '+687', flag: '🇳🇨' },
-  { label: 'FR +33',  value: '+33',  flag: '🇫🇷' },
-  { label: 'AU +61',  value: '+61',  flag: '🇦🇺' },
+  { label: 'NC +687', value: '+687' },
+  { label: 'FR +33',  value: '+33' },
+  { label: 'AU +61',  value: '+61' },
 ]
 
 export const DEFAULT_PREFIX = '+687'

@@ -2,7 +2,7 @@
 // src/components/trust/TrustBadge.tsx
 // ── Badge de confiance vendeur — affiché sur fiche annonce et profil ──────────
 
-import { Shield, ShieldCheck, ShieldAlert, ShieldX, Phone, Star, Clock, Package, MailCheck } from 'lucide-react'
+import { Shield, ShieldCheck, ShieldAlert, ShieldX, Phone, BadgeCheck, Clock, Package, MailCheck } from 'lucide-react'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -69,8 +69,8 @@ const CRITERIA = [
   { key: 'phone_verified', icon: Phone,   label: 'Téléphone vérifié'     },
   { key: 'account_age_30', icon: Clock,   label: 'Compte actif > 30j'    },
   { key: 'nb_annonces_5',  icon: Package, label: '5+ annonces publiées'  },
-  { key: 'nb_avis_3',      icon: Star,    label: '3+ avis reçus'         },
-  { key: 'note_4',         icon: Star,    label: 'Note >= 4/5'           },
+  { key: 'nb_avis_3',      icon: BadgeCheck,    label: '3+ avis reçus'         },
+  { key: 'note_4',         icon: BadgeCheck,    label: 'Note >= 4/5'           },
   { key: 'no_reports',     icon: Shield,  label: 'Aucun signalement'     },
 ] as const
 

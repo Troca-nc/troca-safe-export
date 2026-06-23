@@ -7,7 +7,7 @@ import { useParams, useSearchParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import {
-  Star, MapPin, Calendar, Shield, CheckCircle2,
+  BadgeCheck, MapPin, Calendar, Shield, CheckCircle2,
   Edit3, Save, X, Package, MessageCircle, Heart, AlertTriangle, Clock3, CreditCard
 } from 'lucide-react'
 import { format } from 'date-fns'
@@ -22,7 +22,7 @@ import Link from 'next/link'
 
 const TABS = [
   { id: 'listings', label: 'Annonces',     icon: <Package   className="w-4 h-4" /> },
-  { id: 'reviews',  label: 'Avis reçus',   icon: <Star      className="w-4 h-4" /> },
+  { id: 'reviews',  label: 'Avis reçus',   icon: <BadgeCheck className="w-4 h-4" /> },
 ]
 
 type SubscriptionStatus = {
@@ -162,10 +162,10 @@ function ProfilePageContent() {
     }
   }
 
-  const StarRating = ({ rating }: { rating: number }) => (
+  const RatingRow = ({ rating }: { rating: number }) => (
     <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map((i) => (
-        <Star key={i} className={`w-4 h-4 ${i <= Math.round(rating) ? 'fill-amber-400 text-amber-400' : 'text-night/20'}`} />
+        <BadgeCheck key={i} className={`w-4 h-4 ${i <= Math.round(rating) ? 'text-amber-500' : 'text-night/20'}`} />
       ))}
     </div>
   )
@@ -544,7 +544,7 @@ function ProfilePageContent() {
                     {/* Note */}
                     {profile.rating_count > 0 && (
                       <div className="flex items-center gap-2 mt-1">
-                        <StarRating rating={profile.rating} />
+                        <RatingRow rating={profile.rating} />
                         <span className="text-sm text-night/60">
                           {parseFloat(profile.rating).toFixed(1)} · {profile.rating_count} avis
                         </span>
@@ -644,7 +644,7 @@ function ProfilePageContent() {
           <div className="space-y-3">
             {reviews.length === 0 ? (
               <div className="text-center py-16 text-night/40">
-                <Star className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                <BadgeCheck className="w-10 h-10 mx-auto mb-3 opacity-30" />
                 <p className="text-sm">Aucun avis pour l'instant</p>
               </div>
             ) : (
@@ -663,7 +663,7 @@ function ProfilePageContent() {
                           {format(new Date(rev.created_at), 'dd MMM yyyy', { locale: fr })}
                         </span>
                       </div>
-                      <StarRating rating={rev.rating} />
+                      <RatingRow rating={rev.rating} />
                       {rev.listing_title && (
                         <p className="text-xs text-night/40 mt-1">Re: {rev.listing_title}</p>
                       )}

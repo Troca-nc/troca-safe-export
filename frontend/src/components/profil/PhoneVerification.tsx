@@ -141,8 +141,7 @@ export default function PhoneVerification({
               aria-haspopup="listbox"
               aria-expanded={prefixOpen}
             >
-              <span>{NC_PHONE_PREFIXES.find(p => p.value === prefix)?.flag}</span>
-              <span>{prefix}</span>
+              <span>{NC_PHONE_PREFIXES.find(p => p.value === prefix)?.label || prefix}</span>
               <ChevronDown size={12} className="text-night/40" />
             </button>
 
@@ -157,7 +156,6 @@ export default function PhoneVerification({
                     onClick={() => { setPrefix(p.value); setPrefixOpen(false) }}
                     className={`flex items-center gap-2 px-4 py-2.5 text-sm w-full text-left hover:bg-sand transition-colors ${prefix === p.value ? 'text-coral font-medium' : 'text-night'}`}
                   >
-                    <span>{p.flag}</span>
                     <span>{p.label}</span>
                   </button>
                 ))}

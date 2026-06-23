@@ -13,7 +13,7 @@ import Header from '@/components/layout/Header'
 import { useAuthStore } from '@/store/authStore'
 import axios from 'axios'
 import { useEffect } from 'react'
-import { Star, Receipt, CreditCard, Calendar, AlertCircle, ExternalLink } from 'lucide-react'
+import { BadgeCheck, Receipt, CreditCard, Calendar, AlertCircle, ExternalLink } from 'lucide-react'
 import { API_ORIGIN } from '@/lib/api'
 import { rgpdApi } from '@/lib/api'
 import { newsletterApi } from '@/lib/api'
@@ -96,12 +96,12 @@ function AbonnementSection() {
     new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
 
   return (
-    <Section icon={Star} title="Abonnement Pro">
+    <Section icon={BadgeCheck} title="Abonnement Pro">
       {!user?.is_pro ? (
         <div className="text-center py-4">
           <p className="text-night/60 text-sm mb-4">Vous n\'avez pas encore d\'abonnement Pro.</p>
           <Link href="/pro" className="btn-primary inline-flex items-center gap-2 py-2 px-6 text-sm">
-            <Star className="w-4 h-4" />
+            <BadgeCheck className="w-4 h-4" />
             D?couvrir les offres Pro
           </Link>
         </div>
@@ -110,7 +110,7 @@ function AbonnementSection() {
           {/* Statut */}
           <div className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-xl">
             <div className="flex items-center gap-2">
-              <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+              <BadgeCheck className="w-4 h-4 text-amber-500" />
               <span className="text-sm font-semibold text-amber-800">
                 Compte Pro actif
               </span>

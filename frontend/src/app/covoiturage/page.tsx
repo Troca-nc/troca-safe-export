@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { ArrowRight, Bell, Car, Search, Star, Users } from 'lucide-react'
+import { ArrowRight, BadgeCheck, Bell, Car, Search, Users } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
 import BookingButton from '@/components/covoiturage/BookingButton'
@@ -1173,7 +1173,7 @@ export default function CovoituragePage() {
                     <h2 className="mt-1 text-lg font-semibold text-night">Les plus visibles maintenant</h2>
                   </div>
                   <div className="inline-flex items-center gap-2 rounded-full bg-sand px-3 py-1 text-xs font-semibold text-night/65">
-                    <Star className="h-4 w-4 text-amber-500" />
+                    <BadgeCheck className="h-4 w-4 text-amber-500" />
                     {featuredRides.length} coup(s) de cœur
                   </div>
                 </div>

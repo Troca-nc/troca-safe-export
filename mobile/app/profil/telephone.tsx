@@ -174,7 +174,7 @@ export default function TelephoneScreen() {
 
                 <View style={styles.phoneRow}>
                   <View style={styles.flag}>
-                    <Text style={{ fontSize: 20 }}>🇳🇨</Text>
+                    <Text style={{ fontSize: 20 }}>NC</Text>
                     <Text style={styles.dialCode}>+687</Text>
                   </View>
                   <TextInput

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { BadgeCheck, Loader2, MessageCircle, Star } from 'lucide-react'
+import { BadgeCheck, Loader2, MessageCircle } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
 import ReviewSummary from '@/components/reviews/ReviewSummary'
@@ -49,7 +49,7 @@ function StarPicker({
             className="rounded-full p-1 transition hover:scale-110"
             aria-label={`${index + 1} étoiles`}
           >
-            <Star className={`h-6 w-6 ${active ? 'fill-amber-400 text-amber-400' : 'text-night/20'}`} />
+            <BadgeCheck className={`h-6 w-6 ${active ? 'text-amber-500' : 'text-night/20'}`} />
           </button>
         )
       })}

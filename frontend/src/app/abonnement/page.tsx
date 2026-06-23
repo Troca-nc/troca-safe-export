@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { ArrowRight, Check, ShieldCheck, Sparkles, Star, TrendingUp } from 'lucide-react'
+import { ArrowRight, Check, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react'
 
 import DemoModeNotice from '@/components/DemoModeNotice'
 import { PaymentProviderSelector } from '@/components/monetisation/PaymentProviderSelector'
@@ -82,7 +82,7 @@ export default function AbonnementPage() {
     <div className="min-h-screen bg-sand-light">
       <section className="bg-night px-4 py-16 text-center text-white">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-coral/20 px-3 py-1.5 text-xs font-medium text-coral">
-          <Star size={12} /> Developpez votre activite sur Kalico
+          <TrendingUp size={12} /> Developpez votre activite sur Kalico
         </div>
         <h1 className="font-display text-4xl font-bold leading-tight md:text-5xl">
           La plateforme des professionnels

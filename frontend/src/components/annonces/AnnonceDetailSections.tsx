@@ -8,7 +8,6 @@ import {
   BadgeCheck,
   BadgeDollarSign,
   Clock,
-  Flag,
   Heart,
   MailCheck,
   MapPin,
@@ -18,7 +17,6 @@ import {
   Search,
   Send,
   Sparkles,
-  Star,
   Store,
   TrendingUp,
 } from 'lucide-react'
@@ -99,7 +97,7 @@ type SellerReview = {
 
 function starsFor(note: number, className = 'w-3.5 h-3.5') {
   return Array.from({ length: 5 }).map((_, i) => (
-    <Star
+    <BadgeCheck
       key={i}
       className={`${className} ${i < Math.round(note) ? 'fill-amber-400 stroke-amber-400' : 'stroke-night/20'}`}
     />
@@ -422,7 +420,7 @@ export function SellerSidebar({
               onClick={onReportListing}
               className="inline-flex items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 hover:bg-red-100"
             >
-              <Flag size={16} />
+              <AlertTriangle size={16} />
               Signaler l’annonce
             </button>
           )}
@@ -518,7 +516,7 @@ export function ReviewFormSection({
     return (
       <div className="bg-white rounded-3xl border border-night/8 p-5 shadow-sm">
         <div className="flex items-center gap-2 mb-3 text-night">
-          <Star size={16} className="text-amber-500" />
+          <BadgeCheck size={16} className="text-amber-500" />
           <h2 className="font-semibold">Laisser un avis</h2>
         </div>
         <p className="text-sm text-night/60 leading-6">
@@ -548,7 +546,7 @@ export function ReviewFormSection({
   return (
     <div className="bg-white rounded-3xl border border-night/8 p-5 shadow-sm">
       <div className="flex items-center gap-2 mb-3 text-night">
-        <Star size={16} className="text-amber-500" />
+        <BadgeCheck size={16} className="text-amber-500" />
         <h2 className="font-semibold">Laisser un avis</h2>
       </div>
 
@@ -568,7 +566,7 @@ export function ReviewFormSection({
               className={`w-9 h-9 rounded-xl border transition-colors flex items-center justify-center ${active ? 'border-amber-300 bg-amber-50 text-amber-500' : 'border-night/10 bg-white text-night/25 hover:text-amber-400'}`}
               aria-label={`${value} etoile${value > 1 ? 's' : ''}`}
             >
-              <Star className={`w-4 h-4 ${active ? 'fill-amber-400 stroke-amber-400' : ''}`} />
+              <BadgeCheck className={`w-4 h-4 ${active ? 'text-amber-500' : ''}`} />
             </button>
           )
         })}

@@ -117,7 +117,7 @@ export default function ProfilTab() {
       items: [
         {
           icon: 'star-outline',
-          label: user.is_pro ? '⭐ Compte Pro actif' : 'Passer Pro',
+          label: user.is_pro ? 'Compte Pro actif' : 'Passer Pro',
           value: user.is_pro ? 'Actif' : undefined,
           onPress: () => router.push('/profil/abonnement'),
         },

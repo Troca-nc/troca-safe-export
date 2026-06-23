@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
-import { BadgeCheck, Clock, Heart, MailCheck, MapPin, Phone, ShieldCheck, Star } from 'lucide-react'
+import { BadgeCheck, Clock, Heart, MailCheck, MapPin, Phone, ShieldCheck } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useAuthStore } from '@/store/authStore'
@@ -396,7 +396,7 @@ export default function ListingCard({ listing, className = '' }: Props) {
                 )}
                 {typeof listing.seller_note_moyenne === 'number' && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-nc-emeraudeLight px-2 py-0.5 font-medium text-nc-emeraudeText">
-                    <Star className="h-3 w-3 fill-current" />
+                    <BadgeCheck className="h-3 w-3" />
                     {listing.seller_note_moyenne.toFixed(1)}/5
                     <span className="text-current/70">({listing.seller_nb_avis ?? 0})</span>
                   </span>

@@ -10,7 +10,6 @@ import {
   Clock3,
   MapPin,
   Search,
-  Star,
   Users,
 } from 'lucide-react'
 
@@ -206,7 +205,7 @@ export default function TransporterDetailPage() {
                       {transporter.pro_commune || serviceZones[0] || 'Nouvelle-Calédonie'}
                     </span>
                     <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
-                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                      <BadgeCheck className="h-3.5 w-3.5 text-amber-500" />
                       {rating > 0 ? rating.toFixed(1) : '0.0'} ({reviews.length} avis)
                     </span>
                     <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">

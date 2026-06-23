@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react'
+import { BadgeCheck } from 'lucide-react'
 
 type Props = {
   rating?: number | null
@@ -7,12 +7,12 @@ type Props = {
   className?: string
 }
 
-function StarRow({ rating }: { rating: number }) {
+function RatingRow({ rating }: { rating: number }) {
   return (
     <div className="flex items-center gap-0.5">
       {Array.from({ length: 5 }).map((_, index) => {
         const active = index < Math.round(rating)
-        return <Star key={index} className={`h-4 w-4 ${active ? 'fill-amber-400 text-amber-400' : 'text-night/20'}`} />
+        return <BadgeCheck key={index} className={`h-4 w-4 ${active ? 'text-amber-500' : 'text-night/20'}`} />
       })}
     </div>
   )
@@ -27,7 +27,7 @@ export default function ReviewSummary({ rating = 0, count = 0, verifiedCount = 0
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Résumé des avis</p>
           <h3 className="mt-1 font-display text-2xl font-bold text-night">{value.toFixed(1)}/5</h3>
           <div className="mt-2">
-            <StarRow rating={value} />
+            <RatingRow rating={value} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3 text-center text-sm">

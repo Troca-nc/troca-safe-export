@@ -7,7 +7,7 @@
 import { Suspense, useEffect, useState }  from 'react'
 import { useSearchParams }      from 'next/navigation'
 import Link                     from 'next/link'
-import { CheckCircle2, AlertCircle, Loader2, ArrowRight, Receipt, Star } from 'lucide-react'
+import { CheckCircle2, AlertCircle, Loader2, ArrowRight, Receipt, BadgeCheck } from 'lucide-react'
 import Header                   from '@/components/layout/Header'
 import { api }                  from '@/lib/api'
 import { useAuthStore }         from '@/store/authStore'
@@ -130,7 +130,7 @@ function PaiementSuccesContent() {
         <div className="max-w-lg mx-auto px-4 py-16 text-center">
           <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
             {isSubscription
-              ? <Star className="w-10 h-10 text-amber-500 fill-amber-500" />
+              ? <BadgeCheck className="w-10 h-10 text-amber-500" />
               : <CheckCircle2 className="w-10 h-10 text-green-500" />
             }
           </div>

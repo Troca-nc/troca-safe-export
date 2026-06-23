@@ -2,7 +2,7 @@
 
 import { formatDistanceToNow, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { ArrowLeftRight, FileText, MessageCircle, ShieldCheck, Star } from 'lucide-react'
+import { ArrowLeftRight, BadgeCheck, FileText, MessageCircle, ShieldCheck } from 'lucide-react'
 import type { Conversation } from '@/types/messaging.types'
 
 interface ConversationListProps {
@@ -157,7 +157,7 @@ export default function ConversationList({ conversations, activeId, onSelect, lo
                   {u.prenom} {u.nom}
                 </span>
                 {u.telephone_verifie && <ShieldCheck size={11} className="shrink-0 text-emerald-500" />}
-                {u.is_pro && <Star size={11} className="shrink-0 text-amber-500" />}
+                {u.is_pro && <BadgeCheck size={11} className="shrink-0 text-amber-500" />}
               </div>
 
               <div className="mb-1 flex flex-wrap items-center gap-1.5 text-[10px]">

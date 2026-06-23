@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Flag, MessageSquare, Star, Check } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, BadgeCheck, MessageSquare, Check } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
 import BonPlanCard, { type BonPlanCardModel } from '@/components/bon-plans/BonPlanCard'
@@ -186,7 +186,7 @@ export default function BusinessProfilePage() {
                           </div>
                           <div className="flex items-center gap-1 text-amber-500">
                             {Array.from({ length: 5 }).map((_, index) => (
-                              <Star key={index} className={`h-4 w-4 ${index < review.rating ? 'fill-current' : 'opacity-25'}`} />
+                              <BadgeCheck key={index} className={`h-4 w-4 ${index < review.rating ? 'text-amber-500' : 'opacity-25'}`} />
                             ))}
                           </div>
                         </div>
@@ -198,7 +198,7 @@ export default function BusinessProfilePage() {
                           </div>
                         ) : null}
                         <button type="button" className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-night/50 hover:text-coral">
-                          <Flag className="h-3.5 w-3.5" />
+                          <AlertTriangle className="h-3.5 w-3.5" />
                           Signaler
                         </button>
                       </article>
@@ -233,7 +233,7 @@ export default function BusinessProfilePage() {
                             className={`flex h-11 w-11 items-center justify-center rounded-full border transition ${active ? 'border-amber-300 bg-amber-50 text-amber-500' : 'border-night/10 bg-white text-night/35'}`}
                             aria-label={`${value} étoiles`}
                           >
-                            <Star className={`h-4 w-4 ${active ? 'fill-current' : ''}`} />
+                            <BadgeCheck className={`h-4 w-4 ${active ? 'text-amber-500' : ''}`} />
                           </button>
                         )
                       })}

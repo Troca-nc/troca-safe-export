@@ -13,7 +13,6 @@ import {
   MapPin,
   MessageCircle,
   Phone,
-  Star,
   Store,
   Clock3,
   Package,
@@ -37,7 +36,7 @@ const TABS = [
   { id: 'annonces', label: 'Annonces', icon: Package },
   { id: 'catalogue', label: 'Catalogue', icon: Store },
   { id: 'realisations', label: 'RÃ©alisations', icon: Sparkles },
-  { id: 'avis', label: 'Avis', icon: Star },
+  { id: 'avis', label: 'Avis', icon: BadgeCheck },
   { id: 'apropos', label: 'À propos', icon: Store },
 ] as const
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Flag, Heart, MessageCircle, Star } from 'lucide-react'
+import { AlertTriangle, BadgeCheck, Heart, MessageCircle } from 'lucide-react'
 
 import { reviewsApi } from '@/lib/api'
 
@@ -30,12 +30,12 @@ function formatDate(value?: string | null) {
   return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).format(date)
 }
 
-function StarRow({ rating }: { rating: number }) {
+function RatingRow({ rating }: { rating: number }) {
   return (
     <div className="flex items-center gap-0.5">
       {Array.from({ length: 5 }).map((_, index) => {
         const active = index < Math.round(rating)
-        return <Star key={index} className={`h-4 w-4 ${active ? 'fill-amber-400 text-amber-400' : 'text-night/20'}`} />
+        return <BadgeCheck key={index} className={`h-4 w-4 ${active ? 'text-amber-500' : 'text-night/20'}`} />
       })}
     </div>
   )
@@ -99,7 +99,7 @@ export default function ReviewCard({ review }: { review: ReviewCardModel }) {
       </div>
 
       <div className="mt-3 flex items-center gap-2">
-        <StarRow rating={review.rating} />
+        <RatingRow rating={review.rating} />
         <span className="text-sm font-semibold text-night">{review.rating}/5</span>
       </div>
 
@@ -138,7 +138,7 @@ export default function ReviewCard({ review }: { review: ReviewCardModel }) {
           disabled={loadingReport || reported}
           className="inline-flex items-center gap-2 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
         >
-          <Flag className="h-3.5 w-3.5" />
+          <AlertTriangle className="h-3.5 w-3.5" />
           {reported ? 'Signalé' : 'Signaler'}
         </button>
       </div>

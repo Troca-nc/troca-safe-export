@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Star, X } from 'lucide-react'
+import { BadgeCheck, X } from 'lucide-react'
 
 import { covoiturageApi } from '@/lib/api'
 import FeedbackAlert from '@/components/ui/FeedbackAlert'
@@ -146,7 +146,7 @@ export default function RideReviewModal({
                       className="rounded-full p-1 transition hover:scale-105"
                       aria-label={`${value} étoile${value > 1 ? 's' : ''}`}
                     >
-                      <Star className={`h-8 w-8 ${active ? 'fill-amber-400 text-amber-400' : 'text-amber-200'}`} />
+                      <BadgeCheck className={`h-8 w-8 ${active ? 'text-amber-500' : 'text-amber-200'}`} />
                     </button>
                   )
                 })}

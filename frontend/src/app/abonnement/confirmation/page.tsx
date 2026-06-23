@@ -4,7 +4,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { AlertCircle, ArrowRight, CheckCircle2, Loader2, Receipt, ShieldCheck, Star } from 'lucide-react'
+import { AlertCircle, ArrowRight, BadgeCheck, CheckCircle2, Loader2, Receipt, ShieldCheck } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import { api } from '@/lib/api'
 import { trackEvent } from '@/lib/analytics'
@@ -247,7 +247,7 @@ function ConfirmationContent() {
         <div className="mx-auto max-w-lg px-4 py-16 text-center">
           <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
             {isTrial ? (
-              <Star className="h-10 w-10 fill-amber-500 text-amber-500" />
+              <BadgeCheck className="h-10 w-10 text-amber-500" />
             ) : (
               <CheckCircle2 className="h-10 w-10 text-green-500" />
             )}
