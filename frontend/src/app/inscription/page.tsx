@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -17,7 +18,6 @@ import {
   Eye,
   EyeOff,
   ShieldCheck,
-  Sparkles,
   Store,
   UserRound,
   X,
@@ -305,8 +305,8 @@ export default function RegisterPage() {
         <div className="flex w-full max-w-[540px] flex-col gap-6">
         <div className="text-center">
           <Link href="/" className="inline-flex items-center gap-3">
-            <span className="brand-ring flex h-12 w-12 items-center justify-center rounded-2xl bg-white">
-              <Sparkles className="h-5 w-5 text-coral" />
+            <span className="relative h-12 w-12 overflow-hidden rounded-2xl border border-night/10 bg-white shadow-[0_8px_24px_rgba(8,32,50,0.08)]">
+              <Image src="/brand/kalico1.svg" alt="Kalico" fill sizes="48px" className="object-cover" priority />
             </span>
             <div>
               <p className="font-display text-3xl font-bold text-night">Kalico</p>
