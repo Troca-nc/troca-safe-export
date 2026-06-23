@@ -237,7 +237,7 @@ export default function Header() {
         <div className="mx-auto flex h-16 max-w-[120rem] items-center gap-3 px-6 lg:px-10">
           <Link href="/" className="flex shrink-0 items-center gap-2">
             <span className="relative h-8 w-8 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_8px_24px_rgba(8,32,50,0.12)]">
-              <Image src="/brand/kalico-logo.png" alt="Kalico" fill sizes="40px" className="object-cover" priority />
+              <Image src="/brand/kalico1.svg" alt="Kalico" fill sizes="40px" className="object-cover" priority />
             </span>
             <span className="hidden sm:block">
               <span className="block font-display text-lg font-bold text-night">Kalico</span>

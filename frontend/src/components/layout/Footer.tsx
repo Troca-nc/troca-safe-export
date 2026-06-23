@@ -29,7 +29,7 @@ export default function Footer() {
             <div className="mb-3 flex items-center gap-3">
               <span className="relative h-12 w-12 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_8px_24px_rgba(8,32,50,0.12)]">
                 <Image
-                  src="/brand/kalico-logo.png"
+                  src="/brand/kalico1.svg"
                   alt="Kalico"
                   fill
                   sizes="48px"

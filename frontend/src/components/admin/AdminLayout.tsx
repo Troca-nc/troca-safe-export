@@ -108,7 +108,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <Link href="/" className="flex items-center gap-2">
             <span className="relative h-10 w-10 overflow-hidden rounded-full border border-night/10 bg-white shadow-[0_8px_24px_rgba(8,32,50,0.12)]">
               <Image
-                src="/brand/kalico-logo.png"
+                src="/brand/kalico1.svg"
                 alt="Kalico"
                 fill
                 sizes="40px"

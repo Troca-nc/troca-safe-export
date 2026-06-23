@@ -11,7 +11,7 @@ export default function NotFound() {
       <main className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-4xl items-center px-4 py-16">
         <section className="w-full rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center shadow-sm md:p-10">
           <div className="mx-auto flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-[var(--color-border)] bg-white shadow-sm">
-            <Image src="/brand/kalico-logo.png" alt="Kalico" width={80} height={80} className="h-full w-full object-cover" priority />
+            <Image src="/brand/kalico1.svg" alt="Kalico" width={80} height={80} className="h-full w-full object-cover" priority />
           </div>
           <SearchX className="mx-auto mt-5 h-14 w-14 text-[#0A7EA4]" />
           <h1 className="mt-4 font-display text-3xl font-bold">Cette page n'existe pas</h1>

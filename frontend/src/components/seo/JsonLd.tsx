@@ -23,7 +23,7 @@ export function buildOrganizationSchema() {
     '@type':    'Organization',
     name:       'Kalico',
     url:        'https://kalico.nc',
-    logo:       'https://kalico.nc/logo.png',
+    logo:       'https://kalico.nc/brand/kalico1.svg',
     description: 'Plateforme de petites annonces en Nouvelle-Calédonie',
     address: {
       '@type':          'PostalAddress',

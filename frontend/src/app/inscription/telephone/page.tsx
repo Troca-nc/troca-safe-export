@@ -52,7 +52,7 @@ function SocialPhoneCompletionContent() {
             <div className="flex items-center justify-between gap-4">
               <Link href="/" className="inline-flex items-center gap-3">
                 <span className="relative h-11 w-11 overflow-hidden rounded-2xl border border-night/10 bg-white shadow-[0_8px_24px_rgba(8,32,50,0.08)]">
-                  <Image src="/brand/kalico-logo.png" alt="Kalico" fill sizes="44px" className="object-cover" priority />
+                  <Image src="/brand/kalico1.svg" alt="Kalico" fill sizes="44px" className="object-cover" priority />
                 </span>
                 <span>
                   <span className="block font-display text-xl font-bold text-night">Kalico</span>
