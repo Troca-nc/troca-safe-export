@@ -5,11 +5,18 @@ function normalizeSortValue(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function isTestCategory(node) {
+  const name = String(node?.name || '').trim().toLowerCase();
+  const slug = String(node?.slug || '').trim().toLowerCase();
+  return name === 'test' || slug === 'test';
+}
+
 function buildCategoryTree(rows = []) {
   const byId = new Map();
   const roots = [];
 
   for (const row of rows) {
+    if (isTestCategory(row)) continue;
     byId.set(Number(row.id), {
       id: Number(row.id),
       name: row.name,

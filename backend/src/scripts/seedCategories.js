@@ -25,6 +25,23 @@ async function seedCategories() {
   const rows = flatten(TAXONOMY_TREE);
 
   await withTransaction(async (client) => {
+    await client.query(`
+      WITH RECURSIVE to_delete AS (
+        SELECT id
+        FROM categories
+        WHERE LOWER(name) = 'test'
+           OR LOWER(slug) = 'test'
+
+        UNION ALL
+
+        SELECT c.id
+        FROM categories c
+        INNER JOIN to_delete td ON c.parent_id = td.id
+      )
+      DELETE FROM categories
+      WHERE id IN (SELECT id FROM to_delete)
+    `);
+
     const slugToId = new Map();
 
     for (const row of rows) {
