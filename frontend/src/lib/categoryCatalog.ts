@@ -5,6 +5,9 @@ export type CategoryNode = {
   name: string
   slug: string
   icon?: string
+  badge?: string | null
+  tag?: string | null
+  label?: string | null
   children?: CategoryNode[]
   subcategories?: CategoryNode[]
 }
@@ -49,6 +52,14 @@ function normalizeCategoryText(...parts: string[]) {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
+}
+
+function normalizeCategoryMetaValue(value: unknown) {
+  if (typeof value !== 'string') return undefined
+  const trimmed = value.trim()
+  if (!trimmed) return undefined
+  if (/^test$/i.test(trimmed)) return undefined
+  return trimmed
 }
 
 function inferIconKey(name: string, slug: string, path: string[] = []) {
@@ -105,6 +116,9 @@ function cloneWithIcons(nodes: any[], path: string[] = []): CategoryNode[] {
       name: node.name,
       slug: node.slug,
       icon: node.icon ?? inferIconKey(node.name, node.slug, currentPath),
+      badge: normalizeCategoryMetaValue(node.badge),
+      tag: normalizeCategoryMetaValue(node.tag),
+      label: normalizeCategoryMetaValue(node.label),
       children,
       subcategories: children,
     }
@@ -131,6 +145,9 @@ export function normalizeCategoryTree(categories: CategoryNode[]): CategoryNode[
     const children = normalizeCategoryTree(category.children || category.subcategories || [])
     return {
       ...category,
+      badge: normalizeCategoryMetaValue(category.badge),
+      tag: normalizeCategoryMetaValue(category.tag),
+      label: normalizeCategoryMetaValue(category.label),
       children,
       subcategories: children,
     }

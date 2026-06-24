@@ -20,7 +20,7 @@ import ListingCard from '@/components/listings/ListingCard'
 import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
 import { API_ORIGIN, metaApi } from '@/lib/api'
 import { consumePendingAuthAction, peekPendingAuthAction } from '@/lib/authAction'
-import { FALLBACK_CATEGORIES, hasNestedCategoryTree } from '@/lib/categoryCatalog'
+import { FALLBACK_CATEGORIES, hasNestedCategoryTree, normalizeCategoryTree } from '@/lib/categoryCatalog'
 import { getCategoryIcon } from '@/lib/categoryPresentation'
 import { useInfiniteListings } from '@/hooks/useInfiniteListings'
 import { useListingFilters, type ListingFilters } from '@/hooks/useListingFilters'
@@ -952,11 +952,11 @@ function ListingsPageContent() {
   useEffect(() => {
     Promise.all([metaApi.getCategories(), metaApi.getCommunes()])
       .then(([catRes, comRes]) => {
-        setCategories(catRes.data?.data?.length ? catRes.data.data : FALLBACK_CATEGORIES)
+        setCategories(normalizeCategoryTree(catRes.data?.data?.length ? catRes.data.data : FALLBACK_CATEGORIES))
         setCommunes(comRes.data?.data?.length ? comRes.data.data : FALLBACK_PROVINCES)
       })
       .catch(() => {
-        setCategories(FALLBACK_CATEGORIES)
+        setCategories(normalizeCategoryTree(FALLBACK_CATEGORIES))
         setCommunes(FALLBACK_PROVINCES)
       })
   }, [])
