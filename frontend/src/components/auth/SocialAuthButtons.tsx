@@ -73,6 +73,7 @@ export default function SocialAuthButtons({ redirectTo = '/', mode = 'connexion'
   const { setUser } = useAuthStore()
   const [error, setError] = useState('')
   const [appleLoading, setAppleLoading] = useState(false)
+  const [showConfigNotice, setShowConfigNotice] = useState(false)
 
   const handleSocialSuccess = (data: {
     access_token: string
@@ -133,6 +134,27 @@ export default function SocialAuthButtons({ redirectTo = '/', mode = 'connexion'
   }
 
   const isLoading = googleLoading || appleLoading
+  const isDisabled = !SOCIAL_AUTH_ENABLED
+
+  const handleGoogleClick = () => {
+    setShowConfigNotice(false)
+    if (isDisabled) {
+      setShowConfigNotice(true)
+      return
+    }
+
+    triggerGoogle()
+  }
+
+  const handleAppleClick = () => {
+    setShowConfigNotice(false)
+    if (isDisabled) {
+      setShowConfigNotice(true)
+      return
+    }
+
+    handleApple()
+  }
 
   return (
     <div className="space-y-4">
@@ -145,9 +167,12 @@ export default function SocialAuthButtons({ redirectTo = '/', mode = 'connexion'
       <div className="space-y-3">
         <button
           type="button"
-          onClick={triggerGoogle}
-          disabled={isLoading || !SOCIAL_AUTH_ENABLED}
-          className="btn-secondary w-full justify-start border-night/15 bg-white px-4 py-3 text-sm shadow-sm"
+          onClick={handleGoogleClick}
+          disabled={isLoading}
+          aria-disabled={isDisabled}
+          className={`btn-secondary w-full justify-start border-night/15 bg-white px-4 py-3 text-sm shadow-sm ${
+            isDisabled ? 'cursor-not-allowed opacity-40' : ''
+          }`}
         >
           <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -162,9 +187,12 @@ export default function SocialAuthButtons({ redirectTo = '/', mode = 'connexion'
 
         <button
           type="button"
-          onClick={handleApple}
-          disabled={isLoading || !SOCIAL_AUTH_ENABLED}
-          className="btn-secondary w-full justify-start border-night/15 bg-white px-4 py-3 text-sm shadow-sm"
+          onClick={handleAppleClick}
+          disabled={isLoading}
+          aria-disabled={isDisabled}
+          className={`btn-secondary w-full justify-start border-night/15 bg-white px-4 py-3 text-sm shadow-sm ${
+            isDisabled ? 'cursor-not-allowed opacity-40' : ''
+          }`}
         >
           <svg className="h-5 w-5 shrink-0 fill-night" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.31.07 2.22.75 2.98.8 1.13-.23 2.21-.93 3.39-.84 1.44.12 2.53.7 3.23 1.79-2.93 1.76-2.4 5.62.24 6.73-.57 1.54-1.32 3.05-1.84 4.4zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
@@ -174,7 +202,7 @@ export default function SocialAuthButtons({ redirectTo = '/', mode = 'connexion'
           </span>
         </button>
 
-        {!SOCIAL_AUTH_ENABLED ? (
+        {showConfigNotice ? (
           <p className="rounded-xl border border-night/10 bg-sand/60 px-4 py-3 text-center text-xs text-night/60">
             La connexion sociale est activée dès que la configuration du service est disponible.
           </p>
