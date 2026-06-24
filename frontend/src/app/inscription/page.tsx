@@ -368,9 +368,6 @@ export default function RegisterPage() {
                           Une seule inscription pour publier, échanger, réserver, vendre et suivre ce qui compte pour vous.
                         </p>
                       </div>
-                      <span className="hidden rounded-full border border-coral/15 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-coral sm:inline-flex">
-                        Vue rapide
-                      </span>
                     </div>
 
                     <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
