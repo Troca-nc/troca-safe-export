@@ -304,14 +304,9 @@ export default function RegisterPage() {
       <section className="flex min-h-screen items-center justify-center px-6 py-10 md:px-8 lg:px-12">
         <div className="flex w-full max-w-[540px] flex-col gap-6">
         <div className="text-center">
-          <Link href="/" className="inline-flex items-center gap-3">
-            <span className="relative h-14 w-14 overflow-hidden rounded-2xl border border-night/10 bg-white shadow-[0_8px_24px_rgba(8,32,50,0.08)]">
-              <Image src="/brand/kalico1.svg" alt="Kalico" fill sizes="56px" className="object-cover" priority />
-            </span>
-            <div>
-              <p className="font-display text-3xl font-bold text-night">Kalico</p>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-coral/80">Nouvelle-Calédonie</p>
-            </div>
+          <Link href="/" className="inline-flex flex-col items-center">
+            <p className="font-display text-3xl font-bold text-night">Kalico</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-coral/80">Nouvelle-Calédonie</p>
           </Link>
           <p className="mt-3 text-sm text-night/55">Créez votre compte en douceur, sans surcharge et sans choix prématuré.</p>
         </div>
