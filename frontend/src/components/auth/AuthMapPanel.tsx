@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { ArrowRight, BadgeCheck, BarChart3, Briefcase, CalendarDays, Camera, FileText, RefreshCw, Route, ShieldCheck, Store } from 'lucide-react'
+import { ArrowRight, BadgeCheck, BarChart3, Briefcase, CalendarDays, Camera, FileText, RefreshCw, Route, ShieldCheck, Store, Truck } from 'lucide-react'
 
 const highlights = [
   { icon: Store, title: 'Annonces', text: 'Publiez un produit ou un service en quelques minutes.' },
@@ -11,7 +11,7 @@ const highlights = [
 ]
 
 const quickWins = [
-  { icon: Route, title: 'Covoiturage', text: 'Trajets entre communes, réservation simple, filtre femmes disponible.' },
+  { icon: Truck, title: 'Fret', text: 'Transport de colis et marchandises entre les communes.' },
   { icon: Briefcase, title: 'Pro', text: 'Créez et envoyez des devis en XPF avec TGC intégrée.' },
   { icon: CalendarDays, title: 'Événements', text: 'Mettez en avant ce qui se passe près de chez vous.' },
   { icon: BarChart3, title: 'Visibilité', text: 'Vos annonces remontent dans une expérience locale claire.' },
