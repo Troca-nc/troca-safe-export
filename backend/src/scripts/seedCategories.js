@@ -29,8 +29,8 @@ async function seedCategories() {
       WITH RECURSIVE to_delete AS (
         SELECT id
         FROM categories
-        WHERE LOWER(name) = 'test'
-           OR LOWER(slug) = 'test'
+        WHERE LOWER(name) ~ '(^|[^[:alnum:]])test([^[:alnum:]]|$)'
+           OR LOWER(slug) ~ '(^|[^[:alnum:]])test([^[:alnum:]]|$)'
 
         UNION ALL
 

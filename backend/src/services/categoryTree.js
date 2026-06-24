@@ -8,7 +8,7 @@ function normalizeSortValue(value) {
 function isTestCategory(node) {
   const name = String(node?.name || '').trim().toLowerCase();
   const slug = String(node?.slug || '').trim().toLowerCase();
-  return name === 'test' || slug === 'test';
+  return /\btest\b/.test(name) || /\btest\b/.test(slug);
 }
 
 function buildCategoryTree(rows = []) {
