@@ -306,7 +306,7 @@ export default function RegisterPage() {
         <div className="text-center">
           <Link href="/" className="inline-flex items-center gap-3">
             <span className="relative h-14 w-14 overflow-hidden rounded-2xl border border-night/10 bg-white shadow-[0_8px_24px_rgba(8,32,50,0.08)]">
-              <Image src="/brand/kalico-logo.png" alt="Kalico" fill sizes="56px" className="object-contain p-1.5" priority />
+              <Image src="/brand/kalico1.svg" alt="Kalico" fill sizes="56px" className="object-cover" priority />
             </span>
             <div>
               <p className="font-display text-3xl font-bold text-night">Kalico</p>
@@ -358,24 +358,40 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="rounded-[1.5rem] border border-coral/15 bg-[linear-gradient(135deg,rgba(255,102,102,0.06),rgba(72,202,228,0.08),rgba(255,255,255,0.96))] p-4 shadow-[0_16px_40px_rgba(8,32,50,0.05)]">
-                    <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">
-                      <BadgeCheck className="h-4 w-4" />
-                      Démarrage rapide
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">
+                          <BadgeCheck className="h-4 w-4" />
+                          Tout Kalico dans un seul compte
+                        </div>
+                        <p className="mt-3 max-w-xl text-sm leading-6 text-night/70">
+                          Une seule inscription pour publier, échanger, réserver, vendre et suivre ce qui compte pour vous.
+                        </p>
+                      </div>
+                      <span className="hidden rounded-full border border-coral/15 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-coral sm:inline-flex">
+                        Vue rapide
+                      </span>
                     </div>
-                    <p className="mt-3 max-w-xl text-sm leading-6 text-night/70">
-                      Créez un profil clair, sécurisez votre accès et commencez à publier avec une base propre dès maintenant.
-                    </p>
 
-                    <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                    <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                       {[
-                        { icon: CheckCircle2, title: 'Compte prêt', text: 'Adresse e-mail et mot de passe' },
-                        { icon: ShieldCheck, title: 'Accès protégé', text: 'Vérification et sécurité' },
-                        { icon: Store, title: 'Option Pro', text: 'Choix au bon moment' },
+                        { icon: Store, title: 'Annonces', text: 'Publiez un produit ou un service' },
+                        { icon: Store, title: 'Troc', text: 'Échangez sans passer à côté' },
+                        { icon: ShieldCheck, title: 'Sécurité', text: 'Compte protégé et vérifié' },
+                        { icon: CheckCircle2, title: 'Messages', text: 'Réponses et suivi des échanges' },
+                        { icon: Store, title: 'Pro', text: 'Outils pour développer votre activité' },
+                        { icon: Store, title: 'Local', text: 'Communauté et visibilité NC' },
                       ].map(({ icon: Icon, title, text }) => (
-                        <div key={title} className="rounded-2xl border border-night/10 bg-white/90 px-3 py-3">
-                          <Icon className="h-4 w-4 text-coral" />
-                          <p className="mt-2 text-sm font-semibold text-night">{title}</p>
-                          <p className="mt-1 text-xs leading-5 text-night/55">{text}</p>
+                        <div key={title} className="rounded-2xl border border-night/10 bg-white/90 px-3 py-3 shadow-[0_10px_24px_rgba(8,32,50,0.04)]">
+                          <div className="flex items-start gap-3">
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-coral/10 text-coral">
+                              <Icon className="h-4 w-4" />
+                            </span>
+                            <div>
+                              <p className="text-sm font-semibold text-night">{title}</p>
+                              <p className="mt-1 text-xs leading-5 text-night/55">{text}</p>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
