@@ -308,7 +308,7 @@ export default function RegisterPage() {
             <p className="font-display text-3xl font-bold text-night">Kalico</p>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-coral/80">Nouvelle-Calédonie</p>
           </Link>
-          <p className="mt-3 text-sm text-night/55">Créez votre compte en douceur, sans surcharge et sans choix prématuré.</p>
+          <p className="mt-3 text-sm text-night/55">Créez votre compte en 2 minutes — tout le reste vient après.</p>
         </div>
 
         <div className="card card-hover overflow-hidden p-6 md:p-8">
