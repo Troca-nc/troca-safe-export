@@ -305,8 +305,8 @@ export default function RegisterPage() {
         <div className="flex w-full max-w-[540px] flex-col gap-6">
         <div className="text-center">
           <Link href="/" className="inline-flex items-center gap-3">
-            <span className="relative h-12 w-12 overflow-hidden rounded-2xl border border-night/10 bg-white shadow-[0_8px_24px_rgba(8,32,50,0.08)]">
-              <Image src="/brand/kalico1.svg" alt="Kalico" fill sizes="48px" className="object-cover" priority />
+            <span className="relative h-14 w-14 overflow-hidden rounded-2xl border border-night/10 bg-white shadow-[0_8px_24px_rgba(8,32,50,0.08)]">
+              <Image src="/brand/kalico-logo.png" alt="Kalico" fill sizes="56px" className="object-contain p-1.5" priority />
             </span>
             <div>
               <p className="font-display text-3xl font-bold text-night">Kalico</p>
@@ -347,7 +347,7 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-6">
             <div key={step} className={stepDirection === 'forward' ? 'step-enter-forward' : 'step-enter-backward'}>
               {step === 1 ? (
-                <section className="space-y-4 rounded-[1.75rem] border border-night/10 bg-gradient-to-br from-white via-white to-sand/40 p-5 shadow-sm">
+                <section className="space-y-4 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
                   <div className="flex flex-wrap items-end justify-between gap-3">
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Étape 1</p>
@@ -355,6 +355,30 @@ export default function RegisterPage() {
                       <p className="mt-1 text-sm text-night/55">E-mail, mot de passe et accès rapide avec Google ou Apple si vous préférez.</p>
                     </div>
                     <span className="rounded-full bg-night/5 px-3 py-1 text-xs font-semibold text-night/60">Le choix du compte vient ensuite</span>
+                  </div>
+
+                  <div className="rounded-[1.5rem] border border-coral/15 bg-[linear-gradient(135deg,rgba(255,102,102,0.06),rgba(72,202,228,0.08),rgba(255,255,255,0.96))] p-4 shadow-[0_16px_40px_rgba(8,32,50,0.05)]">
+                    <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">
+                      <BadgeCheck className="h-4 w-4" />
+                      Démarrage rapide
+                    </div>
+                    <p className="mt-3 max-w-xl text-sm leading-6 text-night/70">
+                      Créez un profil clair, sécurisez votre accès et commencez à publier avec une base propre dès maintenant.
+                    </p>
+
+                    <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                      {[
+                        { icon: CheckCircle2, title: 'Compte prêt', text: 'Adresse e-mail et mot de passe' },
+                        { icon: ShieldCheck, title: 'Accès protégé', text: 'Vérification et sécurité' },
+                        { icon: Store, title: 'Option Pro', text: 'Choix au bon moment' },
+                      ].map(({ icon: Icon, title, text }) => (
+                        <div key={title} className="rounded-2xl border border-night/10 bg-white/90 px-3 py-3">
+                          <Icon className="h-4 w-4 text-coral" />
+                          <p className="mt-2 text-sm font-semibold text-night">{title}</p>
+                          <p className="mt-1 text-xs leading-5 text-night/55">{text}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="mt-5">
