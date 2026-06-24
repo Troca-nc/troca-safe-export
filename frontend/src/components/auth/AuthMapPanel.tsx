@@ -1,20 +1,20 @@
 'use client'
 
 import Image from 'next/image'
-import { ArrowRight, BadgeCheck, BarChart3, Briefcase, CalendarDays, CarFront, Camera, MessageCirclePlus, RefreshCw, ShieldCheck, Store } from 'lucide-react'
+import { ArrowRight, BadgeCheck, BarChart3, Briefcase, CalendarDays, Camera, FileText, RefreshCw, Route, ShieldCheck, Store } from 'lucide-react'
 
 const highlights = [
   { icon: Store, title: 'Annonces', text: 'Publiez un produit ou un service en quelques minutes.' },
   { icon: RefreshCw, title: 'Troc', text: 'Échangez, proposez et trouvez une seconde vie aux objets.' },
-  { icon: Camera, title: 'Photos', text: 'Mettez en valeur vos annonces avec une présentation soignée.' },
-  { icon: MessageCirclePlus, title: 'Messages', text: 'Répondez vite et gardez le fil des échanges au même endroit.' },
+  { icon: Route, title: 'Covoiturage', text: 'Trajets entre communes, réservation simple, filtre femmes disponible.' },
+  { icon: FileText, title: 'Devis Pro', text: 'Créez et envoyez des devis en XPF avec TGC intégrée, depuis votre dashboard Pro.' },
 ]
 
 const quickWins = [
-  { icon: Briefcase, title: 'Pro', text: 'Outils pour les activités qui veulent aller plus loin.' },
-  { icon: BarChart3, title: 'Visibilité', text: 'Vos annonces remontent dans une expérience locale claire.' },
+  { icon: Route, title: 'Covoiturage', text: 'Trajets entre communes, réservation simple, filtre femmes disponible.' },
+  { icon: Briefcase, title: 'Pro', text: 'Créez et envoyez des devis en XPF avec TGC intégrée.' },
   { icon: CalendarDays, title: 'Événements', text: 'Mettez en avant ce qui se passe près de chez vous.' },
-  { icon: CarFront, title: 'Covoiturage', text: 'Déplacements et trajets dans un cadre simple.' },
+  { icon: BarChart3, title: 'Visibilité', text: 'Vos annonces remontent dans une expérience locale claire.' },
 ]
 
 export default function AuthMapPanel() {
@@ -36,7 +36,7 @@ export default function AuthMapPanel() {
               Tout Kalico, en une seule inscription.
             </h2>
             <p className="mt-4 max-w-xl text-sm leading-6 text-white/72 md:text-base">
-              Annonces, troc, services, pros, covoiturage et événements, avec un compte prêt à servir dès la première connexion.
+              La seule plateforme locale qui couvre les annonces, le covoiturage entre les communes, les devis Pro et le fret — en XPF, pour la Nouvelle-Calédonie.
             </p>
           </div>
 
