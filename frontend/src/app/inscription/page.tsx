@@ -352,42 +352,6 @@ export default function RegisterPage() {
                     <span className="rounded-full bg-night/5 px-3 py-1 text-xs font-semibold text-night/60">Le choix du compte vient ensuite</span>
                   </div>
 
-                  <div className="rounded-[1.5rem] border border-coral/15 bg-[linear-gradient(135deg,rgba(255,102,102,0.06),rgba(72,202,228,0.08),rgba(255,255,255,0.96))] p-4 shadow-[0_16px_40px_rgba(8,32,50,0.05)]">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">
-                          Tout Kalico dans un seul compte
-                        </p>
-                        <p className="mt-3 max-w-xl text-sm leading-6 text-night/70">
-                          Une seule inscription pour publier, échanger, réserver, vendre et suivre ce qui compte pour vous.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                      {[
-                        { icon: Store, title: 'Annonces', text: 'Publiez un produit ou un service' },
-                        { icon: Store, title: 'Troc', text: 'Échangez sans passer à côté' },
-                        { icon: ShieldCheck, title: 'Sécurité', text: 'Compte protégé et vérifié' },
-                        { icon: CheckCircle2, title: 'Messages', text: 'Réponses et suivi des échanges' },
-                        { icon: Store, title: 'Pro', text: 'Outils pour développer votre activité' },
-                        { icon: Store, title: 'Local', text: 'Communauté et visibilité NC' },
-                      ].map(({ icon: Icon, title, text }) => (
-                        <div key={title} className="rounded-2xl border border-night/10 bg-white/90 px-3 py-3 shadow-[0_10px_24px_rgba(8,32,50,0.04)]">
-                          <div className="flex items-start gap-3">
-                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-coral/10 text-coral">
-                              <Icon className="h-4 w-4" />
-                            </span>
-                            <div>
-                              <p className="text-sm font-semibold text-night">{title}</p>
-                              <p className="mt-1 text-xs leading-5 text-night/55">{text}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
                   <div className="mt-5">
                     <SocialAuthButtons mode="inscription" redirectTo={socialRedirect} showLegalFooter={false} />
                   </div>
