@@ -99,6 +99,7 @@ async function executeListingSearch(req, res, next, extraQuery = {}) {
           a.boost_expires_at AS boost_expires_at,
           a.nb_vues,
           a.boost_expires_at AS boosted_until,
+          ${sortConfig.rankSelect ? `${sortConfig.rankSelect},` : ''}
           ${distanceSelect},
           a.commune_id,
           cat.id AS category_id,

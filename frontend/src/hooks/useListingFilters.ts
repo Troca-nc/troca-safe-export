@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
-export type ListingSort = 'date' | 'price_asc' | 'price_desc'
+export type ListingSort = 'date' | 'price_asc' | 'price_desc' | 'relevance'
 
 export interface ListingFilters {
   q: string
@@ -96,7 +96,7 @@ function encodeLocationToken(filters: ListingFilters) {
 }
 
 function parseSort(value: string | null): ListingSort {
-  return value === 'price_asc' || value === 'price_desc' ? value : 'date'
+  return value === 'price_asc' || value === 'price_desc' || value === 'relevance' ? value : 'date'
 }
 
 function parsePage(value: string | null) {

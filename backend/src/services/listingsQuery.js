@@ -47,7 +47,9 @@ function buildCategoryDescendantClause(column, placeholder) {
   )`;
 }
 
-function getSortConfig(sort) {
+function getSortConfig(sort, searchText = '') {
+  const hasSearchText = Boolean(String(searchText || '').trim())
+
   switch (sort) {
     case 'price_asc':
       return {
@@ -68,6 +70,20 @@ function getSortConfig(sort) {
           -toCursorEpoch(row.published_at ?? row.created_at),
           -Number(row.id),
         ],
+      }
+    case 'relevance':
+      if (!hasSearchText) {
+        return getSortConfig('date')
+      }
+      return {
+        orderBy: '-COALESCE(ts_rank_cd(a.search_vector, plainto_tsquery(\'french\', $1)), 0) ASC, -EXTRACT(EPOCH FROM a.created_at) ASC, -a.id ASC',
+        tupleSql: ['-COALESCE(ts_rank_cd(a.search_vector, plainto_tsquery(\'french\', $1)), 0)', '-EXTRACT(EPOCH FROM a.created_at)', '-a.id'],
+        tupleFromRow: (row) => [
+          -Number(row.relevance_score ?? 0),
+          -toCursorEpoch(row.published_at ?? row.created_at),
+          -Number(row.id),
+        ],
+        rankSelect: 'COALESCE(ts_rank_cd(a.search_vector, plainto_tsquery(\'french\', $1)), 0) AS relevance_score',
       }
     case 'views':
       return {
@@ -128,7 +144,7 @@ function buildListingSearchContext(rawQuery = {}) {
   const hasGeo = Number.isFinite(toFloat(lat, NaN)) && Number.isFinite(toFloat(lng, NaN))
   const radiusKm = Math.min(100, Math.max(5, toFloat(radius, 20)))
   let geo = null
-  const sortConfig = getSortConfig(sort)
+  const sortConfig = getSortConfig(sort, q)
   const decodedCursor = decodeListingCursor(after)
   const cursorValues = decodedCursor?.sort === sort ? decodedCursor.values : null
 

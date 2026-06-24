@@ -1,12 +1,14 @@
 'use client'
 // src/app/annonces/page.tsx
 
+import Link from 'next/link'
 import { Suspense, useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import {
   Bell,
   ChevronDown,
   List,
   Map,
+  PackageSearch,
   Search,
   SlidersHorizontal,
   X,
@@ -29,10 +31,16 @@ import { findCategoryPathById } from '../../../../shared/categoryTaxonomy'
 const AnnoncesMap = dynamic(() => import('@/components/annonces/AnnoncesMap'), { ssr: false })
 
 const SORT_OPTIONS = [
-  { value: 'date',       label: 'Plus récentes' },
+  { value: 'date',       label: 'Plus récente' },
   { value: 'price_asc',  label: 'Prix croissant' },
   { value: 'price_desc', label: 'Prix décroissant' },
+  { value: 'relevance',  label: 'Pertinence' },
 ]
+
+const SORT_LABEL_BY_VALUE: Record<string, string> = SORT_OPTIONS.reduce((acc, option) => {
+  acc[option.value] = option.label
+  return acc
+}, {} as Record<string, string>)
 
 const CONDITION_OPTIONS = [
   { value: 'new',       label: 'Neuf' },
@@ -742,6 +750,7 @@ function ListingsPageContent() {
   const [zoneLoading, setZoneLoading] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false)
+  const [sortMenuOpen, setSortMenuOpen] = useState(false)
   const [viewMode,    setViewMode]    = useState<'list' | 'map'>('list')
   const [geoLoading, setGeoLoading] = useState(false)
   const [searchAlertOpen, setSearchAlertOpen] = useState(false)
@@ -753,6 +762,7 @@ function ListingsPageContent() {
   const sentinelRef = useRef<HTMLDivElement | null>(null)
   const { user } = useAuthStore()
   const { openAuthModal } = useAuthActionStore()
+  const sortMenuRef = useRef<HTMLDivElement | null>(null)
   const {
     filters,
     setFilter,
@@ -763,6 +773,32 @@ function ListingsPageContent() {
   } = useListingFilters()
   const visibleCategories = hasNestedCategoryTree(categories) ? categories : FALLBACK_CATEGORIES
   const expandedCategorySet = useMemo(() => new Set(expandedCategorySlugs), [expandedCategorySlugs])
+
+  useEffect(() => {
+    if (!sortMenuOpen) return
+
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      if (!sortMenuRef.current?.contains(event.target as Node)) {
+        setSortMenuOpen(false)
+      }
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSortMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('touchstart', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('touchstart', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [sortMenuOpen])
+
   const listingFilters = useMemo(() => ({
     q: filters.q,
     category: filters.category,
@@ -1522,24 +1558,56 @@ function ListingsPageContent() {
             </div>
 
             {/* Tri */}
-            <div className="relative w-full sm:w-auto">
-              <select
-                value={filters.sort}
-                onChange={(e) => updateFilter('sort', e.target.value)}
-                aria-label="Trier les annonces"
-                className="input w-full appearance-none pr-8 text-sm cursor-pointer sm:w-auto"
+            <div ref={sortMenuRef} className="relative w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={() => setSortMenuOpen((current) => !current)}
+                className="input inline-flex w-full items-center justify-between gap-2 text-sm font-medium sm:w-auto"
+                aria-haspopup="menu"
+                aria-expanded={sortMenuOpen}
+                aria-controls="annonces-sort-menu"
               >
-                {SORT_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-night/40" />
+                <span className="whitespace-nowrap text-night/80">
+                  Trier : {SORT_LABEL_BY_VALUE[filters.sort] ?? 'Plus récentes'}
+                </span>
+                <ChevronDown className={`h-4 w-4 shrink-0 text-night/40 transition-transform ${sortMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {sortMenuOpen ? (
+                <div
+                  id="annonces-sort-menu"
+                  role="menu"
+                  aria-label="Tri des annonces"
+                  className="absolute right-0 top-full z-40 mt-2 w-64 overflow-hidden rounded-2xl border border-night/10 bg-white shadow-[0_18px_60px_rgba(8,32,50,0.14)]"
+                >
+                  {SORT_OPTIONS.map((opt) => {
+                    const active = filters.sort === opt.value
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          updateFilter('sort', opt.value)
+                          setSortMenuOpen(false)
+                        }}
+                        className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm transition ${
+                          active ? 'bg-nc-lagon/6 text-night' : 'text-night/70 hover:bg-sand'
+                        }`}
+                      >
+                        <span className={active ? 'font-semibold' : ''}>{opt.label}</span>
+                        {active ? <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-lagon">Actif</span> : null}
+                      </button>
+                    )
+                  })}
+                </div>
+              ) : null}
             </div>
 
             <button
               type="button"
               onClick={handleCreateSearchAlert}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-coral/20 bg-coral/6 px-3 py-2 text-sm font-semibold text-coral transition hover:border-coral/30 hover:bg-coral/10 sm:w-auto"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-nc-lagon/20 bg-nc-lagon/6 px-3 py-2 text-sm font-semibold text-nc-lagon transition hover:border-nc-lagon/30 hover:bg-nc-lagon/10 sm:w-auto"
             >
               <Bell className="h-4 w-4" />
               Créer une alerte
@@ -1738,15 +1806,18 @@ function ListingsPageContent() {
             {isInitialLoading ? (
               <ListingSkeletonGrid count={6} className="grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4" />
             ) : displayedListings.length === 0 ? (
-              <div className="rounded-[2rem] border border-night/8 bg-white/85 px-6 py-16 text-center shadow-sm">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-nc-lagonLight text-nc-lagonText" aria-hidden="true">
-                  <Search className="h-7 w-7" />
+              <div className="rounded-[2rem] border border-night/8 bg-white/90 px-6 py-16 text-center shadow-sm">
+                <div
+                  className="mx-auto mb-5 flex h-28 w-28 items-center justify-center rounded-[2rem] border border-nc-lagon/12 bg-[linear-gradient(180deg,_rgba(10,126,164,0.12),_rgba(10,126,164,0.02))] text-nc-lagon shadow-[0_18px_50px_rgba(10,126,164,0.12)]"
+                  aria-hidden="true"
+                >
+                  <PackageSearch className="h-20 w-20" strokeWidth={1.6} />
                 </div>
                 <h3 className="mt-4 font-display text-xl font-bold text-night mb-2">
                   Aucune annonce trouvée pour ces critères
                 </h3>
-                <p className="text-night/50 text-sm mb-6">
-                  Essayez d’élargir votre recherche ou de changer de catégorie.
+                <p className="mx-auto mb-6 max-w-lg text-sm leading-relaxed text-night/55">
+                  Soyez le premier à publier dans cette catégorie — les acheteurs sont là.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <button onClick={clearFilters} className="btn-secondary">
@@ -1754,9 +1825,14 @@ function ListingsPageContent() {
                   </button>
                   {isError ? (
                     <button onClick={() => void refetch()} className="btn-ghost">
-                      R?essayer
+                      Réessayer
                     </button>
                   ) : null}
+                </div>
+                <div className="mt-4">
+                  <Link href="/annonces/nouvelle" className="btn-primary inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm">
+                    Publier une annonce
+                  </Link>
                 </div>
               </div>
             ) : (
