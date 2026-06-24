@@ -180,6 +180,62 @@ function CategoryTreeNode({
   )
 }
 
+function CategoryTreeBrowser({
+  filters,
+  selectedCategoryLabel,
+  visibleCategories,
+  expandedCategorySet,
+  updateFilter,
+  toggleCategoryNode,
+}: {
+  filters: ListingFilters
+  selectedCategoryLabel: string | null
+  visibleCategories: any[]
+  expandedCategorySet: Set<string>
+  updateFilter: (key: keyof ListingFilters, value: string | number) => void
+  toggleCategoryNode: (slug: string) => void
+}) {
+  return (
+    <div className="space-y-3 rounded-2xl border border-night/8 bg-white/80 p-3 shadow-sm">
+      <button
+        type="button"
+        onClick={() => updateFilter('category', '')}
+        className={`w-full rounded-2xl px-3 py-2 text-left text-sm transition-colors ${
+          !filters.category
+            ? 'bg-nc-lagon text-white shadow-sm'
+            : 'text-night/70 hover:bg-sand'
+        }`}
+      >
+        Toutes les catégories
+      </button>
+
+      {selectedCategoryLabel ? (
+        <div className="rounded-2xl border border-nc-lagon/20 bg-nc-lagon/8 px-3 py-3 text-sm text-night">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-nc-lagon">Catégorie active</p>
+          <p className="mt-1 font-semibold">{selectedCategoryLabel}</p>
+        </div>
+      ) : null}
+
+      <div className="max-h-[42rem] space-y-2 overflow-y-auto pr-1">
+        {visibleCategories.map((cat: any) => (
+          <CategoryTreeNode
+            key={cat.id}
+            category={cat}
+            selectedSlug={filters.category}
+            expandedSlugs={expandedCategorySet}
+            onSelect={(slug) => updateFilter('category', slug)}
+            onToggleExpand={toggleCategoryNode}
+          />
+        ))}
+      </div>
+
+      <p className="text-[11px] text-night/40">
+        Cliquez sur une catégorie pour ouvrir ses sous-catégories. Le filtre actif reste mis en avant.
+      </p>
+    </div>
+  )
+}
+
 function findCategoryBySlug(categories: any[], slug: string): any | null {
   const stack = [...categories]
   while (stack.length > 0) {
@@ -193,11 +249,7 @@ function findCategoryBySlug(categories: any[], slug: string): any | null {
 
 type FilterSidebarProps = {
   filters: ListingFilters
-  selectedCategoryLabel: string | null
-  visibleCategories: any[]
-  expandedCategorySet: Set<string>
   updateFilter: (key: keyof ListingFilters, value: string | number) => void
-  toggleCategoryNode: (slug: string) => void
   communes: any[]
   selectedProvince: any
   selectedProvinceCommunes: any[]
@@ -220,11 +272,7 @@ type FilterSidebarProps = {
 
 function FilterSidebar({
   filters,
-  selectedCategoryLabel,
-  visibleCategories,
-  expandedCategorySet,
   updateFilter,
-  toggleCategoryNode,
   selectedProvince,
   selectedProvinceCommunes,
   selectedCommune,
@@ -245,48 +293,6 @@ function FilterSidebar({
 }: FilterSidebarProps) {
   return (
     <div className="space-y-6">
-      {/* Catégories */}
-      <div>
-        <h3 className="mb-3 text-sm font-semibold text-night">Catégorie</h3>
-        <div className="space-y-3 rounded-2xl border border-night/8 bg-white/80 p-3 shadow-sm">
-          <button
-            type="button"
-            onClick={() => updateFilter('category', '')}
-            className={`w-full rounded-2xl px-3 py-2 text-left text-sm transition-colors ${
-              !filters.category
-                ? 'bg-nc-lagon text-white shadow-sm'
-                : 'text-night/70 hover:bg-sand'
-            }`}
-          >
-            Toutes les catégories
-          </button>
-
-          {selectedCategoryLabel ? (
-            <div className="rounded-2xl border border-nc-lagon/20 bg-nc-lagon/8 px-3 py-3 text-sm text-night">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-nc-lagon">Catégorie active</p>
-              <p className="mt-1 font-semibold">{selectedCategoryLabel}</p>
-            </div>
-          ) : null}
-
-          <div className="max-h-[42rem] space-y-2 overflow-y-auto pr-1">
-            {visibleCategories.map((cat: any) => (
-              <CategoryTreeNode
-                key={cat.id}
-                category={cat}
-                selectedSlug={filters.category}
-                expandedSlugs={expandedCategorySet}
-                onSelect={(slug) => updateFilter('category', slug)}
-                onToggleExpand={toggleCategoryNode}
-              />
-            ))}
-          </div>
-
-          <p className="text-[11px] text-night/40">
-            Cliquez sur une catégorie pour ouvrir ses sous-catégories. Le filtre actif reste mis en avant.
-          </p>
-        </div>
-      </div>
-
       {/* Localisation */}
       <div className="rounded-2xl border border-night/8 bg-white/80 p-4 shadow-sm">
         <div className="mb-3">
@@ -735,6 +741,7 @@ function ListingsPageContent() {
   const [zoneOptions, setZoneOptions] = useState<string[]>([])
   const [zoneLoading, setZoneLoading] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false)
   const [viewMode,    setViewMode]    = useState<'list' | 'map'>('list')
   const [geoLoading, setGeoLoading] = useState(false)
   const [searchAlertOpen, setSearchAlertOpen] = useState(false)
@@ -1582,18 +1589,54 @@ function ListingsPageContent() {
           </div>
         </div>
 
+        <div className="mb-4 lg:hidden">
+          <div className="rounded-[1.5rem] border border-night/8 bg-white/90 shadow-sm">
+            <button
+              type="button"
+              className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+              aria-expanded={mobileCategoriesOpen}
+              onClick={() => setMobileCategoriesOpen((current) => !current)}
+            >
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-coral/80">Catégories</p>
+                <p className="mt-1 text-sm font-semibold text-night">
+                  {selectedCategoryLabel ?? 'Toutes les catégories'}
+                </p>
+              </div>
+              <ChevronDown className={`h-4 w-4 text-night/35 transition-transform ${mobileCategoriesOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {mobileCategoriesOpen ? (
+              <div className="border-t border-night/8 p-3">
+                <CategoryTreeBrowser
+                  filters={filters}
+                  selectedCategoryLabel={selectedCategoryLabel}
+                  visibleCategories={visibleCategories}
+                  expandedCategorySet={expandedCategorySet}
+                  updateFilter={updateFilter}
+                  toggleCategoryNode={toggleCategoryNode}
+                />
+              </div>
+            ) : null}
+          </div>
+        </div>
+
         <div className="flex gap-6">
 
           {/* Sidebar desktop */}
           <aside className="hidden lg:block w-80 xl:w-96 shrink-0">
-            <div className="card p-5 sticky top-20 border-l-4 border-l-nc-lagon">
-              <FilterSidebar
+            <div className="card sticky top-20 space-y-5 border-l-4 border-l-nc-lagon p-5">
+              <CategoryTreeBrowser
                 filters={filters}
                 selectedCategoryLabel={selectedCategoryLabel}
                 visibleCategories={visibleCategories}
                 expandedCategorySet={expandedCategorySet}
                 updateFilter={updateFilter}
                 toggleCategoryNode={toggleCategoryNode}
+              />
+              <FilterSidebar
+                filters={filters}
+                updateFilter={updateFilter}
                 communes={communes}
                 selectedProvince={selectedProvince}
                 selectedProvinceCommunes={selectedProvinceCommunes}
@@ -1629,11 +1672,7 @@ function ListingsPageContent() {
                 </div>
                 <FilterSidebar
                   filters={filters}
-                  selectedCategoryLabel={selectedCategoryLabel}
-                  visibleCategories={visibleCategories}
-                  expandedCategorySet={expandedCategorySet}
                   updateFilter={updateFilter}
-                  toggleCategoryNode={toggleCategoryNode}
                   communes={communes}
                   selectedProvince={selectedProvince}
                   selectedProvinceCommunes={selectedProvinceCommunes}

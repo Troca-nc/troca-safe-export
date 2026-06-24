@@ -14,7 +14,7 @@ import {
   SearchAlertsSection,
   HomeStatsSection,
 } from '@/components/home/HomeSections'
-import CategoryTreeSection from '@/components/home/CategoryTreeSection'
+import CategoryGridSection from '@/components/home/CategoryGridSection'
 import ProCarousel from '@/components/pro/ProCarousel'
 import TrocListingsPreview from '@/components/home/TrocListingsPreview'
 import { API_ORIGIN, proApi, searchApi } from '@/lib/api'
@@ -375,7 +375,7 @@ export default function HomePage() {
         <TrocListingsPreview />
       </section>
 
-      <CategoryTreeSection />
+      <CategoryGridSection />
     </main>
   )
 }
