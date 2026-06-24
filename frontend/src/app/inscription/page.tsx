@@ -55,7 +55,7 @@ type BillingCycle = 'monthly' | 'annual'
 const STEPS: Array<{ id: Step; label: string; helper: string }> = [
   { id: 1, label: 'Profil', helper: 'Compte et accès' },
   { id: 2, label: 'Identité', helper: 'Vos informations' },
-  { id: 3, label: 'Sécurité', helper: 'Choix du plan' },
+  { id: 3, label: 'Formule', helper: 'Votre compte' },
 ]
 
 const COMMUNE_PLACEHOLDER = 'Choisir une commune'
