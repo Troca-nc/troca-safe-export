@@ -329,7 +329,12 @@ export default function HomePage() {
       <SearchAlertsSection />
 
       <section className="mx-auto max-w-7xl px-4 pb-10">
-        <div className="rounded-[2rem] border border-[var(--color-border)] border-l-4 border-l-nc-emeraude bg-[var(--color-surface)] p-5 shadow-sm">
+        <div className="rounded-[2rem] border border-nc-emeraude/15 border-l-4 border-l-nc-emeraude bg-[var(--color-surface)] p-5 shadow-sm">
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <span className="badge badge-emeraude inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] shadow-sm">
+              PRO
+            </span>
+          </div>
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">
