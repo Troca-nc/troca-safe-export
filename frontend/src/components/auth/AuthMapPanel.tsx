@@ -81,10 +81,10 @@ export default function AuthMapPanel() {
               ))}
             </div>
 
-            <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-left">
+            <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-white/16 bg-white/8 px-4 py-[14px] text-left">
               <div>
                 <p className="text-sm font-semibold text-white">Publier, échanger, réserver, développer.</p>
-                <p className="mt-1 text-xs leading-5 text-white/70">Tout est pensé pour qu’un nouvel inscrit voie immédiatement ce qu’il peut faire ici.</p>
+                <p className="mt-1 text-xs leading-5 text-white/70">Dès votre inscription, votre compte est actif sur toutes les fonctionnalités — aucune étape cachée.</p>
               </div>
               <ArrowRight className="h-5 w-5 shrink-0 text-nc-lagon" />
             </div>
