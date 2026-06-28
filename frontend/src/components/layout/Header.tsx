@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -12,6 +12,44 @@ import { proApi } from '@/lib/api'
 import NotificationBell from '@/components/ui/NotificationBell'
 import DemoModeSwitcher from '@/components/ui/DemoModeSwitcher'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+
+type NavLinkItem = {
+  label: string
+  href: string
+}
+
+type NavGroupItem = {
+  label: string
+  children: NavLinkItem[]
+}
+
+const GLOBAL_NAV_LINKS: NavLinkItem[] = [
+  { href: '/', label: 'Accueil' },
+  { href: '/pro', label: 'Devenir Pro' },
+]
+
+const GLOBAL_NAV_GROUPS: NavGroupItem[] = [
+  {
+    label: 'Acheter / Vendre',
+    children: [
+      { href: '/annonces', label: 'Annonces' },
+      { href: '/troc', label: 'Troc' },
+      { href: '/bons-plans', label: 'Bons Plans' },
+    ],
+  },
+  {
+    label: 'Services',
+    children: [
+      { href: '/appels-offres', label: 'Trouver un pro' },
+      { href: '/pros', label: 'Annuaire des pros' },
+      { href: '/fret', label: 'Fret' },
+    ],
+  },
+  {
+    label: 'Se dÃ©placer',
+    children: [{ href: '/covoiturage', label: 'Covoiturage' }],
+  },
+]
 
 export function MobileBottomNav() {
   const pathname = usePathname()
@@ -29,7 +67,7 @@ export function MobileBottomNav() {
     { href: '/', icon: Home, label: 'Accueil' },
     { href: '/annonces', icon: Search, label: 'Annonces' },
     { href: '/covoiturage', icon: Car, label: 'Covoit' },
-    { href: '/annonces/nouvelle', icon: PlusCircle, label: 'Déposer', isCta: true },
+    { href: '/annonces/nouvelle', icon: PlusCircle, label: 'DÃ©poser', isCta: true },
     { href: '/messages', icon: MessageCircle, label: 'Messages' },
     { href: '#more', icon: Menu, label: 'Plus', isDrawer: true },
   ]
@@ -175,10 +213,14 @@ export default function Header() {
   const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
   const [menuOpen, setMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [desktopMenuOpen, setDesktopMenuOpen] = useState<string | null>(null)
+  const [mobileGroupOpen, setMobileGroupOpen] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [proUnreadCount, setProUnreadCount] = useState(0)
   const demoModeEnabled = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
   const userMenuId = 'header-user-menu'
+  const desktopNavRef = useRef<HTMLDivElement | null>(null)
+  const mobileMenuRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     let alive = true
@@ -205,6 +247,32 @@ export default function Header() {
     }
   }, [demoProfile, isAuthenticated, user?.is_pro])
 
+  useEffect(() => {
+    setMenuOpen(false)
+    setUserMenuOpen(false)
+    setDesktopMenuOpen(null)
+    setMobileGroupOpen(null)
+  }, [pathname])
+
+  useEffect(() => {
+    const handlePointerDown = (event: Event) => {
+      const target = event.target as Node | null
+      if (!target) return
+      if (desktopNavRef.current && desktopNavRef.current.contains(target)) return
+      if (mobileMenuRef.current && mobileMenuRef.current.contains(target)) return
+      setDesktopMenuOpen(null)
+      setUserMenuOpen(false)
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('touchstart', handlePointerDown)
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('touchstart', handlePointerDown)
+    }
+  }, [])
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) router.push(`/annonces?q=${encodeURIComponent(searchQuery.trim())}`)
@@ -216,25 +284,99 @@ export default function Header() {
     router.push('/')
   }
 
-  const navLinks = [
-    { href: '/', label: 'Accueil' },
-    { href: '/annonces', label: 'Annonces' },
-    { href: '/troc', label: 'Troc' },
-    { href: '/covoiturage', label: 'Covoiturage' },
-    { href: '/bons-plans', label: 'Bons plans' },
-    { href: '/pros', label: 'Pros' },
-    { href: '/appels-offres', label: "Appels d'offres" },
-  ]
-
   const isActiveLink = (href: string) => {
     if (href === '/') return pathname === '/'
     return pathname === href || pathname.startsWith(`${href}/`)
   }
 
+  const isActiveGroup = (group: NavGroupItem) => group.children.some((item) => isActiveLink(item.href))
+
+  const renderNavGroup = (group: NavGroupItem, mobile = false) => {
+    const open = mobile ? mobileGroupOpen === group.label : desktopMenuOpen === group.label
+    const active = isActiveGroup(group)
+
+    if (mobile) {
+      return (
+        <div key={group.label} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)]">
+          <button
+            type="button"
+            onClick={() => setMobileGroupOpen((current) => (current === group.label ? null : group.label))}
+            className={`flex w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold transition ${
+              active ? 'text-nc-lagon' : 'text-night'
+            }`}
+            aria-expanded={open}
+            aria-haspopup="true"
+          >
+            <span>{group.label}</span>
+            <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} />
+          </button>
+          {open ? (
+            <div className="px-2 pb-2">
+              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 fade-in">
+                {group.children.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMenuOpen(false)}
+                    className={`block rounded-2xl px-4 py-3 text-sm transition ${
+                      isActiveLink(item.href)
+                        ? 'bg-nc-lagonLight text-nc-lagon'
+                        : 'text-night/75 hover:bg-[var(--color-background-secondary)] hover:text-night'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      )
+    }
+
+    return (
+      <div key={group.label} className="relative">
+        <button
+          type="button"
+          onClick={() => setDesktopMenuOpen((current) => (current === group.label ? null : group.label))}
+          className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold transition ${
+            open || active
+              ? 'bg-[var(--color-surface-raised)] text-[var(--color-text-primary)] shadow-sm'
+              : 'text-night/75 hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)]'
+          }`}
+          aria-expanded={open}
+          aria-haspopup="menu"
+        >
+          {group.label}
+          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
+        </button>
+
+        {open ? (
+          <div className="absolute left-0 top-full z-30 mt-3 min-w-[18rem] rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-2 shadow-modal fade-in">
+            {group.children.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setDesktopMenuOpen(null)}
+                className={`block rounded-2xl px-4 py-3 text-sm font-medium transition ${
+                  isActiveLink(item.href)
+                    ? 'bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-sm'
+                    : 'text-night/75 hover:bg-[var(--color-surface)] hover:text-[var(--color-text-primary)]'
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    )
+  }
+
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-        <div className="mx-auto flex h-16 max-w-[120rem] items-center gap-3 px-6 lg:px-10">
+        <div ref={desktopNavRef} className="mx-auto flex h-16 max-w-[120rem] items-center gap-3 px-6 lg:px-10">
           <Link href="/" className="flex shrink-0 items-center gap-2">
             <span className="relative h-8 w-8 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_8px_24px_rgba(8,32,50,0.12)]">
               <Image src="/brand/kalico1.svg" alt="Kalico" fill sizes="40px" className="object-cover" priority />
@@ -242,7 +384,7 @@ export default function Header() {
             <span className="hidden sm:block">
               <span className="block font-display text-lg font-bold text-night">Kalico</span>
               <span className="block text-[10px] font-semibold uppercase tracking-[0.22em] text-coral/80">
-                Nouvelle-Calédonie
+                Nouvelle-CalÃ©donie
               </span>
             </span>
           </Link>
@@ -258,7 +400,7 @@ export default function Header() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Rechercher sur Kalico…"
+                placeholder="Rechercher sur Kalicoâ€¦"
                 aria-label="Rechercher sur Kalico"
                 className="input py-1.5 pl-9 pr-4 text-sm"
               />
@@ -266,15 +408,27 @@ export default function Header() {
           </form>
 
           <div className="hidden xl:flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-0.5">
-            {navLinks.map((link) => (
+            {GLOBAL_NAV_LINKS.filter((link) => link.href === '/').map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-full px-3 py-2 text-sm font-semibold transition ${
+                className={`rounded-full px-4 py-2.5 text-sm font-semibold transition ${
                   isActiveLink(link.href)
-                    ? 'bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-sm'
-                  : 'text-night/75 hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)]'
+                    ? 'bg-[var(--color-surface-raised)] text-[var(--color-text-primary)] shadow-sm'
+                    : 'text-night/75 hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)]'
                 }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            {GLOBAL_NAV_GROUPS.map((group) => renderNavGroup(group))}
+
+            {GLOBAL_NAV_LINKS.filter((link) => link.href === '/pro').map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="rounded-full border border-[var(--color-border-strong)] px-4 py-2.5 text-sm font-semibold text-[var(--color-text-primary)] transition hover:bg-[var(--color-surface-raised)]"
               >
                 {link.label}
               </Link>
@@ -287,7 +441,7 @@ export default function Header() {
               className="md:hidden flex shrink-0 items-center gap-1.5 rounded-xl bg-coral px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-coral/30 transition-transform active:scale-95"
             >
               <Plus className="h-4 w-4" strokeWidth={2.5} />
-              Déposer
+              DÃ©poser
             </Link>
           ) : (
             <button
@@ -301,7 +455,7 @@ export default function Header() {
               className="md:hidden flex shrink-0 items-center gap-1.5 rounded-xl bg-coral px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-coral/30 transition-transform active:scale-95"
             >
               <Plus className="h-4 w-4" strokeWidth={2.5} />
-              Déposer
+              DÃ©poser
             </button>
           )}
 
@@ -325,7 +479,7 @@ export default function Header() {
                 </Link>
                 <Link href="/annonces/nouvelle" className="btn-primary px-5 py-2 text-sm shadow-sm">
                   <Plus className="h-4 w-4" />
-      Déposer
+      DÃ©poser
                 </Link>
                 <div className="relative">
                   <button
@@ -371,7 +525,7 @@ export default function Header() {
                         </Link>
                         <Link href="/covoiturage/reservations" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-sand" role="menuitem">
                           <Car className="h-4 w-4 text-night/50" />
-                          Mes réservations
+                          Mes rÃ©servations
                         </Link>
                         <Link href="/mes-rdv" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-sand" role="menuitem">
                           <CalendarDays className="h-4 w-4 text-night/50" />
@@ -383,7 +537,7 @@ export default function Header() {
                         </Link>
                         <Link href="/parametres" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-sand" role="menuitem">
                           <Settings2 className="h-4 w-4 text-night/50" />
-                          Paramètres
+                          ParamÃ¨tres
                         </Link>
                         <Link href="/favoris" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-sand" role="menuitem">
                           <Heart className="h-4 w-4 text-night/50" />
@@ -396,7 +550,7 @@ export default function Header() {
                           role="menuitem"
                         >
                           <LogOut className="h-4 w-4" />
-              Déconnexion
+              DÃ©connexion
                         </button>
                       </div>
                     </>
@@ -431,7 +585,7 @@ export default function Header() {
                   className="btn-primary px-5 py-2 text-sm shadow-sm"
                 >
                   <Plus className="h-4 w-4" />
-      Déposer
+      DÃ©poser
                 </button>
               </>
             )}
@@ -454,84 +608,78 @@ export default function Header() {
         </div>
 
         {menuOpen ? (
-          <div id="mobile-secondary-menu" role="menu" aria-label="Menu mobile secondaire" className="md:hidden flex max-h-[calc(100dvh-4rem)] flex-col gap-1 overflow-y-auto overscroll-contain border-t border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 animate-slide-up">
-            {isAuthenticated ? (
-              <>
-                <Link href="/profil?tab=listings" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
-                  Mes annonces
-                </Link>
-                <Link href="/bons-plans" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
-                  Bons plans
-                </Link>
-                <Link href="/pro" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
-                  Pros
-                </Link>
-                <Link href="/appels-offres" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
-                  Appels d'offres
-                </Link>
-                <Link href="/troc" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
-                  Troc
-                </Link>
-                <Link href="/evenements" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
-      Événements
-                </Link>
-                <Link href="/covoiturage" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
-                  Covoiturage
-                </Link>
-                <Link href="/messages" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
-                  Messages
-                </Link>
-                <Link href="/mes-rdv" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
-                  Mes rendez-vous
-                </Link>
-                <Link href="/favoris" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
-                  Favoris
-                </Link>
-                <Link href="/parametres" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
-      Paramètres
-                </Link>
-                <Link href="/profil" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
-                  Mon profil
-                </Link>
-                <div className="my-1 border-t border-[var(--color-border)]" />
-                <button onClick={handleLogout} className="btn-ghost justify-start text-red-500">
-                  <LogOut className="h-4 w-4" />
-      Déconnexion
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href="/pro" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
-                  Pros
-                </Link>
-                <Link href="/appels-offres" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
-                  Appels d'offres
-                </Link>
-                <Link href="/troc" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
-                  Troc
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    openAuthModal({
-                      type: 'login',
-                      redirectTo: '/connexion',
-                    })
-                  }}
-                  className="btn-secondary justify-center"
-                  role="menuitem"
-                >
-                  Se connecter
-                </button>
-                <Link href="/inscription" onClick={() => setMenuOpen(false)} className="btn-primary justify-center" role="menuitem">
-                  S'inscrire
-                </Link>
-              </>
-            )}
+          <div
+            ref={mobileMenuRef}
+            id="mobile-secondary-menu"
+            role="menu"
+            aria-label="Menu mobile secondaire"
+            className="md:hidden flex max-h-[calc(100dvh-4rem)] flex-col gap-3 overflow-y-auto overscroll-contain border-t border-[var(--color-border)] bg-[var(--color-background-secondary)] px-4 py-4 fade-in"
+          >
+            <Link
+              href="/"
+              onClick={() => setMenuOpen(false)}
+              className={`rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                isActiveLink('/')
+                  ? 'bg-[var(--color-surface)] text-[var(--color-text-primary)]'
+                  : 'bg-[var(--color-surface-raised)] text-night/75'
+              }`}
+              role="menuitem"
+            >
+              Accueil
+            </Link>
+
+            {GLOBAL_NAV_GROUPS.map((group) => renderNavGroup(group, true))}
+
+            <Link
+              href="/pro"
+              onClick={() => setMenuOpen(false)}
+              className="rounded-2xl border border-[var(--color-border-strong)] px-4 py-3 text-sm font-semibold text-[var(--color-text-primary)] transition hover:bg-[var(--color-surface)]"
+              role="menuitem"
+            >
+              Devenir Pro
+            </Link>
+
+            <div className="mt-1 grid gap-2 border-t border-[var(--color-border)] pt-3">
+              {isAuthenticated ? (
+                <>
+                  <Link href="/profil?tab=listings" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
+                    Mes annonces
+                  </Link>
+                  <Link href="/messages" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
+                    Messages
+                  </Link>
+                  <Link href="/parametres" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
+                    Paramètres
+                  </Link>
+                  <button onClick={handleLogout} className="btn-ghost justify-start text-red-500">
+                    <LogOut className="h-4 w-4" />
+                    Déconnexion
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false)
+                      openAuthModal({
+                        type: 'login',
+                        redirectTo: '/connexion',
+                      })
+                    }}
+                    className="btn-secondary justify-center"
+                    role="menuitem"
+                  >
+                    Se connecter
+                  </button>
+                  <Link href="/inscription" onClick={() => setMenuOpen(false)} className="btn-primary justify-center" role="menuitem">
+                    S'inscrire
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         ) : null}
-
         <div className="border-t border-[var(--color-border)] bg-[var(--color-background-secondary)] px-4 py-2">
         <div className="mx-auto max-w-[120rem] px-6 lg:px-10">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">

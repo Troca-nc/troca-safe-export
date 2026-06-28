@@ -1,7 +1,7 @@
 // src/app/layout.tsx
 import type { Metadata } from 'next'
 import './globals.css'
-import { MobileBottomNav } from '@/components/layout/Header'
+import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import CookieBanner from '@/components/legal/CookieBanner'
 import AnalyticsTracker from '@/components/layout/AnalyticsTracker'
@@ -54,8 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      {/* pb-16 : compense la barre de nav fixe en bas sur mobile */}
-      <body className="bg-[var(--color-bg-page)] text-[var(--color-text-primary)] font-body antialiased overflow-x-clip pb-[calc(5rem+env(safe-area-inset-bottom))] pt-14 md:overflow-x-visible md:pb-0 md:pt-14">
+      <body className="bg-[var(--color-bg-page)] text-[var(--color-text-primary)] font-body antialiased overflow-x-clip pt-14 md:overflow-x-visible">
         <ThemeProvider>
           <ReactQueryProvider>
             <JsonLd data={buildOrganizationSchema()} />
@@ -66,9 +65,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <PaymentFailureBanner />
             <AuthRequiredModal />
             <OnboardingWizard />
+            <Header />
             {children}
             <Footer />
-            <MobileBottomNav />
             <CookieBanner />
           </ReactQueryProvider>
         </ThemeProvider>

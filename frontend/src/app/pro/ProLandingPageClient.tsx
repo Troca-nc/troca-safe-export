@@ -21,8 +21,6 @@ import {
   Users,
 } from 'lucide-react'
 
-import Header from '@/components/layout/Header'
-
 const DEMO_PROFILE_HREF = '/pro/3'
 
 const STATS = [
@@ -722,8 +720,6 @@ function FinalCta() {
 export default function ProLandingPage() {
   return (
     <div className="min-h-screen bg-[var(--color-bg-page)] text-night">
-      <Header />
-
       <main>
         <section
           className="relative overflow-hidden px-4 py-20 md:py-24"
