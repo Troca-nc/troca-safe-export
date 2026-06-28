@@ -291,7 +291,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
       <main className="pb-20">
         <section className="mx-auto max-w-7xl px-4 py-6">
           <div className="overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-            <div className="relative h-40 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.35))]">
+            <div className="relative h-32 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.35))] md:h-40">
               {profile.pro_banner_url ? (
                 <Image
                   src={profile.pro_banner_url}
@@ -303,10 +303,10 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
               ) : null}
             </div>
 
-            <div className="-mt-10 px-5 pb-6 md:px-8">
+            <div className="-mt-6 px-5 pb-6 md:-mt-8 md:px-8">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div className="flex items-start gap-4">
-                  <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-[1.75rem] border-4 border-white bg-white shadow-md">
+                  <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-[1.75rem] border-4 border-white bg-white shadow-md md:h-20 md:w-20">
                     {profile.pro_logo_url ? (
                       <Image
                         src={profile.pro_logo_url}
@@ -323,7 +323,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                   <div className="pt-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <h1 className="font-display text-3xl font-bold text-night">{displayName}</h1>
-                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 shadow-sm">
                         <BadgeCheck className="h-3.5 w-3.5" />
                         Pro vérifié
                       </span>
