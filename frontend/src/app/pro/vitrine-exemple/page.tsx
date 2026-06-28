@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import Header from '@/components/layout/Header'
 import { generateNoindexMetadata } from '@/lib/seoHelpers'
 
-import ProPublicClient from '../../[id]/ProPublicClient'
+import ProPublicClient from '../[id]/ProPublicClient'
 import type { ProPublicProfile, ProPublicReview } from '../publicStorefrontData'
 
 const demoReviews: ProPublicReview[] = [
