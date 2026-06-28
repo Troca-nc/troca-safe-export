@@ -86,8 +86,8 @@ const demoProfile: ProPublicProfile = {
     },
   ],
   catalog_categories: [
-    { id: 'cat-1', name: 'Prestations', slug: 'prestations', position: 1 },
-    { id: 'cat-2', name: 'Catalogue', slug: 'catalogue', position: 2 },
+    { id: 1, name: 'Prestations', slug: 'prestations', position: 1 },
+    { id: 2, name: 'Catalogue', slug: 'catalogue', position: 2 },
   ],
   products: [
     {
@@ -100,7 +100,7 @@ const demoProfile: ProPublicProfile = {
       is_available: true,
       is_featured: true,
       category_name: 'Prestations',
-      catalog_category_id: 'cat-1',
+      catalog_category_id: 1,
       catalog_category_name: 'Prestations',
       commune_name: 'Dumbéa',
       unit_label: 'par dossier',
@@ -116,7 +116,7 @@ const demoProfile: ProPublicProfile = {
       is_available: true,
       is_featured: false,
       category_name: 'Catalogue',
-      catalog_category_id: 'cat-2',
+      catalog_category_id: 2,
       catalog_category_name: 'Catalogue',
       commune_name: 'Nouméa',
       unit_label: 'mois',
@@ -132,7 +132,7 @@ const demoProfile: ProPublicProfile = {
       is_available: true,
       is_featured: false,
       category_name: 'Prestations',
-      catalog_category_id: 'cat-1',
+      catalog_category_id: 1,
       catalog_category_name: 'Prestations',
       commune_name: 'Dumbéa',
       unit_label: null,
