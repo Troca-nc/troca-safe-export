@@ -46,7 +46,7 @@ const GLOBAL_NAV_GROUPS: NavGroupItem[] = [
     ],
   },
   {
-    label: 'Se dÃ©placer',
+    label: 'Se déplacer',
     children: [{ href: '/covoiturage', label: 'Covoiturage' }],
   },
 ]
@@ -67,7 +67,7 @@ export function MobileBottomNav() {
     { href: '/', icon: Home, label: 'Accueil' },
     { href: '/annonces', icon: Search, label: 'Annonces' },
     { href: '/covoiturage', icon: Car, label: 'Covoit' },
-    { href: '/annonces/nouvelle', icon: PlusCircle, label: 'DÃ©poser', isCta: true },
+    { href: '/annonces/nouvelle', icon: PlusCircle, label: 'Déposer', isCta: true },
     { href: '/messages', icon: MessageCircle, label: 'Messages' },
     { href: '#more', icon: Menu, label: 'Plus', isDrawer: true },
   ]
@@ -375,7 +375,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+      <header data-kalico-header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
         <div ref={desktopNavRef} className="mx-auto flex h-16 max-w-[120rem] items-center gap-3 px-6 lg:px-10">
           <Link href="/" className="flex shrink-0 items-center gap-2">
             <span className="relative h-8 w-8 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_8px_24px_rgba(8,32,50,0.12)]">
@@ -384,7 +384,7 @@ export default function Header() {
             <span className="hidden sm:block">
               <span className="block font-display text-lg font-bold text-night">Kalico</span>
               <span className="block text-[10px] font-semibold uppercase tracking-[0.22em] text-coral/80">
-                Nouvelle-CalÃ©donie
+                Nouvelle-Calédonie
               </span>
             </span>
           </Link>
@@ -400,7 +400,7 @@ export default function Header() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Rechercher sur Kalicoâ€¦"
+                placeholder="Rechercher sur Kalico…"
                 aria-label="Rechercher sur Kalico"
                 className="input py-1.5 pl-9 pr-4 text-sm"
               />
@@ -441,7 +441,7 @@ export default function Header() {
               className="md:hidden flex shrink-0 items-center gap-1.5 rounded-xl bg-coral px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-coral/30 transition-transform active:scale-95"
             >
               <Plus className="h-4 w-4" strokeWidth={2.5} />
-              DÃ©poser
+              Déposer
             </Link>
           ) : (
             <button
@@ -455,7 +455,7 @@ export default function Header() {
               className="md:hidden flex shrink-0 items-center gap-1.5 rounded-xl bg-coral px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-coral/30 transition-transform active:scale-95"
             >
               <Plus className="h-4 w-4" strokeWidth={2.5} />
-              DÃ©poser
+              Déposer
             </button>
           )}
 
@@ -479,7 +479,7 @@ export default function Header() {
                 </Link>
                 <Link href="/annonces/nouvelle" className="btn-primary px-5 py-2 text-sm shadow-sm">
                   <Plus className="h-4 w-4" />
-      DÃ©poser
+      Déposer
                 </Link>
                 <div className="relative">
                   <button
@@ -525,7 +525,7 @@ export default function Header() {
                         </Link>
                         <Link href="/covoiturage/reservations" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-sand" role="menuitem">
                           <Car className="h-4 w-4 text-night/50" />
-                          Mes rÃ©servations
+                          Mes réservations
                         </Link>
                         <Link href="/mes-rdv" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-sand" role="menuitem">
                           <CalendarDays className="h-4 w-4 text-night/50" />
@@ -537,7 +537,7 @@ export default function Header() {
                         </Link>
                         <Link href="/parametres" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-sand" role="menuitem">
                           <Settings2 className="h-4 w-4 text-night/50" />
-                          ParamÃ¨tres
+                          Paramètres
                         </Link>
                         <Link href="/favoris" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-sand" role="menuitem">
                           <Heart className="h-4 w-4 text-night/50" />
@@ -550,7 +550,7 @@ export default function Header() {
                           role="menuitem"
                         >
                           <LogOut className="h-4 w-4" />
-              DÃ©connexion
+              Déconnexion
                         </button>
                       </div>
                     </>
@@ -585,7 +585,7 @@ export default function Header() {
                   className="btn-primary px-5 py-2 text-sm shadow-sm"
                 >
                   <Plus className="h-4 w-4" />
-      DÃ©poser
+      Déposer
                 </button>
               </>
             )}
