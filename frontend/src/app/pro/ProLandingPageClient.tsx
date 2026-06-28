@@ -216,7 +216,7 @@ function HeroDashboardMockup() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Dashboard Pro</p>
-            <h3 className="mt-1 text-lg font-semibold text-white">Atelier Kalo</h3>
+            <h3 className="mt-1 text-lg font-semibold text-white">Atelier Kalico</h3>
           </div>
           <span className="inline-flex items-center gap-1 rounded-full bg-nc-lagonLight px-3 py-1 text-[11px] font-semibold text-nc-lagon">
             <BadgeCheck className="h-3.5 w-3.5" />
@@ -305,7 +305,7 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-[11px] uppercase tracking-[0.2em] text-white/60">Fiche publique</p>
-              <h3 className="mt-2 text-xl font-semibold">Atelier Kalo</h3>
+              <h3 className="mt-2 text-xl font-semibold">Atelier Kalico</h3>
               <p className="mt-1 text-sm text-white/70">Artisan BTP · Dumbéa</p>
             </div>
             <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold">4.9 / 5</span>

@@ -34,8 +34,8 @@ const demoReviews: ProPublicReview[] = [
 
 const demoProfile: ProPublicProfile = {
   id: 'demo-pro-public',
-  display_name: 'Atelier Kalo',
-  pro_company_name: 'Atelier Kalo',
+  display_name: 'Atelier Kalico',
+  pro_company_name: 'Atelier Kalico',
   pro_category: 'Artisan BTP',
   pro_commune: 'Dumbéa',
   pro_description:
@@ -160,7 +160,7 @@ const demoProfile: ProPublicProfile = {
       category_icon: 'hammer',
       cover_image: null,
       seller_prenom: 'Atelier',
-      seller_nom: 'Kalo',
+      seller_nom: 'Kalico',
       seller_avatar: null,
       seller_is_pro: true,
       seller_pro_verified: true,
@@ -191,7 +191,7 @@ const demoProfile: ProPublicProfile = {
       category_icon: 'file-text',
       cover_image: null,
       seller_prenom: 'Atelier',
-      seller_nom: 'Kalo',
+      seller_nom: 'Kalico',
       seller_avatar: null,
       seller_is_pro: true,
       seller_pro_verified: true,
