@@ -25,29 +25,26 @@ type NavGroupItem = {
 
 const GLOBAL_NAV_LINKS: NavLinkItem[] = [
   { href: '/', label: 'Accueil' },
+  { href: '/bons-plans', label: 'Bons Plans' },
+  { href: '/covoiturage', label: 'Covoiturage' },
   { href: '/pro', label: 'Devenir Pro' },
 ]
 
 const GLOBAL_NAV_GROUPS: NavGroupItem[] = [
   {
-    label: 'Acheter / Vendre',
+    label: 'Acheter/Vendre',
     children: [
       { href: '/annonces', label: 'Annonces' },
       { href: '/troc', label: 'Troc' },
-      { href: '/bons-plans', label: 'Bons Plans' },
     ],
   },
   {
     label: 'Services',
     children: [
-      { href: '/appels-offres', label: 'Trouver un pro' },
-      { href: '/pros', label: 'Annuaire des pros' },
+      { href: '/appels-offres', label: 'Faire un devis' },
+      { href: '/pros', label: 'Professionnels' },
       { href: '/fret', label: 'Fret' },
     ],
-  },
-  {
-    label: 'Se déplacer',
-    children: [{ href: '/covoiturage', label: 'Covoiturage' }],
   },
 ]
 
@@ -339,7 +336,7 @@ export default function Header() {
         <button
           type="button"
           onClick={() => setDesktopMenuOpen((current) => (current === group.label ? null : group.label))}
-          className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold transition ${
+          className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition ${
             open || active
               ? 'bg-[var(--color-surface-raised)] text-[var(--color-text-primary)] shadow-sm'
               : 'text-night/75 hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)]'
@@ -358,11 +355,11 @@ export default function Header() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setDesktopMenuOpen(null)}
-                className={`block rounded-2xl px-4 py-3 text-sm font-medium transition ${
-                  isActiveLink(item.href)
-                    ? 'bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-sm'
-                    : 'text-night/75 hover:bg-[var(--color-surface)] hover:text-[var(--color-text-primary)]'
-                }`}
+                    className={`block whitespace-nowrap rounded-2xl px-4 py-3 text-sm font-medium transition ${
+                      isActiveLink(item.href)
+                        ? 'bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-sm'
+                        : 'text-night/75 hover:bg-[var(--color-surface)] hover:text-[var(--color-text-primary)]'
+                    }`}
               >
                 {item.label}
               </Link>
@@ -382,7 +379,7 @@ export default function Header() {
               <Image src="/brand/kalico1.svg" alt="Kalico" fill sizes="40px" className="object-cover" priority />
             </span>
             <span className="hidden sm:block">
-              <span className="block font-display text-lg font-bold text-night">Kalico</span>
+              <span className="block font-display text-2xl font-bold text-night md:text-3xl">Kalico</span>
               <span className="block text-[10px] font-semibold uppercase tracking-[0.22em] text-coral/80">
                 Nouvelle-Calédonie
               </span>
@@ -412,7 +409,7 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-full px-4 py-2.5 text-sm font-semibold transition ${
+                className={`whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition ${
                   isActiveLink(link.href)
                     ? 'bg-[var(--color-surface-raised)] text-[var(--color-text-primary)] shadow-sm'
                     : 'text-night/75 hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)]'
@@ -422,13 +419,43 @@ export default function Header() {
               </Link>
             ))}
 
-            {GLOBAL_NAV_GROUPS.map((group) => renderNavGroup(group))}
+            {GLOBAL_NAV_GROUPS.filter((group) => group.label === 'Acheter/Vendre').map((group) => renderNavGroup(group))}
+
+            {GLOBAL_NAV_LINKS.filter((link) => link.href === '/bons-plans').map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition ${
+                  isActiveLink(link.href)
+                    ? 'bg-[var(--color-surface-raised)] text-[var(--color-text-primary)] shadow-sm'
+                    : 'text-night/75 hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)]'
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            {GLOBAL_NAV_GROUPS.filter((group) => group.label === 'Services').map((group) => renderNavGroup(group))}
+
+            {GLOBAL_NAV_LINKS.filter((link) => link.href === '/covoiturage').map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition ${
+                  isActiveLink(link.href)
+                    ? 'bg-[var(--color-surface-raised)] text-[var(--color-text-primary)] shadow-sm'
+                    : 'text-night/75 hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)]'
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
 
             {GLOBAL_NAV_LINKS.filter((link) => link.href === '/pro').map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="rounded-full border border-[var(--color-border-strong)] px-4 py-2.5 text-sm font-semibold text-[var(--color-text-primary)] transition hover:bg-[var(--color-surface-raised)]"
+                className="whitespace-nowrap rounded-full border border-[var(--color-border-strong)] px-4 py-2.5 text-sm font-semibold text-[var(--color-text-primary)] transition hover:bg-[var(--color-surface-raised)]"
               >
                 {link.label}
               </Link>
