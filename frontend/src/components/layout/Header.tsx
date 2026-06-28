@@ -375,11 +375,11 @@ export default function Header() {
       <header data-kalico-header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
         <div ref={desktopNavRef} className="mx-auto flex h-16 max-w-[120rem] items-center gap-3 px-6 lg:px-10">
           <Link href="/" className="flex shrink-0 items-center gap-2">
-            <span className="relative h-9 w-9 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_8px_24px_rgba(8,32,50,0.12)]">
+            <span className="relative h-10 w-10 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_8px_24px_rgba(8,32,50,0.12)]">
               <Image src="/brand/kalico1.svg" alt="Kalico" fill sizes="40px" className="object-cover" priority />
             </span>
             <span className="hidden sm:block">
-              <span className="block font-display text-xl font-bold text-night md:text-2xl">Kalico</span>
+              <span className="block font-display text-lg font-bold leading-none text-night md:text-xl">Kalico</span>
               <span className="block text-[10px] font-semibold uppercase tracking-[0.22em] text-coral/80">
                 Nouvelle-Calédonie
               </span>
