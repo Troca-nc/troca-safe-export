@@ -4,16 +4,16 @@ import ProLandingPageClient from './ProLandingPageClient'
 import { SITE_URL } from '@/types/seo.types'
 
 export const metadata: Metadata = {
-  title: 'Espace Professionnel — Kalico NC',
+  title: 'Devenir Pro — Kalico NC',
   description:
-    'Développez votre activité en Nouvelle-Calédonie avec Kalico Pro. Vitrine locale, annonces prioritaires, statistiques et clients ciblés.',
+    'Créez votre espace Pro sur Kalico : vitrine, devis, réservations, transport, fret et visibilité locale en Nouvelle-Calédonie.',
   alternates: {
     canonical: `${SITE_URL}/pro`,
   },
   openGraph: {
-    title: 'Espace Professionnel — Kalico NC',
+    title: 'Devenir Pro — Kalico NC',
     description:
-      'Développez votre activité en Nouvelle-Calédonie avec Kalico Pro. Vitrine locale, annonces prioritaires, statistiques et clients ciblés.',
+      'Créez votre espace Pro sur Kalico : vitrine, devis, réservations, transport, fret et visibilité locale en Nouvelle-Calédonie.',
     url: `${SITE_URL}/pro`,
     siteName: 'Kalico',
     locale: 'fr_NC',
@@ -21,9 +21,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Espace Professionnel — Kalico NC',
+    title: 'Devenir Pro — Kalico NC',
     description:
-      'Développez votre activité en Nouvelle-Calédonie avec Kalico Pro. Vitrine locale, annonces prioritaires, statistiques et clients ciblés.',
+      'Créez votre espace Pro sur Kalico : vitrine, devis, réservations, transport, fret et visibilité locale en Nouvelle-Calédonie.',
   },
 }
 

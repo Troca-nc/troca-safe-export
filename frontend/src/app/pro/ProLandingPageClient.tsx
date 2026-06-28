@@ -1,548 +1,794 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useRef, useState, type ComponentType } from 'react'
+import { useMemo, useState } from 'react'
 import {
   ArrowRight,
   BadgeCheck,
-  BarChart2,
+  Building2,
+  CalendarDays,
+  Car,
   CheckCircle2,
-  Loader2,
-  MessageCircle,
+  ChevronRight,
+  ChefHat,
+  FileText,
+  Hammer,
+  Home,
+  MapPin,
   Sparkles,
   Store,
-  Tag,
-  TrendingUp,
+  Truck,
+  Users,
 } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
-import DocumentUploader from '@/components/pro/DocumentUploader'
-import { proApi } from '@/lib/api'
-import { useAuthActionStore } from '@/store/authActionStore'
-import { useAuthStore } from '@/store/authStore'
 
-const PRO_SECTORS = [
-  'Commerçant',
-  'Restaurateur',
-  'Artisan BTP',
-  'Garagiste',
-  'Paysagiste',
-  'Prestataire IT',
-  'Agence immobilière',
-  'Activité nautique',
-  'Transporteur',
-  'Professionnel de santé',
-  "Organisateur d'événements",
-  'Agriculteur',
-  'Boutique mode',
-  'Salon de beauté',
-  'Coiffeur',
-  'Électricien',
-  'Plombier',
-  'Menuisier',
-  'Photographe',
-  'Traiteur',
-  'Hébergement / hôtel',
-  'Location de véhicules',
-  'Association',
-  'Formation',
-  'Service digital',
+const DEMO_PROFILE_HREF = '/pro/3'
+
+const STATS = [
+  { value: '33', label: 'communes couvertes' },
+  { value: '1', label: 'seul compte, toutes les fonctionnalités' },
+  { value: 'XPF', label: 'paiement local' },
+  { value: '11%', label: 'TGC intégrée dans les devis' },
 ] as const
 
-const COMMUNES = [
-  'Nouméa',
-  'Mont-Dore',
-  'Dumbéa',
-  'Païta',
-  'Boulouparis',
-  'La Foa',
-  'Bourail',
-  'Koné',
-  'Koumac',
-  'Poindimié',
-  'Lifou',
-  'Maré',
-  'Ouvéa',
-  'Autre',
-] as const
+type FeatureKey = 'vitrine' | 'devis' | 'rdv' | 'transport' | 'fret' | 'visibilite'
 
-type ProApplicationForm = {
-  company_name: string
-  category: string
+type FeatureSection = {
+  key: FeatureKey
+  eyebrow: string
+  title: string
   description: string
-  commune: string
-  phone: string
-  website: string
-  hours: string
-  siret: string
+  bullets: string[]
+  accent: 'lagon' | 'corail' | 'emeraude' | 'amber'
 }
 
-const initialForm: ProApplicationForm = {
-  company_name: '',
-  category: '',
-  description: '',
-  commune: '',
-  phone: '',
-  website: '',
-  hours: '',
-  siret: '',
-}
+const FEATURE_SECTIONS: FeatureSection[] = [
+  {
+    key: 'vitrine',
+    eyebrow: 'Vitrine & Catalogue',
+    title: 'Votre vitrine, vos produits, vos preuves',
+    description: 'Un espace public clair pour présenter votre activité, rassurer vos clients et convertir plus vite.',
+    bullets: [
+      'Profil public avec logo, description, horaires et coordonnées',
+      'Catalogue produits et services avec photos',
+      'Avis clients vérifiés',
+      'Prise de rendez-vous intégrée',
+    ],
+    accent: 'lagon',
+  },
+  {
+    key: 'devis',
+    eyebrow: 'Devis & Facturation',
+    title: 'Répondez vite, en XPF, avec la bonne structure',
+    description: 'Créez des devis propres, envoyez-les là où il faut et suivez leur statut sans perdre le fil.',
+    bullets: [
+      'Création de devis en XPF avec TGC automatique',
+      'Envoi par e-mail ou messagerie Kalico',
+      'Suivi des statuts envoyés / acceptés / refusés',
+      'Export PDF en un clic',
+    ],
+    accent: 'corail',
+  },
+  {
+    key: 'rdv',
+    eyebrow: 'Réservations & RDV',
+    title: 'Un planning simple pour remplir vos créneaux',
+    description: 'Laissez vos clients réserver plus facilement et centralisez les réponses sans bricolage.',
+    bullets: [
+      'Calendrier de disponibilités',
+      'Réservation en ligne par les clients',
+      'Notifications automatiques',
+      'Historique complet des rendez-vous',
+    ],
+    accent: 'emeraude',
+  },
+  {
+    key: 'transport',
+    eyebrow: 'Transport Pro',
+    title: 'Courses, réservations et suivi métier',
+    description: 'Pensé pour les transporteurs et conducteurs qui veulent organiser leur activité proprement.',
+    bullets: [
+      'Inscription transporteur professionnel',
+      'Gestion des courses et réservations',
+      'Profil conducteur vérifié',
+      'Statistiques et revenus',
+      'Intégration avec /covoiturage et /fret',
+    ],
+    accent: 'amber',
+  },
+  {
+    key: 'fret',
+    eyebrow: 'Fret & Logistique',
+    title: 'Transport de marchandises, devis et demandes',
+    description: 'Un module dédié pour les pros qui font bouger des colis, du stock ou du matériel.',
+    bullets: [
+      'Annonces de transport de marchandises',
+      'Estimation volume / poids / urgence',
+      'Mise en relation avec les expéditeurs',
+      'Gestion des demandes de fret',
+    ],
+    accent: 'lagon',
+  },
+  {
+    key: 'visibilite',
+    eyebrow: 'Visibilité & Boosts',
+    title: 'Restez en haut, là où les clients regardent',
+    description: 'Des boosts ponctuels, une lecture claire des performances et un badge pro visible partout.',
+    bullets: [
+      'Annonces prioritaires dans les résultats',
+      'Badge Pro vérifié sur toutes les surfaces',
+      'Statistiques de vues et de contacts',
+      'Système de boosts ponctuels',
+    ],
+    accent: 'corail',
+  },
+]
 
-function StatCard({ title, subtitle, value }: { title: string; subtitle: string; value: string }) {
+const SECTOR_CARDS = [
+  {
+    icon: Building2,
+    title: 'Immobilier',
+    description: 'Vitrines, visites et mandats en ligne',
+  },
+  {
+    icon: Car,
+    title: 'Auto / Moto',
+    description: 'Annonces véhicules et devis réparation',
+  },
+  {
+    icon: Hammer,
+    title: 'Artisanat & BTP',
+    description: 'Devis chantier et agenda travaux',
+  },
+  {
+    icon: ChefHat,
+    title: 'Restauration',
+    description: 'Menu, réservations et bons plans',
+  },
+  {
+    icon: Users,
+    title: 'Transport de personnes',
+    description: 'Courses, covoiturage et planning',
+  },
+  {
+    icon: Truck,
+    title: 'Fret & Logistique',
+    description: 'Annonces fret et suivi expéditions',
+  },
+  {
+    icon: Home,
+    title: 'Services à domicile',
+    description: 'RDV, catalogue et avis clients',
+  },
+  {
+    icon: Store,
+    title: 'Commerce & Retail',
+    description: 'Catalogue, stock et promotions',
+  },
+] as const
+
+const COMPARISON_ROWS = [
+  ['Publier des annonces', true, true],
+  ['Messagerie', true, true],
+  ['Vitrine publique', false, true],
+  ['Devis & factures', false, true],
+  ['Réservations / RDV', false, true],
+  ['Transport Pro & Fret', false, true],
+  ['Badge Pro vérifié', false, true],
+  ['Boosts & priorité', false, true],
+  ['Statistiques', false, true],
+  ['Support prioritaire', false, true],
+] as const
+
+function StatCard({ value, label }: { value: string; label: string }) {
   return (
-    <article className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-      <p className="text-3xl font-bold text-night">{value}</p>
-      <p className="mt-2 text-sm font-semibold text-night">{title}</p>
-      <p className="mt-1 text-sm text-night/60">{subtitle}</p>
+    <article className="rounded-[1.5rem] border border-white/10 bg-white/10 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.16)] backdrop-blur-sm">
+      <p className="text-3xl font-bold text-white">{value}</p>
+      <p className="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-white/80">{label}</p>
     </article>
   )
 }
 
-function AdvantageCard({
-  icon: Icon,
+function SectionHeading({
+  eyebrow,
   title,
   description,
 }: {
-  icon: ComponentType<{ className?: string }>
+  eyebrow: string
   title: string
-  description: string
+  description?: string
 }) {
   return (
-    <article className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <span className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0A7EA4]/10 text-[#0A7EA4]">
-        <Icon className="h-5 w-5" />
-      </span>
-      <h3 className="text-lg font-semibold text-night">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-night/65">{description}</p>
-    </article>
+    <div className="max-w-3xl">
+      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-nc-emeraude">{eyebrow}</p>
+      <h2 className="mt-2 font-display text-2xl font-bold text-night sm:text-3xl">{title}</h2>
+      {description ? <p className="mt-3 text-sm leading-relaxed text-night/65 sm:text-base">{description}</p> : null}
+    </div>
+  )
+}
+
+function HeroDashboardMockup() {
+  return (
+    <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(8,32,50,0.92),rgba(4,18,30,0.98))] p-4 shadow-[0_24px_70px_rgba(0,0,0,0.28)]">
+      <div className="absolute inset-0 opacity-30 [background-image:radial-gradient(rgba(72,202,228,0.22)_1px,transparent_1px)] [background-size:18px_18px]" />
+      <div className="relative rounded-[1.5rem] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Dashboard Pro</p>
+            <h3 className="mt-1 text-lg font-semibold text-white">Atelier Kalo</h3>
+          </div>
+          <span className="inline-flex items-center gap-1 rounded-full bg-nc-lagonLight px-3 py-1 text-[11px] font-semibold text-nc-lagon">
+            <BadgeCheck className="h-3.5 w-3.5" />
+            Pro vérifié
+          </span>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-white/45">Vues</p>
+            <p className="mt-2 text-2xl font-bold text-white">18 420</p>
+            <p className="mt-1 text-xs text-white/55">+14% cette semaine</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-white/45">Contacts</p>
+            <p className="mt-2 text-2xl font-bold text-white">268</p>
+            <p className="mt-1 text-xs text-white/55">Messages et appels</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-white/45">Boosts</p>
+            <p className="mt-2 text-2xl font-bold text-white">4</p>
+            <p className="mt-1 text-xs text-white/55">En cours / programmés</p>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Performance</p>
+                <h4 className="mt-1 font-semibold text-white">Vues et contacts</h4>
+              </div>
+              <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/75">30 jours</span>
+            </div>
+            <div className="mt-4 flex h-28 items-end gap-2">
+              {[32, 44, 38, 58, 48, 64, 52, 74, 68, 86].map((height, index) => (
+                <div
+                  key={index}
+                  className="flex-1 rounded-t-xl bg-[linear-gradient(180deg,#48cae4,#0a7ea4)]"
+                  style={{ height: `${height}%` }}
+                />
+              ))}
+            </div>
+            <div className="mt-3 flex items-center justify-between text-xs text-white/50">
+              <span>Lun</span>
+              <span>Mer</span>
+              <span>Ven</span>
+              <span>Dim</span>
+            </div>
+          </div>
+
+          <div className="space-y-3 rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Annonces</p>
+              <span className="rounded-full bg-emerald-400/15 px-2.5 py-1 text-[11px] font-semibold text-emerald-200">3 actives</span>
+            </div>
+            {[
+              ['Réfection terrasse', 'Boost actif jusqu\'à demain'],
+              ['Pose de cuisine', '12 vues aujourd\'hui'],
+              ['Devis clôture', '2 réponses en attente'],
+            ].map(([title, subtitle]) => (
+              <article key={title} className="rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
+                    <Sparkles className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-white">{title}</p>
+                    <p className="mt-1 text-xs text-white/55">{subtitle}</p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FeatureMockup({ section }: { section: FeatureSection }) {
+  if (section.key === 'vitrine') {
+    return (
+      <div className="overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
+        <div className="h-28 rounded-[1.25rem] bg-[linear-gradient(135deg,_rgba(8,32,50,0.94),_rgba(10,126,164,0.24))] p-4 text-white">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.2em] text-white/60">Fiche publique</p>
+              <h3 className="mt-2 text-xl font-semibold">Atelier Kalo</h3>
+              <p className="mt-1 text-sm text-white/70">Artisan BTP · Dumbéa</p>
+            </div>
+            <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold">4.9 / 5</span>
+          </div>
+        </div>
+        <div className="-mt-6 space-y-3 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+          <div className="grid gap-2 sm:grid-cols-3">
+            <div className="rounded-2xl bg-[var(--color-background-secondary)] p-3">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-night/40">Horaires</p>
+              <p className="mt-2 text-sm font-semibold text-night">Lun-Sam</p>
+            </div>
+            <div className="rounded-2xl bg-[var(--color-background-secondary)] p-3">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-night/40">Catalogue</p>
+              <p className="mt-2 text-sm font-semibold text-night">18 produits</p>
+            </div>
+            <div className="rounded-2xl bg-[var(--color-background-secondary)] p-3">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-night/40">RDV</p>
+              <p className="mt-2 text-sm font-semibold text-night">En ligne</p>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-night">Avis vérifiés</p>
+              <p className="text-xs font-semibold text-nc-emeraude">14 nouveaux</p>
+            </div>
+            <p className="mt-2 text-sm text-night/60">“Réponse rapide, vitrine claire et devis précis.”</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (section.key === 'devis') {
+    return (
+      <div className="overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
+        <div className="rounded-[1.25rem] bg-[linear-gradient(135deg,_rgba(8,32,50,0.96),_rgba(10,126,164,0.18))] p-4 text-white">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-white/60">Nouveau devis</p>
+          <h3 className="mt-2 text-xl font-semibold">Menuiserie intérieure</h3>
+          <p className="mt-1 text-sm text-white/70">Client à Nouméa · total estimé</p>
+        </div>
+        <div className="mt-4 space-y-3">
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
+            <p className="text-xs uppercase tracking-[0.18em] text-night/45">Lignes</p>
+            <div className="mt-3 space-y-2 text-sm text-night/70">
+              <div className="flex justify-between"><span>Main d'œuvre</span><span>48 000 XPF</span></div>
+              <div className="flex justify-between"><span>Matériel</span><span>76 500 XPF</span></div>
+              <div className="flex justify-between"><span>TGC 11%</span><span>13 695 XPF</span></div>
+            </div>
+          </div>
+          <div className="flex items-center justify-between rounded-2xl border border-nc-lagon-border bg-nc-lagonLight p-3">
+            <p className="text-sm font-semibold text-nc-lagon-text">PDF prêt à envoyer</p>
+            <FileText className="h-4 w-4 text-nc-lagon" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (section.key === 'rdv') {
+    return (
+      <div className="overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.22em] text-night/45">Planning</p>
+            <h3 className="mt-1 text-xl font-semibold text-night">Août 2026</h3>
+          </div>
+          <CalendarDays className="h-5 w-5 text-[#0A7EA4]" />
+        </div>
+        <div className="mt-4 grid grid-cols-7 gap-2 text-center text-[11px] font-semibold text-night/45">
+          {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day) => <span key={day}>{day}</span>)}
+        </div>
+        <div className="mt-2 grid grid-cols-7 gap-2">
+          {Array.from({ length: 21 }).map((_, index) => (
+            <div
+              key={index}
+              className={`aspect-square rounded-2xl border p-2 ${index === 11 ? 'border-nc-lagon bg-nc-lagonLight text-nc-lagon' : 'border-[var(--color-border)] bg-[var(--color-background-secondary)] text-night/55'}`}
+            >
+              <span className="text-xs font-semibold">{index + 1}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3 text-sm text-night/65">
+          3 réservations confirmées aujourd’hui
+        </div>
+      </div>
+    )
+  }
+
+  if (section.key === 'transport') {
+    return (
+      <div className="overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.22em] text-night/45">Transport Pro</p>
+            <h3 className="mt-1 text-xl font-semibold text-night">Courses du jour</h3>
+          </div>
+          <Truck className="h-5 w-5 text-[#0A7EA4]" />
+        </div>
+        <div className="mt-4 space-y-3">
+          {[
+            ['Nouméa → Bourail', '07:30 · 4 passagers'],
+            ['Dumbéa → Païta', '10:15 · confirmé'],
+            ['Lifou → Nouméa', '18:00 · retour prévu'],
+          ].map(([title, subtitle]) => (
+            <div key={title} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
+              <p className="text-sm font-semibold text-night">{title}</p>
+              <p className="mt-1 text-xs text-night/55">{subtitle}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          <div className="rounded-2xl bg-nc-lagonLight p-3 text-center">
+            <p className="text-lg font-bold text-nc-lagon">96%</p>
+            <p className="text-[11px] text-nc-lagon-text">satisfaction</p>
+          </div>
+          <div className="rounded-2xl bg-nc-emeraudeLight p-3 text-center">
+            <p className="text-lg font-bold text-nc-emeraude">128</p>
+            <p className="text-[11px] text-nc-emeraude-text">courses</p>
+          </div>
+          <div className="rounded-2xl bg-coral/10 p-3 text-center">
+            <p className="text-lg font-bold text-coral">4.9</p>
+            <p className="text-[11px] text-coral/80">note</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (section.key === 'fret') {
+    return (
+      <div className="overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
+        <div className="rounded-[1.25rem] bg-[linear-gradient(135deg,_rgba(8,32,50,0.96),_rgba(10,126,164,0.18))] p-4 text-white">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-white/60">Demande fret</p>
+          <h3 className="mt-2 text-xl font-semibold">Nouméa → Koné</h3>
+          <p className="mt-1 text-sm text-white/70">2.5 m³ · 380 kg · express</p>
+        </div>
+        <div className="mt-4 space-y-3">
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-night">
+              <MapPin className="h-4 w-4 text-coral" />
+              Capacité recommandée
+            </div>
+            <p className="mt-2 text-sm text-night/60">Fourgon, utilitaire ou camion léger selon le volume.</p>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="rounded-2xl bg-nc-lagonLight p-3">
+              <p className="text-lg font-bold text-nc-lagon">XPF</p>
+              <p className="text-[11px] text-nc-lagon-text">devis</p>
+            </div>
+            <div className="rounded-2xl bg-nc-emeraudeLight p-3">
+              <p className="text-lg font-bold text-nc-emeraude">24h</p>
+              <p className="text-[11px] text-nc-emeraude-text">réponse</p>
+            </div>
+            <div className="rounded-2xl bg-coral/10 p-3">
+              <p className="text-lg font-bold text-coral">NC</p>
+              <p className="text-[11px] text-coral/80">territoire</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
+      <div className="rounded-[1.25rem] bg-[linear-gradient(135deg,_rgba(8,32,50,0.96),_rgba(10,126,164,0.18))] p-4 text-white">
+        <p className="text-[11px] uppercase tracking-[0.22em] text-white/60">Visibilité</p>
+        <h3 className="mt-2 text-xl font-semibold">Boosts en cours</h3>
+      </div>
+      <div className="mt-4 space-y-3">
+        <div className="flex items-center justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
+          <span className="text-sm font-semibold text-night">Vues de la semaine</span>
+          <span className="text-sm font-bold text-[#0A7EA4]">+28%</span>
+        </div>
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
+          <div className="flex items-end gap-2">
+            {[12, 24, 18, 34, 28, 46, 42].map((height, index) => (
+              <div key={index} className="flex-1 rounded-t-xl bg-[linear-gradient(180deg,#48cae4,#0a7ea4)]" style={{ height: `${height}px` }} />
+            ))}
+          </div>
+        </div>
+        <div className="rounded-2xl bg-nc-lagonLight p-3 text-sm font-semibold text-nc-lagon">
+          4 boosts actifs · badge Pro vérifié partout
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FeatureTabs() {
+  const [activeKey, setActiveKey] = useState<FeatureKey>('vitrine')
+  const activeSection = useMemo(
+    () => FEATURE_SECTIONS.find((section) => section.key === activeKey) ?? FEATURE_SECTIONS[0],
+    [activeKey]
+  )
+
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-24 md:py-28">
+      <SectionHeading
+        eyebrow="Preview fonctionnalités"
+        title="Tout ce que Kalico Pro rassemble"
+        description="Chaque bloc montre un usage réel, pour que les prospects comprennent vite ce qu’ils gagnent en passant Pro."
+      />
+
+      <div className="mt-8 hidden lg:block">
+        <div className="flex flex-wrap gap-2 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-2 shadow-sm">
+          {FEATURE_SECTIONS.map((section) => {
+            const active = section.key === activeKey
+            return (
+              <button
+                key={section.key}
+                type="button"
+                onClick={() => setActiveKey(section.key)}
+                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                  active
+                    ? 'bg-[#0A7EA4] text-white shadow-sm'
+                    : 'text-night/65 hover:bg-[var(--color-background-secondary)] hover:text-night'
+                }`}
+              >
+                {section.eyebrow}
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="mt-6 grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+          <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+            <p className={`text-sm font-semibold uppercase tracking-[0.22em] ${activeSection.accent === 'corail' ? 'text-coral/80' : activeSection.accent === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-lagon'}`}>
+              {activeSection.eyebrow}
+            </p>
+            <h3 className="mt-2 font-display text-2xl font-bold text-night">{activeSection.title}</h3>
+            <p className="mt-3 text-sm leading-relaxed text-night/65">{activeSection.description}</p>
+
+            <ul className="mt-6 space-y-3">
+              {activeSection.bullets.map((bullet) => (
+                <li key={bullet} className="flex items-start gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
+                  <CheckCircle2 className={`mt-0.5 h-5 w-5 shrink-0 ${activeSection.accent === 'corail' ? 'text-coral' : activeSection.accent === 'emeraude' ? 'text-nc-emeraude' : 'text-[#0A7EA4]'}`} />
+                  <span className="text-sm leading-relaxed text-night/75">{bullet}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
+
+          <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)]/70 p-4 shadow-sm">
+            <FeatureMockup section={activeSection} />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 space-y-4 lg:hidden">
+        {FEATURE_SECTIONS.map((section) => {
+          const active = section.key === activeKey
+          return (
+            <article key={section.key} className="overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+              <button
+                type="button"
+                onClick={() => setActiveKey(section.key)}
+                className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+                aria-expanded={active}
+              >
+                <div>
+                  <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${section.accent === 'corail' ? 'text-coral/80' : section.accent === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-lagon'}`}>
+                    {section.eyebrow}
+                  </p>
+                  <h3 className="mt-1 text-lg font-semibold text-night">{section.title}</h3>
+                </div>
+                <ChevronRight className={`h-5 w-5 shrink-0 text-night/35 transition-transform ${active ? 'rotate-90' : ''}`} />
+              </button>
+
+              {active ? (
+                <div className="border-t border-[var(--color-border)] px-5 py-5">
+                  <p className="text-sm leading-relaxed text-night/65">{section.description}</p>
+                  <ul className="mt-4 space-y-3">
+                    {section.bullets.map((bullet) => (
+                      <li key={bullet} className="flex items-start gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
+                        <CheckCircle2 className={`mt-0.5 h-5 w-5 shrink-0 ${section.accent === 'corail' ? 'text-coral' : section.accent === 'emeraude' ? 'text-nc-emeraude' : 'text-[#0A7EA4]'}`} />
+                        <span className="text-sm leading-relaxed text-night/75">{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-4">
+                    <FeatureMockup section={section} />
+                  </div>
+                </div>
+              ) : null}
+            </article>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+function SectorsGrid() {
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-24 md:py-28">
+      <SectionHeading
+        eyebrow="Secteurs ciblés"
+        title="Fait pour votre secteur"
+        description="Des usages concrets pour les métiers qui ont besoin de visibilité, de rendez-vous, de devis ou de logistique."
+      />
+
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {SECTOR_CARDS.map((sector) => {
+          const Icon = sector.icon
+          return (
+            <article
+              key={sector.title}
+              className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
+                <Icon className="h-5 w-5" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold text-night">{sector.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-night/65">{sector.description}</p>
+            </article>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+function ComparisonTable() {
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-24 md:py-28">
+      <SectionHeading
+        eyebrow="Offre"
+        title="Des offres claires pour démarrer"
+        description="Un point d’entrée simple, puis un plan Pro pensé pour ceux qui veulent vraiment développer leur activité."
+      />
+
+      <div className="mt-8 overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+            <thead className="bg-[var(--color-background-secondary)]">
+              <tr>
+                <th className="px-5 py-4 font-semibold text-night">Fonctionnalité</th>
+                <th className="px-5 py-4 font-semibold text-night">Gratuit</th>
+                <th className="px-5 py-4 font-semibold text-night">Pro</th>
+              </tr>
+            </thead>
+            <tbody>
+              {COMPARISON_ROWS.map(([label, free, pro]) => (
+                <tr key={label} className="border-t border-[var(--color-border)]">
+                  <td className="px-5 py-4 font-medium text-night">{label}</td>
+                  <td className="px-5 py-4">
+                    <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full ${free ? 'bg-emerald-50 text-emerald-700' : 'bg-sand text-night/40'}`}>
+                      {free ? '✓' : '—'}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4">
+                    <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full ${pro ? 'bg-nc-lagonLight text-nc-lagon' : 'bg-sand text-night/40'}`}>
+                      {pro ? '✓' : '—'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="border-t border-[var(--color-border)] bg-[var(--color-background-secondary)] px-5 py-5">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-nc-emeraude">Formule Pro</p>
+              <p className="mt-2 text-2xl font-bold text-night">4 900 XPF / mois</p>
+              <p className="mt-1 text-sm text-night/60">Sans engagement. Résiliable à tout moment.</p>
+            </div>
+            <Link href="/pro/inscription" className="btn-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm">
+              Démarrer l’essai gratuit
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function FinalCta() {
+  return (
+    <section className="mx-auto max-w-7xl px-4 pb-24 md:pb-28">
+      <div
+        className="overflow-hidden rounded-[2.25rem] border border-[var(--color-border)] p-6 shadow-sm md:p-10"
+        style={{
+          backgroundImage:
+            'linear-gradient(135deg, rgba(4,18,30,0.98), rgba(8,32,50,0.96) 55%, rgba(10,126,164,0.25)), radial-gradient(circle at top right, rgba(72,202,228,0.18), transparent 30%)',
+        }}
+      >
+        <div className="max-w-3xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white/70">Dernière étape</p>
+          <h2 className="mt-2 font-display text-3xl font-bold text-white sm:text-4xl">
+            Prêt à développer votre activité en NC ?
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">
+            Créez votre espace Pro en 5 minutes. Commencez gratuitement, passez Pro quand vous voulez.
+          </p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <Link href="/pro/inscription" className="btn-primary inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm">
+              Créer mon espace Pro
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link href={DEMO_PROFILE_HREF} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
+              Voir une vitrine exemple
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
   )
 }
 
 export default function ProLandingPage() {
-  const { isAuthenticated, user } = useAuthStore()
-  const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
-  const formRef = useRef<HTMLElement | null>(null)
-
-  const [form, setForm] = useState<ProApplicationForm>(initialForm)
-  const [selectedCategory, setSelectedCategory] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [successMessage, setSuccessMessage] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
-
-  const stats = useMemo(
-    () => [
-      {
-        value: '100%',
-        title: '100% calédonien',
-        subtitle: 'Une plateforme pensée pour le marché local.',
-      },
-      {
-        value: '15+',
-        title: 'Catégories ciblées',
-        subtitle: 'Touchez exactement vos clients cibles.',
-      },
-      {
-        value: 'Gratuit',
-        title: 'Gratuit pour commencer',
-        subtitle: 'Publiez vos premières annonces sans frais.',
-      },
-    ],
-    []
-  )
-
-  const advantages = [
-    {
-      icon: BadgeCheck,
-      title: 'Badge Pro vérifié',
-      description: 'Votre badge de confiance visible sur toutes vos annonces et votre profil.',
-    },
-    {
-      icon: TrendingUp,
-      title: 'Annonces prioritaires',
-      description: 'Vos annonces remontent automatiquement toutes les semaines. Toujours visibles.',
-    },
-    {
-      icon: Store,
-      title: 'Vitrine personnalisée',
-      description: 'Logo, bannière, description, horaires, site web : votre mini-boutique locale.',
-    },
-    {
-      icon: BarChart2,
-      title: 'Statistiques détaillées',
-      description: 'Vues, contacts, performance de vos boosts. Pilotez votre visibilité en temps réel.',
-    },
-    {
-      icon: MessageCircle,
-      title: 'Messagerie prioritaire',
-      description: 'Vos messages clients remontent en haut de la liste. Répondez plus vite, convertissez plus.',
-    },
-    {
-      icon: Tag,
-      title: 'Bons plans en avant',
-      description: 'Vos promotions et événements apparaissent en tête de la section Bons Plans.',
-    },
-  ] as const
-
-  const plans = [
-    {
-      name: 'Gratuit',
-      price: 'Gratuit',
-      highlighted: false,
-      features: ['5 annonces actives', 'Badge Pro vérifié', 'Messagerie standard', 'Vitrine publique basique'],
-      cta: 'Commencer gratuitement',
-    },
-    {
-      name: 'Pro',
-      price: '2 900 XPF/mois',
-      highlighted: true,
-      features: ['Annonces illimitées', 'Remontée automatique hebdomadaire', 'Vitrine complète (logo, bannière, horaires, site)', 'Statistiques de performance', '1 boost offert par mois', 'Bons plans prioritaires', 'Réponse automatique', 'Support prioritaire'],
-      cta: 'Choisir Pro',
-    },
-  ] as const
-
-  const handleChipSelect = (category: string) => {
-    setSelectedCategory(category)
-    setForm((current) => ({ ...current, category }))
-    requestAnimationFrame(() => {
-      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
-  }
-
-  const handleChange = <K extends keyof ProApplicationForm>(key: K, value: ProApplicationForm[K]) => {
-    setForm((current) => ({ ...current, [key]: value }))
-  }
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setErrorMessage('')
-    setSuccessMessage('')
-
-    if (!isAuthenticated) {
-      openAuthModal({
-        type: 'login',
-        redirectTo: '/pro#formulaire-pro',
-      })
-      return
-    }
-
-    setSubmitting(true)
-    try {
-      await proApi.apply({
-        company_name: form.company_name.trim(),
-        category: form.category.trim(),
-        description: form.description.trim(),
-        commune: form.commune.trim(),
-        phone: form.phone.trim(),
-        website: form.website.trim(),
-        hours: form.hours.trim(),
-        siret: form.siret.trim(),
-      })
-      setSuccessMessage('✅ Demande envoyée ! Notre équipe valide votre compte sous 48h.')
-      setForm(initialForm)
-      setSelectedCategory('')
-      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    } catch (error: any) {
-      const message = error?.response?.data?.error || 'Impossible d’envoyer votre demande pour le moment.'
-      setErrorMessage(message)
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
   return (
     <div className="min-h-screen bg-[var(--color-bg-page)] text-night">
       <Header />
 
       <main>
-        <section className="overflow-hidden bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.18))] px-4 py-10 text-white sm:py-14">
-          <div className="mx-auto max-w-7xl">
+        <section
+          className="relative overflow-hidden px-4 py-20 md:py-24"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at top left, rgba(72,202,228,0.12), transparent 24%), radial-gradient(circle at top right, rgba(10,126,164,0.22), transparent 22%), linear-gradient(135deg, #03131f 0%, #071a28 45%, #0a3041 100%)',
+          }}
+        >
+          <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(rgba(255,255,255,0.16)_1px,transparent_1px)] [background-size:18px_18px]" />
+          <div className="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
             <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-emeraude">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/75 backdrop-blur-sm">
                 <Sparkles className="h-3.5 w-3.5" />
                 Espace Professionnel
               </div>
-              <h1 className="mt-4 font-display text-3xl font-bold leading-tight sm:text-4xl md:text-6xl">
-                Développez votre activité sur Kalico
+              <h1 className="mt-5 font-display text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
+                Votre activité, visible dans toute la Nouvelle-Calédonie
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/78 md:text-base">
-                La première plateforme d’annonces calédonienne ouvre ses portes aux professionnels. Vitrine locale, clients ciblés, outils simples.
+              <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">
+                Vitrine, devis, réservations, transport, fret — tout ce qu’il faut pour développer votre business local.
               </p>
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <Link href="/pro/inscription" className="rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-[#0A7EA4] shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
-                  Créer mon compte Pro
-                </Link>
-                <a href="#avantages" className="rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/15">
-                  En savoir plus
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        <section id="avantages" className="mx-auto max-w-7xl px-4 py-12">
-          <div className="mb-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Chiffres clés</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Tout ce dont vous avez besoin</h2>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {stats.map((item) => (
-              <StatCard key={item.title} value={item.value} title={item.title} subtitle={item.subtitle} />
-            ))}
-          </div>
-
-          <div className="mt-12">
-            <div className="mb-6">
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Avantages pro</p>
-              <h2 className="mt-1 font-display text-2xl font-bold text-night">Nos 6 avantages Pro</h2>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {advantages.map((item) => (
-                <AdvantageCard key={item.title} icon={item.icon} title={item.title} description={item.description} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 pb-12">
-          <div className="mb-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Vous êtes...</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Choisissez votre secteur</h2>
-          </div>
-          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
-            {PRO_SECTORS.map((sector) => (
-              <button
-                key={sector}
-                type="button"
-                onClick={() => handleChipSelect(sector)}
-                className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                  selectedCategory === sector
-                    ? 'border-[#0A7EA4] bg-nc-lagonLight text-[#0A7EA4]'
-                    : 'border-[var(--color-border)] bg-[var(--color-surface)] text-night/70 hover:bg-[var(--color-background-secondary)]'
-                }`}
-              >
-                {sector}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 pb-12">
-          <div className="mb-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Simple et transparent</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Des offres claires pour démarrer</h2>
-          </div>
-          <div className="mx-auto grid max-w-2xl gap-4 md:grid-cols-2">
-            {plans.map((plan) => (
-              <article
-                key={plan.name}
-                className={`relative rounded-[2rem] border bg-[var(--color-surface)] p-5 shadow-sm sm:p-6 ${
-                  plan.highlighted ? 'border-2 border-[#0A7EA4]' : 'border-[var(--color-border)]'
-                }`}
-              >
-                {plan.highlighted ? (
-                  <span className="absolute -top-3 left-6 rounded-full bg-[#0A7EA4] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-sm">
-                    Recommandé
-                  </span>
-                ) : null}
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-night/45">{plan.name}</p>
-                <p className="mt-2 text-3xl font-bold text-night">{plan.price}</p>
-                <ul className="mt-5 space-y-2 text-sm text-night/65">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href={plan.highlighted ? '/pro/inscription?plan=pro' : '/pro/inscription'}
-                  className={`mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                    plan.highlighted
-                      ? 'bg-[#0A7EA4] text-white shadow-sm hover:-translate-y-0.5 hover:shadow-md'
-                      : 'border border-[var(--color-border)] bg-[var(--color-surface)] text-night hover:bg-[var(--color-background-secondary)]'
-                  }`}
-                >
-                  {plan.cta}
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link href="/pro/inscription" className="btn-primary inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold shadow-lg shadow-[#0A7EA4]/25">
+                  Créer mon espace Pro
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-              </article>
+                <Link
+                  href={DEMO_PROFILE_HREF}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/10"
+                >
+                  Voir une vitrine exemple
+                </Link>
+              </div>
+
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                {[
+                  'Badge Pro vérifié',
+                  'Devis et réservations intégrés',
+                  'Transport et fret connectés',
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white/85 backdrop-blur-sm">
+                    <CheckCircle2 className="h-4 w-4 text-nc-lagon" />
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <HeroDashboardMockup />
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 py-24 md:py-28">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {STATS.map((stat) => (
+              <StatCard key={stat.label} value={stat.value} label={stat.label} />
             ))}
           </div>
         </section>
 
-        <section ref={formRef} id="formulaire-pro" className="mx-auto max-w-7xl px-4 pb-16">
-          <div className="overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-            <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.2))] px-5 py-7 text-white sm:px-6 md:px-8">
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/75">Créer mon compte Pro</p>
-                <h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">Gratuit pour commencer</h2>
-                <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/75">
-                  Remplissez votre demande, notre équipe valide votre compte sous 48h et vous aide à démarrer sur Kalico.
-                </p>
-
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">Validation</p>
-                    <p className="mt-2 text-sm text-white/85">Sous 48h par notre équipe.</p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">Contact</p>
-                    <p className="mt-2 text-sm text-white/85">Vitrine, téléphone, site et horaires.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-5 sm:p-6 md:p-8">
-                {successMessage ? (
-                  <div className="mb-6 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
-                    {successMessage}
-                  </div>
-                ) : null}
-
-                {errorMessage ? (
-                  <div className="mb-6 rounded-[1.5rem] border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                    {errorMessage}
-                  </div>
-                ) : null}
-
-                {!isAuthenticated ? (
-                  <div className="mb-6 rounded-[1.5rem] border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-4 text-sm text-night/70">
-                    Connectez-vous pour envoyer votre demande Pro.
-                    <div className="mt-3 flex flex-wrap gap-3">
-                      <button
-                        type="button"
-                        onClick={() => openAuthModal({ type: 'login', redirectTo: '/pro#formulaire-pro' })}
-                        className="btn-primary px-4 py-2 text-sm"
-                      >
-                        Se connecter
-                      </button>
-                      <Link href="/inscription" className="btn-secondary px-4 py-2 text-sm">
-                        Créer un compte
-                      </Link>
-                    </div>
-                  </div>
-                ) : null}
-
-                <form onSubmit={handleSubmit} className="grid gap-4">
-                  <div>
-                    <label className="mb-1 block text-sm font-semibold text-night">Nom de l'entreprise / Raison sociale *</label>
-                    <input
-                      value={form.company_name}
-                      onChange={(e) => handleChange('company_name', e.target.value)}
-                      className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
-                      placeholder="Ex. Atelier Kalo"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-1 block text-sm font-semibold text-night">Catégorie *</label>
-                    <select
-                      value={form.category}
-                      onChange={(e) => handleChange('category', e.target.value)}
-                      className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
-                      required
-                    >
-                      <option value="">Choisissez votre secteur</option>
-                      {PRO_SECTORS.map((sector) => (
-                        <option key={sector} value={sector}>
-                          {sector}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="mb-1 block text-sm font-semibold text-night">Description courte *</label>
-                    <textarea
-                      value={form.description}
-                      onChange={(e) => handleChange('description', e.target.value.slice(0, 300))}
-                      rows={4}
-                      maxLength={300}
-                      className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
-                      placeholder="Présentez votre activité en 300 caractères max."
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-1 block text-sm font-semibold text-night">Commune *</label>
-                    <select
-                      value={form.commune}
-                      onChange={(e) => handleChange('commune', e.target.value)}
-                      className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
-                      required
-                    >
-                      <option value="">Choisissez votre commune</option>
-                      {COMMUNES.map((commune) => (
-                        <option key={commune} value={commune}>
-                          {commune}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <label className="mb-1 block text-sm font-semibold text-night">Téléphone professionnel</label>
-                      <input
-                        value={form.phone}
-                        onChange={(e) => handleChange('phone', e.target.value)}
-                        className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
-                        placeholder="+687 ..."
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-sm font-semibold text-night">Site web</label>
-                      <input
-                        value={form.website}
-                        onChange={(e) => handleChange('website', e.target.value)}
-                        className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
-                        placeholder="https://..."
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="mb-1 block text-sm font-semibold text-night">Horaires d'ouverture</label>
-                    <textarea
-                      value={form.hours}
-                      onChange={(e) => handleChange('hours', e.target.value)}
-                      rows={3}
-                      className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
-                      placeholder="Ex. Lun-Ven 8h-17h, Sam 8h-12h"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-1 block text-sm font-semibold text-night">Numéro RIDET</label>
-                    <input
-                      value={form.siret}
-                      onChange={(e) => handleChange('siret', e.target.value)}
-                      className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm"
-                      placeholder="Ex. 1 234 567.8"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="btn-primary inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm disabled:opacity-70"
-                  >
-                    {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                    Envoyer ma demande
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {user?.is_pro ? (
-          <section className="mx-auto max-w-7xl px-4 pb-16">
-            <DocumentUploader compact />
-          </section>
-        ) : null}
+        <FeatureTabs />
+        <SectorsGrid />
+        <ComparisonTable />
+        <FinalCta />
       </main>
     </div>
   )
