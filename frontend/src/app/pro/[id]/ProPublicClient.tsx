@@ -303,7 +303,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
               ) : null}
             </div>
 
-            <div className="-mt-6 px-5 pb-6 md:-mt-8 md:px-8">
+            <div className="px-5 pb-6 pt-5 md:px-8 md:pt-6">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div className="flex items-start gap-4">
                   <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-[1.75rem] border-4 border-white bg-white shadow-md md:h-20 md:w-20">
