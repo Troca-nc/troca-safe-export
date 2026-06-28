@@ -35,7 +35,7 @@ import type { ProPublicProfile, ProPublicProduct, ProPublicReview } from '@/app/
 const TABS = [
   { id: 'annonces', label: 'Annonces', icon: Package },
   { id: 'catalogue', label: 'Catalogue', icon: Store },
-  { id: 'realisations', label: 'RÃ©alisations', icon: Sparkles },
+  { id: 'realisations', label: 'Réalisations', icon: Sparkles },
   { id: 'avis', label: 'Avis', icon: BadgeCheck },
   { id: 'apropos', label: 'À propos', icon: Store },
 ] as const
@@ -210,10 +210,10 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Profil pro</p>
             <h1 className="mt-3 font-display text-3xl font-bold text-night">Professionnel introuvable</h1>
             <p className="mt-3 text-sm leading-relaxed text-night/60">
-              Cette vitrine n’est pas disponible ou n’a pas encore été validée.
+              Cette vitrine nâ€™est pas disponible ou nâ€™a pas encore Ã©tÃ© validÃ©e.
             </p>
             <Link href="/pro" className="btn-primary mt-6 inline-flex items-center gap-2 px-5 py-3 text-sm">
-              Retour à l’espace Pro
+              Retour Ã  lâ€™espace Pro
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -261,7 +261,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
       : product.price_type === 'on_quote'
         ? 'Demande sur devis'
         : product.price_type === 'from'
-          ? `Demande pour ${product.title} à partir de ${formatPrice(product.price_xpf)}`
+          ? `Demande pour ${product.title} Ã  partir de ${formatPrice(product.price_xpf)}`
           : `Demande pour ${product.title}`
 
     setQuotePrefill({
@@ -272,7 +272,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
         `Produit : ${product.title}`,
         product.brand ? `Marque : ${product.brand}` : null,
         product.unit_label ? `Format : ${product.unit_label}` : null,
-        product.catalog_category_name ? `Catégorie catalogue : ${product.catalog_category_name}` : null,
+        product.catalog_category_name ? `CatÃ©gorie catalogue : ${product.catalog_category_name}` : null,
         product.price_type ? `Type de prix : ${product.price_type}` : null,
         '',
         `Bonjour, je souhaite en savoir plus sur ce produit "${product.title}".`,
@@ -425,9 +425,9 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
 
             <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Inviter un client</p>
-              <h2 className="mt-1 font-display text-2xl font-bold text-night">Collectez plus d'avis vérifiés</h2>
+              <h2 className="mt-1 font-display text-2xl font-bold text-night">Collectez plus d'avis vÃ©rifiÃ©s</h2>
               <p className="mt-2 text-sm leading-relaxed text-night/60">
-                Envoyez un lien d&apos;avis après une transaction pour faire remonter votre note plus rapidement.
+                Envoyez un lien d&apos;avis aprÃ¨s une transaction pour faire remonter votre note plus rapidement.
               </p>
               {isOwner ? (
                 <button
@@ -436,7 +436,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                   className="btn-primary mt-4 inline-flex items-center gap-2 px-5 py-3 text-sm"
                 >
                   <MessageCircle className="h-4 w-4" />
-                  Inviter un client à laisser un avis
+                  Inviter un client Ã  laisser un avis
                 </button>
               ) : (
                 <p className="mt-4 text-sm text-night/50">Connectez-vous avec ce compte Pro pour envoyer des invitations d&apos;avis.</p>
@@ -499,7 +499,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                                 {slot.label || label}
                               </p>
                               <p className="mt-1 text-xs text-night/55">
-                                {label} · {endTime}
+                                {label} Â· {endTime}
                               </p>
                             </div>
                             <span className="rounded-full bg-nc-lagonLight px-2.5 py-1 text-[11px] font-semibold text-nc-lagon">
@@ -531,7 +531,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                     <p className="flex items-start gap-2">
                       <CalendarDays className="mt-0.5 h-4 w-4 text-[#0A7EA4]" />
                       <span>
-                        Créneau minimum {bookingSettings?.advance_notice_hours ?? 24} h à l&apos;avance.
+                        Créneau minimum {bookingSettings?.advance_notice_hours ?? 24} h Ã  l&apos;avance.
                       </span>
                     </p>
                     {bookingSettings?.instructions ? (
@@ -583,7 +583,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
               ) : (
                 <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-14 text-center text-night/55">
                   <p className="text-lg font-semibold text-night">Aucune annonce active</p>
-                  <p className="mt-2 text-sm">Ce professionnel n’a pas encore d’annonce en ligne.</p>
+                  <p className="mt-2 text-sm">Ce professionnel nâ€™a pas encore dâ€™annonce en ligne.</p>
                 </div>
               )}
             </div>
@@ -668,7 +668,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                           <div>
                             <h3 className="line-clamp-1 text-lg font-semibold text-night">{product.title}</h3>
                             <p className="mt-1 text-sm text-night/55">
-                              {product.category_name || 'Catalogue'} · {product.commune_name || profile.pro_commune || 'Nouvelle-Calédonie'}
+                              {product.category_name || 'Catalogue'} Â· {product.commune_name || profile.pro_commune || 'Nouvelle-Calédonie'}
                             </p>
                           </div>
 
@@ -749,7 +749,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                       <div className="relative aspect-[4/3] bg-sand">
                         <Image
                           src={photo}
-                          alt={`RÃ©alisation ${index + 1} de ${displayName}`}
+                          alt={`RÃƒÂ©alisation ${index + 1} de ${displayName}`}
                           fill
                           sizes="(max-width: 640px) 100vw, 33vw"
                           className="object-cover transition duration-500 group-hover:scale-105"
@@ -761,7 +761,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
               ) : (
                 <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-14 text-center text-night/55">
                   <p className="text-lg font-semibold text-night">Aucune réalisation publiée</p>
-                  <p className="mt-2 text-sm">Ce professionnel n’a pas encore partagé de portfolio.</p>
+                  <p className="mt-2 text-sm">Ce professionnel nâ€™a pas encore partagÃ© de portfolio.</p>
                 </div>
               )}
             </div>
@@ -785,7 +785,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                     <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">À propos</p>
                   <h2 className="mt-2 font-display text-2xl font-bold text-night">Votre vitrine professionnelle</h2>
                   <p className="mt-3 text-sm leading-relaxed text-night/65">
-                    {profile.pro_description || 'Ce professionnel présente ses services, ses horaires et ses coordonnées sur Kalico.'}
+                    {profile.pro_description || 'Ce professionnel prÃ©sente ses services, ses horaires et ses coordonnÃ©es sur Kalico.'}
                   </p>
                   {catalogPdfUrl ? (
                     <button
@@ -802,7 +802,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Coordonnées</p>
                 <div className="mt-4 space-y-3 text-sm text-night/65">
                   <p><span className="font-semibold text-night">Commune :</span> {profile.pro_commune || 'Nouvelle-Calédonie'}</p>
-                  <p><span className="font-semibold text-night">Téléphone :</span> {profile.pro_phone || 'Non renseigné'}</p>
+                  <p><span className="font-semibold text-night">TÃ©lÃ©phone :</span> {profile.pro_phone || 'Non renseigné'}</p>
                   <p><span className="font-semibold text-night">Site web :</span> {profile.pro_website || 'Non renseigné'}</p>
                   <p><span className="font-semibold text-night">Horaires :</span> {profile.pro_hours || 'Non renseignés'}</p>
                 </div>
@@ -816,10 +816,10 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Invitation d&apos;avis</p>
-                <h2 className="mt-1 font-display text-2xl font-bold text-night">Inviter un client à laisser un avis</h2>
+                <h2 className="mt-1 font-display text-2xl font-bold text-night">Inviter un client Ã  laisser un avis</h2>
               </div>
               <button type="button" onClick={() => setInviteOpen(false)} className="rounded-full px-2 py-1 text-night/45 hover:bg-sand">
-                ×
+                Ã—
               </button>
             </div>
 

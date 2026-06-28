@@ -65,9 +65,9 @@ interface Props {
 const CONDITION_LABELS: Record<string, string> = {
   new: 'Neuf',
   like_new: 'Comme neuf',
-  good: 'Bon Ã©tat',
+  good: 'Bon état',
   fair: 'Correct',
-  for_parts: 'Pour piÃ¨ces',
+  for_parts: 'Pour pièces',
 }
 
 const blurPlaceholder = 'data:image/gif;base64,R0lGODlhAQABAAAAACw='
@@ -184,7 +184,7 @@ function ListingImageFrame({
       </div>
 
       <div className="absolute right-3 top-3 z-10 flex flex-col items-end gap-2">
-        {boosted ? <span className="badge badge-warning bg-white/90 text-[10px] shadow-sm backdrop-blur-sm">â­ BoostÃ©</span> : null}
+        {boosted ? <span className="badge badge-warning bg-white/90 text-[10px] shadow-sm backdrop-blur-sm">⭐ Boosté</span> : null}
       </div>
 
       <button
@@ -276,7 +276,7 @@ export default function ListingCard({ listing, className = '' }: Props) {
     }
 
     if (!listing.price) {
-      return <span className="text-night/50 text-sm italic">Prix Ã  dÃ©battre</span>
+      return <span className="text-night/50 text-sm italic">Prix à débattre</span>
     }
 
     return (
@@ -300,7 +300,7 @@ export default function ListingCard({ listing, className = '' }: Props) {
   const isConditionVisible = Boolean(listing.condition && CONDITION_LABELS[listing.condition])
   const locationZone = typeof listing.metadata?.quartier_zone === 'string' ? String(listing.metadata.quartier_zone).trim() : ''
   const locationText = listing.commune_name
-    ? `${listing.commune_name}${locationZone ? ` · ${locationZone}` : ''}`
+    ? `${listing.commune_name}${locationZone ? ` Â· ${locationZone}` : ''}`
     : 'Nouvelle-Calédonie'
   const isProVerified = Boolean(
     (listing.author?.is_pro && listing.author?.pro_verified)
@@ -360,13 +360,13 @@ export default function ListingCard({ listing, className = '' }: Props) {
                 {listing.seller_email_verified ? (
                   <span className="inline-flex items-center gap-1">
                     <MailCheck className="h-3 w-3" />
-                    Email vÃ©rifiÃ©
+                    Email vérifié
                   </span>
                 ) : null}
                 {listing.seller_phone_verified ? (
                   <span className="inline-flex items-center gap-1">
                     <Phone className="h-3 w-3" />
-                    TÃ©lÃ©phone vÃ©rifiÃ©
+                    Téléphone vérifié
                   </span>
                 ) : null}
                 {listing.seller_trust_score != null ? (
@@ -410,4 +410,3 @@ export default function ListingCard({ listing, className = '' }: Props) {
     </Link>
   )
 }
-
