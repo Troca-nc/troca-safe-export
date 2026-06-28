@@ -44,6 +44,7 @@ type ProPublicClientProps = {
   proId: string
   initialProfile: ProPublicProfile | null
   initialReviews: ProPublicReview[]
+  showPhoneContact?: boolean
 }
 
 function formatRating(value?: number | null) {
@@ -84,7 +85,7 @@ function getStockBadge(stockQuantity?: number | null) {
   return { label: 'En stock', className: 'bg-nc-lagonLight text-nc-lagon' }
 }
 
-export default function ProPublicPage({ proId, initialProfile, initialReviews }: ProPublicClientProps) {
+export default function ProPublicPage({ proId, initialProfile, initialReviews, showPhoneContact = true }: ProPublicClientProps) {
   const { user } = useAuthStore()
   const searchParams = useSearchParams()
 
@@ -376,7 +377,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                       Site web
                     </a>
                   ) : null}
-                  {profile.pro_phone ? (
+                  {showPhoneContact && profile.pro_phone ? (
                     <a
                       href={`tel:${profile.pro_phone}`}
                       className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
@@ -559,8 +560,8 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                   onClick={() => setActiveTab(tab.id)}
                   className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
                     active
-                      ? 'bg-[#0A7EA4] text-white shadow-sm'
-                      : 'text-night/60 hover:bg-[var(--color-background-secondary)] hover:text-night'
+                      ? 'bg-[#0A7EA4] text-white shadow-sm ring-1 ring-[#0A7EA4]/20'
+                      : 'border border-transparent text-night/75 hover:border-[#0A7EA4]/20 hover:bg-[var(--color-background-secondary)] hover:text-night'
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -802,7 +803,6 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews }:
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Coordonnées</p>
                 <div className="mt-4 space-y-3 text-sm text-night/65">
                   <p><span className="font-semibold text-night">Commune :</span> {profile.pro_commune || 'Nouvelle-Calédonie'}</p>
-                  <p><span className="font-semibold text-night">TÃ©lÃ©phone :</span> {profile.pro_phone || 'Non renseigné'}</p>
                   <p><span className="font-semibold text-night">Site web :</span> {profile.pro_website || 'Non renseigné'}</p>
                   <p><span className="font-semibold text-night">Horaires :</span> {profile.pro_hours || 'Non renseignés'}</p>
                 </div>

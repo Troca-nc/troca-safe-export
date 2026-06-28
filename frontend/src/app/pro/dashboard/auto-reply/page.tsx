@@ -138,7 +138,9 @@ export default function AutoReplyPage() {
             type="button"
             onClick={() => setIsActive((value) => !value)}
             className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition ${
-              isActive ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-[var(--color-border)] bg-sand text-night/65'
+              isActive
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                : 'border-[var(--color-border)] bg-[var(--color-background-secondary)] text-night/75 hover:border-[#0A7EA4]/25 hover:bg-white hover:text-night'
             }`}
           >
             {isActive ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
@@ -209,7 +211,7 @@ export default function AutoReplyPage() {
                       type="button"
                       onClick={() => toggleDay(day.value)}
                       className={`inline-flex items-center gap-2 justify-self-start rounded-full px-3 py-1.5 text-sm font-semibold transition ${
-                        enabled ? 'bg-nc-lagonLight text-nc-lagon' : 'bg-sand text-night/55'
+                        enabled ? 'bg-nc-lagonLight text-nc-lagon' : 'bg-[var(--color-background-secondary)] text-night/75 hover:bg-white hover:text-night'
                       }`}
                     >
                       {enabled ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}

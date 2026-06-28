@@ -41,7 +41,7 @@ const demoProfile: ProPublicProfile = {
   pro_description:
     'Une vitrine locale pensée pour présenter une activité, envoyer des devis, prendre des rendez-vous et gérer le suivi client sur un seul espace.',
   pro_website: 'https://kalico.nc',
-  pro_phone: '+687 99 01 23',
+  pro_phone: null,
   pro_hours: 'Lun - Sam : 07h30 - 18h',
   pro_logo_url: null,
   pro_banner_url: null,
@@ -227,6 +227,7 @@ export default function ProExamplePage() {
           proId="demo-pro-public"
           initialProfile={demoProfile}
           initialReviews={demoReviews}
+          showPhoneContact={false}
         />
       </Suspense>
     </>

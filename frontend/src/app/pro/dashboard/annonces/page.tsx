@@ -198,8 +198,8 @@ export default function ProDashboardListingsPage() {
               onClick={() => setFilter(item.id)}
               className={`shrink-0 rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
                 active
-                  ? 'bg-[#0A7EA4] text-white shadow-sm'
-                  : 'text-night/60 hover:bg-[var(--color-background-secondary)] hover:text-night'
+                  ? 'bg-[#0A7EA4] text-white shadow-sm ring-1 ring-[#0A7EA4]/20'
+                  : 'border border-transparent text-night/75 hover:border-[#0A7EA4]/20 hover:bg-[var(--color-background-secondary)] hover:text-night'
               }`}
             >
               {item.label}

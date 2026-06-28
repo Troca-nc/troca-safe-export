@@ -478,8 +478,8 @@ export default function AppelsOffresClient() {
             onClick={() => setActiveTab('pros')}
             className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
               activeTab === 'pros'
-                ? 'bg-[#0A7EA4] text-white'
-                : 'border border-[var(--color-border)] bg-white text-night hover:bg-[var(--color-background-secondary)]'
+                ? 'bg-[#0A7EA4] text-white shadow-sm ring-1 ring-[#0A7EA4]/20'
+                : 'border border-[var(--color-border)] bg-[var(--color-background-secondary)] text-night/75 hover:bg-white hover:text-night'
             }`}
           >
             Pros vérifiés
@@ -489,8 +489,8 @@ export default function AppelsOffresClient() {
             onClick={() => setActiveTab('requests')}
             className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
               activeTab === 'requests'
-                ? 'bg-[#0A7EA4] text-white'
-                : 'border border-[var(--color-border)] bg-white text-night hover:bg-[var(--color-background-secondary)]'
+                ? 'bg-[#0A7EA4] text-white shadow-sm ring-1 ring-[#0A7EA4]/20'
+                : 'border border-[var(--color-border)] bg-[var(--color-background-secondary)] text-night/75 hover:bg-white hover:text-night'
             }`}
           >
             Mes demandes
@@ -501,8 +501,8 @@ export default function AppelsOffresClient() {
               onClick={() => setActiveTab('quotes')}
               className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
                 activeTab === 'quotes'
-                  ? 'bg-[#0A7EA4] text-white'
-                  : 'border border-[var(--color-border)] bg-white text-night hover:bg-[var(--color-background-secondary)]'
+                  ? 'bg-[#0A7EA4] text-white shadow-sm ring-1 ring-[#0A7EA4]/20'
+                  : 'border border-[var(--color-border)] bg-[var(--color-background-secondary)] text-night/75 hover:bg-white hover:text-night'
               }`}
             >
               Mes propositions

@@ -119,7 +119,7 @@ export default function AbonnementPage() {
             </p>
           </div>
 
-          <div className="inline-flex items-center gap-1 rounded-2xl bg-sand p-1">
+          <div className="inline-flex items-center gap-1 rounded-2xl border border-night/10 bg-[var(--color-background-secondary)] p-1">
             {(['monthly', 'yearly'] as BillingPeriod[]).map((period) => {
               const active = billing === period
               return (
@@ -128,7 +128,7 @@ export default function AbonnementPage() {
                   type="button"
                   onClick={() => setBilling(period)}
                   className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
-                    active ? 'bg-white text-night shadow-sm' : 'text-night/50 hover:text-night'
+                    active ? 'bg-white text-night shadow-sm ring-1 ring-black/5' : 'text-night/75 hover:bg-white hover:text-night'
                   }`}
                 >
                   {period === 'monthly' ? (

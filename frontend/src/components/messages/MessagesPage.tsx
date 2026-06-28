@@ -334,7 +334,7 @@ function MobileTabs({
           Discussions
         </button>
 
-        <div className="grid grid-cols-3 items-center gap-1 rounded-[1.35rem] border border-night/10 bg-sand p-1 sm:ml-auto">
+        <div className="grid grid-cols-3 items-center gap-1 rounded-[1.35rem] border border-night/10 bg-[var(--color-background-secondary)] p-1 sm:ml-auto">
           {[
             { id: 'chat', label: 'Chat' },
             { id: 'media', label: 'Médias' },
@@ -345,7 +345,7 @@ function MobileTabs({
               type="button"
               onClick={() => setPanel(item.id as MobilePanel)}
               className={`rounded-[1.1rem] px-2.5 py-2 text-[11px] font-medium transition-colors sm:px-3 ${
-                panel === item.id ? 'bg-coral text-white shadow-sm' : 'text-night/60 hover:bg-white'
+                panel === item.id ? 'bg-coral text-white shadow-sm ring-1 ring-coral/15' : 'text-night/75 hover:bg-white hover:text-night'
               }`}
             >
               {item.label}

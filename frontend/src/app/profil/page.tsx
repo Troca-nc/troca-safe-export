@@ -600,13 +600,13 @@ function ProfilePageContent() {
         </div>
 
         {/* â”€â”€ Onglets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <div className="flex gap-1 bg-sand rounded-2xl p-1 w-fit">
+        <div className="flex gap-1 rounded-2xl border border-night/10 bg-[var(--color-background-secondary)] p-1 w-fit">
           {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                tab === t.id ? 'bg-white text-coral shadow-sm' : 'text-night/50 hover:text-night'
+                tab === t.id ? 'bg-white text-coral shadow-sm ring-1 ring-black/5' : 'text-night/75 hover:bg-white hover:text-night'
               }`}
             >
               {t.icon} {t.label}

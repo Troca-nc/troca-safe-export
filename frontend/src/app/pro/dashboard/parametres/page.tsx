@@ -915,8 +915,8 @@ export default function ProDashboardSettingsPage() {
                     onClick={() => setPreviewMode('desktop')}
                     className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
                       previewMode === 'desktop'
-                        ? 'bg-white text-[#0A7EA4] shadow-sm'
-                        : 'text-night/55 hover:text-night'
+                        ? 'bg-white text-[#0A7EA4] shadow-sm ring-1 ring-black/5'
+                        : 'text-night/75 hover:bg-white hover:text-night'
                     }`}
                   >
                     Desktop
@@ -926,8 +926,8 @@ export default function ProDashboardSettingsPage() {
                     onClick={() => setPreviewMode('mobile')}
                     className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
                       previewMode === 'mobile'
-                        ? 'bg-white text-[#0A7EA4] shadow-sm'
-                        : 'text-night/55 hover:text-night'
+                        ? 'bg-white text-[#0A7EA4] shadow-sm ring-1 ring-black/5'
+                        : 'text-night/75 hover:bg-white hover:text-night'
                     }`}
                   >
                     Mobile

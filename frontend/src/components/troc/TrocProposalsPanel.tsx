@@ -170,14 +170,14 @@ export default function TrocProposalsPanel() {
             Gardez la main sur vos échanges structurés. Une contre-proposition ouvre un nouveau fil sans perdre le contexte.
           </p>
         </div>
-        <div className="inline-flex rounded-full border border-night/10 bg-sand p-1">
+        <div className="inline-flex rounded-full border border-night/10 bg-[var(--color-background-secondary)] p-1">
           {(['received', 'sent'] as const).map((value) => (
             <button
               key={value}
               type="button"
               onClick={() => setTab(value)}
               className={`rounded-full px-3 py-1.5 text-sm font-semibold transition ${
-                tab === value ? 'bg-white text-night shadow-sm' : 'text-night/55 hover:text-night'
+                tab === value ? 'bg-white text-night shadow-sm ring-1 ring-black/5' : 'text-night/75 hover:bg-white hover:text-night'
               }`}
             >
               {value === 'received' ? 'Reçues' : 'Envoyées'}

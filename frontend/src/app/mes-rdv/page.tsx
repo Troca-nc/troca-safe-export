@@ -160,10 +160,10 @@ export default function MesRdvPage() {
                 key={item.id}
                 type="button"
                 onClick={() => setTab(item.id)}
-                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
-                  active
-                    ? 'bg-[#0A7EA4] text-white shadow-sm'
-                    : 'text-night/60 hover:bg-[var(--color-background-secondary)] hover:text-night'
+              className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
+                active
+                    ? 'bg-[#0A7EA4] text-white shadow-sm ring-1 ring-[#0A7EA4]/20'
+                    : 'border border-transparent text-night/75 hover:border-[#0A7EA4]/20 hover:bg-[var(--color-background-secondary)] hover:text-night'
                 }`}
               >
                 <Filter className="h-4 w-4" />
