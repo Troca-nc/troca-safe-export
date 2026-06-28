@@ -23,7 +23,7 @@ import {
 
 import Header from '@/components/layout/Header'
 
-const DEMO_PROFILE_HREF = '/pro/3'
+const DEMO_PROFILE_HREF = '/pro/vitrine-exemple'
 
 const STATS = [
   { value: '33', label: 'communes couvertes' },
