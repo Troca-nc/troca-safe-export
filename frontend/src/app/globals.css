@@ -145,10 +145,6 @@ html[data-theme='dark'] [class*='border-night/'] {
   box-sizing: border-box;
 }
 
-header[data-kalico-header] ~ header[data-kalico-header] {
-  display: none !important;
-}
-
 html {
   scroll-behavior: smooth;
 }

@@ -1,7 +1,6 @@
 // src/app/layout.tsx
 import type { Metadata } from 'next'
 import './globals.css'
-import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import CookieBanner from '@/components/legal/CookieBanner'
 import AnalyticsTracker from '@/components/layout/AnalyticsTracker'
@@ -65,7 +64,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <PaymentFailureBanner />
             <AuthRequiredModal />
             <OnboardingWizard />
-            <Header />
             {children}
             <Footer />
             <CookieBanner />
