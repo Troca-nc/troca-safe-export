@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 
 import Header from '@/components/layout/Header'
 import { generateNoindexMetadata } from '@/lib/seoHelpers'
@@ -211,11 +212,25 @@ export default function ProExamplePage() {
   return (
     <>
       <Header />
-      <ProPublicClient
-        proId="demo-pro-public"
-        initialProfile={demoProfile}
-        initialReviews={demoReviews}
-      />
+      <Suspense
+        fallback={
+          <div className="mx-auto max-w-7xl px-4 py-12">
+            <div className="space-y-4">
+              <div className="h-48 animate-pulse rounded-[2rem] bg-sand/70" />
+              <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+                <div className="h-64 animate-pulse rounded-[2rem] bg-sand/70" />
+                <div className="h-64 animate-pulse rounded-[2rem] bg-sand/70" />
+              </div>
+            </div>
+          </div>
+        }
+      >
+        <ProPublicClient
+          proId="demo-pro-public"
+          initialProfile={demoProfile}
+          initialReviews={demoReviews}
+        />
+      </Suspense>
     </>
   )
 }
