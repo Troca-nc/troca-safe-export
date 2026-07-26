@@ -15,6 +15,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Link, router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
@@ -32,6 +33,7 @@ type FormData = z.infer<typeof schema>;
 export default function ForgotPasswordScreen() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const insets = useSafeAreaInsets();
   const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
@@ -54,7 +56,10 @@ export default function ForgotPasswordScreen() {
       style={styles.root}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 24 }]}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.card}>
           <Text style={styles.title}>Mot de passe oublié</Text>
           <Text style={styles.subtitle}>

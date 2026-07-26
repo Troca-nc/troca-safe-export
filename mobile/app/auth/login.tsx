@@ -7,6 +7,7 @@ import {
   StyleSheet, KeyboardAvoidingView, Platform,
   ScrollView, Alert, ActivityIndicator,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Link, router }    from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { z }               from 'zod';
@@ -26,6 +27,7 @@ type FormData = z.infer<typeof schema>;
 export default function LoginScreen() {
   const { login, isLoading } = useAuthStore();
   const demoModeEnabled = isDemoModeEnabled();
+  const insets = useSafeAreaInsets();
 
   const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -57,7 +59,7 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
-        contentContainerStyle={styles.scroll}
+        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 24 }]}
         keyboardShouldPersistTaps="handled"
       >
         {/* Logo */}
