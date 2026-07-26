@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Kalico",
-    "slug": "kalico",
+    "slug": "kalico-admin",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -23,6 +23,14 @@
         "applinks:kalico.nc"
       ],
       "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSExceptionDomains": {
+            "51.255.161.64.nip.io": {
+              "NSIncludesSubdomains": true,
+              "NSExceptionAllowsInsecureHTTPLoads": true
+            }
+          }
+        },
         "NSCameraUsageDescription": "Kalico utilise votre caméra pour prendre des photos de vos annonces.",
         "NSPhotoLibraryUsageDescription": "Kalico accède à vos photos pour illustrer vos annonces.",
         "NSMicrophoneUsageDescription": "Kalico utilise votre micro pour envoyer des messages vocaux.",
@@ -65,8 +73,7 @@
         "ACCESS_FINE_LOCATION",
         "RECEIVE_BOOT_COMPLETED",
         "VIBRATE"
-      ],
-      "googleServicesFile": "./google-services.json"
+      ]
     },
     "web": {
       "bundler": "metro"
@@ -89,6 +96,14 @@
         }
       ],
       [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
+      [
         "@stripe/stripe-react-native",
         {
           "merchantIdentifier": "merchant.nc.kalico.app",
@@ -97,7 +112,8 @@
       ],
       "expo-apple-authentication",
       "expo-asset",
-      "expo-font"
+      "expo-font",
+      "expo-build-properties"
     ],
     "experiments": {
       "typedRoutes": true
@@ -107,9 +123,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+        "projectId": "b886f93a-0106-4d5b-82df-3ad6eefe9ea5"
       }
     },
-    "owner": "REPLACE_WITH_EXPO_OWNER"
+    "owner": "kaliconc"
   }
 }
