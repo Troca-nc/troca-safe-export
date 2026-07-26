@@ -16,6 +16,25 @@ type StorageAdapter = {
   delete: (key: string) => void
 }
 
+const ASYNC_STORAGE_PREFIX = 'kalico-mobile-query-client:'
+const storageMirror = new Map<string, string>()
+const storageHydrated = new Set<string>()
+
+async function hydrateStorageKey(key: string) {
+  if (storageHydrated.has(key)) return
+
+  try {
+    const stored = await AsyncStorage.getItem(`${ASYNC_STORAGE_PREFIX}${key}`)
+    if (stored != null) {
+      storageMirror.set(key, stored)
+    }
+  } catch {
+    // Silent fallback: the cache remains in-memory for this session.
+  } finally {
+    storageHydrated.add(key)
+  }
+}
+
 type ListingSummarySource = {
   id: string | number
   titre?: string | null
@@ -68,24 +87,24 @@ function createStorage(): StorageAdapter {
     }
   }
 
-  // Security: on mobile we keep the cache in MMKV for fast offline reads.
-  // TODO: test E2E sur le cache hors ligne et la restauration des annonces vues.
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { MMKV } = require('react-native-mmkv') as {
-    MMKV: new (options: { id: string }) => {
-      getString: (key: string) => string | undefined
-      set: (key: string, value: string) => void
-      delete: (key: string) => void
-    }
-  }
-  const mmkv = new MMKV({ id: 'kalico-mobile-cache' })
+  // TODO: remplacer par react-native-mmkv une fois le build natif
+  // stabilisé (crash au démarrage sans garde sur MMKV.prototype)
+  void hydrateStorageKey('recently_viewed_listings')
+
   return {
-    getString: (key) => mmkv.getString(key) ?? null,
+    getString: (key) => {
+      void hydrateStorageKey(key)
+      return storageMirror.get(key) ?? null
+    },
     setString: (key, value) => {
-      mmkv.set(key, value)
+      storageMirror.set(key, value)
+      storageHydrated.add(key)
+      void AsyncStorage.setItem(`${ASYNC_STORAGE_PREFIX}${key}`, value).catch(() => {})
     },
     delete: (key) => {
-      mmkv.delete(key)
+      storageMirror.delete(key)
+      storageHydrated.add(key)
+      void AsyncStorage.removeItem(`${ASYNC_STORAGE_PREFIX}${key}`).catch(() => {})
     },
   }
 }
