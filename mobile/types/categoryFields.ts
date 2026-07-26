@@ -1,1 +1,1 @@
-export * from '../../shared/categoryFields'
+export * from '../shared-copy/categoryFields'

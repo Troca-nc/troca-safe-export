@@ -1,1 +1,1 @@
-export * from '../../shared/types/troc';
+export * from '../shared-copy/types/troc';

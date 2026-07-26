@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons'
-import { buildCategoryTreeFromFlatRows, flattenCategoryTaxonomy } from '../../shared/categoryTaxonomy'
-import { CATEGORY_ICONS } from '../../shared/category-icons'
+import { buildCategoryTreeFromFlatRows, flattenCategoryTaxonomy } from '../shared-copy/categoryTaxonomy'
+import { CATEGORY_ICONS } from '../shared-copy/category-icons'
 
 const CATEGORY_ICON_MAP = CATEGORY_ICONS as Record<string, string>
 
