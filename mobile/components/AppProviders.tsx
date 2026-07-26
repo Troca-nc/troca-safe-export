@@ -14,9 +14,13 @@ type AppProvidersProps = {
 
 export function AppProviders({ children }: AppProvidersProps) {
   const stripeEnabled = Platform.OS !== 'web';
-  const StripeProvider = stripeEnabled ? require('@stripe/stripe-react-native').StripeProvider : null;
   const offline = useOfflineStatus();
   const demoModeEnabled = isDemoModeEnabled();
+  const stripeKey = process.env.EXPO_PUBLIC_STRIPE_PK ?? '';
+  const isStripeConfigured =
+    stripeEnabled &&
+    stripeKey.trim() !== '' &&
+    !stripeKey.includes('REPLACE_WITH');
 
   const content = (
     <QueryClientProvider client={queryClient}>
@@ -30,13 +34,13 @@ export function AppProviders({ children }: AppProvidersProps) {
     </QueryClientProvider>
   );
 
-  if (!StripeProvider) {
+  if (!isStripeConfigured) {
     return content;
   }
 
-  const STRIPE_PK = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.EXPO_PUBLIC_STRIPE_PK ?? '';
+  const StripeProvider = require('@stripe/stripe-react-native').StripeProvider;
   return (
-    <StripeProvider publishableKey={STRIPE_PK} merchantIdentifier="merchant.nc.kalico.app">
+    <StripeProvider publishableKey={stripeKey} merchantIdentifier="merchant.nc.kalico.app">
       {content}
     </StripeProvider>
   );
