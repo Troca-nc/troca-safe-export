@@ -1,7 +1,7 @@
 'use strict';
 
 const { withTransaction } = require('../config/database');
-const { TAXONOMY_TREE, slugifyCategoryName } = require('../../../shared/categoryTaxonomy');
+const { TAXONOMY_TREE, slugifyCategoryName } = require('../shared-copy/categoryTaxonomy');
 
 function flatten(nodes, parentSlug = null, depth = 0, rows = []) {
   nodes.forEach((node, position) => {

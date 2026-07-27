@@ -2,7 +2,7 @@
 
 const bcrypt = require('bcryptjs');
 const { withTransaction } = require('../config/database');
-const { buildCategoryTreeFromFlatRows } = require('../../../shared/categoryTaxonomy');
+const { buildCategoryTreeFromFlatRows } = require('../shared-copy/categoryTaxonomy');
 
 const DEMO_DOMAIN = '@demo.kalico.nc';
 const DEMO_PASSWORD = 'Demo1234!';

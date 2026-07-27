@@ -4,7 +4,7 @@
 
 const express = require('express');
 const { query } = require('../config/database');
-const { getCommuneBySlug, getZonesForCommune } = require('../../../shared/geoData');
+const { getCommuneBySlug, getZonesForCommune } = require('../shared-copy/geoData');
 const router = express.Router();
 
 function provinceCodeFromSlug(slug) {

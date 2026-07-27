@@ -8,7 +8,7 @@ const { logger } = require('../utils/logger');
 const { triggerCovoiturageAlerts } = require('../services/covoitAlertService');
 const { createNotification } = require('../services/notificationService');
 const { sendPushToUser } = require('../services/pushService');
-const { getRouteCompatibility, isOnRoute, getRouteStopsBetween, normalizeRouteText } = require('../../../shared/routesNC');
+const { getRouteCompatibility, isOnRoute, getRouteStopsBetween, normalizeRouteText } = require('../shared-copy/routesNC');
 const {
   sendRideAutoBookingPassengerEmail,
   sendRideAutoBookingDriverEmail,

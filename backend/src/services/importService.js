@@ -6,7 +6,7 @@ const { parse } = require('csv-parse/sync');
 const XLSX = require('xlsx');
 
 const { query, withTransaction } = require('../config/database');
-const { slugifyCategoryName } = require('../../../shared/categoryTaxonomy');
+const { slugifyCategoryName } = require('../shared-copy/categoryTaxonomy');
 
 const TARGET_FIELDS = {
   title: { label: 'Titre / Nom du produit', required: true },
