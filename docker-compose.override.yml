@@ -9,6 +9,11 @@ services:
       context: ./backend
       dockerfile: Dockerfile
 
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+
   admin:
     build:
       context: ./admin
