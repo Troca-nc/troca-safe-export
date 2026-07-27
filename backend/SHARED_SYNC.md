@@ -10,11 +10,13 @@ If an original changes, copy the update here too.
 | `src/shared-copy/routesNC.js` | `/shared/routesNC.js` |
 | `src/shared-copy/fretPricing.js` | `/shared/fretPricing.js` |
 | `src/shared-copy/envoi-livraisonPricing.js` | `/shared/envoi-livraisonPricing.js` |
+| `src/shared-copy/fretEstimator.js` | `/shared/fretEstimator.js` |
 
 Backend files updated to use the local copies:
 
 - `src/routes/communes.js`
 - `src/routes/covoiturage.route.js`
+- `src/routes/fret.js`
 - `src/routes/pro.products.js`
 - `src/scripts/seedCategories.js`
 - `src/services/demoSeedService.js`
