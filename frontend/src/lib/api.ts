@@ -269,7 +269,7 @@ export const authApi = {
       ...(turnstileToken ? { turnstile_token: turnstileToken } : {}),
     }),
   logout: () => api.post('/auth/logout'),
-  me: () => api.get('/auth/me'),
+  me: () => api.get('/users/me'),
   verifyEmail: (token: string) => api.post('/auth/verify-email', { token }),
   forgotPassword: (identifier: string, turnstileToken?: string) =>
     api.post('/auth/forgot-password', {
@@ -567,6 +567,58 @@ export const bonPlansApi = {
   },
 }
 
+export const campaignsApi = {
+  getHome: () => cachedGet(
+    buildCacheKey('campaigns.getHome', '/campaigns/public/home'),
+    () => api.get('/campaigns/public/home'),
+    CACHE_TTL.short,
+  ),
+  getCategoryBanner: (categorySlug: string) => cachedGet(
+    buildCacheKey('campaigns.getCategoryBanner', `/campaigns/public/category/${categorySlug}`),
+    () => api.get(`/campaigns/public/category/${encodeURIComponent(categorySlug)}`),
+    CACHE_TTL.short,
+  ),
+  getDashboard: () => cachedGet(
+    buildCacheKey('campaigns.getDashboard', '/campaigns/dashboard'),
+    () => api.get('/campaigns/dashboard'),
+    CACHE_TTL.short,
+  ),
+  getWeeklyBonPlans: () => cachedGet(
+    buildCacheKey('campaigns.getWeeklyBonPlans', '/campaigns/dashboard/bon-plans/weekly'),
+    () => api.get('/campaigns/dashboard/bon-plans/weekly'),
+    CACHE_TTL.short,
+  ),
+  getAdmin: () => cachedGet(
+    buildCacheKey('campaigns.getAdmin', '/campaigns/admin'),
+    () => api.get('/campaigns/admin'),
+    CACHE_TTL.short,
+  ),
+  create: async (data: object) => {
+    const res = await api.post('/campaigns', data)
+    invalidateApiCache('campaigns.')
+    invalidateApiCache('bonPlans.')
+    return res
+  },
+  pause: async (id: string | number) => {
+    const res = await api.post(`/campaigns/${id}/pause`)
+    invalidateApiCache('campaigns.')
+    invalidateApiCache('bonPlans.')
+    return res
+  },
+  resume: async (id: string | number) => {
+    const res = await api.post(`/campaigns/${id}/resume`)
+    invalidateApiCache('campaigns.')
+    invalidateApiCache('bonPlans.')
+    return res
+  },
+  saveWeeklyBonPlans: async (campaignIds: Array<string | number>) => {
+    const res = await api.put('/campaigns/dashboard/bon-plans/weekly', { campaign_ids: campaignIds })
+    invalidateApiCache('campaigns.')
+    invalidateApiCache('bonPlans.')
+    return res
+  },
+}
+
 export const eventsApi = {
   list: (params: object = {}) => cachedGet(
     buildCacheKey('events.list', '/events', params),
@@ -847,23 +899,47 @@ export const proDocumentsApi = {
   },
 }
 
-export const fretApi = {
+export const deliveryApi = {
   estimate: (params: object = {}) => cachedGet(
-    buildCacheKey('fret.estimate', '/fret/estimate', params),
-    () => api.get('/fret/estimate', { params }),
+    buildCacheKey('delivery.estimate', '/delivery-requests/estimate', params),
+    () => api.get('/delivery-requests/estimate', { params }),
     CACHE_TTL.short,
   ),
   createRequest: async (data: object) => {
-    const res = await api.post('/fret/requests', data)
-    invalidateApiCache('fret.')
+    const res = await api.post('/delivery-requests', data)
+    invalidateApiCache('delivery.')
     return res
   },
   getMine: () => cachedGet(
-    buildCacheKey('fret.mine', '/fret/requests/mine'),
-    () => api.get('/fret/requests/mine'),
+    buildCacheKey('delivery.mine', '/delivery-requests/mine'),
+    () => api.get('/delivery-requests/mine'),
     CACHE_TTL.short,
   ),
+  getDashboard: () => cachedGet(
+    buildCacheKey('delivery.dashboard', '/delivery-requests/dashboard'),
+    () => api.get('/delivery-requests/dashboard'),
+    CACHE_TTL.short,
+  ),
+  submitOffer: async (requestId: string | number, data: object) => {
+    const res = await api.post(`/delivery-requests/${requestId}/offers`, data)
+    invalidateApiCache('delivery.')
+    return res
+  },
+  selectOffer: async (requestId: string | number, offerId: string | number) => {
+    const res = await api.post(`/delivery-requests/${requestId}/select`, { offer_id: offerId })
+    invalidateApiCache('delivery.')
+    invalidateApiCache('notifications.')
+    return res
+  },
+  markDelivered: async (requestId: string | number) => {
+    const res = await api.post(`/delivery-requests/${requestId}/deliver`)
+    invalidateApiCache('delivery.')
+    invalidateApiCache('notifications.')
+    return res
+  },
 }
+
+export const fretApi = deliveryApi
 
 export const adminApi = {
   listProDocuments: () => cachedGet(
@@ -901,6 +977,49 @@ export const proLaunchPackApi = {
     const res = await api.post('/pro/onboarding/complete-step', data)
     invalidateApiCache('proLaunchPack.')
     invalidateApiCache('pro.')
+    return res
+  },
+}
+
+export const quoteRequestsApi = {
+  create: async (data: object) => {
+    const res = await api.post('/quote-requests', data)
+    invalidateApiCache('quoteRequests.')
+    return res
+  },
+  getMine: (params: object = {}) => cachedGet(
+    buildCacheKey('quoteRequests.mine', '/quote-requests/mine', params),
+    () => api.get('/quote-requests/mine', { params }),
+    CACHE_TTL.short,
+  ),
+  getById: (id: string | number) => cachedGet(
+    buildCacheKey('quoteRequests.getById', `/quote-requests/${id}`),
+    () => api.get(`/quote-requests/${id}`),
+    CACHE_TTL.short,
+  ),
+  getProIncoming: (params: object = {}) => cachedGet(
+    buildCacheKey('quoteRequests.proIncoming', '/quote-requests/pro/incoming', params),
+    () => api.get('/quote-requests/pro/incoming', { params }),
+    CACHE_TTL.short,
+  ),
+  getProOffersMine: (params: object = {}) => cachedGet(
+    buildCacheKey('quoteRequests.proOffersMine', '/quote-requests/pro/offers', params),
+    () => api.get('/quote-requests/pro/offers', { params }),
+    CACHE_TTL.short,
+  ),
+  submitOffer: async (id: string | number, data: object) => {
+    const res = await api.post(`/quote-requests/${id}/offers`, data)
+    invalidateApiCache('quoteRequests.')
+    return res
+  },
+  selectOffer: async (id: string | number, data: object) => {
+    const res = await api.post(`/quote-requests/${id}/select`, data)
+    invalidateApiCache('quoteRequests.')
+    return res
+  },
+  cancel: async (id: string | number) => {
+    const res = await api.delete(`/quote-requests/${id}`)
+    invalidateApiCache('quoteRequests.')
     return res
   },
 }
