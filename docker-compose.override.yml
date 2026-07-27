@@ -1,0 +1,15 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
