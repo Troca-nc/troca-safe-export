@@ -5,6 +5,7 @@ RUN corepack enable
 RUN corepack prepare pnpm@11.1.1 --activate
 COPY package.json ./
 COPY pnpm-workspace.yaml ./
+COPY .npmrc ./
 # TODO: restore --frozen-lockfile once the lockfile is stabilized after the pnpm v11 migration
 RUN pnpm install --no-frozen-lockfile
 
