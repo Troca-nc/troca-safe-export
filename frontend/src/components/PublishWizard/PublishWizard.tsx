@@ -25,7 +25,7 @@ import ListingCoachCard from '@/components/annonces/ListingCoachCard'
 import { FALLBACK_CATEGORIES } from '@/lib/categoryCatalog'
 import { getCategoryIcon } from '@/lib/categoryPresentation'
 import { compressImage } from '@/lib/imageCompressor'
-import { findCategoryNodeById, findCategoryPathById } from '../../../../shared/categoryTaxonomy'
+import { findCategoryNodeById, findCategoryPathById } from '@/shared-copy/categoryTaxonomy'
 
 type CommuneOption = {
   id: number

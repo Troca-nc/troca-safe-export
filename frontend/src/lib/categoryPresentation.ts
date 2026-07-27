@@ -49,7 +49,7 @@ import {
 } from 'lucide-react'
 
 import type { CategoryNode } from '@/lib/categoryCatalog'
-import { CATEGORY_ICONS } from '../../../shared/category-icons'
+import { CATEGORY_ICONS } from '@/shared-copy/category-icons'
 
 export type CategoryVisual = {
   icon: ComponentType<{ className?: string }>

@@ -18,7 +18,7 @@ import Header from '@/components/layout/Header'
 import SearchAlertModal from '@/components/SearchAlertModal'
 import ListingCard from '@/components/listings/ListingCard'
 import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
-import { API_ORIGIN, metaApi } from '@/lib/api'
+import { API_ORIGIN, campaignsApi, metaApi } from '@/lib/api'
 import { consumePendingAuthAction, peekPendingAuthAction } from '@/lib/authAction'
 import { FALLBACK_CATEGORIES, hasNestedCategoryTree, normalizeCategoryTree } from '@/lib/categoryCatalog'
 import { getCategoryIcon } from '@/lib/categoryPresentation'
@@ -26,7 +26,7 @@ import { useInfiniteListings } from '@/hooks/useInfiniteListings'
 import { useListingFilters, type ListingFilters } from '@/hooks/useListingFilters'
 import { useAuthActionStore } from '@/store/authActionStore'
 import { useAuthStore } from '@/store/authStore'
-import { findCategoryPathById } from '../../../../shared/categoryTaxonomy'
+import { findCategoryPathById } from '@/shared-copy/categoryTaxonomy'
 
 const AnnoncesMap = dynamic(() => import('@/components/annonces/AnnoncesMap'), { ssr: false })
 
@@ -756,6 +756,7 @@ function ListingsPageContent() {
   const [searchAlertOpen, setSearchAlertOpen] = useState(false)
   const [collapsedSections, setCollapsedSections] = useState({ radius: false, condition: false })
   const [expandedCategorySlugs, setExpandedCategorySlugs] = useState<string[]>([])
+  const [categoryBanner, setCategoryBanner] = useState<any | null>(null)
   const [fallbackListings, setFallbackListings] = useState<any[]>([])
   const [fallbackTotal, setFallbackTotal] = useState(0)
   const [fallbackLoading, setFallbackLoading] = useState(true)
@@ -997,6 +998,31 @@ function ListingsPageContent() {
       return Array.from(next)
     })
   }, [filters.category, visibleCategories])
+
+  useEffect(() => {
+    let alive = true
+
+    if (!filters.category) {
+      setCategoryBanner(null)
+      return () => {
+        alive = false
+      }
+    }
+
+    campaignsApi.getCategoryBanner(filters.category)
+      .then((response) => {
+        if (!alive) return
+        setCategoryBanner(response.data?.data?.banner ?? null)
+      })
+      .catch(() => {
+        if (!alive) return
+        setCategoryBanner(null)
+      })
+
+    return () => {
+      alive = false
+    }
+  }, [filters.category])
 
   useEffect(() => {
     if (viewMode !== 'list') return
@@ -1787,7 +1813,7 @@ function ListingsPageContent() {
           </div>
         )}
 
-        {/* Grille d'annonces */}
+          {/* Grille d'annonces */}
           <div className="flex-1 min-w-0">
             {/* Resultats */}
             <div className="flex items-center justify-between mb-4">
@@ -1802,6 +1828,41 @@ function ListingsPageContent() {
                 </span>
               )}
             </div>
+
+            {categoryBanner ? (
+              <div className="mb-4 hidden overflow-hidden rounded-[2rem] border border-nc-lagon/15 bg-white/95 shadow-sm md:block">
+                <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
+                  <div className="space-y-3 p-5 lg:p-6">
+                    <div className="inline-flex items-center rounded-full border border-nc-lagon/20 bg-nc-lagon/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-lagon">
+                      Sponsorisé
+                    </div>
+                    <h3 className="font-display text-2xl font-bold text-night">
+                      {categoryBanner.title || 'Mettez votre offre en avant'}
+                    </h3>
+                    <p className="max-w-2xl text-sm leading-relaxed text-night/65">
+                      {categoryBanner.description || 'Une bannière locale visible au-dessus des résultats de la catégorie.'}
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      <a
+                        href={categoryBanner.link_url || '/annonces'}
+                        className="inline-flex items-center justify-center rounded-2xl bg-nc-lagon px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-sm"
+                      >
+                        {categoryBanner.cta_text || 'Découvrir'}
+                      </a>
+                    </div>
+                  </div>
+                  <div className="min-h-56 bg-[linear-gradient(135deg,_rgba(10,126,164,0.18),_rgba(8,32,50,0.06))]">
+                    {categoryBanner.image_url ? (
+                      <img
+                        src={categoryBanner.image_url}
+                        alt={categoryBanner.title || 'Bannière sponsorisée'}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            ) : null}
 
             {isInitialLoading ? (
               <ListingSkeletonGrid count={6} className="grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4" />
