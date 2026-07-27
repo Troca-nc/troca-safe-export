@@ -7,7 +7,7 @@ COPY package.json ./
 COPY pnpm-workspace.yaml ./
 COPY .npmrc ./
 # TODO: restore --frozen-lockfile once the lockfile is stabilized after the pnpm v11 migration
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --no-frozen-lockfile --no-optional
 
 FROM node:22-alpine AS builder
 WORKDIR /app
