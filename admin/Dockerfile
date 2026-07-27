@@ -2,10 +2,10 @@ FROM node:22-alpine AS deps
 WORKDIR /app
 RUN apk add --no-cache libc6-compat curl
 RUN corepack enable
-COPY package.json pnpm-workspace.yaml ./
-# TODO: rétablir --frozen-lockfile une fois le lockfile
-# stabilisé après migration pnpm v11
-RUN PNPM_IGNORE_IGNORED_BUILD_DEPS=sharp pnpm install --no-frozen-lockfile
+COPY package.json ./
+COPY pnpm-workspace.yaml ./
+# TODO: restore --frozen-lockfile once the lockfile is stabilized after the pnpm v11 migration
+RUN pnpm install --no-frozen-lockfile
 
 FROM node:22-alpine AS builder
 WORKDIR /app
