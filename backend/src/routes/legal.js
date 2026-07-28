@@ -11,11 +11,11 @@ const { sendMail } = require('../services/emailService');
 const router = express.Router();
 
 const legalVersions = [
-  { id: 'mentions-legales', title: 'Mentions légales', version: '1.0', updated_at: '2026-05-25' },
-  { id: 'politique-de-confidentialite', title: 'Politique de confidentialité', version: '1.0', updated_at: '2026-05-25' },
-  { id: 'cgu', title: 'CGU', version: '1.0', updated_at: '2026-05-25' },
-  { id: 'cgv', title: 'CGV', version: '1.0', updated_at: '2026-05-25' },
-  { id: 'politique-cookies', title: 'Politique cookies', version: '1.0', updated_at: '2026-05-25' },
+  { id: 'mentions-legales', title: 'Mentions légales', version: '1.1', updated_at: '2026-07-10' },
+  { id: 'politique-de-confidentialite', title: 'Politique de confidentialité', version: '1.1', updated_at: '2026-07-10' },
+  { id: 'cgu', title: 'CGU', version: '1.1', updated_at: '2026-07-10' },
+  { id: 'cgv', title: 'CGV', version: '1.1', updated_at: '2026-07-10' },
+  { id: 'politique-cookies', title: 'Politique cookies', version: '1.1', updated_at: '2026-07-10' },
 ];
 
 async function queryOptional(sql, params) {

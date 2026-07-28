@@ -22,6 +22,16 @@ const nextConfig = {
     return config
   },
 
+  async redirects() {
+    return [
+      {
+        source: '/fret',
+        destination: '/envoi-livraison',
+        permanent: true,
+      },
+    ]
+  },
+
   // Variables d'environnement publiques exposées au client
   env: {
     NEXT_PUBLIC_API_URL:    process.env.NEXT_PUBLIC_API_URL    || 'http://localhost:3001',

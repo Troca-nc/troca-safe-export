@@ -13,6 +13,8 @@ import {
   MessageCircle,
   Menu,
   Package,
+  Megaphone,
+  Truck,
   Upload,
   Rocket,
   Settings2,
@@ -32,6 +34,7 @@ const NAV_ITEMS = [
   { href: '/pro/dashboard/rdv', label: 'Rendez-vous', icon: CalendarDays },
   { href: '/pro/dashboard/annonces', label: 'Mes annonces', icon: Store },
   { href: '/pro/dashboard/boosts', label: 'Boosts', icon: Bell },
+  { href: '/pro/dashboard/publicite', label: 'Publicité', icon: Megaphone },
   { href: '/pro/dashboard/factures', label: 'Factures', icon: FileText },
   { href: '/pro/dashboard/devis', label: 'Devis', icon: FileSignature },
   { href: '/pro/dashboard/coupons', label: 'Coupons', icon: QrCode },
@@ -39,6 +42,7 @@ const NAV_ITEMS = [
   { href: '/pro/dashboard/pack-lancement', label: 'Pack lancement', icon: Rocket },
   { href: '/pro/dashboard/auto-reply', label: 'Réponse auto', icon: MessageCircle },
   { href: '/pro/dashboard/transport', label: 'Transport', icon: Building2 },
+  { href: '/pro/dashboard/envoi-livraison', label: 'Envoi & Livraison', icon: Truck },
   { href: '/pro/[id]', label: 'Ma vitrine', icon: Building2 },
   { href: '/pro/dashboard/parametres', label: 'Paramètres Pro', icon: Settings2 },
 ] as const
@@ -53,6 +57,8 @@ export default function ProDashboardLayout({ children }: { children: ReactNode }
   const pathname = usePathname()
   const { user, isAuthenticated, hasHydrated } = useAuthStore()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const canAccessPubliciteOnly = pathname.startsWith('/pro/dashboard/publicite')
+  const canAccessVerifiedPublicite = Boolean(user?.is_verified) && canAccessPubliciteOnly
 
   useEffect(() => {
     if (!hasHydrated) return
@@ -60,12 +66,12 @@ export default function ProDashboardLayout({ children }: { children: ReactNode }
       router.replace('/connexion')
       return
     }
-    if (user && !user.is_pro) {
+    if (user && !user.is_pro && !canAccessVerifiedPublicite) {
       router.replace('/pro')
     }
-  }, [hasHydrated, isAuthenticated, router, user])
+  }, [canAccessVerifiedPublicite, hasHydrated, isAuthenticated, router, user])
 
-  if (!hasHydrated || !isAuthenticated || (user && !user.is_pro)) {
+  if (!hasHydrated || !isAuthenticated || (user && !user.is_pro && !canAccessVerifiedPublicite)) {
     return (
       <main className="mx-auto flex min-h-[60vh] max-w-7xl items-center justify-center px-4">
         <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-10 text-center shadow-sm">

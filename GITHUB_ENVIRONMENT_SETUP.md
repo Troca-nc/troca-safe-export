@@ -29,6 +29,19 @@ Store these in GitHub Secrets or Environment Secrets:
 - `GOOGLE_CLIENT_SECRET`
 - `EXPO_ACCESS_TOKEN`
 
+## Rotation policy
+
+Because Kalico is a renamed continuation of Troca, treat inherited values as untrusted until rotated.
+
+Rotate these before the first production deploy:
+- `DB_PASSWORD`
+- `JWT_SECRET`
+- `NEXTAUTH_SECRET`
+- `INTERNAL_API_TOKEN`
+- `REDIS_PASSWORD`
+- `ADMIN_API_TOKEN`
+- `ADMIN_PASSWORD_HASH`
+
 ## Variables
 
 Store these in GitHub Variables or Environment Variables:
@@ -82,4 +95,3 @@ These are safe as variables:
 - Never put private keys in `.env.example`.
 - Keep the repo limited to placeholders.
 - Use GitHub Environments for anything sensitive that differs between staging and production.
-

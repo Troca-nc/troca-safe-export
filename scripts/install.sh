@@ -62,11 +62,12 @@ fi
 
 # 7. Variables d'environnement
 if [ ! -f .env.production.local ]; then
-  cp .env.example .env.production.local
+  cp .env.production.example .env.production.local
 fi
 
 echo ""
 echo "Editez ${DEPLOY_PATH}/.env.production.local avant de continuer."
+echo "Regenerer les secrets critiques au lieu de reutiliser les valeurs Troca."
 echo "nano ${DEPLOY_PATH}/.env.production.local"
 read -r -p "Appuyez sur Entree une fois le fichier .env edite..."
 

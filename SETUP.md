@@ -84,9 +84,13 @@ Rappels:
 Copier et remplir le fichier de configuration:
 
 ```bash
-cp .env.production .env.production.local
+cp .env.production.example .env.production.local
 nano .env.production.local
 ```
+
+Important:
+- ne pas reutiliser les secrets issus de Troca
+- regenerer au minimum `DB_PASSWORD`, `JWT_SECRET`, `NEXTAUTH_SECRET`, `INTERNAL_API_TOKEN`, `REDIS_PASSWORD` et `ADMIN_API_TOKEN`
 
 Variables minimales a renseigner:
 

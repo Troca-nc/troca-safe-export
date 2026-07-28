@@ -274,10 +274,10 @@ async function rotateRefreshToken(userId, oldRefreshToken) {
 
 async function findUserByEmail(email) {
   return query(
-    `SELECT id, email, password_hash, prenom, nom, is_admin, account_type,
+    `SELECT id, email, password_hash, prenom, nom, is_admin, account_type, pro_category,
             CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
             CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN pro_plan ELSE NULL END AS pro_plan,
-            pro_expires_at, last_bon_plan_offer_at, email_verified, onboarding_step, deleted_at
+            pro_expires_at, last_bon_plan_offer_at, email_verified, onboarding_step, COALESCE(tours_seen, '{}'::text[]) AS tours_seen, deleted_at
      FROM users WHERE email = $1`,
     [normalizeEmail(email)]
   );
@@ -286,10 +286,10 @@ async function findUserByEmail(email) {
 async function findUserById(userId) {
   return query(
     `SELECT id, email, prenom, nom, telephone, phone_verified, email_verified,
-            avatar_url, commune_id, bio, is_admin, account_type,
+            avatar_url, commune_id, bio, is_admin, account_type, pro_category,
             CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
             CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN pro_plan ELSE NULL END AS pro_plan,
-            pro_expires_at, last_bon_plan_offer_at, onboarding_step,
+            pro_expires_at, last_bon_plan_offer_at, onboarding_step, COALESCE(tours_seen, '{}'::text[]) AS tours_seen,
             nb_annonces, note_moyenne, nb_avis, created_at
      FROM users WHERE id = $1`,
     [userId]
@@ -332,7 +332,7 @@ async function registerAccount({ email, password, prenom, nom, commune_id, accou
     const ins = await client.query(
       `INSERT INTO users (email, password_hash, prenom, nom, commune_id, is_pro, account_type, email_verified)
        VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE)
-       RETURNING id, email, prenom, nom, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at, email_verified, onboarding_step, account_type`,
+       RETURNING id, email, prenom, nom, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at, email_verified, onboarding_step, account_type, pro_category, COALESCE(tours_seen, '{}'::text[]) AS tours_seen`,
       [normalizedEmail, password_hash, prenom.trim(), nom.trim(), commune_id || null, normalizedAccountType === 'professional', normalizedAccountType]
     );
     return ins.rows[0];

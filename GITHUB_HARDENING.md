@@ -32,6 +32,12 @@ Store only sensitive values in GitHub Secrets or Environment Secrets:
 - `AWS_SECRET_ACCESS_KEY`
 - `SERVER_SSH_KEY`
 
+## Secret rotation
+
+- Do not reuse Troca-era secrets for Kalico.
+- Create separate values for local, preview, and production.
+- Rotate `DB_PASSWORD`, session secrets, API tokens, and provider keys before the first public deploy.
+
 ## GitHub Variables
 
 Use GitHub Variables for non-sensitive runtime settings:

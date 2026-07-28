@@ -1,6 +1,7 @@
 'use strict';
 
 const { activateBonPlanFromPayment } = require('./bonPlansService');
+const { activateCampaignFromPayment } = require('./campaignsService');
 const { sendBoostActivatedEmail, sendTicketEmail } = require('./emailService');
 const { finalizeEventTicketPayment } = require('./eventTicketingService');
 
@@ -486,6 +487,18 @@ async function processStripeWebhookEvent({
       }
     }
 
+    if (meta.payment_type === 'campaign') {
+      await withTransaction(async (client) => {
+        await activateCampaignFromPayment(
+          client,
+          payment,
+          meta,
+          paymentRef,
+          'stripe'
+        );
+      });
+    }
+
     if (meta.payment_type === 'bon_plan') {
       await withTransaction(async (client) => {
         await activateBonPlanFromPayment(
@@ -806,6 +819,18 @@ async function processPayplugWebhook({
           payment.user_id
         ).catch(() => {});
       }
+    }
+
+    if (meta.payment_type === 'campaign') {
+      await withTransaction(async (client) => {
+        await activateCampaignFromPayment(
+          client,
+          payment,
+          meta,
+          resourceId,
+          'payplug'
+        );
+      });
     }
 
     if (meta.payment_type === 'bon_plan') {

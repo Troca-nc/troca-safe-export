@@ -727,6 +727,15 @@ type BonPlanItem = {
   author_is_pro?: boolean | null
 }
 
+type CampaignItem = {
+  id: number | string
+  title: string
+  description?: string | null
+  image_url?: string | null
+  link_url?: string | null
+  cta_text?: string | null
+}
+
 function formatDateLabel(value?: string | null) {
   if (!value) return 'Date libre'
   const date = new Date(value)
@@ -839,12 +848,52 @@ function CovoiturageCard({
   )
 }
 
+function SponsoredCampaignCard({ item }: { item: CampaignItem }) {
+  const href = item.link_url || '/annonces'
+
+  return (
+    <article className="overflow-hidden rounded-[1.5rem] border border-white/10 border-l-4 border-l-nc-sable bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-nc-lagon/20 to-nc-emeraude/20">
+        {item.image_url ? (
+          <Image
+            src={item.image_url}
+            alt={item.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 90vw, 33vw"
+          />
+        ) : null}
+        <div className="absolute left-3 top-3">
+          <span className="badge badge-sable rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] shadow-sm">
+            Sponsorisé
+          </span>
+        </div>
+      </div>
+
+      <div className="space-y-3 p-4">
+        <h3 className="line-clamp-2 text-lg font-semibold text-night">{item.title}</h3>
+        <p className="line-clamp-3 text-sm leading-relaxed text-night/65">
+          {item.description || 'Une visibilité locale payante, affichée au bon moment sur Kalico.'}
+        </p>
+        <a
+          href={href}
+          className="inline-flex w-full items-center justify-center rounded-2xl bg-nc-sable px-4 py-3 text-sm font-semibold text-white transition hover:bg-nc-sable/90"
+        >
+          {item.cta_text || 'Découvrir'}
+        </a>
+      </div>
+    </article>
+  )
+}
+
 export function BonPlanSection({
+  sponsoredItems,
   promoItems,
   eventItems,
   covoiturageItems,
   loading,
 }: {
+  sponsoredItems?: CampaignItem[]
   promoItems?: BonPlanItem[]
   eventItems?: BonPlanItem[]
   covoiturageItems?: Array<{
@@ -864,6 +913,7 @@ export function BonPlanSection({
   }>
   loading?: boolean
 }) {
+  const sponsoredHasItems = (sponsoredItems || []).length > 0
   const promoHasItems = (promoItems || []).length > 0
   const eventHasItems = (eventItems || []).length > 0
   const rideHasItems = (covoiturageItems || []).length > 0
@@ -871,6 +921,25 @@ export function BonPlanSection({
   return (
     <section className="mx-auto max-w-7xl px-4 pb-10">
       <div className="grid gap-5 overflow-hidden rounded-[2rem] border border-night/8 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.12))] p-5 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)]">
+        {sponsoredHasItems ? (
+          <div>
+            <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-sable">Sponsorisé</p>
+                <h3 className="mt-1 text-2xl font-bold text-white">Les bons plans mis en avant</h3>
+              </div>
+              <Link href="/pro/dashboard/publicite" className="text-sm font-semibold text-nc-sable hover:underline">
+                Gérer les campagnes
+              </Link>
+            </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              {sponsoredItems!.map((item) => (
+                <SponsoredCampaignCard key={item.id} item={item} />
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="section-lagon">
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/80">Bons plans & événements</p>

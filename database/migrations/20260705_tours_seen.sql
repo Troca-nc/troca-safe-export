@@ -1,0 +1,2 @@
+ALTER TABLE users
+ADD COLUMN IF NOT EXISTS tours_seen TEXT[] NOT NULL DEFAULT '{}'::text[];

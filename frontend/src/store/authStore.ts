@@ -25,6 +25,8 @@ interface User {
   account_type?: 'personal' | 'professional'
   pro_plan?: 'pro'
   onboarding_step?: number
+  pro_category?: string | null
+  tours_seen?: string[]
 }
 
 export type DemoProfileKey = 'visitor' | 'particulier' | 'pro' | 'bon_plan'
@@ -45,6 +47,7 @@ const DEMO_USERS: Record<Exclude<DemoProfileKey, 'visitor'>, User> = {
     rating: 4.8,
     commune_name: 'Nouméa',
     demo_role: 'Particulier',
+    tours_seen: [],
   },
   pro: {
     id: 'demo-pro',
@@ -58,6 +61,8 @@ const DEMO_USERS: Record<Exclude<DemoProfileKey, 'visitor'>, User> = {
     rating: 4.9,
     commune_name: 'Dumbéa',
     demo_role: 'Compte Pro',
+    pro_category: 'Artisan BTP',
+    tours_seen: [],
   },
   bon_plan: {
     id: 'demo-bon-plan',
@@ -71,6 +76,8 @@ const DEMO_USERS: Record<Exclude<DemoProfileKey, 'visitor'>, User> = {
     rating: 5,
     commune_name: 'Nouméa',
     demo_role: 'Annonceur Bon Plan',
+    pro_category: 'Bon plans & événements',
+    tours_seen: [],
   },
 }
 

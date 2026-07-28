@@ -11,7 +11,7 @@ const highlights = [
 ]
 
 const quickWins = [
-  { icon: Truck, title: 'Fret', text: 'Transport de colis et marchandises entre les communes.' },
+  { icon: Truck, title: 'Envoi & Livraison', text: 'Transport de colis, déménagement et marchandises entre les communes.' },
   { icon: Briefcase, title: 'Pro', text: 'Créez et envoyez des devis en XPF avec TGC intégrée.' },
   { icon: CalendarDays, title: 'Événements', text: 'Mettez en avant ce qui se passe près de chez vous.' },
   { icon: BarChart3, title: 'Visibilité', text: 'Vos annonces remontent dans une expérience locale claire.' },
@@ -36,7 +36,7 @@ export default function AuthMapPanel() {
               Tout Kalico, en une seule inscription.
             </h2>
             <p className="mt-4 max-w-xl text-sm leading-6 text-white/72 md:text-base">
-              La seule plateforme locale qui couvre les annonces, le covoiturage entre les communes, les devis Pro et le fret — en XPF, pour la Nouvelle-Calédonie.
+              La seule plateforme locale qui couvre les annonces, le covoiturage entre les communes, les devis Pro et l’envoi & livraison — en XPF, pour la Nouvelle-Calédonie.
             </p>
           </div>
 

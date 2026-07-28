@@ -143,10 +143,32 @@ router.get('/exporter-donnees', async (req, res) => {
 
   try {
     // Collecter toutes les données
-    const [userRes, annoncesRes, messagesRes, favorisRes, paymentsRes, alertsRes, notificationsRes, notificationPrefsRes] =
+    const [
+      userRes,
+      annoncesRes,
+      messagesRes,
+      favorisRes,
+      paymentsRes,
+      alertsRes,
+      notificationsRes,
+      notificationPrefsRes,
+      proQuoteRequestsRes,
+      proQuotesRes,
+      quoteRequestsRes,
+      quoteRequestOffersRes,
+      fretRequestsRes,
+      fretOffersRes,
+      campaignsRes,
+      proDocumentsRes,
+      proBookingsRes,
+      proAvailabilityRes,
+      proAvailabilityExceptionsRes,
+    ] =
       await Promise.all([
         query(`SELECT id, email, prenom, nom, telephone, bio, commune_id,
-                      is_pro, created_at, updated_at
+                      is_pro, account_type, pro_category, onboarding_step,
+                      COALESCE(tours_seen, '{}'::text[]) AS tours_seen,
+                      created_at, updated_at
                FROM users WHERE id = $1`, [userId]),
         query(`SELECT id, titre, description, prix, status, created_at, published_at
                FROM annonces WHERE user_id = $1 ORDER BY created_at DESC`, [userId]),
@@ -167,6 +189,52 @@ router.get('/exporter-donnees', async (req, res) => {
                FROM notifications WHERE user_id = $1 ORDER BY created_at DESC`, [userId]),
         query(`SELECT *
                FROM notification_preferences WHERE user_id = $1`, [userId]),
+        query(`SELECT *
+               FROM pro_quote_requests
+               WHERE pro_id = $1 OR requester_user_id = $1
+               ORDER BY created_at DESC`, [userId]),
+        query(`SELECT *
+               FROM pro_quotes
+               WHERE pro_id = $1 OR requester_user_id = $1
+               ORDER BY created_at DESC`, [userId]),
+        query(`SELECT *
+               FROM quote_requests
+               WHERE author_id = $1
+               ORDER BY created_at DESC`, [userId]),
+        query(`SELECT o.*
+               FROM quote_request_offers o
+               JOIN quote_requests qr ON qr.id = o.request_id
+               WHERE qr.author_id = $1 OR o.pro_user_id = $1
+               ORDER BY o.created_at DESC`, [userId]),
+        query(`SELECT *
+               FROM fret_requests
+               WHERE user_id = $1
+               ORDER BY created_at DESC`, [userId]),
+        query(`SELECT o.*
+               FROM fret_offers o
+               JOIN fret_requests fr ON fr.id = o.fret_request_id
+               WHERE fr.user_id = $1 OR o.transporteur_id = $1
+               ORDER BY o.created_at DESC`, [userId]),
+        query(`SELECT *
+               FROM campaigns
+               WHERE user_id = $1
+               ORDER BY created_at DESC`, [userId]),
+        query(`SELECT *
+               FROM pro_documents
+               WHERE user_id = $1
+               ORDER BY created_at DESC`, [userId]),
+        query(`SELECT *
+               FROM pro_bookings
+               WHERE pro_id = $1 OR requester_user_id = $1
+               ORDER BY created_at DESC`, [userId]),
+        query(`SELECT *
+               FROM pro_availability
+               WHERE transporter_id = $1
+               ORDER BY day_of_week, start_time`, [userId]),
+        query(`SELECT *
+               FROM pro_availability_exceptions
+               WHERE transporter_id = $1
+               ORDER BY date_from DESC`, [userId]),
       ]);
 
     const exportData = {
@@ -180,6 +248,17 @@ router.get('/exporter-donnees', async (req, res) => {
       alertes:      alertsRes.rows,
       notifications: notificationsRes.rows,
       notification_preferences: notificationPrefsRes.rows,
+      pro_quote_requests: proQuoteRequestsRes.rows,
+      pro_quotes: proQuotesRes.rows,
+      quote_requests: quoteRequestsRes.rows,
+      quote_request_offers: quoteRequestOffersRes.rows,
+      fret_requests: fretRequestsRes.rows,
+      fret_offers: fretOffersRes.rows,
+      campaigns: campaignsRes.rows,
+      pro_documents: proDocumentsRes.rows,
+      pro_bookings: proBookingsRes.rows,
+      pro_availability: proAvailabilityRes.rows,
+      pro_availability_exceptions: proAvailabilityExceptionsRes.rows,
     };
 
     // Logger l'export
@@ -214,6 +293,7 @@ Date d'export : ${new Date().toLocaleDateString('fr-FR')}
   - paiements : votre historique de paiements
   - alertes : vos alertes de recherche
   - notifications : vos notifications in-app
+  - devis, appels d'offres, fret, campagnes et données Pro : vos échanges et contenus professionnels
 
 ## Vos droits
 

@@ -8,6 +8,7 @@ const { authenticate, optionalAuth } = require('../middleware/auth');
 const { sendMail } = require('../services/emailService');
 const { sendPushToUser } = require('../services/pushService');
 const { createNotification } = require('../services/notificationService');
+const { sendSms } = require('../services/fretWorkflowService');
 const { refreshTrustScore } = require('../services/trustService');
 const { mapListingSearchRow } = require('../services/listingsPresentation');
 const { getAutoReply, saveAutoReply } = require('../services/autoReplyService');
@@ -780,7 +781,7 @@ router.post('/:id/quote', optionalAuth, async (req, res, next) => {
     }
 
     const proRes = await query(
-      `SELECT id, prenom, nom, email, pro_company_name, pro_verified, is_pro, pro_plan, pro_expires_at
+      `SELECT id, prenom, nom, email, telephone, pro_company_name, pro_verified, is_pro, pro_plan, pro_expires_at
        FROM users
        WHERE id = $1
          AND is_pro = TRUE
@@ -883,6 +884,13 @@ router.post('/:id/quote', optionalAuth, async (req, res, next) => {
         data: { type: 'quote_request', proId },
       }),
     ]);
+
+    if (pro.telephone) {
+      await sendSms({
+        to: pro.telephone,
+        body: `Kalico : nouvelle demande de devis de ${requesterName} pour ${needType} à ${commune}. Répondez sur kalico.nc/pro/dashboard`,
+      }).catch(() => {});
+    }
 
     return res.status(201).json({
       data: {

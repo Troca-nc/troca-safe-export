@@ -9,6 +9,7 @@ const { authenticate, optionalAuth } = require('../middleware/auth');
 const { sendMail } = require('../services/emailService');
 const { sendPushToUser } = require('../services/pushService');
 const { createNotification } = require('../services/notificationService');
+const { sendSms } = require('../services/fretWorkflowService');
 
 const router = express.Router();
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
@@ -331,6 +332,13 @@ async function sendQuoteSentEmails(quote) {
     subject,
     html,
   }).catch(() => {});
+
+  if (quote.requester_phone) {
+    await sendSms({
+      to: quote.requester_phone,
+      body: `Kalico : ${quote.pro.display_name} vous a envoyé un devis pour ${quote.subject}. Consultez-le sur kalico.nc`,
+    }).catch(() => {});
+  }
 }
 
 async function sendQuoteDecisionEmails(quote, decision, reason) {
@@ -642,6 +650,13 @@ router.post('/:id/accept', optionalAuth, async (req, res, next) => {
       }).catch(() => {}),
     ]);
 
+    if (quote.pro_phone) {
+      await sendSms({
+        to: quote.pro_phone,
+        body: `Kalico : votre devis ${quote.quote_number} a été accepté par ${quote.requester_name}.`,
+      }).catch(() => {});
+    }
+
     return res.json({ data: parsed });
   } catch (err) {
     next(err);
@@ -696,6 +711,13 @@ router.post('/:id/refuse', optionalAuth, async (req, res, next) => {
         data: { type: 'quote_refused', quoteId },
       }).catch(() => {}),
     ]);
+
+    if (quote.pro_phone) {
+      await sendSms({
+        to: quote.pro_phone,
+        body: `Kalico : votre devis ${quote.quote_number} a été refusé par ${quote.requester_name}.`,
+      }).catch(() => {});
+    }
 
     return res.json({ data: parsed });
   } catch (err) {

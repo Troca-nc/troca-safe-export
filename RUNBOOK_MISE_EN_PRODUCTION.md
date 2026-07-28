@@ -68,8 +68,34 @@ curl http://localhost:3000
 ## 2. Fichiers a preparer sur le serveur
 
 1. Copier le projet dans le repertoire de deploiement.
-2. Renommer le template `.env.production` en `.env.production.local`.
+2. Copier le template `.env.production.example` vers `.env.production.local`.
 3. Renseigner toutes les valeurs de production.
+
+### Rotation minimale recommandee
+
+Avant tout premier deploiement Kalico, regenerer systematiquement:
+
+- `DB_PASSWORD`
+- `JWT_SECRET`
+- `NEXTAUTH_SECRET`
+- `INTERNAL_API_TOKEN`
+- `REDIS_PASSWORD`
+- `ADMIN_API_TOKEN`
+- `ADMIN_PASSWORD_HASH`
+
+Si les services externes sont deja relies:
+
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `PAYPLUG_SECRET_KEY`
+- `PAYPLUG_WEBHOOK_SECRET`
+- `TWILIO_ACCOUNT_SID`
+- `TWILIO_AUTH_TOKEN`
+- `GOOGLE_CLIENT_SECRET`
+- `APPLE_PRIVATE_KEY`
+- `TURNSTILE_SECRET_KEY`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
 
 ### Variables indispensables dans `.env.production.local`
 

@@ -14,8 +14,16 @@ export function useAuthSessionSync() {
 
   useEffect(() => {
     if (!hasHydrated) return
-    if (demoProfile || isAuthenticated) return
     if (!getStoredAccessToken()) return
+    if (demoProfile) return
+
+    const needsRefresh =
+      !isAuthenticated ||
+      !user ||
+      user.pro_category === undefined ||
+      user.tours_seen === undefined
+
+    if (!needsRefresh) return
 
     let alive = true
     setAuthSyncing(true)
@@ -31,7 +39,7 @@ export function useAuthSessionSync() {
     return () => {
       alive = false
     }
-  }, [demoProfile, hasHydrated, isAuthenticated, refreshMe])
+  }, [demoProfile, hasHydrated, isAuthenticated, refreshMe, user])
 
   return {
     user,

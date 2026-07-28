@@ -101,6 +101,17 @@ is_placeholder() {
   return 1
 }
 
+is_weak_legacy_secret() {
+  local value="${1:-}"
+  local lowered="${value,,}"
+  case "$lowered" in
+    kalico|troca|change-me|changeme|admin1234|demo1234!|demo|troca_prod|kalico_prod)
+      return 0
+      ;;
+  esac
+  return 1
+}
+
 for key in "${required_vars[@]}"; do
   value="${!key:-}"
   if is_placeholder "$value"; then
@@ -117,6 +128,19 @@ if [[ "$ENV_FILE" == *production* ]]; then
       missing=1
     fi
   done
+
+  for key in DB_PASSWORD REDIS_PASSWORD; do
+    value="${!key:-}"
+    if is_weak_legacy_secret "$value"; then
+      echo "Weak legacy value rejected in production: $key" >&2
+      missing=1
+    fi
+  done
+
+  if [[ -n "${DB_USER:-}" && -n "${DB_PASSWORD:-}" && "${DB_USER}" == "${DB_PASSWORD}" ]]; then
+    echo "DB_PASSWORD must not match DB_USER in production" >&2
+    missing=1
+  fi
 fi
 
 if [[ -n "${JWT_SECRET:-}" && ${#JWT_SECRET} -lt 64 ]]; then

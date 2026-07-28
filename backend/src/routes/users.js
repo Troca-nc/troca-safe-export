@@ -12,6 +12,7 @@ const bcrypt  = require('bcryptjs');
 const Joi     = require('joi');
 const { query } = require('../config/database');
 const { authenticate } = require('../middleware/auth');
+const { findUserById } = require('../services/authAccountService');
 const { getUserTrocBadges } = require('../services/trocWorkflowService');
 const { getUserPresence, getPresenceLabel } = require('../services/presenceService');
 const { getSellerResponseTime } = require('../services/sellerInsightsService');
@@ -114,6 +115,46 @@ async function getPublicProfilePayload(userId) {
 
 // ── GET /api/users/me/favoris — Mes favoris ─────────────────
 
+// â”€â”€ GET /api/users/me â€” Mon profil courant â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+router.get('/me', authenticate, async (req, res, next) => {
+  try {
+    const result = await findUserById(req.user.id)
+    const user = result.rows[0] || null
+    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable.' })
+    return res.json({ data: user })
+  } catch (err) {
+    next(err)
+  }
+})
+
+const tourSeenSchema = Joi.object({
+  tourKey: Joi.string().trim().min(1).max(120).required(),
+})
+
+// â”€â”€ PATCH /api/users/me/tours-seen â€” Marquer un tour comme vu â”€â”€â”€â”€â”€â”€â”€
+
+router.patch('/me/tours-seen', authenticate, async (req, res, next) => {
+  try {
+    const { error, value } = tourSeenSchema.validate(req.body || {})
+    if (error) return res.status(400).json({ error: error.details[0].message })
+
+    await query(
+      `UPDATE users
+       SET tours_seen = CASE
+         WHEN $2 = ANY(COALESCE(tours_seen, '{}'::text[])) THEN COALESCE(tours_seen, '{}'::text[])
+         ELSE COALESCE(tours_seen, '{}'::text[]) || $2::text
+       END,
+       updated_at = NOW()
+       WHERE id = $1`,
+      [req.user.id, value.tourKey]
+    )
+
+    return res.status(204).send()
+  } catch (err) {
+    next(err)
+  }
+})
 router.get('/me/favoris', authenticate, async (req, res, next) => {
   try {
     const { page = 1, limit = 20 } = req.query;

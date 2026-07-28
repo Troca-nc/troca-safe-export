@@ -43,7 +43,7 @@ const GLOBAL_NAV_GROUPS: NavGroupItem[] = [
     children: [
       { href: '/appels-offres', label: 'Faire un devis' },
       { href: '/pros', label: 'Professionnels' },
-      { href: '/fret', label: 'Fret' },
+      { href: '/envoi-livraison', label: 'Envoi & Livraison' },
     ],
   },
 ]
@@ -215,6 +215,8 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('')
   const [proUnreadCount, setProUnreadCount] = useState(0)
   const demoModeEnabled = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
+  const runtimeEnv = process.env.NEXT_PUBLIC_NODE_ENV || process.env.NODE_ENV
+  const showQaTools = runtimeEnv === 'development'
   const userMenuId = 'header-user-menu'
   const desktopNavRef = useRef<HTMLDivElement | null>(null)
   const mobileMenuRef = useRef<HTMLDivElement | null>(null)
@@ -711,7 +713,7 @@ export default function Header() {
         <div className="mx-auto max-w-[120rem] px-6 lg:px-10">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <DemoModeSwitcher />
-              {demoModeEnabled ? (
+              {demoModeEnabled && showQaTools ? (
                 <div className="flex flex-wrap items-center gap-2">
                   <Link
                     href="/qa"
@@ -720,7 +722,7 @@ export default function Header() {
                     Ouvrir le dashboard QA
                   </Link>
                   <span className="rounded-full bg-night/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-night/60">
-                    Seed local actif
+                    SEED LOCAL ACTIF
                   </span>
                 </div>
               ) : null}

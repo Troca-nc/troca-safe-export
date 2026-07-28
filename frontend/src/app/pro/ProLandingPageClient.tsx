@@ -93,20 +93,20 @@ const FEATURE_SECTIONS: FeatureSection[] = [
       'Gestion des courses et réservations',
       'Profil conducteur vérifié',
       'Statistiques et revenus',
-      'Intégration avec /covoiturage et /fret',
+      'Intégration avec /covoiturage et /envoi-livraison',
     ],
     accent: 'amber',
   },
   {
     key: 'fret',
-    eyebrow: 'Fret & Logistique',
+    eyebrow: 'Envoi & Livraison',
     title: 'Transport de marchandises, devis et demandes',
     description: 'Un module dédié pour les pros qui font bouger des colis, du stock ou du matériel.',
     bullets: [
       'Annonces de transport de marchandises',
       'Estimation volume / poids / urgence',
       'Mise en relation avec les expéditeurs',
-      'Gestion des demandes de fret',
+      'Gestion des demandes d’envoi et livraison',
     ],
     accent: 'lagon',
   },
@@ -153,8 +153,8 @@ const SECTOR_CARDS = [
   },
   {
     icon: Truck,
-    title: 'Fret & Logistique',
-    description: 'Annonces fret et suivi expéditions',
+    title: 'Envoi & Livraison',
+    description: 'Demandes, offres et suivi d’expéditions',
   },
   {
     icon: Home,
@@ -174,7 +174,7 @@ const COMPARISON_ROWS = [
   ['Vitrine publique', false, true],
   ['Devis & factures', false, true],
   ['Réservations / RDV', false, true],
-  ['Transport Pro & Fret', false, true],
+  ['Transport Pro & Livraison', false, true],
   ['Badge Pro vérifié', false, true],
   ['Boosts & priorité', false, true],
   ['Statistiques', false, true],
@@ -184,8 +184,8 @@ const COMPARISON_ROWS = [
 function StatCard({ value, label }: { value: string; label: string }) {
   return (
     <article className="rounded-[1.5rem] border border-white/10 bg-white/10 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.16)] backdrop-blur-sm">
-      <p className="text-3xl font-bold text-white">{value}</p>
-      <p className="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-white/80">{label}</p>
+      <p className="text-3xl font-bold text-[#0a7ea4]">{value}</p>
+      <p className="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-[#1e293b]">{label}</p>
     </article>
   )
 }
@@ -438,7 +438,7 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
     return (
       <div className="overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
         <div className="rounded-[1.25rem] bg-[linear-gradient(135deg,_rgba(8,32,50,0.96),_rgba(10,126,164,0.18))] p-4 text-white">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-white/60">Demande fret</p>
+          <p className="text-[11px] uppercase tracking-[0.22em] text-white/60">Demande Envoi & Livraison</p>
           <h3 className="mt-2 text-xl font-semibold">Nouméa → Koné</h3>
           <p className="mt-1 text-sm text-white/70">2.5 m³ · 380 kg · express</p>
         </div>
@@ -644,21 +644,21 @@ function ComparisonTable() {
             <thead className="bg-[var(--color-background-secondary)]">
               <tr>
                 <th className="px-5 py-4 font-semibold text-night">Fonctionnalité</th>
-                <th className="px-5 py-4 font-semibold text-night">Gratuit</th>
-                <th className="px-5 py-4 font-semibold text-night">Pro</th>
+                <th className="px-5 py-4 text-center font-semibold text-night">Gratuit</th>
+                <th className="px-5 py-4 text-center font-semibold text-night">Pro</th>
               </tr>
             </thead>
             <tbody>
               {COMPARISON_ROWS.map(([label, free, pro]) => (
                 <tr key={label} className="border-t border-[var(--color-border)]">
                   <td className="px-5 py-4 font-medium text-night">{label}</td>
-                  <td className="px-5 py-4">
-                    <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full ${free ? 'bg-emerald-50 text-emerald-700' : 'bg-sand text-night/40'}`}>
+                  <td className="px-5 py-4 text-center">
+                    <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full align-middle ${free ? 'bg-emerald-50 text-emerald-700' : 'bg-sand text-night/40'}`}>
                       {free ? '✓' : '—'}
                     </span>
                   </td>
-                  <td className="px-5 py-4">
-                    <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full ${pro ? 'bg-nc-lagonLight text-nc-lagon' : 'bg-sand text-night/40'}`}>
+                  <td className="px-5 py-4 text-center">
+                    <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full align-middle ${pro ? 'bg-nc-lagonLight text-nc-lagon' : 'bg-sand text-night/40'}`}>
                       {pro ? '✓' : '—'}
                     </span>
                   </td>
@@ -676,9 +676,12 @@ function ComparisonTable() {
               <p className="mt-1 text-sm text-night/60">Sans engagement. Résiliable à tout moment.</p>
             </div>
             <Link href="/pro/inscription" className="btn-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm">
-              Démarrer l’essai gratuit
+              Créer mon espace Pro
               <ArrowRight className="h-4 w-4" />
             </Link>
+            <p className="text-sm text-[#0a7ea4] md:ml-4 md:max-w-md">
+              🔥 3 mois offerts pour les 20 premiers inscrits
+            </p>
           </div>
         </div>
       </div>
@@ -743,7 +746,7 @@ export default function ProLandingPage() {
                 Votre activité, visible dans toute la Nouvelle-Calédonie
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">
-                Vitrine, devis, réservations, transport, fret — tout ce qu’il faut pour développer votre business local.
+                Vitrine, devis, réservations, transport, envoi & livraison — tout ce qu’il faut pour développer votre business local.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -758,12 +761,15 @@ export default function ProLandingPage() {
                   Voir une vitrine exemple
                 </Link>
               </div>
+              <p className="mt-3 text-sm font-semibold text-[#0a7ea4]">
+                🔥 3 mois offerts pour les 20 premiers inscrits
+              </p>
 
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
                 {[
                   'Badge Pro vérifié',
                   'Devis et réservations intégrés',
-                  'Transport et fret connectés',
+                  'Transport et livraison connectés',
                 ].map((item) => (
                   <div key={item} className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white/85 backdrop-blur-sm">
                     <CheckCircle2 className="h-4 w-4 text-nc-lagon" />

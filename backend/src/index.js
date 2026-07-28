@@ -18,6 +18,7 @@ const { apiLimiter, authLimiter }        = require('./middleware/rateLimit');
 const { csrfMiddleware }    = require('./middleware/csrf');
 const { initSocket, shutdownWebsocketBridge }        = require('./services/websocketServer');
 const { startAllJobs }      = require('./jobs/scheduler');
+const { ensureDefaultPopupCampaign } = require('./services/campaignsService');
 const { logger }            = require('./utils/logger');
 const {
   getSnapshot,
@@ -60,6 +61,9 @@ const proBookingsRouter    = require('./routes/pro.bookings');
 const proLaunchPackRouter  = require('./routes/pro.launch-pack');
 const proTransportRouter   = require('./routes/pro-transport');
 const fretRouter           = require('./routes/fret');
+const deliveryRouter       = require('./routes/delivery');
+const campaignsRouter      = require('./routes/campaigns.route');
+const quoteRequestsRouter  = require('./routes/quote-requests.route');
 const eventsRouter         = require('./routes/events.route');
 const importRouter         = require('./routes/import.route');
 const covoiturageRouter    = require('./routes/covoiturage.route');
@@ -232,6 +236,10 @@ app.use('/api/analytics',  analyticsRouter);
 app.use('/api/search',     searchRouter);
 app.use('/api/pro-transport', proTransportRouter);
 app.use('/api/fret', fretRouter);
+app.use('/api/delivery-requests', deliveryRouter);
+app.use('/api/delivery-offers', deliveryRouter);
+app.use('/api/quote-requests', quoteRequestsRouter);
+app.use('/api/campaigns', campaignsRouter);
 app.use('/api/events', eventsRouter);
 app.use('/api/import', importRouter);
 app.use('/api/covoiturage', covoiturageRouter);
@@ -276,6 +284,9 @@ async function start() {
   }
 
   initSocket(server);
+  await ensureDefaultPopupCampaign().catch((error) => {
+    logger.warn('default_popup_init_failed', { error: error?.message || String(error) });
+  });
   if (process.env.RUN_JOBS !== 'false' && databaseReady) {
     startAllJobs();
   } else if (process.env.RUN_JOBS !== 'false') {

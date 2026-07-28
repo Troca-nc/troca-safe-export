@@ -2,49 +2,115 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, BadgeCheck, CalendarDays, Download, Loader2, Mail, MapPin, MessageCircle, Sparkles, User } from 'lucide-react'
+import {
+  ArrowLeft,
+  BadgeCheck,
+  CalendarDays,
+  Loader2,
+  MapPin,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react'
 
-import { proApi } from '@/lib/api'
+import { quoteRequestsApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import { showToast } from '@/lib/toast'
 
 type QuoteRequestDetail = {
-  id: string
-  proId: number
-  proName: string
-  proCommune?: string | null
-  proCategory?: string | null
-  requesterUserId?: number | null
-  createdAt: string
-  request: {
-    requester_name: string
-    requester_email: string
-    requester_phone: string
-    need_type: string
-    commune: string
-    budget_xpf: string
-    desired_date: string
-    details: string
+  id: number
+  author_id: number | null
+  mode: 'open' | 'targeted'
+  category_slug: string
+  category_name: string
+  commune: string
+  title: string
+  description: string
+  budget_min_xpf: number | null
+  budget_max_xpf: number | null
+  desired_date: string | null
+  contact_email: string
+  contact_phone: string | null
+  status: 'open' | 'closed' | 'cancelled'
+  created_at: string
+  updated_at: string
+  offers_count: number
+  offers: Array<{
+    id: number
+    request_id: number
+    pro_id: number
+    pro_user_id: number
+    pro_name: string
+    pro_rating: number
+    amount_xpf: number
+    delay_days: number
+    message: string | null
+    status: 'pending' | 'selected' | 'rejected'
+    created_at: string
+    updated_at: string
+  }>
+}
+
+function formatMoney(value?: number | null) {
+  if (value == null || !Number.isFinite(Number(value))) return 'Non précisé'
+  return `${Number(value).toLocaleString('fr-FR')} XPF`
+}
+
+function buildBudgetLabel(min?: number | null, max?: number | null) {
+  const minValue = Number(min ?? 0)
+  const maxValue = Number(max ?? 0)
+  if (minValue > 0 && maxValue > 0) {
+    return `${formatMoney(minValue)} - ${formatMoney(maxValue)}`
+  }
+  if (minValue > 0) {
+    return `À partir de ${formatMoney(minValue)}`
+  }
+  if (maxValue > 0) {
+    return `Jusqu’à ${formatMoney(maxValue)}`
+  }
+  return 'Budget non précisé'
+}
+
+function formatDateLabel(value?: string | null) {
+  if (!value) return 'À préciser'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return 'À préciser'
+  return new Intl.DateTimeFormat('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(date)
+}
+
+function getStatusTone(status?: string | null) {
+  switch (status) {
+    case 'selected':
+      return 'bg-emerald-50 text-emerald-700 border-emerald-200'
+    case 'rejected':
+      return 'bg-slate-100 text-slate-600 border-slate-200'
+    default:
+      return 'bg-nc-lagonLight text-[#0A7EA4] border-nc-lagon/20'
   }
 }
 
-function formatDate(value: string) {
-  try {
-    return new Intl.DateTimeFormat('fr-FR', {
-      dateStyle: 'full',
-      timeStyle: 'short',
-    }).format(new Date(value))
-  } catch {
-    return value
+function getRequestStatusLabel(status?: string | null) {
+  switch (status) {
+    case 'open':
+      return 'Ouverte'
+    case 'closed':
+      return 'Fermée'
+    case 'cancelled':
+      return 'Annulée'
+    default:
+      return status || 'Inconnue'
   }
 }
 
 export default function QuoteRequestDetailClient({ requestId }: { requestId: string }) {
-  const { user, isAuthenticated } = useAuthStore()
+  const { user, isAuthenticated, hasHydrated } = useAuthStore()
   const [data, setData] = useState<QuoteRequestDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [downloading, setDownloading] = useState(false)
+  const [selectingId, setSelectingId] = useState<number | null>(null)
 
   useEffect(() => {
     let alive = true
@@ -53,7 +119,7 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
       setLoading(true)
       setError('')
       try {
-        const response = await proApi.getQuoteRequestById(requestId)
+        const response = await quoteRequestsApi.getById(requestId)
         if (!alive) return
         setData(response.data?.data || null)
       } catch (err: any) {
@@ -71,43 +137,33 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
     }
   }, [requestId])
 
-  const isProOwner = useMemo(() => {
-    if (!user || !data) return false
-    return Boolean(user.is_pro && Number(user.id) === Number(data.proId))
-  }, [data, user])
-
   const isRequester = useMemo(() => {
     if (!user || !data) return false
-    return Number(user.id) === Number(data.requesterUserId)
+    return Number(user.id) === Number(data.author_id)
   }, [data, user])
 
-  const handleDownloadPdf = async () => {
+  const canChoose = Boolean(isRequester && data && data.status === 'open')
+
+  const handleSelectOffer = async (offerId: number) => {
     if (!data) return
-    setDownloading(true)
+    setSelectingId(offerId)
     try {
-      const response = await proApi.downloadQuoteRequestPdf(data.id)
-      const blob = new Blob([response.data], { type: 'application/pdf' })
-      const url = window.URL.createObjectURL(blob)
-      const anchor = document.createElement('a')
-      anchor.href = url
-      anchor.download = `devis-${data.id}.pdf`
-      document.body.appendChild(anchor)
-      anchor.click()
-      anchor.remove()
-      window.URL.revokeObjectURL(url)
+      await quoteRequestsApi.selectOffer(data.id, { offer_id: offerId })
       showToast({
         tone: 'success',
-        title: 'PDF téléchargé',
-        message: 'La demande a été exportée en PDF.',
+        title: 'Offre sélectionnée',
+        message: 'La demande a bien été attribuée au professionnel choisi.',
       })
+      const refreshed = await quoteRequestsApi.getById(requestId)
+      setData(refreshed.data?.data || null)
     } catch (err: any) {
       showToast({
         tone: 'error',
-        title: 'Téléchargement impossible',
-        message: err?.response?.data?.error || 'Impossible de générer le PDF.',
+        title: 'Sélection impossible',
+        message: err?.response?.data?.error || 'Impossible de sélectionner cette offre.',
       })
     } finally {
-      setDownloading(false)
+      setSelectingId(null)
     }
   }
 
@@ -119,12 +175,12 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
     )
   }
 
-  if (!isAuthenticated) {
+  if (!hasHydrated || !isAuthenticated) {
     return (
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         <p className="text-lg font-semibold text-night">Connectez-vous pour voir cette demande.</p>
         <p className="mt-2 text-sm text-night/60">
-          Cette page est réservée au client qui a envoyé la demande ou au professionnel concerné.
+          Cette page est réservée au demandeur qui a créé l’appel d’offres.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link href={`/connexion?next=/appels-offres/${requestId}`} className="rounded-2xl bg-[#0A7EA4] px-4 py-3 text-sm font-semibold text-white">
@@ -156,9 +212,9 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Détail de la demande</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-night">{data.request.need_type}</h1>
+            <h1 className="mt-2 font-display text-3xl font-bold text-night">{data.title}</h1>
             <p className="mt-3 text-sm text-night/60">
-              Envoyée le {formatDate(data.createdAt)} à {data.proName}.
+              Publiée le {formatDateLabel(data.created_at)} · {data.offers_count} offre{data.offers_count > 1 ? 's' : ''} reçue{data.offers_count > 1 ? 's' : ''}
             </p>
           </div>
           <Link href="/appels-offres" className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]">
@@ -168,39 +224,36 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
         </div>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+      <section className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
         <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Demandeur</p>
-              <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-night">
-                <User className="h-4 w-4 text-[#0A7EA4]" />
-                {data.request.requester_name}
-              </p>
-              <p className="mt-1 text-sm text-night/60">{data.request.requester_email}</p>
-              {data.request.requester_phone ? <p className="mt-1 text-sm text-night/60">{data.request.requester_phone}</p> : null}
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Demande</p>
+              <p className="mt-2 text-sm font-semibold text-night">{data.title}</p>
+              <p className="mt-1 text-sm text-night/60">{data.description}</p>
             </div>
             <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Besoin</p>
-              <p className="mt-2 text-sm font-semibold text-night">{data.request.need_type}</p>
-              <p className="mt-1 text-sm text-night/60">{data.request.details || 'Aucun détail supplémentaire.'}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Catégorie</p>
+              <p className="mt-2 text-sm font-semibold text-night">{data.category_name}</p>
+              <p className="mt-1 text-sm text-night/60">{data.mode === 'open' ? 'Ouvert à tous les pros' : 'Ciblage de pros spécifiques'}</p>
             </div>
             <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Commune</p>
               <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-night">
                 <MapPin className="h-4 w-4 text-coral" />
-                {data.request.commune}
+                {data.commune}
               </p>
-              <p className="mt-1 text-sm text-night/60">{data.proCommune || 'Nouvelle-Calédonie'}</p>
+              <p className="mt-1 text-sm text-night/60">{getRequestStatusLabel(data.status)}</p>
+              <p className="mt-2 text-sm leading-relaxed text-night/55">
+                Votre demande reste ouverte jusqu&apos;à ce que vous choisissiez une offre. Les pros ont généralement 48h pour vous répondre.
+              </p>
             </div>
             <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Budget / date</p>
-              <p className="mt-2 text-sm font-semibold text-night">
-                {data.request.budget_xpf ? `${Number(data.request.budget_xpf).toLocaleString('fr-FR')} XPF` : 'Budget non précisé'}
-              </p>
+              <p className="mt-2 text-sm font-semibold text-night">{buildBudgetLabel(data.budget_min_xpf, data.budget_max_xpf)}</p>
               <p className="mt-1 flex items-center gap-2 text-sm text-night/60">
                 <CalendarDays className="h-4 w-4 text-[#0A7EA4]" />
-                {data.request.desired_date || 'Date souhaitée non précisée'}
+                {formatDateLabel(data.desired_date)}
               </p>
             </div>
           </div>
@@ -210,71 +263,106 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
             <div className="flex items-start gap-3">
               <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
-                <BadgeCheck className="h-5 w-5" />
+                <ShieldCheck className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Professionnel</p>
-                <h2 className="mt-1 font-display text-xl font-bold text-night">{data.proName}</h2>
-                <p className="mt-1 text-sm text-night/60">{data.proCategory || 'Professionnel Kalico'}</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Accès</p>
+                <h2 className="mt-1 font-display text-xl font-bold text-night">Réservé au demandeur</h2>
+                <p className="mt-1 text-sm text-night/60">
+                  {isRequester
+                    ? 'Vous êtes bien l’auteur de cette demande.'
+                    : 'Vous consultez cette demande en lecture seule.'}
+                </p>
               </div>
             </div>
 
-            <p className="mt-4 flex items-center gap-2 text-sm text-night/65">
-              <MapPin className="h-4 w-4 text-coral" />
-              {data.proCommune || 'Nouvelle-Calédonie'}
-            </p>
-
-            <div className="mt-5 space-y-2">
-              {isProOwner ? (
-                <Link
-                  href={`/pro/dashboard/devis?request=${data.id}`}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  Répondre avec un devis
-                </Link>
-              ) : null}
-              {(isRequester || isProOwner) ? (
-                <button
-                  type="button"
-                  onClick={() => void handleDownloadPdf()}
-                  disabled={downloading}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)] disabled:opacity-60"
-                >
-                  {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                  Télécharger PDF
-                </button>
-              ) : null}
-              <Link
-                href={`/pro/${data.proId}`}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
-              >
-                Voir la vitrine
-                <MessageCircle className="h-4 w-4" />
-              </Link>
-              {data.request.requester_email ? (
-                <a
-                  href={`mailto:${data.request.requester_email}`}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
-                >
-                  <Mail className="h-4 w-4" />
-                  Contacter par email
-                </a>
-              ) : null}
-            </div>
-
-            <div className="mt-5 rounded-2xl bg-[var(--color-background-secondary)] p-4 text-sm text-night/65">
-              <p className="font-semibold text-night">État d’accès</p>
-              <p className="mt-1">
-                {isProOwner
-                  ? 'Vous êtes le professionnel concerné par cette demande.'
-                  : isRequester
-                    ? 'Vous êtes à l’origine de cette demande.'
-                    : 'Vous consultez cette demande en lecture seule.'}
-              </p>
+            <div className="mt-5 space-y-2 rounded-2xl bg-[var(--color-background-secondary)] p-4 text-sm text-night/65">
+              <p className="font-semibold text-night">Contact de suivi</p>
+              <p>{data.contact_email}</p>
+              {data.contact_phone ? <p>{data.contact_phone}</p> : null}
             </div>
           </article>
         </aside>
+      </section>
+
+      <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Offres reçues</p>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Comparez les réponses et choisissez</h2>
+          </div>
+          <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-3 py-1 text-xs font-semibold text-night/60">
+            {data.status === 'open' ? 'Demande ouverte' : getRequestStatusLabel(data.status)}
+          </span>
+        </div>
+
+        {!data.offers.length ? (
+          <div className="mt-5 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-background-secondary)] p-6 text-center">
+            <p className="text-lg font-semibold text-night">Aucune offre pour l’instant.</p>
+            <p className="mt-2 text-sm text-night/55">Les professionnels voient la demande et peuvent répondre depuis leur dashboard.</p>
+          </div>
+        ) : (
+          <div className="mt-5 grid gap-4 lg:grid-cols-2">
+            {data.offers.map((offer) => {
+              const selected = offer.status === 'selected'
+              const rejected = offer.status === 'rejected'
+              return (
+                <article
+                  key={offer.id}
+                  className={`rounded-[1.75rem] border p-5 shadow-sm ${
+                    selected
+                      ? 'border-emerald-200 bg-emerald-50/70'
+                      : rejected
+                        ? 'border-slate-200 bg-slate-50/70'
+                        : 'border-[var(--color-border)] bg-[var(--color-background-secondary)]'
+                  }`}
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-emeraude">
+                        {offer.pro_name}
+                      </p>
+                      <h3 className="mt-1 text-lg font-semibold text-night">{formatMoney(offer.amount_xpf)}</h3>
+                    </div>
+                    <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getStatusTone(offer.status)}`}>
+                      {selected ? 'Sélectionnée' : rejected ? 'Non retenue' : 'En attente'}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-2xl bg-white px-4 py-3">
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Note moyenne</p>
+                      <p className="mt-1 flex items-center gap-2 font-semibold text-night">
+                        <BadgeCheck className="h-4 w-4 text-[#0A7EA4]" />
+                        {Number(offer.pro_rating || 0).toFixed(1)}/5
+                      </p>
+                    </div>
+                    <div className="rounded-2xl bg-white px-4 py-3">
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Délai</p>
+                      <p className="mt-1 font-semibold text-night">{offer.delay_days} jours</p>
+                    </div>
+                    <div className="rounded-2xl bg-white px-4 py-3 sm:col-span-2">
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Message</p>
+                      <p className="mt-1 text-sm text-night/65">{offer.message || 'Aucun message complémentaire.'}</p>
+                    </div>
+                  </div>
+
+                  {canChoose ? (
+                    <button
+                      type="button"
+                      onClick={() => void handleSelectOffer(offer.id)}
+                      disabled={selectingId === offer.id || data.status !== 'open'}
+                      className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {selectingId === offer.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                      Choisir cette offre
+                    </button>
+                  ) : null}
+                </article>
+              )
+            })}
+          </div>
+        )}
       </section>
     </div>
   )
