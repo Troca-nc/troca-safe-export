@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS users (
   phone_verified      BOOLEAN       NOT NULL DEFAULT FALSE,
   email_verified      BOOLEAN       NOT NULL DEFAULT FALSE,
   avatar_url          VARCHAR(500)  DEFAULT NULL,
-  commune_id          INTEGER       DEFAULT NULL REFERENCES communes(id) ON DELETE SET NULL,
+  commune_id          INTEGER       DEFAULT NULL,
   bio                 TEXT          DEFAULT NULL,
   member_since        TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
   rides_as_driver     INTEGER       NOT NULL DEFAULT 0,
@@ -128,6 +128,10 @@ INSERT INTO communes (province_id, name, slug) VALUES
   (3, 'Maré',            'mare'),
   (3, 'Ouvéa',           'ouvea')
 ON CONFLICT (slug) DO NOTHING;
+
+ALTER TABLE users
+  ADD CONSTRAINT fk_users_commune
+  FOREIGN KEY (commune_id) REFERENCES communes(id) ON DELETE SET NULL;
 
 -- ── CATEGORIES ────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS categories (

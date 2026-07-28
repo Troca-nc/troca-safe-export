@@ -97,7 +97,8 @@ services:
       PGBOUNCER_AUTH_PASSWORD: ${PGBOUNCER_AUTH_PASSWORD:-}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+      - ./database:/docker-entrypoint-initdb-src:ro
       - ./docker/postgres/init-pgbouncer-auth.sql:/docker-entrypoint-initdb.d/02_pgbouncer_auth.sql:ro
     networks:
       - db_net
