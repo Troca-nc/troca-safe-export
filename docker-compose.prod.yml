@@ -52,20 +52,20 @@ services:
     restart: unless-stopped
     environment:
       SERVER_NAME: ${SERVER_NAME:-51.255.161.64.nip.io}
+      NGINX_SSL_ENABLED: ${NGINX_SSL_ENABLED:-false}
     ports:
       - '80:80'
       - '443:443'
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/sites:/etc/nginx/conf.d:ro
+      - ./docker/nginx/entrypoint.sh:/docker/nginx/entrypoint.sh:ro
       - ./nginx/logrotate.conf:/etc/logrotate.d/nginx:ro
       - certbot_www:/var/www/certbot:ro
       - certbot_conf:/etc/letsencrypt:ro
       - uploads_data:/app/uploads:ro
       - ./nginx/logs:/var/log/nginx
-    command: >
-      /bin/sh -c "envsubst '$$SERVER_NAME' < /etc/nginx/nginx.conf > /tmp/nginx.conf &&
-      nginx -c /tmp/nginx.conf -g 'daemon off;'"
+    entrypoint: ["/bin/sh", "/docker/nginx/entrypoint.sh"]
     depends_on:
       - backend
       - frontend
