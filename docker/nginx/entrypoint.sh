@@ -2,6 +2,7 @@
 set -eu
 
 SERVER_NAME="${SERVER_NAME:-51.255.161.64.nip.io}"
+ADMIN_SERVER_NAME="${ADMIN_SERVER_NAME:-admin.51.255.161.64.nip.io}"
 NGINX_SSL_ENABLED="${NGINX_SSL_ENABLED:-false}"
 
 SRC_DIR="/etc/nginx/conf.d"
@@ -20,7 +21,7 @@ render_site_block() {
   mode="$3"
   tmp="$dest.tmp"
 
-  envsubst '$SERVER_NAME' < "$src" > "$tmp"
+  envsubst '$SERVER_NAME $ADMIN_SERVER_NAME' < "$src" > "$tmp"
 
   if [ "$mode" = "https" ]; then
     awk '
@@ -42,10 +43,13 @@ render_site_block() {
 if [ "$NGINX_SSL_ENABLED" = "true" ]; then
   render_site_block "$SRC_DIR/kalico.nc.conf" "$RENDER_DIR/conf.d/kalico.nc.conf" "https"
   if [ -f "$SRC_DIR/admin.kalico.nc.conf" ]; then
-    envsubst '$SERVER_NAME' < "$SRC_DIR/admin.kalico.nc.conf" > "$RENDER_DIR/conf.d/admin.kalico.nc.conf"
+    render_site_block "$SRC_DIR/admin.kalico.nc.conf" "$RENDER_DIR/conf.d/admin.kalico.nc.conf" "https"
   fi
 else
   render_site_block "$SRC_DIR/kalico.nc.conf" "$RENDER_DIR/conf.d/kalico.nc.conf" "http"
+  if [ -f "$SRC_DIR/admin.kalico.nc.conf" ]; then
+    render_site_block "$SRC_DIR/admin.kalico.nc.conf" "$RENDER_DIR/conf.d/admin.kalico.nc.conf" "http"
+  fi
 fi
 
 exec nginx -c "$RENDER_DIR/nginx.conf" -g 'daemon off;'

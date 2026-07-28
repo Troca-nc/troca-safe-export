@@ -52,6 +52,7 @@ services:
     restart: unless-stopped
     environment:
       SERVER_NAME: ${SERVER_NAME:-51.255.161.64.nip.io}
+      ADMIN_SERVER_NAME: ${ADMIN_SERVER_NAME:-admin.51.255.161.64.nip.io}
       NGINX_SSL_ENABLED: ${NGINX_SSL_ENABLED:-false}
     ports:
       - '80:80'
