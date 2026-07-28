@@ -13,6 +13,7 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
 RUN corepack enable
+RUN corepack prepare pnpm@11.1.1 --activate
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -23,6 +24,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN apk add --no-cache curl
+RUN corepack enable
+RUN corepack prepare pnpm@11.1.1 --activate
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/package.json ./package.json
