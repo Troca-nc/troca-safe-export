@@ -50,6 +50,8 @@ services:
     image: nginx:1.27-alpine
     container_name: kalico_nginx
     restart: unless-stopped
+    environment:
+      SERVER_NAME: ${SERVER_NAME:-51.255.161.64.nip.io}
     ports:
       - '80:80'
       - '443:443'
@@ -61,6 +63,9 @@ services:
       - certbot_conf:/etc/letsencrypt:ro
       - uploads_data:/app/uploads:ro
       - ./nginx/logs:/var/log/nginx
+    command: >
+      /bin/sh -c "envsubst '$$SERVER_NAME' < /etc/nginx/nginx.conf > /tmp/nginx.conf &&
+      nginx -c /tmp/nginx.conf -g 'daemon off;'"
     depends_on:
       - backend
       - frontend
