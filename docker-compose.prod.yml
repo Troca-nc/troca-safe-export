@@ -94,13 +94,11 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_HOST_AUTH_METHOD: md5
-    command: >
-      postgres
-      -c password_encryption=md5
+      PGBOUNCER_AUTH_PASSWORD: ${PGBOUNCER_AUTH_PASSWORD:-}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./docker/postgres/init-pgbouncer-auth.sql:/docker-entrypoint-initdb.d/02_pgbouncer_auth.sql:ro
     networks:
       - db_net
     healthcheck:
@@ -131,12 +129,12 @@ services:
     restart: unless-stopped
     environment:
       DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       PGBOUNCER_PORT: 6432
       PGBOUNCER_POOL_MODE: transaction
+      PGBOUNCER_AUTH_PASSWORD: ${PGBOUNCER_AUTH_PASSWORD:-}
       PGBOUNCER_MAX_CLIENT_CONN: ${PGBOUNCER_MAX_CLIENT_CONN:-500}
       PGBOUNCER_DEFAULT_POOL_SIZE: ${PGBOUNCER_DEFAULT_POOL_SIZE:-50}
       PGBOUNCER_RESERVE_POOL_SIZE: ${PGBOUNCER_RESERVE_POOL_SIZE:-20}
