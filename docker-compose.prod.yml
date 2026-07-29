@@ -182,14 +182,19 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - uploads_data:/app/uploads
-    networks:
-      - db_net
-      - cache_net
-      - app_net
+      volumes:
+        - uploads_data:/app/uploads
+      networks:
+        - db_net
+        - cache_net
+        - app_net
+      healthcheck:
+        test: ['CMD-SHELL', 'pgrep -f "node" > /dev/null || exit 1']
+        interval: 30s
+        timeout: 10s
+        retries: 3
 
-  frontend:
+    frontend:
     image: ${FRONTEND_IMAGE}
     restart: unless-stopped
     environment:
