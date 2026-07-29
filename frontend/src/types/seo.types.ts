@@ -46,7 +46,7 @@ export const CATEGORIES_SEO: Record<string, { label: string; description: string
   'autres':         { label: 'Autres',            description: 'Toutes les autres annonces en NC',                      emoji: '📦' },
 }
 
-export const SITE_URL     = 'https://kalico.nc'
+export const SITE_URL     = process.env.NEXT_PUBLIC_SITE_URL || 'https://kalico.nc'
 export const SITE_NAME    = 'Kalico'
 export const SITE_LOCALE  = 'fr_NC'
 export const SITE_TWITTER = '@KalicoNC'

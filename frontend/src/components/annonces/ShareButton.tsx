@@ -1,6 +1,7 @@
 'use client'
 
 import ShareSheet from '@/components/share/ShareSheet'
+import { SITE_URL } from '@/types/seo.types'
 
 interface ShareButtonProps {
   annonce: {
@@ -23,7 +24,7 @@ function buildShareContent(annonce: ShareButtonProps['annonce']) {
     itemId: annonce.id,
     title: `${annonce.titre} | Kalico`,
     description: [price, location].filter(Boolean).join(' • '),
-    url: `https://kalico.nc/annonces/${annonce.id}`,
+    url: `${SITE_URL}/annonces/${annonce.id}`,
     imageUrl: annonce.image_url ?? null,
   }
 }

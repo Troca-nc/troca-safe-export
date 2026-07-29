@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 
 import Header from '@/components/layout/Header'
 import { generateNoindexMetadata } from '@/lib/seoHelpers'
+import { SITE_URL } from '@/types/seo.types'
 
 import ProPublicClient from '../[id]/ProPublicClient'
 import type { ProPublicProfile, ProPublicReview } from '../publicStorefrontData'
@@ -40,7 +41,7 @@ const demoProfile: ProPublicProfile = {
   pro_commune: 'Dumbéa',
   pro_description:
     'Une vitrine locale pensée pour présenter une activité, envoyer des devis, prendre des rendez-vous et gérer le suivi client sur un seul espace.',
-  pro_website: 'https://kalico.nc',
+  pro_website: SITE_URL,
   pro_phone: null,
   pro_hours: 'Lun - Sam : 07h30 - 18h',
   pro_logo_url: null,

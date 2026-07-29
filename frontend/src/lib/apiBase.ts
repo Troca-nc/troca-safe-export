@@ -7,10 +7,6 @@ export function normalizeApiOrigin(rawUrl?: string | null) {
 
   try {
     const parsed = new URL(trimmed)
-    if (parsed.hostname === 'api.kalico.nc') {
-      parsed.hostname = 'kalico.nc'
-    }
-
     if (parsed.pathname === '/api') {
       parsed.pathname = ''
     } else if (parsed.pathname.endsWith('/api')) {
@@ -20,8 +16,6 @@ export function normalizeApiOrigin(rawUrl?: string | null) {
     return parsed.toString().replace(/\/$/, '')
   } catch {
     let value = trimmed
-      .replace(/^https:\/\/api\.kalico\.nc(?=\/|$)/i, 'https://kalico.nc')
-      .replace(/^http:\/\/api\.kalico\.nc(?=\/|$)/i, 'http://kalico.nc')
 
     if (value.endsWith('/api')) {
       value = value.slice(0, -4)

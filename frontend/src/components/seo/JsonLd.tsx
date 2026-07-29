@@ -2,6 +2,8 @@
 // ── Injection JSON-LD (schema.org) dans le <head> ────────────────────────────
 // À utiliser dans les pages annonce et catégorie pour le rich snippet Google
 
+import { SITE_URL } from '@/types/seo.types'
+
 interface JsonLdProps {
   data: Record<string, unknown> | Record<string, unknown>[]
 }
@@ -22,8 +24,8 @@ export function buildOrganizationSchema() {
     '@context': 'https://schema.org',
     '@type':    'Organization',
     name:       'Kalico',
-    url:        'https://kalico.nc',
-    logo:       'https://kalico.nc/brand/kalico1.svg',
+    url:        SITE_URL,
+    logo:       `${SITE_URL}/brand/kalico1.svg`,
     description: 'Plateforme de petites annonces en Nouvelle-Calédonie',
     address: {
       '@type':          'PostalAddress',
@@ -49,13 +51,13 @@ export function buildWebSiteSchema() {
     '@context': 'https://schema.org',
     '@type':    'WebSite',
     name:       'Kalico',
-    url:        'https://kalico.nc',
+    url:        SITE_URL,
     description: 'Petites annonces Nouvelle-Calédonie',
     potentialAction: {
       '@type':       'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: 'https://kalico.nc/annonces?q={search_term_string}',
+        urlTemplate: `${SITE_URL}/annonces?q={search_term_string}`,
       },
       'query-input': 'required name=search_term_string',
     },
@@ -78,7 +80,7 @@ export function buildProductSchema(annonce: {
     name:       annonce.titre,
     description: annonce.description.slice(0, 500),
     image:      annonce.images.slice(0, 4).map(i => i.url),
-    url:        `https://kalico.nc/annonces/${annonce.id}`,
+    url:        `${SITE_URL}/annonces/${annonce.id}`,
     ...(annonce.prix && {
       offers: {
         '@type':       'Offer',

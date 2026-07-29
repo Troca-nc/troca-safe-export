@@ -11,6 +11,7 @@ import AnnonceDetail     from '@/components/annonces/AnnonceDetail'
 import JsonLd            from '@/components/seo/JsonLd'
 import { normalizeApiBase } from '@/lib/apiBase'
 import { generateAnnonceMetadata } from '@/lib/seoHelpers'
+import { SITE_URL } from '@/types/seo.types'
 
 const API = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001')
 
@@ -71,7 +72,7 @@ export default async function ListingDetailPage(
       name:        annonce.titre,
       description: annonce.description?.slice(0, 300),
       image:       annonce.images?.map((i: any) => i.url) ?? [],
-      url:         `https://kalico.nc/annonces/${annonce.id}`,
+      url:         `${SITE_URL}/annonces/${annonce.id}`,
       ...(annonce.prix && {
         offers: {
           '@type':       'Offer',
@@ -89,9 +90,9 @@ export default async function ListingDetailPage(
       '@context': 'https://schema.org',
       '@type':    'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Accueil',    item: 'https://kalico.nc' },
-        { '@type': 'ListItem', position: 2, name: 'Annonces',   item: 'https://kalico.nc/annonces' },
-        { '@type': 'ListItem', position: 3, name: annonce.titre, item: `https://kalico.nc/annonces/${annonce.id}` },
+        { '@type': 'ListItem', position: 1, name: 'Accueil',    item: SITE_URL },
+        { '@type': 'ListItem', position: 2, name: 'Annonces',   item: `${SITE_URL}/annonces` },
+        { '@type': 'ListItem', position: 3, name: annonce.titre, item: `${SITE_URL}/annonces/${annonce.id}` },
       ],
     },
   ]

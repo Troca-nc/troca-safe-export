@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Header from '@/components/layout/Header'
 import LegalLayout from '@/components/legal/LegalLayout'
+import { SITE_URL } from '@/types/seo.types'
 
 export const metadata: Metadata = {
   title: 'Mentions légales — Kalico',
@@ -16,7 +17,7 @@ export default function MentionsLegalesPage() {
       <LegalLayout title="Mentions légales" lastUpdated={LAST_UPDATE}>
         <h2>1. Éditeur du site</h2>
         <p>
-          Le site <strong>Kalico</strong> (https://kalico.nc) est édité par :
+          Le site <strong>Kalico</strong> ({SITE_URL}) est édité par :
         </p>
         <ul>
           <li><strong>Raison sociale / Nom :</strong> À renseigner avant publication</li>

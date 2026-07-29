@@ -12,6 +12,7 @@ import ContentShareButton from '@/components/share/ContentShareButton'
 import { useAuthStore } from '@/store/authStore'
 import SellerStatsDashboard from '@/components/profil/SellerStatsDashboard'
 import { usersApi } from '@/lib/api'
+import { SITE_URL } from '@/types/seo.types'
 import Link from 'next/link'
 
 function MetricCard({ label, value, sub, icon: Icon, tone = 'text-coral' }: {
@@ -53,7 +54,7 @@ export default function PublicProfilePage() {
           profile.is_pro ? 'Compte professionnel' : 'Profil particulier',
           profile.nb_annonces ? `${profile.nb_annonces} annonce${profile.nb_annonces > 1 ? 's' : ''}` : null,
         ].filter(Boolean).join(' • '),
-        url: `https://kalico.nc/profil/${id}`,
+        url: `${SITE_URL}/profil/${id}`,
         imageUrl: null,
       }
     : null

@@ -4,6 +4,12 @@
 
 /** @type {import('next').NextConfig} */
 const isProd = process.env.NODE_ENV === 'production'
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kalico.nc'
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || `${siteUrl}/api`
+const siteUrlObject = new URL(siteUrl)
+const siteOrigin = siteUrlObject.origin
+const apiOrigin = new URL(apiUrl, siteUrl).origin
+const apiWsOrigin = apiOrigin.replace(/^http/, 'ws')
 
 const nextConfig = {
   experimental: {
@@ -39,6 +45,7 @@ const nextConfig = {
 
   // Variables d'environnement publiques exposées au client
   env: {
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || 'https://kalico.nc',
     NEXT_PUBLIC_API_URL:    process.env.NEXT_PUBLIC_API_URL    || 'http://localhost:3001',
     NEXT_PUBLIC_STRIPE_PK: process.env.NEXT_PUBLIC_STRIPE_PK || '',
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
@@ -55,8 +62,8 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'kalico.nc',
+        protocol: siteUrlObject.protocol.replace(':', ''),
+        hostname: siteUrlObject.hostname,
         pathname: '/**',
       },
       {
@@ -106,7 +113,7 @@ const nextConfig = {
       "img-src 'self' data: blob: https: http://localhost:3000 http://127.0.0.1:3000 http://localhost:3001 http://127.0.0.1:3001",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
-      "connect-src 'self' http://localhost:3001 http://127.0.0.1:3001 ws://localhost:3001 ws://127.0.0.1:3001 https://kalico.nc https://api.kalico.nc",
+      `connect-src 'self' ${siteOrigin} ${apiOrigin} ${apiWsOrigin} http://localhost:3001 http://127.0.0.1:3001 ws://localhost:3001 ws://127.0.0.1:3001`,
       "font-src 'self' data: https:",
     ].join('; ')
 
