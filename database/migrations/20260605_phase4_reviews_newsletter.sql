@@ -2,13 +2,12 @@
 -- Kalico - Phase 4 Pro : avis vérifiés, auto-réponse, newsletter
 -- ============================================================
 
-ALTER TABLE users ADD COLUMN IF NOT EXISTS
-  avatar_url TEXT,
-  bio TEXT,
-  member_since TIMESTAMPTZ DEFAULT NOW(),
-  rides_as_driver INTEGER DEFAULT 0,
-  rides_as_passenger INTEGER DEFAULT 0,
-  trust_score INTEGER DEFAULT 100;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS member_since TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE users ADD COLUMN IF NOT EXISTS rides_as_driver INTEGER DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS rides_as_passenger INTEGER DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS trust_score INTEGER DEFAULT 100;
 
 CREATE TABLE IF NOT EXISTS verified_reviews (
   id SERIAL PRIMARY KEY,
