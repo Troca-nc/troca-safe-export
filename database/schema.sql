@@ -129,9 +129,14 @@ INSERT INTO communes (province_id, name, slug) VALUES
   (3, 'Ouvéa',           'ouvea')
 ON CONFLICT (slug) DO NOTHING;
 
-ALTER TABLE users
-  ADD CONSTRAINT fk_users_commune
-  FOREIGN KEY (commune_id) REFERENCES communes(id) ON DELETE SET NULL;
+DO $$
+BEGIN
+  ALTER TABLE users
+    ADD CONSTRAINT fk_users_commune
+    FOREIGN KEY (commune_id) REFERENCES communes(id) ON DELETE SET NULL;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- ── CATEGORIES ────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS categories (
