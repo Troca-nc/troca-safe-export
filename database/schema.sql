@@ -481,7 +481,7 @@ CREATE INDEX IF NOT EXISTS idx_invoices_user_created
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS pro_listing_stats AS
 SELECT
-  l.author_id,
+  l.user_id,
   l.id as listing_id,
   l.titre as title,
   cat.name as category,
@@ -524,7 +524,7 @@ FROM annonces l
 LEFT JOIN listing_stats ls ON ls.listing_id = l.id
 LEFT JOIN listing_contacts lc ON lc.listing_id = l.id
 LEFT JOIN categories cat ON cat.id = l.category_id
-GROUP BY l.author_id, l.id, l.titre, cat.name, l.prix, l.status, l.created_at;
+GROUP BY l.user_id, l.id, l.titre, cat.name, l.prix, l.status, l.created_at;
 
 CREATE INDEX IF NOT EXISTS idx_pro_listing_stats_listing_id
   ON pro_listing_stats (listing_id);
