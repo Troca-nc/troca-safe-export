@@ -6,6 +6,10 @@
 const isProd = process.env.NODE_ENV === 'production'
 
 const nextConfig = {
+  experimental: {
+    instrumentationHook: true,
+  },
+
   generateBuildId: async () => {
     return `build-${Date.now()}`
   },
