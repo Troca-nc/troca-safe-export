@@ -10,8 +10,13 @@ WHERE commune_id IS NOT NULL
     WHERE c.id = users.commune_id
   );
 
-ALTER TABLE users
-  ADD CONSTRAINT users_commune_id_fkey
-  FOREIGN KEY (commune_id)
-  REFERENCES communes(id)
-  ON DELETE SET NULL;
+DO $$
+BEGIN
+  ALTER TABLE users
+    ADD CONSTRAINT users_commune_id_fkey
+    FOREIGN KEY (commune_id)
+    REFERENCES communes(id)
+    ON DELETE SET NULL;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
