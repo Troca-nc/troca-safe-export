@@ -143,9 +143,14 @@ ALTER TABLE bon_plans
 ALTER TABLE bon_plans
   ALTER COLUMN status SET DEFAULT 'draft';
 
-ALTER TABLE bon_plans
-  ADD CONSTRAINT bon_plans_status_check
-  CHECK (status IN ('draft', 'active', 'expired'));
+DO $$
+BEGIN
+  ALTER TABLE bon_plans
+    ADD CONSTRAINT bon_plans_status_check
+    CHECK (status IN ('draft', 'active', 'expired'));
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 UPDATE bon_plans
 SET duration_days = 7
@@ -159,9 +164,14 @@ EXCEPTION
     NULL;
 END $$;
 
-ALTER TABLE bon_plans
-  ADD CONSTRAINT bon_plans_duration_days_check
-  CHECK (duration_days IN (7, 30));
+DO $$
+BEGIN
+  ALTER TABLE bon_plans
+    ADD CONSTRAINT bon_plans_duration_days_check
+    CHECK (duration_days IN (7, 30));
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_bon_plans_active
   ON bon_plans (status, published_until DESC)
@@ -184,6 +194,11 @@ EXCEPTION
     NULL;
 END $$;
 
-ALTER TABLE payments
-  ADD CONSTRAINT payments_type_check
-  CHECK (type IN ('boost', 'subscription', 'bon_plan'));
+DO $$
+BEGIN
+  ALTER TABLE payments
+    ADD CONSTRAINT payments_type_check
+    CHECK (type IN ('boost', 'subscription', 'bon_plan'));
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;

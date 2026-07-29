@@ -35,9 +35,14 @@ BEGIN
   END IF;
 END $$;
 
-ALTER TABLE IF EXISTS delivery_requests
-  ADD CONSTRAINT delivery_requests_status_check
-  CHECK (status IN ('open', 'closed', 'cancelled', 'delivered', 'expired', 'selected', 'confirmed'));
+DO $$
+BEGIN
+  ALTER TABLE delivery_requests
+    ADD CONSTRAINT delivery_requests_status_check
+    CHECK (status IN ('open', 'closed', 'cancelled', 'delivered', 'expired', 'selected', 'confirmed'));
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 ALTER TABLE IF EXISTS delivery_requests
   DROP CONSTRAINT IF EXISTS fret_requests_selected_offer_fk;
@@ -57,4 +62,3 @@ CREATE INDEX IF NOT EXISTS idx_delivery_offers_request_created
 
 CREATE INDEX IF NOT EXISTS idx_delivery_offers_transporter_created
   ON delivery_offers (transporter_user_id, created_at DESC);
-

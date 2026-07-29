@@ -52,13 +52,23 @@ ALTER TABLE search_alerts
   ALTER COLUMN nb_results SET DEFAULT 0,
   ALTER COLUMN updated_at SET DEFAULT NOW();
 
-ALTER TABLE search_alerts
-  ADD CONSTRAINT search_alerts_status_check
-  CHECK (status IN ('active', 'paused', 'deleted'));
+DO $$
+BEGIN
+  ALTER TABLE search_alerts
+    ADD CONSTRAINT search_alerts_status_check
+    CHECK (status IN ('active', 'paused', 'deleted'));
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
-ALTER TABLE search_alerts
-  ADD CONSTRAINT search_alerts_frequency_check
-  CHECK (frequency IN ('immediate', 'daily', 'weekly'));
+DO $$
+BEGIN
+  ALTER TABLE search_alerts
+    ADD CONSTRAINT search_alerts_frequency_check
+    CHECK (frequency IN ('immediate', 'daily', 'weekly'));
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Index pour les jobs de matching
 CREATE INDEX IF NOT EXISTS idx_alerts_status_frequency
