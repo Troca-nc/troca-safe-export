@@ -33,6 +33,7 @@ BEGIN
   ) THEN
     ALTER TABLE delivery_requests DROP CONSTRAINT IF EXISTS fret_requests_status_check;
   END IF;
+  ALTER TABLE IF EXISTS delivery_requests DROP CONSTRAINT IF EXISTS delivery_requests_status_check;
 END $$;
 
 DO $$
