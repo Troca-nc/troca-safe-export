@@ -27,7 +27,7 @@ CREATE INDEX IF NOT EXISTS idx_listing_contacts_listing
 CREATE TABLE IF NOT EXISTS listing_boosts (
   id SERIAL PRIMARY KEY,
   listing_id INTEGER REFERENCES annonces(id) ON DELETE CASCADE,
-  user_id INTEGER REFERENCES users(id),
+  author_id INTEGER REFERENCES users(id),
   started_at TIMESTAMPTZ DEFAULT NOW(),
   expires_at TIMESTAMPTZ NOT NULL,
   duration_days INTEGER NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS listing_boosts (
 );
 
 CREATE INDEX IF NOT EXISTS idx_listing_boosts_author
-  ON listing_boosts (user_id, status, expires_at DESC);
+  ON listing_boosts (author_id, status, expires_at DESC);
 
 CREATE TABLE IF NOT EXISTS invoices (
   id SERIAL PRIMARY KEY,
