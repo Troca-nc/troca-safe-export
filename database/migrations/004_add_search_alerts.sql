@@ -34,13 +34,33 @@ ALTER TABLE search_alerts
 ALTER TABLE search_alerts
   ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
 
-UPDATE search_alerts
-SET status = CASE WHEN active IS FALSE THEN 'paused' ELSE 'active' END
-WHERE status IS NULL OR status = '';
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_name = 'search_alerts'
+      AND column_name = 'active'
+  ) THEN
+    UPDATE search_alerts
+    SET status = CASE WHEN active IS FALSE THEN 'paused' ELSE 'active' END
+    WHERE status IS NULL OR status = '';
+  END IF;
+END $$;
 
-UPDATE search_alerts
-SET last_sent_at = last_sent
-WHERE last_sent_at IS NULL AND last_sent IS NOT NULL;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_name = 'search_alerts'
+      AND column_name = 'last_sent'
+  ) THEN
+    UPDATE search_alerts
+    SET last_sent_at = last_sent
+    WHERE last_sent_at IS NULL AND last_sent IS NOT NULL;
+  END IF;
+END $$;
 
 UPDATE search_alerts
 SET unsubscribe_token = COALESCE(unsubscribe_token, md5(id::text || user_id::text || created_at::text))
