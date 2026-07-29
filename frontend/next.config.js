@@ -18,6 +18,7 @@ const nextConfig = {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       'pdfjs-dist': 'pdfjs-dist/legacy/build/pdf',
+      '@napi-rs/canvas': false,
     }
     return config
   },
