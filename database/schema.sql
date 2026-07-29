@@ -515,7 +515,7 @@ SELECT
     ORDER BY b.expires_at DESC
     LIMIT 1
   ) as boost_expires_at
-FROM listings l
+FROM annonces l
 LEFT JOIN listing_stats ls ON ls.listing_id = l.id
 LEFT JOIN listing_contacts lc ON lc.listing_id = l.id
 LEFT JOIN categories cat ON cat.id = l.category_id
