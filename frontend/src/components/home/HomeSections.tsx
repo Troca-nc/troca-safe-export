@@ -126,18 +126,44 @@ function getHeroListingHref(listing: HomeListing) {
 function HeroListingCard({ listing }: { listing: HomeListing }) {
   const image = getHeroListingImage(listing)
   const categoryLabel = listing.category_name || listing.category || 'Annonce'
+  const categoryInitial = categoryLabel.trim().charAt(0).toUpperCase() || 'A'
+  const [loaded, setLoaded] = useState(false)
+  const [errored, setErrored] = useState(false)
+
+  useEffect(() => {
+    setLoaded(false)
+    setErrored(false)
+  }, [listing.id])
 
   return (
     <Link
       href={getHeroListingHref(listing)}
-      className="group flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/8 shadow-[0_20px_60px_rgba(3,31,45,0.16)] transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/12"
+      className="group flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-[#e7dbcd] bg-white shadow-[0_20px_60px_rgba(3,31,45,0.12)] transition duration-300 hover:-translate-y-1 hover:border-[#d4c4b0] hover:shadow-[0_24px_64px_rgba(3,31,45,0.14)] dark:border-white/10 dark:bg-white/8 dark:hover:border-white/20 dark:hover:bg-white/12"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-[linear-gradient(160deg,_rgba(255,255,255,0.12),_rgba(255,255,255,0.03))]">
-        {image ? (
-          <Image src={image} alt={listing.title || 'Annonce Kalico'} fill sizes="(max-width: 768px) 50vw, 320px" className="object-cover transition duration-500 group-hover:scale-[1.03]" />
+      <div className="relative aspect-[4/3] overflow-hidden bg-[#f1e7da] dark:bg-[linear-gradient(160deg,_rgba(255,255,255,0.12),_rgba(255,255,255,0.03))]">
+        {image && !errored ? (
+          <>
+            <div
+              className={`absolute inset-0 flex items-center justify-center bg-[#1d9e75] text-5xl font-bold text-white transition-opacity duration-300 ${
+                loaded ? 'opacity-0' : 'opacity-100'
+              }`}
+            >
+              {categoryInitial}
+            </div>
+            <Image
+              src={image}
+              alt={listing.title || 'Annonce Kalico'}
+              fill
+              sizes="(max-width: 768px) 50vw, 320px"
+              className={`object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+              onLoadingComplete={() => setLoaded(true)}
+              onError={() => setErrored(true)}
+            />
+          </>
         ) : (
-          <div className="flex h-full items-center justify-center bg-[linear-gradient(160deg,_rgba(255,255,255,0.12),_rgba(255,255,255,0.04))]">
-            <span className="text-5xl">☀️</span>
+          <div className="flex h-full flex-col items-center justify-center bg-[#1d9e75] text-white">
+            <span className="text-5xl font-bold leading-none">{categoryInitial}</span>
+            <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85">{categoryLabel}</span>
           </div>
         )}
         <span className="absolute left-4 top-4 rounded-full border border-white/15 bg-[rgba(6,36,52,0.75)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/90 backdrop-blur-sm">
@@ -145,17 +171,17 @@ function HeroListingCard({ listing }: { listing: HomeListing }) {
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col gap-2.5 p-4 text-white">
+      <div className="flex flex-1 flex-col gap-2.5 p-4 text-[#17313d] dark:text-white">
         <div className="space-y-1">
           <p className="line-clamp-2 font-display text-xl font-bold leading-tight">{listing.title || 'Annonce locale'}</p>
-          <p className="text-lg font-semibold text-[#8ce3d2]">{normalizeHeroPrice(listing)}</p>
+          <p className="text-lg font-semibold text-[#1d9e75] dark:text-[#8ce3d2]">{normalizeHeroPrice(listing)}</p>
         </div>
-        <div className="mt-auto flex items-center justify-between gap-3 text-sm text-white/75">
+        <div className="mt-auto flex items-center justify-between gap-3 text-sm text-[#39505b] dark:text-white/75">
           <span className="inline-flex min-w-0 items-center gap-1.5 truncate">
-            <MapPin className="h-4 w-4 shrink-0 text-[#8ce3d2]" />
+            <MapPin className="h-4 w-4 shrink-0 text-[#1d9e75] dark:text-[#8ce3d2]" />
             {getHeroListingCommune(listing)}
           </span>
-          <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.16em] text-white/55">
+          <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#6d5d4b] dark:text-white/55">
             Voir
             <ArrowRight className="h-3.5 w-3.5" />
           </span>
@@ -183,41 +209,42 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
   const cards = [...listings.slice(0, 2), ...HERO_FALLBACK_LISTINGS].slice(0, 2)
 
   return (
-    <section className="relative overflow-hidden px-4 pb-10 pt-6 text-white">
-      <div className="absolute inset-x-0 top-0 h-1.5 bg-[linear-gradient(90deg,_#e8832a_0%,_#e8832a_35%,_#1d9e75_100%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,_#0f6f8f_0%,_#0a4157_48%,_#082734_100%)]" />
-      <div className="absolute inset-0 opacity-[0.08] [background-image:radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.7)_1px,_transparent_0)] [background-size:28px_28px]" />
+    <section
+      className="relative overflow-hidden px-4 pb-10 pt-6 text-[#17313d] dark:text-white dark:!bg-[#0c2a35]"
+      style={{ background: '#fdf8f1' }}
+    >
+      <div className="absolute inset-0 opacity-[0.04] [background-image:radial-gradient(circle_at_1px_1px,_rgba(23,49,61,0.22)_1px,_transparent_0)] [background-size:28px_28px] dark:[background-image:radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.75)_1px,_transparent_0)]" />
 
       <div className="relative mx-auto max-w-7xl">
-        <div className="grid gap-6 rounded-[2rem] border border-white/10 bg-[rgba(7,28,41,0.16)] p-5 shadow-[0_30px_90px_rgba(3,31,45,0.2)] backdrop-blur-md md:grid-cols-[1.05fr_0.95fr] md:p-8">
+        <div className="grid gap-6 rounded-[2rem] border border-[#e7dbcd] bg-white/75 p-5 shadow-[0_30px_90px_rgba(3,31,45,0.08)] backdrop-blur-md md:grid-cols-[1.05fr_0.95fr] md:p-8 dark:border-white/10 dark:bg-[rgba(7,28,41,0.16)]">
           <div className="flex min-w-0 flex-col justify-center">
-            <span className="inline-flex w-fit items-center rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/75">
+            <span className="inline-flex w-fit items-center rounded-full border border-[#d8c8b5] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#1d6d89] dark:border-white/15 dark:bg-white/10 dark:text-white/75">
               100 % Nouvelle-Calédonie
             </span>
 
-            <h1 className="mt-4 max-w-2xl font-display text-4xl font-bold leading-tight text-white md:text-6xl">
+            <h1 className="mt-4 max-w-2xl font-display text-4xl font-bold leading-tight text-[#17313d] md:text-6xl dark:text-white">
               Ce qui se vend en NC, c&apos;est ici.
             </h1>
 
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/80 md:text-lg">
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#39505b] md:text-lg dark:text-white/80">
               Annonces, services et pros locaux partout en Nouvelle-Calédonie. De Nouméa aux Loyauté, de Koné à l&apos;Île des Pins.
             </p>
 
             <form onSubmit={onSubmit} className="mt-6 flex w-full max-w-2xl flex-col gap-3 sm:flex-row">
               <div className="relative min-w-0 flex-1">
-                <Search className="absolute left-4 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-white/45" />
+                <Search className="absolute left-4 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-[#71838d] dark:text-white/45" />
                 <input
                   value={q}
                   onChange={(event) => onQueryChange(event.target.value)}
                   placeholder="Toyota, studio Nouméa, plombier, iPhone..."
                   aria-label="Rechercher une annonce"
-                  className="w-full rounded-2xl border border-white/12 bg-white/10 px-4 py-3 pl-11 text-sm text-white placeholder:text-white/55 outline-none ring-0 backdrop-blur-sm transition focus:border-white/30 focus:bg-white/12 focus:ring-4 focus:ring-white/10"
+                  className="w-full rounded-2xl border border-[#d8c8b5] bg-white px-4 py-3 pl-11 text-sm text-[#17313d] placeholder:text-[#6d5d4b]/55 outline-none ring-0 backdrop-blur-sm transition focus:border-[#1d9e75]/40 focus:bg-white focus:ring-4 focus:ring-[#1d9e75]/10 dark:border-white/12 dark:bg-white/10 dark:text-white dark:placeholder:text-white/55 dark:focus:border-white/30 dark:focus:bg-white/12 dark:focus:ring-white/10"
                   autoComplete="off"
                 />
               </div>
               <button
                 type="submit"
-                className="inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-[#0a6e8d] shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/15"
+                className="inline-flex items-center justify-center rounded-2xl bg-[#17313d] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/15 dark:bg-white dark:text-[#0a6e8d]"
               >
                 Rechercher
               </button>
@@ -228,7 +255,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
                 <Link
                   key={pill.slug}
                   href={`/annonces?categorie=${encodeURIComponent(pill.slug)}`}
-                  className="inline-flex items-center rounded-full border border-white/12 bg-white/8 px-3.5 py-2 text-sm font-medium text-white/90 transition hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/12"
+                  className="inline-flex items-center rounded-full border border-[#d8c8b5] bg-white px-3.5 py-2 text-sm font-medium text-[#17313d] transition hover:-translate-y-0.5 hover:border-[#1d9e75]/30 hover:bg-[#f8f2ea] dark:border-white/12 dark:bg-white/8 dark:text-white/90 dark:hover:border-white/20 dark:hover:bg-white/12"
                 >
                   {pill.label}
                 </Link>
