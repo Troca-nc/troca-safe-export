@@ -18,42 +18,9 @@ import {
 import CategoryGridSection from '@/components/home/CategoryGridSection'
 import ProCarousel from '@/components/pro/ProCarousel'
 import TrocListingsPreview from '@/components/home/TrocListingsPreview'
-import { API_ORIGIN, campaignsApi, proApi, searchApi } from '@/lib/api'
+import { API_ORIGIN, campaignsApi, proApi } from '@/lib/api'
 import { trackEvent } from '@/lib/analytics'
 import { useAuthStore } from '@/store/authStore'
-
-function buildHeroSearchSuggestions(listings: any[]) {
-  const staticSuggestions = [
-    'Toyota Hilux',
-    'Toyota RAV4',
-    'Toyota pièces',
-    'iPhone',
-    'Samsung Galaxy',
-    'Véhicules',
-    'Immobilier',
-    'Nouméa',
-    'Dumbéa',
-    'Païta',
-    'Location',
-    'Troc possible',
-  ]
-
-  const dynamicSuggestions = listings.flatMap((listing) => [
-    listing?.title,
-    listing?.category_name,
-    listing?.category,
-    listing?.commune_name,
-    listing?.location_name,
-  ])
-
-  return Array.from(
-    new Set(
-      [...staticSuggestions, ...dynamicSuggestions]
-        .map((value) => String(value || '').trim())
-        .filter(Boolean),
-    ),
-  ).slice(0, 24)
-}
 
 function cleanText(value: unknown, fallback = '') {
   const text = String(value ?? '')
@@ -96,7 +63,6 @@ export default function HomePage() {
   const { user, hasHydrated } = useAuthStore()
   const [q, setQ] = useState('')
   const [recentSearches, setRecentSearches] = useState<string[]>([])
-  const [heroSearchSuggestions, setHeroSearchSuggestions] = useState<string[]>(() => buildHeroSearchSuggestions([]))
   const [listings, setListings] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [promoBonPlans, setPromoBonPlans] = useState<any[]>([])
@@ -112,7 +78,6 @@ export default function HomePage() {
   } | null>(null)
 
   const featuredListings = useMemo(() => listings.slice(0, 8), [listings])
-  const heroFallbackSuggestions = useMemo(() => buildHeroSearchSuggestions(listings), [listings])
   const premiumListings = useMemo(
     () =>
       listings
@@ -130,32 +95,6 @@ export default function HomePage() {
       setRecentSearches([])
     }
   }, [])
-
-  useEffect(() => {
-    let alive = true
-    const term = q.trim()
-    const timer = window.setTimeout(async () => {
-      try {
-        const response = await searchApi.suggestions({ q: term, limit: 24 })
-        const suggestions = Array.isArray(response.data?.data?.suggestions)
-          ? response.data.data.suggestions
-              .map((item: any) => String(item?.label || '').trim())
-              .filter(Boolean)
-          : []
-
-        if (!alive) return
-        setHeroSearchSuggestions(suggestions.length > 0 ? suggestions : heroFallbackSuggestions)
-      } catch {
-        if (!alive) return
-        setHeroSearchSuggestions(heroFallbackSuggestions)
-      }
-    }, term ? 180 : 0)
-
-    return () => {
-      alive = false
-      window.clearTimeout(timer)
-    }
-  }, [heroFallbackSuggestions, q])
 
   useEffect(() => {
     let alive = true
@@ -334,7 +273,7 @@ export default function HomePage() {
         </div>
       ) : null}
 
-      <HomeHeroSection q={q} onQueryChange={setQ} onSubmit={handleSearch} suggestions={heroSearchSuggestions} />
+      <HomeHeroSection q={q} onQueryChange={setQ} onSubmit={handleSearch} listings={featuredListings} />
 
       {recentSearches.length > 0 ? (
         <section className="mx-auto max-w-7xl px-4 pt-4">
