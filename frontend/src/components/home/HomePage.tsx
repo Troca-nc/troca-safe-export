@@ -1,12 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowRight, BadgeCheck, X } from 'lucide-react'
+import { ArrowRight, BadgeCheck } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
+import OnboardingToast from '@/components/onboarding/OnboardingToast'
 import { HomeSpotlightSection } from '@/components/home/HomeSpotlightSection'
 import {
   BonPlanSection,
@@ -49,15 +49,6 @@ function sanitizeValue(value: unknown): unknown {
   return value
 }
 
-const DEFAULT_HOME_POPUP = {
-  is_default_popup: true,
-  title: 'Bienvenue sur Kalico NC',
-  description: 'La plateforme locale de Nouvelle-Calédonie — annonces, services, covoiturage et bien plus.',
-  image_url: '/brand/kalico1.svg',
-  link_url: '/',
-  cta_text: 'Découvrir Kalico',
-}
-
 export default function HomePage() {
   const router = useRouter()
   const { user, hasHydrated } = useAuthStore()
@@ -69,8 +60,6 @@ export default function HomePage() {
   const [eventBonPlans, setEventBonPlans] = useState<any[]>([])
   const [covoiturages, setCovoiturages] = useState<any[]>([])
   const [sponsoredBonPlans, setSponsoredBonPlans] = useState<any[]>([])
-  const [homePopup, setHomePopup] = useState<any | null>(null)
-  const [showHomePopup, setShowHomePopup] = useState(false)
   const [bonPlansLoading, setBonPlansLoading] = useState(true)
   const [proSummary, setProSummary] = useState<{
     listings?: { active?: number; total?: number }
@@ -113,14 +102,12 @@ export default function HomePage() {
         setEventBonPlans(Array.isArray(eventRes?.data) ? eventRes.data.map((item: any) => sanitizeValue(item)) : [])
         setCovoiturages(Array.isArray(rideRes?.data) ? rideRes.data.map((item: any) => sanitizeValue(item)) : [])
         setSponsoredBonPlans(Array.isArray(campaignRes.data?.data?.bon_plans) ? campaignRes.data.data.bon_plans.map((item: any) => sanitizeValue(item)) : [])
-        setHomePopup(campaignRes.data?.data?.popup ? sanitizeValue(campaignRes.data.data.popup) : DEFAULT_HOME_POPUP)
       } catch {
         if (!alive) return
         setPromoBonPlans([])
         setEventBonPlans([])
         setCovoiturages([])
         setSponsoredBonPlans([])
-        setHomePopup(DEFAULT_HOME_POPUP)
       } finally {
         if (alive) setBonPlansLoading(false)
       }
@@ -132,19 +119,6 @@ export default function HomePage() {
     }
   }, [])
 
-  useEffect(() => {
-    if (!homePopup) return
-    if (typeof window === 'undefined') return
-    if (user?.is_admin) return
-    const hasDesktop = window.matchMedia('(min-width: 769px)').matches
-    const storageKey = 'kalico_home_popup_seen'
-    if (!hasDesktop || window.sessionStorage.getItem(storageKey) === '1') {
-      return
-    }
-
-    const timer = window.setTimeout(() => setShowHomePopup(true), 2000)
-    return () => window.clearTimeout(timer)
-  }, [homePopup, user?.is_admin])
 
   useEffect(() => {
     let alive = true
@@ -210,68 +184,7 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-[var(--color-bg-page)] text-[var(--color-text-primary)]">
       <Header />
-
-      {showHomePopup && homePopup ? (
-        <div className="fixed inset-0 z-50 hidden items-end justify-center bg-night/55 px-4 py-6 md:flex md:items-center">
-          <div className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.94))] text-white shadow-[0_32px_100px_rgba(8,32,50,0.35)]">
-            <button
-              type="button"
-              onClick={() => {
-                window.sessionStorage.setItem('kalico_home_popup_seen', '1')
-                setShowHomePopup(false)
-              }}
-              className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/90 transition hover:bg-white/15"
-              aria-label="Fermer la popup"
-            >
-              <X className="h-5 w-5" />
-            </button>
-
-            <div className="grid gap-5 p-5 sm:grid-cols-[0.95fr_1.05fr] sm:items-center sm:p-6">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/10">
-                {homePopup.image_url ? (
-                  <Image
-                    src={homePopup.image_url}
-                    alt={homePopup.title || 'Popup Kalico'}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 100vw, 320px"
-                  />
-                ) : null}
-              </div>
-
-              <div className="space-y-4">
-                <div className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/75">
-                  Nouveauté Kalico
-                </div>
-                <h2 className="font-display text-2xl font-bold leading-tight sm:text-3xl">
-                  {homePopup.title || 'Bienvenue sur Kalico'}
-                </h2>
-                <p className="text-sm leading-relaxed text-white/75">
-                  {homePopup.description || 'Découvrez les annonces, bons plans et services locaux qui comptent vraiment en Nouvelle-Calédonie.'}
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <a
-                    href={homePopup.link_url || '/'}
-                    className="inline-flex items-center justify-center rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-nc-lagon transition hover:-translate-y-0.5"
-                  >
-                    {homePopup.cta_text || 'Découvrir'}
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      window.sessionStorage.setItem('kalico_home_popup_seen', '1')
-                      setShowHomePopup(false)
-                    }}
-                    className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
-                  >
-                    Plus tard
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <OnboardingToast />
 
       <HomeHeroSection q={q} onQueryChange={setQ} onSubmit={handleSearch} listings={featuredListings} />
 
