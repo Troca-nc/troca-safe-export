@@ -49,14 +49,14 @@ export default function CategoryGridSection() {
             <Link
               key={slug}
               href={`/annonces?categorie=${slug}`}
-              className="group flex items-center gap-3 rounded-[1.25rem] border border-night/8 bg-[rgba(3,22,35,0.94)] px-4 py-4 text-white shadow-[0_10px_28px_rgba(5,24,38,0.12)] transition hover:-translate-y-0.5 hover:border-nc-lagon/30 hover:bg-[rgba(5,31,49,0.98)]"
+              className="group flex items-center gap-3 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-4 py-4 text-[var(--color-text-primary)] shadow-card transition hover:-translate-y-0.5 hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface)]"
             >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/8 text-nc-lagon">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] text-nc-lagon">
                 <Icon className="h-5 w-5" />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-semibold">{label}</span>
-                <span className="block text-[11px] uppercase tracking-[0.18em] text-white/45 group-hover:text-white/55">
+                <span className="block text-[11px] uppercase tracking-[0.18em] text-[var(--color-text-tertiary)] group-hover:text-[var(--color-text-secondary)]">
                   Explorer
                 </span>
               </span>
