@@ -12,7 +12,6 @@ import AuthRequiredModal from '@/components/auth/AuthRequiredModal'
 import DemoBanner from '@/components/DemoBanner'
 import ToastCenter from '@/components/ui/ToastCenter'
 import OnboardingWizard from '@/components/OnboardingWizard'
-import TourPopupGate from '@/components/layout/TourPopupGate'
 import { DEFAULT_OG_IMAGE, SITE_LOCALE, SITE_NAME, SITE_TWITTER, SITE_URL } from '@/types/seo.types'
 
 export const metadata: Metadata = {
@@ -65,7 +64,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <PaymentFailureBanner />
             <AuthRequiredModal />
             <OnboardingWizard />
-            <TourPopupGate />
             {children}
             <Footer />
             <CookieBanner />
