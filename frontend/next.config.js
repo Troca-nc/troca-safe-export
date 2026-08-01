@@ -105,23 +105,10 @@ const nextConfig = {
 
   // Headers de sécurité
   async headers() {
-    const csp = [
-      "default-src 'self'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "frame-ancestors 'none'",
-      "img-src 'self' data: blob: https: http://localhost:3000 http://127.0.0.1:3000 http://localhost:3001 http://127.0.0.1:3001",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' js.stripe.com accounts.google.com static.cloudflareinsights.com",
-      "style-src 'self' 'unsafe-inline'",
-      `connect-src 'self' ${siteOrigin} ${apiOrigin} ${apiWsOrigin} accounts.google.com https://oauth2.googleapis.com https://api.stripe.com wss://${siteUrlObject.hostname} http://localhost:3001 http://127.0.0.1:3001 ws://localhost:3001 ws://127.0.0.1:3001`,
-      "font-src 'self' data: https:",
-    ].join('; ')
-
     return [
       {
         source: '/(.*)',
         headers: [
-          { key: 'Content-Security-Policy', value: csp },
           { key: 'X-Frame-Options',         value: 'DENY' },
           { key: 'X-Content-Type-Options',   value: 'nosniff' },
           { key: 'Referrer-Policy',          value: 'strict-origin-when-cross-origin' },
