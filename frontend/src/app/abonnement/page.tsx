@@ -536,7 +536,7 @@ export default function AbonnementPage() {
                   type="button"
                   onClick={handleSubscribe}
                   disabled={loading}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-coral px-4 py-3 text-sm font-semibold text-white transition hover:bg-coral-dark disabled:opacity-60"
+                  className="btn-primary flex w-full items-center justify-center gap-2 px-4 py-3 text-sm font-semibold disabled:opacity-60"
                 >
                   {loading
                     ? 'Redirection...'
