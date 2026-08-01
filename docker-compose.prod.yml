@@ -81,10 +81,8 @@ services:
     volumes:
       - certbot_www:/var/www/certbot
       - certbot_conf:/etc/letsencrypt
-    command:
-      - /bin/sh
-      - -c
-      - tail -f /dev/null
+    	entrypoint: ["tail", "-f", "/dev/null"]
+    	command: []
 
   postgres:
     image: postgis/postgis:16-3.4
