@@ -10,20 +10,16 @@ import { z } from 'zod'
 import {
   AlertCircle,
   ArrowRight,
-  BadgeCheck,
   BarChart3,
   Camera,
-  Check,
   CheckCircle2,
   Eye,
   EyeOff,
-  ShieldCheck,
   Store,
   UserRound,
   X,
 } from 'lucide-react'
 import SocialAuthButtons from '@/components/auth/SocialAuthButtons'
-import TurnstileChallenge from '@/components/auth/TurnstileChallenge'
 import { metaApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import AuthMapPanel from '@/components/auth/AuthMapPanel'
@@ -135,6 +131,34 @@ function PasswordRules({ password }: { password: string }) {
   )
 }
 
+type RegistrationError = {
+  message: string
+  ctaHref?: string
+  ctaLabel?: string
+}
+
+function getRegistrationError(err: any): RegistrationError {
+  const raw = String(err?.response?.data?.error ?? err?.message ?? '').toLowerCase()
+
+  if (raw.includes('email') || raw.includes('already exists')) {
+    return {
+      message: 'Cet email est déjà utilisé. Connectez-vous ou utilisez un autre email.',
+      ctaHref: '/connexion',
+      ctaLabel: 'Se connecter →',
+    }
+  }
+
+  if (raw.includes('network') || raw.includes('fetch')) {
+    return {
+      message: 'Connexion impossible. Vérifiez votre réseau et réessayez.',
+    }
+  }
+
+  return {
+    message: 'Une erreur est survenue. Réessayez dans un moment.',
+  }
+}
+
 function StepPill({
   step,
   current,
@@ -223,9 +247,10 @@ export default function RegisterPage() {
   const [selectedProfile, setSelectedProfile] = useState<ProfileChoice>('particulier')
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly')
   const [showPassword, setShowPassword] = useState(false)
-  const [serverError, setServerError] = useState('')
+  const [serverError, setServerError] = useState<RegistrationError | null>(null)
   const [turnstileToken, setTurnstileToken] = useState('')
   const [communes, setCommunes] = useState<Array<{ id: number; name?: string; nom?: string }>>([])
+  const [showProOptions, setShowProOptions] = useState(false)
   const socialRedirect = selectedProfile === 'pro' ? '/bienvenue?role=pro' : '/bienvenue?role=particulier'
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || ''
   const turnstileEnabled = Boolean(turnstileSiteKey && !turnstileSiteKey.startsWith('CHANGEME'))
@@ -256,6 +281,32 @@ export default function RegisterPage() {
     setStep(next)
   }
 
+  const submitRegistration = async (data: FormData, accountType: ProfileChoice = selectedProfile) => {
+    setServerError(null)
+    try {
+      const { password_confirm: _passwordConfirm, ...payload } = data
+      if (turnstileEnabled && !turnstileToken) {
+        setServerError({
+          message: 'Veuillez compléter la vérification anti-bot.',
+        })
+        return
+      }
+
+      await registerUser(
+        {
+          ...payload,
+          telephone: payload.phone,
+          commune_id: payload.commune_id ? parseInt(payload.commune_id, 10) : undefined,
+          account_type: accountType,
+        },
+        turnstileToken || undefined,
+      )
+      router.push(`/verification-email?email=${encodeURIComponent(payload.email)}&role=${accountType}`)
+    } catch (err: any) {
+      setServerError(getRegistrationError(err))
+    }
+  }
+
   const nextFromStep1 = async () => {
     const ok = await trigger(['email', 'password', 'password_confirm'])
     if (ok) goToStep(2)
@@ -270,31 +321,11 @@ export default function RegisterPage() {
       return
     }
 
-    await handleSubmit(onSubmit)()
+    await handleSubmit((data) => submitRegistration(data, 'particulier'))()
   }
 
   const onSubmit = async (data: FormData) => {
-    setServerError('')
-    try {
-      const { password_confirm: _passwordConfirm, ...payload } = data
-      if (turnstileEnabled && !turnstileToken) {
-        setServerError('Veuillez compléter la vérification anti-bot.')
-        return
-      }
-
-      await registerUser(
-        {
-          ...payload,
-          telephone: payload.phone,
-          commune_id: payload.commune_id ? parseInt(payload.commune_id, 10) : undefined,
-          account_type: selectedProfile,
-        },
-        turnstileToken || undefined,
-      )
-      router.push(`/verification-email?email=${encodeURIComponent(payload.email)}&role=${selectedProfile}`)
-    } catch (err: any) {
-      setServerError(err?.response?.data?.error || 'Erreur lors de la création du compte')
-    }
+    await submitRegistration(data)
   }
 
   const canSubmitAtStep2 = selectedProfile === 'particulier'
@@ -308,22 +339,17 @@ export default function RegisterPage() {
             <p className="font-display text-3xl font-bold text-night">Kalico</p>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-coral/80">Nouvelle-Calédonie</p>
           </Link>
-          <p className="mt-3 text-sm text-night/55">Créez votre compte en 2 minutes — tout le reste vient après.</p>
+          <p className="mt-3 text-sm text-night/55">Créez votre compte en 2 minutes. Tout le reste vient après.</p>
         </div>
 
         <div className="card card-hover overflow-hidden p-6 md:p-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="max-w-2xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Inscription progressive</p>
               <h1 className="mt-2 font-display text-4xl font-bold text-night md:text-5xl">Rejoindre Kalico</h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-night/60 md:text-base">
                 Commencez avec votre compte, complétez votre profil, puis choisissez votre formule au bon moment.
               </p>
             </div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-coral/10 px-3 py-1 text-xs font-semibold text-coral">
-              <BadgeCheck className="h-3.5 w-3.5" />
-              Étapes guidées
-            </span>
           </div>
 
           <div className="mt-5 grid gap-3 md:grid-cols-3">
@@ -333,9 +359,16 @@ export default function RegisterPage() {
           </div>
 
           {serverError ? (
-            <div className="mt-5 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="mt-5 flex items-start gap-3 rounded-xl border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-4 py-3 text-sm text-[var(--color-danger)]">
               <AlertCircle className="h-4 w-4 shrink-0" />
-              {serverError}
+              <div className="min-w-0 flex-1">
+                <p>{serverError.message}</p>
+                {serverError.ctaHref ? (
+                  <Link href={serverError.ctaHref} className="mt-1 inline-flex items-center gap-1 font-semibold underline underline-offset-2">
+                    {serverError.ctaLabel || 'Se connecter →'}
+                  </Link>
+                ) : null}
+              </div>
             </div>
           ) : null}
 
@@ -349,7 +382,6 @@ export default function RegisterPage() {
                       <h2 className="mt-2 text-2xl font-semibold text-night">Créez votre compte</h2>
                       <p className="mt-1 text-sm text-night/55">E-mail, mot de passe et accès rapide avec Google ou Apple si vous préférez.</p>
                     </div>
-                    <span className="rounded-full bg-night/5 px-3 py-1 text-xs font-semibold text-night/60">Le choix du compte vient ensuite</span>
                   </div>
 
                   <div className="mt-5">
@@ -416,7 +448,7 @@ export default function RegisterPage() {
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Étape 2</p>
                     <h2 className="mt-2 text-2xl font-semibold text-night">Parlez-nous de vous</h2>
-                    <p className="mt-1 text-sm text-night/55">Une base simple et claire, sans multiplier les champs.</p>
+                    <p className="mt-1 text-sm text-night/55">Juste l'essentiel pour commencer.</p>
                   </div>
 
                   <div className="grid gap-5">
@@ -500,121 +532,138 @@ export default function RegisterPage() {
                     </p>
                   </div>
 
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    <article className="rounded-[1.75rem] border border-jungle/20 bg-jungle/5 p-5">
-                      <div className="inline-flex items-center rounded-full bg-jungle/15 px-3 py-1 text-xs font-semibold text-jungle">
-                        Gratuit
-                      </div>
-                      <p className="mt-4 text-3xl font-bold text-night">0 XPF / mois</p>
-                      <ul className="mt-4 space-y-2 text-sm text-night/65">
-                        <li className="flex items-center gap-2">
-                          <X className="h-4 w-4 text-night/35" />
-                          5 annonces actives
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <X className="h-4 w-4 text-night/35" />
-                          6 photos par annonce
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <X className="h-4 w-4 text-night/35" />
-                          60 jours de visibilité
-                        </li>
-                      </ul>
-                      <button type="button" className="btn-secondary mt-5 w-full">
-                        Commencer gratuitement
-                      </button>
-                    </article>
+                  <div className="space-y-3">
+                    <button
+                      type="button"
+                      onClick={() => void handleSubmit((data) => submitRegistration(data, 'particulier'))()}
+                      disabled={isSubmitting}
+                      className="btn-primary w-full"
+                    >
+                      {isSubmitting ? 'Création…' : 'Commencer gratuitement'}
+                    </button>
 
-                    <article className="pulse-once rounded-[1.75rem] border border-coral/20 bg-[linear-gradient(180deg,rgba(10,126,164,0.08),rgba(255,255,255,1))] p-5 shadow-lg shadow-coral/10">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="inline-flex items-center rounded-full bg-coral px-3 py-1 text-xs font-semibold text-white">
-                          Recommandé
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setBillingCycle((value) => (value === 'monthly' ? 'annual' : 'monthly'))}
-                          className="inline-flex items-center gap-1 rounded-full border border-night/10 bg-white px-3 py-1.5 text-xs font-semibold text-night transition hover:border-coral/25 hover:text-coral"
-                        >
-                          <span className={billingCycle === 'monthly' ? 'text-coral' : 'text-night/50'}>Mensuel</span>
-                          <span className="text-night/25">/</span>
-                          <span className={billingCycle === 'annual' ? 'text-coral' : 'text-night/50'}>Annuel</span>
-                        </button>
-                      </div>
-
-                      <p className="mt-4 text-3xl font-bold text-coral">
-                        {billingCycle === 'monthly' ? '4 900 XPF / mois' : '44 900 XPF / an'}
-                      </p>
-                      {billingCycle === 'annual' ? (
-                        <p className="mt-2 text-sm font-semibold text-jungle">2 mois offerts</p>
-                      ) : (
-                        <p className="mt-2 text-sm text-night/55">Paiement flexible, à tout moment.</p>
-                      )}
-
-                      <div className="mt-5 space-y-3">
-                        {PLAN_FEATURES.map((feature) => (
-                          <div key={feature.label} className="rounded-2xl border border-night/8 bg-white/80 p-3">
-                            <div className="flex items-center justify-between gap-3 text-sm">
-                              <span className="font-medium text-night">{feature.label}</span>
-                              <span className="font-semibold text-coral">Pro : {feature.pro}</span>
-                            </div>
-                            <div className="mt-2 h-2 rounded-full bg-night/10">
-                              <div
-                                className="h-2 rounded-full bg-coral"
-                                style={{
-                                  width:
-                                    feature.label === 'Annonces actives'
-                                      ? '100%'
-                                      : feature.label === 'Photos par annonce'
-                                        ? '80%'
-                                        : feature.label === 'Badge visible'
-                                          ? '70%'
-                                          : '90%',
-                                }}
-                              />
-                            </div>
-                            <p className="mt-2 text-xs text-night/55">Gratuit : {feature.free}</p>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="mt-5 grid gap-3 rounded-2xl border border-coral/15 bg-coral/5 p-4 text-sm text-night/65">
-                        <div className="flex items-center justify-between gap-3">
-                          <span>Annonces</span>
-                          <strong className="text-coral">∞ vs 5</strong>
-                        </div>
-                        <div className="flex items-center justify-between gap-3">
-                          <span>Photos</span>
-                          <strong className="text-coral">12 vs 6</strong>
-                        </div>
-                        <div className="flex items-center justify-between gap-3">
-                          <span>Badge et stats</span>
-                          <strong className="text-coral">Visibles</strong>
-                        </div>
-                        <div className="rounded-2xl bg-white/80 p-3">
-                          <div className="flex items-center justify-between gap-3">
-                            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-night/45">
-                              <BarChart3 className="h-3.5 w-3.5" />
-                              Statistiques
-                            </span>
-                            <span className="rounded-full bg-coral px-2.5 py-1 text-[11px] font-semibold text-white">Badge Pro</span>
-                          </div>
-                          <div className="mt-3 h-20 rounded-2xl bg-[linear-gradient(180deg,rgba(72,202,228,0.16),rgba(10,126,164,0.04))] p-3">
-                            <div className="flex h-full items-end gap-2">
-                              <span className="h-6 w-4 rounded-t-full bg-night/15" />
-                              <span className="h-10 w-4 rounded-t-full bg-night/15" />
-                              <span className="h-14 w-4 rounded-t-full bg-coral" />
-                              <span className="h-8 w-4 rounded-t-full bg-night/15" />
-                              <span className="h-16 w-4 rounded-t-full bg-coral/70" />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <button type="submit" disabled={isSubmitting} className="btn-primary mt-5 w-full">
-                        {isSubmitting ? 'Création…' : 'Démarrer l’essai gratuit'}
-                      </button>
-                    </article>
+                    <button
+                      type="button"
+                      onClick={() => setShowProOptions((value) => !value)}
+                      className="inline-flex items-center gap-1 text-sm font-semibold text-coral hover:underline"
+                      aria-expanded={showProOptions}
+                    >
+                      Voir les options Pro →
+                    </button>
                   </div>
+
+                  {showProOptions ? (
+                    <div className="space-y-4 pt-2">
+                      <div className="grid gap-4 lg:grid-cols-2">
+                        <article className="rounded-[1.75rem] border border-jungle/20 bg-jungle/5 p-5">
+                          <div className="inline-flex items-center rounded-full bg-jungle/15 px-3 py-1 text-xs font-semibold text-jungle">
+                            Gratuit
+                          </div>
+                          <p className="mt-4 text-3xl font-bold text-night">0 XPF / mois</p>
+                          <ul className="mt-4 space-y-2 text-sm text-night/65">
+                            <li className="flex items-center gap-2">
+                              <X className="h-4 w-4 text-night/35" />
+                              5 annonces actives
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <X className="h-4 w-4 text-night/35" />
+                              6 photos par annonce
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <X className="h-4 w-4 text-night/35" />
+                              60 jours de visibilité
+                            </li>
+                          </ul>
+                        </article>
+
+                        <article className="pulse-once rounded-[1.75rem] border border-coral/20 bg-[linear-gradient(180deg,rgba(10,126,164,0.08),rgba(255,255,255,1))] p-5 shadow-lg shadow-coral/10">
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="inline-flex items-center rounded-full bg-coral px-3 py-1 text-xs font-semibold text-white">
+                              Recommandé
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setBillingCycle((value) => (value === 'monthly' ? 'annual' : 'monthly'))}
+                              className="inline-flex items-center gap-1 rounded-full border border-night/10 bg-white px-3 py-1.5 text-xs font-semibold text-night transition hover:border-coral/25 hover:text-coral"
+                            >
+                              <span className={billingCycle === 'monthly' ? 'text-coral' : 'text-night/50'}>Mensuel</span>
+                              <span className="text-night/25">/</span>
+                              <span className={billingCycle === 'annual' ? 'text-coral' : 'text-night/50'}>Annuel</span>
+                            </button>
+                          </div>
+
+                          <p className="mt-4 text-3xl font-bold text-coral">
+                            {billingCycle === 'monthly' ? '4 900 XPF / mois' : '44 900 XPF / an'}
+                          </p>
+                          {billingCycle === 'annual' ? (
+                            <p className="mt-2 text-sm font-semibold text-jungle">2 mois offerts</p>
+                          ) : (
+                            <p className="mt-2 text-sm text-night/55">Paiement flexible, à tout moment.</p>
+                          )}
+
+                          <div className="mt-5 space-y-3">
+                            {PLAN_FEATURES.map((feature) => (
+                              <div key={feature.label} className="rounded-2xl border border-night/8 bg-white/80 p-3">
+                                <div className="flex items-center justify-between gap-3 text-sm">
+                                  <span className="font-medium text-night">{feature.label}</span>
+                                  <span className="font-semibold text-coral">Pro : {feature.pro}</span>
+                                </div>
+                                <div className="mt-2 h-2 rounded-full bg-night/10">
+                                  <div
+                                    className="h-2 rounded-full bg-coral"
+                                    style={{
+                                      width:
+                                        feature.label === 'Annonces actives'
+                                          ? '100%'
+                                          : feature.label === 'Photos par annonce'
+                                            ? '80%'
+                                            : feature.label === 'Badge visible'
+                                              ? '70%'
+                                              : '90%',
+                                    }}
+                                  />
+                                </div>
+                                <p className="mt-2 text-xs text-night/55">Gratuit : {feature.free}</p>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="mt-5 grid gap-3 rounded-2xl border border-coral/15 bg-coral/5 p-4 text-sm text-night/65">
+                            <div className="flex items-center justify-between gap-3">
+                              <span>Annonces</span>
+                              <strong className="text-coral">∞ vs 5</strong>
+                            </div>
+                            <div className="flex items-center justify-between gap-3">
+                              <span>Photos</span>
+                              <strong className="text-coral">12 vs 6</strong>
+                            </div>
+                            <div className="flex items-center justify-between gap-3">
+                              <span>Badge et stats</span>
+                              <strong className="text-coral">Visibles</strong>
+                            </div>
+                            <div className="rounded-2xl bg-white/80 p-3">
+                              <div className="flex items-center justify-between gap-3">
+                                <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-night/45">
+                                  <BarChart3 className="h-3.5 w-3.5" />
+                                  Statistiques
+                                </span>
+                                <span className="rounded-full bg-coral px-2.5 py-1 text-[11px] font-semibold text-white">Badge Pro</span>
+                              </div>
+                              <div className="mt-3 h-20 rounded-2xl bg-[linear-gradient(180deg,rgba(72,202,228,0.16),rgba(10,126,164,0.04))] p-3">
+                                <div className="flex h-full items-end gap-2">
+                                  <span className="h-6 w-4 rounded-t-full bg-night/15" />
+                                  <span className="h-10 w-4 rounded-t-full bg-night/15" />
+                                  <span className="h-14 w-4 rounded-t-full bg-coral" />
+                                  <span className="h-8 w-4 rounded-t-full bg-night/15" />
+                                  <span className="h-16 w-4 rounded-t-full bg-coral/70" />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </article>
+                      </div>
+                    </div>
+                  ) : null}
 
                   <p className="text-center text-sm text-night/55">
                     Pas encore décidé ?{' '}

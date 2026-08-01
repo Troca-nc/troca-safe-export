@@ -289,13 +289,13 @@ export default function TrocPage() {
       setTrocResults(items)
 
       if (items.length === 0) {
-        setStatusMessage('Aucun troc disponible dans cette gamme — revenez bientôt !')
+        setStatusMessage('Aucun troc disponible dans cette gamme - revenez bientôt !')
       } else if (items.length < 3) {
         setStatusMessage(`Seulement ${items.length} troc(s) disponible(s) dans cette gamme de prix.`)
       }
     } catch {
       setTrocResults([])
-      setStatusMessage('Aucun troc disponible dans cette gamme — revenez bientôt !')
+      setStatusMessage('Aucun troc disponible dans cette gamme - revenez bientôt !')
     } finally {
       setTrocLoading(false)
     }
@@ -353,7 +353,7 @@ export default function TrocPage() {
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Annonces disponibles au troc</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">Annonces disponibles au troc</h2>
           <p className="mt-1 text-sm text-night/55">
-            Ces Calédoniens acceptent les échanges — trouvez votre bonheur.
+            Ces Calédoniens acceptent les échanges - trouvez votre bonheur.
           </p>
         </div>
 
@@ -453,7 +453,7 @@ export default function TrocPage() {
       <section className="mx-auto max-w-4xl px-4 pb-12">
         <div className="mb-5">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Trocômètre</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">⚖️ Trocômètre — Trouvez un équivalent</h2>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">⚖️ Trocômètre - Trouvez un équivalent</h2>
           <p className="mt-1 text-sm text-night/55">
             Vous avez posté une annonce troc ? Entrez son prix et découvrez 3 annonces de valeur équivalente prêtes à l&apos;échange.
           </p>
@@ -492,7 +492,7 @@ export default function TrocPage() {
                 >
                   {ownListings.map((listing) => (
                     <option key={listing.id} value={String(listing.id)}>
-                      {listing.title} — {new Intl.NumberFormat('fr-FR').format(getListingPrice(listing))} XPF
+                      {listing.title} - {new Intl.NumberFormat('fr-FR').format(getListingPrice(listing))} XPF
                     </option>
                   ))}
                 </select>

@@ -3,7 +3,7 @@ import Header from '@/components/layout/Header'
 import LegalLayout from '@/components/legal/LegalLayout'
 
 export const metadata: Metadata = {
-  title: 'Politique de confidentialité — Kalico',
+  title: 'Politique de confidentialité - Kalico',
   description: 'Politique de confidentialité et protection des données personnelles de Kalico.',
 }
 

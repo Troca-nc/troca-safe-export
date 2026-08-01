@@ -421,7 +421,7 @@ export default function BonsPlansPage() {
                 <div className="rounded-[2rem] border border-night/8 bg-white px-6 py-14 text-center text-night/55">
                   <p className="text-lg font-semibold text-night">Les premières promos arrivent bientôt</p>
                   <p className="mt-2 text-sm">
-                    Commerçants, artisans, associations — publiez votre offre et touchez des milliers de Calédoniens.
+                    Commerçants, artisans, associations - publiez votre offre et touchez des milliers de Calédoniens.
                   </p>
                   <Link href="/bons-plans/publier" className="btn-primary mt-5 inline-flex items-center gap-2">
                     Publier une promo
@@ -490,7 +490,7 @@ export default function BonsPlansPage() {
                 <div className="rounded-[2rem] border border-night/8 bg-white px-6 py-14 text-center text-night/55">
                   <p className="text-lg font-semibold text-night">Aucun événement à venir pour le moment</p>
                   <p className="mt-2 text-sm">
-                    Concerts, marchés, expos, conférences — ajoutez votre événement pour le faire connaître.
+                    Concerts, marchés, expos, conférences - ajoutez votre événement pour le faire connaître.
                   </p>
                   <Link href="/bons-plans/publier" className="btn-primary mt-5 inline-flex items-center gap-2">
                     Créer un événement

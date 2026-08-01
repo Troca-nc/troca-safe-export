@@ -746,7 +746,7 @@ export default function ProLandingPage() {
                 Votre activité, visible dans toute la Nouvelle-Calédonie
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">
-                Vitrine, devis, réservations, transport, envoi & livraison — tout ce qu’il faut pour développer votre business local.
+                Vitrine, devis, réservations, transport, envoi & livraison - tout ce qu’il faut pour développer votre business local.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">

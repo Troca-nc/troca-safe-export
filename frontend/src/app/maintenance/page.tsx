@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { buildPageMetadata } from '@/lib/pageMetadata'
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'Maintenance — Kalico NC',
+  title: 'Maintenance - Kalico NC',
   description: 'Kalico est temporairement en maintenance. Merci de revenir un peu plus tard.',
   path: '/maintenance',
   noindex: true,

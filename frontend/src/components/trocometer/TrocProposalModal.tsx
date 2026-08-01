@@ -95,7 +95,7 @@ export default function TrocProposalModal({
     try {
       const proposalResponse = await trocApi.sendProposal(targetListing.id, {
         offered_listing_ids: [selectedListing.id],
-        offered_description: `${getTitle(selectedListing)} — ${formatPrice(selectedPrice)}`,
+        offered_description: `${getTitle(selectedListing)} - ${formatPrice(selectedPrice)}`,
         offered_photos: selectedImage ? [selectedImage] : [],
         complement_xpf: 0,
         complement_direction: 'none',

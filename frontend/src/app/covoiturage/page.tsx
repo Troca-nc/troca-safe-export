@@ -551,7 +551,7 @@ export default function CovoituragePage() {
           </div>
           <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl">Trouver un trajet, publier une place, voyager serein.</h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
-            Trouvez un trajet ou proposez une place — simple, local, entre Calédoniens.
+            Trouvez un trajet ou proposez une place - simple, local, entre Calédoniens.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link href="/connexion" className="btn-primary rounded-2xl px-4 py-2.5">

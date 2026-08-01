@@ -62,7 +62,7 @@ export default function BookingButton({
       })
       const status = String(response.data?.data?.status || '').toLowerCase()
       if (status === 'pending') {
-        setSuccess({ mode: 'manual', label: '⏳ Demande envoyée — réponse sous 24h' })
+        setSuccess({ mode: 'manual', label: '⏳ Demande envoyée - réponse sous 24h' })
       } else {
         setSuccess({ mode: 'auto', label: '✅ Place réservée !' })
       }

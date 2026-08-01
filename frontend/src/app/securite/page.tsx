@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Conseils de sécurité — Kalico',
+  title: 'Conseils de sécurité - Kalico',
   description:
     'Recommandations pratiques pour acheter et vendre en sécurité sur Kalico en Nouvelle-Calédonie.',
 }

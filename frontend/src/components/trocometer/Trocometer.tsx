@@ -231,7 +231,7 @@ export default function Trocometer() {
       setRenderSeed((value) => value + 1)
 
       if (filtered.length === 0) {
-        setStatusMessage('Aucun troc disponible dans cette gamme — revenez bientôt !')
+        setStatusMessage('Aucun troc disponible dans cette gamme - revenez bientôt !')
       } else if (filtered.length < PAGE_SIZE) {
         setStatusMessage(`Seulement ${filtered.length} troc(s) disponible(s) dans cette gamme de prix.`)
       } else {
@@ -241,7 +241,7 @@ export default function Trocometer() {
       setMatches([])
       setPageIndex(0)
       setRenderSeed((value) => value + 1)
-      setStatusMessage('Aucun troc disponible dans cette gamme — revenez bientôt !')
+      setStatusMessage('Aucun troc disponible dans cette gamme - revenez bientôt !')
     } finally {
       setSearching(false)
     }
@@ -446,7 +446,7 @@ export default function Trocometer() {
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-6 text-center">
             <p className="text-lg font-semibold text-night">
               {statusMessage.includes('Aucun troc disponible')
-                ? 'Aucun troc disponible dans cette gamme — revenez bientôt !'
+                ? 'Aucun troc disponible dans cette gamme - revenez bientôt !'
                 : statusMessage}
             </p>
             <p className="mt-2 text-sm text-night/60">

@@ -50,7 +50,7 @@ export interface AlertAnnonce {
 
 // Payload création
 export interface CreateAlertPayload {
-  label?:     string          // optionnel — auto-généré si absent
+  label?:     string          // optionnel - auto-généré si absent
   filters:    AlertFilters
   frequency:  AlertFrequency
 }

@@ -3,7 +3,7 @@ import Header from '@/components/layout/Header'
 import LegalLayout from '@/components/legal/LegalLayout'
 
 export const metadata: Metadata = {
-  title: 'CGU — Kalico',
+  title: 'CGU - Kalico',
   description: "Conditions générales d'utilisation de Kalico.",
 }
 

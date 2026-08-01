@@ -250,7 +250,7 @@ export function HomeSpotlightSection({
       : active.key === 'latest'
         ? {
             title: 'Soyez parmi les premiers !',
-            subtitle: 'Aucune annonce pour l&apos;instant — publiez la vôtre et lancez la communauté.',
+            subtitle: 'Aucune annonce pour l&apos;instant - publiez la vôtre et lancez la communauté.',
             cta: 'Publier une annonce',
             href: '/annonces/nouvelle',
           }

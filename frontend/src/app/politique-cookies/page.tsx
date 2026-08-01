@@ -4,7 +4,7 @@ import LegalLayout from '@/components/legal/LegalLayout'
 import CookieManager from '@/components/legal/CookieManager'
 
 export const metadata: Metadata = {
-  title: 'Cookies — Kalico',
+  title: 'Cookies - Kalico',
   description: 'Gestion des cookies, du stockage local et des préférences de consentement de Kalico.',
 }
 

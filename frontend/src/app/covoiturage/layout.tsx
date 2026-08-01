@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { buildPageMetadata } from '@/lib/pageMetadata'
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'Covoiturage NC — Trajets Nouvelle-Calédonie',
+  title: 'Covoiturage NC - Trajets Nouvelle-Calédonie',
   description: 'Trouvez ou proposez un trajet en covoiturage partout en Nouvelle-Calédonie. Simple, local, entre Calédoniens.',
   path: '/covoiturage',
 })

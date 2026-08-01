@@ -8,7 +8,7 @@ export interface SendOtpResponse {
   success:    boolean
   channel?:   'sms' | 'email'
   cooldown?:  number
-  expires_at: string   // ISO — expiration du code (10 min)
+  expires_at: string   // ISO - expiration du code (10 min)
   masked:     string   // ex: "+687••••34" pour affichage
   message?:   string
 }

@@ -8,7 +8,7 @@ import ContactForm from '@/components/contact/ContactForm'
 import { buildPageMetadata } from '@/lib/pageMetadata'
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'Contact & FAQ — Kalico NC',
+  title: 'Contact & FAQ - Kalico NC',
   description: "Une question ? Consultez notre FAQ ou contactez l'équipe Kalico.",
   path: '/contact',
 })

@@ -4,7 +4,7 @@ import LegalLayout from '@/components/legal/LegalLayout'
 import { SITE_URL } from '@/types/seo.types'
 
 export const metadata: Metadata = {
-  title: 'Mentions légales — Kalico',
+  title: 'Mentions légales - Kalico',
   description: 'Mentions légales de la plateforme Kalico.',
 }
 

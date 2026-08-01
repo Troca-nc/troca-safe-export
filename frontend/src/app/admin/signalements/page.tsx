@@ -69,7 +69,7 @@ function SignalementCard({
           </span>
           <div>
             <p className="font-medium text-sm text-night">
-              #{s.annonce.id} — {s.annonce.titre}
+              #{s.annonce.id} - {s.annonce.titre}
             </p>
             <p className="text-xs text-night/50">
               {s.nb_reporters} signalement{s.nb_reporters > 1 ? 's' : ''} · {timeAgo(s.created_at)}
@@ -268,7 +268,7 @@ export default function AdminSignalementsPage() {
         {(data?.total ?? 0) > (data?.data.length ?? 0) && (
           <p className="text-center text-xs text-night/40 mt-4 flex items-center justify-center gap-1">
             <Clock size={12} />
-            {data?.total} signalements au total — affichage des plus récents
+            {data?.total} signalements au total - affichage des plus récents
           </p>
         )}
       </div>

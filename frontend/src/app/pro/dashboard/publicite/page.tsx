@@ -743,7 +743,7 @@ export default function ProDashboardPublicitePage() {
         <div className="rounded-[1.75rem] border border-amber-200 bg-amber-50 p-5 shadow-sm">
           <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-amber-800">
             <CheckCircle2 className="h-4 w-4" />
-            1 seul popup actif à la fois — votre campagne sera mise en file d’attente si un popup est déjà en cours.
+            1 seul popup actif à la fois - votre campagne sera mise en file d’attente si un popup est déjà en cours.
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {[

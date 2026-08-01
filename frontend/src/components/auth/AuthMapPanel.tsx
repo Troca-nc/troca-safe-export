@@ -36,7 +36,7 @@ export default function AuthMapPanel() {
               Tout Kalico, en une seule inscription.
             </h2>
             <p className="mt-4 max-w-xl text-sm leading-6 text-white/72 md:text-base">
-              La seule plateforme locale qui couvre les annonces, le covoiturage entre les communes, les devis Pro et l’envoi & livraison — en XPF, pour la Nouvelle-Calédonie.
+              La seule plateforme locale qui couvre les annonces, le covoiturage entre les communes, les devis Pro et l’envoi & livraison - en XPF, pour la Nouvelle-Calédonie.
             </p>
           </div>
 
@@ -84,7 +84,7 @@ export default function AuthMapPanel() {
             <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-white/16 bg-white/8 px-4 py-[14px] text-left">
               <div>
                 <p className="text-sm font-semibold text-white">Publier, échanger, réserver, développer.</p>
-                <p className="mt-1 text-xs leading-5 text-white/70">Dès votre inscription, votre compte est actif sur toutes les fonctionnalités — aucune étape cachée.</p>
+                <p className="mt-1 text-xs leading-5 text-white/70">Dès votre inscription, votre compte est actif sur toutes les fonctionnalités - aucune étape cachée.</p>
               </div>
               <ArrowRight className="h-5 w-5 shrink-0 text-nc-lagon" />
             </div>

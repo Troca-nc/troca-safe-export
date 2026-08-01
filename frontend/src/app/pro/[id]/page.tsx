@@ -44,7 +44,7 @@ export async function generateMetadata(
   }
 
   const displayName = buildDisplayName(profile)
-  const title = `${displayName} — Vitrine Pro | Kalico`
+  const title = `${displayName} - Vitrine Pro | Kalico`
   const description = buildDescription(profile, displayName)
   const canonical = `${SITE_URL}/pro/${id}`
 

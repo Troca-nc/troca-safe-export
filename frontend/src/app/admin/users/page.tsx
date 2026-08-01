@@ -315,7 +315,7 @@ export default function AdminUsersPage() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-4">
             <p className="text-xs text-night/40">
-              Page {filters.page} / {totalPages} — {data?.total.toLocaleString('fr-FR')} utilisateurs
+              Page {filters.page} / {totalPages} - {data?.total.toLocaleString('fr-FR')} utilisateurs
             </p>
             <div className="flex gap-2">
               <button

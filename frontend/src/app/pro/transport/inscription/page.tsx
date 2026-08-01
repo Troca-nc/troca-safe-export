@@ -157,7 +157,7 @@ export default function ProTransportInscriptionPage() {
               <div className="md:col-span-2">
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Formulaire</p>
                 <h2 className="mt-1 font-display text-2xl font-bold text-night">Créer mon compte Transport Pro</h2>
-                <p className="mt-1 text-sm text-night/55">Gratuit pour commencer — validé par notre équipe sous 48h.</p>
+                <p className="mt-1 text-sm text-night/55">Gratuit pour commencer - validé par notre équipe sous 48h.</p>
               </div>
 
               <label className="block md:col-span-2">

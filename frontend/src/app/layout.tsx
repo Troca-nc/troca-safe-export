@@ -16,7 +16,7 @@ import { DEFAULT_OG_IMAGE, SITE_LOCALE, SITE_NAME, SITE_TWITTER, SITE_URL } from
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'Kalico — Petites annonces Nouvelle-Calédonie',
+  title: 'Kalico - Petites annonces Nouvelle-Calédonie',
   description: 'La première plateforme de petites annonces dédiée à la Nouvelle-Calédonie. Achetez, vendez, louez en toute confiance.',
   keywords: 'annonces, nouvelle-calédonie, noumea, vente, achat, immobilier, véhicules',
   openGraph: {

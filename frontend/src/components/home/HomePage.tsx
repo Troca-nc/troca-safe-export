@@ -316,7 +316,7 @@ export default function HomePage() {
               Annonces disponibles au troc
             </h2>
             <p className="mt-1 text-sm text-night/55">
-              Ces calédoniens acceptent les échanges — trouvez votre bonheur.
+              Ces calédoniens acceptent les échanges - trouvez votre bonheur.
             </p>
           </div>
           <Link href="/troc" className="hidden items-center gap-1 text-sm font-semibold text-coral hover:underline md:inline-flex">

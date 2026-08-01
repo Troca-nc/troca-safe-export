@@ -65,7 +65,7 @@ function ImageCard({
       }}
       tabIndex={0}
       className="relative group aspect-square rounded-xl overflow-hidden bg-sand border border-night/10 cursor-grab active:cursor-grabbing"
-      aria-label={`Image ${index + 1} sur ${total}${index === 0 ? ' — photo principale' : ''}`}
+      aria-label={`Image ${index + 1} sur ${total}${index === 0 ? ' - photo principale' : ''}`}
       role="group"
     >
       <img src={preview} alt="" className="w-full h-full object-cover" />

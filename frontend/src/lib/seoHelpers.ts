@@ -21,7 +21,7 @@ function formatXPF(price: number): string {
 // ── Page d'accueil ────────────────────────────────────────────────────────────
 
 export function generateHomeMetadata(): Metadata {
-  const title       = 'Kalico — Petites annonces Nouvelle-Calédonie'
+  const title       = 'Kalico - Petites annonces Nouvelle-Calédonie'
   const description = 'Achetez, vendez, échangez et troquez en Nouvelle-Calédonie. La première plateforme d’annonces 100% calédonienne.'
 
   return {
@@ -36,7 +36,7 @@ export function generateHomeMetadata(): Metadata {
       siteName:  SITE_NAME,
       locale:    SITE_LOCALE,
       type:      'website',
-      images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: 'Kalico — Petites annonces NC' }],
+      images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: 'Kalico - Petites annonces NC' }],
     },
     twitter: {
       card:        'summary_large_image',
@@ -59,7 +59,7 @@ export function generateCategoryMetadata(
   const label = cat?.label ?? slug
 
   const location = commune ? ` à ${commune}` : ' en Nouvelle-Calédonie'
-  const title     = `${label}${location} — ${nb_annonces} annonces | Kalico`
+  const title     = `${label}${location} - ${nb_annonces} annonces | Kalico`
   const description = truncate(
     `${nb_annonces} annonces de ${label.toLowerCase()}${location}. ${cat?.description ?? ''} Kalico, la plateforme de petites annonces NC.`,
     160,
@@ -108,7 +108,7 @@ interface AnnonceMetaInput {
 }
 
 export function generateAnnonceMetadata(annonce: AnnonceMetaInput): Metadata {
-  const prix_str  = annonce.prix ? ` — ${formatXPF(annonce.prix)}` : ''
+  const prix_str  = annonce.prix ? ` - ${formatXPF(annonce.prix)}` : ''
   const lieu_str  = annonce.commune ? ` à ${annonce.commune}` : ' en NC'
   const cat       = CATEGORIES_SEO[annonce.categorie]
 
@@ -203,7 +203,7 @@ export function generateProfilMetadata(user: {
   prenom: string; nom: string; nb_annonces: number; commune?: string
 }, profileUrl: string = `${SITE_URL}/profil`): Metadata {
   const name  = `${user.prenom} ${user.nom}`
-  const title = `${name} — ${user.nb_annonces} annonce${user.nb_annonces > 1 ? 's' : ''} sur Kalico`
+  const title = `${name} - ${user.nb_annonces} annonce${user.nb_annonces > 1 ? 's' : ''} sur Kalico`
   const description = `Consultez les ${user.nb_annonces} annonce${user.nb_annonces > 1 ? 's' : ''} de ${name}${user.commune ? ` à ${user.commune}` : ''} sur Kalico, la plateforme de petites annonces NC.`
 
   return {

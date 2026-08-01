@@ -1878,7 +1878,7 @@ function ListingsPageContent() {
                   Aucune annonce trouvée pour ces critères
                 </h3>
                 <p className="mx-auto mb-6 max-w-lg text-sm leading-relaxed text-night/55">
-                  Soyez le premier à publier dans cette catégorie — les acheteurs sont là.
+                  Soyez le premier à publier dans cette catégorie - les acheteurs sont là.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <button onClick={clearFilters} className="btn-secondary">

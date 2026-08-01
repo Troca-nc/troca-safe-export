@@ -51,7 +51,7 @@ export default function SaveSearchAlert({ filters, className = '' }: SaveSearchA
     return (
       <div className={`flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm ${className}`}>
         <Check size={15} />
-        Alerte créée — vous serez notifié par email
+        Alerte créée - vous serez notifié par email
       </div>
     )
   }

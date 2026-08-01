@@ -998,7 +998,7 @@ export function BonPlanSection({
                     Le prochain événement NC mérite d&apos;être ici.
                   </p>
                   <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-                    Concerts, marchés, conférences — tout y est.
+                    Concerts, marchés, conférences - tout y est.
                   </p>
                   <Link href="/evenements/nouveau" className="btn-primary mt-4 inline-flex items-center justify-center">
                     Créer un événement
