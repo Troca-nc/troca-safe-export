@@ -60,14 +60,16 @@ interface Listing {
 interface Props {
   listing: Listing
   className?: string
+  boosted?: boolean
+  featured?: boolean
 }
 
 const CONDITION_LABELS: Record<string, string> = {
   new: 'Neuf',
   like_new: 'Comme neuf',
-  good: 'Bon état',
+  good: 'Bon Ã©tat',
   fair: 'Correct',
-  for_parts: 'Pour pièces',
+  for_parts: 'Pour piÃ¨ces',
 }
 
 const blurPlaceholder = 'data:image/gif;base64,R0lGODlhAQABAAAAACw='
@@ -82,6 +84,10 @@ function getListingCategoryLabel(listing: Listing) {
   const slug = String(listing.category_slug ?? '').replaceAll('_', ' ')
   if (!slug) return 'Annonce'
   return slug.charAt(0).toUpperCase() + slug.slice(1)
+}
+function getListingCategoryInitial(listing: Listing) {
+  const label = getListingCategoryLabel(listing)
+  return label.trim().charAt(0).toUpperCase() || 'A'
 }
 
 function getListingBadgeClass(listing: Listing) {
@@ -139,6 +145,7 @@ function ListingImageFrame({
   saved,
   isLoading,
   onFavorite,
+  featuredCard,
 }: {
   listing: Listing
   loaded: boolean
@@ -146,12 +153,28 @@ function ListingImageFrame({
   saved: boolean
   isLoading: boolean
   onFavorite: (event: React.MouseEvent<HTMLButtonElement>) => void
+  featuredCard: boolean
 }) {
-  const boosted = listing.is_featured || Boolean(listing.boosted_until && new Date(listing.boosted_until) > new Date())
+  const hasCoverImage = Boolean(listing.cover_image)
+  const categoryInitial = getListingCategoryInitial(listing)
+  const [imageTimedOut, setImageTimedOut] = useState(false)
+  const priceLabel = listing.is_free
+    ? 'Gratuit'
+    : listing.price
+      ? `${listing.price.toLocaleString('fr-FR')} XPF`
+      : 'Prix à débattre'
+
+  useEffect(() => {
+    if (!hasCoverImage) return undefined
+
+    setImageTimedOut(false)
+    const timer = window.setTimeout(() => setImageTimedOut(true), 8_000)
+    return () => window.clearTimeout(timer)
+  }, [hasCoverImage, listing.id])
 
   return (
-    <div className="relative aspect-[16/9] overflow-hidden bg-sand">
-      {listing.cover_image ? (
+    <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-surface-raised)]">
+      {hasCoverImage ? (
         <ListingImage
           src={listing.cover_image}
           alt={listing.title}
@@ -160,39 +183,32 @@ function ListingImageFrame({
           placeholder="blur"
           blurDataURL={blurPlaceholder}
           onLoadingComplete={() => setLoaded(true)}
-          imgClassName={`transition-transform duration-300 group-hover:scale-[1.04] ${loaded ? 'opacity-100' : 'opacity-0'}`}
+          imgClassName={`h-full w-full object-cover transition-transform ease-out ${featuredCard ? 'duration-200 group-hover:scale-[1.02]' : 'duration-150 group-hover:scale-[1.01]'} motion-reduce:transition-none motion-reduce:transform-none ${loaded ? 'opacity-100' : 'opacity-0'}`}
         />
       ) : (
-        <ListingImage
-          src={null}
-          alt={listing.title}
-          fallbackIcon={listing.category_icon}
-        />
+        <div className="flex h-full w-full items-center justify-center bg-[var(--color-surface-raised)]">
+          <span className="text-6xl font-semibold text-night/20">{categoryInitial}</span>
+        </div>
       )}
 
-      {listing.cover_image && !loaded ? <div className="skeleton absolute inset-0 rounded-none" aria-hidden="true" /> : null}
+      {hasCoverImage && !loaded && !imageTimedOut ? <div className="skeleton absolute inset-0 rounded-none" aria-hidden="true" /> : null}
 
-      <div className="absolute left-3 top-3 z-10 flex max-w-[70%] flex-wrap gap-2">
-        <span className={`badge text-[10px] shadow-sm backdrop-blur-sm ${getListingBadgeClass(listing)}`}>
-          {getListingCategoryLabel(listing)}
-        </span>
-        {listing.is_troc || listing.contre_quoi ? (
-          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 shadow-sm backdrop-blur-sm">
-            ⇄ Troc
-          </span>
-        ) : null}
-      </div>
-
-      <div className="absolute right-3 top-3 z-10 flex flex-col items-end gap-2">
-        {boosted ? <span className="badge badge-warning bg-white/90 text-[10px] shadow-sm backdrop-blur-sm">⭐ Boosté</span> : null}
-      </div>
+      {featuredCard ? (
+        <>
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.55))]" />
+          <div className="absolute bottom-3 left-3 z-10 text-base font-medium text-white">{priceLabel}</div>
+          <div className="absolute right-3 top-3 z-10 rounded bg-coral px-2 py-0.5 text-xs font-medium text-white shadow-sm">
+            À la une
+          </div>
+        </>
+      ) : null}
 
       <button
         type="button"
         onClick={onFavorite}
         disabled={isLoading}
         aria-label={saved ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-        className={`absolute bottom-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/85 text-night/50 shadow-md backdrop-blur-sm transition duration-150 hover:scale-110 active:scale-95 ${
+        className={`absolute bottom-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/85 text-night/50 shadow-md backdrop-blur-sm transition duration-150 hover:scale-110 active:scale-95 motion-reduce:transition-none motion-reduce:hover:scale-100 ${
           isLoading ? 'cursor-wait opacity-50' : ''
         }`}
       >
@@ -201,8 +217,7 @@ function ListingImageFrame({
     </div>
   )
 }
-
-export default function ListingCard({ listing, className = '' }: Props) {
+export default function ListingCard({ listing, className = '', boosted, featured }: Props) {
   const { isAuthenticated } = useAuthStore()
   const { isFavorited, toggleFavorite, isToggling } = useFavorite()
   const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
@@ -270,22 +285,12 @@ export default function ListingCard({ listing, className = '' }: Props) {
     })
   }
 
-  const formatPrice = () => {
-    if (listing.is_free) {
-      return <span className="text-jungle">Gratuit</span>
-    }
-
-    if (!listing.price) {
-      return <span className="text-night/50 text-sm italic">Prix à débattre</span>
-    }
-
-    return (
-      <span className="font-bold text-night">
-        {listing.price.toLocaleString('fr-FR')}{' '}
-        <span className="text-sm font-normal text-night/60">XPF</span>
-      </span>
-    )
-  }
+  const priceText = listing.is_free
+    ? 'Gratuit'
+    : listing.price
+      ? `${listing.price.toLocaleString('fr-FR')} XPF`
+      : 'Prix Ã  dÃ©battre'
+  const priceClassName = listing.is_free ? 'text-jungle' : 'text-coral'
 
   const publishedAt = listing.published_at ?? listing.created_at ?? new Date().toISOString()
   const timeAgo = formatDistanceToNow(new Date(publishedAt), {
@@ -300,18 +305,24 @@ export default function ListingCard({ listing, className = '' }: Props) {
   const isConditionVisible = Boolean(listing.condition && CONDITION_LABELS[listing.condition])
   const locationZone = typeof listing.metadata?.quartier_zone === 'string' ? String(listing.metadata.quartier_zone).trim() : ''
   const locationText = listing.commune_name
-    ? `${listing.commune_name}${locationZone ? ` Â· ${locationZone}` : ''}`
-    : 'Nouvelle-Calédonie'
+    ? `${listing.commune_name}${locationZone ? ` Ã‚Â· ${locationZone}` : ''}`
+    : 'Nouvelle-CalÃ©donie'
   const isProVerified = Boolean(
     (listing.author?.is_pro && listing.author?.pro_verified)
     || (listing.is_pro && listing.seller_pro_verified)
     || (listing.seller_is_pro && listing.seller_pro_verified)
   )
 
+  const level2 = Boolean((featured ?? boosted ?? listing.is_featured) || Boolean(listing.boosted_until && new Date(listing.boosted_until) > new Date()))
+
   return (
     <Link
       href={`/annonces/${listing.id}`}
-      className={`group card card-hover block overflow-hidden rounded-[12px] border-night/10 border-l-4 ${getListingFrameClass(listing)} bg-white/96 p-0 shadow-sm ${className}`}
+      className={`group block overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-white shadow-sm transform-gpu transition-all ease-out motion-reduce:transition-none motion-reduce:transform-none ${
+        level2
+          ? 'duration-200 hover:scale-[1.02] hover:shadow-[0_14px_36px_rgba(8,32,50,0.18)]'
+          : 'duration-150 hover:-translate-y-[2px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)]'
+      } ${className}`}
     >
       <ListingImageFrame
         listing={listing}
@@ -320,19 +331,22 @@ export default function ListingCard({ listing, className = '' }: Props) {
         saved={saved}
         isLoading={isLoading}
         onFavorite={handleFavorite}
+        featuredCard={level2}
       />
 
       <div className="space-y-3 p-4">
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           <h3 className="line-clamp-2 text-[15px] font-medium leading-6 text-night transition-colors duration-150 group-hover:text-coral">
             {listing.title}
           </h3>
-          <div className="text-[24px] font-bold leading-tight text-night">
-            {formatPrice()}
-          </div>
+          {level2 ? null : (
+            <div className={`text-lg font-medium leading-tight ${priceClassName}`}>
+              {priceText}
+            </div>
+          )}
         </div>
 
-        <div className="flex items-center justify-between gap-3 text-xs text-night/55">
+        <div className="flex items-center justify-between gap-3 text-xs text-[var(--color-text-tertiary)]">
           <span className="flex min-w-0 items-center gap-1 truncate">
             <MapPin className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">{locationText}</span>

@@ -11,6 +11,7 @@ import ListingCard from '@/components/listings/ListingCard'
 import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
 import type { CategoryNode } from '@/lib/categoryCatalog'
 import { SEARCH_ALERTS, getCategoryIcon } from '@/lib/categoryPresentation'
+import { useScrollReveal } from '@/hooks/useScrollReveal'
 
 function formatNumber(value: number | null) {
   if (value === null || Number.isNaN(value)) return '...'
@@ -22,6 +23,33 @@ function getCategoryChildren(category: CategoryNode) {
 
 function getHomepageCategoryIcon(category: Pick<CategoryNode, 'slug' | 'name' | 'icon'>) {
   return getCategoryIcon(category.slug, category.name, category.icon)
+}
+
+function EmptyHomeCta({
+  icon: Icon,
+  title,
+  subtitle,
+  cta,
+  href,
+}: {
+  icon: typeof Sparkles
+  title: string
+  subtitle: string
+  cta: string
+  href: string
+}) {
+  return (
+    <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5 text-white/80">
+      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white animate-pulse motion-reduce:animate-none">
+        <Icon className="h-5 w-5" aria-hidden="true" />
+      </div>
+      <p className="font-display text-lg font-semibold text-white">{title}</p>
+      <p className="mt-2 text-sm text-white/65">{subtitle}</p>
+      <Link href={href} className="btn-primary mt-4 rounded-2xl px-4 py-2.5 text-sm">
+        {cta}
+      </Link>
+    </div>
+  )
 }
 
 type HomeHeroSectionProps = {
@@ -48,11 +76,11 @@ type HomeListing = {
 }
 
 const HERO_CATEGORY_PILLS = [
-  { slug: 'vehicules', label: '🚗 Véhicules' },
-  { slug: 'immobilier', label: '🏠 Immobilier' },
-  { slug: 'services', label: '🛠 Services' },
-  { slug: 'electronique-multimedia', label: '📱 High-tech' },
-  { slug: 'maison-jardin', label: '🌿 Jardin' },
+  { slug: 'vehicules', label: 'ðŸš— VÃ©hicules' },
+  { slug: 'immobilier', label: 'ðŸ  Immobilier' },
+  { slug: 'services', label: 'ðŸ›  Services' },
+  { slug: 'electronique-multimedia', label: 'ðŸ“± High-tech' },
+  { slug: 'maison-jardin', label: 'ðŸŒ¿ Jardin' },
 ] as const
 
 const HERO_FALLBACK_LISTINGS = [
@@ -60,16 +88,16 @@ const HERO_FALLBACK_LISTINGS = [
     id: 'fallback-vehicules',
     title: 'Toyota Hilux 4x4 double cabine',
     price_display: '2 450 000 F',
-    commune_name: 'Nouméa',
+    commune_name: 'NoumÃ©a',
     image_url: null,
     category_slug: 'vehicules',
-    category_name: 'Véhicules',
+    category_name: 'VÃ©hicules',
   },
   {
     id: 'fallback-immobilier',
-    title: 'Appartement T2 meublé',
+    title: 'Appartement T2 meublÃ©',
     price_display: '85 000 F / mois',
-    commune_name: 'Dumbéa',
+    commune_name: 'DumbÃ©a',
     image_url: null,
     category_slug: 'immobilier',
     category_name: 'Immobilier',
@@ -85,11 +113,11 @@ const HERO_FEATURES = [
   {
     icon: MapPin,
     title: 'Toute la NC couverte',
-    subtitle: 'Communes, tribus, îles',
+    subtitle: 'Communes, tribus, Ã®les',
   },
   {
     icon: ShieldCheck,
-    title: 'Pros vérifiés',
+    title: 'Pros vÃ©rifiÃ©s',
     subtitle: 'Artisans et services de confiance',
   },
 ] as const
@@ -104,7 +132,7 @@ function normalizeHeroPrice(listing: HomeListing) {
 }
 
 function getHeroListingCommune(listing: HomeListing) {
-  return String(listing.commune_name ?? listing.commune ?? '').trim() || 'Nouvelle-Calédonie'
+  return String(listing.commune_name ?? listing.commune ?? '').trim() || 'Nouvelle-CalÃ©donie'
 }
 
 function getHeroListingImage(listing: HomeListing) {
@@ -219,7 +247,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
         <div className="grid gap-6 rounded-[2rem] border border-[#e7dbcd] bg-white/75 p-5 shadow-[0_30px_90px_rgba(3,31,45,0.08)] backdrop-blur-md md:grid-cols-[1.05fr_0.95fr] md:p-8 dark:border-white/10 dark:bg-[rgba(7,28,41,0.16)]">
           <div className="flex min-w-0 flex-col justify-center">
             <span className="inline-flex w-fit items-center rounded-full border border-[#d8c8b5] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#1d6d89] dark:border-white/15 dark:bg-white/10 dark:text-white/75">
-              100 % Nouvelle-Calédonie
+              100 % Nouvelle-CalÃ©donie
             </span>
 
             <h1 className="mt-4 max-w-2xl font-display text-4xl font-bold leading-tight text-[#17313d] md:text-6xl dark:text-white">
@@ -227,7 +255,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
             </h1>
 
             <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#39505b] md:text-lg dark:text-white/80">
-              Annonces, services et pros locaux partout en Nouvelle-Calédonie. De Nouméa aux Loyauté, de Koné à l&apos;Île des Pins.
+              Annonces, services et pros locaux partout en Nouvelle-CalÃ©donie. De NoumÃ©a aux LoyautÃ©, de KonÃ© Ã  l&apos;ÃŽle des Pins.
             </p>
 
             <form onSubmit={onSubmit} className="mt-6 flex w-full max-w-2xl flex-col gap-3 sm:flex-row">
@@ -236,7 +264,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
                 <input
                   value={q}
                   onChange={(event) => onQueryChange(event.target.value)}
-                  placeholder="Toyota, studio Nouméa, plombier, iPhone..."
+                  placeholder="Toyota, studio NoumÃ©a, plombier, iPhone..."
                   aria-label="Rechercher une annonce"
                   className="w-full rounded-2xl border border-[#d8c8b5] bg-white px-4 py-3 pl-11 text-sm text-[#17313d] placeholder:text-[#6d5d4b]/55 outline-none ring-0 backdrop-blur-sm transition focus:border-[#1d9e75]/40 focus:bg-white focus:ring-4 focus:ring-[#1d9e75]/10 dark:border-white/12 dark:bg-white/10 dark:text-white dark:placeholder:text-white/55 dark:focus:border-white/30 dark:focus:bg-white/12 dark:focus:ring-white/10"
                   autoComplete="off"
@@ -352,10 +380,12 @@ export function FeaturedListingsSection({
   listings: any[]
   loading: boolean
 }) {
+  useScrollReveal()
+
   if (!loading && listings.length === 0) return null
 
   return (
-    <section id="featured-listings" className="mx-auto max-w-7xl px-4 pb-10">
+    <section id="featured-listings" data-reveal="true" className="mx-auto max-w-7xl px-4 pb-10">
       <div className="mb-5 flex items-end justify-between gap-4">
         <div className="section-lagon">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Annonces en vedette</p>
@@ -392,8 +422,10 @@ export function FeaturedListingsSection({
 }
 
 export function SearchAlertsSection() {
+  useScrollReveal()
+
   return (
-    <section className="mx-auto max-w-7xl px-4 pb-10">
+    <section data-reveal="true" className="mx-auto max-w-7xl px-4 pb-10">
       <div className="grid gap-5 overflow-hidden rounded-[2rem] border border-[var(--color-border)] border-b-4 border-b-nc-corail bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.18))] px-6 py-8 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)] lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div className="min-w-0">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-lagon">
@@ -590,8 +622,10 @@ export function PopularCategoriesSection({
   categories: CategoryNode[]
   onBrowse: (slug: string) => void
 }) {
+  useScrollReveal()
+
   return (
-    <section className="mx-auto max-w-7xl px-4 py-10">
+    <section data-reveal="true" className="mx-auto max-w-7xl px-4 py-10">
       <div className="mb-5 flex items-end justify-between gap-4">
         <div className="section-lagon">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Rayons populaires</p>
@@ -618,7 +652,13 @@ export function ExpandedCategoriesSection({
   categories: CategoryNode[]
   onBrowse: (slug: string) => void
 }) {
-  return <CategoryTreeSection />
+  useScrollReveal()
+
+  return (
+    <div data-reveal="true" className="mx-auto max-w-7xl px-4 py-10">
+      <CategoryTreeSection />
+    </div>
+  )
 }
 
 function buildCategorySearchHref(categorySlug: string, subcategorySlug?: string) {
@@ -668,7 +708,13 @@ export function ExpandedCategoriesGridSection({
 }: {
   categories: CategoryNode[]
 }) {
-  return <CategoryTreeSection />
+  useScrollReveal()
+
+  return (
+    <div data-reveal="true" className="mx-auto max-w-7xl px-4 py-10">
+      <CategoryTreeSection />
+    </div>
+  )
 }
 
 type BonPlanItem = {
@@ -883,9 +929,10 @@ export function BonPlanSection({
   const promoHasItems = (promoItems || []).length > 0
   const eventHasItems = (eventItems || []).length > 0
   const rideHasItems = (covoiturageItems || []).length > 0
+  useScrollReveal()
 
   return (
-    <section className="mx-auto max-w-7xl px-4 pb-10">
+    <section data-reveal="true" className="mx-auto max-w-7xl px-4 pb-10">
       <div className="grid gap-5 overflow-hidden rounded-[2rem] border border-night/8 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.12))] p-5 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)]">
         {sponsoredHasItems ? (
           <div>
@@ -913,7 +960,7 @@ export function BonPlanSection({
               Promotions, culture et mobilitÃ© locale
             </h3>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
-              Une seule vue claire pour les offres du moment, lâ€™agenda culturel et les trajets Ã  partager.
+              Une seule vue claire pour les offres du moment, l'agenda culturel et les trajets Ã  partager.
             </p>
           </div>
           <Link href="/bons-plans" className="hidden items-center gap-1 text-sm font-semibold text-white hover:underline md:inline-flex">
@@ -945,12 +992,13 @@ export function BonPlanSection({
                 ))}
               </div>
             ) : (
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5 text-white/80">
-                <p className="text-lg font-semibold text-white">Aucune promotion en ligne pour le moment</p>
-                <p className="mt-2 text-sm text-white/65">
-                  Publiez une promo, un coupon ou une vente flash pour lancer la section.
-                </p>
-              </div>
+              <EmptyHomeCta
+                icon={Sparkles}
+                title="La première promo NC, c'est la vôtre."
+                subtitle="Touchez vos clients là où ils cherchent."
+                cta="Publier une offre"
+                href="/bons-plans/nouvelle"
+              />
             )}
           </div>
 
@@ -977,12 +1025,13 @@ export function BonPlanSection({
                 ))}
               </div>
             ) : (
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5 text-white/80">
-                <p className="text-lg font-semibold text-white">Les rendez-vous Ã  venir s&apos;afficheront ici</p>
-                <p className="mt-2 text-sm text-white/65">
-                  Ajoutez un concert, une confÃ©rence ou un marchÃ© pour alimenter la section culturelle.
-                </p>
-              </div>
+              <EmptyHomeCta
+                icon={Sparkles}
+                title="Le prochain événement NC mérite d'être ici."
+                subtitle="Concerts, marchés, conférences - tout y est."
+                cta="Créer un événement"
+                href="/evenements/nouveau"
+              />
             )}
           </div>
         </div>
