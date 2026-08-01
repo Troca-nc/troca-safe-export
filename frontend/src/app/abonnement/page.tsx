@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { ArrowRight, Check, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react'
 
 import DemoModeNotice from '@/components/DemoModeNotice'
 import { PaymentProviderSelector } from '@/components/monetisation/PaymentProviderSelector'
@@ -103,6 +103,14 @@ export default function AbonnementPage() {
       </section>
 
       <main className="mx-auto max-w-7xl px-4 py-12">
+        <Link
+          href="/"
+          className="mb-4 inline-flex items-center gap-1 text-sm text-night/50 transition-colors hover:text-night"
+        >
+          <ArrowLeft size={14} />
+          Retour à l&apos;accueil
+        </Link>
+
         <div className="flex flex-col gap-4 rounded-[2rem] border border-night/8 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">

@@ -246,7 +246,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
               </div>
               <button
                 type="submit"
-                className="inline-flex items-center justify-center rounded-2xl bg-[#17313d] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/15 dark:bg-white dark:text-[#0a6e8d]"
+                className="btn-primary inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold"
               >
                 Rechercher
               </button>
