@@ -47,7 +47,7 @@ const FEATURE_SECTIONS: FeatureSection[] = [
   {
     key: 'vitrine',
     eyebrow: 'Vitrine & Catalogue',
-    title: 'Votre vitrine, vos produits, vos preuves',
+    title: 'Votre espace pro. Vos clients. Vos résultats.',
     description: 'Un espace public clair pour présenter votre activité, rassurer vos clients et convertir plus vite.',
     bullets: [
       'Profil public avec logo, description, horaires et coordonnées',
@@ -113,8 +113,8 @@ const FEATURE_SECTIONS: FeatureSection[] = [
   {
     key: 'visibilite',
     eyebrow: 'Visibilité & Boosts',
-    title: 'Restez en haut, là où les clients regardent',
-    description: 'Des boosts ponctuels, une lecture claire des performances et un badge pro visible partout.',
+    title: 'Soyez visible quand les clients cherchent.',
+    description: 'Boostez quand vous en avez besoin.',
     bullets: [
       'Annonces prioritaires dans les résultats',
       'Badge Pro vérifié sur toutes les surfaces',
@@ -184,7 +184,7 @@ const COMPARISON_ROWS = [
 function StatCard({ value, label }: { value: string; label: string }) {
   return (
     <article className="rounded-[1.5rem] border border-white/10 bg-white/10 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.16)] backdrop-blur-sm">
-      <p className="text-3xl font-bold text-[#0a7ea4]">{value}</p>
+      <p className="text-3xl font-bold text-nc-lagon">{value}</p>
       <p className="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-[#1e293b]">{label}</p>
     </article>
   )
@@ -255,7 +255,7 @@ function HeroDashboardMockup() {
               {[32, 44, 38, 58, 48, 64, 52, 74, 68, 86].map((height, index) => (
                 <div
                   key={index}
-                  className="flex-1 rounded-t-xl bg-[linear-gradient(180deg,#48cae4,#0a7ea4)]"
+                  className="flex-1 rounded-t-xl bg-gradient-to-b from-nc-lagonLight to-nc-lagon"
                   style={{ height: `${height}%` }}
                 />
               ))}
@@ -271,7 +271,7 @@ function HeroDashboardMockup() {
           <div className="space-y-3 rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
             <div className="flex items-center justify-between">
               <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Annonces</p>
-              <span className="rounded-full bg-emerald-400/15 px-2.5 py-1 text-[11px] font-semibold text-emerald-200">3 actives</span>
+              <span className="rounded-full bg-[var(--color-success)]/15 px-2.5 py-1 text-[11px] font-semibold text-[var(--color-success)]">3 actives</span>
             </div>
             {[
               ['Réfection terrasse', 'Boost actif jusqu\'à demain'],
@@ -280,7 +280,7 @@ function HeroDashboardMockup() {
             ].map(([title, subtitle]) => (
               <article key={title} className="rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-nc-lagonLight text-nc-lagon">
                     <Sparkles className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">
@@ -372,7 +372,7 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
             <p className="text-[11px] uppercase tracking-[0.22em] text-night/45">Planning</p>
             <h3 className="mt-1 text-xl font-semibold text-night">Août 2026</h3>
           </div>
-          <CalendarDays className="h-5 w-5 text-[#0A7EA4]" />
+          <CalendarDays className="h-5 w-5 text-nc-lagon" />
         </div>
         <div className="mt-4 grid grid-cols-7 gap-2 text-center text-[11px] font-semibold text-night/45">
           {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day) => <span key={day}>{day}</span>)}
@@ -402,7 +402,7 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
             <p className="text-[11px] uppercase tracking-[0.22em] text-night/45">Transport Pro</p>
             <h3 className="mt-1 text-xl font-semibold text-night">Courses du jour</h3>
           </div>
-          <Truck className="h-5 w-5 text-[#0A7EA4]" />
+          <Truck className="h-5 w-5 text-nc-lagon" />
         </div>
         <div className="mt-4 space-y-3">
           {[
@@ -416,7 +416,7 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
             </div>
           ))}
         </div>
-        <div className="mt-4 grid grid-cols-3 gap-2">
+        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
           <div className="rounded-2xl bg-nc-lagonLight p-3 text-center">
             <p className="text-lg font-bold text-nc-lagon">96%</p>
             <p className="text-[11px] text-nc-lagon-text">satisfaction</p>
@@ -450,7 +450,7 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
             </div>
             <p className="mt-2 text-sm text-night/60">Fourgon, utilitaire ou camion léger selon le volume.</p>
           </div>
-          <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="grid grid-cols-1 gap-2 text-center sm:grid-cols-3">
             <div className="rounded-2xl bg-nc-lagonLight p-3">
               <p className="text-lg font-bold text-nc-lagon">XPF</p>
               <p className="text-[11px] text-nc-lagon-text">devis</p>
@@ -478,12 +478,12 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
       <div className="mt-4 space-y-3">
         <div className="flex items-center justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
           <span className="text-sm font-semibold text-night">Vues de la semaine</span>
-          <span className="text-sm font-bold text-[#0A7EA4]">+28%</span>
+          <span className="text-sm font-bold text-nc-lagon">+28%</span>
         </div>
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
           <div className="flex items-end gap-2">
             {[12, 24, 18, 34, 28, 46, 42].map((height, index) => (
-              <div key={index} className="flex-1 rounded-t-xl bg-[linear-gradient(180deg,#48cae4,#0a7ea4)]" style={{ height: `${height}px` }} />
+              <div key={index} className="flex-1 rounded-t-xl bg-gradient-to-b from-nc-lagonLight to-nc-lagon" style={{ height: `${height}px` }} />
             ))}
           </div>
         </div>
@@ -521,7 +521,7 @@ function FeatureTabs() {
                 onClick={() => setActiveKey(section.key)}
                 className={`inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
                   active
-                    ? 'bg-[#0A7EA4] text-white shadow-sm'
+                    ? 'bg-nc-lagon text-white shadow-sm'
                     : 'text-night/65 hover:bg-[var(--color-background-secondary)] hover:text-night'
                 }`}
               >
@@ -542,14 +542,14 @@ function FeatureTabs() {
             <ul className="mt-6 space-y-3">
               {activeSection.bullets.map((bullet) => (
                 <li key={bullet} className="flex items-start gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-                  <CheckCircle2 className={`mt-0.5 h-5 w-5 shrink-0 ${activeSection.accent === 'corail' ? 'text-coral' : activeSection.accent === 'emeraude' ? 'text-nc-emeraude' : 'text-[#0A7EA4]'}`} />
+                  <CheckCircle2 className={`mt-0.5 h-5 w-5 shrink-0 ${activeSection.accent === 'corail' ? 'text-coral' : activeSection.accent === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-lagon'}`} />
                   <span className="text-sm leading-relaxed text-night/75">{bullet}</span>
                 </li>
               ))}
             </ul>
           </article>
 
-          <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)]/70 p-4 shadow-sm">
+          <div className="overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)]/70 p-4 shadow-sm">
             <FeatureMockup section={activeSection} />
           </div>
         </div>
@@ -581,7 +581,7 @@ function FeatureTabs() {
                   <ul className="mt-4 space-y-3">
                     {section.bullets.map((bullet) => (
                       <li key={bullet} className="flex items-start gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-                        <CheckCircle2 className={`mt-0.5 h-5 w-5 shrink-0 ${section.accent === 'corail' ? 'text-coral' : section.accent === 'emeraude' ? 'text-nc-emeraude' : 'text-[#0A7EA4]'}`} />
+                        <CheckCircle2 className={`mt-0.5 h-5 w-5 shrink-0 ${section.accent === 'corail' ? 'text-coral' : section.accent === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-lagon'}`} />
                         <span className="text-sm leading-relaxed text-night/75">{bullet}</span>
                       </li>
                     ))}
@@ -604,7 +604,7 @@ function SectorsGrid() {
     <section className="mx-auto max-w-7xl px-4 py-24 md:py-28">
       <SectionHeading
         eyebrow="Secteurs ciblés"
-        title="Fait pour votre secteur"
+        title="Un seul profil pour tous vos métiers."
         description="Des usages concrets pour les métiers qui ont besoin de visibilité, de rendez-vous, de devis ou de logistique."
       />
 
@@ -616,7 +616,7 @@ function SectorsGrid() {
               key={sector.title}
               className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             >
-              <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
+              <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-nc-lagonLight text-nc-lagon">
                 <Icon className="h-5 w-5" />
               </div>
               <h3 className="mt-4 text-lg font-semibold text-night">{sector.title}</h3>
@@ -653,13 +653,13 @@ function ComparisonTable() {
                 <tr key={label} className="border-t border-[var(--color-border)]">
                   <td className="px-5 py-4 font-medium text-night">{label}</td>
                   <td className="px-5 py-4 text-center">
-                    <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full align-middle ${free ? 'bg-emerald-50 text-emerald-700' : 'bg-sand text-night/40'}`}>
-                      {free ? '✓' : '—'}
+                    <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full align-middle ${free ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]' : 'bg-sand text-night/40'}`}>
+                      {free ? '✓' : '-'}
                     </span>
                   </td>
                   <td className="px-5 py-4 text-center">
                     <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full align-middle ${pro ? 'bg-nc-lagonLight text-nc-lagon' : 'bg-sand text-night/40'}`}>
-                      {pro ? '✓' : '—'}
+                      {pro ? '✓' : '-'}
                     </span>
                   </td>
                 </tr>
@@ -679,7 +679,7 @@ function ComparisonTable() {
               Créer mon espace Pro
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <p className="text-sm text-[#0a7ea4] md:ml-4 md:max-w-md">
+            <p className="text-sm text-nc-lagon md:ml-4 md:max-w-md">
               🔥 3 mois offerts pour les 20 premiers inscrits
             </p>
           </div>
@@ -743,14 +743,14 @@ export default function ProLandingPage() {
                 Espace Professionnel
               </div>
               <h1 className="mt-5 font-display text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
-                Votre activité, visible dans toute la Nouvelle-Calédonie
+                Votre espace pro. Vos clients. Vos résultats.
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">
                 Vitrine, devis, réservations, transport, envoi & livraison - tout ce qu’il faut pour développer votre business local.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link href="/pro/inscription" className="btn-primary inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold shadow-lg shadow-[#0A7EA4]/25">
+                <Link href="/pro/inscription" className="btn-primary inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold shadow-lg shadow-nc-lagon/25">
                   Créer mon espace Pro
                   <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -761,7 +761,7 @@ export default function ProLandingPage() {
                   Voir une vitrine exemple
                 </Link>
               </div>
-              <p className="mt-3 text-sm font-semibold text-[#0a7ea4]">
+              <p className="mt-3 text-sm font-semibold text-nc-lagon">
                 🔥 3 mois offerts pour les 20 premiers inscrits
               </p>
 

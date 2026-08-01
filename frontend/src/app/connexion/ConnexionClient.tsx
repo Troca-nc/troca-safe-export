@@ -26,13 +26,54 @@ type ConnexionClientProps = {
   nextPath: string
 }
 
+function parseLoginError(raw?: string | null) {
+  const normalized = (raw || '').toLowerCase()
+
+  if (
+    normalized.includes('network') ||
+    normalized.includes('fetch') ||
+    normalized.includes('timeout') ||
+    normalized.includes('failed to fetch')
+  ) {
+    return { message: 'Connexion impossible. Vérifiez votre réseau.' }
+  }
+
+  if (
+    normalized.includes('not found') ||
+    normalized.includes('unknown email') ||
+    normalized.includes('account not found') ||
+    normalized.includes('user not found') ||
+    normalized.includes('email does not exist') ||
+    normalized.includes('no account')
+  ) {
+    return {
+      message: "Aucun compte avec cet email. Inscrivez-vous ?",
+      href: '/inscription',
+      linkLabel: "S'inscrire",
+    }
+  }
+
+  if (
+    normalized.includes('incorrect') ||
+    normalized.includes('invalid') ||
+    normalized.includes('password') ||
+    normalized.includes('credentials')
+  ) {
+    return { message: 'Email ou mot de passe incorrect.' }
+  }
+
+  return { message: raw || 'Erreur de connexion' }
+}
+
 export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
   const router = useRouter()
   const { login, isLoading } = useAuthStore()
   const [showPassword, setShowPassword] = useState(false)
   const [awaitingPassword, setAwaitingPassword] = useState(false)
   const [serverError, setServerError] = useState('')
+  const [serverErrorLink, setServerErrorLink] = useState<string | null>(null)
   const [turnstileToken, setTurnstileToken] = useState('')
+  const [showMapPanel, setShowMapPanel] = useState(false)
   const passwordInputRef = useRef<HTMLInputElement | null>(null)
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || ''
   const turnstileEnabled = Boolean(turnstileSiteKey && !turnstileSiteKey.startsWith('CHANGEME'))
@@ -57,8 +98,20 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
     }
   }, [awaitingPassword])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const media = window.matchMedia('(min-width: 1024px)')
+    const update = () => setShowMapPanel(media.matches)
+
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
+
   const onSubmit = async (data: FormData) => {
     setServerError('')
+    setServerErrorLink(null)
     try {
       const demoProfile = inferDemoAccount(data.email)
       const isDemoLogin =
@@ -67,7 +120,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
         data.password === DEMO_ACCOUNTS[demoProfile].password
 
       if (turnstileEnabled && !turnstileToken && !isDemoLogin) {
-        setServerError('Veuillez compléter la vérification anti-bot.')
+        setServerError("Merci de confirmer que vous n'êtes pas un robot.")
         return
       }
 
@@ -78,13 +131,16 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
         router.push(`/verification-email?email=${encodeURIComponent(data.email)}`)
         return
       }
-      setServerError(err?.response?.data?.error || 'Erreur de connexion')
+      const parsed = parseLoginError(err?.response?.data?.error || err?.message)
+      setServerError(parsed.message)
+      setServerErrorLink(parsed.href || null)
     }
   }
 
   const handlePrimaryAction = async () => {
     if (!awaitingPassword) {
       setServerError('')
+      setServerErrorLink(null)
       const ok = await trigger('email')
       if (ok) setAwaitingPassword(true)
       return
@@ -97,6 +153,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
     if (!demoProfile || (demoProfile !== 'particulier' && demoProfile !== 'pro' && demoProfile !== 'bon_plan')) return
 
     setServerError('')
+    setServerErrorLink(null)
     try {
       useAuthStore.getState().setDemoProfile(demoProfile)
       router.push('/profil')
@@ -106,7 +163,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white lg:grid lg:grid-cols-2">
+    <div className="min-h-screen bg-white dark:bg-[var(--color-surface)] lg:grid lg:grid-cols-2">
       <main className="flex min-h-screen items-center justify-center px-6 py-10 sm:px-8 lg:px-12">
         <div className="w-full max-w-[380px]">
           <Link href="/" className="inline-flex items-center gap-3">
@@ -125,13 +182,22 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
             <h1 className="text-[24px] font-semibold leading-tight text-night">
               Connectez-vous ou créez votre compte Kalico
             </h1>
-            <p className="mt-1.5 text-sm text-night/60">Annonces entre Calédoniens.</p>
+            <p className="mt-1.5 text-sm text-night/60">La marketplace locale de Nouvelle-Calédonie.</p>
           </div>
 
           {serverError ? (
-            <div className="mt-5 flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              <AlertCircle className="h-4 w-4 shrink-0" />
-              {serverError}
+            <div className="mt-5 rounded-2xl border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-4 py-3 text-sm text-[var(--color-danger)]">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <div className="space-y-1">
+                  <p>{serverError}</p>
+                  {serverErrorLink ? (
+                    <Link href={serverErrorLink} className="inline-flex font-semibold underline underline-offset-2">
+                      S'inscrire
+                    </Link>
+                  ) : null}
+                </div>
+              </div>
             </div>
           ) : null}
 
@@ -202,7 +268,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
                 isLoading ? (
                   <span className="flex items-center gap-2">
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    Connexion…
+                    Connexion...
                   </span>
                 ) : (
                   'Se connecter'
@@ -217,7 +283,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
             <div className="mt-4 rounded-2xl border border-coral/20 bg-coral/5 p-4">
               <p className="text-sm font-semibold text-night">Compte démo détecté</p>
               <p className="mt-1 text-sm text-night/60">
-                Vous pouvez entrer dans l&apos;application sans vérification supplémentaire.
+                Vous pouvez entrer dans l'application sans vérification supplémentaire.
               </p>
               <button type="button" onClick={() => void handleDemoQuickLogin()} className="btn-primary mt-3 w-full py-3">
                 Se connecter en mode démo
@@ -250,7 +316,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
         </div>
       </main>
 
-      <AuthMapPanel />
+      {showMapPanel ? <AuthMapPanel /> : null}
     </div>
   )
 }

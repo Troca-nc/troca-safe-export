@@ -33,7 +33,7 @@ const PROFILE_CONFIG: Record<
   particulier: {
     title: 'Particulier',
     subtitle: 'Dépose une annonce simple et rapide',
-    accent: 'from-coral/20 to-white',
+    accent: 'from-coral/20 to-[var(--color-surface)]',
     badge: 'Déposer une annonce',
     depositLabel: 'Annonce classique',
     accountLabel: 'Mon compte particulier',
@@ -42,7 +42,7 @@ const PROFILE_CONFIG: Record<
   pro: {
     title: 'Compte Pro',
     subtitle: 'Gestion du catalogue, statistiques et visibilité',
-    accent: 'from-ocean/20 to-white',
+    accent: 'from-ocean/20 to-[var(--color-surface)]',
     badge: 'Espace vendeur pro',
     depositLabel: 'Vitrine professionnelle',
     accountLabel: 'Tableau de bord pro',
@@ -51,7 +51,7 @@ const PROFILE_CONFIG: Record<
   bon_plan: {
     title: 'Annonceur Bon Plan',
     subtitle: 'Promo, événement ou mise en avant locale',
-    accent: 'from-lagoon/20 to-white',
+    accent: 'from-lagoon/20 to-[var(--color-surface)]',
     badge: 'Bon plan sponsorisé',
     depositLabel: 'Contenu sponsorisé',
     accountLabel: 'Espace bon plan',
@@ -85,13 +85,13 @@ export default function ProfileDemoPreview({
 
   if (activeProfile === 'visitor') {
     return (
-      <div className="rounded-[1.5rem] border border-night/10 bg-white p-5 shadow-sm">
+      <div className="rounded-[1.5rem] border border-night/10 bg-white dark:bg-[var(--color-surface)] p-5 shadow-sm">
         <div className="flex items-start gap-3">
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-night/5 text-night/60">
             <UsersRound className="h-5 w-5" />
           </span>
           <div>
-            <p className="text-sm font-semibold text-night">Mode visiteur</p>
+            <p className="text-sm font-semibold text-night">Choisissez un profil pour voir l'aperçu.</p>
             <p className="text-sm text-night/60">
               Choisissez un profil démo dans le header pour voir la publication et le compte comme un vrai utilisateur.
             </p>
@@ -124,13 +124,13 @@ export default function ProfileDemoPreview({
 
   return (
     <div className={`rounded-[1.75rem] border border-night/10 bg-gradient-to-br ${config.accent} p-5 shadow-[0_20px_70px_rgba(8,32,50,0.08)]`}>
-      <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-white/70 bg-white/75 px-4 py-3 shadow-sm backdrop-blur">
+      <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-white/70 bg-white/75 dark:bg-[var(--color-surface)] px-4 py-3 shadow-sm backdrop-blur">
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-night text-white shadow-sm">
             <BadgeCheck className="h-4 w-4" />
           </span>
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-night/50">Profil actif</p>
+                        {/* Profil actif supprimé pour garder le contexte */}
             <p className="text-sm font-semibold text-night">{profileLabel}</p>
           </div>
         </div>
@@ -145,14 +145,14 @@ export default function ProfileDemoPreview({
           <h3 className="mt-1 text-xl font-bold text-night">{config.title}</h3>
           <p className="text-sm text-night/60">{config.subtitle}</p>
         </div>
-        <span className="rounded-full border border-night/10 bg-white px-3 py-1 text-xs font-semibold text-night/70">
-          {mode === 'deposit' ? 'Aperçu publication' : 'Aperçu compte'}
+        <span className="rounded-full border border-night/10 bg-white dark:bg-[var(--color-surface)] px-3 py-1 text-xs font-semibold text-night/70">
+          {mode === 'deposit' ? 'Comment votre annonce apparaît' : 'Votre espace personnel'}
         </span>
       </div>
 
       {mode === 'deposit' ? (
         <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-2xl border border-white/70 bg-white/90 p-4">
+          <div className="rounded-2xl border border-white/70 bg-white/90 dark:bg-[var(--color-surface)] p-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-night">
               <Plus className="h-4 w-4 text-coral" />
               {config.depositLabel}
@@ -164,7 +164,7 @@ export default function ProfileDemoPreview({
               <div className="rounded-xl border border-night/10 bg-sand px-3 py-2 text-sm text-night/70">Photos + description</div>
             </div>
           </div>
-          <div className="rounded-2xl border border-white/70 bg-white/90 p-4">
+          <div className="rounded-2xl border border-white/70 bg-white/90 dark:bg-[var(--color-surface)] p-4">
             <p className="text-sm font-semibold text-night">{config.accountLabel}</p>
             <p className="mt-1 text-sm text-night/60">{config.accountHint}</p>
             <div className="mt-4 space-y-2">
@@ -182,7 +182,7 @@ export default function ProfileDemoPreview({
       ) : (
         <>
           <div className="mt-4 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="rounded-2xl border border-white/70 bg-white/90 p-4">
+            <div className="rounded-2xl border border-white/70 bg-white/90 dark:bg-[var(--color-surface)] p-4">
               <p className="text-sm font-semibold text-night">{config.accountLabel}</p>
               <p className="mt-1 text-sm text-night/60">{config.accountHint}</p>
               <div className="mt-4 space-y-2">
@@ -201,7 +201,7 @@ export default function ProfileDemoPreview({
                 })}
               </div>
             </div>
-            <div className="rounded-2xl border border-white/70 bg-white/90 p-4">
+            <div className="rounded-2xl border border-white/70 bg-white/90 dark:bg-[var(--color-surface)] p-4">
               <div className="flex items-center gap-2 text-sm font-semibold text-night">
                 <Store className="h-4 w-4 text-coral" />
                 Vue rapide du compte
@@ -229,10 +229,10 @@ export default function ProfileDemoPreview({
           </div>
 
           {activeProfile === 'particulier' ? (
-            <div className="mt-4 rounded-2xl border border-night/10 bg-white p-4 shadow-sm">
+            <div className="mt-4 rounded-2xl border border-night/10 bg-white dark:bg-[var(--color-surface)] p-4 shadow-sm">
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-night">Aucune annonce pour le moment</p>
+                  <p className="text-sm font-semibold text-night">Vous n'avez pas encore d'annonce. Publiez la vôtre.</p>
                   <p className="mt-1 text-sm text-night/60">
                     Votre compte particulier n&apos;a pas encore d&apos;annonce active. Le bouton ci-dessous vous envoie directement vers la page de publication.
                   </p>
@@ -255,7 +255,7 @@ export default function ProfileDemoPreview({
                   ? { title: 'Statistiques à suivre', meta: 'Suivi de visibilité et clics.' }
                   : { title: 'Paramètres à compléter', meta: 'Retrouvez vos préférences ici.' },
               ].map((item) => (
-                <div key={item.title} className="rounded-2xl border border-night/10 bg-white p-4 shadow-sm">
+                <div key={item.title} className="rounded-2xl border border-night/10 bg-white dark:bg-[var(--color-surface)] p-4 shadow-sm">
                   <p className="text-sm font-semibold text-night">{item.title}</p>
                   <p className="mt-1 text-sm text-night/60">{item.meta}</p>
                 </div>

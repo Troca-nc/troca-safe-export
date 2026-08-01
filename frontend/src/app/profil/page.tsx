@@ -165,7 +165,7 @@ function ProfilePageContent() {
   const RatingRow = ({ rating }: { rating: number }) => (
     <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map((i) => (
-        <BadgeCheck key={i} className={`w-4 h-4 ${i <= Math.round(rating) ? 'text-amber-500' : 'text-night/20'}`} />
+        <BadgeCheck key={i} className={`w-4 h-4 ${i <= Math.round(rating) ? 'text-[var(--color-warning)]' : 'text-night/20'}`} />
       ))}
     </div>
   )
@@ -207,10 +207,10 @@ function ProfilePageContent() {
       <div className="min-h-screen">
         <Header />
         <div className="mx-auto flex max-w-5xl flex-col items-center px-4 py-12 text-center">
-          <div className="w-full rounded-[2rem] border border-night/8 bg-white p-8 shadow-card">
+          <div className="w-full rounded-[2rem] border border-night/8 bg-white dark:bg-[var(--color-surface)] p-8 shadow-card">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Profil</p>
             <h1 className="mt-3 font-display text-3xl font-bold text-night">
-              {profileId ? 'Chargement de votre profil' : 'Connexion requise'}
+              {profileId ? 'Chargement de votre profil' : 'Connectez-vous pour accéder à votre espace.'}
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-night/60">
               {profileId
@@ -352,7 +352,7 @@ function ProfilePageContent() {
       </div>
 
       {!demoActive && isOwn && (
-        <div className="mt-6 rounded-[1.5rem] border border-night/8 bg-white p-4">
+        <div className="mt-6 rounded-[1.5rem] border border-night/8 bg-white dark:bg-[var(--color-surface)] p-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Bons Plans</p>
@@ -371,7 +371,7 @@ function ProfilePageContent() {
   ) : null
 
   const favoritesPanel = isOwn ? (
-    <div className="card border-coral/15 bg-white p-5 shadow-sm">
+    <div className="card border-coral/15 bg-white dark:bg-[var(--color-surface)] p-5 shadow-sm">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Favoris</p>
@@ -432,10 +432,10 @@ function ProfilePageContent() {
           <div
             className={`rounded-[1.5rem] border p-4 shadow-sm ${
               subscriptionMeta.tone === 'danger'
-                ? 'border-red-200 bg-red-50'
+                ? 'border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10'
                 : subscriptionMeta.tone === 'warning'
-                  ? 'border-amber-200 bg-amber-50'
-                  : 'border-emerald-200 bg-emerald-50'
+                  ? 'border-[var(--color-warning)]/30 bg-[var(--color-warning)]/10'
+                  : 'border-[var(--color-success)]/30 bg-[var(--color-success)]/10'
             }`}
           >
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -443,16 +443,16 @@ function ProfilePageContent() {
                 <subscriptionMeta.icon
                   className={`mt-0.5 h-5 w-5 shrink-0 ${
                     subscriptionMeta.tone === 'danger'
-                      ? 'text-red-600'
+                      ? 'text-[var(--color-danger)]'
                       : subscriptionMeta.tone === 'warning'
-                        ? 'text-amber-600'
-                        : 'text-emerald-600'
+                        ? 'text-[var(--color-warning)]'
+                        : 'text-[var(--color-success)]'
                   }`}
                 />
                 <div>
                   <p className="text-sm font-semibold text-night">{subscriptionMeta.label}</p>
                   <p className="text-sm text-night/60">{subscriptionMeta.description}</p>
-                  <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/75 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-night/60">
+                  <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/75 dark:bg-[var(--color-surface)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-night/60">
                     {subscriptionStatus?.plan === 'pro' ? 'Pro' : 'Gratuit'}
                     {subscriptionStatus?.payment_provider ? ` · ${subscriptionStatus.payment_provider.toUpperCase()}` : ''}
                     {typeof subscriptionStatus?.days_remaining === 'number' && subscriptionStatus.days_remaining > 0
@@ -505,7 +505,7 @@ function ProfilePageContent() {
             {/* Infos */}
             {editing ? (
               <form onSubmit={handleSubmit(onSave)} className="flex-1 space-y-3">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-medium text-night/60 mb-1 block">Prénom</label>
                     <input {...register('first_name')} className="input text-sm" />
@@ -600,12 +600,12 @@ function ProfilePageContent() {
         </div>
 
         {/* â”€â”€ Onglets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <div className="flex gap-1 rounded-2xl border border-night/10 bg-[var(--color-background-secondary)] p-1 w-fit">
+        <div className="flex w-full gap-1 overflow-x-auto rounded-2xl border border-night/10 bg-[var(--color-background-secondary)] p-1">
           {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+              className={`flex flex-shrink-0 items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                 tab === t.id ? 'bg-white text-coral shadow-sm ring-1 ring-black/5' : 'text-night/75 hover:bg-white hover:text-night'
               }`}
             >
@@ -613,7 +613,7 @@ function ProfilePageContent() {
             </button>
           ))}
           {isOwn && (
-            <Link href="/favoris" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-night/50 hover:text-night transition-all">
+            <Link href="/favoris" className="flex flex-shrink-0 items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-night/50 hover:text-night transition-all">
               <Heart className="w-4 h-4" /> Favoris
             </Link>
           )}
@@ -625,7 +625,7 @@ function ProfilePageContent() {
             {listings.length === 0 ? (
               <div className="text-center py-16 text-night/40">
                 <Package className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Aucune annonce active</p>
+                <p className="text-sm">Vous n'avez pas encore d'annonce. Publiez la vôtre.</p>
                 {isOwn && (
                   <Link href="/annonces/nouvelle" className="btn-primary text-sm mt-4 inline-flex">
                     Déposer une annonce
@@ -633,7 +633,7 @@ function ProfilePageContent() {
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {listings.map((l) => <ListingCard key={l.id} listing={l} />)}
               </div>
             )}
@@ -645,7 +645,7 @@ function ProfilePageContent() {
             {reviews.length === 0 ? (
               <div className="text-center py-16 text-night/40">
                 <BadgeCheck className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Aucun avis pour l'instant</p>
+                <p className="text-sm">Vos premiers avis apparaîtront ici.</p>
               </div>
             ) : (
               reviews.map((rev) => (
