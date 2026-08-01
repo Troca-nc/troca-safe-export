@@ -413,9 +413,9 @@ export default function CategoryFields({ categorySlug, register, errors }: Props
               {field.type === 'select' && (
                 <select
                   {...register(field.name, registerOptions)}
-                  className={`input w-full ${errorMessage ? 'border-red-400' : ''}`}
+                  className={`input w-full ${errorMessage ? 'border-[var(--color-danger)]/30' : ''}`}
                 >
-                  <option value="">— Choisir —</option>
+                  <option value="">Choisir une option</option>
                   {field.options?.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
@@ -426,7 +426,7 @@ export default function CategoryFields({ categorySlug, register, errors }: Props
                 <textarea
                   {...register(field.name, registerOptions)}
                   placeholder={field.placeholder}
-                  className={`input w-full min-h-[110px] ${errorMessage ? 'border-red-400' : ''}`}
+                  className={`input w-full min-h-[110px] ${errorMessage ? 'border-[var(--color-danger)]/30' : ''}`}
                 />
               )}
 
@@ -434,7 +434,7 @@ export default function CategoryFields({ categorySlug, register, errors }: Props
                 <input
                   {...register(field.name, registerOptions)}
                   type="date"
-                  className={`input w-full ${errorMessage ? 'border-red-400' : ''}`}
+                  className={`input w-full ${errorMessage ? 'border-[var(--color-danger)]/30' : ''}`}
                 />
               )}
 
@@ -489,7 +489,7 @@ export default function CategoryFields({ categorySlug, register, errors }: Props
                         target: { ...event.target, value: String(snapped), name: field.name },
                       } as any)
                     }}
-                    className={`input w-full ${field.unit ? 'pr-12' : ''} ${errorMessage ? 'border-red-400' : ''}`}
+                    className={`input w-full ${field.unit ? 'pr-12' : ''} ${errorMessage ? 'border-[var(--color-danger)]/30' : ''}`}
                   />
                   {field.unit && (
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-night/40 select-none">
@@ -504,7 +504,7 @@ export default function CategoryFields({ categorySlug, register, errors }: Props
               )}
 
               {errorMessage && (
-                <p className="text-xs text-red-500 mt-1">{errorMessage}</p>
+                <p className="text-xs text-[var(--color-danger)] mt-1">{errorMessage}</p>
               )}
             </div>
           )

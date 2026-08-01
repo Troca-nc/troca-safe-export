@@ -329,7 +329,7 @@ function SimpleBonPlanPage() {
         ) : null}
 
         {successMessage ? (
-          <div className="mb-6 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-5 text-emerald-900">
+          <div className="mb-6 rounded-[1.5rem] border border-[var(--color-success)]/30 bg-[var(--color-success)]/10 p-5 text-[var(--color-success)]">
             <p className="font-semibold">Bon plan publié</p>
             <p className="mt-1 text-sm">{successMessage}</p>
             <div className="mt-4 flex flex-wrap gap-3">
@@ -347,10 +347,11 @@ function SimpleBonPlanPage() {
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <form onSubmit={handleSubmit} className="space-y-5 rounded-[2rem] border border-night/8 bg-white/95 p-5 shadow-card">
             {error ? (
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+              <div className="rounded-2xl border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 p-4 text-sm text-[var(--color-danger)]">
                 {error}
               </div>
             ) : null}
+
 
             <div className="grid gap-4 md:grid-cols-2">
               <label className="space-y-2">
@@ -589,12 +590,12 @@ function SimpleBonPlanPage() {
           </form>
 
           <aside className="space-y-5">
-            <div className="rounded-[2rem] border border-night/8 bg-[linear-gradient(180deg,_rgba(8,32,50,0.98),_rgba(8,32,50,0.9))] p-5 text-white shadow-[0_24px_80px_rgba(8,32,50,0.18)]">
+            <div className="rounded-[2rem] border border-night/8 bg-[#0c2a35] p-5 text-white shadow-[0_24px_80px_rgba(8,32,50,0.18)]">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-lagoon">
                 <Sparkles className="h-3.5 w-3.5" />
                 Apercu prix
               </div>
-              <p className="mt-4 text-sm uppercase tracking-[0.18em] text-white/45">Tarif estimatif</p>
+              <p className="mt-4 text-sm uppercase tracking-[0.18em] text-white/45">Estimation</p>
               <p className="mt-2 text-4xl font-bold text-white">{formatPrice(estimatedPrice)}</p>
               <p className="mt-3 text-sm leading-relaxed text-white/70">
                 Le prix est calculé selon le profil choisi et la durée. Si vous êtes Pro et que votre bon plan offert
@@ -621,7 +622,7 @@ function SimpleBonPlanPage() {
                 <p><span className="font-semibold text-night">Profil:</span> {form.target_audience === 'pro' ? 'Professionnel' : 'Particulier'}</p>
                 <p><span className="font-semibold text-night">Durée:</span> {form.duration_days} jours</p>
                 <p><span className="font-semibold text-night">Type:</span> {form.kind}</p>
-                <p><span className="font-semibold text-night">Commune:</span> {selectedCommune?.name || 'Non renseignée'}</p>
+                <p><span className="font-semibold text-night">Commune:</span> {selectedCommune?.name || 'À compléter'}</p>
                 <p><span className="font-semibold text-night">Lieu:</span> {form.location_name.trim() || 'Non renseigné'}</p>
               </div>
               <div className="mt-4 rounded-2xl bg-sand p-4 text-sm text-night/65">

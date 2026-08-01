@@ -280,6 +280,44 @@ function PhotoGrid({
   )
 }
 
+function PublicationPreview({
+  draft,
+  selectedCategory,
+  selectedCommune,
+}: {
+  draft: WizardDraft
+  selectedCategory?: CategoryOption | null
+  selectedCommune?: CommuneOption | null
+}) {
+  return (
+    <div className="rounded-[2rem] border border-night/8 bg-[#0c2a35] p-5 text-white shadow-[0_24px_80px_rgba(8,32,50,0.18)]">
+      <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-lagoon">
+        <Sparkles className="h-3.5 w-3.5" />
+        Aperçu
+      </div>
+
+      <p className="mt-4 text-sm uppercase tracking-[0.18em] text-white/45">Résumé rapide</p>
+      <p className="mt-2 text-3xl font-bold text-white">
+        {draft.price ? `${Number(draft.price || 0).toLocaleString('fr-FR')} XPF` : '0 XPF'}
+      </p>
+      <p className="mt-3 text-sm leading-relaxed text-white/70">
+        {draft.title.trim() || "Votre annonce s'affichera ici en temps réel."}
+      </p>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lagoon">Catégorie</p>
+          <p className="mt-2 text-sm font-semibold text-white">{selectedCategory?.name || 'À choisir'}</p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lagoon">Commune</p>
+          <p className="mt-2 text-sm font-semibold text-white">{selectedCommune?.name || 'À compléter'}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function PublishWizard() {
   const router = useRouter()
   const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
@@ -295,6 +333,7 @@ export default function PublishWizard() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [showMobilePreview, setShowMobilePreview] = useState(false)
   const metadataForm = useForm<{ metadata: Record<string, unknown> }>({ defaultValues: { metadata: {} } })
   const {
     register: registerMetadata,
@@ -733,20 +772,16 @@ export default function PublishWizard() {
     ? 'Décrivez votre annonce'
     : draft.step === 2
       ? 'Ajoutez vos photos'
-      : 'Finalisez la publication'
+      : 'Derniers détails'
 
   return (
     <div className="min-h-screen bg-sand-light">
       <main className="mx-auto max-w-6xl px-4 py-8 md:py-12">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-coral/15 bg-coral/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-coral">
-              <Sparkles className="h-3.5 w-3.5" />
-              Publication guidée
-            </div>
             <h1 className="mt-3 font-display text-3xl font-bold text-night md:text-4xl">{stepTitle}</h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-night/60 md:text-base">
-              Un parcours en 3 étapes pour publier vite, sans perdre de données, même avec une connexion mobile limitée.
+              Un parcours en 3 étapes pour publier vite, sans perdre de données.
             </p>
           </div>
 
@@ -788,13 +823,13 @@ export default function PublishWizard() {
             <WizardStepper step={draft.step} />
 
             {error ? (
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+              <div className="rounded-2xl border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 p-4 text-sm text-[var(--color-danger)]">
                 {error}
               </div>
             ) : null}
 
             {success ? (
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+              <div className="rounded-2xl border border-[var(--color-success)]/30 bg-[var(--color-success)]/10 p-4 text-sm text-[var(--color-success)]">
                 {success}
               </div>
             ) : null}
@@ -947,7 +982,7 @@ export default function PublishWizard() {
 
             {draft.step === 3 && (
               <div className="space-y-4">
-                <div className="rounded-[1.75rem] border border-[#0A7EA4]/18 bg-[#0A7EA4]/6 p-4 shadow-sm">
+                <div className="rounded-[1.75rem] border border-nc-lagon/20 bg-nc-lagon/6 p-4 shadow-sm">
                   <label className="flex cursor-pointer items-start gap-3">
                     <input
                       type="checkbox"
@@ -959,7 +994,7 @@ export default function PublishWizard() {
                           contre_quoi: event.target.checked ? current.contre_quoi : '',
                         }))
                       }
-                      className="mt-1 h-4 w-4 rounded border-night/20 text-[#0A7EA4] focus:ring-[#0A7EA4]/25"
+                      className="mt-1 h-4 w-4 rounded border-night/20 text-nc-lagon focus:ring-nc-lagon/20"
                     />
                     <span className="flex-1">
                       <span className="block text-sm font-semibold text-night">Troc possible</span>
@@ -977,7 +1012,7 @@ export default function PublishWizard() {
                         value={draft.contre_quoi}
                         onChange={(event) => setDraft((current) => ({ ...current, contre_quoi: event.target.value }))}
                         placeholder="Ex. vélo, smartphone, console, outillage..."
-                        className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#0A7EA4] focus:ring-4 focus:ring-[#0A7EA4]/15"
+                        className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-nc-lagon focus:ring-4 focus:ring-nc-lagon/20"
                       />
                     </label>
                   ) : null}
@@ -1039,7 +1074,7 @@ export default function PublishWizard() {
                           ? 'Choisissez une commune'
                           : zoneLoading
                             ? 'Chargement...'
-                            : 'Aucune préférence'}
+                            : ''}
                       </option>
                       {zoneOptions.map((zone) => (
                         <option key={zone} value={zone}>
@@ -1050,7 +1085,7 @@ export default function PublishWizard() {
                   </label>
 
                   <div className="rounded-2xl border border-dashed border-night/10 bg-white px-4 py-3 text-xs text-night/55">
-                    Optionnel : vous pouvez préciser un quartier, une tribu ou laisser “Aucune préférence”.
+                    Optionnel : vous pouvez préciser un quartier ou une tribu.
                   </div>
                 </div>
 
@@ -1150,35 +1185,29 @@ export default function PublishWizard() {
                 Voir les annonces
               </button>
             </div>
+
+            {draft.step === 3 ? (
+              <div className="lg:hidden">
+                <button
+                  type="button"
+                  onClick={() => setShowMobilePreview((current) => !current)}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-semibold text-night transition hover:bg-sand"
+                >
+                  {showMobilePreview ? 'Masquer l&apos;aperçu' : 'Voir l&apos;aperçu'}
+                </button>
+
+                {showMobilePreview ? (
+                  <div className="mt-4">
+                    <PublicationPreview draft={draft} selectedCategory={selectedCategory} selectedCommune={selectedCommune} />
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
           </section>
 
-          <aside className="space-y-5">
+          <aside className="hidden space-y-5 lg:block">
             <ListingCoachCard photoCount={photos.length} description={draft.description} />
-            <div className="rounded-[2rem] border border-night/8 bg-[linear-gradient(180deg,_rgba(8,32,50,0.98),_rgba(8,32,50,0.9))] p-5 text-white shadow-[0_24px_80px_rgba(8,32,50,0.18)]">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-lagoon">
-                <Sparkles className="h-3.5 w-3.5" />
-                Aperçu
-              </div>
-
-              <p className="mt-4 text-sm uppercase tracking-[0.18em] text-white/45">Résumé rapide</p>
-              <p className="mt-2 text-3xl font-bold text-white">
-                {draft.price ? `${Number(draft.price || 0).toLocaleString('fr-FR')} XPF` : '0 XPF'}
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-white/70">
-                {draft.title.trim() || 'Votre annonce apparaîtra ici.'}
-              </p>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lagoon">Catégorie</p>
-                  <p className="mt-2 text-sm font-semibold text-white">{selectedCategory?.name || 'Non sélectionnée'}</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lagoon">Commune</p>
-                  <p className="mt-2 text-sm font-semibold text-white">{selectedCommune?.name || 'Non sélectionnée'}</p>
-                </div>
-              </div>
-            </div>
+            <PublicationPreview draft={draft} selectedCategory={selectedCategory} selectedCommune={selectedCommune} />
 
             <div className="rounded-[2rem] border border-night/8 bg-white p-5 shadow-card">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Checklist</p>
@@ -1194,10 +1223,6 @@ export default function PublishWizard() {
                 <p className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-jungle" />
                   Prix, commune et durée validés
-                </p>
-                <p className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-amber-500" />
-                  Publication optimisée pour les connexions mobiles lentes
                 </p>
               </div>
             </div>
