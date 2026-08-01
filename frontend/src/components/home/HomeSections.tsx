@@ -377,12 +377,12 @@ export function FeaturedListingsSection({
           </div>
         ) : (
           <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] py-14 text-center text-night/45">
-            <p className="text-sm font-semibold text-night">Les meilleures annonces apparaÃ®tront ici</p>
+            <p className="text-sm font-semibold text-night">Les meilleures annonces apparaîtront ici</p>
             <p className="mt-2 text-sm text-night/65">
-              Boostez votre annonce pour apparaÃ®tre en tÃªte de page.
+              Boostez votre annonce pour apparaître en tête de page.
             </p>
             <Link href="/annonces/nouvelle" className="btn-primary mt-4 inline-block">
-              DÃ©poser une annonce
+              Déposer une annonce
             </Link>
           </div>
         )}
@@ -398,13 +398,13 @@ export function SearchAlertsSection() {
         <div className="min-w-0">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-lagon">
             <Sparkles className="h-3.5 w-3.5" />
-            Coups de cÅ“ur
+            Coups de cœur
           </div>
           <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
-            Gardez vos recherches en mÃ©moire et recevez une alerte quand une offre correspond.
+            Gardez vos recherches en mémoire et recevez une alerte quand une offre correspond.
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
-            Les utilisateurs peuvent enregistrer des mots-clÃ©s pour suivre ce qui compte vraiment: un modÃ¨le prÃ©cis, une commune, une gamme de prix ou une catÃ©gorie.
+            Les utilisateurs peuvent enregistrer des mots-clés pour suivre ce qui compte vraiment: un modèle précis, une commune, une gamme de prix ou une catégorie.
           </p>
           <div className="mt-5 flex flex-wrap gap-2 pb-1 sm:flex-nowrap sm:overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {SEARCH_ALERTS.map((term) => (
@@ -423,19 +423,19 @@ export function SearchAlertsSection() {
           <div className="mt-4 space-y-3">
             <div className="rounded-2xl bg-white/10 p-4">
               <p className="text-sm font-semibold">"Toyota Hilux"</p>
-              <p className="mt-1 text-sm text-white/65">NoumÃ©a, prix max 3 500 000 XPF</p>
+              <p className="mt-1 text-sm text-white/65">Nouméa, prix max 3 500 000 XPF</p>
             </div>
             <div className="rounded-2xl bg-white/10 p-4">
               <p className="text-sm font-semibold">"Studio"</p>
-              <p className="mt-1 text-sm text-white/65">DumbÃ©a / NoumÃ©a, location ou vente</p>
+              <p className="mt-1 text-sm text-white/65">Dumbéa / Nouméa, location ou vente</p>
             </div>
             <div className="rounded-2xl bg-white/10 p-4">
               <p className="text-sm font-semibold">"iPhone"</p>
-              <p className="mt-1 text-sm text-white/65">Ã‰tat bon ou comme neuf, en Nouvelle-CalÃ©donie</p>
+              <p className="mt-1 text-sm text-white/65">État bon ou comme neuf, en Nouvelle-Calédonie</p>
             </div>
           </div>
           <Link href="/alertes" className="btn-primary mt-5 inline-flex w-full items-center justify-center gap-2">
-            GÃ©rer mes alertes
+            Gérer mes alertes
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -473,7 +473,7 @@ function CategoryTreeRow({
         <span className="min-w-0 flex-1">
           <span className="block font-semibold text-[var(--color-text-primary)]">{category.name}</span>
           <span className="block text-xs text-[var(--color-text-secondary)]">
-            {depth === 0 ? 'Famille ouverte' : 'Sous-catÃ©gorie ouverte'}
+            {depth === 0 ? 'Famille ouverte' : 'Sous-catégorie ouverte'}
           </span>
         </span>
         <ChevronRight className="h-4 w-4 shrink-0 text-nc-lagon" />
@@ -501,7 +501,7 @@ function CategoryTreeRow({
                   <span className="min-w-0 flex-1">
                     <span className="block font-semibold text-[var(--color-text-primary)]">{child.name}</span>
                     <span className="block text-xs text-[var(--color-text-secondary)]">
-                      {grandChildren.length > 0 ? `${grandChildren.length} sous-catÃ©gorie${grandChildren.length > 1 ? 's' : ''}` : 'Dernier niveau'}
+                      {grandChildren.length > 0 ? `${grandChildren.length} sous-catégorie${grandChildren.length > 1 ? 's' : ''}` : 'Dernier niveau'}
                     </span>
                   </span>
                   <ChevronRight className="h-4 w-4 shrink-0 text-nc-lagon" />
@@ -550,7 +550,7 @@ function CategoryCard({
           <Visual className="h-7 w-7" />
         </span>
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">CatÃ©gorie</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Catégorie</p>
           <h3 className="mt-1 text-lg font-semibold text-night">{category.name}</h3>
         </div>
       </div>
@@ -595,7 +595,7 @@ export function PopularCategoriesSection({
       <div className="mb-5 flex items-end justify-between gap-4">
         <div className="section-lagon">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Rayons populaires</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les catÃ©gories que les gens cherchent vraiment</h2>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les catégories que les gens cherchent vraiment</h2>
         </div>
         <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
           Voir toutes les annonces <ArrowRight className="h-4 w-4" />
@@ -745,12 +745,12 @@ function BonPlanCard({ item }: { item: BonPlanItem }) {
         {item.discount_pct ? (
           <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">-{item.discount_pct}%</span>
         ) : null}
-      <span className="rounded-full bg-sand px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-CalÃ©donie'}</span>
+      <span className="rounded-full bg-sand px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-Calédonie'}</span>
       </div>
 
       <div className="mt-4 space-y-1 text-sm text-night/55">
         <p>{formatDateLabel(item.event_date)}</p>
-        <p>{item.author_prenom ? `PubliÃ© par ${item.author_prenom}` : 'Publication locale'}</p>
+        <p>{item.author_prenom ? `Publié par ${item.author_prenom}` : 'Publication locale'}</p>
         {item.contact_name ? <p>Contact: {item.contact_name}</p> : null}
       </div>
     </article>
@@ -788,7 +788,7 @@ function CovoiturageCard({
         </span>
         {seatsRemaining <= 1 ? (
           <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-700">
-            DerniÃ¨re place
+            Dernière place
           </span>
         ) : null}
       </div>
@@ -797,7 +797,7 @@ function CovoiturageCard({
         {item.departure} - {item.destination}
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-night/60">
-        {dateLabel} Ã  {timeLabel} Â· {item.vehicle || 'VÃ©hicule dÃ©taillÃ©'} Â· {item.price_xpf.toLocaleString('fr-FR')} XPF / place
+        {dateLabel} à {timeLabel} · {item.vehicle || 'Véhicule détaillé'} · {item.price_xpf.toLocaleString('fr-FR')} XPF / place
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-night/65">
@@ -808,7 +808,7 @@ function CovoiturageCard({
 
       <div className="mt-4 space-y-1 text-sm text-night/55">
         <p>{item.driver_prenom ? `Conducteur: ${item.driver_prenom}` : 'Conducteur local'}</p>
-        <p>{item.trust_score != null ? `FiabilitÃ©: ${item.trust_score}/100` : 'Trajet vÃ©rifiÃ©'}</p>
+        <p>{item.trust_score != null ? `Fiabilité: ${item.trust_score}/100` : 'Trajet vérifié'}</p>
       </div>
     </article>
   )
@@ -831,7 +831,7 @@ function SponsoredCampaignCard({ item }: { item: CampaignItem }) {
         ) : null}
         <div className="absolute left-3 top-3">
           <span className="badge badge-sable rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] shadow-sm">
-            SponsorisÃ©
+            Sponsorisé
           </span>
         </div>
       </div>
@@ -839,13 +839,13 @@ function SponsoredCampaignCard({ item }: { item: CampaignItem }) {
       <div className="space-y-3 p-4">
         <h3 className="line-clamp-2 text-lg font-semibold text-night">{item.title}</h3>
         <p className="line-clamp-3 text-sm leading-relaxed text-night/65">
-          {item.description || 'Une visibilitÃ© locale payante, affichÃ©e au bon moment sur Kalico.'}
+          {item.description || 'Une visibilité locale payante, affichée au bon moment sur Kalico.'}
         </p>
         <a
           href={href}
           className="inline-flex w-full items-center justify-center rounded-2xl bg-nc-sable px-4 py-3 text-sm font-semibold text-white transition hover:bg-nc-sable/90"
         >
-          {item.cta_text || 'DÃ©couvrir'}
+          {item.cta_text || 'Découvrir'}
         </a>
       </div>
     </article>
@@ -891,11 +891,11 @@ export function BonPlanSection({
           <div>
             <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-sable">SponsorisÃ©</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-sable">Sponsorisé</p>
                 <h3 className="mt-1 text-2xl font-bold text-white">Les bons plans mis en avant</h3>
               </div>
               <Link href="/pro/dashboard/publicite" className="text-sm font-semibold text-nc-sable hover:underline">
-                GÃ©rer les campagnes
+                Gérer les campagnes
               </Link>
             </div>
             <div className="grid gap-3 md:grid-cols-3">
@@ -908,12 +908,12 @@ export function BonPlanSection({
 
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="section-lagon">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/80">Bons plans & Ã©vÃ©nements</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/80">Bons plans & événements</p>
             <h3 className="mt-1 font-display text-2xl font-bold text-white md:text-3xl">
-              Promotions, culture et mobilitÃ© locale
+              Promotions, culture et mobilité locale
             </h3>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
-              Une seule vue claire pour les offres du moment, lâ€™agenda culturel et les trajets Ã  partager.
+              Une seule vue claire pour les offres du moment, l'agenda culturel et les trajets à partager.
             </p>
           </div>
           <Link href="/bons-plans" className="hidden items-center gap-1 text-sm font-semibold text-white hover:underline md:inline-flex">
@@ -929,7 +929,7 @@ export function BonPlanSection({
                 <h4 className="mt-1 text-2xl font-bold text-white">Les offres qui marchent maintenant</h4>
               </div>
               <Link href="/annonces/nouvelle" className="text-sm font-semibold text-nc-emeraude hover:underline">
-                Ajouter la vÃ´tre
+                Ajouter la vôtre
               </Link>
             </div>
             {loading ? (
@@ -958,10 +958,10 @@ export function BonPlanSection({
             <div className="mb-3 flex items-end justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-sable">Culture</p>
-                <h4 className="mt-1 text-2xl font-bold text-white">Les rendez-vous Ã  venir</h4>
+                <h4 className="mt-1 text-2xl font-bold text-white">Les rendez-vous à venir</h4>
               </div>
               <Link href="/bons-plans/publier" className="text-sm font-semibold text-nc-sable hover:underline">
-                CrÃ©er un Ã©vÃ©nement
+                Créer un événement
               </Link>
             </div>
             {loading ? (
@@ -978,9 +978,9 @@ export function BonPlanSection({
               </div>
             ) : (
               <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5 text-white/80">
-                <p className="text-lg font-semibold text-white">Les rendez-vous Ã  venir s&apos;afficheront ici</p>
+                <p className="text-lg font-semibold text-white">Les rendez-vous à venir s&apos;afficheront ici</p>
                 <p className="mt-2 text-sm text-white/65">
-                  Ajoutez un concert, une confÃ©rence ou un marchÃ© pour alimenter la section culturelle.
+                  Ajoutez un concert, une conférence ou un marché pour alimenter la section culturelle.
                 </p>
               </div>
             )}
@@ -990,7 +990,7 @@ export function BonPlanSection({
         <div className="rounded-[1.5rem] border border-white/10 border-b-4 border-b-nc-corail bg-white/5 p-5">
           <div className="mb-3 flex items-end justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-corail">MobilitÃ©</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-corail">Mobilité</p>
               <h4 className="mt-1 text-2xl font-bold text-white">Covoiturage local et interurbain</h4>
             </div>
             <Link href="/covoiturage" className="text-sm font-semibold text-nc-corail hover:underline">
@@ -999,7 +999,7 @@ export function BonPlanSection({
           </div>
           <p className="max-w-3xl text-sm leading-relaxed text-white/70 md:text-base">
             Trouvez un trajet, proposez une place ou consultez les profils de confiance. Les trajets sont
-            pensÃ©s pour la recherche rapide, les rÃ©servations simples et la sÃ©curitÃ© des Ã©changes.
+            pensés pour la recherche rapide, les réservations simples et la sécurité des échanges.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link href="/covoiturage" className="btn-primary rounded-2xl px-4 py-2.5">
@@ -1023,9 +1023,9 @@ export function BonPlanSection({
             </div>
           ) : (
             <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/8 p-5 text-white/80">
-              <p className="text-lg font-semibold text-white">La mobilitÃ© locale dÃ©marre ici</p>
+              <p className="text-lg font-semibold text-white">La mobilité locale démarre ici</p>
               <p className="mt-2 text-sm text-white/65">
-                Proposez un trajet pour lancer les premiers Ã©changes et rÃ©servations.
+                Proposez un trajet pour lancer les premiers échanges et réservations.
               </p>
             </div>
           )}
