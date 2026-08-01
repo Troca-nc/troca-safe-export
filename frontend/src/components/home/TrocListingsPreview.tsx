@@ -13,7 +13,7 @@ export default function TrocListingsPreview() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const baseUrl = normalizeApiOrigin(API_ORIGIN || 'http://localhost:3001')
+    const baseUrl = normalizeApiOrigin(API_ORIGIN || 'https://kalico-nc.com/api')
 
     fetch(`${baseUrl}/api/listings?troc=true&limit=4&sort=date`, {
       credentials: 'include',

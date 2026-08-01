@@ -9,7 +9,7 @@ import { isDemoMode, showDemoToast } from '@/lib/demoMode'
 import { clearStoredTokens, getStoredAccessToken, getStoredRefreshToken, saveStoredTokens } from '@/lib/tokenStorage'
 import { normalizeApiBase } from '@/lib/apiBase'
 
-const API_URL = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')
+const API_URL = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL || 'https://kalico-nc.com/api')
 export const API_ORIGIN = API_URL.replace(/\/api$/, '')
 
 export const api = axios.create({

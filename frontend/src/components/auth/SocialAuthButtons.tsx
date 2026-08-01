@@ -46,9 +46,6 @@ function useGoogleSignIn(onToken: (token: string) => Promise<void>) {
   useEffect(() => {
     return () => {
       isPromptingRef.current = false
-      if (window.google?.accounts?.id) {
-        window.google.accounts.id.cancel()
-      }
     }
   }, [])
 

@@ -1,5 +1,5 @@
 export function normalizeApiOrigin(rawUrl?: string | null) {
-  const fallback = 'http://localhost:3001'
+  const fallback = 'https://kalico-nc.com'
   const input = (rawUrl ?? '').trim()
   if (!input) return fallback
 

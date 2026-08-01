@@ -13,7 +13,7 @@ import { normalizeApiBase } from '@/lib/apiBase'
 import { generateAnnonceMetadata } from '@/lib/seoHelpers'
 import { SITE_URL } from '@/types/seo.types'
 
-const API = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001')
+const API = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? 'https://kalico-nc.com/api')
 
 // ── Fetch serveur (shared between generateMetadata + page) ────
 async function fetchAnnonce(id: string) {

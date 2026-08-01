@@ -10,7 +10,6 @@ import { useSubscription } from '@/hooks/usePayment'
 import { trackEvent } from '@/lib/analytics'
 import { PRO_PLANS, type BillingPeriod, type PaymentProvider } from '@/types/monetisation.types'
 
-const XPF_PER_EUR = 119.3317
 const PRO_PLAN = PRO_PLANS[0]
 
 const BOOST_PRICING = [
@@ -20,16 +19,7 @@ const BOOST_PRICING = [
   { label: '30 jours', publicXpf: 2500, proXpf: 2000 },
 ]
 
-function formatEur(amountXpf: number) {
-  return (amountXpf / XPF_PER_EUR).toLocaleString('fr-FR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
-
-function formatXpfEur(amountXpf: number) {
-  return `${amountXpf.toLocaleString('fr-FR')} XPF (${formatEur(amountXpf)} EUR)`
-}
+const CLIENT_LOGOS = ['Logo client 1', 'Logo client 2', 'Logo client 3']
 
 function getSavingsMonths(monthlyXpf: number, yearlyXpf: number) {
   if (!monthlyXpf) return 0
@@ -55,14 +45,20 @@ export default function AbonnementPage() {
   const [billing, setBilling] = useState<BillingPeriod>('monthly')
   const [provider, setProvider] = useState<PaymentProvider>('stripe')
   const { initiateSubscription, loading, error } = useSubscription()
+  const stripePk = process.env.NEXT_PUBLIC_STRIPE_PK?.trim()
+  const hasStripeConfigured = Boolean(stripePk)
 
   const annualSavingsMonths = useMemo(
     () => getSavingsMonths(PRO_PLAN.price_monthly, PRO_PLAN.price_yearly),
-    []
+    [],
   )
 
-  const currentPrice = billing === 'monthly' ? PRO_PLAN.price_monthly : PRO_PLAN.price_yearly
-  const monthlyEquivalent = billing === 'yearly' ? Math.round(PRO_PLAN.price_yearly / 12) : PRO_PLAN.price_monthly
+  const proPriceLabel =
+    billing === 'yearly'
+      ? `${PRO_PLAN.price_yearly.toLocaleString('fr-FR')} XPF / an`
+      : `${PRO_PLAN.price_monthly.toLocaleString('fr-FR')} XPF / mois`
+
+  const hasRealClientLogos = CLIENT_LOGOS.some((label) => !/^Logo client \d+$/i.test(label))
 
   const handleSubscribe = () => {
     void trackEvent('subscription_cta_click', {
@@ -82,7 +78,7 @@ export default function AbonnementPage() {
     <div className="min-h-screen bg-sand-light">
       <section className="bg-night px-4 py-16 text-center text-white">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-coral/20 px-3 py-1.5 text-xs font-medium text-coral">
-          <TrendingUp size={12} /> Developpez votre activite sur Kalico
+          <TrendingUp size={12} /> Développez votre activité sur Kalico
         </div>
         <h1 className="font-display text-4xl font-bold leading-tight md:text-5xl">
           La plateforme des professionnels
@@ -95,13 +91,13 @@ export default function AbonnementPage() {
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-white/45">
           <span className="flex items-center gap-1">
-            <ShieldCheck size={12} /> Paiement securise
+            <ShieldCheck size={12} /> Paiement sécurisé
           </span>
           <span className="flex items-center gap-1">
-            <Check size={12} /> Resiliation a tout moment
+            <Check size={12} /> Résiliation à tout moment
           </span>
           <span className="flex items-center gap-1">
-            <Sparkles size={12} /> 14 jours d'essai si configure
+            <Sparkles size={12} /> 14 jours d&apos;essai si configuré
           </span>
         </div>
       </section>
@@ -114,7 +110,7 @@ export default function AbonnementPage() {
             </p>
             <h2 className="mt-1 text-2xl font-bold text-night">Mensuel ou annuel</h2>
             <p className="mt-1 max-w-2xl text-sm text-night/60">
-              L&apos;option annuelle affiche directement la reduction sur 12 mois. Le calcul reste
+              L&apos;option annuelle affiche directement la réduction sur 12 mois. Le calcul reste
               local dans l&apos;interface, juste un prix clair.
             </p>
           </div>
@@ -128,7 +124,9 @@ export default function AbonnementPage() {
                   type="button"
                   onClick={() => setBilling(period)}
                   className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
-                    active ? 'bg-white text-night shadow-sm ring-1 ring-black/5' : 'text-night/75 hover:bg-white hover:text-night'
+                    active
+                      ? 'bg-white text-night shadow-sm ring-1 ring-black/5'
+                      : 'text-night/75 hover:bg-white hover:text-night'
                   }`}
                 >
                   {period === 'monthly' ? (
@@ -155,8 +153,8 @@ export default function AbonnementPage() {
           />
           <DemoModeNotice className="mt-4" />
           <p className="mt-3 text-sm text-night/55">
-            Stripe est recommande pour les cartes internationales. PayPlug est recommande pour les
-            cartes OPT-NC et le reseau local.
+            Stripe est recommandé pour les cartes internationales. PayPlug est recommandé pour les
+            cartes OPT-NC et le réseau local.
           </p>
         </div>
 
@@ -165,7 +163,7 @@ export default function AbonnementPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">Gratuit</p>
             <h3 className="mt-2 text-2xl font-bold text-night">Pour particuliers</h3>
             <p className="mt-2 text-sm leading-6 text-night/60">
-              Publiez sans friction avec les fonctionnalites de base pour rester actif sur la
+              Publiez sans friction avec les fonctionnalités de base pour rester actif sur la
               plateforme.
             </p>
             <div className="mt-4 rounded-2xl bg-sand/40 p-4">
@@ -173,18 +171,18 @@ export default function AbonnementPage() {
               <div className="text-xs text-night/45">Toujours gratuit</div>
             </div>
             <ul className="mt-6 space-y-3">
-              <PlanFeature enabled text="Jusqu'a 5 annonces actives" />
-              <PlanFeature enabled text="Jusqu'a 6 photos par annonce" />
-              <PlanFeature enabled text="Chat integre et verification telephone" />
-              <PlanFeature enabled text="Boosts a l'acte" />
+              <PlanFeature enabled text="Jusqu'à 5 annonces actives" />
+              <PlanFeature enabled text="Jusqu'à 6 photos par annonce" />
+              <PlanFeature enabled text="Chat intégré et vérification téléphone" />
+              <PlanFeature enabled text="Boosts à l'acte" />
               <PlanFeature enabled={false} text="Statistiques et badge Pro" />
             </ul>
             <div className="mt-auto pt-6">
               <Link
                 href="/inscription"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-night px-4 py-3 text-sm font-semibold text-white transition hover:bg-night/80"
+                className="btn-secondary flex w-full items-center justify-center gap-2 px-4 py-3 text-sm font-semibold"
               >
-                Creer mon compte
+                Créer mon compte
                 <ArrowRight size={16} />
               </Link>
             </div>
@@ -192,24 +190,22 @@ export default function AbonnementPage() {
 
           <article className="relative flex h-full flex-col rounded-[2rem] border-2 border-coral bg-white p-6 shadow-xl ring-2 ring-coral/10 lg:scale-[1.02]">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-coral px-4 py-1 text-xs font-bold text-white shadow">
-              Recommande
+              Recommandé
             </div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">Pro</p>
-            <h3 className="mt-2 text-2xl font-bold text-night">Developpez votre activite</h3>
+            <h3 className="mt-2 text-2xl font-bold text-night">Développez votre activité</h3>
             <p className="mt-2 text-sm leading-6 text-night/60">
-              4 900 XPF/mois ou 44 900 XPF/an. Le meilleur choix pour les professionnels qui
+              4 900 XPF / mois ou 44 900 XPF / an. Le meilleur choix pour les professionnels qui
               veulent plus de volume, plus de photos et moins de frais sur les boosts.
             </p>
             <div className="mt-4 rounded-2xl bg-night p-4 text-white">
-              <div className="text-3xl font-bold">{formatXpfEur(currentPrice)}</div>
+              <div className="text-3xl font-bold">{proPriceLabel}</div>
               <div className="mt-1 text-xs text-white/70">
-                {billing === 'yearly'
-                  ? `${formatXpfEur(monthlyEquivalent)} / mois en moyenne`
-                  : `${formatXpfEur(PRO_PLAN.price_yearly)} / an`}
+                {billing === 'yearly' ? 'Paiement annuel' : 'Paiement mensuel'}
               </div>
               {billing === 'yearly' ? (
                 <div className="mt-2 inline-flex rounded-full bg-emerald-400/20 px-2 py-1 text-[11px] font-semibold text-emerald-200">
-                  Economisez {annualSavingsMonths} mois
+                  Économisez {annualSavingsMonths} mois
                 </div>
               ) : null}
             </div>
@@ -225,43 +221,48 @@ export default function AbonnementPage() {
                 disabled={loading}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-coral px-4 py-3 text-sm font-semibold text-white transition hover:bg-coral-dark disabled:opacity-60"
               >
-                {loading ? 'Redirection...' : "Commencer l'essai gratuit 14 jours"}
+                {loading
+                  ? 'Redirection...'
+                  : hasStripeConfigured
+                    ? "Commencer l'essai gratuit 14 jours"
+                    : 'Choisir le plan Pro'}
                 {!loading ? <ArrowRight size={16} /> : null}
               </button>
-              <p className="mt-3 text-center text-[11px] leading-5 text-night/50">
-                Si aucun essai n&apos;est configure, le tunnel passe directement en abonnement.
-              </p>
             </div>
           </article>
 
           <article className="flex h-full flex-col rounded-[2rem] border border-night/8 bg-white p-6 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">Boosts</p>
-            <h3 className="mt-2 text-2xl font-bold text-night">A la carte</h3>
+            <h3 className="mt-2 text-2xl font-bold text-night">À la carte</h3>
             <p className="mt-2 text-sm leading-6 text-night/60">
-              Les boosts restent disponibles pour tous les utilisateurs. Les abonnes Pro paient
+              Les boosts restent disponibles pour tous les utilisateurs. Les abonnés Pro paient
               moins cher.
             </p>
             <div className="mt-4 rounded-2xl bg-sand/40 p-4">
-              <div className="text-sm font-semibold text-night">Tarifs public / Pro</div>
+              <div className="text-sm font-semibold text-night">Tarif Pro / Tarif standard</div>
               <div className="mt-3 space-y-2 text-sm text-night/70">
                 {BOOST_PRICING.map((boost) => (
                   <div key={boost.label} className="flex items-center justify-between gap-3">
                     <span>{boost.label}</span>
-                    <span className="text-right">
-                      <strong>{boost.publicXpf.toLocaleString('fr-FR')} XPF</strong>
-                      <br />
-                      <span className="text-xs text-night/45">
-                        Pro {boost.proXpf.toLocaleString('fr-FR')} XPF
-                      </span>
-                    </span>
+                    <div className="text-right">
+                      <div className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-success)]">
+                        <span>{boost.proXpf.toLocaleString('fr-FR')} XPF</span>
+                        <span className="rounded-full bg-[var(--color-success)]/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--color-success)]">
+                          Pro
+                        </span>
+                      </div>
+                      <div className="text-xs text-night/45 line-through">
+                        {boost.publicXpf.toLocaleString('fr-FR')} XPF
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
             <ul className="mt-6 space-y-3">
-              <PlanFeature enabled text="Boost a la une" />
+              <PlanFeature enabled text="Boost à la une" />
               <PlanFeature enabled text="Badge urgent" />
-              <PlanFeature enabled text="Photos supplementaires" />
+              <PlanFeature enabled text="Photos supplémentaires" />
               <PlanFeature enabled text="Disponible pour particuliers et pros" />
             </ul>
             <div className="mt-auto pt-6">
@@ -282,19 +283,19 @@ export default function AbonnementPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">
                 Pourquoi Pro ?
               </p>
-              <h2 className="mt-1 text-2xl font-bold text-night">Un usage pro, un revenu recurrent</h2>
+              <h2 className="mt-1 text-2xl font-bold text-night">Un usage pro, un revenu récurrent</h2>
             </div>
             <p className="max-w-2xl text-sm text-night/55">
-              Gratuit pour faire grossir le reseau. Pro pour les pros. Boosts a l'acte pour tout le
-              monde.
+              Le compte gratuit suffit pour démarrer. Le Pro accompagne ceux qui veulent aller plus
+              loin. Les boosts restent accessibles à tous.
             </p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
             {[
               'Gestion de volume sans friction',
-              'Plus de visibilite et de photos',
-              'Revenus recurrents simples a comprendre',
+              'Plus de visibilité et de photos',
+              'Revenus récurrents simples à comprendre',
             ].map((item) => (
               <div key={item} className="rounded-2xl bg-sand/40 p-4 text-sm text-night/70">
                 {item}
@@ -303,23 +304,28 @@ export default function AbonnementPage() {
           </div>
         </section>
 
-        <section className="mt-10 rounded-[2rem] border border-night/8 bg-white p-6 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">
-                Ils font confiance a Kalico Pro
-              </p>
-              <h2 className="mt-1 text-2xl font-bold text-night">Logos clients a venir</h2>
-            </div>
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {['Logo client 1', 'Logo client 2', 'Logo client 3'].map((label) => (
-              <div key={label} className="flex h-24 items-center justify-center rounded-2xl border border-dashed border-night/10 bg-sand/30 text-sm text-night/35">
-                {label}
+        {hasRealClientLogos ? (
+          <section className="mt-10 rounded-[2rem] border border-night/8 bg-white p-6 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">
+                  Ils font confiance à Kalico Pro
+                </p>
+                <h2 className="mt-1 text-2xl font-bold text-night">Logos clients à venir</h2>
               </div>
-            ))}
-          </div>
-        </section>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              {CLIENT_LOGOS.map((label) => (
+                <div
+                  key={label}
+                  className="flex h-24 items-center justify-center rounded-2xl border border-dashed border-night/10 bg-sand/30 text-sm text-night/35"
+                >
+                  {label}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className="mt-10 rounded-[2rem] border border-night/8 bg-white p-6 shadow-sm">
           <h2 className="text-2xl font-bold text-night">FAQ</h2>
@@ -327,15 +333,15 @@ export default function AbonnementPage() {
             {[
               {
                 q: 'Qui est Pro pour vous ?',
-                a: 'Les professionnels qui publient souvent, gèrent plusieurs annonces ou veulent des outils de visibilite et de statistiques.',
+                a: 'Les professionnels qui publient souvent, gèrent plusieurs annonces ou veulent des outils de visibilité et de statistiques.',
               },
               {
                 q: 'Puis-je annuler ?',
-                a: "Oui, vous pouvez resilier a tout moment depuis votre espace client. L'acces reste actif jusqu'a la fin de la periode en cours.",
+                a: "Oui, vous pouvez résilier à tout moment depuis votre espace client. L'accès reste actif jusqu'à la fin de la période en cours.",
               },
               {
                 q: 'Quels moyens de paiement ?',
-                a: 'Carte internationale via Stripe ou carte OPT-NC / reseau local via PayPlug.',
+                a: 'Carte internationale via Stripe ou carte OPT-NC / réseau local via PayPlug.',
               },
             ].map((item) => (
               <article key={item.q} className="rounded-2xl bg-sand/30 p-4">
@@ -351,34 +357,33 @@ export default function AbonnementPage() {
             <div className="flex items-start gap-3">
               <TrendingUp className="mt-0.5 h-5 w-5 shrink-0 text-coral" />
               <div>
-                <p className="text-sm font-semibold text-night">Le plus important a retenir</p>
+                <p className="text-sm font-semibold text-night">Le plus important à retenir</p>
                 <p className="mt-1 text-sm text-night/60">
-                  Gratuit pour grossir le reseau. Pro pour les professionnels. Boosts pour
-                  accelerer quand il faut.
+                  Le compte gratuit suffit pour démarrer. Le Pro accompagne ceux qui veulent aller
+                  plus loin. Les boosts restent accessibles à tous.
                 </p>
               </div>
             </div>
             <div className="flex flex-wrap gap-2 text-[11px] text-night/55">
               <span className="rounded-full bg-sand px-3 py-1">Stripe / PayPlug</span>
               <span className="rounded-full bg-sand px-3 py-1">Paiement local</span>
-              <span className="rounded-full bg-sand px-3 py-1">Annulation a tout moment</span>
+              <span className="rounded-full bg-sand px-3 py-1">Annulation à tout moment</span>
             </div>
           </div>
         </div>
 
         {error ? (
-          <div className="mt-6 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-center text-sm text-red-600">
+          <div className="mt-6 rounded-xl border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-4 py-3 text-center text-sm text-[var(--color-danger)]">
             {error}
           </div>
         ) : null}
 
         <div className="mt-8 text-center text-sm text-night/55">
-          Besoin d&apos;un detail avant de vous lancer ?{' '}
+          Besoin d&apos;un détail avant de vous lancer ?{' '}
           <Link href="/contact" className="font-semibold text-coral hover:underline">
             Contactez-nous
           </Link>
         </div>
-
       </main>
     </div>
   )

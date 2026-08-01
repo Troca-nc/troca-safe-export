@@ -12,7 +12,7 @@ import { getStoredAccessToken } from '@/lib/tokenStorage'
 import { CATEGORY_TO_TOUR, PARTICULIER_TOUR_ORDER, PRO_TOUR_ORDER, TOURS } from './tours.config'
 
 const STORAGE_KEY_PREFIX = 'kalico_tours_seen'
-const API_BASE = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')
+const API_BASE = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL || 'https://kalico-nc.com/api')
 
 export type TourAccountType = 'particulier' | 'pro'
 
