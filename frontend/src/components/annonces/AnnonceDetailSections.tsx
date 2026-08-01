@@ -138,7 +138,7 @@ export function ListingHeroCard({
 
   return (
     <section className="space-y-4">
-      <div className="bg-white rounded-3xl border border-night/8 overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-[var(--color-surface)] rounded-3xl border border-night/8 overflow-hidden shadow-sm">
         <div className="aspect-[4/3] bg-sand relative">
           {activeCover ? (
             <ListingImageComponent src={activeCover} alt={listing.title} sizes="(max-width: 768px) 100vw, 60vw" />
@@ -147,10 +147,10 @@ export function ListingHeroCard({
           )}
           <div className="absolute top-4 left-4 flex flex-wrap gap-2">
             {listing.is_featured && (
-              <span className="px-3 py-1 rounded-full bg-coral text-white text-xs font-semibold">A la une</span>
+              <span className="px-3 py-1 rounded-full bg-coral text-white text-xs font-semibold">À la une</span>
             )}
             {listing.is_urgent && (
-              <span className="px-3 py-1 rounded-full bg-amber-500 text-white text-xs font-semibold">Urgent</span>
+              <span className="px-3 py-1 rounded-full bg-[var(--color-warning)]/10 text-[var(--color-warning)] text-xs font-semibold">Urgent</span>
             )}
             {listing.contre_quoi && (
               <span className="px-3 py-1 rounded-full bg-night text-white text-xs font-semibold">Troc</span>
@@ -159,13 +159,13 @@ export function ListingHeroCard({
         </div>
 
         {images.length > 1 && (
-          <div className="p-3 flex gap-2 overflow-x-auto border-t border-night/8">
+          <div className="p-3 flex gap-2 overflow-x-auto snap-x scroll-smooth border-t border-night/8">
             {images.map((image, index) => (
               <button
                 key={image.id}
                 type="button"
                 onClick={() => onPickImage(index)}
-                className={`relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 border-2 transition-colors ${
+                className={`relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 border-2 transition-colors snap-center ${
                   index === activeImage ? 'border-coral' : 'border-transparent'
                 }`}
               >
@@ -180,7 +180,7 @@ export function ListingHeroCard({
         )}
       </div>
 
-      <div className="bg-white rounded-3xl border border-night/8 p-5 shadow-sm">
+      <div className="bg-white dark:bg-[var(--color-surface)] rounded-3xl border border-night/8 p-5 shadow-sm">
         <div className="flex flex-wrap items-center gap-2 text-xs text-night/45 mb-3">
           <Link href={primaryCategoryHref} className="inline-flex items-center gap-1 rounded-full bg-night/5 px-3 py-1 hover:bg-night/10">
             {listing.category_icon && <span>{listing.category_icon}</span>}
@@ -188,7 +188,7 @@ export function ListingHeroCard({
           </Link>
           <span className="inline-flex items-center gap-1 rounded-full bg-night/5 px-3 py-1">
             <MapPin size={12} />
-            {listing.commune_name ?? 'Nouvelle-Cal?donie'}
+            {listing.commune_name ?? 'Nouvelle-Calédonie'}
           </span>
           {trustScore != null && (
             <span className="inline-flex items-center gap-1 rounded-full bg-jungle/10 px-3 py-1 text-jungle">
@@ -294,7 +294,7 @@ export function SellerSidebar({
             {(listing.user.seller_commune_name || listing.user.seller_province_name) && (
               <p className="mt-1 flex items-center gap-1 text-xs text-night/50">
                 <MapPin size={12} />
-                {listing.user.seller_commune_name ?? 'Nouvelle-Cal?donie'}
+                {listing.user.seller_commune_name ?? 'Nouvelle-Calédonie'}
                 {listing.user.seller_province_name && (
                   <span className="text-night/35">· {listing.user.seller_province_name}</span>
                 )}
@@ -305,25 +305,25 @@ export function SellerSidebar({
               {listing.user.email_verified && (
                 <span className="inline-flex items-center gap-1 rounded-full border border-ocean/20 bg-ocean/8 px-2.5 py-0.5 text-[11px] font-medium text-ocean">
                   <MailCheck size={12} />
-                  Email verifie
+                  Email vérifié
                 </span>
               )}
               {listing.user.telephone_verifie && (
                 <span className="inline-flex items-center gap-1 rounded-full border border-jungle/20 bg-jungle/8 px-2.5 py-0.5 text-[11px] font-medium text-jungle">
                   <Phone size={12} />
-                  Telephone verifie
+                  Téléphone vérifié
                 </span>
               )}
               {listing.user.is_pro && (
-                <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-700">
+              <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-warning)]/30 bg-[var(--color-warning)]/10 px-2.5 py-0.5 text-[11px] font-medium text-[var(--color-warning)]">
                   <Store size={12} />
                   Pro
                 </span>
               )}
               <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
-                listing.user.is_online ? 'border border-emerald-200 bg-emerald-50 text-emerald-700' : 'border border-night/10 bg-sand text-night/50'
+                listing.user.is_online ? 'border border-[var(--color-success)]/30 bg-[var(--color-success)]/10 text-[var(--color-success)]' : 'border border-night/10 bg-sand text-night/50'
               }`}>
-                <span className={`h-2 w-2 rounded-full ${listing.user.is_online ? 'bg-emerald-500' : 'bg-night/25'}`} />
+                <span className={`h-2 w-2 rounded-full ${listing.user.is_online ? 'bg-[var(--color-success)]' : 'bg-night/25'}`} />
                 {listing.user.is_online ? 'En ligne' : (listing.user.last_seen_label ?? 'Hors ligne')}
               </span>
             </div>
@@ -402,7 +402,7 @@ export function SellerSidebar({
             className="inline-flex items-center justify-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-medium text-night/35 cursor-not-allowed"
           >
             <Send size={16} />
-            {listing.user.telephone_verifie ? 'Appel a activer' : 'Telephone non verifie'}
+            {listing.user.telephone_verifie ? 'Appel non activé' : 'Téléphone non vérifié'}
           </button>
           {isOwner && (
             <button
@@ -418,7 +418,7 @@ export function SellerSidebar({
             <button
               type="button"
               onClick={onReportListing}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 hover:bg-red-100"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-4 py-3 text-sm font-medium text-[var(--color-danger)] hover:bg-[var(--color-danger)]/20"
             >
               <AlertTriangle size={16} />
               Signaler l’annonce
@@ -447,7 +447,7 @@ export function SellerReviewsSection({
   formatDateFn: (value?: string) => string
 }) {
   return (
-    <div className="bg-white rounded-3xl border border-night/8 p-5 shadow-sm">
+    <div className="bg-white dark:bg-[var(--color-surface)] rounded-3xl border border-night/8 p-5 shadow-sm">
       <div className="flex items-center gap-2 mb-3 text-night">
         <Sparkles size={16} className="text-coral" />
         <h2 className="font-semibold">Avis acheteurs</h2>
@@ -459,7 +459,7 @@ export function SellerReviewsSection({
           <div className="h-16 rounded-2xl bg-sand animate-pulse" />
         </div>
       ) : reviews.length === 0 ? (
-        <p className="text-sm text-night/45">Aucun avis pour le moment.</p>
+        <p className="text-sm text-night/45">Soyez le premier à laisser un avis.</p>
       ) : (
         <div className="space-y-3">
           {reviews.map((review) => (
@@ -516,11 +516,11 @@ export function ReviewFormSection({
     return (
       <div className="bg-white rounded-3xl border border-night/8 p-5 shadow-sm">
         <div className="flex items-center gap-2 mb-3 text-night">
-          <BadgeCheck size={16} className="text-amber-500" />
+          <BadgeCheck size={16} className="text-[var(--color-warning)]" />
           <h2 className="font-semibold">Laisser un avis</h2>
         </div>
         <p className="text-sm text-night/60 leading-6">
-          Connectez-vous pour noter ce vendeur, ajouter des etoiles et partager votre retour avec la communaute.
+          Connectez-vous pour noter ce vendeur, ajouter des étoiles et partager votre retour avec la communauté.
         </p>
         {onRequireAuth ? (
           <button
@@ -546,12 +546,12 @@ export function ReviewFormSection({
   return (
     <div className="bg-white rounded-3xl border border-night/8 p-5 shadow-sm">
       <div className="flex items-center gap-2 mb-3 text-night">
-        <BadgeCheck size={16} className="text-amber-500" />
+        <BadgeCheck size={16} className="text-[var(--color-warning)]" />
         <h2 className="font-semibold">Laisser un avis</h2>
       </div>
 
       <p className="text-sm text-night/60 mb-3">
-        Votre retour aide les autres acheteurs a faire confiance au vendeur.
+        Votre retour aide les autres acheteurs à faire confiance au vendeur.
       </p>
 
       <div className="flex items-center gap-1 mb-4">
@@ -563,10 +563,10 @@ export function ReviewFormSection({
               key={value}
               type="button"
               onClick={() => onNoteChange(value)}
-              className={`w-9 h-9 rounded-xl border transition-colors flex items-center justify-center ${active ? 'border-amber-300 bg-amber-50 text-amber-500' : 'border-night/10 bg-white text-night/25 hover:text-amber-400'}`}
-              aria-label={`${value} etoile${value > 1 ? 's' : ''}`}
+              className={`w-9 h-9 rounded-xl border transition-colors flex items-center justify-center ${active ? 'border-[var(--color-warning)]/30 bg-[var(--color-warning)]/10 text-[var(--color-warning)]' : 'border-night/10 bg-white text-night/25 hover:text-[var(--color-warning)]'}`}
+              aria-label={`${value} étoile${value > 1 ? 's' : ''}`}
             >
-              <BadgeCheck className={`w-4 h-4 ${active ? 'text-amber-500' : ''}`} />
+              <BadgeCheck className={`w-4 h-4 ${active ? 'text-[var(--color-warning)]' : ''}`} />
             </button>
           )
         })}
@@ -591,22 +591,22 @@ export function ReviewFormSection({
       </button>
 
       {feedback && <p className="mt-3 text-sm text-jungle">{feedback}</p>}
-      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-3 text-sm text-[var(--color-danger)]">{error}</p>}
     </div>
   )
 }
 
 export function SecurityTipsCard() {
   return (
-    <div className="bg-amber-50 rounded-3xl border border-amber-100 p-5">
-      <div className="flex items-center gap-2 mb-2 text-amber-800">
+    <div className="bg-[var(--color-warning)]/10 rounded-3xl border border-[var(--color-warning)]/30 p-5">
+      <div className="flex items-center gap-2 mb-2 text-[var(--color-warning)]">
         <AlertTriangle size={16} />
-        <h2 className="font-semibold">Conseils de securite</h2>
+        <h2 className="font-semibold">Conseils de sécurité</h2>
       </div>
-      <ul className="space-y-2 text-sm text-amber-900/80 leading-6">
-        <li>- N'envoyez jamais d'argent avant d'avoir verifie l'annonce et le vendeur.</li>
-        <li>- Preferez l'echange en personne dans un lieu public.</li>
-        <li>- Gardez toutes les discussions dans Kalico pour faciliter la moderation.</li>
+      <ul className="space-y-2 text-sm text-[var(--color-warning)] leading-6">
+        <li>- N'envoyez jamais d'argent avant d'avoir vérifié l'annonce et le vendeur.</li>
+        <li>- Préférez l'échange en personne dans un lieu public.</li>
+        <li>- Gardez toutes les discussions dans Kalico pour faciliter la modération.</li>
       </ul>
     </div>
   )
@@ -626,7 +626,7 @@ export function SellerListingsSection({
       <div className="flex items-center justify-between gap-3 mb-4">
         <div>
           <h2 className="text-xl font-semibold text-night">Autres articles du vendeur</h2>
-          <p className="text-sm text-night/50">Decouvrez le reste de sa boutique avant de contacter.</p>
+          <p className="text-sm text-night/50">Ses autres annonces sur Kalico.</p>
         </div>
         <Link href={`/profil/${sellerId}`} className="text-sm text-coral hover:underline">
           Voir tous ses articles

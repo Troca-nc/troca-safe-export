@@ -539,7 +539,50 @@ Priorite connexion lente, contexte Nouvelle-Caledonie :
 
 ---
 
-## 8. Rappels operationnels
+## 8. Principes visuels de reference
+
+### Lois UX appliquees a Kalico
+
+Loi de Fitts : boutons CTA min 44x44px sur mobile, positionnes dans la zone de confort du pouce (bas de l ecran, pas de CTA principal en haut).
+
+Loi de Hick : max 5 choix visibles simultanement dans un formulaire ou un menu. Au-dela, paginer ou grouper.
+
+Loi de Miller : max 7 categories visibles dans un menu ou une grille sans scroll.
+
+Loi de Jakob : s aligner sur les conventions des marketplaces connues (Leboncoin, Vinted) pour les patterns de navigation et de publication.
+
+### Principes Gestalt appliques
+
+Proximite : espacement interne card 12px, espacement entre cards 16px minimum.
+
+Similarite : tous les boutons primaires identiques, tous les prix en coral, toutes les localisations en text-tertiary.
+
+Continuite : grille alignee sur 8pt, pas d elements flottants sans ancrage visuel.
+
+### Emotion Design - 3 niveaux Kalico
+
+Visceral (0-50ms) : fond creme #fdf8f1, pirogue logo, palette NC orange/turquoise. Objectif : chaleur et appartenance immediate.
+
+Comportemental : micro-interactions moderees, transitions 150ms, feedback tactile sur les clics. Objectif : fluidite et confiance.
+
+Reflexif : copywriting ancre NC, "Ce qui se vend en NC, c est ici", sections localisees (Noumea, Loyautes, communes). Objectif : attachement a la marque locale.
+
+### Metriques WCAG 2.1
+
+Contraste texte normal : min 4.5:1
+
+Contraste grands titres : min 3:1
+
+Zone cliquable mobile : min 44x44px
+
+Animations : desactivees si prefers-reduced-motion
+
+Ratios actuels Kalico :
+- #e8832a (coral) sur blanc : ~3.2:1 -> acceptable pour titres, insuffisant pour texte courant -> compenser en augmentant la taille ou le poids
+- #1d9e75 (emeraude) sur blanc : ~4.6:1 -> conforme
+- #1a2e25 (night) sur blanc : ~13:1 -> excellent
+
+## 9. Rappels operationnels
 
 - `html[data-theme='dark']` est la source de verite pour le dark mode.
 - Les composants de base doivent utiliser les tokens et les classes globales avant les couleurs utilitaires locales.

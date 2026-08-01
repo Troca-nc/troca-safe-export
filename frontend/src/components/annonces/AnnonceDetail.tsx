@@ -117,8 +117,8 @@ const CONDITION_LABELS: Record<string, string> = {
 const TRUST_LABELS: Record<string, { label: string; className: string }> = {
   excellent: { label: 'Vendeur de confiance', className: 'bg-jungle/10 text-jungle border-jungle/20' },
   bon: { label: 'Vendeur fiable', className: 'bg-teal-50 text-teal-700 border-teal-100' },
-  moyen: { label: 'Profil en cours', className: 'bg-amber-50 text-amber-700 border-amber-100' },
-  faible: { label: 'Profil sensible', className: 'bg-red-50 text-red-600 border-red-100' },
+  moyen: { label: 'Profil en cours', className: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border-[var(--color-warning)]/30' },
+  faible: { label: 'Profil sensible', className: 'bg-[var(--color-danger)]/10 text-[var(--color-danger)] border-[var(--color-danger)]/30' },
   inconnu: { label: 'Non évalué', className: 'bg-sand text-night/60 border-night/10' },
 }
 
@@ -584,25 +584,25 @@ export default function AnnonceDetail({ id, initialData }: Props) {
       </div>
 
       {error && (
-        <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-5 rounded-2xl border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-4 py-3 text-sm text-[var(--color-danger)]">
           {error}
         </div>
       )}
 
       {publishedBannerOpen ? (
-        <div className="mb-5 rounded-[2rem] border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+        <div className="mb-5 rounded-[2rem] border border-[var(--color-success)]/30 bg-[var(--color-success)]/10 p-5 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">Publication réussie</p>
-              <h2 className="mt-2 text-2xl font-bold text-emerald-950">Votre annonce est en ligne</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-emerald-950/70">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-success)]">Publication réussie</p>
+              <h2 className="mt-2 text-2xl font-bold text-[var(--color-success)]">Votre annonce est en ligne</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-success)]/70">
                 Partagez-la maintenant, retrouvez-la dans vos annonces et découvrez les options de visibilité pour lui donner un coup de pouce.
               </p>
             </div>
             <button
               type="button"
               onClick={() => setPublishedBannerOpen(false)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-emerald-200 bg-white text-emerald-700 transition hover:bg-emerald-100"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-success)]/30 bg-white text-[var(--color-success)] transition hover:bg-[var(--color-success)]/10"
               aria-label="Fermer le message de publication"
             >
               <X className="h-4 w-4" />
@@ -613,15 +613,15 @@ export default function AnnonceDetail({ id, initialData }: Props) {
             {shareAnnonce && <ShareButton annonce={shareAnnonce} variant="full" className="rounded-2xl" />}
             <Link
               href="/profil?tab=listings"
-              className="inline-flex items-center justify-center rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"
+              className="inline-flex items-center justify-center rounded-2xl border border-[var(--color-success)]/30 bg-white px-4 py-3 text-sm font-semibold text-[var(--color-success)] transition hover:bg-[var(--color-success)]/10"
             >
               Voir mes annonces
             </Link>
             <Link
               href="/pro"
-              className="inline-flex items-center justify-center rounded-2xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
+              className="inline-flex items-center justify-center rounded-2xl bg-[var(--color-success)] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
             >
-              Découvrir les boosts
+              Mettre en avant
             </Link>
           </div>
         </div>
@@ -746,7 +746,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
               </div>
             )}
             {offerError && (
-              <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div className="mt-4 rounded-2xl border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-4 py-3 text-sm text-[var(--color-danger)]">
                 {offerError}
               </div>
             )}
@@ -785,11 +785,11 @@ export default function AnnonceDetail({ id, initialData }: Props) {
             </button>
 
             <div className="flex items-start gap-3 pr-10">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--color-danger)]/10 text-[var(--color-danger)]">
                 <AlertTriangle className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-red-600/80">Signalement</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--color-danger)]/80">Signalement</p>
                 <h2 className="mt-1 text-2xl font-bold text-night">Signaler cette annonce</h2>
                 <p className="mt-2 text-sm leading-6 text-night/60">
                   Aidez-nous à garder une plateforme de confiance. Votre signalement sera transmis à notre équipe.
@@ -803,7 +803,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
                 <select
                   value={reportReason}
                   onChange={(event) => setReportReason(event.target.value as typeof reportReason)}
-                  className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-red-300 focus:ring-4 focus:ring-red-100"
+                  className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-[var(--color-danger)]/30 focus:ring-4 focus:ring-[var(--color-danger)]/10"
                 >
                   <option value="spam">Spam ou publicité abusive</option>
                   <option value="fake">Annonce douteuse ou trompeuse</option>
@@ -819,7 +819,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
                   value={reportComment}
                   onChange={(event) => setReportComment(event.target.value)}
                   rows={4}
-                  className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-red-300 focus:ring-4 focus:ring-red-100"
+                  className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-[var(--color-danger)]/30 focus:ring-4 focus:ring-[var(--color-danger)]/10"
                   placeholder="Expliquez brièvement ce qui vous paraît problématique..."
                   maxLength={500}
                 />
@@ -832,7 +832,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
               </div>
             )}
             {reportError && (
-              <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div className="mt-4 rounded-2xl border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-4 py-3 text-sm text-[var(--color-danger)]">
                 {reportError}
               </div>
             )}
@@ -849,7 +849,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
                 type="button"
                 onClick={handleSubmitReport}
                 disabled={reportSubmitting}
-                className="inline-flex items-center justify-center rounded-2xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-wait disabled:opacity-60"
+                className="inline-flex items-center justify-center rounded-2xl bg-[var(--color-danger)] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-wait disabled:opacity-60"
               >
                 {reportSubmitting ? 'Envoi...' : 'Envoyer le signalement'}
               </button>
