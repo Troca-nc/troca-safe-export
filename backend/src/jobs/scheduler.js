@@ -1,10 +1,10 @@
 ﻿'use strict';
 
 // ============================================================
-//  Kalico â€” Jobs planifiÃ©s (node-cron)
-//  â€¢ Expiration des boosts payÃ©s
-//  â€¢ Envoi des alertes de recherche (daily + weekly)
-//  â€¢ Matching immediate des nouvelles annonces
+//  Kalico — Jobs planifiés (node-cron)
+//  • Expiration des boosts payés
+//  • Envoi des alertes de recherche (daily + weekly)
+//  • Matching immediate des nouvelles annonces
 // ============================================================
 
 const cron                = require('node-cron');
@@ -75,7 +75,7 @@ function getPerformanceWindowDays(frequency) {
 
 function getPerformancePeriodLabel(frequency, startDate) {
   const labelMap = {
-    daily: 'les derniÃ¨res 24 heures',
+    daily: 'les dernières 24 heures',
     weekly: 'les 7 derniers jours',
     monthly: 'les 30 derniers jours',
   };
@@ -198,8 +198,8 @@ async function notifyTrocDirectMatch(anchorListing, candidateListing) {
   for (const payload of payloads) {
     const recipientName = formatUserName(payload.recipient.prenom, payload.recipient.nom);
     const counterpartName = formatUserName(payload.counterpart.prenom, payload.counterpart.nom);
-    const title = 'ðŸ”„ Troc compatible trouvÃ© !';
-    const body = `${counterpartName} a une annonce qui correspond Ã  votre troc.`;
+    const title = '🔄 Troc compatible trouvé !';
+    const body = `${counterpartName} a une annonce qui correspond à votre troc.`;
 
     await createNotification(payload.recipient.id, {
       type: 'troc_match',
@@ -249,7 +249,7 @@ async function notifyTrocCycle(cycle, listingById) {
 
   for (const participant of participants) {
     const recipientName = formatUserName(participant.prenom, participant.nom);
-    const title = 'ðŸ”„ Troc en chaÃ®ne dÃ©tectÃ© !';
+    const title = '🔄 Troc en chaîne détecté !';
     const body = "Vous, d'autres troceurs et leurs annonces pouvez tous y gagner.";
 
     await createNotification(participant.participantId, {
@@ -273,7 +273,7 @@ async function notifyTrocCycle(cycle, listingById) {
         to: participant.email,
         subject: title,
         html: `<p>Bonjour ${recipientName},</p>
-          <p>Un troc en chaÃ®ne a Ã©tÃ© dÃ©tectÃ© autour de vos annonces.</p>
+          <p>Un troc en chaîne a été détecté autour de vos annonces.</p>
           <p><a href="${baseUrl}/troc/cycles/${cycle.id}">Voir le cycle</a></p>`,
       }).catch(() => {});
     }
@@ -360,7 +360,7 @@ async function processTrocMatchingQueue() {
 }
 
 // â”€â”€ 1. Expiration des boosts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Toutes les heures : dÃ©sactive les boosts dont boost_expires_at est passÃ©
+// Toutes les heures : désactive les boosts dont boost_expires_at est passé
 
 function startBoostExpiryJob() {
   cron.schedule('0 * * * *', async () => {
@@ -463,8 +463,8 @@ function startProQuoteExpiryJob() {
           for (const row of result.rows) {
             await createNotification(row.pro_id, {
               type: 'quote_expired',
-              title: `Votre devis ${row.quote_number} a expirÃ© sans rÃ©ponse.`,
-              body: `Votre devis ${row.quote_number} a expirÃ© sans rÃ©ponse.`,
+              title: `Votre devis ${row.quote_number} a expiré sans réponse.`,
+              body: `Votre devis ${row.quote_number} a expiré sans réponse.`,
               href: '/pro/dashboard/devis',
             }).catch(() => {});
           }
@@ -599,14 +599,14 @@ async function expireTrocProposals() {
   for (const row of expired.rows) {
     await createNotification(row.proposer_id, {
       type: 'troc_expired',
-      title: 'â° Proposition expirÃ©e',
-      body: "Votre proposition de troc n'a pas reÃ§u de reponse.",
+      title: '⏰ Proposition expirée',
+      body: "Votre proposition de troc n'a pas reçu de réponse.",
       href: `/troc/${row.listing_id}`,
     }).catch(() => {});
 
     await sendPushToUser(row.proposer_id, {
-      title: 'â° Proposition expirÃ©e',
-      body: "Votre proposition de troc n'a pas reÃ§u de reponse.",
+      title: '⏰ Proposition expirée',
+      body: "Votre proposition de troc n'a pas reçu de réponse.",
       data: { type: 'troc_expired', proposal_id: row.id, listing_id: row.listing_id },
     }).catch(() => {});
   }
@@ -630,8 +630,8 @@ async function expireTrocCycles() {
 
   for (const row of expired.rows) {
     await sendPushToUsers(row.participant_ids || [], {
-      title: 'ðŸ”„ Cycle Troc expirÃ©',
-      body: "Le troc en chaÃ®ne n'a pas ete confirme a temps.",
+      title: '🔄 Cycle Troc expiré',
+      body: "Le troc en chaîne n'a pas été confirmé à temps.",
       data: { type: 'troc_cycle_expired', cycle_id: row.id },
     }).catch(() => {});
   }
@@ -701,10 +701,10 @@ function startAdminAlertsJob() {
 }
 
 // â”€â”€ 2. Envoi des alertes daily â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Tous les jours Ã  8h00 heure NoumÃ©a
+// Tous les jours à 8h00 heure Nouméa
 
 // â”€â”€ 2. Email + notif relance annonces expirant dans 3 jours â”€â”€â”€â”€â”€
-// Tous les jours Ã  9h00 heure NoumÃ©a
+// Tous les jours à 9h00 heure Nouméa
 
 function startExpiringListingsJob() {
   cron.schedule('0 9 * * *', async () => {
@@ -759,7 +759,7 @@ function startDailyAlertsJob() {
 }
 
 // â”€â”€ 3. Envoi des alertes weekly â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Tous les lundis Ã  8h00 heure NoumÃ©a
+// Tous les lundis à 8h00 heure Nouméa
 
 function startWeeklyAlertsJob() {
   cron.schedule('0 8 * * 1', () => runSingletonJob('cron:alerts-weekly', 30 * 60 * 1000, () => runAlertJob('weekly')), { timezone: 'Pacific/Noumea' });
@@ -808,7 +808,7 @@ async function runAlertJob(frequency) {
   let errors = 0;
 
   try {
-    // RÃ©cupÃ©rer toutes les alertes actives pour cette frÃ©quence
+    // Récupérer toutes les alertes actives pour cette fréquence
     const alerts = await query(`
       SELECT sa.id, sa.user_id, sa.label, sa.filters, sa.unsubscribe_token,
              sa.last_sent_at, u.email, u.prenom
@@ -837,8 +837,8 @@ async function runAlertJob(frequency) {
 
         if (prefs?.push_search_alert) {
           await sendPushToUser(alert.user_id, {
-            title: `ðŸ”” ${annonces.length} nouvelle${annonces.length > 1 ? 's' : ''} annonce${annonces.length > 1 ? 's' : ''} pour "${alert.label}"`,
-            body: 'Cliquez pour voir les rÃ©sultats',
+            title: `🔔 ${annonces.length} nouvelle${annonces.length > 1 ? 's' : ''} annonce${annonces.length > 1 ? 's' : ''} pour "${alert.label}"`,
+            body: 'Cliquez pour voir les résultats',
             data: {
               type: 'search_alert',
               alert_id: alert.id,
@@ -847,7 +847,7 @@ async function runAlertJob(frequency) {
           }).catch(() => {});
         }
 
-        // Logger les annonces envoyÃ©es pour Ã©viter les doublons
+        // Logger les annonces envoyées pour éviter les doublons
         for (const a of annonces) {
           await query(`
             INSERT INTO alert_sent_log (alert_id, annonce_id)
@@ -856,7 +856,7 @@ async function runAlertJob(frequency) {
           `, [alert.id, a.id]).catch(() => {});
         }
 
-        // Mettre Ã  jour last_sent_at et nb_results
+        // Mettre à jour last_sent_at et nb_results
         await query(`
           UPDATE search_alerts
           SET last_sent_at = NOW(), nb_results = nb_results + $2, updated_at = NOW()
@@ -880,7 +880,7 @@ async function runAlertJob(frequency) {
 
 /**
  * Trouve les annonces correspondant aux filtres d'une alerte
- * et non encore envoyÃ©es Ã  cet utilisateur
+ * et non encore envoy?es ? cet utilisateur
  */
 async function matchAlerteAnnonces(alert) {
   const filters = typeof alert.filters === 'string'
@@ -889,11 +889,11 @@ async function matchAlerteAnnonces(alert) {
 
   const conditions = [
     `a.status = 'active'`,
-    // Exclure les annonces dÃ©jÃ  envoyÃ©es pour cette alerte
+    // Exclure les annonces déjà envoyées pour cette alerte
     `a.id NOT IN (
        SELECT annonce_id FROM alert_sent_log WHERE alert_id = $1
      )`,
-    // Annonces publiÃ©es depuis le dernier envoi (ou derniÃ¨res 7 jours si premiÃ¨re fois)
+    // Annonces publiées depuis le dernier envoi (ou dernières 7 jours si première fois)
     `a.created_at > COALESCE($2::timestamptz, NOW() - INTERVAL '7 days')`,
   ];
   const params = [alert.id, alert.last_sent_at || null];
@@ -914,11 +914,11 @@ async function matchAlerteAnnonces(alert) {
   }
   if (filters.price_min != null || filters.prix_min != null) {
     conditions.push(`a.prix_xpf >= $${idx++}`);
-    params.push(filters.price_min ?? filters.prix_min);
+    params.push(filters.price_min ? filters.prix_min);
   }
   if (filters.price_max != null || filters.prix_max != null) {
     conditions.push(`a.prix_xpf <= $${idx++}`);
-    params.push(filters.price_max ?? filters.prix_max);
+    params.push(filters.price_max ? filters.prix_max);
   }
   if (filters.condition) {
     conditions.push(`a.condition = $${idx++}`);
@@ -941,7 +941,7 @@ async function matchAlerteAnnonces(alert) {
 }
 
 /**
- * Matching immÃ©diat : appelÃ© quand une nouvelle annonce est publiÃ©e
+ * Matching immédiat : appelé quand une nouvelle annonce est publiée
  * Envoie les emails aux utilisateurs ayant une alerte 'immediate' correspondante
  */
 async function matchImmediateAlerts(annonce) {
@@ -966,13 +966,13 @@ async function matchImmediateAlerts(annonce) {
         ? JSON.parse(alert.filters)
         : alert.filters;
 
-      // Test simple cÃ´tÃ© JS pour l'immediate (Ã©vite une requÃªte par alerte)
+      // Test simple côté JS pour l'immediate (évite une requête par alerte)
       const matches = (
         (!filters.q             || annonce.titre?.toLowerCase().includes(filters.q.toLowerCase())) &&
         (!(filters.category_id || filters.categorie_id) || String(annonce.category_id) === String(filters.category_id || filters.categorie_id)) &&
         (!filters.commune_id    || String(annonce.commune_id)   === String(filters.commune_id))   &&
-        (!filters.price_min && !filters.prix_min || (annonce.prix ?? annonce.prix_xpf ?? 0) >= Number(filters.price_min ?? filters.prix_min)) &&
-        (!filters.price_max && !filters.prix_max || (annonce.prix ?? annonce.prix_xpf ?? 0) <= Number(filters.price_max ?? filters.prix_max)) &&
+        (!filters.price_min && !filters.prix_min || (annonce.prix ? annonce.prix_xpf ? 0) >= Number(filters.price_min ? filters.prix_min)) &&
+        (!filters.price_max && !filters.prix_max || (annonce.prix ? annonce.prix_xpf ? 0) <= Number(filters.price_max ? filters.prix_max)) &&
         (!filters.condition     || String(annonce.condition) === String(filters.condition)) &&
         (String(filters.troc) !== 'true' && String(filters.troc) !== '1' || Boolean(annonce.contre_quoi))
       );
@@ -990,8 +990,8 @@ async function matchImmediateAlerts(annonce) {
       ).catch(() => {});
       if (prefs?.push_search_alert) {
         await sendPushToUser(alert.user_id, {
-          title: `ðŸ”” 1 nouvelle annonce pour "${alert.label}"`,
-          body: 'Cliquez pour voir le rÃ©sultat',
+          title: `🔔 1 nouvelle annonce pour "${alert.label}"`,
+          body: 'Cliquez pour voir le résultat',
           data: {
             type: 'search_alert',
             alert_id: alert.id,
@@ -1013,10 +1013,10 @@ async function matchImmediateAlerts(annonce) {
   }
 }
 
-// â”€â”€ Point d'entrÃ©e â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Point d'entrée ─────────────────────────────────────────
 
 // â”€â”€ 5. Email post-transaction pour inciter les avis â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Tous les jours Ã  10h00 : envoyer un email 48h aprÃ¨s le premier message
+// Tous les jours à 10h00 : envoyer un email 48h après le premier message
 
 async function buildPerformanceReportForUser(userRow, prefs) {
   const frequency = prefs.performance_report_frequency || 'weekly';
@@ -1122,8 +1122,8 @@ async function runPerformanceReportsJob() {
 
         if (recipient.push_performance_report) {
           await sendPushToUser(recipient.user_id, {
-            title: 'ðŸ“Š Votre rapport de performance est prÃªt',
-            body: `${report.totals.views.toLocaleString('fr-FR')} vues Â· ${report.totals.clicks.toLocaleString('fr-FR')} clics`,
+            title: '📊 Votre rapport de performance est prêt',
+            body: `${report.totals.views.toLocaleString('fr-FR')} vues · ${report.totals.clicks.toLocaleString('fr-FR')} clics`,
             data: {
               type: 'performance_report',
               period: report.frequency,
@@ -1166,7 +1166,7 @@ function startReviewReminderJob() {
     await runSingletonJob('cron:review-reminder', 30 * 60 * 1000, async () => {
       try {
         // Conversations dont le premier message date d'exactement 48h (Â±1h)
-        // et pour lesquelles aucun avis n'a encore Ã©tÃ© laissÃ©
+        // et pour lesquelles aucun avis n'a encore été laissé
         const result = await query(`
           SELECT DISTINCT
             c.id          AS conv_id,
@@ -1184,7 +1184,7 @@ function startReviewReminderJob() {
                                   AND NOW() - INTERVAL '47 hours'
             AND ub.deleted_at IS NULL
             AND us.deleted_at IS NULL
-            -- Pas encore d'avis laissÃ© par l'acheteur pour ce vendeur
+            -- Pas encore d'avis laissé par l'acheteur pour ce vendeur
             AND NOT EXISTS (
               SELECT 1 FROM avis av
               WHERE av.auteur_id  = c.buyer_id
@@ -1200,9 +1200,9 @@ function startReviewReminderJob() {
             to:      row.buyer_email,
             subject: "Retour sur votre transaction - Kalico",
             html: '<p>Bonjour ' + row.buyer_prenom + ',</p>'
-                + '<p>Vous avez Ã©changÃ© avec <strong>' + row.seller_prenom + '</strong>'
-                + ' Ã  propos de "<strong>' + row.annonce_titre + '</strong>".</p>'
-                + '<p>Partagez votre expÃ©rience en laissant un avis â€” cela aide la communautÃ© Kalico !</p>'
+                + '<p>Vous avez échangé avec <strong>' + row.seller_prenom + '</strong>'
+                + ' à propos de "<strong>' + row.annonce_titre + '</strong>".</p>'
+                + '<p>Partagez votre expérience en laissant un avis — cela aide la communauté Kalico !</p>'
                 + '<p><a href="' + baseUrl + '/profil/' + row.seller_id + '?review=1"'
                 + ' style="background:#2563eb;color:#fff;padding:12px 24px;border-radius:8px;'
                 + 'text-decoration:none;font-weight:bold;display:inline-block;">'
@@ -1289,7 +1289,7 @@ function startRideReviewReminderJob() {
           await createNotification(row.passenger_id, {
             type: 'review',
             title: 'âœï¸ Notez votre conducteur',
-            body: `Partagez votre avis sur ${rideLabel} pour aider la communautÃ©.`,
+            body: `Partagez votre avis sur ${rideLabel} pour aider la communaut?.`,
             href: `/covoiturage/reservations?review_booking=${row.booking_id}`,
           }).catch(() => {});
 
@@ -1400,7 +1400,7 @@ async function runProBookingReminderWindow({
       await createNotification(row.requester_user_id, {
         type: 'appointment_reminder',
         title: notificationTitle,
-        body: `${proName} Â· ${when}`,
+        body: `${proName} · ${when}`,
         href: '/mes-rdv',
       }).catch(() => {});
 
@@ -1426,7 +1426,7 @@ async function runProBookingReminderWindow({
             proName,
             proCommune: row.pro_commune,
             commune: row.commune,
-            locationText: row.pro_commune || 'Lieu Ã  confirmer',
+            locationText: row.pro_commune || 'Lieu à confirmer',
             slotLabel: when,
             bookingId: row.booking_id,
             bookingAccessToken: row.booking_access_token,
@@ -1440,7 +1440,7 @@ async function runProBookingReminderWindow({
     await createNotification(row.pro_id, {
       type: 'appointment_reminder',
       title: notificationTitle,
-      body: `${row.requester_name || 'Client'} Â· ${when}`,
+      body: `${row.requester_name || 'Client'} · ${when}`,
       href: '/pro/dashboard/rdv',
     }).catch(() => {});
 
@@ -1466,7 +1466,7 @@ async function runProBookingReminderWindow({
           proName,
           proCommune: row.pro_commune,
           commune: row.commune,
-          locationText: row.pro_commune || 'Lieu Ã  confirmer',
+          locationText: row.pro_commune || 'Lieu à confirmer',
           slotLabel: when,
           bookingId: row.booking_id,
           bookingAccessToken: row.booking_access_token,
@@ -1501,8 +1501,8 @@ function startProBookingReminderJob() {
           windowStartHours: 23.75,
           windowEndHours: 24.25,
           reminderLabel: 'J-1',
-          notificationTitle: 'ðŸ“… Rendez-vous demain',
-          notificationBody: (row, proName, partnerName, when) => `Rendez-vous avec ${proName} Â· ${when}`,
+          notificationTitle: '📅 Rendez-vous demain',
+          notificationBody: (row, proName, partnerName, when) => `Rendez-vous avec ${proName} ? ${when}`,
           emailIntro: (role, row, proName, when) => role === 'client'
             ? `Votre rendez-vous avec ${proName} approche.`
             : `Votre rendez-vous avec ${row.requester_name || 'un client'} approche.`,
@@ -1515,10 +1515,10 @@ function startProBookingReminderJob() {
           windowEndHours: 2.25,
           reminderLabel: 'H-2',
           notificationTitle: 'â° Rendez-vous dans 2 heures',
-          notificationBody: (row, proName, partnerName, when) => `PrÃ©parez votre rendez-vous avec ${proName} Â· ${when}`,
+          notificationBody: (row, proName, partnerName, when) => `Préparez votre rendez-vous avec ${proName} · ${when}`,
           emailIntro: (role, row, proName, when) => role === 'client'
-            ? `Votre rendez-vous avec ${proName} est prÃ©vu dans moins de 2 heures.`
-            : `Votre rendez-vous avec ${row.requester_name || 'un client'} est prÃ©vu dans moins de 2 heures.`,
+            ? `Votre rendez-vous avec ${proName} est prévu dans moins de 2 heures.`
+            : `Votre rendez-vous avec ${row.requester_name || 'un client'} est prévu dans moins de 2 heures.`,
         });
 
         if (sent24h || sent2h) {
