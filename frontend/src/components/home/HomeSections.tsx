@@ -9,6 +9,7 @@ import PlatformStats from '@/components/PlatformStats'
 import CategoryTreeSection from '@/components/home/CategoryTreeSection'
 import ListingCard from '@/components/listings/ListingCard'
 import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
+import { useScrollReveal } from '@/hooks/useScrollReveal'
 import type { CategoryNode } from '@/lib/categoryCatalog'
 import { SEARCH_ALERTS, getCategoryIcon } from '@/lib/categoryPresentation'
 
@@ -207,6 +208,7 @@ function HeroFeature({ icon: Icon, title, subtitle }: (typeof HERO_FEATURES)[num
 
 export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHeroSectionProps) {
   const cards = [...listings.slice(0, 2), ...HERO_FALLBACK_LISTINGS].slice(0, 2)
+  useScrollReveal()
 
   return (
     <section
@@ -339,7 +341,7 @@ function AnimatedStat({ value, label, loading }: { value: number | null; label: 
 
 export function HomeStatsSection() {
   return (
-    <section className="mx-auto max-w-7xl px-4 pb-10">
+    <section className="mx-auto max-w-7xl px-4 pb-10" data-reveal="true">
       <PlatformStats variant="light" />
     </section>
   )
@@ -355,7 +357,7 @@ export function FeaturedListingsSection({
   if (!loading && listings.length === 0) return null
 
   return (
-    <section id="featured-listings" className="mx-auto max-w-7xl px-4 pb-10">
+    <section id="featured-listings" className="mx-auto max-w-7xl px-4 pb-10" data-reveal="true">
       <div className="mb-5 flex items-end justify-between gap-4">
         <div className="section-lagon">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Annonces en vedette</p>
@@ -393,7 +395,7 @@ export function FeaturedListingsSection({
 
 export function SearchAlertsSection() {
   return (
-    <section className="mx-auto max-w-7xl px-4 pb-10">
+    <section className="mx-auto max-w-7xl px-4 pb-10" data-reveal="true">
       <div className="grid gap-5 overflow-hidden rounded-[2rem] border border-[var(--color-border)] border-b-4 border-b-nc-corail bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.18))] px-6 py-8 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)] lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div className="min-w-0">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-lagon">
@@ -591,7 +593,7 @@ export function PopularCategoriesSection({
   onBrowse: (slug: string) => void
 }) {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-10">
+    <section className="mx-auto max-w-7xl px-4 py-10" data-reveal="true">
       <div className="mb-5 flex items-end justify-between gap-4">
         <div className="section-lagon">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Rayons populaires</p>
@@ -885,7 +887,7 @@ export function BonPlanSection({
   const rideHasItems = (covoiturageItems || []).length > 0
 
   return (
-    <section className="mx-auto max-w-7xl px-4 pb-10">
+    <section className="mx-auto max-w-7xl px-4 pb-10" data-reveal="true">
       <div className="grid gap-5 overflow-hidden rounded-[2rem] border border-night/8 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.12))] p-5 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)]">
         {sponsoredHasItems ? (
           <div>
@@ -945,11 +947,21 @@ export function BonPlanSection({
                 ))}
               </div>
             ) : (
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5 text-white/80">
-                <p className="text-lg font-semibold text-white">Aucune promotion en ligne pour le moment</p>
-                <p className="mt-2 text-sm text-white/65">
-                  Publiez une promo, un coupon ou une vente flash pour lancer la section.
-                </p>
+              <div className="rounded-[1.5rem] border border-white/10 bg-white/8 px-5 py-8 text-center text-white/80">
+                <div className="mx-auto flex max-w-md flex-col items-center">
+                  <span className="mb-3 text-2xl animate-pulse motion-reduce:animate-none" aria-hidden="true">
+                    🎁
+                  </span>
+                  <p className="font-display text-lg font-medium text-night dark:text-white">
+                    La première promo NC, c&apos;est la vôtre.
+                  </p>
+                  <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+                    Touchez vos clients là où ils cherchent.
+                  </p>
+                  <Link href="/bons-plans/nouvelle" className="btn-primary mt-4 inline-flex items-center justify-center">
+                    Publier une offre
+                  </Link>
+                </div>
               </div>
             )}
           </div>
@@ -977,11 +989,21 @@ export function BonPlanSection({
                 ))}
               </div>
             ) : (
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5 text-white/80">
-                <p className="text-lg font-semibold text-white">Les rendez-vous à venir s&apos;afficheront ici</p>
-                <p className="mt-2 text-sm text-white/65">
-                  Ajoutez un concert, une conférence ou un marché pour alimenter la section culturelle.
-                </p>
+              <div className="rounded-[1.5rem] border border-white/10 bg-white/8 px-5 py-8 text-center text-white/80">
+                <div className="mx-auto flex max-w-md flex-col items-center">
+                  <span className="mb-3 text-2xl animate-pulse motion-reduce:animate-none" aria-hidden="true">
+                    🎭
+                  </span>
+                  <p className="font-display text-lg font-medium text-night dark:text-white">
+                    Le prochain événement NC mérite d&apos;être ici.
+                  </p>
+                  <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+                    Concerts, marchés, conférences — tout y est.
+                  </p>
+                  <Link href="/evenements/nouveau" className="btn-primary mt-4 inline-flex items-center justify-center">
+                    Créer un événement
+                  </Link>
+                </div>
               </div>
             )}
           </div>
@@ -1022,11 +1044,21 @@ export function BonPlanSection({
               ))}
             </div>
           ) : (
-            <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/8 p-5 text-white/80">
-              <p className="text-lg font-semibold text-white">La mobilité locale démarre ici</p>
-              <p className="mt-2 text-sm text-white/65">
-                Proposez un trajet pour lancer les premiers échanges et réservations.
-              </p>
+            <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/8 px-5 py-8 text-center text-white/80">
+              <div className="mx-auto flex max-w-md flex-col items-center">
+                <span className="mb-3 text-2xl animate-pulse motion-reduce:animate-none" aria-hidden="true">
+                  🚗
+                </span>
+                <p className="font-display text-lg font-medium text-night dark:text-white">
+                  Le premier trajet, c&apos;est souvent le plus utile.
+                </p>
+                <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+                  Proposez un trajet, trouvez des passagers.
+                </p>
+                <Link href="/covoiturage/nouveau" className="btn-primary mt-4 inline-flex items-center justify-center">
+                  Proposer un trajet
+                </Link>
+              </div>
             </div>
           )}
         </div>

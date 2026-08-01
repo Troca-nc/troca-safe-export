@@ -291,20 +291,23 @@ header nav button {
     box-shadow: 0 2px 8px rgba(10, 126, 164, 0.18);
   }
 
+  .btn-primary,
+  .btn-secondary {
+    @apply active:scale-[0.97];
+  }
+
   .btn-primary:hover {
     background: var(--ocean);
   }
 
   .btn-primary:active,
-  .btn-secondary:active,
+  .btn-secondary:active {
+    transform: scale(0.97);
+  }
+
   .btn-ghost:active,
   .btn-danger:active {
     transform: scale(0.98);
-  }
-
-  .btn-primary:active,
-  .btn-secondary:active {
-    transform: scale(0.97);
   }
 
   .btn-secondary {
