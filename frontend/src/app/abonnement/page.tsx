@@ -13,26 +13,16 @@ import {
   Shield,
   ShieldCheck,
   ShoppingBag,
-  Sparkles,
   TrendingUp,
   Truck,
   Wrench,
 } from 'lucide-react'
 
-import DemoModeNotice from '@/components/DemoModeNotice'
-import { PaymentProviderSelector } from '@/components/monetisation/PaymentProviderSelector'
 import { useSubscription } from '@/hooks/usePayment'
 import { trackEvent } from '@/lib/analytics'
 import { PRO_PLANS, type BillingPeriod, type PaymentProvider } from '@/types/monetisation.types'
 
 const PRO_PLAN = PRO_PLANS[0]
-
-const BOOST_PRICING = [
-  { label: '3 jours', standardXpf: 500, proXpf: 400 },
-  { label: '7 jours', standardXpf: 900, proXpf: 720 },
-  { label: '14 jours', standardXpf: 1500, proXpf: 1200 },
-  { label: '30 jours', standardXpf: 2500, proXpf: 2000 },
-]
 
 const METIER_CARDS = [
   {
@@ -46,7 +36,7 @@ const METIER_CARDS = [
         description: 'Créez et envoyez des devis professionnels en XPF avec TGC intégrée. Le client signe en ligne.',
       },
       {
-        title: 'Appels d\'offres',
+        title: "Appels d'offres",
         description: 'Recevez des demandes de particuliers qui cherchent un artisan dans votre commune. Répondez en 2 clics.',
       },
       {
@@ -177,6 +167,13 @@ const FREE_FEATURES = [
   'Vérification téléphone',
 ]
 
+const BOOST_PRICING = [
+  { label: '3 jours', standardXpf: 500, proXpf: 400 },
+  { label: '7 jours', standardXpf: 900, proXpf: 720 },
+  { label: '14 jours', standardXpf: 1500, proXpf: 1200 },
+  { label: '30 jours', standardXpf: 2500, proXpf: 2000 },
+]
+
 const PRO_FEATURES = [
   'Annonces illimitées',
   '12 photos par annonce',
@@ -216,21 +213,6 @@ const WHY_PRO_ITEMS = [
     description: 'Le badge Pro vérifié rassure vos clients avant même le premier contact.',
   },
 ]
-
-const FAQ_ITEMS = [
-  {
-    q: 'Qui est Pro pour vous ?',
-    a: 'Les professionnels qui publient souvent, gèrent plusieurs annonces ou veulent des outils de visibilité et de statistiques.',
-  },
-  {
-    q: 'Puis-je annuler ?',
-    a: 'Oui, vous pouvez résilier à tout moment depuis votre espace client. L\'accès reste actif jusqu\'à la fin de la période en cours.',
-  },
-  {
-    q: 'Quels moyens de paiement ?',
-    a: 'Carte internationale via Stripe ou carte OPT-NC et réseau local via PayPlug.',
-  },
-] as const
 
 function getSavingsMonths(monthlyXpf: number, yearlyXpf: number) {
   if (!monthlyXpf) return 0
@@ -314,8 +296,8 @@ function MetierCard({
 
 export default function AbonnementPage() {
   const [billing, setBilling] = useState<BillingPeriod>('monthly')
-  const [provider, setProvider] = useState<PaymentProvider>('stripe')
   const [openMetierId, setOpenMetierId] = useState<string | null>(null)
+  const [provider] = useState<PaymentProvider>('stripe')
   const { initiateSubscription, loading, error } = useSubscription()
   const stripePk = process.env.NEXT_PUBLIC_STRIPE_PK?.trim()
   const hasStripeConfigured = Boolean(stripePk)
@@ -383,60 +365,7 @@ export default function AbonnementPage() {
           Retour à l'accueil
         </Link>
 
-        <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">
-                Comment payer ?
-              </p>
-              <h2 className="mt-1 text-2xl font-bold text-night">Choisissez votre rythme</h2>
-              <p className="mt-1 max-w-2xl text-sm text-night/60">
-                Stripe pour les cartes internationales. PayPlug pour les cartes OPT-NC et le
-                réseau local.
-              </p>
-            </div>
-
-            <div className="inline-flex items-center gap-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-1">
-              {(['monthly', 'yearly'] as BillingPeriod[]).map((period) => {
-                const active = billing === period
-                return (
-                  <button
-                    key={period}
-                    type="button"
-                    onClick={() => setBilling(period)}
-                    className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
-                      active
-                        ? 'bg-white text-night shadow-sm ring-1 ring-black/5'
-                        : 'text-night/75 hover:bg-white hover:text-night'
-                    }`}
-                  >
-                    {period === 'monthly' ? (
-                      'Mensuel'
-                    ) : (
-                      <span className="flex items-center gap-1.5">
-                        Annuel
-                        <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
-                          2 mois offerts
-                        </span>
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          <div className="mt-5 rounded-2xl border border-[var(--color-border)] bg-white p-5">
-            <PaymentProviderSelector
-              value={provider}
-              onChange={setProvider}
-              className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-5"
-            />
-            <DemoModeNotice className="mt-4" />
-          </div>
-        </section>
-
-        <section className="mt-10">
+        <section>
           <div className="mb-6">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral/80">
               Fait pour votre métier
@@ -526,11 +455,33 @@ export default function AbonnementPage() {
                   </div>
                 ) : null}
               </div>
+
+              <div className="mt-4 inline-flex w-fit items-center gap-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-1">
+                {(['monthly', 'yearly'] as BillingPeriod[]).map((period) => {
+                  const active = billing === period
+                  return (
+                    <button
+                      key={period}
+                      type="button"
+                      onClick={() => setBilling(period)}
+                      className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+                        active
+                          ? 'bg-white text-night shadow-sm ring-1 ring-black/5'
+                          : 'text-night/75 hover:bg-white hover:text-night'
+                      }`}
+                    >
+                      {period === 'monthly' ? 'Mensuel' : 'Annuel'}
+                    </button>
+                  )
+                })}
+              </div>
+
               <ul className="mt-6 space-y-3">
                 {PRO_FEATURES.map((feature) => (
                   <PlanFeature key={feature} enabled text={feature} />
                 ))}
               </ul>
+
               <div className="mt-auto pt-6">
                 <button
                   type="button"
@@ -608,10 +559,6 @@ export default function AbonnementPage() {
                 Un usage pro, un revenu récurrent
               </h2>
             </div>
-            <p className="max-w-2xl text-sm text-night/55">
-              Le compte gratuit suffit pour démarrer. Le Pro accompagne ceux qui veulent aller
-              plus loin. Les boosts restent accessibles à tous.
-            </p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
@@ -629,38 +576,6 @@ export default function AbonnementPage() {
             })}
           </div>
         </section>
-
-        <section className="mt-10 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
-          <h2 className="text-2xl font-bold text-night">FAQ</h2>
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            {FAQ_ITEMS.map((item) => (
-              <article key={item.q} className="rounded-2xl bg-[var(--color-surface-raised)] p-4">
-                <h3 className="font-semibold text-night">{item.q}</h3>
-                <p className="mt-2 text-sm leading-6 text-night/65">{item.a}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <div className="mt-8 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-            <div className="flex items-start gap-3">
-              <TrendingUp className="mt-0.5 h-5 w-5 shrink-0 text-coral" />
-              <div>
-                <p className="text-sm font-semibold text-night">Le plus important à retenir</p>
-                <p className="mt-1 text-sm text-night/60">
-                  Le compte gratuit suffit pour démarrer. Le Pro accompagne ceux qui veulent aller
-                  plus loin. Les boosts restent accessibles à tous.
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2 text-[11px] text-night/55">
-              <span className="rounded-full bg-sand px-3 py-1">Stripe / PayPlug</span>
-              <span className="rounded-full bg-sand px-3 py-1">Paiement local</span>
-              <span className="rounded-full bg-sand px-3 py-1">Annulation à tout moment</span>
-            </div>
-          </div>
-        </div>
 
         {error ? (
           <div className="mt-6 rounded-xl border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-4 py-3 text-center text-sm text-[var(--color-danger)]">
