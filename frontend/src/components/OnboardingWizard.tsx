@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2, ChevronRight, X } from 'lucide-react'
 
@@ -28,6 +28,7 @@ export default function OnboardingWizard() {
   const [open, setOpen] = useState(false)
   const [savingStep, setSavingStep] = useState<number | null>(null)
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
+  const initializedUserIdRef = useRef<string | number | null>(null)
 
   const dismissKey = useMemo(() => getDismissKey(user?.id), [user?.id])
 
@@ -58,17 +59,17 @@ export default function OnboardingWizard() {
   const activeStep = steps[currentStepIndex] ?? steps[0]
 
   useEffect(() => {
-    setCurrentStepIndex(Math.min(Math.max(onboardingStep, 0), 2))
-  }, [onboardingStep])
+    if (typeof window === 'undefined' || !user?.id) return
+    if (initializedUserIdRef.current === user.id) return
+    initializedUserIdRef.current = user.id
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    if (!user?.id || onboardingStep >= 3) {
+    if (onboardingStep >= 3) {
       setOpen(false)
       return
     }
 
     const dismissed = window.sessionStorage.getItem(dismissKey) === '1'
+    setCurrentStepIndex(Math.min(Math.max(onboardingStep, 0), 2))
     setOpen(onboardingStep === 0 && !dismissed)
   }, [dismissKey, onboardingStep, user?.id])
 
