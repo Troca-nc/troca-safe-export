@@ -9,20 +9,27 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
   AlertCircle,
+  ArrowLeftRight,
   ArrowRight,
   BarChart3,
   Camera,
+  CalendarHeart,
+  Car,
   CheckCircle2,
   Eye,
   EyeOff,
+  FileText,
+  Lock,
+  Megaphone,
+  ShieldCheck,
   Store,
+  Truck,
   UserRound,
   X,
 } from 'lucide-react'
 import SocialAuthButtons from '@/components/auth/SocialAuthButtons'
 import { metaApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
-import AuthMapPanel from '@/components/auth/AuthMapPanel'
 
 const schema = z
   .object({
@@ -62,6 +69,54 @@ const PLAN_FEATURES = [
   { label: 'Badge visible', free: 'Non', pro: 'Oui' },
   { label: 'Statistiques', free: 'Non', pro: 'Oui' },
 ] as const
+
+const PANEL_STATS = [
+  { value: '0 F', label: 'Pour publier' },
+  { value: '17', label: 'Catégories' },
+  { value: '100%', label: 'Local NC' },
+] as const
+
+const PANEL_FEATURES = [
+  {
+    icon: Megaphone,
+    title: 'Annonces',
+    description: 'Publiez en quelques minutes, visibles partout en NC.',
+  },
+  {
+    icon: ArrowLeftRight,
+    title: 'Troc',
+    description: "Échangez ce que vous avez contre ce qu'il vous faut.",
+  },
+  {
+    icon: Car,
+    title: 'Covoiturage',
+    description: 'Trajets entre communes, réservation simple.',
+  },
+  {
+    icon: FileText,
+    title: 'Devis Pro',
+    description: 'Créez et envoyez vos devis en XPF avec TGC.',
+  },
+  {
+    icon: Truck,
+    title: 'Livraison',
+    description: 'Colis et fret entre communes et vers les îles.',
+  },
+  {
+    icon: CalendarHeart,
+    title: 'Bons plans et événements',
+    description: 'Offres locales, concerts, marchés près de chez vous.',
+  },
+] as const
+
+const TRUST_ITEMS = [
+  { icon: ShieldCheck, label: 'Paiement sécurisé' },
+  { icon: Lock, label: 'Données locales' },
+  { icon: CheckCircle2, label: 'Pros vérifiés' },
+] as const
+
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() || ''
+const showGoogleAuth = GOOGLE_CLIENT_ID !== '' && !GOOGLE_CLIENT_ID.toLowerCase().includes('changeme')
 
 function passwordScore(password: string) {
   const rules = [
@@ -287,7 +342,7 @@ export default function RegisterPage() {
       const { password_confirm: _passwordConfirm, ...payload } = data
       if (turnstileEnabled && !turnstileToken) {
         setServerError({
-          message: 'Veuillez compléter la vérification anti-bot.',
+          message: 'Veuillez confirmer que vous n’êtes pas un robot.',
         })
         return
       }
@@ -334,381 +389,555 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-white lg:grid lg:grid-cols-2">
       <section className="flex min-h-screen items-center justify-center px-6 py-10 md:px-8 lg:px-12">
         <div className="flex w-full max-w-[540px] flex-col gap-6">
-        <div className="text-center">
-          <Link href="/" className="inline-flex flex-col items-center">
-            <p className="font-display text-3xl font-bold text-night">Kalico</p>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-coral/80">Nouvelle-Calédonie</p>
-          </Link>
-          <p className="mt-3 text-sm text-night/55">Créez votre compte en 2 minutes. Tout le reste vient après.</p>
-        </div>
-
-        <div className="card card-hover overflow-hidden p-6 md:p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="max-w-2xl">
-              <h1 className="mt-2 font-display text-4xl font-bold text-night md:text-5xl">Rejoindre Kalico</h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-night/60 md:text-base">
-                Commencez avec votre compte, complétez votre profil, puis choisissez votre formule au bon moment.
-              </p>
-            </div>
+          <div className="text-center">
+            <Link href="/" className="inline-flex flex-col items-center">
+              <p className="font-display text-3xl font-bold text-night">Kalico</p>
+              <p className="mt-3 text-sm text-night/55">Rejoignez les premiers Calédoniens sur Kalico.</p>
+            </Link>
           </div>
 
-          <div className="mt-5 grid gap-3 md:grid-cols-3">
-            {STEPS.map((item) => (
-              <StepPill key={item.id} step={item.id} current={step} onClick={goToStep} />
-            ))}
-          </div>
-
-          {serverError ? (
-            <div className="mt-5 flex items-start gap-3 rounded-xl border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-4 py-3 text-sm text-[var(--color-danger)]">
-              <AlertCircle className="h-4 w-4 shrink-0" />
-              <div className="min-w-0 flex-1">
-                <p>{serverError.message}</p>
-                {serverError.ctaHref ? (
-                  <Link href={serverError.ctaHref} className="mt-1 inline-flex items-center gap-1 font-semibold underline underline-offset-2">
-                    {serverError.ctaLabel || 'Se connecter →'}
-                  </Link>
-                ) : null}
+          <div className="card card-hover overflow-hidden p-6 md:p-8">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="max-w-2xl">
+                <h1 className="mt-2 font-display text-4xl font-bold text-night md:text-5xl">Rejoindre Kalico</h1>
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-night/60 md:text-base">
+                  Trois étapes, deux minutes. Votre annonce peut être en ligne dès maintenant.
+                </p>
               </div>
             </div>
-          ) : null}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-6">
-            <div key={step} className={stepDirection === 'forward' ? 'step-enter-forward' : 'step-enter-backward'}>
-              {step === 1 ? (
-                <section className="space-y-4 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
-                  <div className="flex flex-wrap items-end justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Étape 1</p>
-                      <h2 className="mt-2 text-2xl font-semibold text-night">Créez votre compte</h2>
-                      <p className="mt-1 text-sm text-night/55">E-mail, mot de passe et accès rapide avec Google ou Apple si vous préférez.</p>
-                    </div>
-                  </div>
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              {STEPS.map((item) => (
+                <StepPill key={item.id} step={item.id} current={step} onClick={goToStep} />
+              ))}
+            </div>
 
-                  <div className="mt-5">
-                    <SocialAuthButtons mode="inscription" redirectTo={socialRedirect} showLegalFooter={false} />
-                  </div>
-
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <label className="space-y-2 md:col-span-2">
-                      <span className="field-label">Adresse e-mail</span>
-                      <input {...register('email')} type="email" className="input h-12 w-full" placeholder="vous@exemple.nc" />
-                      {errors.email ? <p className="field-error">{errors.email.message}</p> : null}
-                    </label>
-
-                    <label className="space-y-2">
-                      <span className="field-label">Mot de passe</span>
-                      <div className="relative">
-                        <input
-                          {...register('password')}
-                          type={showPassword ? 'text' : 'password'}
-                          className="input h-12 w-full pr-12"
-                          placeholder="Créez un mot de passe"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword((value) => !value)}
-                          className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-night/45 transition hover:text-night/70"
-                          aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
-                        >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
-                      </div>
-                      {errors.password ? <p className="field-error">{errors.password.message}</p> : null}
-                      <PasswordRules password={password} />
-                    </label>
-
-                    <label className="space-y-2">
-                      <span className="field-label">Confirmer le mot de passe</span>
-                      <input
-                        {...register('password_confirm')}
-                        type={showPassword ? 'text' : 'password'}
-                        className="input h-12 w-full"
-                        placeholder="Répétez le mot de passe"
-                      />
-                      {errors.password_confirm ? <p className="field-error">{errors.password_confirm.message}</p> : null}
-                    </label>
-                  </div>
-
-                  <p className="pt-2 text-xs text-night/45">
-                    En continuant, vous acceptez nos{' '}
-                    <Link href="/cgu" className="underline underline-offset-2 hover:text-night/70">
-                      CGU
-                    </Link>{' '}
-                    et notre{' '}
-                    <Link href="/politique-de-confidentialite" className="underline underline-offset-2 hover:text-night/70">
-                      politique de confidentialité
+            {serverError ? (
+              <div className="mt-5 flex items-start gap-3 rounded-xl border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-4 py-3 text-sm text-[var(--color-danger)]">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p>{serverError.message}</p>
+                  {serverError.ctaHref ? (
+                    <Link href={serverError.ctaHref} className="mt-1 inline-flex items-center gap-1 font-semibold underline underline-offset-2">
+                      {serverError.ctaLabel || 'Se connecter →'}
                     </Link>
-                    .
-                  </p>
-                </section>
-              ) : null}
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
 
-              {step === 2 ? (
-                <section className="space-y-5 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Étape 2</p>
-                    <h2 className="mt-2 text-2xl font-semibold text-night">Parlez-nous de vous</h2>
-                    <p className="mt-1 text-sm text-night/55">Juste l'essentiel pour commencer.</p>
-                  </div>
+            <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-6">
+              <div key={step} className={stepDirection === 'forward' ? 'step-enter-forward' : 'step-enter-backward'}>
+                {step === 1 ? (
+                  <section className="space-y-4 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
+                    <div className="flex flex-wrap items-end justify-between gap-3">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Étape 1</p>
+                        <h2 className="mt-2 text-2xl font-semibold text-night">Créez votre compte</h2>
+                        <p className="mt-1 text-sm text-night/55">E-mail, mot de passe et accès rapide avec Google si vous le souhaitez.</p>
+                      </div>
+                    </div>
 
-                  <div className="grid gap-5">
-                    <div className="rounded-[1.5rem] border border-night/10 bg-sand/40 p-5">
-                      <div className="flex items-center gap-4">
-                        <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-night/10 bg-white">
-                          <span className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(72,202,228,0.22),transparent_65%)]" />
-                          <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-coral/10 text-lg font-bold text-coral">
-                            {profileName.trim().charAt(0).toUpperCase() || 'T'}
-                          </span>
-                          <span className="absolute bottom-1 right-1 flex h-7 w-7 items-center justify-center rounded-full border border-white bg-night text-white shadow-sm">
-                            <Camera className="h-3.5 w-3.5" />
-                          </span>
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-night/45">Avatar optionnel</p>
-                          <p className="mt-1 text-sm leading-6 text-night/60">Votre photo peut venir plus tard. Un avatar clair s’affiche en attendant.</p>
+                    {showGoogleAuth ? (
+                      <div className="mt-5">
+                        <div className="relative flex items-center gap-3">
+                          <div className="h-px flex-1 bg-night/10" />
+                          <span className="shrink-0 text-xs font-medium text-night/45">Ou continuer avec</span>
+                          <div className="h-px flex-1 bg-night/10" />
                         </div>
                       </div>
+                    ) : null}
+
+                    <div className="signup-social-only-google mt-4">
+                      <SocialAuthButtons mode="inscription" redirectTo={socialRedirect} showLegalFooter={false} />
                     </div>
 
                     <div className="grid gap-4 md:grid-cols-2">
-                      <label className="space-y-2">
-                        <span className="field-label">Prénom</span>
-                        <input {...register('first_name')} className="input h-12 w-full" placeholder="Votre prénom" />
-                        {errors.first_name ? <p className="field-error">{errors.first_name.message}</p> : null}
-                      </label>
-                      <label className="space-y-2">
-                        <span className="field-label">Nom</span>
-                        <input {...register('last_name')} className="input h-12 w-full" placeholder="Votre nom" />
-                        {errors.last_name ? <p className="field-error">{errors.last_name.message}</p> : null}
+                      <label className="space-y-2 md:col-span-2">
+                        <span className="field-label">Adresse e-mail</span>
+                        <input {...register('email')} type="email" className="input h-12 w-full" placeholder="vous@exemple.nc" />
+                        {errors.email ? <p className="field-error">{errors.email.message}</p> : null}
                       </label>
 
-                      <label className="space-y-2 md:col-span-2">
-                      <span className="field-label">Téléphone mobile</span>
-                      <input {...register('phone')} className="input h-12 w-full" placeholder="+687..." />
-                      {errors.phone ? <p className="field-error">{errors.phone.message}</p> : null}
-                      <p className="text-xs text-night/45">Nécessaire pour la récupération de mot de passe si vous choisissez l’option SMS.</p>
+                      <label className="space-y-2">
+                        <span className="field-label">Mot de passe</span>
+                        <div className="relative">
+                          <input
+                            {...register('password')}
+                            type={showPassword ? 'text' : 'password'}
+                            className="input h-12 w-full pr-12"
+                            placeholder="Créez un mot de passe"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword((value) => !value)}
+                            className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-night/45 transition hover:text-night/70"
+                            aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                          >
+                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
+                        {errors.password ? <p className="field-error">{errors.password.message}</p> : null}
+                        <PasswordRules password={password} />
                       </label>
 
-                      <label className="space-y-2 md:col-span-2">
-                        <span className="field-label">Votre commune en NC</span>
-                        <select {...register('commune_id')} className="input h-12 w-full">
-                          <option value="">{COMMUNE_PLACEHOLDER}</option>
-                          {communes.map((commune) => (
-                            <option key={commune.id} value={commune.id}>
-                              {commune.name ?? commune.nom}
-                            </option>
-                          ))}
-                        </select>
+                      <label className="space-y-2">
+                        <span className="field-label">Confirmer le mot de passe</span>
+                        <input
+                          {...register('password_confirm')}
+                          type={showPassword ? 'text' : 'password'}
+                          className="input h-12 w-full"
+                          placeholder="Répétez le mot de passe"
+                        />
+                        {errors.password_confirm ? <p className="field-error">{errors.password_confirm.message}</p> : null}
                       </label>
                     </div>
-                  </div>
 
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    <AccountTypeCard
-                      active={selectedProfile === 'particulier'}
-                      icon={UserRound}
-                      title="Particulier"
-                      description="J'achète, je vends, je troque et je publie pour un usage personnel."
-                      onClick={() => setSelectedProfile('particulier')}
-                    />
-                    <AccountTypeCard
-                      active={selectedProfile === 'pro'}
-                      icon={Store}
-                      title="Professionnel"
-                      description="Enseigne, commerce, agence ou vendeur régulier qui veut plus de visibilité."
-                      onClick={() => setSelectedProfile('pro')}
-                    />
-                  </div>
-                </section>
-              ) : null}
-
-              {step === 3 && selectedProfile === 'pro' ? (
-                <section className="space-y-5 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Étape 3</p>
-                    <h2 className="mt-2 text-2xl font-semibold text-night">Choisissez votre plan</h2>
-                    <p className="mt-1 text-sm text-night/55">
-                      Vous pouvez commencer gratuitement ou profiter du Pro quand votre activité le justifie.
+                    <p className="pt-2 text-xs text-night/45">
+                      En continuant, vous acceptez nos{' '}
+                      <Link href="/cgu" className="underline underline-offset-2 hover:text-night/70">
+                        CGU
+                      </Link>{' '}
+                      et notre{' '}
+                      <Link href="/politique-de-confidentialite" className="underline underline-offset-2 hover:text-night/70">
+                        politique de confidentialité
+                      </Link>
+                      .
                     </p>
-                  </div>
+                  </section>
+                ) : null}
 
-                  <div className="space-y-3">
-                    <button
-                      type="button"
-                      onClick={() => void handleSubmit((data) => submitRegistration(data, 'particulier'))()}
-                      disabled={isSubmitting}
-                      className="btn-primary w-full"
-                    >
-                      {isSubmitting ? 'Création…' : 'Commencer gratuitement'}
-                    </button>
+                {step === 2 ? (
+                  <section className="space-y-5 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Étape 2</p>
+                      <h2 className="mt-2 text-2xl font-semibold text-night">Parlez-nous de vous</h2>
+                      <p className="mt-1 text-sm text-night/55">Juste l’essentiel pour commencer.</p>
+                    </div>
 
-                    <button
-                      type="button"
-                      onClick={() => setShowProOptions((value) => !value)}
-                      className="inline-flex items-center gap-1 text-sm font-semibold text-coral hover:underline"
-                      aria-expanded={showProOptions}
-                    >
-                      Voir les options Pro →
-                    </button>
-                  </div>
-
-                  {showProOptions ? (
-                    <div className="space-y-4 pt-2">
-                      <div className="grid gap-4 lg:grid-cols-2">
-                        <article className="rounded-[1.75rem] border border-jungle/20 bg-jungle/5 p-5">
-                          <div className="inline-flex items-center rounded-full bg-jungle/15 px-3 py-1 text-xs font-semibold text-jungle">
-                            Gratuit
-                          </div>
-                          <p className="mt-4 text-3xl font-bold text-night">0 XPF / mois</p>
-                          <ul className="mt-4 space-y-2 text-sm text-night/65">
-                            <li className="flex items-center gap-2">
-                              <X className="h-4 w-4 text-night/35" />
-                              5 annonces actives
-                            </li>
-                            <li className="flex items-center gap-2">
-                              <X className="h-4 w-4 text-night/35" />
-                              6 photos par annonce
-                            </li>
-                            <li className="flex items-center gap-2">
-                              <X className="h-4 w-4 text-night/35" />
-                              60 jours de visibilité
-                            </li>
-                          </ul>
-                        </article>
-
-                        <article className="pulse-once rounded-[1.75rem] border border-coral/20 bg-[linear-gradient(180deg,rgba(10,126,164,0.08),rgba(255,255,255,1))] p-5 shadow-lg shadow-coral/10">
-                          <div className="flex items-center justify-between gap-3">
-                            <span className="inline-flex items-center rounded-full bg-coral px-3 py-1 text-xs font-semibold text-white">
-                              Recommandé
+                    <div className="grid gap-5">
+                      <div className="rounded-[1.5rem] border border-night/10 bg-sand/40 p-5">
+                        <div className="flex items-center gap-4">
+                          <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-night/10 bg-white">
+                            <span className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(72,202,228,0.22),transparent_65%)]" />
+                            <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-coral/10 text-lg font-bold text-coral">
+                              {profileName.trim().charAt(0).toUpperCase() || 'T'}
                             </span>
-                            <button
-                              type="button"
-                              onClick={() => setBillingCycle((value) => (value === 'monthly' ? 'annual' : 'monthly'))}
-                              className="inline-flex items-center gap-1 rounded-full border border-night/10 bg-white px-3 py-1.5 text-xs font-semibold text-night transition hover:border-coral/25 hover:text-coral"
-                            >
-                              <span className={billingCycle === 'monthly' ? 'text-coral' : 'text-night/50'}>Mensuel</span>
-                              <span className="text-night/25">/</span>
-                              <span className={billingCycle === 'annual' ? 'text-coral' : 'text-night/50'}>Annuel</span>
-                            </button>
+                            <span className="absolute bottom-1 right-1 flex h-7 w-7 items-center justify-center rounded-full border border-white bg-night text-white shadow-sm">
+                              <Camera className="h-3.5 w-3.5" />
+                            </span>
                           </div>
+                          <div>
+                            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-night/45">Avatar optionnel</p>
+                            <p className="mt-1 text-sm leading-6 text-night/60">Votre photo peut venir plus tard. Un avatar clair s’affiche en attendant.</p>
+                          </div>
+                        </div>
+                      </div>
 
-                          <p className="mt-4 text-3xl font-bold text-coral">
-                            {billingCycle === 'monthly' ? '4 900 XPF / mois' : '44 900 XPF / an'}
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <label className="space-y-2">
+                          <span className="field-label">Prénom</span>
+                          <input {...register('first_name')} className="input h-12 w-full" placeholder="Votre prénom" />
+                          {errors.first_name ? <p className="field-error">{errors.first_name.message}</p> : null}
+                        </label>
+                        <label className="space-y-2">
+                          <span className="field-label">Nom</span>
+                          <input {...register('last_name')} className="input h-12 w-full" placeholder="Votre nom" />
+                          {errors.last_name ? <p className="field-error">{errors.last_name.message}</p> : null}
+                        </label>
+
+                        <label className="space-y-2 md:col-span-2">
+                          <span className="field-label">Téléphone mobile</span>
+                          <input {...register('phone')} className="input h-12 w-full" placeholder="+687..." />
+                          {errors.phone ? <p className="field-error">{errors.phone.message}</p> : null}
+                          <p className="text-xs text-night/45">
+                            Nécessaire pour la récupération de mot de passe si vous choisissez l’option SMS.
                           </p>
-                          {billingCycle === 'annual' ? (
-                            <p className="mt-2 text-sm font-semibold text-jungle">2 mois offerts</p>
-                          ) : (
-                            <p className="mt-2 text-sm text-night/55">Paiement flexible, à tout moment.</p>
-                          )}
+                        </label>
 
-                          <div className="mt-5 space-y-3">
-                            {PLAN_FEATURES.map((feature) => (
-                              <div key={feature.label} className="rounded-2xl border border-night/8 bg-white/80 p-3">
-                                <div className="flex items-center justify-between gap-3 text-sm">
-                                  <span className="font-medium text-night">{feature.label}</span>
-                                  <span className="font-semibold text-coral">Pro : {feature.pro}</span>
-                                </div>
-                                <div className="mt-2 h-2 rounded-full bg-night/10">
-                                  <div
-                                    className="h-2 rounded-full bg-coral"
-                                    style={{
-                                      width:
-                                        feature.label === 'Annonces actives'
-                                          ? '100%'
-                                          : feature.label === 'Photos par annonce'
-                                            ? '80%'
-                                            : feature.label === 'Badge visible'
-                                              ? '70%'
-                                              : '90%',
-                                    }}
-                                  />
-                                </div>
-                                <p className="mt-2 text-xs text-night/55">Gratuit : {feature.free}</p>
-                              </div>
+                        <label className="space-y-2 md:col-span-2">
+                          <span className="field-label">Votre commune en NC</span>
+                          <select {...register('commune_id')} className="input h-12 w-full">
+                            <option value="">{COMMUNE_PLACEHOLDER}</option>
+                            {communes.map((commune) => (
+                              <option key={commune.id} value={commune.id}>
+                                {commune.name ?? commune.nom}
+                              </option>
                             ))}
-                          </div>
-
-                          <div className="mt-5 grid gap-3 rounded-2xl border border-coral/15 bg-coral/5 p-4 text-sm text-night/65">
-                            <div className="flex items-center justify-between gap-3">
-                              <span>Annonces</span>
-                              <strong className="text-coral">∞ vs 5</strong>
-                            </div>
-                            <div className="flex items-center justify-between gap-3">
-                              <span>Photos</span>
-                              <strong className="text-coral">12 vs 6</strong>
-                            </div>
-                            <div className="flex items-center justify-between gap-3">
-                              <span>Badge et stats</span>
-                              <strong className="text-coral">Visibles</strong>
-                            </div>
-                            <div className="rounded-2xl bg-white/80 p-3">
-                              <div className="flex items-center justify-between gap-3">
-                                <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-night/45">
-                                  <BarChart3 className="h-3.5 w-3.5" />
-                                  Statistiques
-                                </span>
-                                <span className="rounded-full bg-coral px-2.5 py-1 text-[11px] font-semibold text-white">Badge Pro</span>
-                              </div>
-                              <div className="mt-3 h-20 rounded-2xl bg-[linear-gradient(180deg,rgba(72,202,228,0.16),rgba(10,126,164,0.04))] p-3">
-                                <div className="flex h-full items-end gap-2">
-                                  <span className="h-6 w-4 rounded-t-full bg-night/15" />
-                                  <span className="h-10 w-4 rounded-t-full bg-night/15" />
-                                  <span className="h-14 w-4 rounded-t-full bg-coral" />
-                                  <span className="h-8 w-4 rounded-t-full bg-night/15" />
-                                  <span className="h-16 w-4 rounded-t-full bg-coral/70" />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </article>
+                          </select>
+                        </label>
                       </div>
                     </div>
-                  ) : null}
 
-                  <p className="text-center text-sm text-night/55">
-                    Pas encore décidé ?{' '}
-                    <button type="button" onClick={() => setSelectedProfile('particulier')} className="font-semibold text-coral hover:underline">
-                      Commencez gratuitement →
-                    </button>
-                  </p>
-                </section>
-              ) : null}
-            </div>
+                    <div className="grid gap-4 lg:grid-cols-2">
+                      <AccountTypeCard
+                        active={selectedProfile === 'particulier'}
+                        icon={UserRound}
+                        title="Particulier"
+                        description="J’achète, je vends, je troque et je publie pour un usage personnel."
+                        onClick={() => setSelectedProfile('particulier')}
+                      />
+                      <AccountTypeCard
+                        active={selectedProfile === 'pro'}
+                        icon={Store}
+                        title="Professionnel"
+                        description="Enseigne, commerce, agence ou vendeur régulier qui veut plus de visibilité."
+                        onClick={() => setSelectedProfile('pro')}
+                      />
+                    </div>
+                  </section>
+                ) : null}
 
-            <div className="flex items-center justify-between gap-3 border-t border-night/10 pt-5">
-              <button
-                type="button"
-                onClick={() => {
-                  if (step > 1) goToStep((step - 1) as Step)
-                }}
-                disabled={step === 1}
-                className="inline-flex items-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-semibold text-night transition hover:border-coral/30 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <span>Retour</span>
-              </button>
+                {step === 3 && selectedProfile === 'pro' ? (
+                  <section className="space-y-5 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Étape 3</p>
+                      <h2 className="mt-2 text-2xl font-semibold text-night">Choisissez votre plan</h2>
+                      <p className="mt-1 text-sm text-night/55">
+                        Vous pouvez commencer gratuitement ou profiter du Pro quand votre activité le justifie.
+                      </p>
+                    </div>
 
-              {step === 1 ? (
-                <button type="button" onClick={nextFromStep1} className="btn-primary px-5 py-3">
-                  Continuer
-                  <ArrowRight className="h-4 w-4" />
+                    <div className="space-y-3">
+                      <button
+                        type="button"
+                        onClick={() => void handleSubmit((data) => submitRegistration(data, 'particulier'))()}
+                        disabled={isSubmitting}
+                        className="btn-primary w-full"
+                      >
+                        {isSubmitting ? 'Création...' : 'Commencer gratuitement'}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowProOptions((value) => !value)}
+                        className="inline-flex items-center gap-1 text-sm font-semibold text-coral hover:underline"
+                        aria-expanded={showProOptions}
+                      >
+                        Voir les options Pro →
+                      </button>
+                    </div>
+
+                    {showProOptions ? (
+                      <div className="space-y-4 pt-2">
+                        <div className="grid gap-4 lg:grid-cols-2">
+                          <article className="rounded-[1.75rem] border border-jungle/20 bg-jungle/5 p-5">
+                            <div className="inline-flex items-center rounded-full bg-jungle/15 px-3 py-1 text-xs font-semibold text-jungle">
+                              Gratuit
+                            </div>
+                            <p className="mt-4 text-3xl font-bold text-night">0 XPF / mois</p>
+                            <ul className="mt-4 space-y-2 text-sm text-night/65">
+                              <li className="flex items-center gap-2">
+                                <X className="h-4 w-4 text-night/35" />
+                                5 annonces actives
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <X className="h-4 w-4 text-night/35" />
+                                6 photos par annonce
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <X className="h-4 w-4 text-night/35" />
+                                60 jours de visibilité
+                              </li>
+                            </ul>
+                          </article>
+
+                          <article className="pulse-once rounded-[1.75rem] border border-coral/20 bg-[linear-gradient(180deg,rgba(10,126,164,0.08),rgba(255,255,255,1))] p-5 shadow-lg shadow-coral/10">
+                            <div className="flex items-center justify-between gap-3">
+                              <span className="inline-flex items-center rounded-full bg-coral px-3 py-1 text-xs font-semibold text-white">
+                                Recommandé
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setBillingCycle((value) => (value === 'monthly' ? 'annual' : 'monthly'))}
+                                className="inline-flex items-center gap-1 rounded-full border border-night/10 bg-white px-3 py-1.5 text-xs font-semibold text-night transition hover:border-coral/25 hover:text-coral"
+                              >
+                                <span className={billingCycle === 'monthly' ? 'text-coral' : 'text-night/50'}>Mensuel</span>
+                                <span className="text-night/25">/</span>
+                                <span className={billingCycle === 'annual' ? 'text-coral' : 'text-night/50'}>Annuel</span>
+                              </button>
+                            </div>
+
+                            <p className="mt-4 text-3xl font-bold text-coral">
+                              {billingCycle === 'monthly' ? '4 900 XPF / mois' : '44 900 XPF / an'}
+                            </p>
+                            {billingCycle === 'annual' ? (
+                              <p className="mt-2 text-sm font-semibold text-jungle">2 mois offerts</p>
+                            ) : (
+                              <p className="mt-2 text-sm text-night/55">Paiement flexible, à tout moment.</p>
+                            )}
+
+                            <div className="mt-5 space-y-3">
+                              {PLAN_FEATURES.map((feature) => (
+                                <div key={feature.label} className="rounded-2xl border border-night/8 bg-white/80 p-3">
+                                  <div className="flex items-center justify-between gap-3 text-sm">
+                                    <span className="font-medium text-night">{feature.label}</span>
+                                    <span className="font-semibold text-coral">Pro : {feature.pro}</span>
+                                  </div>
+                                  <div className="mt-2 h-2 rounded-full bg-night/10">
+                                    <div
+                                      className="h-2 rounded-full bg-coral"
+                                      style={{
+                                        width:
+                                          feature.label === 'Annonces actives'
+                                            ? '100%'
+                                            : feature.label === 'Photos par annonce'
+                                              ? '80%'
+                                              : feature.label === 'Badge visible'
+                                                ? '70%'
+                                                : '90%',
+                                      }}
+                                    />
+                                  </div>
+                                  <p className="mt-2 text-xs text-night/55">Gratuit : {feature.free}</p>
+                                </div>
+                              ))}
+                            </div>
+
+                            <div className="mt-5 grid gap-3 rounded-2xl border border-coral/15 bg-coral/5 p-4 text-sm text-night/65">
+                              <div className="flex items-center justify-between gap-3">
+                                <span>Annonces</span>
+                                <strong className="text-coral">∞ vs 5</strong>
+                              </div>
+                              <div className="flex items-center justify-between gap-3">
+                                <span>Photos</span>
+                                <strong className="text-coral">12 vs 6</strong>
+                              </div>
+                              <div className="flex items-center justify-between gap-3">
+                                <span>Badge et stats</span>
+                                <strong className="text-coral">Visibles</strong>
+                              </div>
+                              <div className="rounded-2xl bg-white/80 p-3">
+                                <div className="flex items-center justify-between gap-3">
+                                  <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-night/45">
+                                    <BarChart3 className="h-3.5 w-3.5" />
+                                    Statistiques
+                                  </span>
+                                  <span className="rounded-full bg-coral px-2.5 py-1 text-[11px] font-semibold text-white">Badge Pro</span>
+                                </div>
+                                <div className="mt-3 h-20 rounded-2xl bg-[linear-gradient(180deg,rgba(72,202,228,0.16),rgba(10,126,164,0.04))] p-3">
+                                  <div className="flex h-full items-end gap-2">
+                                    <span className="h-6 w-4 rounded-t-full bg-night/15" />
+                                    <span className="h-10 w-4 rounded-t-full bg-night/15" />
+                                    <span className="h-14 w-4 rounded-t-full bg-coral" />
+                                    <span className="h-8 w-4 rounded-t-full bg-night/15" />
+                                    <span className="h-16 w-4 rounded-t-full bg-coral/70" />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </article>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <p className="text-center text-sm text-night/55">
+                      Pas encore décidé ?{' '}
+                      <button type="button" onClick={() => setSelectedProfile('particulier')} className="font-semibold text-coral hover:underline">
+                        Commencez gratuitement →
+                      </button>
+                    </p>
+                  </section>
+                ) : null}
+              </div>
+
+              <div className="flex items-center justify-between gap-3 border-t border-night/10 pt-5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (step > 1) goToStep((step - 1) as Step)
+                  }}
+                  disabled={step === 1}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-semibold text-night transition hover:border-coral/30 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <span>Retour</span>
                 </button>
-              ) : step === 2 ? (
-                <button type="button" onClick={nextFromStep2} className="btn-primary px-5 py-3">
-                  {canSubmitAtStep2 ? 'Créer mon compte' : 'Continuer'}
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              ) : (
-                <button type="submit" disabled={isSubmitting} className="btn-primary px-5 py-3 disabled:cursor-not-allowed disabled:opacity-60">
-                  {isSubmitting ? 'Création…' : 'Créer mon compte'}
-                </button>
-              )}
-            </div>
-          </form>
-        </div>
+
+                {step === 1 ? (
+                  <button type="button" onClick={nextFromStep1} className="btn-primary px-5 py-3">
+                    Continuer
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                ) : step === 2 ? (
+                  <button type="button" onClick={nextFromStep2} className="btn-primary px-5 py-3">
+                    {canSubmitAtStep2 ? 'Créer mon compte' : 'Continuer'}
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                ) : (
+                  <button type="submit" disabled={isSubmitting} className="btn-primary px-5 py-3 disabled:cursor-not-allowed disabled:opacity-60">
+                    {isSubmitting ? 'Création...' : 'Créer mon compte'}
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
         </div>
       </section>
 
-      <AuthMapPanel />
+      <aside className="hidden min-h-screen overflow-hidden bg-[#fdf8f1] dark:bg-[#0c2a35] lg:flex">
+        <div className="flex w-full items-center justify-center px-8 py-8">
+          <div className="signup-panel relative w-full max-w-[680px] rounded-[16px] p-7 text-left text-night dark:text-white">
+            <div className="absolute inset-0 rounded-[16px] bg-transparent dark:bg-transparent" />
+
+            <div className="relative z-10 space-y-6">
+              <div className="signup-panel-anim signup-panel-anim--logo flex items-center gap-3" style={{ animationDelay: '0ms' }}>
+                <Image
+                  src="/brand/kalico1.svg"
+                  alt="Kalico"
+                  width={44}
+                  height={44}
+                  className="h-11 w-11 rounded-[10px] object-cover"
+                  priority
+                />
+                <div>
+                  <p className="text-[18px] font-medium leading-none text-night dark:text-white">Kalico</p>
+                  <p className="mt-1 text-xs text-night/55 dark:text-white/60">Nouvelle-Calédonie</p>
+                </div>
+              </div>
+
+              <div
+                className="signup-panel-anim inline-flex items-center gap-2 rounded-full border border-[rgba(29,158,117,0.18)] bg-[rgba(29,158,117,0.08)] px-3 py-1.5 text-xs font-semibold text-night dark:border-white/10 dark:bg-white/8 dark:text-white"
+                style={{ animationDelay: '80ms' }}
+              >
+                <span className="signup-panel-pulse h-2.5 w-2.5 rounded-full bg-nc-emeraude" />
+                <span>Plateforme locale active</span>
+              </div>
+
+              <div className="signup-panel-anim space-y-1" style={{ animationDelay: '140ms' }}>
+                <h2
+                  className="font-display text-[clamp(20px,2.5vw,26px)] font-semibold leading-tight text-night dark:text-white"
+                  style={{ fontFamily: 'var(--font-display), Georgia, serif' }}
+                >
+                  <span className="block">Ce que vous pouvez faire</span>
+                  <span className="block text-coral">dès maintenant.</span>
+                </h2>
+              </div>
+
+              <p className="signup-panel-anim max-w-xl text-xs leading-5 text-night/60 dark:text-white/65" style={{ animationDelay: '180ms' }}>
+                Gratuit pour démarrer. Pro pour aller plus loin. Tout en XPF, de Nouméa aux Loyauté.
+              </p>
+
+              <div
+                className="signup-panel-anim grid grid-cols-3 overflow-hidden rounded-[10px] border border-night/10 bg-white dark:border-white/10 dark:bg-[var(--color-surface)]"
+                style={{ animationDelay: '220ms' }}
+              >
+                {PANEL_STATS.map((stat, index) => (
+                  <div
+                    key={stat.label}
+                    className={`group border-l border-night/10 px-4 py-4 transition-colors duration-200 hover:bg-[rgba(29,158,117,0.06)] dark:border-white/10 dark:hover:bg-white/5 ${index === 0 ? 'border-l-0' : ''}`}
+                  >
+                    <p className="text-lg font-semibold text-night dark:text-white">{stat.value}</p>
+                    <p className="mt-1 text-[11px] text-night/55 dark:text-white/55">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div
+                className="signup-panel-anim overflow-hidden rounded-[10px]"
+                style={{ animationDelay: '260ms' }}
+              >
+                <div className="grid grid-cols-1 gap-3 overflow-hidden sm:grid-cols-2">
+                  {PANEL_FEATURES.map((item, index) => {
+                    const Icon = item.icon
+                    const delays = ['260ms', '300ms', '340ms', '380ms', '420ms', '460ms']
+                    return (
+                      <div
+                        key={item.title}
+                        className="group rounded-[10px] border border-night/10 bg-white p-[11px] text-left transition-colors duration-200 hover:border-[var(--nc-emeraude)] hover:shadow-[0_4px_12px_rgba(29,158,117,0.12)] dark:border-white/10 dark:bg-[var(--color-surface)]"
+                        style={{ animationDelay: delays[index] }}
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[rgba(29,158,117,0.08)] text-nc-emeraude transition-transform duration-200 group-hover:scale-[1.15]">
+                            <Icon className="h-4 w-4" />
+                          </span>
+                          <div>
+                            <p className="text-[11px] font-medium text-night dark:text-white">{item.title}</p>
+                            <p className="mt-1 text-[10px] leading-4 text-night/55 dark:text-white/60">{item.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="signup-panel-anim flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[10px] text-night/55 dark:text-white/55" style={{ animationDelay: '500ms' }}>
+                {TRUST_ITEMS.map(({ icon: Icon, label }) => (
+                  <span key={label} className="inline-flex items-center gap-1.5">
+                    <Icon className="h-3.5 w-3.5 text-nc-emeraude" />
+                    <span>{label}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <style jsx global>{`
+        .signup-panel-anim {
+          animation: signupReveal 350ms ease-out both;
+          animation-fill-mode: both;
+        }
+
+        .signup-panel-anim--logo {
+          animation: signupLogoReveal 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+          animation-fill-mode: both;
+        }
+
+        .signup-panel-pulse {
+          animation: signupPulse 2s ease-in-out infinite;
+        }
+
+        .signup-social-only-google > div.relative {
+          display: none !important;
+        }
+
+        .signup-social-only-google > div.space-y-3 > button:nth-of-type(2) {
+          display: none !important;
+        }
+
+        @keyframes signupReveal {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes signupLogoReveal {
+          from {
+            opacity: 0;
+            transform: translateY(10px) scale(0.8) rotate(-5deg);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1) rotate(0deg);
+          }
+        }
+
+        @keyframes signupPulse {
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.4;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .signup-panel-anim,
+          .signup-panel-anim--logo,
+          .signup-panel-pulse {
+            animation: none !important;
+            transition: none !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }
