@@ -914,11 +914,11 @@ async function matchAlerteAnnonces(alert) {
   }
   if (filters.price_min != null || filters.prix_min != null) {
     conditions.push(`a.prix_xpf >= $${idx++}`);
-    params.push(filters.price_min ? filters.prix_min);
+    params.push(filters.price_min ?? filters.prix_min);
   }
   if (filters.price_max != null || filters.prix_max != null) {
     conditions.push(`a.prix_xpf <= $${idx++}`);
-    params.push(filters.price_max ? filters.prix_max);
+    params.push(filters.price_max ?? filters.prix_max);
   }
   if (filters.condition) {
     conditions.push(`a.condition = $${idx++}`);
@@ -971,8 +971,8 @@ async function matchImmediateAlerts(annonce) {
         (!filters.q             || annonce.titre?.toLowerCase().includes(filters.q.toLowerCase())) &&
         (!(filters.category_id || filters.categorie_id) || String(annonce.category_id) === String(filters.category_id || filters.categorie_id)) &&
         (!filters.commune_id    || String(annonce.commune_id)   === String(filters.commune_id))   &&
-        (!filters.price_min && !filters.prix_min || (annonce.prix ? annonce.prix_xpf ? 0) >= Number(filters.price_min ? filters.prix_min)) &&
-        (!filters.price_max && !filters.prix_max || (annonce.prix ? annonce.prix_xpf ? 0) <= Number(filters.price_max ? filters.prix_max)) &&
+        ((!filters.price_min && !filters.prix_min) || Number(annonce.prix_xpf ?? 0) >= Number(filters.price_min ?? filters.prix_min)) &&
+        ((!filters.price_max && !filters.prix_max) || Number(annonce.prix_xpf ?? 0) <= Number(filters.price_max ?? filters.prix_max)) &&
         (!filters.condition     || String(annonce.condition) === String(filters.condition)) &&
         (String(filters.troc) !== 'true' && String(filters.troc) !== '1' || Boolean(annonce.contre_quoi))
       );
