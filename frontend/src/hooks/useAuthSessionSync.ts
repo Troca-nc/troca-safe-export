@@ -12,6 +12,7 @@ export function useAuthSessionSync() {
 
   const [authSyncing, setAuthSyncing] = useState(false)
   const lastSyncedUserIdRef = useRef<string | number | null>(null)
+  const lastRefreshAttemptKeyRef = useRef<string | null>(null)
   const refreshMeRef = useRef(refreshMe)
   const demoProfileRef = useRef(demoProfile)
   const userSnapshotRef = useRef({
@@ -42,6 +43,13 @@ export function useAuthSessionSync() {
     if (demoProfileRef.current) return
 
     const currentUser = userSnapshotRef.current
+    const refreshAttemptKey = [
+      hasHydrated ? 'hydrated' : 'not-hydrated',
+      isAuthenticated ? 'auth' : 'guest',
+      currentUser.id ?? 'no-user',
+      currentUser.pro_category ?? 'no-pro-category',
+      currentUser.tours_seen === undefined ? 'no-tours-seen' : 'tours-seen',
+    ].join(':')
     const needsRefresh =
       !isAuthenticated ||
       !currentUser.id ||
@@ -49,9 +57,11 @@ export function useAuthSessionSync() {
       currentUser.tours_seen === undefined
 
     if (!needsRefresh) return
+    if (lastRefreshAttemptKeyRef.current === refreshAttemptKey) return
     if (currentUser.id && lastSyncedUserIdRef.current === currentUser.id) return
 
     let alive = true
+    lastRefreshAttemptKeyRef.current = refreshAttemptKey
     if (currentUser.id) {
       lastSyncedUserIdRef.current = currentUser.id
     }
