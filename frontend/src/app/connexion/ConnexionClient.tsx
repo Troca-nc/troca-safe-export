@@ -68,6 +68,12 @@ function parseLoginError(raw?: string | null) {
 }
 
 function RightPanel() {
+  const stats = [
+    { value: 'Gratuit', label: 'Pour démarrer' },
+    { value: 'Local', label: 'De Nouméa aux Loyauté' },
+    { value: 'Pro', label: 'Pour aller plus loin' },
+  ] as const
+
   const items = [
     { icon: CheckCircle2, label: 'Vos annonces actives' },
     { icon: Bell, label: 'Vos alertes de recherche' },
@@ -78,21 +84,21 @@ function RightPanel() {
     <aside className="hidden min-h-screen overflow-hidden bg-[#fdf8f1] dark:bg-[#0c2a35] lg:flex">
       <div className="flex w-full items-center justify-center px-8 py-8">
         <div className="connexion-panel flex w-full max-w-[760px] items-center justify-center rounded-[16px] bg-[#fdf8f1] p-8 text-night dark:bg-[#0c2a35] dark:text-white">
-          <div className="flex w-full max-w-[560px] flex-col items-center justify-center text-center">
+          <div className="flex w-full max-w-[620px] flex-col items-center justify-center text-center">
             <div className="connexion-logo-shell" style={{ animationDelay: '0ms' }}>
               <Image
                 src="/brand/kalico1.svg"
                 alt="Kalico"
-                width={80}
-                height={80}
-                className="h-20 w-20 rounded-[16px] object-cover"
+                width={120}
+                height={120}
+                className="h-[120px] w-[120px] rounded-[20px] object-cover"
                 priority
               />
             </div>
 
             <div className="connexion-anim mt-6" style={{ animationDelay: '150ms' }}>
               <h2
-                className="font-display text-[clamp(22px,2.5vw,28px)] font-semibold leading-tight text-night dark:text-white"
+                className="font-display text-[clamp(26px,3vw,34px)] font-medium leading-tight text-night dark:text-white"
                 style={{ fontFamily: 'var(--font-display), Georgia, serif' }}
               >
                 Content de vous revoir.
@@ -100,29 +106,43 @@ function RightPanel() {
             </div>
 
             <p
-              className="connexion-anim mt-3 max-w-[300px] font-display text-[15px] italic leading-6 text-[var(--color-text-secondary)] dark:text-white/65"
+              className="connexion-anim mt-3 mb-7 max-w-[300px] font-display text-[16px] italic leading-6 text-[var(--color-text-secondary)] dark:text-white/65"
               style={{ animationDelay: '220ms', fontFamily: 'var(--font-display), Georgia, serif' }}
             >
               Nouvelle-Calédonie dans l'âme, Kalico dans la poche.
             </p>
 
-            <div className="mt-6 flex w-full max-w-[300px] flex-col gap-3">
-              {items.map(({ icon: Icon, label }, index) => {
-                const delays = ['300ms', '360ms', '420ms']
-                return (
+            <div className="connexion-anim mb-6 w-full max-w-[360px]" style={{ animationDelay: '300ms' }}>
+              <div className="grid grid-cols-3 overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-white dark:border-white/10 dark:bg-[var(--color-surface)]">
+                {stats.map((stat, index) => (
                   <div
-                    key={label}
-                    className="connexion-anim flex items-center justify-center gap-2 text-sm font-medium text-night dark:text-white"
-                    style={{ animationDelay: delays[index] }}
+                    key={stat.label}
+                    className={`px-4 py-4 text-center transition-colors duration-200 hover:bg-[rgba(29,158,117,0.05)] dark:hover:bg-white/5 ${
+                      index > 0 ? 'border-l border-[var(--color-border)] dark:border-white/10' : ''
+                    }`}
                   >
-                    <Icon className="h-4 w-4 shrink-0 text-nc-emeraude" />
-                    <span>{label}</span>
+                    <p className="text-[15px] font-medium text-[var(--color-text-primary)] dark:text-white">{stat.value}</p>
+                    <p className="mt-1 text-[10px] text-[var(--color-text-tertiary)] dark:text-white/55">{stat.label}</p>
                   </div>
-                )
-              })}
+                ))}
+              </div>
             </div>
 
-            <div className="connexion-anim mt-8" style={{ animationDelay: '480ms' }}>
+            <div className="connexion-anim w-full max-w-[360px]" style={{ animationDelay: '360ms' }}>
+              {items.map(({ icon: Icon, label }, index) => (
+                <div
+                  key={label}
+                  className={`flex items-center justify-center gap-2 py-[10px] text-sm font-medium text-night dark:text-white ${
+                    index > 0 ? 'border-t border-[0.5px] border-[var(--color-border)]' : ''
+                  }`}
+                >
+                  <Icon className="h-4 w-4 shrink-0 text-nc-emeraude" />
+                  <span>{label}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="connexion-anim mt-5 w-full max-w-[360px] border-t border-[0.5px] border-[var(--color-border)] pt-5 text-center" style={{ animationDelay: '480ms' }}>
               <Link href="/inscription" className="inline-flex items-center gap-1 text-sm font-semibold text-coral hover:underline">
                 Pas encore de compte ? Rejoindre Kalico →
               </Link>
@@ -254,7 +274,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
 
           {turnstileEnabled ? (
             <div className="mt-5 rounded-2xl border border-night/10 bg-sand/40 p-4">
-              <p className="text-sm font-semibold text-night">Vérification anti-bot</p>
+              <p className="text-sm font-semibold text-night">VÃ©rification anti-bot</p>
               <div className="mt-3">
                 <TurnstileChallenge action="login" label="Connexion" onTokenChange={setTurnstileToken} />
               </div>
@@ -285,7 +305,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
                 <div className="flex items-center justify-between gap-3">
                   <label className="field-label mb-0">Mot de passe</label>
                   <Link href="/reset-password" className="text-sm font-medium text-coral hover:underline">
-                    Mot de passe oublié ?
+                    Mot de passe oubliÃ© ?
                   </Link>
                 </div>
                 <div className="relative">
@@ -293,7 +313,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
                     {...register('password')}
                     ref={passwordInputRef}
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
+                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                     className="input h-12 w-full pr-12"
                     autoComplete="current-password"
                   />
@@ -321,19 +341,19 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
                   'Se connecter'
                 )
               ) : (
-                'Continuer →'
+                'Continuer â†’'
               )}
             </button>
           </form>
 
           {demoProfile ? (
             <div className="mt-4 rounded-2xl border border-coral/20 bg-coral/5 p-4">
-              <p className="text-sm font-semibold text-night">Compte démo détecté</p>
+              <p className="text-sm font-semibold text-night">Compte dÃ©mo dÃ©tectÃ©</p>
               <p className="mt-1 text-sm text-night/60">
-                Vous pouvez entrer dans l'application sans vérification supplémentaire.
+                Vous pouvez entrer dans l'application sans vÃ©rification supplÃ©mentaire.
               </p>
               <button type="button" onClick={() => void handleDemoQuickLogin()} className="btn-primary mt-3 w-full py-3">
-                Se connecter en mode démo
+                Se connecter en mode dÃ©mo
               </button>
               <p className="mt-2 text-[11px] text-night/45">
                 Email: {demoProfile === 'particulier' ? 'particulier@demo.kalico.nc' : demoProfile === 'pro' ? 'pro@demo.kalico.nc' : 'bonplan@demo.kalico.nc'}
@@ -362,11 +382,11 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
             </Link>
             ,{' '}
             <Link href="/mentions-legales" className="transition hover:text-coral hover:underline">
-              mentions légales
+              mentions lÃ©gales
             </Link>{' '}
             et notre{' '}
             <Link href="/politique-de-confidentialite" className="transition hover:text-coral hover:underline">
-              politique de confidentialité
+              politique de confidentialitÃ©
             </Link>
             .
           </p>
@@ -387,7 +407,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
           animation-fill-mode: both;
         }
 
-        .connexion-social-only-google > div.relative {
+        .connexion-social-only-google > div > div.relative {
           display: none !important;
         }
 
@@ -409,7 +429,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
         @keyframes connexionLogoReveal {
           from {
             opacity: 0;
-            transform: translateY(10px) scale(0.8) rotate(-5deg);
+            transform: translateY(10px) scale(0.8) rotate(-6deg);
           }
           to {
             opacity: 1;
@@ -427,20 +447,9 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
           }
         }
 
-        @keyframes connexionPulse {
-          0%,
-          100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.4;
-          }
-        }
-
         @media (prefers-reduced-motion: reduce) {
-          .connexion-anim,
-          .connexion-anim--logo,
-          .connexion-pulse {
+          .connexion-panel,
+          .connexion-panel * {
             animation: none !important;
             transition: none !important;
           }

@@ -7,7 +7,7 @@ const { OAuth2Client } = require('google-auth-library')
 const appleSignin   = require('apple-signin-auth')
 const { query }     = require('../config/database')
 const { isConfiguredValue } = require('../config/env')
-const { signAccessToken, signRefreshToken, getRefreshExpiresMs } = require('../config/jwt')
+const { generateTokens, getRefreshExpiresMs } = require('../config/jwt')
 const { setSecureCookie } = require('../config/cookies')
 const { socialAuthLimiter } = require('../middleware/rateLimit')
 const { logger } = require('../utils/logger')
@@ -60,12 +60,11 @@ async function upsertSocialUser({ email, prenom, nom, avatar_url, provider, prov
 // ── Réponse auth commune ──────────────────────────────────────────────────────
 
 function buildAuthResponse(user) {
-  const access_token  = signAccessToken({ sub: user.id, email: user.email })
-  const refresh_token = signRefreshToken({ sub: user.id })
+  const { accessToken, refreshToken } = generateTokens(user.id)
 
   return {
-    access_token,
-    refresh_token,
+    access_token: accessToken,
+    refresh_token: refreshToken,
     user: {
       id:         user.id,
       email:      user.email,
