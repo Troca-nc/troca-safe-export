@@ -204,7 +204,7 @@ const WHY_PRO_ITEMS = [
   },
   {
     icon: FileText,
-    title: 'Moins d\'allers-retours',
+    title: 'Moins de va-et-vient',
     description: 'Devis, réservations et messages au même endroit.',
   },
   {
