@@ -184,6 +184,10 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 let isRefreshing = false
 let queue: Array<{ resolve: (v: string) => void; reject: (e: unknown) => void }> = []
 
+function isRefreshUrl(url?: string | null) {
+  return Boolean(url && url.includes('/auth/refresh'))
+}
+
 api.interceptors.response.use(
   (res) => res,
   async (error: AxiosError) => {
@@ -196,6 +200,13 @@ api.interceptors.response.use(
         status: error.response?.status ?? null,
         url: original?.url ?? null,
       })
+    }
+
+    if (isRefreshUrl(original?.url)) {
+      queue.forEach((p) => p.reject(error))
+      queue = []
+      redirectToLoginAfterAuthFailure()
+      return Promise.reject(error)
     }
 
     if (error.response?.status === 401 && !original._retry) {
@@ -227,11 +238,19 @@ api.interceptors.response.use(
 
         original.headers.Authorization = `Bearer ${access_token}`
         return api(original)
-      } catch {
+      } catch (refreshError) {
+        const status = (refreshError as AxiosError)?.response?.status ?? null
+        if (status === 429 || (typeof status === 'number' && status >= 400 && status < 500)) {
+          queue.forEach((p) => p.reject(refreshError))
+          queue = []
+          redirectToLoginAfterAuthFailure()
+          return Promise.reject(refreshError)
+        }
+
         queue.forEach((p) => p.reject(error))
         queue = []
         redirectToLoginAfterAuthFailure()
-        return Promise.reject(error)
+        return Promise.reject(refreshError)
       } finally {
         isRefreshing = false
       }
