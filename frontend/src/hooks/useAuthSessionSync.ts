@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { getStoredAccessToken } from '@/lib/tokenStorage'
 import { useAuthStore } from '@/store/authStore'
@@ -11,6 +11,7 @@ export function useAuthSessionSync() {
   const refreshMe = useAuthStore((state) => state.refreshMe)
 
   const [authSyncing, setAuthSyncing] = useState(false)
+  const lastSyncedUserIdRef = useRef<string | number | null>(null)
 
   useEffect(() => {
     if (!hasHydrated) return
@@ -24,8 +25,12 @@ export function useAuthSessionSync() {
       user.tours_seen === undefined
 
     if (!needsRefresh) return
+    if (user?.id && lastSyncedUserIdRef.current === user.id) return
 
     let alive = true
+    if (user?.id) {
+      lastSyncedUserIdRef.current = user.id
+    }
     setAuthSyncing(true)
 
     refreshMe()
@@ -39,7 +44,7 @@ export function useAuthSessionSync() {
     return () => {
       alive = false
     }
-  }, [demoProfile, hasHydrated, isAuthenticated, refreshMe, user])
+  }, [demoProfile, hasHydrated, isAuthenticated, refreshMe, user?.id, user?.pro_category, user?.tours_seen])
 
   return {
     user,
