@@ -274,7 +274,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
 
           {turnstileEnabled ? (
             <div className="mt-5 rounded-2xl border border-night/10 bg-sand/40 p-4">
-              <p className="text-sm font-semibold text-night">VÃ©rification anti-bot</p>
+              <p className="text-sm font-semibold text-night">Vérification anti-bot</p>
               <div className="mt-3">
                 <TurnstileChallenge action="login" label="Connexion" onTokenChange={setTurnstileToken} />
               </div>
@@ -305,7 +305,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
                 <div className="flex items-center justify-between gap-3">
                   <label className="field-label mb-0">Mot de passe</label>
                   <Link href="/reset-password" className="text-sm font-medium text-coral hover:underline">
-                    Mot de passe oubliÃ© ?
+                    Mot de passe oublié ?
                   </Link>
                 </div>
                 <div className="relative">
@@ -313,7 +313,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
                     {...register('password')}
                     ref={passwordInputRef}
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                    placeholder="••••••••"
                     className="input h-12 w-full pr-12"
                     autoComplete="current-password"
                   />
@@ -341,19 +341,19 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
                   'Se connecter'
                 )
               ) : (
-                'Continuer â†’'
+                'Continuer →'
               )}
             </button>
           </form>
 
           {demoProfile ? (
             <div className="mt-4 rounded-2xl border border-coral/20 bg-coral/5 p-4">
-              <p className="text-sm font-semibold text-night">Compte dÃ©mo dÃ©tectÃ©</p>
+              <p className="text-sm font-semibold text-night">Compte démo détecté</p>
               <p className="mt-1 text-sm text-night/60">
-                Vous pouvez entrer dans l'application sans vÃ©rification supplÃ©mentaire.
+                Vous pouvez entrer dans l'application sans vérification supplémentaire.
               </p>
               <button type="button" onClick={() => void handleDemoQuickLogin()} className="btn-primary mt-3 w-full py-3">
-                Se connecter en mode dÃ©mo
+                Se connecter en mode démo
               </button>
               <p className="mt-2 text-[11px] text-night/45">
                 Email: {demoProfile === 'particulier' ? 'particulier@demo.kalico.nc' : demoProfile === 'pro' ? 'pro@demo.kalico.nc' : 'bonplan@demo.kalico.nc'}
@@ -382,11 +382,11 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
             </Link>
             ,{' '}
             <Link href="/mentions-legales" className="transition hover:text-coral hover:underline">
-              mentions lÃ©gales
+              mentions légales
             </Link>{' '}
             et notre{' '}
             <Link href="/politique-de-confidentialite" className="transition hover:text-coral hover:underline">
-              politique de confidentialitÃ©
+              politique de confidentialité
             </Link>
             .
           </p>

@@ -12,28 +12,52 @@ export function useAuthSessionSync() {
 
   const [authSyncing, setAuthSyncing] = useState(false)
   const lastSyncedUserIdRef = useRef<string | number | null>(null)
+  const refreshMeRef = useRef(refreshMe)
+  const demoProfileRef = useRef(demoProfile)
+  const userSnapshotRef = useRef({
+    id: user?.id ?? null,
+    pro_category: user?.pro_category,
+    tours_seen: user?.tours_seen,
+  })
+
+  useEffect(() => {
+    refreshMeRef.current = refreshMe
+  }, [refreshMe])
+
+  useEffect(() => {
+    demoProfileRef.current = demoProfile
+  }, [demoProfile])
+
+  useEffect(() => {
+    userSnapshotRef.current = {
+      id: user?.id ?? null,
+      pro_category: user?.pro_category,
+      tours_seen: user?.tours_seen,
+    }
+  }, [user?.id, user?.pro_category, user?.tours_seen])
 
   useEffect(() => {
     if (!hasHydrated) return
     if (!getStoredAccessToken()) return
-    if (demoProfile) return
+    if (demoProfileRef.current) return
 
+    const currentUser = userSnapshotRef.current
     const needsRefresh =
       !isAuthenticated ||
-      !user ||
-      user.pro_category === undefined ||
-      user.tours_seen === undefined
+      !currentUser.id ||
+      currentUser.pro_category === undefined ||
+      currentUser.tours_seen === undefined
 
     if (!needsRefresh) return
-    if (user?.id && lastSyncedUserIdRef.current === user.id) return
+    if (currentUser.id && lastSyncedUserIdRef.current === currentUser.id) return
 
     let alive = true
-    if (user?.id) {
-      lastSyncedUserIdRef.current = user.id
+    if (currentUser.id) {
+      lastSyncedUserIdRef.current = currentUser.id
     }
     setAuthSyncing(true)
 
-    refreshMe()
+    refreshMeRef.current()
       .catch(() => {})
       .finally(() => {
         if (alive) {
@@ -44,7 +68,7 @@ export function useAuthSessionSync() {
     return () => {
       alive = false
     }
-  }, [demoProfile, hasHydrated, isAuthenticated, refreshMe, user?.id, user?.pro_category, user?.tours_seen])
+  }, [hasHydrated, isAuthenticated, user?.id])
 
   return {
     user,

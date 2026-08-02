@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -33,14 +33,14 @@ import { useAuthStore } from '@/store/authStore'
 
 const schema = z
   .object({
-    first_name: z.string().min(2, 'PrÃ©nom requis'),
+    first_name: z.string().min(2, 'Prénom requis'),
     last_name: z.string().min(2, 'Nom requis'),
     email: z.string().email('Adresse e-mail invalide'),
-    phone: z.string().regex(/^(\+687|0)[0-9]{6}$/, 'NumÃ©ro NC invalide'),
+    phone: z.string().regex(/^(\+687|0)[0-9]{6}$/, 'Numéro NC invalide'),
     commune_id: z.string().optional(),
     password: z
       .string()
-      .min(8, 'Au moins 8 caractÃ¨res')
+      .min(8, 'Au moins 8 caractères')
       .regex(/[A-Z]/, 'Au moins une majuscule')
       .regex(/[0-9]/, 'Au moins un chiffre'),
     password_confirm: z.string(),
@@ -56,8 +56,8 @@ type ProfileChoice = 'particulier' | 'pro'
 type BillingCycle = 'monthly' | 'annual'
 
 const STEPS: Array<{ id: Step; label: string; helper: string }> = [
-  { id: 1, label: 'Profil', helper: 'Compte et accÃ¨s' },
-  { id: 2, label: 'IdentitÃ©', helper: 'Vos informations' },
+  { id: 1, label: 'Profil', helper: 'Compte et accès' },
+  { id: 2, label: 'Identité', helper: 'Vos informations' },
   { id: 3, label: 'Formule', helper: 'Votre compte' },
 ]
 
@@ -72,7 +72,7 @@ const PLAN_FEATURES = [
 
 const PANEL_STATS = [
   { value: '0 F', label: 'Pour publier' },
-  { value: '17', label: 'CatÃ©gories' },
+  { value: '17', label: 'Catégories' },
   { value: '100%', label: 'Local NC' },
 ] as const
 
@@ -85,34 +85,34 @@ const PANEL_FEATURES = [
   {
     icon: ArrowLeftRight,
     title: 'Troc',
-    description: "Ã‰changez ce que vous avez contre ce qu'il vous faut.",
+    description: "Échangez ce que vous avez contre ce qu'il vous faut.",
   },
   {
     icon: Car,
     title: 'Covoiturage',
-    description: 'Trajets entre communes, rÃ©servation simple.',
+    description: 'Trajets entre communes, réservation simple.',
   },
   {
     icon: FileText,
     title: 'Devis Pro',
-    description: 'CrÃ©ez et envoyez vos devis en XPF avec TGC.',
+    description: 'Créez et envoyez vos devis en XPF avec TGC.',
   },
   {
     icon: Truck,
     title: 'Livraison',
-    description: 'Colis et fret entre communes et vers les Ã®les.',
+    description: 'Colis et fret entre communes et vers les îles.',
   },
   {
     icon: CalendarHeart,
-    title: 'Bons plans et Ã©vÃ©nements',
-    description: 'Offres locales, concerts, marchÃ©s prÃ¨s de chez vous.',
+    title: 'Bons plans et événements',
+    description: 'Offres locales, concerts, marchés près de chez vous.',
   },
 ] as const
 
 const TRUST_ITEMS = [
-  { icon: ShieldCheck, label: 'Paiement sÃ©curisÃ©' },
-  { icon: Lock, label: 'DonnÃ©es locales' },
-  { icon: CheckCircle2, label: 'Pros vÃ©rifiÃ©s' },
+  { icon: ShieldCheck, label: 'Paiement sécurisé' },
+  { icon: Lock, label: 'Données locales' },
+  { icon: CheckCircle2, label: 'Pros vérifiés' },
 ] as const
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() || ''
@@ -133,13 +133,13 @@ function strengthLabel(score: number) {
   if (score <= 1) return 'Faible'
   if (score === 2) return 'Moyen'
   if (score === 3) return 'Fort'
-  return 'TrÃ¨s fort'
+  return 'Très fort'
 }
 
 function PasswordRules({ password }: { password: string }) {
   const score = passwordScore(password)
   const labels = [
-    { ok: password.length >= 8, label: '8 caractÃ¨res' },
+    { ok: password.length >= 8, label: '8 caractères' },
     { ok: /[A-Z]/.test(password), label: '1 majuscule' },
     { ok: /[0-9]/.test(password), label: '1 chiffre' },
     { ok: /[^A-Za-z0-9]/.test(password), label: '1 symbole' },
@@ -148,7 +148,7 @@ function PasswordRules({ password }: { password: string }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">SoliditÃ© du mot de passe</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Solidité du mot de passe</p>
         <p className="text-xs font-semibold text-night/55">{strengthLabel(score)}</p>
       </div>
       <div className="grid grid-cols-4 gap-2">
@@ -197,7 +197,7 @@ function getRegistrationError(err: any): RegistrationError {
 
   if (raw.includes('email') || raw.includes('already exists')) {
     return {
-      message: 'Cet email est dÃ©jÃ  utilisÃ©. Connectez-vous ou utilisez un autre email.',
+      message: 'Cet email est déjà utilisé. Connectez-vous ou utilisez un autre email.',
       ctaHref: '/connexion',
       ctaLabel: 'Se connecter â†’',
     }
@@ -205,12 +205,12 @@ function getRegistrationError(err: any): RegistrationError {
 
   if (raw.includes('network') || raw.includes('fetch')) {
     return {
-      message: 'Connexion impossible. VÃ©rifiez votre rÃ©seau et rÃ©essayez.',
+      message: 'Connexion impossible. Vérifiez votre réseau et réessayez.',
     }
   }
 
   return {
-    message: 'Une erreur est survenue. RÃ©essayez dans un moment.',
+    message: 'Une erreur est survenue. Réessayez dans un moment.',
   }
 }
 
@@ -342,7 +342,7 @@ export default function RegisterPage() {
       const { password_confirm: _passwordConfirm, ...payload } = data
       if (turnstileEnabled && !turnstileToken) {
         setServerError({
-          message: 'Veuillez confirmer que vous nâ€™Ãªtes pas un robot.',
+          message: "Veuillez confirmer que vous n'êtes pas un robot.",
         })
         return
       }
@@ -401,7 +401,7 @@ export default function RegisterPage() {
               <div className="max-w-2xl">
                 <h1 className="mt-2 font-display text-4xl font-bold text-night md:text-5xl">Rejoindre Kalico</h1>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-night/60 md:text-base">
-                  Trois Ã©tapes, deux minutes. Votre annonce peut Ãªtre en ligne dÃ¨s maintenant.
+                  Trois étapes, deux minutes. Votre annonce peut être en ligne dès maintenant.
                 </p>
               </div>
             </div>
@@ -432,9 +432,9 @@ export default function RegisterPage() {
                   <section className="space-y-4 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Ã‰tape 1</p>
-                        <h2 className="mt-2 text-2xl font-semibold text-night">CrÃ©ez votre compte</h2>
-                        <p className="mt-1 text-sm text-night/55">E-mail, mot de passe et accÃ¨s rapide avec Google si vous le souhaitez.</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Étape 1</p>
+                        <h2 className="mt-2 text-2xl font-semibold text-night">Créez votre compte</h2>
+                        <p className="mt-1 text-sm text-night/55">E-mail, mot de passe et accès rapide avec Google si vous le souhaitez.</p>
                       </div>
                     </div>
 
@@ -466,7 +466,7 @@ export default function RegisterPage() {
                             {...register('password')}
                             type={showPassword ? 'text' : 'password'}
                             className="input h-12 w-full pr-12"
-                            placeholder="CrÃ©ez un mot de passe"
+                            placeholder="Créez un mot de passe"
                           />
                           <button
                             type="button"
@@ -487,7 +487,7 @@ export default function RegisterPage() {
                           {...register('password_confirm')}
                           type={showPassword ? 'text' : 'password'}
                           className="input h-12 w-full"
-                          placeholder="RÃ©pÃ©tez le mot de passe"
+                          placeholder="Répétez le mot de passe"
                         />
                         {errors.password_confirm ? <p className="field-error">{errors.password_confirm.message}</p> : null}
                       </label>
@@ -500,7 +500,7 @@ export default function RegisterPage() {
                       </Link>{' '}
                       et notre{' '}
                       <Link href="/politique-de-confidentialite" className="underline underline-offset-2 hover:text-night/70">
-                        politique de confidentialitÃ©
+                        politique de confidentialité
                       </Link>
                       .
                     </p>
@@ -510,9 +510,9 @@ export default function RegisterPage() {
                 {step === 2 ? (
                   <section className="space-y-5 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Ã‰tape 2</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Étape 2</p>
                       <h2 className="mt-2 text-2xl font-semibold text-night">Parlez-nous de vous</h2>
-                      <p className="mt-1 text-sm text-night/55">Juste lâ€™essentiel pour commencer.</p>
+                      <p className="mt-1 text-sm text-night/55">Juste l'essentiel pour commencer.</p>
                     </div>
 
                     <div className="grid gap-5">
@@ -529,15 +529,15 @@ export default function RegisterPage() {
                           </div>
                           <div>
                             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-night/45">Avatar optionnel</p>
-                            <p className="mt-1 text-sm leading-6 text-night/60">Votre photo peut venir plus tard. Un avatar clair sâ€™affiche en attendant.</p>
+                            <p className="mt-1 text-sm leading-6 text-night/60">Votre photo peut venir plus tard. Un avatar clair s'affiche en attendant.</p>
                           </div>
                         </div>
                       </div>
 
                       <div className="grid gap-4 md:grid-cols-2">
                         <label className="space-y-2">
-                          <span className="field-label">PrÃ©nom</span>
-                          <input {...register('first_name')} className="input h-12 w-full" placeholder="Votre prÃ©nom" />
+                          <span className="field-label">Prénom</span>
+                          <input {...register('first_name')} className="input h-12 w-full" placeholder="Votre prénom" />
                           {errors.first_name ? <p className="field-error">{errors.first_name.message}</p> : null}
                         </label>
                         <label className="space-y-2">
@@ -547,11 +547,11 @@ export default function RegisterPage() {
                         </label>
 
                         <label className="space-y-2 md:col-span-2">
-                          <span className="field-label">TÃ©lÃ©phone mobile</span>
+                          <span className="field-label">Téléphone mobile</span>
                           <input {...register('phone')} className="input h-12 w-full" placeholder="+687..." />
                           {errors.phone ? <p className="field-error">{errors.phone.message}</p> : null}
                           <p className="text-xs text-night/45">
-                            NÃ©cessaire pour la rÃ©cupÃ©ration de mot de passe si vous choisissez lâ€™option SMS.
+                            Nécessaire pour la récupération de mot de passe si vous choisissez l'option SMS.
                           </p>
                         </label>
 
@@ -574,14 +574,14 @@ export default function RegisterPage() {
                         active={selectedProfile === 'particulier'}
                         icon={UserRound}
                         title="Particulier"
-                        description="Jâ€™achÃ¨te, je vends, je troque et je publie pour un usage personnel."
+                        description="J'achète, je vends, je troque et je publie pour un usage personnel."
                         onClick={() => setSelectedProfile('particulier')}
                       />
                       <AccountTypeCard
                         active={selectedProfile === 'pro'}
                         icon={Store}
                         title="Professionnel"
-                        description="Enseigne, commerce, agence ou vendeur rÃ©gulier qui veut plus de visibilitÃ©."
+                        description="Enseigne, commerce, agence ou vendeur régulier qui veut plus de visibilité."
                         onClick={() => setSelectedProfile('pro')}
                       />
                     </div>
@@ -591,10 +591,10 @@ export default function RegisterPage() {
                 {step === 3 && selectedProfile === 'pro' ? (
                   <section className="space-y-5 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Ã‰tape 3</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Étape 3</p>
                       <h2 className="mt-2 text-2xl font-semibold text-night">Choisissez votre plan</h2>
                       <p className="mt-1 text-sm text-night/55">
-                        Vous pouvez commencer gratuitement ou profiter du Pro quand votre activitÃ© le justifie.
+                        Vous pouvez commencer gratuitement ou profiter du Pro quand votre activité le justifie.
                       </p>
                     </div>
 
@@ -605,7 +605,7 @@ export default function RegisterPage() {
                         disabled={isSubmitting}
                         className="btn-primary w-full"
                       >
-                        {isSubmitting ? 'CrÃ©ation...' : 'Commencer gratuitement'}
+                        {isSubmitting ? 'Création...' : 'Commencer gratuitement'}
                       </button>
 
                       <button
@@ -637,7 +637,7 @@ export default function RegisterPage() {
                               </li>
                               <li className="flex items-center gap-2">
                                 <X className="h-4 w-4 text-night/35" />
-                                60 jours de visibilitÃ©
+                                60 jours de visibilité
                               </li>
                             </ul>
                           </article>
@@ -645,7 +645,7 @@ export default function RegisterPage() {
                           <article className="pulse-once rounded-[1.75rem] border border-coral/20 bg-[linear-gradient(180deg,rgba(10,126,164,0.08),rgba(255,255,255,1))] p-5 shadow-lg shadow-coral/10">
                             <div className="flex items-center justify-between gap-3">
                               <span className="inline-flex items-center rounded-full bg-coral px-3 py-1 text-xs font-semibold text-white">
-                                RecommandÃ©
+                                Recommandé
                               </span>
                               <button
                                 type="button"
@@ -664,7 +664,7 @@ export default function RegisterPage() {
                             {billingCycle === 'annual' ? (
                               <p className="mt-2 text-sm font-semibold text-jungle">2 mois offerts</p>
                             ) : (
-                              <p className="mt-2 text-sm text-night/55">Paiement flexible, Ã  tout moment.</p>
+                              <p className="mt-2 text-sm text-night/55">Paiement flexible, à tout moment.</p>
                             )}
 
                             <div className="mt-5 space-y-3">
@@ -732,7 +732,7 @@ export default function RegisterPage() {
                     ) : null}
 
                     <p className="text-center text-sm text-night/55">
-                      Pas encore dÃ©cidÃ© ?{' '}
+                      Pas encore décidé ?{' '}
                       <button type="button" onClick={() => setSelectedProfile('particulier')} className="font-semibold text-coral hover:underline">
                         Commencez gratuitement â†’
                       </button>
@@ -760,12 +760,12 @@ export default function RegisterPage() {
                   </button>
                 ) : step === 2 ? (
                   <button type="button" onClick={nextFromStep2} className="btn-primary px-5 py-3">
-                    {canSubmitAtStep2 ? 'CrÃ©er mon compte' : 'Continuer'}
+                    {canSubmitAtStep2 ? 'Créer mon compte' : 'Continuer'}
                     <ArrowRight className="h-4 w-4" />
                   </button>
                 ) : (
                   <button type="submit" disabled={isSubmitting} className="btn-primary px-5 py-3 disabled:cursor-not-allowed disabled:opacity-60">
-                    {isSubmitting ? 'CrÃ©ation...' : 'CrÃ©er mon compte'}
+                    {isSubmitting ? 'Création...' : 'Créer mon compte'}
                   </button>
                 )}
               </div>
@@ -803,7 +803,7 @@ export default function RegisterPage() {
                   style={{ fontFamily: 'var(--font-display), Georgia, serif' }}
                 >
                   <span className="block">Ce que vous pouvez faire</span>
-                  <span className="block text-coral">dÃ¨s maintenant.</span>
+                  <span className="block text-coral">dès maintenant.</span>
                 </h2>
               </div>
 
@@ -811,7 +811,7 @@ export default function RegisterPage() {
                 className="signup-panel-anim mx-auto max-w-[300px] font-display text-[15px] italic leading-6 text-[var(--color-text-secondary)] dark:text-white/65"
                 style={{ animationDelay: '180ms', fontFamily: 'var(--font-display), Georgia, serif' }}
               >
-                Nouvelle-CalÃ©donie dans l'Ã¢me, Kalico dans la poche.
+                Nouvelle-Calédonie dans l'âme, Kalico dans la poche.
               </p>
 
               <div
