@@ -9,6 +9,13 @@ Tout changement visuel futur doit s y conformer.
 Kalico est la marketplace de proximite de Nouvelle-Caledonie.
 Le visuel doit rester chaleureux, local, de confiance et professionnel, sans devenir corporatif.
 
+### Devise officielle
+"Nouvelle-Calédonie dans l'âme, Kalico dans la poche."
+
+Usage : footer, pages d'auth (inscription, connexion), page Pro, matériel de communication B2B.
+Ne pas modifier, ne pas tronquer.
+Ne pas traduire.
+
 ### Anti-patterns a eviter
 - froid
 - generique

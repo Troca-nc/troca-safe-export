@@ -99,7 +99,7 @@ export default function Footer() {
           </div>
         </section>
         <div className="mt-8 flex flex-col gap-2 border-t border-[var(--color-border)] pt-4 text-xs text-night/40 sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 Kalico. Tous droits réservés.</p>
+          <p>© 2026 Kalico · Nouvelle-Calédonie dans l'âme, Kalico dans la poche.</p>
           <p>Nouvelle-Calédonie.</p>
         </div>
       </div>

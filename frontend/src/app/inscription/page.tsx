@@ -392,7 +392,7 @@ export default function RegisterPage() {
           <div className="text-center">
             <Link href="/" className="inline-flex flex-col items-center">
               <p className="font-display text-3xl font-bold text-night">Kalico</p>
-              <p className="mt-3 text-sm text-night/55">Rejoignez les premiers Calédoniens sur Kalico.</p>
+              <p className="mt-3 text-sm text-night/55">Bienvenue chez vous.</p>
             </Link>
           </div>
 
@@ -813,8 +813,11 @@ export default function RegisterPage() {
                 </h2>
               </div>
 
-              <p className="signup-panel-anim max-w-xl text-xs leading-5 text-night/60 dark:text-white/65" style={{ animationDelay: '180ms' }}>
-                Gratuit pour démarrer. Pro pour aller plus loin. Tout en XPF, de Nouméa aux Loyauté.
+              <p
+                className="signup-panel-anim mx-auto max-w-[300px] font-display text-[15px] italic leading-6 text-[var(--color-text-secondary)] dark:text-white/65"
+                style={{ animationDelay: '180ms', fontFamily: 'var(--font-display), Georgia, serif' }}
+              >
+                Nouvelle-Calédonie dans l'âme, Kalico dans la poche.
               </p>
 
               <div
@@ -889,7 +892,7 @@ export default function RegisterPage() {
           animation: signupPulse 2s ease-in-out infinite;
         }
 
-        .signup-social-only-google > div.relative {
+        .signup-social-only-google > div > div.relative {
           display: none !important;
         }
 

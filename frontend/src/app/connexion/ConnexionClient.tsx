@@ -7,11 +7,10 @@ import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { AlertCircle, Eye, EyeOff } from 'lucide-react'
+import { AlertCircle, Bell, CheckCircle2, Eye, EyeOff, MessageCircle } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import SocialAuthButtons from '@/components/auth/SocialAuthButtons'
 import TurnstileChallenge from '@/components/auth/TurnstileChallenge'
-import AuthMapPanel from '@/components/auth/AuthMapPanel'
 import { consumeRedirectAfterLogin } from '@/lib/authRedirect'
 import { DEMO_ACCOUNTS, inferDemoAccount } from '@/lib/demoApi'
 
@@ -25,6 +24,9 @@ type FormData = z.infer<typeof schema>
 type ConnexionClientProps = {
   nextPath: string
 }
+
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() || ''
+const showGoogleAuth = GOOGLE_CLIENT_ID !== '' && !GOOGLE_CLIENT_ID.toLowerCase().includes('changeme')
 
 function parseLoginError(raw?: string | null) {
   const normalized = (raw || '').toLowerCase()
@@ -47,7 +49,7 @@ function parseLoginError(raw?: string | null) {
     normalized.includes('no account')
   ) {
     return {
-      message: "Aucun compte avec cet email. Inscrivez-vous ?",
+      message: 'Aucun compte avec cet email. Inscrivez-vous ?',
       href: '/inscription',
       linkLabel: "S'inscrire",
     }
@@ -65,6 +67,73 @@ function parseLoginError(raw?: string | null) {
   return { message: raw || 'Erreur de connexion' }
 }
 
+function RightPanel() {
+  const items = [
+    { icon: CheckCircle2, label: 'Vos annonces actives' },
+    { icon: Bell, label: 'Vos alertes de recherche' },
+    { icon: MessageCircle, label: 'Vos conversations en cours' },
+  ] as const
+
+  return (
+    <aside className="hidden min-h-screen overflow-hidden bg-[#fdf8f1] dark:bg-[#0c2a35] lg:flex">
+      <div className="flex w-full items-center justify-center px-8 py-8">
+        <div className="connexion-panel flex w-full max-w-[760px] items-center justify-center rounded-[16px] bg-[#fdf8f1] p-8 text-night dark:bg-[#0c2a35] dark:text-white">
+          <div className="flex w-full max-w-[560px] flex-col items-center justify-center text-center">
+            <div className="connexion-logo-shell" style={{ animationDelay: '0ms' }}>
+              <Image
+                src="/brand/kalico1.svg"
+                alt="Kalico"
+                width={80}
+                height={80}
+                className="h-20 w-20 rounded-[16px] object-cover"
+                priority
+              />
+            </div>
+
+            <div className="connexion-anim mt-6" style={{ animationDelay: '150ms' }}>
+              <h2
+                className="font-display text-[clamp(22px,2.5vw,28px)] font-semibold leading-tight text-night dark:text-white"
+                style={{ fontFamily: 'var(--font-display), Georgia, serif' }}
+              >
+                Content de vous revoir.
+              </h2>
+            </div>
+
+            <p
+              className="connexion-anim mt-3 max-w-[300px] font-display text-[15px] italic leading-6 text-[var(--color-text-secondary)] dark:text-white/65"
+              style={{ animationDelay: '220ms', fontFamily: 'var(--font-display), Georgia, serif' }}
+            >
+              Nouvelle-Calédonie dans l'âme, Kalico dans la poche.
+            </p>
+
+            <div className="mt-6 flex w-full max-w-[300px] flex-col gap-3">
+              {items.map(({ icon: Icon, label }, index) => {
+                const delays = ['300ms', '360ms', '420ms']
+                return (
+                  <div
+                    key={label}
+                    className="connexion-anim flex items-center justify-center gap-2 text-sm font-medium text-night dark:text-white"
+                    style={{ animationDelay: delays[index] }}
+                  >
+                    <Icon className="h-4 w-4 shrink-0 text-nc-emeraude" />
+                    <span>{label}</span>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="connexion-anim mt-8" style={{ animationDelay: '480ms' }}>
+              <Link href="/inscription" className="inline-flex items-center gap-1 text-sm font-semibold text-coral hover:underline">
+                Pas encore de compte ? Rejoindre Kalico →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  )
+}
+
 export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
   const router = useRouter()
   const { login, isLoading } = useAuthStore()
@@ -73,7 +142,6 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
   const [serverError, setServerError] = useState('')
   const [serverErrorLink, setServerErrorLink] = useState<string | null>(null)
   const [turnstileToken, setTurnstileToken] = useState('')
-  const [showMapPanel, setShowMapPanel] = useState(false)
   const passwordInputRef = useRef<HTMLInputElement | null>(null)
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || ''
   const turnstileEnabled = Boolean(turnstileSiteKey && !turnstileSiteKey.startsWith('CHANGEME'))
@@ -97,17 +165,6 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
       passwordInputRef.current?.focus()
     }
   }, [awaitingPassword])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const media = window.matchMedia('(min-width: 1024px)')
-    const update = () => setShowMapPanel(media.matches)
-
-    update()
-    media.addEventListener('change', update)
-    return () => media.removeEventListener('change', update)
-  }, [])
 
   const onSubmit = async (data: FormData) => {
     setServerError('')
@@ -163,7 +220,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[var(--color-surface)] lg:grid lg:grid-cols-2">
+    <div className="min-h-screen bg-white dark:bg-[var(--color-surface)] lg:grid lg:grid-cols-[45fr_55fr]">
       <main className="flex min-h-screen items-center justify-center px-6 py-10 sm:px-8 lg:px-12">
         <div className="w-full max-w-[380px]">
           <Link href="/" className="inline-flex items-center gap-3">
@@ -172,17 +229,11 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
             </span>
             <span>
               <span className="block font-display text-2xl font-bold text-night">Kalico</span>
-              <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-coral/80">
-                Nouvelle-Calédonie
-              </span>
             </span>
           </Link>
 
           <div className="mt-10">
-            <h1 className="text-[24px] font-semibold leading-tight text-night">
-              Connectez-vous ou créez votre compte Kalico
-            </h1>
-            <p className="mt-1.5 text-sm text-night/60">La marketplace locale de Nouvelle-Calédonie.</p>
+            <h1 className="text-[24px] font-semibold leading-tight text-night">Bon retour sur Kalico.</h1>
           </div>
 
           {serverError ? (
@@ -233,13 +284,9 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
               <div className="space-y-2 animate-fade-in">
                 <div className="flex items-center justify-between gap-3">
                   <label className="field-label mb-0">Mot de passe</label>
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((value) => !value)}
-                    className="text-xs font-medium text-coral hover:underline"
-                  >
-                    {showPassword ? 'Masquer' : 'Afficher'}
-                  </button>
+                  <Link href="/reset-password" className="text-sm font-medium text-coral hover:underline">
+                    Mot de passe oublié ?
+                  </Link>
                 </div>
                 <div className="relative">
                   <input
@@ -294,9 +341,19 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
             </div>
           ) : null}
 
-          <div className="mt-6">
-            <SocialAuthButtons redirectTo="/" mode="connexion" showLegalFooter={false} />
-          </div>
+          {showGoogleAuth ? (
+            <div className="mt-6 space-y-4">
+              <div className="relative flex items-center gap-3">
+                <div className="h-px flex-1 bg-night/10" />
+                <span className="shrink-0 text-xs font-medium text-night/45">Ou continuer avec</span>
+                <div className="h-px flex-1 bg-night/10" />
+              </div>
+
+              <div className="connexion-social-only-google">
+                <SocialAuthButtons redirectTo="/" mode="connexion" showLegalFooter={false} />
+              </div>
+            </div>
+          ) : null}
 
           <p className="mt-6 text-[11px] leading-relaxed text-night/40">
             En continuant, vous acceptez nos{' '}
@@ -316,7 +373,79 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
         </div>
       </main>
 
-      {showMapPanel ? <AuthMapPanel /> : null}
+      <RightPanel />
+
+      <style jsx global>{`
+        .connexion-anim {
+          animation: connexionReveal 350ms ease-out both;
+          animation-fill-mode: both;
+        }
+
+        .connexion-logo-shell {
+          animation: connexionLogoReveal 600ms cubic-bezier(0.16, 1, 0.3, 1) both,
+            connexionLogoFloat 3s ease-in-out 600ms infinite;
+          animation-fill-mode: both;
+        }
+
+        .connexion-social-only-google > div.relative {
+          display: none !important;
+        }
+
+        .connexion-social-only-google > div.space-y-3 > button:nth-of-type(2) {
+          display: none !important;
+        }
+
+        @keyframes connexionReveal {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes connexionLogoReveal {
+          from {
+            opacity: 0;
+            transform: translateY(10px) scale(0.8) rotate(-5deg);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1) rotate(0deg);
+          }
+        }
+
+        @keyframes connexionLogoFloat {
+          0%,
+          100% {
+            transform: translateY(-4px) scale(1) rotate(0deg);
+          }
+          50% {
+            transform: translateY(0) scale(1) rotate(0deg);
+          }
+        }
+
+        @keyframes connexionPulse {
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.4;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .connexion-anim,
+          .connexion-anim--logo,
+          .connexion-pulse {
+            animation: none !important;
+            transition: none !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }
