@@ -77,18 +77,18 @@ export default function OnboardingToast() {
   const [isClosing, setIsClosing] = useState(false)
 
   useEffect(() => {
-    if (!hasHydrated || !isAuthenticated || !user || typeof window === 'undefined') {
+    if (!hasHydrated || !isAuthenticated || !user || (user.onboarding_step ?? 0) <= 0 || typeof window === 'undefined') {
       setSeenFeatures([])
       return
     }
 
     setSeenFeatures(readSeenFeatures())
-  }, [hasHydrated, isAuthenticated, user])
+  }, [hasHydrated, isAuthenticated, user, user?.onboarding_step])
 
   const nextFeature = useMemo(() => {
-    if (!hasHydrated || !isAuthenticated || !user) return null
+    if (!hasHydrated || !isAuthenticated || !user || (user.onboarding_step ?? 0) <= 0) return null
     return FEATURES.find((feature) => !seenFeatures.includes(feature.key)) ?? null
-  }, [hasHydrated, isAuthenticated, user, seenFeatures])
+  }, [hasHydrated, isAuthenticated, seenFeatures, user, user?.onboarding_step])
 
   useEffect(() => {
     if (!nextFeature || typeof window === 'undefined') {

@@ -1,0 +1,30 @@
+.tooltip {
+  position: fixed;
+  z-index: 80;
+  max-width: 200px;
+  border-radius: 6px;
+  background: #1a2e25;
+  color: #fff;
+  padding: 6px 10px;
+  font-size: 11px;
+  line-height: 1.4;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+  pointer-events: none;
+}
+
+.arrow {
+  position: absolute;
+  top: -5px;
+  left: 18px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid #1a2e25;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tooltip {
+    transition: none;
+  }
+}

@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight, BadgeCheck } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
+import WelcomeToast from '@/components/onboarding/WelcomeToast'
 import OnboardingToast from '@/components/onboarding/OnboardingToast'
 import { HomeSpotlightSection } from '@/components/home/HomeSpotlightSection'
 import {
@@ -184,6 +185,7 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-[var(--color-bg-page)] text-[var(--color-text-primary)]">
       <Header />
+      <WelcomeToast />
       <OnboardingToast />
 
       <HomeHeroSection q={q} onQueryChange={setQ} onSubmit={handleSearch} listings={featuredListings} />

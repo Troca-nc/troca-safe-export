@@ -66,6 +66,7 @@ function getStatusCopy(status: SubscriptionStatusResponse['data']) {
 export default function PaymentFailureBanner() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const demoProfile = useAuthStore((state) => state.demoProfile)
+  const user = useAuthStore((state) => state.user)
 
   const { data } = useQuery({
     queryKey: ['subscriptions', 'status'],
@@ -80,8 +81,12 @@ export default function PaymentFailureBanner() {
   })
 
   const status = data?.data ?? null
+  const onboardingStep = user?.onboarding_step ?? 0
   const copy = getStatusCopy(status)
   if (!copy) return null
+  if (onboardingStep < 3) return null
+  if (!status || status.plan !== 'pro') return null
+  if (!['expired', 'cancelled', 'payment_failed'].includes(String(status.status ?? ''))) return null
 
   const Icon = copy.icon
   const toneStyles =

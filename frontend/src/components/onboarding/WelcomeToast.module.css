@@ -1,0 +1,77 @@
+.toast {
+  position: fixed;
+  right: 20px;
+  top: 80px;
+  z-index: 70;
+  width: min(320px, calc(100vw - 40px));
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 20px;
+  opacity: 0;
+  transform: translateX(28px);
+  transition: opacity 300ms ease-out, transform 300ms ease-out;
+  color: var(--color-text-primary);
+}
+
+.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.closing {
+  opacity: 0;
+  transform: translateX(28px);
+}
+
+:global(html[data-theme='dark']) .toast {
+  background: var(--color-surface);
+}
+
+.closeButton {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.title {
+  margin: 0;
+  padding-right: 24px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.linkButton {
+  border: 0;
+  background: transparent;
+  color: var(--coral);
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    transition: none;
+  }
+}
