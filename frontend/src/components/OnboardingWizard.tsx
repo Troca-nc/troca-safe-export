@@ -1,7 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { CheckCircle2, ChevronRight, X } from 'lucide-react'
 
 import { api } from '@/lib/api'
@@ -13,51 +13,25 @@ function getDismissKey(userId?: string | number | null) {
   return `${DISMISS_KEY_PREFIX}${String(userId ?? 'guest')}`
 }
 
+type OnboardingStep = {
+  id: number
+  title: string
+  description: string
+  href: string
+  cta: string
+}
+
 export default function OnboardingWizard() {
+  const router = useRouter()
   const { user, refreshMe } = useAuthStore()
   const onboardingStep = user?.onboarding_step ?? 0
   const [open, setOpen] = useState(false)
   const [savingStep, setSavingStep] = useState<number | null>(null)
+  const [currentStepIndex, setCurrentStepIndex] = useState(0)
 
   const dismissKey = useMemo(() => getDismissKey(user?.id), [user?.id])
-  const currentStep = Math.min(Math.max(onboardingStep + 1, 1), 3)
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    if (!user || onboardingStep >= 3) {
-      setOpen(false)
-      return
-    }
-
-    const dismissed = window.sessionStorage.getItem(dismissKey) === '1'
-    setOpen(onboardingStep === 0 && !dismissed)
-  }, [dismissKey, onboardingStep, user])
-
-  const completeStep = async (step: number) => {
-    if (!user) return
-    setSavingStep(step)
-    try {
-      await api.patch('/users/me/onboarding', { step })
-      await refreshMe()
-      if (step >= 3 && typeof window !== 'undefined') {
-        window.sessionStorage.setItem(dismissKey, '1')
-        setOpen(false)
-      }
-    } finally {
-      setSavingStep(null)
-    }
-  }
-
-  const dismiss = () => {
-    if (typeof window !== 'undefined') {
-      window.sessionStorage.setItem(dismissKey, '1')
-    }
-    setOpen(false)
-  }
-
-  if (!open || !user) return null
-
-  const steps = [
+  const steps: OnboardingStep[] = [
     {
       id: 1,
       title: 'Ajouter une photo de profil',
@@ -81,9 +55,69 @@ export default function OnboardingWizard() {
     },
   ]
 
+  const activeStep = steps[currentStepIndex] ?? steps[0]
+
+  useEffect(() => {
+    setCurrentStepIndex(Math.min(Math.max(onboardingStep, 0), 2))
+  }, [onboardingStep])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!user?.id || onboardingStep >= 3) {
+      setOpen(false)
+      return
+    }
+
+    const dismissed = window.sessionStorage.getItem(dismissKey) === '1'
+    setOpen(onboardingStep === 0 && !dismissed)
+  }, [dismissKey, onboardingStep, user?.id])
+
+  const persistStep = async (step: number) => {
+    if (!user) return
+
+    setSavingStep(step)
+    try {
+      await api.patch('/users/me/onboarding', { step })
+      await refreshMe()
+
+      if (step >= 3 && typeof window !== 'undefined') {
+        window.sessionStorage.setItem(dismissKey, '1')
+        setOpen(false)
+        return
+      }
+
+      setCurrentStepIndex((value) => Math.min(value + 1, 2))
+    } finally {
+      setSavingStep(null)
+    }
+  }
+
+  const handlePrimaryAction = async () => {
+    if (!activeStep) return
+    await persistStep(activeStep.id)
+    router.push(activeStep.href)
+  }
+
+  const handleCompleteAction = async () => {
+    if (!activeStep) return
+    await persistStep(activeStep.id)
+    if (activeStep.id >= 3) {
+      setOpen(false)
+    }
+  }
+
+  const dismiss = () => {
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.setItem(dismissKey, '1')
+    }
+    setOpen(false)
+  }
+
+  if (!open || !user) return null
+
   return (
-    <div className="fixed inset-0 z-[90] flex items-end justify-center bg-[var(--color-text-primary)]/55 px-4 py-6 backdrop-blur-sm sm:items-center">
-      <div className="relative w-full max-w-2xl overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface-raised)] shadow-[0_24px_80px_rgba(8,32,50,0.2)] dark:border-white/10 dark:bg-night">
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-[var(--color-text-primary)]/55 px-4 py-6 backdrop-blur-sm">
+      <div className="onboarding-wizard-card relative w-full max-w-[480px] overflow-hidden rounded-[16px] border border-[var(--color-border)] bg-white shadow-[0_24px_80px_rgba(8,32,50,0.2)] dark:border-white/10 dark:bg-[var(--color-surface)]">
         <button
           type="button"
           onClick={dismiss}
@@ -93,114 +127,90 @@ export default function OnboardingWizard() {
           <X className="h-4 w-4" />
         </button>
 
-        <div className="border-b border-[var(--color-border)] bg-[var(--color-background-secondary)]/50 px-6 py-5 sm:px-7 dark:border-white/10 dark:bg-white/5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--coral)]">Onboarding</p>
-          <h2 className="mt-2 text-2xl font-bold text-[var(--color-text-primary)] dark:text-white">
-            Bienvenue, {user.first_name ?? user.prenom ?? 'vous'}.
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-[var(--color-text-primary)]/60 dark:text-white/65">
-            Trois petites étapes pour démarrer plus vite et profiter du plein potentiel de Kalico.
-          </p>
-          <div className="mt-5 flex items-center justify-center gap-2">
-            {steps.map((step) => {
-              const status = step.id < currentStep ? 'completed' : step.id === currentStep ? 'active' : 'future'
-              return (
-                <div
-                  key={step.id}
-                  className={`flex h-10 w-10 items-center justify-center rounded-full border text-sm font-bold transition ${
-                    status === 'completed'
-                      ? 'border-[var(--color-success)] bg-[var(--color-success)] text-white'
-                      : status === 'active'
-                        ? 'border-[var(--coral)] bg-[var(--coral)] text-white'
-                        : 'border-[var(--color-border)] bg-[var(--color-surface-raised)] text-[var(--color-text-primary)]/35 dark:border-white/10 dark:bg-white/5 dark:text-white/35'
-                  }`}
-                >
-                  {status === 'completed' ? <CheckCircle2 className="h-4 w-4" /> : step.id}
-                </div>
-              )
-            })}
+        <div key={activeStep.id} className="onboarding-wizard-step flex min-h-[520px] flex-col px-8 py-8 text-center sm:px-8 sm:py-8">
+          <div className="flex flex-1 flex-col items-center justify-center">
+            <div className="text-[48px] font-semibold leading-none text-[var(--coral)]">0{activeStep.id}</div>
+
+            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-text-primary)]/35 dark:text-white/35">
+              Étape {activeStep.id}/3
+            </p>
+
+            <h2
+              className="mt-3 font-display text-[clamp(22px,2.8vw,30px)] font-bold leading-tight text-[var(--color-text-primary)] dark:text-white"
+              style={{ fontFamily: 'var(--font-display), Georgia, serif' }}
+            >
+              {activeStep.title}
+            </h2>
+
+            <p className="mt-3 max-w-[360px] text-sm leading-6 text-[var(--color-text-primary)]/65 dark:text-white/70">
+              {activeStep.description}
+            </p>
+
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => void handlePrimaryAction()}
+                className="btn-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm"
+              >
+                {activeStep.cta}
+                <ChevronRight className="h-4 w-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => void handleCompleteAction()}
+                disabled={savingStep === activeStep.id}
+                className="btn-secondary inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm disabled:opacity-60"
+              >
+                {savingStep === activeStep.id ? 'Enregistrement...' : "J'ai terminé"}
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-8 flex items-center justify-center gap-2">
+            {steps.map((step, index) => (
+              <span
+                key={step.id}
+                aria-hidden="true"
+                className={`h-2.5 w-2.5 rounded-full transition-colors ${
+                  index === currentStepIndex
+                    ? 'bg-[var(--coral)]'
+                    : index < currentStepIndex
+                      ? 'bg-[var(--color-success)]'
+                      : 'bg-[var(--color-text-primary)]/20 dark:bg-white/20'
+                }`}
+              />
+            ))}
           </div>
         </div>
-
-        <div className="space-y-3 p-6 sm:p-7">
-          {steps.map((step) => {
-            const completed = currentStep > step.id
-            const active = currentStep === step.id
-            return (
-              <div
-                key={step.id}
-                className={`rounded-2xl border p-4 transition ${
-                  completed
-                    ? 'border-[var(--color-success)]/20 bg-[var(--color-success)]/5 dark:border-[var(--color-success)]/30 dark:bg-[var(--color-success)]/10'
-                    : active
-                      ? 'border-[var(--coral)]/20 bg-[var(--coral)]/5 dark:border-[var(--coral)]/30 dark:bg-[var(--coral)]/10'
-                      : 'border-[var(--color-border)] bg-[var(--color-surface-raised)] dark:border-white/10 dark:bg-white/5'
-                }`}
-              >
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-start gap-4">
-                    <div
-                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border text-sm font-bold ${
-                        completed
-                          ? 'border-[var(--color-success)] bg-[var(--color-success)] text-white'
-                          : active
-                            ? 'border-[var(--coral)] bg-[var(--coral)] text-white'
-                            : 'border-[var(--color-border)] bg-[var(--color-surface-raised)] text-[var(--color-text-primary)]/45 dark:border-white/10 dark:bg-white/5 dark:text-white/45'
-                      }`}
-                    >
-                      {completed ? <CheckCircle2 className="h-4 w-4" /> : step.id}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-text-primary)]/35 dark:text-white/35">
-                        Étape {step.id}
-                      </p>
-                      <h3 className="mt-1 text-lg font-bold text-[var(--color-text-primary)] dark:text-white">
-                        {step.title}
-                      </h3>
-                      <p className="mt-2 text-sm leading-6 text-[var(--color-text-primary)]/60 dark:text-white/65">
-                        {step.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 md:shrink-0">
-                    <Link
-                      href={step.href}
-                      className="btn-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm"
-                    >
-                      {step.cta}
-                      <ChevronRight className="h-4 w-4" />
-                    </Link>
-                    {!completed ? (
-                      <button
-                        type="button"
-                        onClick={() => void completeStep(step.id)}
-                        disabled={savingStep === step.id}
-                        className="btn-secondary inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm disabled:opacity-60"
-                      >
-                        {savingStep === step.id ? 'Enregistrement...' : "J'ai terminé"}
-                      </button>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color-border)] bg-[var(--color-background-secondary)]/40 px-6 py-4 sm:px-7 dark:border-white/10 dark:bg-white/5">
-          <p className="text-sm text-[var(--color-text-primary)]/60 dark:text-white/65">
-            Vous pouvez revenir plus tard. Le suivi reprend là où vous l'avez laissé.
-          </p>
-          <button
-            type="button"
-            onClick={dismiss}
-            className="btn-ghost rounded-xl px-4 py-2.5 text-sm"
-          >
-            Passer
-          </button>
-        </div>
       </div>
+
+      <style jsx>{`
+        .onboarding-wizard-card,
+        .onboarding-wizard-step {
+          animation: onboardingWizardStep 300ms ease-out both;
+        }
+
+        @keyframes onboardingWizardStep {
+          from {
+            opacity: 0;
+            transform: translateY(16px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .onboarding-wizard-card,
+          .onboarding-wizard-step,
+          .onboarding-wizard-card * {
+            animation: none !important;
+            transition: none !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }
