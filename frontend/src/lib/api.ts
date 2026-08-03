@@ -457,7 +457,7 @@ export const messagesApi = {
   ),
   startConversation: (data: object) => {
     if (isDemoMode()) {
-      showDemoToast('Désactivé en mode démo')
+      showDemoToast('D�sactiv� en mode d�mo')
       return Promise.resolve(createDemoResponse({ data: { id: 'demo-conversation', ...data } }))
     }
     return api.post('/messages/conversations', data)
@@ -466,7 +466,7 @@ export const messagesApi = {
     api.post('/messages/offers', { conv_id: Number(convId), amount_xpf }),
   sendMessage: (convId: string, content: string) => {
     if (isDemoMode()) {
-      showDemoToast('Désactivé en mode démo')
+      showDemoToast('D�sactiv� en mode d�mo')
       return Promise.resolve(createDemoResponse({
         data: {
           id: `demo-message-${Date.now()}`,
@@ -481,7 +481,7 @@ export const messagesApi = {
   },
   sendPhoto: (convId: string, photo_url: string) => {
     if (isDemoMode()) {
-      showDemoToast('Désactivé en mode démo')
+      showDemoToast('D�sactiv� en mode d�mo')
       return Promise.resolve(createDemoResponse({
         data: {
           id: `demo-photo-${Date.now()}`,
@@ -497,7 +497,7 @@ export const messagesApi = {
   },
   sendDocument: (convId: string, attachment_url: string, attachment_name: string, attachment_mime_type: string, attachment_size_bytes?: number | null) => {
     if (isDemoMode()) {
-      showDemoToast('DÃ©sactivÃ© en mode dÃ©mo')
+      showDemoToast('D�sactiv� en mode d�mo')
       return Promise.resolve(createDemoResponse({
         data: {
           id: `demo-doc-${Date.now()}`,
@@ -522,7 +522,7 @@ export const messagesApi = {
   },
   sendAudio: (convId: string, audio_url: string) => {
     if (isDemoMode()) {
-      showDemoToast('DÃ©sactivÃ© en mode dÃ©mo')
+      showDemoToast('D�sactiv� en mode d�mo')
       return Promise.resolve(createDemoResponse({
         data: {
           id: `demo-audio-${Date.now()}`,

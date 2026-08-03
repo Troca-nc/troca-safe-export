@@ -40,7 +40,7 @@ export interface AdminSignalement {
   id: number; type: TypeSignalement; urgence: UrgenceSignalement
   description: string; nb_reporters: number; created_at: string; traite: boolean
   annonce: { id: number; titre: string; prix: number | null; statut: StatutAnnonce }
-  user_signalé: { id: number; nom: string; email: string }
+  user_signale: { id: number; nom: string; email: string }
   reporters: { id: number; nom: string }[]
 }
 export interface AdminSignalementsResponse { data: AdminSignalement[]; total: number; en_attente: number }

@@ -19,7 +19,7 @@ export default function TrocCompatibilityMeter({ compatibility, emptyLabel, clas
   if (!compatibility) {
     return (
       <div className={`rounded-2xl border border-dashed border-night/10 bg-sand/60 p-3 text-sm text-night/55 ${className}`}>
-        {emptyLabel || 'Connectez-vous pour voir votre compatibilité'}
+        {emptyLabel || 'Connectez-vous pour voir votre compatibilit�'}
       </div>
     )
   }
@@ -30,7 +30,7 @@ export default function TrocCompatibilityMeter({ compatibility, emptyLabel, clas
     <div className={`rounded-2xl border border-night/8 bg-white/95 p-3 shadow-sm ${className}`}>
       <div className="mb-2 flex items-center justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-night/45">Troc-o-mètre</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-night/45">Troc-o-m�tre</p>
           <p className="text-sm font-semibold text-night">{compatibility.label}</p>
         </div>
         <span className="text-sm font-bold text-night">{score}/100</span>

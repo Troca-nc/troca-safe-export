@@ -38,9 +38,9 @@ type EventItem = {
 }
 
 function formatDateLabel(value?: string | null) {
-  if (!value) return 'Date à confirmer'
+  if (!value) return 'Date e confirmer'
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'Date à confirmer'
+  if (Number.isNaN(date.getTime())) return 'Date e confirmer'
   return new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }).format(date)
 }
 
@@ -72,7 +72,7 @@ function CinemaCard({ event }: { event: EventItem }) {
     <article className="rounded-2xl border border-[var(--color-border)] bg-[linear-gradient(180deg,_#ffffff,_#f8fbfd)] p-4 shadow-sm">
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-nc-emeraude">🎬 Cinéma</p>
       <h3 className="mt-2 text-base font-bold text-night">{event.title}</h3>
-      <p className="mt-1 text-sm text-night/60">{event.commune_name || event.location_name || 'Nouvelle-Calédonie'}</p>
+      <p className="mt-1 text-sm text-night/60">{event.commune_name || event.location_name || 'Nouvelle-Caledonie'}</p>
       <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-night/65">
         <span className="rounded-full bg-white px-2.5 py-1">{formatDateLabel(event.event_date)}</span>
         {event.version ? <span className="rounded-full bg-white px-2.5 py-1">{event.version}</span> : null}
@@ -85,7 +85,7 @@ function CinemaCard({ event }: { event: EventItem }) {
         rel={external ? 'noreferrer' : undefined}
         className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white"
       >
-        Réserver
+        Reserver
       </a>
     </article>
   )
@@ -169,9 +169,9 @@ export default function EvenementsPage() {
                 <Sparkles className="h-3.5 w-3.5" />
                 Agenda Kalico
               </p>
-              <h1 className="mt-4 font-display text-4xl font-bold">Événements, concerts et sorties en Nouvelle-Calédonie</h1>
+              <h1 className="mt-4 font-display text-4xl font-bold">evenements, concerts et sorties en Nouvelle-Caledonie</h1>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/75 md:text-base">
-                Retrouvez une vue calendrier claire des événements à venir, avec les dates clés, les lieux et un accès direct vers les annonces.
+                Retrouvez une vue calendrier claire des evenements e venir, avec les dates cles, les lieux et un acces direct vers les annonces.
               </p>
             </div>
           </div>
@@ -192,21 +192,21 @@ export default function EvenementsPage() {
                   onClick={() => setMonthOffset((value) => value - 1)}
                   className="rounded-2xl border border-[var(--color-border)] px-3 py-2 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
                 >
-                  ←
+                  e
                 </button>
                 <button
                   type="button"
                   onClick={() => setMonthOffset(0)}
                   className="rounded-2xl border border-[var(--color-border)] px-3 py-2 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
                 >
-                  Aujourd’hui
+                  Aujourdhui
                 </button>
                 <button
                   type="button"
                   onClick={() => setMonthOffset((value) => value + 1)}
                   className="rounded-2xl border border-[var(--color-border)] px-3 py-2 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
                 >
-                  →
+                  e
                 </button>
               </div>
             </div>
@@ -248,13 +248,13 @@ export default function EvenementsPage() {
                       {dayEvents.slice(0, 2).map((event) => (
                         event.category === 'cinema' ? (
                           <div key={event.id} className="rounded-xl bg-white px-2.5 py-2 text-left shadow-sm">
-                            <p className="line-clamp-1 text-xs font-semibold text-night">🎬 {event.title}</p>
-                            <p className="mt-0.5 text-[11px] text-night/50">{event.commune_name || event.location_name || 'Nouvelle-Calédonie'}</p>
+                            <p className="line-clamp-1 text-xs font-semibold text-night">{event.title}</p>
+                            <p className="mt-0.5 text-[11px] text-night/50">{event.commune_name || event.location_name || 'Nouvelle-Caledonie'}</p>
                           </div>
                         ) : (
                           <div key={event.id} className="rounded-xl bg-white px-2.5 py-2 text-left shadow-sm">
                             <p className="line-clamp-1 text-xs font-semibold text-night">{event.title}</p>
-                            <p className="mt-0.5 text-[11px] text-night/50">{event.commune_name || event.location_name || 'Nouvelle-Calédonie'}</p>
+                            <p className="mt-0.5 text-[11px] text-night/50">{event.commune_name || event.location_name || 'Nouvelle-Caledonie'}</p>
                           </div>
                         )
                       ))}
@@ -267,7 +267,7 @@ export default function EvenementsPage() {
 
           <aside className="space-y-4">
             <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">À venir ce mois-ci</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">e venir ce mois-ci</p>
               <div className="mt-4 space-y-3">
                 {loading ? (
                   <div className="space-y-3">
@@ -286,7 +286,7 @@ export default function EvenementsPage() {
                           <p className="mt-1 text-xs text-night/55 line-clamp-2">{event.description}</p>
                         </div>
                         {event.author_is_pro ? (
-                          <span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-700">Organisateur vérifié</span>
+                          <span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-700">Organisateur verifie</span>
                         ) : null}
                       </div>
 
@@ -312,7 +312,7 @@ export default function EvenementsPage() {
                           rel={event.link_url || event.website_url ? 'noreferrer' : undefined}
                           className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
                         >
-                          Ouvrir l’événement
+                          Ouvrir levenement
                           <ArrowRight className="h-4 w-4" />
                         </a>
                       </div>
@@ -321,14 +321,14 @@ export default function EvenementsPage() {
                   ))
                 ) : (
                   <p className="rounded-2xl border border-dashed border-[var(--color-border)] px-4 py-8 text-sm text-night/55">
-                    Aucun événement n’est publié pour ce mois.
+                    Aucun evenement nest publie pour ce mois.
                   </p>
                 )}
               </div>
 
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <Link href="/evenements/publier" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white">
-                  Publier un événement
+                  Publier un evenement
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link href="/scan" className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-2.5 text-sm font-semibold text-night">
@@ -341,7 +341,7 @@ export default function EvenementsPage() {
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Explorer</p>
               <h3 className="mt-1 font-display text-2xl font-bold text-night">Promotions et sorties</h3>
               <p className="mt-2 text-sm leading-relaxed text-night/60">
-                Consultez aussi les bons plans, les promos et les événements dans la même base éditoriale.
+                Consultez aussi les bons plans, les promos et les evenements dans la meme base editoriale.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link href="/bons-plans#evenements" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white">

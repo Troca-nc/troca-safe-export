@@ -7,14 +7,14 @@ import { SITE_URL } from '@/types/seo.types'
 export const metadata: Metadata = {
   title: 'Annuaire des pros - Kalico NC',
   description:
-    'Découvrez les professionnels vérifiés de Nouvelle-Calédonie. Filtrez par catégorie, commune et note pour trouver le bon partenaire local.',
+    'D�couvrez les professionnels v�rifi�s de Nouvelle-Cal�donie. Filtrez par cat�gorie, commune et note pour trouver le bon partenaire local.',
   alternates: {
     canonical: `${SITE_URL}/pros`,
   },
   openGraph: {
     title: 'Annuaire des pros - Kalico NC',
     description:
-      'Découvrez les professionnels vérifiés de Nouvelle-Calédonie. Filtrez par catégorie, commune et note pour trouver le bon partenaire local.',
+      'D�couvrez les professionnels v�rifi�s de Nouvelle-Cal�donie. Filtrez par cat�gorie, commune et note pour trouver le bon partenaire local.',
     url: `${SITE_URL}/pros`,
     siteName: 'Kalico',
     locale: 'fr_NC',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Annuaire des pros - Kalico NC',
     description:
-      'Découvrez les professionnels vérifiés de Nouvelle-Calédonie. Filtrez par catégorie, commune et note pour trouver le bon partenaire local.',
+      'D�couvrez les professionnels v�rifi�s de Nouvelle-Cal�donie. Filtrez par cat�gorie, commune et note pour trouver le bon partenaire local.',
   },
 }
 

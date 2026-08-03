@@ -90,7 +90,7 @@ export default function ProQuoteModal({ proId, proName, open, onClose, template,
 
   const budgetLabel = useMemo(() => {
     const amount = Number(form.budget_xpf || 0)
-    if (!Number.isFinite(amount) || amount <= 0) return 'Budget à définir'
+    if (!Number.isFinite(amount) || amount <= 0) return 'Budget � d�finir'
     return formatBudget(amount)
   }, [form.budget_xpf])
 
@@ -137,15 +137,15 @@ export default function ProQuoteModal({ proId, proName, open, onClose, template,
       setSent(true)
       showToast({
         tone: 'success',
-        title: 'Demande de devis envoyée',
-        message: `${proName} a reçu votre demande et peut vous répondre rapidement.`,
+        title: 'Demande de devis envoy�e',
+        message: `${proName} a re�u votre demande et peut vous r�pondre rapidement.`,
       })
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Impossible d’envoyer votre demande.'
+      const message = err?.response?.data?.error || 'Impossible denvoyer votre demande.'
       setError(message)
       showToast({
         tone: 'error',
-        title: 'Devis non envoyé',
+        title: 'Devis non envoy�',
         message,
       })
     } finally {
@@ -164,7 +164,7 @@ export default function ProQuoteModal({ proId, proName, open, onClose, template,
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Demande de devis rapide</p>
             <h2 className="mt-1 font-display text-2xl font-bold text-night">{quoteTemplate.title}</h2>
             <p className="mt-1 text-sm text-night/55">
-              {quoteTemplate.subtitle} Le professionnel {proName} reçoit la demande immédiatement.
+              {quoteTemplate.subtitle} Le professionnel {proName} re�oit la demande imm�diatement.
             </p>
           </div>
           <button
@@ -181,8 +181,8 @@ export default function ProQuoteModal({ proId, proName, open, onClose, template,
           <div className="border-b border-[var(--color-border)] px-6 py-6 lg:border-b-0 lg:border-r">
             {sent ? (
               <div className="flex h-full flex-col justify-center">
-                <FeedbackAlert tone="success" title="Demande envoyée !">
-                  {proName} a reçu votre demande de devis. Vous pouvez suivre vos échanges depuis votre messagerie.
+                <FeedbackAlert tone="success" title="Demande envoy�e !">
+                  {proName} a re�u votre demande de devis. Vous pouvez suivre vos �changes depuis votre messagerie.
                 </FeedbackAlert>
                 <div className="mt-6 flex justify-center">
                   <button
@@ -339,26 +339,26 @@ export default function ProQuoteModal({ proId, proName, open, onClose, template,
 
           <aside className="space-y-4 px-6 py-6">
             <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral/80">Récapitulatif</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral/80">R�capitulatif</p>
               <div className="mt-3 space-y-3 text-sm text-night/65">
                 <p className="flex items-start gap-2">
                   <MessageSquareQuote className="mt-0.5 h-4 w-4 text-[#0A7EA4]" />
-                  <span>Votre demande part directement au professionnel sélectionné.</span>
+                  <span>Votre demande part directement au professionnel s�lectionn�.</span>
                 </p>
                 <p className="flex items-start gap-2">
                   <MapPin className="mt-0.5 h-4 w-4 text-[#0A7EA4]" />
-                  <span>Vous pouvez préciser la commune pour un retour plus rapide.</span>
+                  <span>Vous pouvez pr�ciser la commune pour un retour plus rapide.</span>
                 </p>
                 {quoteTemplate.show_budget ? (
                   <p className="flex items-start gap-2">
                     <CreditCard className="mt-0.5 h-4 w-4 text-[#0A7EA4]" />
-                    <span>Budget estimé actuel : {budgetLabel}.</span>
+                    <span>Budget estim� actuel : {budgetLabel}.</span>
                   </p>
                 ) : null}
                 {quoteTemplate.show_date ? (
                   <p className="flex items-start gap-2">
                     <CalendarDays className="mt-0.5 h-4 w-4 text-[#0A7EA4]" />
-                    <span>La date souhaitée permet au pro de prioriser votre demande.</span>
+                    <span>La date souhait�e permet au pro de prioriser votre demande.</span>
                   </p>
                 ) : null}
               </div>
@@ -367,8 +367,8 @@ export default function ProQuoteModal({ proId, proName, open, onClose, template,
             <div className="rounded-[1.5rem] border border-emerald-100 bg-emerald-50/70 p-4 text-sm text-night/70">
               <p className="font-semibold text-emerald-800">Astuce</p>
               <p className="mt-2">
-                Plus votre besoin est clair, plus le professionnel peut répondre vite et avec une estimation
-                réaliste.
+                Plus votre besoin est clair, plus le professionnel peut r�pondre vite et avec une estimation
+                r�aliste.
               </p>
             </div>
           </aside>

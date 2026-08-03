@@ -67,9 +67,9 @@ interface Props {
 const CONDITION_LABELS: Record<string, string> = {
   new: 'Neuf',
   like_new: 'Comme neuf',
-  good: 'Bon Ã©tat',
+  good: 'Bon �tat',
   fair: 'Correct',
-  for_parts: 'Pour piÃ¨ces',
+  for_parts: 'Pour pi�ces',
 }
 
 const blurPlaceholder = 'data:image/gif;base64,R0lGODlhAQABAAAAACw='
@@ -162,7 +162,7 @@ function ListingImageFrame({
     ? 'Gratuit'
     : listing.price
       ? `${listing.price.toLocaleString('fr-FR')} XPF`
-      : 'Prix à débattre'
+      : 'Prix � d�battre'
 
   useEffect(() => {
     if (!hasCoverImage) return undefined
@@ -198,7 +198,7 @@ function ListingImageFrame({
           <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.55))]" />
           <div className="absolute bottom-3 left-3 z-10 text-base font-medium text-white">{priceLabel}</div>
           <div className="absolute right-3 top-3 z-10 rounded bg-coral px-2 py-0.5 text-xs font-medium text-white shadow-sm">
-            À la une
+            � la une
           </div>
         </>
       ) : null}
@@ -289,7 +289,7 @@ export default function ListingCard({ listing, className = '', boosted, featured
     ? 'Gratuit'
     : listing.price
       ? `${listing.price.toLocaleString('fr-FR')} XPF`
-      : 'Prix Ã  dÃ©battre'
+      : 'Prix � d�battre'
   const priceClassName = listing.is_free ? 'text-jungle' : 'text-coral'
 
   const publishedAt = listing.published_at ?? listing.created_at ?? new Date().toISOString()
@@ -305,8 +305,8 @@ export default function ListingCard({ listing, className = '', boosted, featured
   const isConditionVisible = Boolean(listing.condition && CONDITION_LABELS[listing.condition])
   const locationZone = typeof listing.metadata?.quartier_zone === 'string' ? String(listing.metadata.quartier_zone).trim() : ''
   const locationText = listing.commune_name
-    ? `${listing.commune_name}${locationZone ? ` Ã‚Â· ${locationZone}` : ''}`
-    : 'Nouvelle-CalÃ©donie'
+    ? `${listing.commune_name}${locationZone ? ` �� ${locationZone}` : ''}`
+    : 'Nouvelle-Cal�donie'
   const isProVerified = Boolean(
     (listing.author?.is_pro && listing.author?.pro_verified)
     || (listing.is_pro && listing.seller_pro_verified)
@@ -374,13 +374,13 @@ export default function ListingCard({ listing, className = '', boosted, featured
                 {listing.seller_email_verified ? (
                   <span className="inline-flex items-center gap-1">
                     <MailCheck className="h-3 w-3" />
-                    Email vérifié
+                    Email v�rifi�
                   </span>
                 ) : null}
                 {listing.seller_phone_verified ? (
                   <span className="inline-flex items-center gap-1">
                     <Phone className="h-3 w-3" />
-                    Téléphone vérifié
+                    T�l�phone v�rifi�
                   </span>
                 ) : null}
                 {listing.seller_trust_score != null ? (

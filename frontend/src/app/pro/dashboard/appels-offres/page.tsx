@@ -71,14 +71,14 @@ const EMPTY_FORM: OfferFormState = {
 }
 
 function formatMoney(value?: number | null) {
-  if (value == null || !Number.isFinite(Number(value))) return 'À préciser'
+  if (value == null || !Number.isFinite(Number(value))) return '� pr�ciser'
   return `${Number(value).toLocaleString('fr-FR')} XPF`
 }
 
 function formatDate(value?: string | null) {
-  if (!value) return 'À confirmer'
+  if (!value) return '� confirmer'
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'À confirmer'
+  if (Number.isNaN(date.getTime())) return '� confirmer'
   return new Intl.DateTimeFormat('fr-FR', {
     day: '2-digit',
     month: 'short',
@@ -101,7 +101,7 @@ function getStatusTone(status?: string | null) {
 function getStatusLabel(status?: string | null) {
   switch (String(status || '').toLowerCase()) {
     case 'selected':
-      return 'Sélectionné'
+      return 'S�lectionn�'
     case 'rejected':
       return 'Non retenu'
     case 'pending':
@@ -173,7 +173,7 @@ export default function ProDashboardAppelsOffresPage() {
   const handleSubmitOffer = async (requestId: number) => {
     const form = offerForms[requestId] || EMPTY_FORM
     if (!form.amount_xpf.trim() || !form.delay_days.trim()) {
-      setError('Merci de renseigner le montant et le délai.')
+      setError('Merci de renseigner le montant et le d�lai.')
       return
     }
 
@@ -187,7 +187,7 @@ export default function ProDashboardAppelsOffresPage() {
         delay_days: Number(form.delay_days),
         message: form.message.trim() || null,
       })
-      setSuccess('Votre offre a bien été envoyée.')
+      setSuccess('Votre offre a bien �t� envoy�e.')
       const [incomingResponse, historyResponse] = await Promise.all([
         quoteRequestsApi.getProIncoming(),
         quoteRequestsApi.getProOffersMine(),
@@ -228,10 +228,10 @@ export default function ProDashboardAppelsOffresPage() {
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Appels d’offres</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-night">Demandes reçues et offres soumises</h1>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Appels doffres</p>
+            <h1 className="mt-2 font-display text-3xl font-bold text-night">Demandes re�ues et offres soumises</h1>
             <p className="mt-3 text-sm leading-relaxed text-night/60">
-              Répondez aux demandes ciblées ou ouvertes de votre catégorie, envoyez vos offres puis suivez leur statut depuis votre espace Pro.
+              R�pondez aux demandes cibl�es ou ouvertes de votre cat�gorie, envoyez vos offres puis suivez leur statut depuis votre espace Pro.
             </p>
           </div>
           <Link
@@ -269,15 +269,15 @@ export default function ProDashboardAppelsOffresPage() {
       <section className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Demandes reçues</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Soumettez une offre quand vous êtes intéressé</h2>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Demandes re�ues</p>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Soumettez une offre quand vous �tes int�ress�</h2>
           </div>
         </div>
 
         {requests.length === 0 ? (
           <div className="rounded-[2rem] border border-dashed border-[var(--color-border)] bg-[var(--color-background-secondary)] p-6 text-center">
-            <p className="text-lg font-semibold text-night">Aucune demande disponible pour l’instant.</p>
-            <p className="mt-2 text-sm text-night/55">Les demandes correspondant à votre activité apparaîtront ici dès qu’elles seront publiées.</p>
+            <p className="text-lg font-semibold text-night">Aucune demande disponible pour linstant.</p>
+            <p className="mt-2 text-sm text-night/55">Les demandes correspondant � votre activit� appara�tront ici d�s quelles seront publi�es.</p>
           </div>
         ) : (
           <div className="grid gap-4 xl:grid-cols-2">
@@ -299,7 +299,7 @@ export default function ProDashboardAppelsOffresPage() {
                     </div>
                     {hasResponded ? (
                       <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                        Déjà répondu
+                        D�j� r�pondu
                       </span>
                     ) : (
                       <span className="rounded-full bg-nc-lagonLight px-3 py-1 text-xs font-semibold text-[#0A7EA4]">
@@ -320,19 +320,19 @@ export default function ProDashboardAppelsOffresPage() {
                       <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Budget</p>
                       <p className="mt-1 font-semibold text-night">
                         {request.budget_min_xpf || request.budget_max_xpf
-                          ? `${request.budget_min_xpf ? formatMoney(request.budget_min_xpf) : '—'} · ${request.budget_max_xpf ? formatMoney(request.budget_max_xpf) : '—'}`
-                          : 'Non précisé'}
+                          ? `${request.budget_min_xpf ? formatMoney(request.budget_min_xpf) : ''} � ${request.budget_max_xpf ? formatMoney(request.budget_max_xpf) : ''}`
+                          : 'Non pr�cis�'}
                       </p>
                     </div>
                     <div className="rounded-2xl bg-[var(--color-background-secondary)] px-4 py-3">
-                      <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Date souhaitée</p>
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Date souhait�e</p>
                       <p className="mt-1 flex items-center gap-2 font-semibold text-night">
                         <CalendarDays className="h-4 w-4 text-[#0A7EA4]" />
                         {formatDate(request.desired_date)}
                       </p>
                     </div>
                     <div className="rounded-2xl bg-[var(--color-background-secondary)] px-4 py-3">
-                      <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Offres reçues</p>
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Offres re�ues</p>
                       <p className="mt-1 font-semibold text-night">{request.offer_count}</p>
                     </div>
                   </div>
@@ -342,7 +342,7 @@ export default function ProDashboardAppelsOffresPage() {
                   <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-night/60">
                     <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
                       <MessageSquare className="h-3.5 w-3.5" />
-                      {request.mode === 'open' ? 'Diffusion ouverte' : 'Diffusion ciblée'}
+                      {request.mode === 'open' ? 'Diffusion ouverte' : 'Diffusion cibl�e'}
                     </span>
                     <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
                       <Sparkles className="h-3.5 w-3.5" />
@@ -354,7 +354,7 @@ export default function ProDashboardAppelsOffresPage() {
                     <div className="mt-5 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Répondre</p>
+                          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">R�pondre</p>
                           <h4 className="mt-1 text-base font-bold text-night">Soumettre une offre</h4>
                         </div>
                       </div>
@@ -372,7 +372,7 @@ export default function ProDashboardAppelsOffresPage() {
                           />
                         </label>
                         <label className="space-y-2">
-                          <span className="text-sm font-semibold text-night">Délai en jours</span>
+                          <span className="text-sm font-semibold text-night">D�lai en jours</span>
                           <input
                             type="number"
                             min="1"
@@ -390,7 +390,7 @@ export default function ProDashboardAppelsOffresPage() {
                             value={form.message}
                             onChange={(event) => handleOfferChange(request.id, 'message', event.target.value)}
                             className="input w-full rounded-2xl py-3"
-                            placeholder="Ajoutez un mot de contexte, vos disponibilités ou vos garanties..."
+                            placeholder="Ajoutez un mot de contexte, vos disponibilit�s ou vos garanties..."
                           />
                         </label>
                       </div>
@@ -407,7 +407,7 @@ export default function ProDashboardAppelsOffresPage() {
                     </div>
                   ) : (
                     <div className="mt-5 rounded-[1.75rem] border border-emerald-200 bg-emerald-50/80 p-4 text-sm text-emerald-800">
-                      Votre offre est déjà enregistrée pour cette demande. Vous la retrouverez dans l’historique ci-dessous.
+                      Votre offre est d�j� enregistr�e pour cette demande. Vous la retrouverez dans lhistorique ci-dessous.
                     </div>
                   )}
 
@@ -439,8 +439,8 @@ export default function ProDashboardAppelsOffresPage() {
 
         {offers.length === 0 ? (
           <div className="mt-4 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-background-secondary)] p-6 text-center">
-            <p className="text-lg font-semibold text-night">Aucune offre envoyée pour l’instant.</p>
-            <p className="mt-2 text-sm text-night/55">Vos réponses apparaîtront ici dès que vous commencerez à traiter des demandes.</p>
+            <p className="text-lg font-semibold text-night">Aucune offre envoy�e pour linstant.</p>
+            <p className="mt-2 text-sm text-night/55">Vos r�ponses appara�tront ici d�s que vous commencerez � traiter des demandes.</p>
           </div>
         ) : (
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
@@ -467,12 +467,12 @@ export default function ProDashboardAppelsOffresPage() {
                     <p className="mt-1 font-semibold text-night">{formatMoney(offer.amount_xpf)}</p>
                   </div>
                   <div className="rounded-2xl bg-white px-4 py-3">
-                    <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Délai</p>
+                    <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">D�lai</p>
                     <p className="mt-1 font-semibold text-night">{offer.delay_days} jours</p>
                   </div>
                   <div className="rounded-2xl bg-white px-4 py-3 sm:col-span-2">
                     <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Message</p>
-                    <p className="mt-1 text-sm text-night/65">{offer.message || 'Aucun message complémentaire.'}</p>
+                    <p className="mt-1 text-sm text-night/65">{offer.message || 'Aucun message compl�mentaire.'}</p>
                   </div>
                 </div>
 

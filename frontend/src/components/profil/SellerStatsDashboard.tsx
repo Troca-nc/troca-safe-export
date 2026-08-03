@@ -1,7 +1,7 @@
 'use client'
 // ============================================================
-//  Kalico — Dashboard statistiques vendeur (Pro)
-//  Affiché dans /profil quand l'utilisateur est Pro
+//  Kalico  Dashboard statistiques vendeur (Pro)
+//  Affich� dans /profil quand l'utilisateur est Pro
 // ============================================================
 
 import { useEffect, useState } from 'react'
@@ -113,7 +113,7 @@ export default function SellerStatsDashboard() {
           color="text-green-500"
         />
         <StatCard
-          icon={Clock} label="Taux de réponse"
+          icon={Clock} label="Taux de r�ponse"
           value={`${taux_reponse.taux_reponse_pct ?? 0}%`}
           sub={`${taux_reponse.conv_avec_reponse}/${taux_reponse.total_conv} conv.`}
           color="text-purple-500"
@@ -128,7 +128,7 @@ export default function SellerStatsDashboard() {
           color="text-coral"
         />
         <StatCard
-          icon={Award} label="Annonces boostées"
+          icon={Award} label="Annonces boost�es"
           value={totaux.annonces_boostees ?? '0'}
           color="text-amber-500"
         />
@@ -136,14 +136,14 @@ export default function SellerStatsDashboard() {
           <>
             <StatCard
               icon={BadgeCheck} label="Note moyenne"
-              value={avis.note_moyenne ? `${avis.note_moyenne}/5` : '—'}
+              value={avis.note_moyenne ? `${avis.note_moyenne}/5` : ''}
               sub={`${avis.total_avis} avis`}
               color="text-amber-400"
             />
             <StatCard
-              icon={BadgeCheck} label="Avis 5 étoiles"
+              icon={BadgeCheck} label="Avis 5 �toiles"
               value={avis.cinq_etoiles ?? '0'}
-              sub={`${avis.une_etoile} avis 1 étoile`}
+              sub={`${avis.une_etoile} avis 1 �toile`}
               color="text-amber-400"
             />
           </>
@@ -215,9 +215,9 @@ export default function SellerStatsDashboard() {
       {!stats.is_pro && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center">
           <p className="text-sm font-medium text-amber-800 mb-2">
-            Passez Pro pour accéder à toutes vos statistiques
+            Passez Pro pour acc�der � toutes vos statistiques
           </p>
-          <a href="/pro" className="text-xs text-amber-700 underline">Découvrir les offres Pro →</a>
+          <a href="/pro" className="text-xs text-amber-700 underline">D�couvrir les offres Pro �</a>
         </div>
       )}
     </div>

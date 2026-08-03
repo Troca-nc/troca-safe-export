@@ -198,7 +198,7 @@ export default function Trocometer() {
 
     const price = getListingPrice(selectedListing)
     if (price <= 0) {
-      setStatusMessage('Sélectionnez une annonce avec un prix valide.')
+      setStatusMessage('S�lectionnez une annonce avec un prix valide.')
       return
     }
 
@@ -231,7 +231,7 @@ export default function Trocometer() {
       setRenderSeed((value) => value + 1)
 
       if (filtered.length === 0) {
-        setStatusMessage('Aucun troc disponible dans cette gamme - revenez bientôt !')
+        setStatusMessage('Aucun troc disponible dans cette gamme - revenez bient�t !')
       } else if (filtered.length < PAGE_SIZE) {
         setStatusMessage(`Seulement ${filtered.length} troc(s) disponible(s) dans cette gamme de prix.`)
       } else {
@@ -241,7 +241,7 @@ export default function Trocometer() {
       setMatches([])
       setPageIndex(0)
       setRenderSeed((value) => value + 1)
-      setStatusMessage('Aucun troc disponible dans cette gamme - revenez bientôt !')
+      setStatusMessage('Aucun troc disponible dans cette gamme - revenez bient�t !')
     } finally {
       setSearching(false)
     }
@@ -267,10 +267,10 @@ export default function Trocometer() {
         <div className="bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.16))] px-6 py-6 text-white">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em]">
             <Scale className="h-3.5 w-3.5" />
-            Trocômètre
+            Troc�m�tre
           </div>
           <h3 className="mt-4 font-display text-2xl font-bold">Que vaut votre objet en troc ?</h3>
-          <p className="mt-2 text-sm text-white/70">Chargement de votre session…</p>
+          <p className="mt-2 text-sm text-white/70">Chargement de votre session&</p>
         </div>
         <div className="p-6">
           <div className="h-28 animate-pulse rounded-2xl border border-[var(--color-border)] bg-sand/70" />
@@ -285,18 +285,18 @@ export default function Trocometer() {
         <div className="bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.16))] px-6 py-6 text-white">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em]">
             <Scale className="h-3.5 w-3.5" />
-            Trocômètre
+            Troc�m�tre
           </div>
           <h3 className="mt-4 font-display text-2xl font-bold">Que vaut votre objet en troc ?</h3>
           <p className="mt-2 max-w-2xl text-sm text-white/70">
-            Choisissez une de vos annonces et découvrez 3 objets de valeur équivalente prêts à être échangés.
+            Choisissez une de vos annonces et d�couvrez 3 objets de valeur �quivalente pr�ts � �tre �chang�s.
           </p>
         </div>
         <div className="p-6">
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center">
-            <p className="text-lg font-semibold text-night">Connectez-vous pour utiliser le Trocômètre</p>
+            <p className="text-lg font-semibold text-night">Connectez-vous pour utiliser le Troc�m�tre</p>
             <p className="mt-2 text-sm text-night/60">
-              Accédez à vos annonces et trouvez les meilleurs trocs de la communauté calédonienne.
+              Acc�dez � vos annonces et trouvez les meilleurs trocs de la communaut� cal�donienne.
             </p>
             <Link
               href="/connexion"
@@ -316,12 +316,12 @@ export default function Trocometer() {
       <div className="bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.16))] px-6 py-6 text-white md:px-8">
         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/90">
           <Scale className="h-3.5 w-3.5" />
-          Trocômètre
+          Troc�m�tre
         </div>
         <h3 className="mt-4 font-display text-2xl font-bold md:text-3xl">Que vaut votre objet en troc ?</h3>
         <p className="mt-2 max-w-2xl text-sm text-white/70 md:text-base">
-          Choisissez une de vos annonces, lancez la recherche, puis parcourez trois trocs à la fois dans une
-          fourchette de valeur de ±30%.
+          Choisissez une de vos annonces, lancez la recherche, puis parcourez trois trocs � la fois dans une
+          fourchette de valeur de �30%.
         </p>
       </div>
 
@@ -343,7 +343,7 @@ export default function Trocometer() {
                       <ListingImage
                         src={selectedListing.cover_image ?? selectedListing.photos?.[0] ?? null}
                         alt={selectedListing.title}
-                        fallbackIcon="🪙"
+                        fallbackIcon=">�"
                         className="h-full w-full"
                       />
                     </span>
@@ -355,7 +355,7 @@ export default function Trocometer() {
                     </span>
                   </span>
                 ) : (
-                  <span className="block text-sm text-night/45">Choisissez une de vos annonces…</span>
+                  <span className="block text-sm text-night/45">Choisissez une de vos annonces&</span>
                 )}
               </span>
               <ChevronDown className={`h-5 w-5 shrink-0 text-night/45 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
@@ -378,7 +378,7 @@ export default function Trocometer() {
                         <ListingImage
                           src={listing.cover_image ?? listing.photos?.[0] ?? null}
                           alt={listing.title}
-                          fallbackIcon="🪙"
+                          fallbackIcon=">�"
                           className="h-full w-full"
                         />
                       </span>
@@ -400,21 +400,21 @@ export default function Trocometer() {
             className="btn-primary inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
             {searching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Scale className="h-4 w-4" />}
-            {searching ? 'Recherche en cours…' : 'Trouver des trocs'}
+            {searching ? 'Recherche en cours&' : 'Trouver des trocs'}
           </button>
         </div>
 
         {loadingOwnListings ? (
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5 text-sm text-night/55">
-            Chargement de vos annonces…
+            Chargement de vos annonces&
           </div>
         ) : null}
 
         {!loadingOwnListings && ownListingCount === 0 ? (
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5 text-center">
-            <p className="text-lg font-semibold text-night">Aucune de vos annonces n’est prête pour le Trocômètre</p>
+            <p className="text-lg font-semibold text-night">Aucune de vos annonces nest pr�te pour le Troc�m�tre</p>
             <p className="mt-2 text-sm text-night/60">
-              Publiez une annonce avec un prix pour commencer à trouver des échanges de même valeur.
+              Publiez une annonce avec un prix pour commencer � trouver des �changes de m�me valeur.
             </p>
             <Link href="/annonces/nouvelle" className="btn-primary mt-4 inline-flex rounded-2xl px-5 py-3 text-sm">
               Publier une annonce
@@ -446,11 +446,11 @@ export default function Trocometer() {
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-6 text-center">
             <p className="text-lg font-semibold text-night">
               {statusMessage.includes('Aucun troc disponible')
-                ? 'Aucun troc disponible dans cette gamme - revenez bientôt !'
+                ? 'Aucun troc disponible dans cette gamme - revenez bient�t !'
                 : statusMessage}
             </p>
             <p className="mt-2 text-sm text-night/60">
-              Essayez une autre annonce ou revenez plus tard pour découvrir de nouvelles opportunités.
+              Essayez une autre annonce ou revenez plus tard pour d�couvrir de nouvelles opportunit�s.
             </p>
           </div>
         ) : null}

@@ -47,11 +47,11 @@ function normalizeSlot(slot: Partial<WeeklySlot>, day: number): WeeklySlot {
 }
 
 export default function AvailabilityManager({
-  title = 'Calendrier de disponibilités',
-  description = 'Définissez vos créneaux réguliers et vos exceptions ponctuelles.',
+  title = 'Calendrier de disponibilit�s',
+  description = 'D�finissez vos cr�neaux r�guliers et vos exceptions ponctuelles.',
   initialAvailability,
   initialExceptions,
-  saveLabel = 'Sauvegarder la disponibilité',
+  saveLabel = 'Sauvegarder la disponibilit�',
   onSave,
 }: {
   title?: string
@@ -142,7 +142,7 @@ export default function AvailabilityManager({
               <div>
                 <p className="text-sm font-semibold text-night">{WEEKDAYS[slot.day_of_week]}</p>
                 <p className="text-xs text-night/55">
-                  {slot.is_active ? `${slot.start_time} - ${slot.end_time}` : 'Fermé'}
+                  {slot.is_active ? `${slot.start_time} - ${slot.end_time}` : 'Ferm�'}
                 </p>
               </div>
               <label className="inline-flex items-center gap-2 text-xs font-semibold text-night/60">
@@ -158,7 +158,7 @@ export default function AvailabilityManager({
 
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <label className="block">
-                <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Début</span>
+                <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.16em] text-night/45">D�but</span>
                 <input
                   type="time"
                   value={slot.start_time}
@@ -184,7 +184,7 @@ export default function AvailabilityManager({
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
             <p className="text-sm font-semibold text-night">Exceptions</p>
-            <p className="text-xs text-night/55">Ajoutez des fermetures ou des plages spéciales sur certaines dates.</p>
+            <p className="text-xs text-night/55">Ajoutez des fermetures ou des plages sp�ciales sur certaines dates.</p>
           </div>
           <button
             type="button"
@@ -221,7 +221,7 @@ export default function AvailabilityManager({
                     type="text"
                     value={exception.reason || ''}
                     onChange={(e) => updateException(index, { reason: e.target.value })}
-                    placeholder="Congés, maintenance, événement..."
+                    placeholder="Cong�s, maintenance, �v�nement..."
                     className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm outline-none"
                   />
                 </label>
@@ -235,10 +235,10 @@ export default function AvailabilityManager({
                     onChange={(e) => updateException(index, { is_unavailable: e.target.checked })}
                     className="h-4 w-4 rounded border-[var(--color-border)] text-[#0A7EA4]"
                   />
-                  Jour bloqué
+                  Jour bloqu�
                 </label>
                 <label className="inline-flex items-center gap-2 text-sm font-medium text-night/60">
-                  <span className="text-xs uppercase tracking-[0.16em]">Début</span>
+                  <span className="text-xs uppercase tracking-[0.16em]">D�but</span>
                   <input
                     type="time"
                     value={exception.start_time || ''}

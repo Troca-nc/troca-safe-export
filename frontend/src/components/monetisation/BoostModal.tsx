@@ -49,7 +49,7 @@ function ProviderSelector({
 }
 
 function formatCardLabel(card: SavedCard) {
-  return `${String(card.brand || 'card').toUpperCase()} •••• ${card.last4}`
+  return `${String(card.brand || 'card').toUpperCase()} """" ${card.last4}`
 }
 
 interface BoostModalProps {
@@ -137,7 +137,7 @@ export default function BoostModal({ annonce, onClose }: BoostModalProps) {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Paiement rapide</p>
-                <p className="mt-1 text-sm font-semibold text-night">Cartes enregistrées</p>
+                <p className="mt-1 text-sm font-semibold text-night">Cartes enregistr�es</p>
               </div>
               {cardsLoading ? <Loader2 size={16} className="animate-spin text-night/45" /> : null}
             </div>
@@ -158,17 +158,17 @@ export default function BoostModal({ annonce, onClose }: BoostModalProps) {
                     <div>
                       <p className="text-sm font-semibold text-night">{formatCardLabel(card)}</p>
                       <p className="text-xs text-night/45">
-                        {card.holder_name || 'Titulaire non renseigné'} · expire {String(card.exp_month || '--').padStart(2, '0')}/{card.exp_year || '----'}
+                        {card.holder_name || 'Titulaire non renseign�'} � expire {String(card.exp_month || '--').padStart(2, '0')}/{card.exp_year || '----'}
                       </p>
                     </div>
                     <span className="rounded-full bg-nc-lagonLight px-2.5 py-1 text-[11px] font-semibold text-nc-lagon">
-                      {selectedCardId === card.id ? 'Sélectionnée' : 'Choisir'}
+                      {selectedCardId === card.id ? 'S�lectionn�e' : 'Choisir'}
                     </span>
                   </button>
                 ))}
               </div>
             ) : (
-              <p className="mt-3 text-sm text-night/55">Aucune carte enregistrée. Le paiement standard reste disponible.</p>
+              <p className="mt-3 text-sm text-night/55">Aucune carte enregistr�e. Le paiement standard reste disponible.</p>
             )}
           </div>
 
@@ -182,7 +182,7 @@ export default function BoostModal({ annonce, onClose }: BoostModalProps) {
                   <div key={type} className="overflow-hidden rounded-2xl border border-night/8">
                     <div className="flex items-center gap-2 bg-sand/50 px-3 py-2.5">
                       {BOOST_ICONS[type]}
-                      <span className="text-sm font-medium text-night">{first.emoji} {first.label.split(' —')[0]}</span>
+                      <span className="text-sm font-medium text-night">{first.emoji} {first.label.split(' ')[0]}</span>
                     </div>
                     <div className="divide-y divide-night/6">
                       {options.map((option) => (
@@ -217,7 +217,7 @@ export default function BoostModal({ annonce, onClose }: BoostModalProps) {
 
           {selectedSavedCard ? (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-sm text-emerald-800">
-              Boost en un clic prêt à être utilisé avec <strong>{formatCardLabel(selectedSavedCard)}</strong>.
+              Boost en un clic pr�t � �tre utilis� avec <strong>{formatCardLabel(selectedSavedCard)}</strong>.
               <button type="button" onClick={() => setSelectedCardId('')} className="ml-2 font-semibold underline">
                 Utiliser une autre carte
               </button>
@@ -236,7 +236,7 @@ export default function BoostModal({ annonce, onClose }: BoostModalProps) {
           <div className="rounded-2xl bg-sand p-4">
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <p className="text-xs text-night/50">Total à payer</p>
+                <p className="text-xs text-night/50">Total � payer</p>
                 <p className="text-2xl font-bold text-night">{formatXPF(selectedBoost.price_xpf)}</p>
               </div>
               <div className="text-right text-xs text-night/40">
@@ -253,16 +253,16 @@ export default function BoostModal({ annonce, onClose }: BoostModalProps) {
               {loading ? (
                 <>
                   <Loader2 size={16} className="animate-spin" />
-                  Redirection…
+                  Redirection&
                 </>
               ) : selectedSavedCard ? (
-                `Payer ${formatXPF(selectedBoost.price_xpf)} avec la carte enregistrée →`
+                `Payer ${formatXPF(selectedBoost.price_xpf)} avec la carte enregistr�e �`
               ) : (
-                `Payer ${formatXPF(selectedBoost.price_xpf)} →`
+                `Payer ${formatXPF(selectedBoost.price_xpf)} �`
               )}
             </button>
             <p className="mt-2 text-center text-[10px] text-night/35">
-              Paiement sécurisé · Activation immédiate après paiement
+              Paiement s�curis� � Activation imm�diate apr�s paiement
             </p>
           </div>
         </div>

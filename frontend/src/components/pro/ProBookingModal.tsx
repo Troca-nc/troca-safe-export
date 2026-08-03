@@ -53,7 +53,7 @@ function formatSlot(slot: ProPublicBookingSlot) {
     minute: '2-digit',
   }).format(endsAt)
 
-  return `${date} · ${startTime} → ${endTime}`
+  return `${date} � ${startTime} � ${endTime}`
 }
 
 function toMonthKey(date: Date) {
@@ -200,7 +200,7 @@ export default function ProBookingModal({
 
   const handleSubmit = async () => {
     if (!selectedSlot) {
-      setError('Merci de choisir un créneau.')
+      setError('Merci de choisir un cr�neau.')
       return
     }
     if (!form.requester_name.trim()) {
@@ -241,15 +241,15 @@ export default function ProBookingModal({
       setSent(true)
       showToast({
         tone: 'success',
-        title: 'Rendez-vous demandé',
-        message: `${proName} a reçu votre demande. Vous pouvez suivre son évolution dans Mes rendez-vous.`,
+        title: 'Rendez-vous demand�',
+        message: `${proName} a re�u votre demande. Vous pouvez suivre son �volution dans Mes rendez-vous.`,
       })
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Impossible d’envoyer votre demande.'
+      const message = err?.response?.data?.error || 'Impossible denvoyer votre demande.'
       setError(message)
       showToast({
         tone: 'error',
-        title: 'Rendez-vous non envoyé',
+        title: 'Rendez-vous non envoy�',
         message,
       })
     } finally {
@@ -270,7 +270,7 @@ export default function ProBookingModal({
               {settings?.title || 'Prendre rendez-vous'}
             </h2>
             <p className="mt-1 text-sm text-night/55">
-              {settings?.subtitle || 'Réservez un créneau directement avec ce professionnel.'}
+              {settings?.subtitle || 'R�servez un cr�neau directement avec ce professionnel.'}
             </p>
           </div>
           <button
@@ -285,8 +285,8 @@ export default function ProBookingModal({
 
         {sent ? (
           <div className="px-6 py-8">
-            <FeedbackAlert tone="success" title="Demande envoyée !">
-              Votre rendez-vous a bien été transmis à {proName}. Suivez son statut depuis votre espace <strong>Mes rendez-vous</strong>.
+            <FeedbackAlert tone="success" title="Demande envoy�e !">
+              Votre rendez-vous a bien �t� transmis � {proName}. Suivez son statut depuis votre espace <strong>Mes rendez-vous</strong>.
             </FeedbackAlert>
             <div className="mt-6 flex justify-end">
               <button
@@ -331,7 +331,7 @@ export default function ProBookingModal({
                         <span className="min-w-0 flex-1">
                           <span className="block text-sm font-semibold text-night">{service.title}</span>
                           <span className="mt-1 block text-xs text-night/55">
-                            {service.duration_minutes} min{service.price_xpf != null ? ` · ${Number(service.price_xpf).toLocaleString('fr-FR')} XPF` : ''}
+                            {service.duration_minutes} min{service.price_xpf != null ? ` � ${Number(service.price_xpf).toLocaleString('fr-FR')} XPF` : ''}
                           </span>
                           {service.description ? (
                             <span className="mt-1 block text-xs leading-relaxed text-night/60">{service.description}</span>
@@ -366,7 +366,7 @@ export default function ProBookingModal({
                   </label>
 
                   <label className="block space-y-2">
-                    <span className="text-sm font-semibold text-night">Téléphone</span>
+                    <span className="text-sm font-semibold text-night">T�l�phone</span>
                     <input
                       value={form.requester_phone}
                       onChange={(event) => setForm((current) => ({ ...current, requester_phone: event.target.value }))}
@@ -382,7 +382,7 @@ export default function ProBookingModal({
                     value={form.commune}
                     onChange={(event) => setForm((current) => ({ ...current, commune: event.target.value }))}
                     className="input w-full rounded-2xl"
-                    placeholder="Nouméa, Dumbéa..."
+                    placeholder="Noum�a, Dumb�a..."
                   />
                 </label>
 
@@ -392,18 +392,18 @@ export default function ProBookingModal({
                     value={form.subject}
                     onChange={(event) => setForm((current) => ({ ...current, subject: event.target.value }))}
                     className="input w-full rounded-2xl"
-                    placeholder={selectedService?.title || 'Ex. devis, dépannage, visite...'}
+                    placeholder={selectedService?.title || 'Ex. devis, d�pannage, visite...'}
                   />
                 </label>
 
                 <label className="block space-y-2">
-                  <span className="text-sm font-semibold text-night">Précisions</span>
+                  <span className="text-sm font-semibold text-night">Pr�cisions</span>
                   <textarea
                     value={form.details}
                     onChange={(event) => setForm((current) => ({ ...current, details: event.target.value }))}
                     rows={4}
                     className="input w-full rounded-2xl py-3"
-                    placeholder="Expliquez votre besoin, les contraintes, les documents à préparer..."
+                    placeholder="Expliquez votre besoin, les contraintes, les documents � pr�parer..."
                   />
                 </label>
 
@@ -450,7 +450,7 @@ export default function ProBookingModal({
                         setCalendarMonth(toMonthKey(current))
                       }}
                       className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-border)] bg-white text-night/70"
-                      aria-label="Mois précédent"
+                      aria-label="Mois pr�c�dent"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </button>
@@ -503,7 +503,7 @@ export default function ProBookingModal({
                           {new Intl.DateTimeFormat('fr-FR', { day: 'numeric' }).format(new Date(`${day.date}T00:00:00`))}
                         </span>
                         <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.12em]">
-                          {day.is_blocked ? 'Bloqué' : day.slots.length ? `${day.slots.length} créneau${day.slots.length > 1 ? 'x' : ''}` : 'Aucun'}
+                          {day.is_blocked ? 'Bloqu�' : day.slots.length ? `${day.slots.length} cr�neau${day.slots.length > 1 ? 'x' : ''}` : 'Aucun'}
                         </span>
                       </button>
                     )
@@ -511,9 +511,9 @@ export default function ProBookingModal({
                 </div>
               </div>
               <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral/80">Créneaux disponibles</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral/80">Cr�neaux disponibles</p>
                 <p className="mt-1 text-sm text-night/60">
-                  {loadingSlots ? 'Chargement des créneaux...' : 'Choisissez l’horaire qui vous convient le mieux.'}
+                  {loadingSlots ? 'Chargement des cr�neaux...' : 'Choisissez lhoraire qui vous convient le mieux.'}
                 </p>
                 <div className="mt-4 space-y-2">
                   {visibleSlots.length ? (
@@ -538,25 +538,25 @@ export default function ProBookingModal({
                   ) : (
                     <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-sm text-night/55">
                       {selectedDate
-                        ? 'Aucun créneau disponible pour ce jour.'
-                        : 'Aucun créneau n’est encore publié. Le professionnel peut en ajouter depuis son espace.'}
+                        ? 'Aucun cr�neau disponible pour ce jour.'
+                        : 'Aucun cr�neau nest encore publi�. Le professionnel peut en ajouter depuis son espace.'}
                     </div>
                   )}
                 </div>
               </div>
 
               <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[linear-gradient(180deg,_rgba(214,240,246,0.55),_rgba(255,255,255,0.95))] p-4 text-sm text-night/70">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-nc-emeraude">Récapitulatif</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-nc-emeraude">R�capitulatif</p>
                 <div className="mt-3 space-y-2">
                   <p className="flex items-start gap-2">
                     <MapPin className="mt-0.5 h-4 w-4 text-[#0A7EA4]" />
                     <span>
-                      {settings?.location_label || 'Lieu du rendez-vous'} : {settings?.location_text || 'à confirmer avec le professionnel'}
+                      {settings?.location_label || 'Lieu du rendez-vous'} : {settings?.location_text || '� confirmer avec le professionnel'}
                     </span>
                   </p>
                   <p className="flex items-start gap-2">
                     <CalendarDays className="mt-0.5 h-4 w-4 text-[#0A7EA4]" />
-                    <span>{selectedSlot ? formatSlot(selectedSlot) : 'Choisissez un créneau pour continuer.'}</span>
+                    <span>{selectedSlot ? formatSlot(selectedSlot) : 'Choisissez un cr�neau pour continuer.'}</span>
                   </p>
                   {settings?.instructions ? (
                     <p className="flex items-start gap-2">

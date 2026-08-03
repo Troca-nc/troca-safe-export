@@ -18,11 +18,11 @@ export interface BoostOption {
 }
 
 export const BOOST_CATALOG: BoostOption[] = [
-  { type: 'une', duration: 7, label: 'A la une', description: 'En tete de liste pendant 7 jours', price_xpf: 1200, emoji: '🚀' },
-  { type: 'une', duration: 14, label: 'A la une - 14j', description: 'En tete de liste pendant 14 jours', price_xpf: 2000, emoji: '🚀' },
-  { type: 'urgent', duration: 7, label: 'Badge Urgent', description: 'Picto "Urgent" pendant 7 jours', price_xpf: 500, emoji: '🔴' },
-  { type: 'remonte', duration: 3, label: 'Remettre en avant', description: 'Retour en tete pendant 3 jours', price_xpf: 400, emoji: '📈' },
-  { type: 'photos', duration: 30, label: 'Pack photos', description: "Jusqu'a 15 photos pendant 30 jours", price_xpf: 300, emoji: '📷' },
+  { type: 'une', duration: 7, label: 'A la une', description: 'En tete de liste pendant 7 jours', price_xpf: 1200, emoji: '=�' },
+  { type: 'une', duration: 14, label: 'A la une - 14j', description: 'En tete de liste pendant 14 jours', price_xpf: 2000, emoji: '=�' },
+  { type: 'urgent', duration: 7, label: 'Badge Urgent', description: 'Picto "Urgent" pendant 7 jours', price_xpf: 500, emoji: '=4' },
+  { type: 'remonte', duration: 3, label: 'Remettre en avant', description: 'Retour en tete pendant 3 jours', price_xpf: 400, emoji: '=�' },
+  { type: 'photos', duration: 30, label: 'Pack photos', description: "Jusqu'a 15 photos pendant 30 jours", price_xpf: 300, emoji: '=�' },
 ]
 
 export type PlanId = 'pro'
@@ -55,11 +55,11 @@ export const PRO_PLANS: ProPlan[] = [
     payplug_plan_id_monthly: process.env.NEXT_PUBLIC_PAYPLUG_PLAN_PRO_MONTHLY ?? '',
     payplug_plan_id_yearly: process.env.NEXT_PUBLIC_PAYPLUG_PLAN_PRO_YEARLY ?? '',
     features: [
-      'Annonces illimitées',
+      'Annonces illimit�es',
       '12 photos par annonce',
-      'Badge Pro vérifié',
+      'Badge Pro v�rifi�',
       'Statistiques d\'annonce',
-      'Boosts à tarif réduit',
+      'Boosts � tarif r�duit',
       'Support prioritaire',
     ],
   },

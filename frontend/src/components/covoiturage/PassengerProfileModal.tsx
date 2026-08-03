@@ -146,7 +146,7 @@ export default function PassengerProfileModal({
         <div className="flex items-center justify-between border-b border-night/10 px-6 py-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#0A7EA4]">Profil passager</p>
-            <h3 className="font-display text-2xl font-bold text-night">Réservation en attente</h3>
+            <h3 className="font-display text-2xl font-bold text-night">R�servation en attente</h3>
           </div>
           <button
             type="button"
@@ -225,7 +225,7 @@ export default function PassengerProfileModal({
                       </div>
                       <p className="mt-2 text-sm leading-relaxed text-night/70">{review.comment || 'Aucun commentaire.'}</p>
                       <p className="mt-1 text-[11px] text-night/40">
-                        {review.reviewer_prenom ? `par ${review.reviewer_prenom}` : 'Avis reçu'}
+                        {review.reviewer_prenom ? `par ${review.reviewer_prenom}` : 'Avis re�u'}
                       </p>
                     </div>
                   ))}
@@ -236,9 +236,9 @@ export default function PassengerProfileModal({
             </div>
 
             <div className="mt-5 rounded-2xl border border-night/10 p-4">
-              <p className="text-sm font-semibold text-night">Trajet demandé</p>
+              <p className="text-sm font-semibold text-night">Trajet demand�</p>
               <p className="mt-1 text-sm text-night/65">
-                {booking.ride.departure} → {booking.ride.destination} · {booking.ride.ride_date} à {booking.ride.ride_time.slice(0, 5)}
+                {booking.ride.departure} � {booking.ride.destination} � {booking.ride.ride_date} � {booking.ride.ride_time.slice(0, 5)}
               </p>
               <p className="mt-1 text-sm font-semibold text-[#0A7EA4]">
                 {booking.ride.price_xpf.toLocaleString('fr-FR')} XPF / place

@@ -1,7 +1,7 @@
 'use client'
 // ============================================================
-//  Kalico — Page paiement/succes
-//  FIX 5 : Vérifie le statut réel via session_id Stripe
+//  Kalico  Page paiement/succes
+//  FIX 5 : V�rifie le statut r�el via session_id Stripe
 // ============================================================
 
 import { Suspense, useEffect, useState }  from 'react'
@@ -32,7 +32,7 @@ function PaiementSuccesContent() {
     if (provider === 'payplug') {
       const ppId = ppPaymentId || ppSubId
       if (!ppId) { setResult({ status: 'invalid' }); return }
-      // Vérifier via la route dédiée
+      // V�rifier via la route d�di�e
       let attempts = 0
       const verifyPP = async () => {
         try {
@@ -92,7 +92,7 @@ function PaiementSuccesContent() {
       <div className="min-h-screen bg-sand-light flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-coral animate-spin mx-auto mb-4" />
-          <p className="text-night/60 font-medium">Confirmation du paiement…</p>
+          <p className="text-night/60 font-medium">Confirmation du paiement&</p>
           {retries > 0 && <p className="text-sm text-night/40 mt-1">Synchronisation ({retries}/6)</p>}
         </div>
       </div>
@@ -107,11 +107,11 @@ function PaiementSuccesContent() {
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <AlertCircle className="w-10 h-10 text-red-500" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-night mb-2">Paiement non vérifié</h1>
-          <p className="text-night/60 text-sm mb-8">Nous n'avons pas pu confirmer votre paiement. Réessayez ou contactez-nous.</p>
+          <h1 className="font-display text-2xl font-bold text-night mb-2">Paiement non v�rifi�</h1>
+          <p className="text-night/60 text-sm mb-8">Nous n'avons pas pu confirmer votre paiement. R�essayez ou contactez-nous.</p>
           <div className="flex flex-col gap-3">
-            <button onClick={() => window.location.reload()} className="btn-primary py-3">Rafraîchir</button>
-            <Link href="/parametres" className="btn-secondary py-3">Mes paramètres</Link>
+            <button onClick={() => window.location.reload()} className="btn-primary py-3">Rafra�chir</button>
+            <Link href="/parametres" className="btn-secondary py-3">Mes param�tres</Link>
           </div>
         </div>
       </div>
@@ -136,10 +136,10 @@ function PaiementSuccesContent() {
           </div>
 
           <h1 className="font-display text-3xl font-bold text-night mb-4">
-            {isSubscription ? isTrial ? "14 jours d'essai activés !" : 'Abonnement Pro activé !' : 'Boost activé !'}
+            {isSubscription ? isTrial ? "14 jours d'essai activ�s !" : 'Abonnement Pro activ� !' : 'Boost activ� !'}
           </h1>
 
-          {/* Détails */}
+          {/* D�tails */}
           <div className="bg-white rounded-2xl p-5 mb-8 text-left shadow-sm border border-night/5 space-y-3">
             {isSubscription ? (
               <>
@@ -149,13 +149,13 @@ function PaiementSuccesContent() {
                 </div>
                 {trialEndStr && <div className="flex justify-between text-sm"><span className="text-night/50">Fin d'essai</span><span className="font-semibold text-green-600">{trialEndStr}</span></div>}
                 {periodEndStr && <div className="flex justify-between text-sm"><span className="text-night/50">Prochain renouvellement</span><span className="font-semibold text-night">{periodEndStr}</span></div>}
-                {isTrial && <div className="bg-green-50 text-green-700 text-xs rounded-xl px-3 py-2">Aucun débit pendant la période d'essai. Annulation possible à tout moment.</div>}
+                {isTrial && <div className="bg-green-50 text-green-700 text-xs rounded-xl px-3 py-2">Aucun d�bit pendant la p�riode d'essai. Annulation possible � tout moment.</div>}
               </>
             ) : (
               <>
                 {result.annonce_titre && <div className="flex justify-between text-sm"><span className="text-night/50">Annonce</span><span className="font-semibold text-night truncate max-w-[200px]">{result.annonce_titre}</span></div>}
                 {result.boost_type && <div className="flex justify-between text-sm"><span className="text-night/50">Type</span><span className="font-semibold text-night capitalize">{result.boost_type}</span></div>}
-                {result.boost_days && <div className="flex justify-between text-sm"><span className="text-night/50">Durée</span><span className="font-semibold text-night">{result.boost_days} jours</span></div>}
+                {result.boost_days && <div className="flex justify-between text-sm"><span className="text-night/50">Dur�e</span><span className="font-semibold text-night">{result.boost_days} jours</span></div>}
               </>
             )}
           </div>
@@ -173,9 +173,9 @@ function PaiementSuccesContent() {
             ) : (
               <>
                 <Link href={result.annonce_id ? `/annonces/${result.annonce_id}` : '/annonces'} className="btn-primary justify-center py-3 flex items-center gap-2">
-                  Voir mon annonce boostée <ArrowRight className="w-4 h-4" />
+                  Voir mon annonce boost�e <ArrowRight className="w-4 h-4" />
                 </Link>
-                <Link href="/" className="btn-secondary justify-center py-3">Retour à l'accueil</Link>
+                <Link href="/" className="btn-secondary justify-center py-3">Retour � l'accueil</Link>
               </>
             )}
           </div>

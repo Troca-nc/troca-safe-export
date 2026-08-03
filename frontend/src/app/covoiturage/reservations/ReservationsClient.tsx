@@ -55,20 +55,20 @@ type TabKey = 'passenger' | 'driver'
 
 function statusLabel(status: string, expiresAt?: string | null) {
   if (status === 'pending' && expiresAt && new Date(expiresAt).getTime() < Date.now()) {
-    return { label: '⌛ Expiré', className: 'bg-slate-100 text-slate-500' }
+    return { label: ' Expir�', className: 'bg-slate-100 text-slate-500' }
   }
 
   switch (status) {
     case 'pending':
-      return { label: '⏳ En attente', className: 'bg-amber-50 text-amber-700 border border-amber-200' }
+      return { label: '� En attente', className: 'bg-amber-50 text-amber-700 border border-amber-200' }
     case 'auto_confirmed':
-      return { label: '✅ Confirmé', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200' }
+      return { label: ' Confirm�', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200' }
     case 'accepted':
-      return { label: '✅ Accepté', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200' }
+      return { label: ' Accept�', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200' }
     case 'refused':
-      return { label: '❌ Refusé', className: 'bg-red-50 text-red-700 border border-red-200' }
+      return { label: 'L Refus�', className: 'bg-red-50 text-red-700 border border-red-200' }
     case 'cancelled':
-      return { label: 'Annulé', className: 'bg-slate-100 text-slate-500 border border-slate-200' }
+      return { label: 'Annul�', className: 'bg-slate-100 text-slate-500 border border-slate-200' }
     default:
       return { label: 'En cours', className: 'bg-slate-100 text-slate-600 border border-slate-200' }
   }
@@ -114,10 +114,10 @@ function BookingCard({
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="text-lg font-semibold text-night">
-            {booking.ride.departure} → {booking.ride.destination}
+            {booking.ride.departure} � {booking.ride.destination}
           </h3>
           <p className="mt-1 text-sm text-night/60">
-            {booking.ride.ride_date} à {booking.ride.ride_time.slice(0, 5)} · {booking.ride.price_xpf.toLocaleString('fr-FR')} XPF / place
+            {booking.ride.ride_date} � {booking.ride.ride_time.slice(0, 5)} � {booking.ride.price_xpf.toLocaleString('fr-FR')} XPF / place
           </p>
         </div>
       </div>
@@ -125,11 +125,11 @@ function BookingCard({
       <div className="mt-4 grid gap-2 text-sm text-night/65 sm:grid-cols-2">
         <p className="flex items-center gap-2">
           <MapPinned className="h-4 w-4 text-[#0A7EA4]" />
-          {booking.ride.departure} → {booking.ride.destination}
+          {booking.ride.departure} � {booking.ride.destination}
         </p>
         <p className="flex items-center gap-2">
           <CalendarDays className="h-4 w-4 text-[#0A7EA4]" />
-          Demandé le {new Date(booking.created_at).toLocaleDateString('fr-FR')}
+          Demand� le {new Date(booking.created_at).toLocaleDateString('fr-FR')}
         </p>
         <p className="flex items-center gap-2">
           <UserRound className="h-4 w-4 text-[#0A7EA4]" />
@@ -137,7 +137,7 @@ function BookingCard({
         </p>
         <p className="flex items-center gap-2">
           <ShieldCheck className="h-4 w-4 text-[#0A7EA4]" />
-          {booking.seats} place{booking.seats > 1 ? 's' : ''} demandée{booking.seats > 1 ? 's' : ''}
+          {booking.seats} place{booking.seats > 1 ? 's' : ''} demand�e{booking.seats > 1 ? 's' : ''}
         </p>
       </div>
 
@@ -151,7 +151,7 @@ function BookingCard({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#0A7EA4]">
-              Coordonnées utiles
+              Coordonn�es utiles
             </p>
             <p className="mt-1 text-sm font-semibold text-night">
               Le jour du trajet, ouvrez la conversation pour vous coordonner.
@@ -162,10 +162,10 @@ function BookingCard({
           </div>
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-night/65 shadow-sm">
-              {booking.ride.ride_date} à {booking.ride.ride_time.slice(0, 5)}
+              {booking.ride.ride_date} � {booking.ride.ride_time.slice(0, 5)}
             </span>
             <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-night/65 shadow-sm">
-              {booking.ride.departure} → {booking.ride.destination}
+              {booking.ride.departure} � {booking.ride.destination}
             </span>
             {isRideSoon ? (
               <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700 shadow-sm">
@@ -220,7 +220,7 @@ function BookingCard({
         {booking.role === 'passenger' && booking.review_exists ? (
           <span className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700">
             <CheckCircle2 className="h-4 w-4" />
-            Avis envoyé
+            Avis envoy�
           </span>
         ) : null}
 
@@ -346,11 +346,11 @@ export default function CovoiturageReservationsPage() {
         <section className="rounded-[2rem] border border-night/8 border-b-4 border-b-nc-corail bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.18))] px-6 py-8 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)]">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-corail">
             <CheckCircle2 className="h-3.5 w-3.5" />
-            Mes réservations
+            Mes r�servations
           </div>
-          <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl">Suivez vos trajets et vos demandes au même endroit.</h1>
+          <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl">Suivez vos trajets et vos demandes au m�me endroit.</h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
-            Gérez vos trajets en tant que passager ou conducteur, consultez les demandes reçues et retrouvez les confirmations en un clin d'œil.
+            G�rez vos trajets en tant que passager ou conducteur, consultez les demandes re�ues et retrouvez les confirmations en un clin d'Sil.
           </p>
         </section>
 
@@ -404,12 +404,12 @@ export default function CovoiturageReservationsPage() {
                 {tab === 'passenger' ? <MessageCircle className="h-6 w-6" /> : <Clock3 className="h-6 w-6" />}
               </div>
               <p className="mt-4 text-lg font-semibold text-night">
-                {tab === 'passenger' ? 'Aucune réservation pour le moment' : 'Aucune demande reçue pour le moment'}
+                {tab === 'passenger' ? 'Aucune r�servation pour le moment' : 'Aucune demande re�ue pour le moment'}
               </p>
               <p className="mt-2 text-sm">
                 {tab === 'passenger'
-                  ? 'Lancez une recherche ou réservez votre prochain trajet depuis la page Covoiturage.'
-                  : 'Quand un passager demandera une place, elle apparaîtra ici.'}
+                  ? 'Lancez une recherche ou r�servez votre prochain trajet depuis la page Covoiturage.'
+                  : 'Quand un passager demandera une place, elle appara�tra ici.'}
               </p>
               <Link href="/covoiturage" className="btn-primary mt-5 inline-flex items-center gap-2 rounded-2xl px-5 py-3">
                 Voir le covoiturage

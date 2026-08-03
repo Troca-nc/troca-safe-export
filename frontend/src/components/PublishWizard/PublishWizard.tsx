@@ -146,7 +146,7 @@ function StepBadge({ index, active, done }: { index: number; active: boolean; do
 
 function WizardStepper({ step }: { step: number }) {
   const items = [
-    { label: 'Détails', index: 1 },
+    { label: 'D�tails', index: 1 },
     { label: 'Photos', index: 2 },
     { label: 'Publication', index: 3 },
   ]
@@ -215,10 +215,10 @@ function PhotoGrid({
           </div>
           <div>
             <p className="text-sm font-semibold text-night">
-              {dragOver ? 'Déposez vos photos ici' : 'Ajoutez 1 à 8 photos'}
+              {dragOver ? 'D�posez vos photos ici' : 'Ajoutez 1 � 8 photos'}
             </p>
             <p className="mt-1 text-sm text-night/55">
-              Glissez-déposez ou cliquez pour choisir vos images. Les 8 premières sont conservées.
+              Glissez-d�posez ou cliquez pour choisir vos images. Les 8 premi�res sont conserv�es.
             </p>
           </div>
           <p className="text-xs text-night/40">JPEG, PNG, WebP, HEIC</p>
@@ -293,25 +293,25 @@ function PublicationPreview({
     <div className="rounded-[2rem] border border-night/8 bg-[#0c2a35] p-5 text-white shadow-[0_24px_80px_rgba(8,32,50,0.18)]">
       <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-lagoon">
         <Sparkles className="h-3.5 w-3.5" />
-        Aperçu
+        Aper�u
       </div>
 
-      <p className="mt-4 text-sm uppercase tracking-[0.18em] text-white/45">Résumé rapide</p>
+      <p className="mt-4 text-sm uppercase tracking-[0.18em] text-white/45">R�sum� rapide</p>
       <p className="mt-2 text-3xl font-bold text-white">
         {draft.price ? `${Number(draft.price || 0).toLocaleString('fr-FR')} XPF` : '0 XPF'}
       </p>
       <p className="mt-3 text-sm leading-relaxed text-white/70">
-        {draft.title.trim() || "Votre annonce s'affichera ici en temps réel."}
+        {draft.title.trim() || "Votre annonce s'affichera ici en temps r�el."}
       </p>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lagoon">Catégorie</p>
-          <p className="mt-2 text-sm font-semibold text-white">{selectedCategory?.name || 'À choisir'}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lagoon">Cat�gorie</p>
+          <p className="mt-2 text-sm font-semibold text-white">{selectedCategory?.name || '� choisir'}</p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lagoon">Commune</p>
-          <p className="mt-2 text-sm font-semibold text-white">{selectedCommune?.name || 'À compléter'}</p>
+          <p className="mt-2 text-sm font-semibold text-white">{selectedCommune?.name || '� compl�ter'}</p>
         </div>
       </div>
     </div>
@@ -631,7 +631,7 @@ export default function PublishWizard() {
     }
 
     if (selectedCategory?.slug && isLeafCategory(selectedCategory) && !(await metadataForm.trigger())) {
-      setError('Merci de compléter les caractéristiques spécifiques.')
+      setError('Merci de compl�ter les caract�ristiques sp�cifiques.')
       return
     }
 
@@ -661,25 +661,25 @@ export default function PublishWizard() {
       window.sessionStorage.setItem(PREVIEW_STORAGE_KEY, JSON.stringify(payload))
       window.open('/annonces/preview', '_blank')
     } catch {
-      setError('Impossible d’ouvrir la prévisualisation pour le moment.')
+      setError('Impossible douvrir la pr�visualisation pour le moment.')
     }
   }
 
   const validateStep = () => {
     if (draft.step === 1) {
       if (!draft.title.trim()) return 'Le titre est requis.'
-      if (!draft.category_id) return 'La catégorie est requise.'
-      if (!selectedCategory || !isLeafCategory(selectedCategory)) return 'Choisissez la sous-catégorie finale.'
+      if (!draft.category_id) return 'La cat�gorie est requise.'
+      if (!selectedCategory || !isLeafCategory(selectedCategory)) return 'Choisissez la sous-cat�gorie finale.'
       if (!draft.description.trim()) return 'La description est requise.'
     }
     if (draft.step === 2) {
       if (photos.length < 1) return 'Ajoutez au moins une photo.'
-      if (photos.length > 8) return 'Vous ne pouvez pas dépasser 8 photos.'
+      if (photos.length > 8) return 'Vous ne pouvez pas d�passer 8 photos.'
     }
     if (draft.step === 3) {
       if (!draft.price.trim()) return 'Le prix est requis.'
       if (!draft.commune_id) return 'La localisation est requise.'
-      if (!draft.duration_days) return 'La durée est requise.'
+      if (!draft.duration_days) return 'La dur�e est requise.'
     }
     return ''
   }
@@ -691,7 +691,7 @@ export default function PublishWizard() {
       return
     }
     if (draft.step === 1 && selectedCategory?.slug && isLeafCategory(selectedCategory) && !(await metadataForm.trigger())) {
-      setError('Merci de compléter les caractéristiques spécifiques.')
+      setError('Merci de compl�ter les caract�ristiques sp�cifiques.')
       return
     }
     setError('')
@@ -711,7 +711,7 @@ export default function PublishWizard() {
     }
 
     if (selectedCategory?.slug && isLeafCategory(selectedCategory) && !(await metadataForm.trigger())) {
-      setError('Merci de compléter les caractéristiques spécifiques.')
+      setError('Merci de compl�ter les caract�ristiques sp�cifiques.')
       return
     }
 
@@ -750,7 +750,7 @@ export default function PublishWizard() {
       const response = await listingsApi.create(payload)
       const createdId = response.data?.data?.id
       if (!createdId) {
-        throw new Error('Impossible de créer l’annonce.')
+        throw new Error('Impossible de cr�er lannonce.')
       }
 
       if (photos.length) {
@@ -758,10 +758,10 @@ export default function PublishWizard() {
       }
 
       clearDraft()
-      setSuccess('Annonce publiée avec succès.')
+      setSuccess('Annonce publi�e avec succ�s.')
       router.push(`/annonces/${createdId}?published=1`)
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'La publication a échoué.'
+      const message = err instanceof Error ? err.message : 'La publication a �chou�.'
       setError(message)
     } finally {
       setSubmitting(false)
@@ -769,10 +769,10 @@ export default function PublishWizard() {
   }
 
   const stepTitle = draft.step === 1
-    ? 'Décrivez votre annonce'
+    ? 'D�crivez votre annonce'
     : draft.step === 2
       ? 'Ajoutez vos photos'
-      : 'Derniers détails'
+      : 'Derniers d�tails'
 
   return (
     <div className="min-h-screen bg-sand-light">
@@ -781,7 +781,7 @@ export default function PublishWizard() {
           <div>
             <h1 className="mt-3 font-display text-3xl font-bold text-night md:text-4xl">{stepTitle}</h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-night/60 md:text-base">
-              Un parcours en 3 étapes pour publier vite, sans perdre de données.
+              Un parcours en 3 �tapes pour publier vite, sans perdre de donn�es.
             </p>
           </div>
 
@@ -801,9 +801,9 @@ export default function PublishWizard() {
           <div className="mb-6 rounded-[1.5rem] border border-lagoon/20 bg-lagoon/8 p-4 text-night shadow-sm">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-sm font-semibold">Brouillon restauré</p>
+                <p className="text-sm font-semibold">Brouillon restaur�</p>
                 <p className="mt-1 text-sm text-night/70">
-                  Brouillon restauré {draftAgeLabel ? `- ${draftAgeLabel}` : ''}
+                  Brouillon restaur� {draftAgeLabel ? `- ${draftAgeLabel}` : ''}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -841,13 +841,13 @@ export default function PublishWizard() {
                   <input
                     value={draft.title}
                     onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
-                    placeholder="Ex. iPhone 14 en excellent état"
+                    placeholder="Ex. iPhone 14 en excellent �tat"
                     className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/20"
                   />
                 </label>
 
                 <div className="space-y-2">
-                  <span className="text-sm font-semibold text-night">Catégorie *</span>
+                  <span className="text-sm font-semibold text-night">Cat�gorie *</span>
                   <div className="rounded-[1.5rem] border border-night/10 bg-sand/30 p-4">
                     <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
                       <Layers3 className="h-3.5 w-3.5 text-lagoon" />
@@ -867,24 +867,24 @@ export default function PublishWizard() {
                           </button>
                         ))
                       ) : (
-                        <span>Choisissez une famille puis la sous-catégorie finale</span>
+                        <span>Choisissez une famille puis la sous-cat�gorie finale</span>
                       )}
                     </div>
 
                     {loadingMeta ? (
                       <div className="mt-4 rounded-2xl border border-dashed border-night/10 bg-white/70 px-4 py-6 text-center text-sm text-night/45">
-                        Chargement des catégories...
+                        Chargement des cat�gories...
                       </div>
                     ) : (
                       <div className="mt-4 space-y-3">
                         <div className="flex items-center justify-between gap-3">
                           <div>
                             <p className="text-sm font-semibold text-night">
-                              {activeCategoryNode ? activeCategoryNode.name : 'Catégories principales'}
+                              {activeCategoryNode ? activeCategoryNode.name : 'Cat�gories principales'}
                             </p>
                             <p className="mt-1 text-xs text-night/45">
                               {activeCategoryNode
-                                ? 'Choisissez une sous-catégorie finale.'
+                                ? 'Choisissez une sous-cat�gorie finale.'
                                 : 'Commencez par une famille.'}
                             </p>
                           </div>
@@ -928,8 +928,8 @@ export default function PublishWizard() {
                                   <span className="block font-semibold">{category.name}</span>
                                   <span className={`mt-1 block text-xs ${selected ? 'text-white/70' : 'text-night/45'}`}>
                                     {children.length > 0
-                                      ? `${children.length} sous-catégorie${children.length > 1 ? 's' : ''}`
-                                      : 'Catégorie finale'}
+                                      ? `${children.length} sous-cat�gorie${children.length > 1 ? 's' : ''}`
+                                      : 'Cat�gorie finale'}
                                   </span>
                                 </span>
                               </button>
@@ -939,7 +939,7 @@ export default function PublishWizard() {
 
                         {selectedCategoryPath.length > 0 ? (
                           <div className="rounded-2xl border border-nc-lagon/20 bg-nc-lagon/8 px-4 py-3 text-sm text-night">
-                            <p className="font-semibold text-night">Catégorie finale sélectionnée</p>
+                            <p className="font-semibold text-night">Cat�gorie finale s�lectionn�e</p>
                             <p className="mt-1 text-night/65">
                               {selectedCategoryPath.map((node) => node.name).join(' / ')}
                             </p>
@@ -956,7 +956,7 @@ export default function PublishWizard() {
                     value={draft.description}
                     onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))}
                     rows={6}
-                    placeholder="Décrivez l'état, l'historique, les accessoires inclus et ce qui rassure l'acheteur."
+                    placeholder="D�crivez l'�tat, l'historique, les accessoires inclus et ce qui rassure l'acheteur."
                     className="w-full rounded-3xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/20"
                   />
                 </label>
@@ -975,7 +975,7 @@ export default function PublishWizard() {
               <div className="space-y-4">
                 <PhotoGrid photos={photos} onAddFiles={addPhotos} onRemove={removePhoto} onMove={movePhoto} />
                 <p className="text-xs text-night/45">
-                  Ajoutez jusqu&apos;à 8 photos. Le réordonnancement conserve la première photo comme couverture principale.
+                  Ajoutez jusqu&apos;� 8 photos. Le r�ordonnancement conserve la premi�re photo comme couverture principale.
                 </p>
               </div>
             )}
@@ -999,19 +999,19 @@ export default function PublishWizard() {
                     <span className="flex-1">
                       <span className="block text-sm font-semibold text-night">Troc possible</span>
                       <span className="mt-1 block text-xs leading-relaxed text-night/60">
-                        Les autres utilisateurs pourront vous proposer un échange au lieu d&apos;un paiement.
+                        Les autres utilisateurs pourront vous proposer un �change au lieu d&apos;un paiement.
                       </span>
                     </span>
                   </label>
 
                   {draft.is_troc ? (
                     <label className="mt-4 block space-y-2">
-                      <span className="text-sm font-semibold text-night">Contre quoi souhaitez-vous échanger ?</span>
+                      <span className="text-sm font-semibold text-night">Contre quoi souhaitez-vous �changer ?</span>
                       <input
                         type="text"
                         value={draft.contre_quoi}
                         onChange={(event) => setDraft((current) => ({ ...current, contre_quoi: event.target.value }))}
-                        placeholder="Ex. vélo, smartphone, console, outillage..."
+                        placeholder="Ex. v�lo, smartphone, console, outillage..."
                         className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-nc-lagon focus:ring-4 focus:ring-nc-lagon/20"
                       />
                     </label>
@@ -1085,7 +1085,7 @@ export default function PublishWizard() {
                   </label>
 
                   <div className="rounded-2xl border border-dashed border-night/10 bg-white px-4 py-3 text-xs text-night/55">
-                    Optionnel : vous pouvez préciser un quartier ou une tribu.
+                    Optionnel : vous pouvez pr�ciser un quartier ou une tribu.
                   </div>
                 </div>
 
@@ -1093,7 +1093,7 @@ export default function PublishWizard() {
                   <label className="block space-y-2">
                     <span className="flex items-center gap-2 text-sm font-semibold text-night">
                       <CalendarDays className="h-4 w-4 text-coral" />
-                      Durée de mise en ligne *
+                      Dur�e de mise en ligne *
                     </span>
                     <select
                       value={draft.duration_days}
@@ -1107,7 +1107,7 @@ export default function PublishWizard() {
                   </label>
 
                   <label className="block space-y-2">
-                    <span className="text-sm font-semibold text-night">État</span>
+                    <span className="text-sm font-semibold text-night">�tat</span>
                     <select
                       value={draft.condition}
                       onChange={(event) => setDraft((current) => ({ ...current, condition: event.target.value as WizardDraft['condition'] }))}
@@ -1115,9 +1115,9 @@ export default function PublishWizard() {
                     >
                       <option value="new">Neuf</option>
                       <option value="like_new">Comme neuf</option>
-                      <option value="good">Bon état</option>
+                      <option value="good">Bon �tat</option>
                       <option value="fair">Correct</option>
-                      <option value="for_parts">Pour pièces</option>
+                      <option value="for_parts">Pour pi�ces</option>
                     </select>
                   </label>
 
@@ -1128,7 +1128,7 @@ export default function PublishWizard() {
                       onChange={(event) => setDraft((current) => ({ ...current, price_negotiable: event.target.checked }))}
                       className="mt-1 h-4 w-4 rounded border-night/20 text-coral focus:ring-coral/25"
                     />
-                    <span className="text-sm text-night">Prix négociable</span>
+                    <span className="text-sm text-night">Prix n�gociable</span>
                   </label>
                 </div>
               </div>
@@ -1142,7 +1142,7 @@ export default function PublishWizard() {
                   className="inline-flex items-center gap-2 rounded-2xl border border-night/10 bg-white px-5 py-3 text-sm font-semibold text-night transition hover:bg-sand"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                  Précédent
+                  Pr�c�dent
                 </button>
               ) : null}
 
@@ -1163,7 +1163,7 @@ export default function PublishWizard() {
                   disabled={submitting}
                   className="inline-flex items-center gap-2 rounded-2xl bg-coral px-5 py-3 text-sm font-semibold text-white transition hover:bg-coral-dark disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {submitting ? 'Publication...' : 'Publier l’annonce'}
+                  {submitting ? 'Publication...' : 'Publier lannonce'}
                 </button>
               )}
 
@@ -1173,7 +1173,7 @@ export default function PublishWizard() {
                   onClick={handlePreview}
                   className="inline-flex items-center gap-2 rounded-2xl border border-lagoon/25 bg-lagoon/8 px-5 py-3 text-sm font-semibold text-night transition hover:bg-lagoon/12"
                 >
-                  Prévisualiser
+                  Pr�visualiser
                 </button>
               ) : null}
 
@@ -1193,7 +1193,7 @@ export default function PublishWizard() {
                   onClick={() => setShowMobilePreview((current) => !current)}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-semibold text-night transition hover:bg-sand"
                 >
-                  {showMobilePreview ? 'Masquer l&apos;aperçu' : 'Voir l&apos;aperçu'}
+                  {showMobilePreview ? 'Masquer l&apos;aper�u' : 'Voir l&apos;aper�u'}
                 </button>
 
                 {showMobilePreview ? (
@@ -1214,15 +1214,15 @@ export default function PublishWizard() {
               <div className="mt-4 space-y-3 text-sm text-night/65">
                 <p className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-jungle" />
-                  Titre et catégorie renseignés
+                  Titre et cat�gorie renseign�s
                 </p>
                 <p className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-jungle" />
-                  Photos préparées pour l&apos;upload
+                  Photos pr�par�es pour l&apos;upload
                 </p>
                 <p className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-jungle" />
-                  Prix, commune et durée validés
+                  Prix, commune et dur�e valid�s
                 </p>
               </div>
             </div>

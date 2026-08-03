@@ -45,7 +45,7 @@ const DEMO_USERS: Record<Exclude<DemoProfileKey, 'visitor'>, User> = {
     is_pro: false,
     is_admin: false,
     rating: 4.8,
-    commune_name: 'Nouméa',
+    commune_name: 'Noum�a',
     demo_role: 'Particulier',
     tours_seen: [],
   },
@@ -59,7 +59,7 @@ const DEMO_USERS: Record<Exclude<DemoProfileKey, 'visitor'>, User> = {
     is_pro: true,
     is_admin: false,
     rating: 4.9,
-    commune_name: 'Dumbéa',
+    commune_name: 'Dumb�a',
     demo_role: 'Compte Pro',
     pro_category: 'Artisan BTP',
     tours_seen: [],
@@ -74,9 +74,9 @@ const DEMO_USERS: Record<Exclude<DemoProfileKey, 'visitor'>, User> = {
     is_pro: true,
     is_admin: false,
     rating: 5,
-    commune_name: 'Nouméa',
+    commune_name: 'Noum�a',
     demo_role: 'Annonceur Bon Plan',
-    pro_category: 'Bon plans & événements',
+    pro_category: 'Bon plans & �v�nements',
     tours_seen: [],
   },
 }
@@ -208,7 +208,7 @@ export const useAuthStore = create<AuthState>()(
           saveTokens(access_token, refresh_token)
           set({ user, isAuthenticated: true, demoProfile: null })
           clearRealAuthBackup()
-          // Sync les favoris depuis le serveur après connexion
+          // Sync les favoris depuis le serveur apr�s connexion
           useFavorisStore.getState().hydrate()
         } finally {
           set({ isLoading: false })

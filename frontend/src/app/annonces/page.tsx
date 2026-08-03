@@ -31,9 +31,9 @@ import { findCategoryPathById } from '@/shared-copy/categoryTaxonomy'
 const AnnoncesMap = dynamic(() => import('@/components/annonces/AnnoncesMap'), { ssr: false })
 
 const SORT_OPTIONS = [
-  { value: 'date',       label: 'Plus récente' },
+  { value: 'date',       label: 'Plus r�cente' },
   { value: 'price_asc',  label: 'Prix croissant' },
-  { value: 'price_desc', label: 'Prix décroissant' },
+  { value: 'price_desc', label: 'Prix d�croissant' },
   { value: 'relevance',  label: 'Pertinence' },
 ]
 
@@ -45,9 +45,9 @@ const SORT_LABEL_BY_VALUE: Record<string, string> = SORT_OPTIONS.reduce((acc, op
 const CONDITION_OPTIONS = [
   { value: 'new',       label: 'Neuf' },
   { value: 'like_new',  label: 'Comme neuf' },
-  { value: 'good',      label: 'Bon état' },
+  { value: 'good',      label: 'Bon �tat' },
   { value: 'fair',      label: 'Correct' },
-  { value: 'for_parts', label: 'Pour pièces' },
+  { value: 'for_parts', label: 'Pour pi�ces' },
 ]
 
 const RADIUS_OPTIONS = [5, 10, 20, 50, 100]
@@ -144,7 +144,7 @@ function CategoryTreeNode({
           <span className="block font-semibold">{category.name}</span>
           {children.length > 0 ? (
             <span className={`block text-[11px] ${isSelected ? 'text-white/65' : 'text-night/45'}`}>
-              {isExpanded ? 'Sous-catégories ouvertes' : `${children.length} sous-catégorie${children.length > 1 ? 's' : ''}`}
+              {isExpanded ? 'Sous-cat�gories ouvertes' : `${children.length} sous-cat�gorie${children.length > 1 ? 's' : ''}`}
             </span>
           ) : null}
         </span>
@@ -214,12 +214,12 @@ function CategoryTreeBrowser({
             : 'text-night/70 hover:bg-sand'
         }`}
       >
-        Toutes les catégories
+        Toutes les cat�gories
       </button>
 
       {selectedCategoryLabel ? (
         <div className="rounded-2xl border border-nc-lagon/20 bg-nc-lagon/8 px-3 py-3 text-sm text-night">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-nc-lagon">Catégorie active</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-nc-lagon">Cat�gorie active</p>
           <p className="mt-1 font-semibold">{selectedCategoryLabel}</p>
         </div>
       ) : null}
@@ -238,7 +238,7 @@ function CategoryTreeBrowser({
       </div>
 
       <p className="text-[11px] text-night/40">
-        Cliquez sur une catégorie pour ouvrir ses sous-catégories. Le filtre actif reste mis en avant.
+        Cliquez sur une cat�gorie pour ouvrir ses sous-cat�gories. Le filtre actif reste mis en avant.
       </p>
     </div>
   )
@@ -411,7 +411,7 @@ function FilterSidebar({
                         : 'border-night/12 bg-white text-night/65 hover:bg-sand'
                     }`}
                   >
-                    Aucune préférence
+                    Aucune pr�f�rence
                   </button>
                   {zoneLoading ? (
                     <span className="rounded-full border border-night/10 bg-sand/30 px-3 py-2 text-sm text-night/45">
@@ -452,7 +452,7 @@ function FilterSidebar({
               Rayon de recherche
             </label>
             <p className="mt-1 text-xs text-night/45">
-              Distance max autour de votre position partagée.
+              Distance max autour de votre position partag�e.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -490,7 +490,7 @@ function FilterSidebar({
                 disabled={geoLoading}
                 className="rounded-full bg-night px-3 py-2 text-xs font-medium text-white disabled:opacity-60"
               >
-                {geoLoading ? 'Localisation…' : 'Utiliser ma position'}
+                {geoLoading ? 'Localisation&' : 'Utiliser ma position'}
               </button>
               {filters.lat && filters.lng && (
                 <button
@@ -504,11 +504,11 @@ function FilterSidebar({
             </div>
             {filters.lat && filters.lng ? (
               <p className="text-[11px] text-jungle">
-                Position partagée activée.
+                Position partag�e activ�e.
               </p>
             ) : (
               <p className="text-[11px] text-night/40">
-                Aucune demande de permission n’est envoyée tant que vous ne cliquez pas sur le bouton.
+                Aucune demande de permission nest envoy�e tant que vous ne cliquez pas sur le bouton.
               </p>
             )}
           </>
@@ -583,7 +583,7 @@ function FilterSidebar({
               <span className="rounded-full bg-white/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-night/50 shadow-sm">
                 {priceHistogramView.selectionLabel}
               </span>
-              <span>{priceHistogramView.datasetMax > 0 ? `${Math.round(priceHistogramView.datasetMax).toLocaleString('fr-FR')} XPF` : '—'}</span>
+              <span>{priceHistogramView.datasetMax > 0 ? `${Math.round(priceHistogramView.datasetMax).toLocaleString('fr-FR')} XPF` : ''}</span>
             </div>
             <div className="flex items-center gap-2">
               <input
@@ -609,9 +609,9 @@ function FilterSidebar({
               />
             </div>
             <div className="mt-2 flex items-center justify-between gap-3 text-[10px] text-night/35">
-              <span>La courbe reflète les annonces chargées pour cette recherche.</span>
+              <span>La courbe refl�te les annonces charg�es pour cette recherche.</span>
               <span className="rounded-full bg-nc-lagon/10 px-2 py-1 font-medium text-nc-lagonText">
-                {priceHistogramView.bins.length > 0 ? `${displayedListings.length} résultats` : 'Aucune donnée'}
+                {priceHistogramView.bins.length > 0 ? `${displayedListings.length} r�sultats` : 'Aucune donn�e'}
               </span>
             </div>
           </div>
@@ -626,9 +626,9 @@ function FilterSidebar({
           aria-expanded={!collapsedSections.condition}
         >
           <div>
-            <h3 className="text-sm font-semibold text-night">État</h3>
+            <h3 className="text-sm font-semibold text-night">�tat</h3>
             <p className="mt-1 text-xs text-night/45">
-              Affinez selon l’état du produit.
+              Affinez selon l�tat du produit.
             </p>
           </div>
           <ChevronDown className={`h-4 w-4 text-night/35 transition-transform ${collapsedSections.condition ? '' : 'rotate-180'}`} />
@@ -659,7 +659,7 @@ function FilterSidebar({
 
       {activeFilterCount > 0 && (
         <button onClick={clearFilters} className="btn-ghost w-full justify-center text-sm text-red-500">
-          <X className="h-4 w-4" /> Réinitialiser les filtres ({activeFilterCount})
+          <X className="h-4 w-4" /> R�initialiser les filtres ({activeFilterCount})
         </button>
       )}
     </div>
@@ -724,7 +724,7 @@ const FALLBACK_PROVINCES = [
     name: 'Province Nord',
     code: 'N',
     communes: [
-      { id: 201, name: 'Koné', latitude: null, longitude: null },
+      { id: 201, name: 'Kon�', latitude: null, longitude: null },
       { id: 202, name: 'Koumac', latitude: null, longitude: null },
       { id: 203, name: 'Poum', latitude: null, longitude: null },
       { id: 204, name: 'Voh', latitude: null, longitude: null },
@@ -1060,7 +1060,7 @@ function ListingsPageContent() {
 
   const handleUseLocation = useCallback(() => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
-      window.alert('La géolocalisation n’est pas disponible dans ce navigateur.')
+      window.alert('La g�olocalisation nest pas disponible dans ce navigateur.')
       return
     }
 
@@ -1075,7 +1075,7 @@ function ListingsPageContent() {
       },
       () => {
         setGeoLoading(false)
-        window.alert('Impossible de récupérer votre position pour le moment.')
+        window.alert('Impossible de r�cup�rer votre position pour le moment.')
       },
       {
         enableHighAccuracy: false,
@@ -1169,9 +1169,9 @@ function ListingsPageContent() {
   // Sidebar filtres
   const LegacyFilterSidebar = () => (
       <div className="space-y-6">
-      {/* Catégories */}
+      {/* Cat�gories */}
       <div>
-        <h3 className="font-semibold text-night text-sm mb-3">Catégorie</h3>
+        <h3 className="font-semibold text-night text-sm mb-3">Cat�gorie</h3>
         <div className="space-y-3 rounded-2xl border border-night/8 bg-white/80 p-3 shadow-sm">
           <button
             type="button"
@@ -1182,12 +1182,12 @@ function ListingsPageContent() {
                 : 'hover:bg-sand text-night/70'
             }`}
           >
-            Toutes les catégories
+            Toutes les cat�gories
           </button>
 
           {selectedCategoryLabel ? (
             <div className="rounded-2xl border border-nc-lagon/20 bg-nc-lagon/8 px-3 py-3 text-sm text-night">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-nc-lagon">Catégorie active</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-nc-lagon">Cat�gorie active</p>
               <p className="mt-1 font-semibold">{selectedCategoryLabel}</p>
             </div>
           ) : null}
@@ -1206,7 +1206,7 @@ function ListingsPageContent() {
           </div>
 
           <p className="text-[11px] text-night/40">
-            Cliquez sur une catégorie pour ouvrir ses sous-catégories. Le filtre actif reste mis en avant.
+            Cliquez sur une cat�gorie pour ouvrir ses sous-cat�gories. Le filtre actif reste mis en avant.
           </p>
         </div>
       </div>
@@ -1315,7 +1315,7 @@ function ListingsPageContent() {
               Rayon de recherche
             </label>
             <p className="mt-1 text-xs text-night/45">
-            Distance max autour de votre position partagée.
+            Distance max autour de votre position partag�e.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -1353,7 +1353,7 @@ function ListingsPageContent() {
                 disabled={geoLoading}
                 className="rounded-full bg-night px-3 py-2 text-xs font-medium text-white disabled:opacity-60"
               >
-                {geoLoading ? 'Localisation…' : 'Utiliser ma position'}
+                {geoLoading ? 'Localisation&' : 'Utiliser ma position'}
               </button>
               {filters.lat && filters.lng && (
                 <button
@@ -1367,11 +1367,11 @@ function ListingsPageContent() {
             </div>
             {filters.lat && filters.lng ? (
               <p className="text-[11px] text-jungle">
-                Position partagée activée.
+                Position partag�e activ�e.
               </p>
             ) : (
               <p className="text-[11px] text-night/40">
-                Aucune demande de permission n’est envoyée tant que vous ne cliquez pas sur le bouton.
+                Aucune demande de permission nest envoy�e tant que vous ne cliquez pas sur le bouton.
               </p>
             )}
           </>
@@ -1447,7 +1447,7 @@ function ListingsPageContent() {
               <span className="rounded-full bg-white/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-night/50 shadow-sm">
                 {priceHistogramView.selectionLabel}
               </span>
-              <span>{priceHistogramView.datasetMax > 0 ? `${Math.round(priceHistogramView.datasetMax).toLocaleString('fr-FR')} XPF` : '—'}</span>
+              <span>{priceHistogramView.datasetMax > 0 ? `${Math.round(priceHistogramView.datasetMax).toLocaleString('fr-FR')} XPF` : ''}</span>
             </div>
             <div className="flex gap-2 items-center">
               <input
@@ -1473,9 +1473,9 @@ function ListingsPageContent() {
               />
             </div>
             <div className="mt-2 flex items-center justify-between gap-3 text-[10px] text-night/35">
-              <span>La courbe reflète les annonces chargées pour cette recherche.</span>
+              <span>La courbe refl�te les annonces charg�es pour cette recherche.</span>
               <span className="rounded-full bg-nc-lagon/10 px-2 py-1 font-medium text-nc-lagonText">
-                {priceHistogramView.bins.length > 0 ? `${displayedListings.length} résultats` : 'Aucune donnée'}
+                {priceHistogramView.bins.length > 0 ? `${displayedListings.length} r�sultats` : 'Aucune donn�e'}
               </span>
             </div>
           </div>
@@ -1491,9 +1491,9 @@ function ListingsPageContent() {
           aria-expanded={!collapsedSections.condition}
         >
           <div>
-            <h3 className="font-semibold text-night text-sm">État</h3>
+            <h3 className="font-semibold text-night text-sm">�tat</h3>
             <p className="mt-1 text-xs text-night/45">
-              Affinez selon l’état du produit.
+              Affinez selon l�tat du produit.
             </p>
           </div>
           <ChevronDown className={`h-4 w-4 text-night/35 transition-transform ${collapsedSections.condition ? '' : 'rotate-180'}`} />
@@ -1525,7 +1525,7 @@ function ListingsPageContent() {
       {/* Effacer tous les filtres */}
       {activeFilterCount > 0 && (
         <button onClick={clearFilters} className="btn-ghost text-sm text-red-500 w-full justify-center">
-          <X className="w-4 h-4" /> Réinitialiser les filtres ({activeFilterCount})
+          <X className="w-4 h-4" /> R�initialiser les filtres ({activeFilterCount})
         </button>
       )}
     </div>
@@ -1594,7 +1594,7 @@ function ListingsPageContent() {
                 aria-controls="annonces-sort-menu"
               >
                 <span className="whitespace-nowrap text-night/80">
-                  Trier : {SORT_LABEL_BY_VALUE[filters.sort] ?? 'Plus récentes'}
+                  Trier : {SORT_LABEL_BY_VALUE[filters.sort] ?? 'Plus r�centes'}
                 </span>
                 <ChevronDown className={`h-4 w-4 shrink-0 text-night/40 transition-transform ${sortMenuOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -1636,7 +1636,7 @@ function ListingsPageContent() {
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-nc-lagon/20 bg-nc-lagon/6 px-3 py-2 text-sm font-semibold text-nc-lagon transition hover:border-nc-lagon/30 hover:bg-nc-lagon/10 sm:w-auto"
             >
               <Bell className="h-4 w-4" />
-              Créer une alerte
+              Cr�er une alerte
             </button>
 
             {/* Bouton filtres mobile */}
@@ -1692,9 +1692,9 @@ function ListingsPageContent() {
               onClick={() => setMobileCategoriesOpen((current) => !current)}
             >
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-coral/80">Catégories</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-coral/80">Cat�gories</p>
                 <p className="mt-1 text-sm font-semibold text-night">
-                  {selectedCategoryLabel ?? 'Toutes les catégories'}
+                  {selectedCategoryLabel ?? 'Toutes les cat�gories'}
                 </p>
               </div>
               <ChevronDown className={`h-4 w-4 text-night/35 transition-transform ${mobileCategoriesOpen ? 'rotate-180' : ''}`} />
@@ -1834,20 +1834,20 @@ function ListingsPageContent() {
                 <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
                   <div className="space-y-3 p-5 lg:p-6">
                     <div className="inline-flex items-center rounded-full border border-nc-lagon/20 bg-nc-lagon/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-lagon">
-                      Sponsorisé
+                      Sponsoris�
                     </div>
                     <h3 className="font-display text-2xl font-bold text-night">
                       {categoryBanner.title || 'Mettez votre offre en avant'}
                     </h3>
                     <p className="max-w-2xl text-sm leading-relaxed text-night/65">
-                      {categoryBanner.description || 'Une bannière locale visible au-dessus des résultats de la catégorie.'}
+                      {categoryBanner.description || 'Une banni�re locale visible au-dessus des r�sultats de la cat�gorie.'}
                     </p>
                     <div className="flex flex-wrap gap-3">
                       <a
                         href={categoryBanner.link_url || '/annonces'}
                         className="inline-flex items-center justify-center rounded-2xl bg-nc-lagon px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-sm"
                       >
-                        {categoryBanner.cta_text || 'Découvrir'}
+                        {categoryBanner.cta_text || 'D�couvrir'}
                       </a>
                     </div>
                   </div>
@@ -1855,7 +1855,7 @@ function ListingsPageContent() {
                     {categoryBanner.image_url ? (
                       <img
                         src={categoryBanner.image_url}
-                        alt={categoryBanner.title || 'Bannière sponsorisée'}
+                        alt={categoryBanner.title || 'Banni�re sponsoris�e'}
                         className="h-full w-full object-cover"
                       />
                     ) : null}
@@ -1875,10 +1875,10 @@ function ListingsPageContent() {
                   <PackageSearch className="h-20 w-20" strokeWidth={1.6} />
                 </div>
                 <h3 className="mt-4 font-display text-xl font-bold text-night mb-2">
-                  Aucune annonce trouvée pour ces critères
+                  Aucune annonce trouv�e pour ces crit�res
                 </h3>
                 <p className="mx-auto mb-6 max-w-lg text-sm leading-relaxed text-night/55">
-                  Soyez le premier à publier dans cette catégorie - les acheteurs sont là.
+                  Soyez le premier � publier dans cette cat�gorie - les acheteurs sont l�.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <button onClick={clearFilters} className="btn-secondary">
@@ -1886,7 +1886,7 @@ function ListingsPageContent() {
                   </button>
                   {isError ? (
                     <button onClick={() => void refetch()} className="btn-ghost">
-                      Réessayer
+                      R�essayer
                     </button>
                   ) : null}
                 </div>

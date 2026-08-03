@@ -1,4 +1,4 @@
-// lib/tours.config.ts
+﻿// lib/tours.config.ts
 //
 // Deux parcours indépendants :
 // - Particulier : 7 tours

@@ -94,7 +94,7 @@ export default function ReviewCard({ review }: { review: ReviewCardModel }) {
           </div>
         </div>
         <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1 text-xs font-semibold text-night/65">
-          {review.verified_purchase ? 'Achat vérifié' : 'Avis vérifié'}
+          {review.verified_purchase ? 'Achat v�rifi�' : 'Avis v�rifi�'}
         </span>
       </div>
 
@@ -110,13 +110,13 @@ export default function ReviewCard({ review }: { review: ReviewCardModel }) {
         <div className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
           <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
             <MessageCircle className="h-3.5 w-3.5" />
-            Réponse du pro
+            R�ponse du pro
           </p>
           <p className="mt-2 text-sm leading-relaxed text-night/70">{review.reply_content}</p>
           {(review.reply_author_name || review.reply_at) ? (
             <p className="mt-2 text-xs text-night/45">
-              {review.reply_author_name ? `— ${review.reply_author_name}` : '— Le professionnel'}
-              {review.reply_at ? ` · ${formatDate(review.reply_at)}` : ''}
+              {review.reply_author_name ? ` ${review.reply_author_name}` : ' Le professionnel'}
+              {review.reply_at ? ` � ${formatDate(review.reply_at)}` : ''}
             </p>
           ) : null}
         </div>
@@ -139,7 +139,7 @@ export default function ReviewCard({ review }: { review: ReviewCardModel }) {
           className="inline-flex items-center gap-2 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
         >
           <AlertTriangle className="h-3.5 w-3.5" />
-          {reported ? 'Signalé' : 'Signaler'}
+          {reported ? 'Signal�' : 'Signaler'}
         </button>
       </div>
     </article>

@@ -92,7 +92,7 @@ export function usePhoneVerification(onVerified?: (telephone: string) => void) {
         deliveryChannel: channel,
         loading: false,
         error: '',
-        success: data.message || 'Code envoyé',
+        success: data.message || 'Code envoy�',
         cooldown: Number(data.cooldown ?? 60),
         expires_at: typeof data.expires_at === 'string' ? data.expires_at : null,
       })
@@ -126,7 +126,7 @@ export function usePhoneVerification(onVerified?: (telephone: string) => void) {
           step: 'verified',
           loading: false,
           error: '',
-          success: data.message || 'Téléphone vérifié',
+          success: data.message || 'T�l�phone v�rifi�',
           cooldown: 0,
         }))
         onVerified?.(state.telephone)
@@ -136,11 +136,11 @@ export function usePhoneVerification(onVerified?: (telephone: string) => void) {
       setState((current) => ({
         ...current,
         loading: false,
-        error: data?.error || 'Code incorrect ou expiré',
+        error: data?.error || 'Code incorrect ou expir�',
       }))
       return false
     } catch (error) {
-      const message = getErrorMessage(error, 'Réessayez')
+      const message = getErrorMessage(error, 'R�essayez')
       setState((current) => ({
         ...current,
         loading: false,
@@ -171,7 +171,7 @@ export function usePhoneVerification(onVerified?: (telephone: string) => void) {
         deliveryChannel: nextChannel,
         loading: false,
         error: '',
-        success: data.message || 'Code renvoyé',
+        success: data.message || 'Code renvoy�',
         cooldown: Number(data.cooldown ?? 60),
         expires_at: typeof data.expires_at === 'string' ? data.expires_at : current.expires_at,
       }))

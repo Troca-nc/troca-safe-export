@@ -9,7 +9,7 @@ export interface SendOtpResponse {
   channel?:   'sms' | 'email'
   cooldown?:  number
   expires_at: string   // ISO - expiration du code (10 min)
-  masked:     string   // ex: "+687••••34" pour affichage
+  masked:     string   // ex: "+687""""34" pour affichage
   message?:   string
 }
 
@@ -37,7 +37,7 @@ export interface PhoneVerificationState {
   success?:   string
 }
 
-// Préfixes téléphoniques Nouvelle-Calédonie
+// Pr�fixes t�l�phoniques Nouvelle-Cal�donie
 export const NC_PHONE_PREFIXES = [
   { label: 'NC +687', value: '+687' },
   { label: 'FR +33',  value: '+33' },
@@ -49,7 +49,7 @@ export const DEFAULT_PREFIX = '+687'
 // Validation format NC
 export function validateNCPhone(phone: string): string | null {
   const cleaned = phone.replace(/\s/g, '')
-  // NC mobile : 6 chiffres après +687 (ex: +687261234)
+  // NC mobile : 6 chiffres apr�s +687 (ex: +687261234)
   if (/^\+687\d{6}$/.test(cleaned)) return null
   // NC fixe : 6 chiffres (ex: +687241234)
   if (/^\+687\d{6}$/.test(cleaned)) return null
@@ -57,5 +57,5 @@ export function validateNCPhone(phone: string): string | null {
   if (/^\+33[67]\d{8}$/.test(cleaned)) return null
   // Australie
   if (/^\+614\d{8}$/.test(cleaned)) return null
-  return 'Numéro invalide. Format NC : +687 XX XX XX'
+  return 'Num�ro invalide. Format NC : +687 XX XX XX'
 }

@@ -14,7 +14,7 @@ export default function PlanBadge({ className = '' }: PlanBadgeProps) {
       }`}
     >
       <Check className="h-3 w-3" />
-      Pro ✓
+      Pro 
     </span>
   )
 }

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -35,7 +35,7 @@ function SocialPhoneCompletionContent() {
     try {
       await refreshMe()
     } catch {
-      // Si le refresh échoue, on laisse quand même l'utilisateur continuer.
+      // Si le refresh �choue, on laisse quand m�me l'utilisateur continuer.
     }
     router.replace(next)
   }
@@ -61,25 +61,25 @@ function SocialPhoneCompletionContent() {
 
               <span className="inline-flex items-center gap-2 rounded-full bg-coral/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-coral">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                Sécurisation
+                S�curisation
               </span>
             </div>
 
             <div className="mt-8">
               <div className="inline-flex items-center gap-2 rounded-full bg-night/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-night/50">
                 <Phone className="h-3.5 w-3.5" />
-                Étape de finalisation
+                �tape de finalisation
               </div>
               <h1 className="mt-5 text-3xl font-semibold leading-tight text-night md:text-4xl">
-                Ajoutez votre numéro de téléphone
+                Ajoutez votre num�ro de t�l�phone
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-night/60">
-                Le téléphone est utilisé pour la récupération de mot de passe par SMS et pour renforcer la sécurité de votre compte.
+                Le t�l�phone est utilis� pour la r�cup�ration de mot de passe par SMS et pour renforcer la s�curit� de votre compte.
               </p>
             </div>
 
             <div className="mt-6 rounded-[1.75rem] border border-coral/15 bg-coral/5 p-4 text-sm text-night/70">
-              Si votre numéro est déjà renseigné dans votre compte, il sera pré-rempli. Sinon, ajoutez-le maintenant puis validez le code reçu.
+              Si votre num�ro est d�j� renseign� dans votre compte, il sera pr�-rempli. Sinon, ajoutez-le maintenant puis validez le code re�u.
             </div>
 
             <div className="mt-6">
@@ -92,15 +92,15 @@ function SocialPhoneCompletionContent() {
               />
             </div>
             <p className="mt-4 text-sm leading-6 text-night/60">
-              Vous pourrez ajouter votre numéro plus tard depuis votre profil.
+              Vous pourrez ajouter votre num�ro plus tard depuis votre profil.
             </p>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Link href="/connexion" className="btn-ghost justify-center px-5 py-3">
-                Retour à la connexion
+                Retour � la connexion
               </Link>
                             <Link href={next} className="btn-secondary w-full justify-center px-5 py-3 sm:w-auto">
-                Continuer sans vérification →
+                Continuer sans v�rification �
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -108,20 +108,20 @@ function SocialPhoneCompletionContent() {
 
           <aside className="rounded-[2rem] border border-night/10 bg-night px-6 py-8 text-white shadow-[0_20px_60px_rgba(8,32,50,0.22)] md:px-8">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/45">
-              Pourquoi ce numéro ?
+              Pourquoi ce num�ro ?
             </p>
             <h2 className="mt-3 text-2xl font-semibold leading-tight">
-              Récupération plus simple, sécurité renforcée
+              R�cup�ration plus simple, s�curit� renforc�e
             </h2>
             <p className="mt-3 text-sm leading-6 text-white/70">
-              En cas d'oubli de mot de passe, vous pourrez recevoir un SMS de réinitialisation. Si le téléphone n'est pas vérifié, la récupération bascule automatiquement par email.
+              En cas d'oubli de mot de passe, vous pourrez recevoir un SMS de r�initialisation. Si le t�l�phone n'est pas v�rifi�, la r�cup�ration bascule automatiquement par email.
             </p>
 
             <div className="mt-6 space-y-3">
               {[
-                'SMS prioritaire si le numéro est vérifié',
-                'Fallback email si le téléphone n\'est pas vérifié',
-                'Compte mieux protégé contre les accès non autorisés',
+                'SMS prioritaire si le num�ro est v�rifi�',
+                'Fallback email si le t�l�phone n\'est pas v�rifi�',
+                'Compte mieux prot�g� contre les acc�s non autoris�s',
               ].map((item) => (
                 <div key={item} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80">
                   {item}
@@ -130,7 +130,7 @@ function SocialPhoneCompletionContent() {
             </div>
 
             <p className="mt-6 text-xs leading-relaxed text-white/45">
-              Vous pourrez compléter ou modifier ce numéro plus tard depuis les paramètres de votre compte.
+              Vous pourrez compl�ter ou modifier ce num�ro plus tard depuis les param�tres de votre compte.
             </p>
           </aside>
         </div>

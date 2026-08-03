@@ -77,9 +77,9 @@ function getDisplayName(pro: ProCardModel) {
 }
 
 function formatDateLabel(value?: string | null) {
-  if (!value) return 'À préciser'
+  if (!value) return '� pr�ciser'
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'À préciser'
+  if (Number.isNaN(date.getTime())) return '� pr�ciser'
   return new Intl.DateTimeFormat('fr-FR', {
     day: 'numeric',
     month: 'short',
@@ -88,7 +88,7 @@ function formatDateLabel(value?: string | null) {
 }
 
 function formatMoney(value?: number | null) {
-  if (value == null || !Number.isFinite(Number(value))) return 'Non précisé'
+  if (value == null || !Number.isFinite(Number(value))) return 'Non pr�cis�'
   return `${Number(value).toLocaleString('fr-FR')} XPF`
 }
 
@@ -99,12 +99,12 @@ function buildBudgetLabel(min?: number | null, max?: number | null) {
     return `${formatMoney(minValue)} - ${formatMoney(maxValue)}`
   }
   if (minValue > 0) {
-    return `À partir de ${formatMoney(minValue)}`
+    return `� partir de ${formatMoney(minValue)}`
   }
   if (maxValue > 0) {
-    return `Jusqu’à ${formatMoney(maxValue)}`
+    return `Jusqu� ${formatMoney(maxValue)}`
   }
-  return 'Budget non précisé'
+  return 'Budget non pr�cis�'
 }
 
 function getCategoryLabel(categories: CategoryNode[], slug: string) {
@@ -139,7 +139,7 @@ function ProQuoteCard({
           </div>
           <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
             <BadgeCheck className="h-3.5 w-3.5" />
-            Vérifié
+            V�rifi�
           </span>
         </div>
 
@@ -151,7 +151,7 @@ function ProQuoteCard({
           <div className="text-right text-xs text-night/60">
             <p className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
               <MapPin className="h-3.5 w-3.5 text-coral" />
-              {pro.pro_commune || 'Nouvelle-Calédonie'}
+              {pro.pro_commune || 'Nouvelle-Cal�donie'}
             </p>
           </div>
         </div>
@@ -168,7 +168,7 @@ function ProQuoteCard({
         </div>
 
         <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-night/65">
-          {pro.pro_description || 'Découvrir ce professionnel et lui envoyer une demande adaptée.'}
+          {pro.pro_description || 'D�couvrir ce professionnel et lui envoyer une demande adapt�e.'}
         </p>
 
         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
@@ -197,7 +197,7 @@ function MyRequestCard({ request }: { request: QuoteRequestMineItem }) {
     <article className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Demande envoyée</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Demande envoy�e</p>
           <h3 className="mt-1 text-lg font-semibold text-night">{request.title}</h3>
         </div>
         <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-night/60">
@@ -207,7 +207,7 @@ function MyRequestCard({ request }: { request: QuoteRequestMineItem }) {
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="rounded-2xl bg-white px-4 py-3">
-          <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Catégorie</p>
+          <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Cat�gorie</p>
           <p className="mt-1 font-semibold text-night">{request.category_name}</p>
         </div>
         <div className="rounded-2xl bg-white px-4 py-3">
@@ -219,7 +219,7 @@ function MyRequestCard({ request }: { request: QuoteRequestMineItem }) {
           <p className="mt-1 font-semibold text-night">{buildBudgetLabel(request.budget_min_xpf, request.budget_max_xpf)}</p>
         </div>
         <div className="rounded-2xl bg-white px-4 py-3">
-          <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Offres reçues</p>
+          <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Offres re�ues</p>
           <p className="mt-1 font-semibold text-night">{request.offer_count}</p>
         </div>
       </div>
@@ -232,13 +232,13 @@ function MyRequestCard({ request }: { request: QuoteRequestMineItem }) {
               ? 'bg-nc-lagonLight text-nc-lagon'
               : 'bg-slate-100 text-slate-600'
         }`}>
-          {request.status === 'open' ? 'En attente' : request.status === 'closed' ? 'Fermée' : 'Annulée'}
+          {request.status === 'open' ? 'En attente' : request.status === 'closed' ? 'Ferm�e' : 'Annul�e'}
         </span>
         <Link
           href={`/appels-offres/${request.id}`}
           className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-white"
         >
-          Voir le détail
+          Voir le d�tail
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
@@ -402,8 +402,8 @@ export default function AppelsOffresClient() {
     if (!requestForm.category_slug) {
       showToast({
         tone: 'error',
-        title: 'Catégorie requise',
-        message: 'Choisissez une catégorie principale.',
+        title: 'Cat�gorie requise',
+        message: 'Choisissez une cat�gorie principale.',
       })
       return
     }
@@ -421,7 +421,7 @@ export default function AppelsOffresClient() {
       showToast({
         tone: 'error',
         title: 'Titre ou description manquants',
-        message: 'Ajoutez un résumé et une description pour votre demande.',
+        message: 'Ajoutez un r�sum� et une description pour votre demande.',
       })
       return
     }
@@ -430,7 +430,7 @@ export default function AppelsOffresClient() {
       showToast({
         tone: 'error',
         title: 'Email requis',
-        message: 'Ajoutez un email de contact pour recevoir les réponses.',
+        message: 'Ajoutez un email de contact pour recevoir les r�ponses.',
       })
       return
     }
@@ -438,8 +438,8 @@ export default function AppelsOffresClient() {
     if (requestForm.mode === 'targeted' && requestForm.target_pro_ids.length === 0) {
       showToast({
         tone: 'error',
-        title: 'Pros ciblés manquants',
-        message: 'Sélectionnez jusqu’à 5 professionnels.',
+        title: 'Pros cibl�s manquants',
+        message: 'S�lectionnez jusqu� 5 professionnels.',
       })
       return
     }
@@ -463,8 +463,8 @@ export default function AppelsOffresClient() {
       const created = response.data?.data
       showToast({
         tone: 'success',
-        title: 'Demande publiée',
-        message: 'Votre appel d’offres a été envoyé aux professionnels concernés.',
+        title: 'Demande publi�e',
+        message: 'Votre appel doffres a �t� envoy� aux professionnels concern�s.',
       })
 
       if (created?.id && isAuthenticated) {
@@ -507,7 +507,7 @@ export default function AppelsOffresClient() {
         showToast({
           tone: 'info',
           title: 'Limite atteinte',
-          message: 'Vous pouvez cibler jusqu’à 5 professionnels.',
+          message: 'Vous pouvez cibler jusqu� 5 professionnels.',
         })
         return current
       }
@@ -524,12 +524,12 @@ export default function AppelsOffresClient() {
     <div className="space-y-8">
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         <div className="max-w-3xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Appels d’offres</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Appels doffres</p>
           <h1 className="mt-2 font-display text-3xl font-bold text-night sm:text-4xl">
             Publiez votre besoin, comparez les offres, choisissez librement.
           </h1>
           <p className="mt-3 text-sm leading-relaxed text-night/60">
-            Décrivez votre demande une seule fois. Selon le mode choisi, Kalico la diffuse à tous les pros actifs de la catégorie ou uniquement à une sélection ciblée.
+            D�crivez votre demande une seule fois. Selon le mode choisi, Kalico la diffuse � tous les pros actifs de la cat�gorie ou uniquement � une s�lection cibl�e.
           </p>
         </div>
       </section>
@@ -538,11 +538,11 @@ export default function AppelsOffresClient() {
         <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Créer une demande</p>
-              <h2 className="mt-1 font-display text-2xl font-bold text-night">Ouvert à tous les pros ou ciblé</h2>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Cr�er une demande</p>
+              <h2 className="mt-1 font-display text-2xl font-bold text-night">Ouvert � tous les pros ou cibl�</h2>
             </div>
             <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-3 py-1 text-xs font-semibold text-night/60">
-              Réponses libres, pas de timer
+              R�ponses libres, pas de timer
             </span>
           </div>
 
@@ -552,8 +552,8 @@ export default function AppelsOffresClient() {
                 <span className="text-sm font-semibold text-night">Mode de publication</span>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {[
-                    { value: 'open', label: 'Ouvert à tous les pros' },
-                    { value: 'targeted', label: 'Cibler des pros spécifiques' },
+                    { value: 'open', label: 'Ouvert � tous les pros' },
+                    { value: 'targeted', label: 'Cibler des pros sp�cifiques' },
                   ].map((item) => (
                     <button
                       key={item.value}
@@ -572,13 +572,13 @@ export default function AppelsOffresClient() {
               </label>
 
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-night">Catégorie *</span>
+                <span className="text-sm font-semibold text-night">Cat�gorie *</span>
                 <select
                   value={requestForm.category_slug}
                   onChange={(event) => setRequestForm((current) => ({ ...current, category_slug: event.target.value }))}
                   className="input w-full rounded-2xl"
                 >
-                  <option value="">Choisir une catégorie</option>
+                  <option value="">Choisir une cat�gorie</option>
                   {rootCategories.map((category) => (
                     <option key={category.slug} value={category.slug}>
                       {category.name}
@@ -604,24 +604,24 @@ export default function AppelsOffresClient() {
               </label>
 
               <label className="space-y-2 md:col-span-2">
-                <span className="text-sm font-semibold text-night">Titre du besoin (100 caractères max) *</span>
+                <span className="text-sm font-semibold text-night">Titre du besoin (100 caract�res max) *</span>
                 <input
                   value={requestForm.title}
                   onChange={(event) => setRequestForm((current) => ({ ...current, title: event.target.value }))}
                   className="input w-full rounded-2xl"
                   maxLength={100}
-                  placeholder="Résumé rapide de ce que vous cherchez"
+                  placeholder="R�sum� rapide de ce que vous cherchez"
                 />
               </label>
 
               <label className="space-y-2 md:col-span-2">
-                <span className="text-sm font-semibold text-night">Description détaillée *</span>
+                <span className="text-sm font-semibold text-night">Description d�taill�e *</span>
                 <textarea
                   rows={5}
                   value={requestForm.description}
                   onChange={(event) => setRequestForm((current) => ({ ...current, description: event.target.value }))}
                   className="input w-full rounded-2xl py-3"
-                  placeholder="Expliquez le besoin, les contraintes, le lieu, les délais..."
+                  placeholder="Expliquez le besoin, les contraintes, le lieu, les d�lais..."
                 />
               </label>
 
@@ -650,7 +650,7 @@ export default function AppelsOffresClient() {
               </label>
 
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-night">Date souhaitée</span>
+                <span className="text-sm font-semibold text-night">Date souhait�e</span>
                 <input
                   type="date"
                   value={requestForm.desired_date}
@@ -660,12 +660,12 @@ export default function AppelsOffresClient() {
               </label>
 
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-night">Téléphone</span>
+                <span className="text-sm font-semibold text-night">T�l�phone</span>
                 <input
                   value={requestForm.contact_phone}
                   onChange={(event) => setRequestForm((current) => ({ ...current, contact_phone: event.target.value }))}
                   className="input w-full rounded-2xl"
-                  placeholder="Numéro de contact"
+                  placeholder="Num�ro de contact"
                 />
               </label>
 
@@ -686,8 +686,8 @@ export default function AppelsOffresClient() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Ciblage</p>
-                    <h3 className="mt-1 text-lg font-bold text-night">Rechercher et sélectionner des pros</h3>
-                    <p className="mt-1 text-sm text-night/60">Sélectionnez jusqu’à 5 professionnels.</p>
+                    <h3 className="mt-1 text-lg font-bold text-night">Rechercher et s�lectionner des pros</h3>
+                    <p className="mt-1 text-sm text-night/60">S�lectionnez jusqu� 5 professionnels.</p>
                   </div>
                   <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-night/55">
                     {requestForm.target_pro_ids.length}/5
@@ -703,13 +703,13 @@ export default function AppelsOffresClient() {
                         value={requestForm.target_query}
                         onChange={(event) => setRequestForm((current) => ({ ...current, target_query: event.target.value }))}
                         className="input w-full rounded-2xl pl-10"
-                        placeholder="Nom, commune, catégorie..."
+                        placeholder="Nom, commune, cat�gorie..."
                       />
                     </div>
                   </label>
 
                   <div className="space-y-3">
-                    <p className="text-sm font-semibold text-night">Pros sélectionnés</p>
+                    <p className="text-sm font-semibold text-night">Pros s�lectionn�s</p>
                     {selectedTargetPros.length ? (
                       <div className="flex flex-wrap gap-2">
                         {selectedTargetPros.map((pro) => (
@@ -725,7 +725,7 @@ export default function AppelsOffresClient() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-night/55">Aucun professionnel sélectionné.</p>
+                      <p className="text-sm text-night/55">Aucun professionnel s�lectionn�.</p>
                     )}
                   </div>
                 </div>
@@ -746,13 +746,13 @@ export default function AppelsOffresClient() {
                       >
                         <p className="font-semibold text-night">{getDisplayName(pro)}</p>
                         <p className="mt-1 text-xs text-night/55">{pro.pro_category || 'Professionnel local'}</p>
-                        <p className="mt-1 text-xs text-night/45">{pro.pro_commune || 'Nouvelle-Calédonie'}</p>
+                        <p className="mt-1 text-xs text-night/45">{pro.pro_commune || 'Nouvelle-Cal�donie'}</p>
                       </button>
                     )
                   })}
                   {targetFilteredPros.length === 0 ? (
                     <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-white px-4 py-5 text-sm text-night/55 md:col-span-2 xl:col-span-4">
-                      Aucun professionnel trouvé dans cette sélection.
+                      Aucun professionnel trouv� dans cette s�lection.
                     </div>
                   ) : null}
                 </div>
@@ -762,8 +762,8 @@ export default function AppelsOffresClient() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-sm text-night/55">
                 {requestForm.mode === 'open'
-                  ? 'Votre demande sera envoyée aux pros actifs de la catégorie choisie.'
-                  : 'Votre demande sera envoyée uniquement aux professionnels ciblés.'}
+                  ? 'Votre demande sera envoy�e aux pros actifs de la cat�gorie choisie.'
+                  : 'Votre demande sera envoy�e uniquement aux professionnels cibl�s.'}
               </p>
               <button
                 type="submit"
@@ -782,16 +782,16 @@ export default function AppelsOffresClient() {
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Mode compétitif</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Mode comp�titif</p>
               <h2 className="mt-1 font-display text-xl font-bold text-night">Le demandeur choisit librement</h2>
             </div>
           </div>
 
           <div className="grid gap-3">
             {[
-              { title: 'Open', desc: 'Diffusion auprès des pros actifs de la catégorie.', icon: UserPlus },
-              { title: 'Targeted', desc: 'Diffusion à une sélection de professionnels.', icon: BadgeCheck },
-              { title: 'Libre', desc: 'Pas de timer, pas d’attribution automatique.', icon: FilterX },
+              { title: 'Open', desc: 'Diffusion aupr�s des pros actifs de la cat�gorie.', icon: UserPlus },
+              { title: 'Targeted', desc: 'Diffusion � une s�lection de professionnels.', icon: BadgeCheck },
+              { title: 'Libre', desc: 'Pas de timer, pas dattribution automatique.', icon: FilterX },
             ].map((item) => {
               const Icon = item.icon
               return (
@@ -807,7 +807,7 @@ export default function AppelsOffresClient() {
           </div>
 
           <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4 text-sm text-night/60">
-            Déposez une demande structurée, comparez les offres reçues, puis choisissez le pro qui vous convient.
+            D�posez une demande structur�e, comparez les offres re�ues, puis choisissez le pro qui vous convient.
           </div>
         </aside>
       </section>
@@ -816,7 +816,7 @@ export default function AppelsOffresClient() {
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Mes demandes en cours</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Suivez vos publications et le nombre d’offres reçues</h2>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Suivez vos publications et le nombre doffres re�ues</h2>
           </div>
           <span className="text-sm text-night/55">
             {requestCount} demande{requestCount > 1 ? 's' : ''}
@@ -826,7 +826,7 @@ export default function AppelsOffresClient() {
         {!hasHydrated || !isAuthenticated ? (
           <div className="mt-4 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-background-secondary)] p-6 text-center">
             <p className="text-lg font-semibold text-night">Connectez-vous pour suivre vos demandes.</p>
-            <p className="mt-2 text-sm text-night/55">Les demandes créées avec votre compte apparaîtront ici avec le nombre d’offres reçues.</p>
+            <p className="mt-2 text-sm text-night/55">Les demandes cr��es avec votre compte appara�tront ici avec le nombre doffres re�ues.</p>
             <div className="mt-5 flex justify-center">
               <Link href="/connexion?next=/appels-offres" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-5 py-3 text-sm font-semibold text-white">
                 Se connecter
@@ -841,8 +841,8 @@ export default function AppelsOffresClient() {
           </div>
         ) : myRequests.length === 0 ? (
           <div className="mt-4 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-background-secondary)] p-6 text-center">
-            <p className="text-lg font-semibold text-night">Aucune demande pour l’instant.</p>
-            <p className="mt-2 text-sm text-night/55">Publiez votre première demande pour commencer à recevoir des offres.</p>
+            <p className="text-lg font-semibold text-night">Aucune demande pour linstant.</p>
+            <p className="mt-2 text-sm text-night/55">Publiez votre premi�re demande pour commencer � recevoir des offres.</p>
           </div>
         ) : (
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
@@ -871,7 +871,7 @@ export default function AppelsOffresClient() {
               className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
             >
               <FilterX className="h-4 w-4" />
-              Réinitialiser
+              R�initialiser
             </button>
           </div>
         </div>
@@ -885,12 +885,12 @@ export default function AppelsOffresClient() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 className="input w-full rounded-2xl pl-10"
-                placeholder="Nom, commune, catégorie, description..."
+                placeholder="Nom, commune, cat�gorie, description..."
               />
             </div>
           </label>
           <label className="space-y-2">
-            <span className="text-sm font-semibold text-night">Catégorie</span>
+            <span className="text-sm font-semibold text-night">Cat�gorie</span>
             <select
               value={categoryFilter}
               onChange={(event) => setCategoryFilter(event.target.value)}
@@ -942,7 +942,7 @@ export default function AppelsOffresClient() {
           </div>
         ) : filteredPros.length === 0 ? (
           <div className="mt-5 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-background-secondary)] p-6 text-center text-sm text-night/55">
-            Aucun professionnel ne correspond à vos critères.
+            Aucun professionnel ne correspond � vos crit�res.
           </div>
         ) : (
           <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -970,8 +970,8 @@ export default function AppelsOffresClient() {
           onSent={(payload) => {
             showToast({
               tone: 'success',
-              title: 'Demande envoyée',
-              message: `${payload.proName} a reçu votre besoin. Vous pouvez aussi utiliser le formulaire d’appels d’offres ci-dessus.`,
+              title: 'Demande envoy�e',
+              message: `${payload.proName} a re�u votre besoin. Vous pouvez aussi utiliser le formulaire dappels doffres ci-dessus.`,
             })
           }}
         />

@@ -63,11 +63,11 @@ function formatDate(value: string) {
 function formatQuoteStatus(status: string) {
   const normalized = String(status || '').toLowerCase()
   if (normalized === 'draft') return { label: 'Brouillon', tone: 'bg-sand text-night/70' }
-  if (normalized === 'sent') return { label: 'Envoyé', tone: 'bg-nc-lagonLight text-nc-lagon' }
+  if (normalized === 'sent') return { label: 'Envoy�', tone: 'bg-nc-lagonLight text-nc-lagon' }
   if (normalized === 'viewed') return { label: 'Vu', tone: 'bg-blue-50 text-blue-700' }
-  if (normalized === 'accepted') return { label: 'Accepté', tone: 'bg-emerald-50 text-emerald-700' }
-  if (normalized === 'refused') return { label: 'Refusé', tone: 'bg-red-50 text-red-700' }
-  if (normalized === 'expired') return { label: 'Expiré', tone: 'bg-slate-100 text-slate-500' }
+  if (normalized === 'accepted') return { label: 'Accept�', tone: 'bg-emerald-50 text-emerald-700' }
+  if (normalized === 'refused') return { label: 'Refus�', tone: 'bg-red-50 text-red-700' }
+  if (normalized === 'expired') return { label: 'Expir�', tone: 'bg-slate-100 text-slate-500' }
   if (normalized === 'converted') return { label: 'Converti', tone: 'bg-violet-50 text-violet-700' }
   return { label: status || 'Inconnu', tone: 'bg-slate-100 text-slate-600' }
 }
@@ -240,11 +240,11 @@ function formatDelayLabel(value?: string | null) {
   const quoteStatusFilters = [
     { id: 'all', label: 'Tous' },
     { id: 'draft', label: 'Brouillons' },
-    { id: 'sent', label: 'Envoyés' },
+    { id: 'sent', label: 'Envoy�s' },
     { id: 'viewed', label: 'Vus' },
-    { id: 'accepted', label: 'Acceptés' },
-    { id: 'refused', label: 'Refusés' },
-    { id: 'expired', label: 'Expirés' },
+    { id: 'accepted', label: 'Accept�s' },
+    { id: 'refused', label: 'Refus�s' },
+    { id: 'expired', label: 'Expir�s' },
     { id: 'converted', label: 'Convertis' },
   ] as const
 
@@ -306,8 +306,8 @@ function formatDelayLabel(value?: string | null) {
             <div className="max-w-3xl">
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-700">Verrouillage 24h</p>
               <p className="mt-1 text-sm leading-relaxed text-amber-900/80">
-                {lockedRequests.length} demande{lockedRequests.length > 1 ? 's' : ''} sont visibles immédiatement pour les comptes Pro Premium.
-                Pour les comptes gratuits, elles restent masquées pendant encore {formatDelayLabel(lockedRequests[0]?.visibleFreeAt)}.
+                {lockedRequests.length} demande{lockedRequests.length > 1 ? 's' : ''} sont visibles imm�diatement pour les comptes Pro Premium.
+                Pour les comptes gratuits, elles restent masqu�es pendant encore {formatDelayLabel(lockedRequests[0]?.visibleFreeAt)}.
               </p>
             </div>
             <span className="inline-flex items-center rounded-full border border-amber-200 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800">
@@ -390,10 +390,10 @@ function formatDelayLabel(value?: string | null) {
               {request.isLockedForFree ? (
                 <div className="absolute inset-0 z-10 flex items-center justify-center bg-[linear-gradient(180deg,rgba(255,251,235,0.45),rgba(255,251,235,0.92))] p-5 backdrop-blur-[1px]">
                   <div className="max-w-md rounded-[1.5rem] border border-amber-200 bg-white/95 p-5 text-center shadow-lg">
-                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-700">Bloqué 24h</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-700">Bloqu� 24h</p>
                     <h3 className="mt-2 text-xl font-semibold text-night">Disponible dans {formatDelayLabel(request.visibleFreeAt)}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-night/65">
-                      Les comptes gratuits voient cette demande après 24h. Passez en Pro Premium pour accéder immédiatement aux nouveaux appels d'offres.
+                      Les comptes gratuits voient cette demande apr�s 24h. Passez en Pro Premium pour acc�der imm�diatement aux nouveaux appels d'offres.
                     </p>
                   </div>
                 </div>
@@ -412,7 +412,7 @@ function formatDelayLabel(value?: string | null) {
 
                   <h2 className="mt-3 text-xl font-semibold text-night">{request.request.need_type}</h2>
                   <p className="mt-1 text-sm text-night/60">
-                    {request.proName} · {request.proCommune || 'Nouvelle-Caledonie'}
+                    {request.proName} � {request.proCommune || 'Nouvelle-Caledonie'}
                   </p>
 
                   <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -539,7 +539,7 @@ function formatDelayLabel(value?: string | null) {
                       </p>
                       <h3 className="mt-1 text-lg font-semibold text-night">{quote.subject}</h3>
                       <p className="mt-1 text-sm text-night/60">
-                        {quote.requester_name} · {quote.commune}
+                        {quote.requester_name} � {quote.commune}
                       </p>
                     </div>
                     <span className={`rounded-full px-3 py-1 text-xs font-semibold ${status.tone}`}>{status.label}</span>
@@ -547,8 +547,8 @@ function formatDelayLabel(value?: string | null) {
 
                   <div className="mt-4 grid gap-2 text-sm text-night/65 sm:grid-cols-2">
                     <p><strong>Total :</strong> {Number(quote.total_xpf || 0).toLocaleString('fr-FR')} XPF</p>
-                    <p><strong>Validité :</strong> {quote.valid_until ? formatDate(quote.valid_until) : 'Non précisée'}</p>
-                    <p><strong>Envoyé :</strong> {quote.sent_at ? formatDate(quote.sent_at) : 'Brouillon'}</p>
+                    <p><strong>Validit� :</strong> {quote.valid_until ? formatDate(quote.valid_until) : 'Non pr�cis�e'}</p>
+                    <p><strong>Envoy� :</strong> {quote.sent_at ? formatDate(quote.sent_at) : 'Brouillon'}</p>
                     <p><strong>Vu :</strong> {quote.viewed_at ? formatDate(quote.viewed_at) : 'Pas encore'}</p>
                   </div>
 
@@ -577,8 +577,8 @@ function formatDelayLabel(value?: string | null) {
         ) : (
           <div className="mt-5 rounded-[1.5rem] border border-dashed border-[var(--color-border)] bg-[var(--color-background-secondary)] px-6 py-10 text-center text-night/55">
             <FileText className="mx-auto h-8 w-8 text-night/25" />
-            <p className="mt-3 text-lg font-semibold text-night">Aucun devis cree pour l’instant</p>
-            <p className="mt-2 text-sm">Créez votre premier devis depuis une demande reçue ou depuis le bouton Nouveau devis.</p>
+            <p className="mt-3 text-lg font-semibold text-night">Aucun devis cree pour linstant</p>
+            <p className="mt-2 text-sm">Cr�ez votre premier devis depuis une demande re�ue ou depuis le bouton Nouveau devis.</p>
           </div>
         )}
       </section>

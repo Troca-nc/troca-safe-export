@@ -14,7 +14,7 @@ const CATEGORY_TABS = [
   { value: '', label: 'Tout' },
   { value: 'alimentation', label: 'Alimentation' },
   { value: 'mode', label: 'Mode' },
-  { value: 'beaute', label: 'Beauté' },
+  { value: 'beaute', label: 'Beaut�' },
   { value: 'high_tech', label: 'High-Tech' },
   { value: 'auto_moto', label: 'Auto/Moto' },
   { value: 'maison', label: 'Maison' },
@@ -27,10 +27,10 @@ const CATEGORY_TABS = [
 
 const EVENT_TABS = [
   { value: 'all', label: 'Tout' },
-  { value: 'upcoming', label: 'À venir' },
+  { value: 'upcoming', label: '� venir' },
   { value: 'weekend', label: 'Ce week-end' },
   { value: 'free', label: 'Gratuits' },
-  { value: 'past', label: 'Passés' },
+  { value: 'past', label: 'Pass�s' },
 ] as const
 
 type BusinessOption = {
@@ -94,8 +94,8 @@ function EventCard({ item }: { item: DirectoryItem }) {
     <article className="overflow-hidden rounded-[1.5rem] border border-night/8 bg-[var(--color-surface)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="border-l-4 border-l-nc-sable p-4">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="badge-sable">Événement</span>
-          {item.author_is_pro ? <span className="badge badge-emeraude">Organisateur vérifié</span> : null}
+          <span className="badge-sable">�v�nement</span>
+          {item.author_is_pro ? <span className="badge badge-emeraude">Organisateur v�rifi�</span> : null}
         </div>
         <h3 className="mt-3 text-lg font-bold leading-tight text-night">{item.title}</h3>
         <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-night/65">{item.description}</p>
@@ -103,11 +103,11 @@ function EventCard({ item }: { item: DirectoryItem }) {
         <div className="mt-4 grid gap-2 text-xs font-semibold text-night/65 sm:grid-cols-2">
           <span className="rounded-full bg-sand px-2.5 py-1">
             <MapPin className="mr-1 inline h-3.5 w-3.5 text-coral" />
-            {item.commune_name || item.location_name || 'Nouvelle-Calédonie'}
+            {item.commune_name || item.location_name || 'Nouvelle-Cal�donie'}
           </span>
           <span className="rounded-full bg-sand px-2.5 py-1">
             <CalendarDays className="mr-1 inline h-3.5 w-3.5 text-coral" />
-            {formatDateLabel(item.event_date, 'Date à confirmer')}
+            {formatDateLabel(item.event_date, 'Date � confirmer')}
           </span>
           <span className="rounded-full bg-sand px-2.5 py-1">
             <Users className="mr-1 inline h-3.5 w-3.5 text-coral" />
@@ -122,10 +122,10 @@ function EventCard({ item }: { item: DirectoryItem }) {
         <div className="mt-4 rounded-2xl bg-sand/50 p-3">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Info</p>
           <p className="mt-1 text-sm font-semibold text-night">
-            {item.link_url ? 'Ouvert à la billetterie' : 'Informations à venir'}
+            {item.link_url ? 'Ouvert � la billetterie' : 'Informations � venir'}
           </p>
           <p className="mt-1 text-sm text-night/60">
-            {item.link_url || item.website_url ? 'Consultez le lien de l’événement pour les détails.' : 'Suivez les mises à jour de l’agenda local.'}
+            {item.link_url || item.website_url ? 'Consultez le lien de l�v�nement pour les d�tails.' : 'Suivez les mises � jour de lagenda local.'}
           </p>
         </div>
 
@@ -142,11 +142,11 @@ function EventCard({ item }: { item: DirectoryItem }) {
             </a>
           ) : (
             <span className="inline-flex items-center gap-2 rounded-2xl bg-night/10 px-4 py-2.5 text-sm font-semibold text-night/60">
-              Bientôt disponible
+              Bient�t disponible
             </span>
           )}
           <span className="inline-flex items-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-2.5 text-sm font-semibold text-night">
-            {isPastEvent(item.event_date) ? 'Passé' : 'À venir'}
+            {isPastEvent(item.event_date) ? 'Pass�' : '� venir'}
           </span>
         </div>
       </div>
@@ -308,13 +308,13 @@ export default function BonsPlansPage() {
         <div className="overflow-hidden rounded-[2rem] border border-night/8 border-b-4 border-b-nc-emeraude bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.16))] px-6 py-8 text-white shadow-[0_24px_80px_rgba(8,32,50,0.14)] md:px-8 md:py-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-emeraude">
             <Sparkles className="h-3.5 w-3.5" />
-            Bons plans & Événements
+            Bons plans & �v�nements
           </div>
           <h1 className="mt-4 max-w-3xl font-display text-4xl font-bold leading-tight md:text-5xl">
-            Promos locales et agenda culturel de Nouvelle-Calédonie, au même endroit.
+            Promos locales et agenda culturel de Nouvelle-Cal�donie, au m�me endroit.
           </h1>
           <p className="mt-4 max-w-3xl text-sm leading-relaxed text-white/72 md:text-base">
-            Retrouvez les bons plans du moment et l’agenda culturel de la Nouvelle-Calédonie sans changer de navigation.
+            Retrouvez les bons plans du moment et lagenda culturel de la Nouvelle-Cal�donie sans changer de navigation.
           </p>
         </div>
       </section>
@@ -322,8 +322,8 @@ export default function BonsPlansPage() {
       <div className="mx-auto max-w-7xl px-4 pb-8">
         <div className="flex flex-wrap gap-2">
           {[
-            { id: 'promos', label: '🏷️ Promotions' },
-            { id: 'evenements', label: '🎭 Événements' },
+            { id: 'promos', label: '<� Promotions' },
+            { id: 'evenements', label: '<� �v�nements' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -419,9 +419,9 @@ export default function BonsPlansPage() {
                 </div>
               ) : (
                 <div className="rounded-[2rem] border border-night/8 bg-white px-6 py-14 text-center text-night/55">
-                  <p className="text-lg font-semibold text-night">Les premières promos arrivent bientôt</p>
+                  <p className="text-lg font-semibold text-night">Les premi�res promos arrivent bient�t</p>
                   <p className="mt-2 text-sm">
-                    Commerçants, artisans, associations - publiez votre offre et touchez des milliers de Calédoniens.
+                    Commer�ants, artisans, associations - publiez votre offre et touchez des milliers de Cal�doniens.
                   </p>
                   <Link href="/bons-plans/publier" className="btn-primary mt-5 inline-flex items-center gap-2">
                     Publier une promo
@@ -436,7 +436,7 @@ export default function BonsPlansPage() {
             <div className="mb-4 flex items-end justify-between gap-4">
               <div className="section-sable">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-sable">Culture</p>
-                <h2 className="mt-1 font-display text-2xl font-bold text-night">Les rendez-vous à venir</h2>
+                <h2 className="mt-1 font-display text-2xl font-bold text-night">Les rendez-vous � venir</h2>
               </div>
             </div>
 
@@ -447,7 +447,7 @@ export default function BonsPlansPage() {
                   <input
                     value={eventQuery}
                     onChange={(e) => setEventQuery(e.target.value)}
-                    placeholder="Rechercher un événement, une salle, un artiste..."
+                    placeholder="Rechercher un �v�nement, une salle, un artiste..."
                     className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 pl-11 text-sm outline-none transition focus:border-nc-sable/35 focus:ring-4 focus:ring-nc-sable/10"
                   />
                 </div>
@@ -488,12 +488,12 @@ export default function BonsPlansPage() {
                 </div>
               ) : (
                 <div className="rounded-[2rem] border border-night/8 bg-white px-6 py-14 text-center text-night/55">
-                  <p className="text-lg font-semibold text-night">Aucun événement à venir pour le moment</p>
+                  <p className="text-lg font-semibold text-night">Aucun �v�nement � venir pour le moment</p>
                   <p className="mt-2 text-sm">
-                    Concerts, marchés, expos, conférences - ajoutez votre événement pour le faire connaître.
+                    Concerts, march�s, expos, conf�rences - ajoutez votre �v�nement pour le faire conna�tre.
                   </p>
                   <Link href="/bons-plans/publier" className="btn-primary mt-5 inline-flex items-center gap-2">
-                    Créer un événement
+                    Cr�er un �v�nement
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
@@ -505,7 +505,7 @@ export default function BonsPlansPage() {
 
       {savingFollow ? (
         <div className="fixed bottom-4 right-4 rounded-full bg-night px-4 py-2 text-sm font-semibold text-white shadow-lg">
-          Mise à jour en cours...
+          Mise � jour en cours...
         </div>
       ) : null}
     </main>

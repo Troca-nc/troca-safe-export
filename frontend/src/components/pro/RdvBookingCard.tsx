@@ -87,23 +87,23 @@ function formatSlotLabel(booking: RdvBookingItem) {
         minute: '2-digit',
       }).format(endsAt)
     : null
-  return `${date} · ${start}${end ? ` → ${end}` : ''}`
+  return `${date} � ${start}${end ? ` � ${end}` : ''}`
 }
 
 function statusLabel(status: string) {
   const value = String(status || '').toLowerCase()
   if (value === 'pending') return { label: 'En attente', tone: 'bg-amber-50 text-amber-700 border-amber-200' }
-  if (value === 'confirmed') return { label: 'Confirmé', tone: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
-  if (value === 'declined') return { label: 'Refusé', tone: 'bg-red-50 text-red-700 border-red-200' }
-  if (value === 'cancelled') return { label: 'Annulé', tone: 'bg-slate-100 text-slate-500 border-slate-200' }
-  if (value === 'completed') return { label: 'Terminé', tone: 'bg-sky-50 text-sky-700 border-sky-200' }
+  if (value === 'confirmed') return { label: 'Confirm�', tone: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
+  if (value === 'declined') return { label: 'Refus�', tone: 'bg-red-50 text-red-700 border-red-200' }
+  if (value === 'cancelled') return { label: 'Annul�', tone: 'bg-slate-100 text-slate-500 border-slate-200' }
+  if (value === 'completed') return { label: 'Termin�', tone: 'bg-sky-50 text-sky-700 border-sky-200' }
   if (value === 'no_show') return { label: 'Absent', tone: 'bg-rose-50 text-rose-700 border-rose-200' }
   return { label: 'En cours', tone: 'bg-slate-100 text-slate-600 border-slate-200' }
 }
 
 function reminderLabel(value?: string | null, fallback = 'Rappel') {
   if (!value) return null;
-  return `${fallback} envoyé`;
+  return `${fallback} envoy�`;
 }
 
 export default function RdvBookingCard({
@@ -144,7 +144,7 @@ export default function RdvBookingCard({
       <div className="flex flex-wrap items-center gap-2">
         <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${status.tone}`}>{status.label}</span>
         <span className="rounded-full bg-sand px-3 py-1 text-xs font-semibold text-night/60">
-          {isClient ? 'Mes demandes' : 'Demandes reçues'}
+          {isClient ? 'Mes demandes' : 'Demandes re�ues'}
         </span>
         <span className="rounded-full bg-[#0A7EA4]/8 px-3 py-1 text-xs font-semibold text-[#0A7EA4]">
           {formatSlotLabel(booking)}
@@ -174,7 +174,7 @@ export default function RdvBookingCard({
         </p>
         <p className="flex items-center gap-2">
           <MapPin className="h-4 w-4 text-[#0A7EA4]" />
-          {booking.commune || booking.pro.pro_commune || 'Nouvelle-Calédonie'}
+          {booking.commune || booking.pro.pro_commune || 'Nouvelle-Cal�donie'}
         </p>
         <p className="flex items-center gap-2">
           <UserRound className="h-4 w-4 text-[#0A7EA4]" />

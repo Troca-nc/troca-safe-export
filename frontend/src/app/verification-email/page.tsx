@@ -17,7 +17,7 @@ function VerificationEmailContent() {
   const role = searchParams.get('role') === 'pro' ? 'pro' : 'particulier'
   const [status, setStatus] = useState<Status>(token ? 'loading' : 'error')
   const [message, setMessage] = useState(
-    token ? 'Vérification en cours...' : "Vérifiez votre boîte mail pour confirmer votre compte."
+    token ? 'V�rification en cours...' : "V�rifiez votre bo�te mail pour confirmer votre compte."
   )
   const [resendBusy, setResendBusy] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
@@ -34,12 +34,12 @@ function VerificationEmailContent() {
       .then(() => {
         if (!mounted) return
         setStatus('success')
-        setMessage('Votre email a été confirmé. Votre compte est maintenant prêt.')
+        setMessage('Votre email a �t� confirm�. Votre compte est maintenant pr�t.')
       })
       .catch((err: any) => {
         if (!mounted) return
         setStatus('error')
-        setMessage(err?.response?.data?.error || 'Lien invalide ou expiré.')
+        setMessage(err?.response?.data?.error || 'Lien invalide ou expir�.')
       })
 
     return () => {
@@ -55,7 +55,7 @@ function VerificationEmailContent() {
 
     if (turnstileEnabled && !turnstileToken) {
       setStatus('error')
-      setMessage('Veuillez compléter la vérification anti-bot.')
+      setMessage('Veuillez compl�ter la v�rification anti-bot.')
       return
     }
 
@@ -63,7 +63,7 @@ function VerificationEmailContent() {
     try {
       const { data } = await authApi.resendVerification(email, turnstileToken || undefined)
       setStatus('success')
-      setMessage(data?.message || 'Un nouveau lien de confirmation a été envoyé.')
+      setMessage(data?.message || 'Un nouveau lien de confirmation a �t� envoy�.')
       setTurnstileToken('')
     } catch (err: any) {
       setStatus('error')
@@ -84,7 +84,7 @@ function VerificationEmailContent() {
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Confirmation email</p>
               <h1 className="mt-1 font-display text-3xl font-bold text-night">
-                {status === 'success' ? 'Compte confirmé' : 'Confirmez votre email'}
+                {status === 'success' ? 'Compte confirm�' : 'Confirmez votre email'}
               </h1>
               <p className="mt-2 text-sm text-night/60">{message}</p>
             </div>
@@ -94,12 +94,12 @@ function VerificationEmailContent() {
             <div className="rounded-2xl bg-sand/70 p-4">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-jungle" />
-                <p className="text-sm font-semibold text-night">Pourquoi c’est important</p>
+                <p className="text-sm font-semibold text-night">Pourquoi cest important</p>
               </div>
               <ul className="mt-3 space-y-2 text-sm text-night/65">
                 <li className="flex items-center gap-2">
                   <BadgeCheck className="h-4 w-4 text-jungle" />
-                  Badge de confiance renforcé
+                  Badge de confiance renforc�
                 </li>
                 <li className="flex items-center gap-2">
                   <BadgeCheck className="h-4 w-4 text-jungle" />
@@ -107,7 +107,7 @@ function VerificationEmailContent() {
                 </li>
                 <li className="flex items-center gap-2">
                   <BadgeCheck className="h-4 w-4 text-jungle" />
-                  Accès complet au compte Kalico
+                  Acc�s complet au compte Kalico
                 </li>
               </ul>
             </div>
@@ -119,18 +119,18 @@ function VerificationEmailContent() {
               </div>
               <p className="mt-2 text-sm text-night/60">
                 {role === 'pro'
-                  ? 'Après confirmation, vous pourrez configurer votre espace professionnel et activer vos options de visibilité.'
-                  : 'Après confirmation, vous pourrez déposer votre première annonce et utiliser toutes les fonctions de base.'}
+                  ? 'Apr�s confirmation, vous pourrez configurer votre espace professionnel et activer vos options de visibilit�.'
+                  : 'Apr�s confirmation, vous pourrez d�poser votre premi�re annonce et utiliser toutes les fonctions de base.'}
               </p>
               <p className="mt-3 text-xs text-night/50">
-                Le téléphone reste optionnel à ce stade, mais sa vérification améliore votre badge de confiance.
+                Le t�l�phone reste optionnel � ce stade, mais sa v�rification am�liore votre badge de confiance.
               </p>
             </div>
           </div>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link href={status === 'success' ? ctaHref : '/inscription'} className="btn-primary justify-center px-5 py-3">
-              {status === 'success' ? 'Continuer' : 'Retour à l’inscription'}
+              {status === 'success' ? 'Continuer' : 'Retour � linscription'}
             </Link>
             <button
               type="button"
@@ -150,9 +150,9 @@ function VerificationEmailContent() {
           </div>
 
           <div className="mt-4 rounded-2xl border border-night/10 bg-sand/40 p-4">
-            <p className="text-sm font-semibold text-night">Vérification anti-bot</p>
+            <p className="text-sm font-semibold text-night">V�rification anti-bot</p>
             <p className="mt-1 text-xs text-night/55">
-              Le renvoi de lien est protégé par un challenge discret pour éviter les abus.
+              Le renvoi de lien est prot�g� par un challenge discret pour �viter les abus.
             </p>
             <div className="mt-3">
               <TurnstileChallenge action="resend_verification" label="Renvoi de lien" onTokenChange={setTurnstileToken} />
@@ -161,7 +161,7 @@ function VerificationEmailContent() {
 
           {email ? (
             <p className="mt-4 text-sm text-night/50">
-              Email utilisé : <span className="font-semibold text-night">{email}</span>
+              Email utilis� : <span className="font-semibold text-night">{email}</span>
             </p>
           ) : null}
         </div>

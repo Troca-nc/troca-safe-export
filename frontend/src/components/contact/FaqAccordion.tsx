@@ -15,37 +15,37 @@ type FaqGroup = {
 
 const FAQ_GROUPS: FaqGroup[] = [
   {
-    title: '🔐 Compte & Sécurité',
+    title: '= Compte & S�curit�',
     items: [
       {
-        question: 'Comment créer un compte ?',
+        question: 'Comment cr�er un compte ?',
         answer:
-          'Cliquez sur "Inscription" en haut à droite, renseignez votre email et un mot de passe. Vous recevrez un email de confirmation pour activer votre compte.',
+          'Cliquez sur "Inscription" en haut � droite, renseignez votre email et un mot de passe. Vous recevrez un email de confirmation pour activer votre compte.',
       },
       {
-        question: "J'ai oublié mon mot de passe, comment le réinitialiser ?",
+        question: "J'ai oubli� mon mot de passe, comment le r�initialiser ?",
         answer:
-          'Sur la page de connexion, cliquez sur "Mot de passe oublié ?". Entrez votre email et vous recevrez un lien de réinitialisation dans les minutes qui suivent.',
+          'Sur la page de connexion, cliquez sur "Mot de passe oubli� ?". Entrez votre email et vous recevrez un lien de r�initialisation dans les minutes qui suivent.',
       },
       {
         question: 'Comment supprimer mon compte ?',
         answer:
-          'Rendez-vous dans Paramètres → Mon compte → Supprimer mon compte. Cette action est irréversible et supprime toutes vos annonces et données personnelles.',
+          'Rendez-vous dans Param�tres � Mon compte � Supprimer mon compte. Cette action est irr�versible et supprime toutes vos annonces et donn�es personnelles.',
       },
     ],
   },
   {
-    title: '📢 Annonces',
+    title: '=� Annonces',
     items: [
       {
         question: 'Comment publier une annonce ?',
         answer:
-          'Cliquez sur "Publier une annonce", choisissez une catégorie, renseignez les informations et ajoutez des photos. Votre annonce sera en ligne après validation.',
+          'Cliquez sur "Publier une annonce", choisissez une cat�gorie, renseignez les informations et ajoutez des photos. Votre annonce sera en ligne apr�s validation.',
       },
       {
-        question: "Pourquoi mon annonce n'apparaît-elle pas ?",
+        question: "Pourquoi mon annonce n'appara�t-elle pas ?",
         answer:
-          'Les annonces sont vérifiées avant publication. Si votre annonce ne s’affiche pas sous 24h, vérifiez qu’elle respecte nos conditions d’utilisation ou contactez-nous via ce formulaire.',
+          'Les annonces sont v�rifi�es avant publication. Si votre annonce ne saffiche pas sous 24h, v�rifiez quelle respecte nos conditions dutilisation ou contactez-nous via ce formulaire.',
       },
       {
         question: 'Combien de temps reste une annonce en ligne ?',
@@ -55,72 +55,72 @@ const FAQ_GROUPS: FaqGroup[] = [
       {
         question: 'Comment modifier ou supprimer une annonce ?',
         answer:
-          'Connectez-vous, allez dans "Mes annonces", cliquez sur l’annonce concernée puis "Modifier" ou "Supprimer".',
+          'Connectez-vous, allez dans "Mes annonces", cliquez sur lannonce concern�e puis "Modifier" ou "Supprimer".',
       },
     ],
   },
   {
-    title: '💳 Paiement & Boost',
+    title: '=� Paiement & Boost',
     items: [
       {
         question: "Comment fonctionne le boost d'annonce ?",
         answer:
-          'Le boost met votre annonce en avant sur la homepage et en tête des résultats de sa catégorie pendant la durée choisie. Vous pouvez booster depuis votre espace annonces.',
+          'Le boost met votre annonce en avant sur la homepage et en t�te des r�sultats de sa cat�gorie pendant la dur�e choisie. Vous pouvez booster depuis votre espace annonces.',
       },
       {
-        question: 'Quels moyens de paiement sont acceptés ?',
+        question: 'Quels moyens de paiement sont accept�s ?',
         answer:
-          'Nous acceptons les cartes bancaires Visa et Mastercard via notre partenaire de paiement sécurisé Stripe.',
+          'Nous acceptons les cartes bancaires Visa et Mastercard via notre partenaire de paiement s�curis� Stripe.',
       },
       {
         question: 'Comment obtenir un remboursement ?',
         answer:
-          'Si votre boost n’a pas fonctionné correctement, contactez-nous via ce formulaire dans les 7 jours avec votre numéro de transaction.',
+          'Si votre boost na pas fonctionn� correctement, contactez-nous via ce formulaire dans les 7 jours avec votre num�ro de transaction.',
       },
     ],
   },
   {
-    title: '🛡️ Sécurité des transactions',
+    title: '=� S�curit� des transactions',
     items: [
       {
-        question: 'Comment éviter les arnaques ?',
+        question: 'Comment �viter les arnaques ?',
         answer:
-          'Privilégiez toujours les échanges en personne, ne payez jamais par virement avant de voir l’objet, méfiez-vous des prix anormalement bas. En cas de doute, signalez l’annonce.',
+          'Privil�giez toujours les �changes en personne, ne payez jamais par virement avant de voir lobjet, m�fiez-vous des prix anormalement bas. En cas de doute, signalez lannonce.',
       },
       {
         question: 'Kalico garantit-il les transactions ?',
         answer:
-          'Kalico est une plateforme de mise en relation. Nous ne garantissons pas les transactions entre particuliers. Nous vous incitons à la prudence et à rencontrer les vendeurs en lieu public.',
+          'Kalico est une plateforme de mise en relation. Nous ne garantissons pas les transactions entre particuliers. Nous vous incitons � la prudence et � rencontrer les vendeurs en lieu public.',
       },
       {
-        question: 'Un vendeur me demande de payer par virement, est-ce sûr ?',
+        question: 'Un vendeur me demande de payer par virement, est-ce s�r ?',
         answer:
-          'Non. Ne payez jamais par virement bancaire ou mandat cash avant d’avoir reçu ou vu l’objet. C’est le mode opératoire classique des arnaques. Signalez immédiatement l’annonce.',
-      },
-    ],
-  },
-  {
-    title: '🚗 Covoiturage',
-    items: [
-      {
-        question: 'Comment réserver un trajet ?',
-        answer:
-          'Recherchez un trajet depuis la page Covoiturage, cliquez sur une offre et contactez le conducteur via la messagerie intégrée pour confirmer votre place.',
-      },
-      {
-        question: 'Comment annuler une réservation ?',
-        answer:
-          'Contactez le conducteur directement via la messagerie. En cas de problème, utilisez ce formulaire de contact.',
+          'Non. Ne payez jamais par virement bancaire ou mandat cash avant davoir re�u ou vu lobjet. Cest le mode op�ratoire classique des arnaques. Signalez imm�diatement lannonce.',
       },
     ],
   },
   {
-    title: '🏷️ Bons Plans',
+    title: '=� Covoiturage',
     items: [
       {
-        question: 'Qui peut publier un bon plan ou un événement ?',
+        question: 'Comment r�server un trajet ?',
         answer:
-          'Tout utilisateur inscrit peut publier un bon plan. Les professionnels (commerçants, enseignes) peuvent créer un compte Pro pour bénéficier de fonctionnalités supplémentaires.',
+          'Recherchez un trajet depuis la page Covoiturage, cliquez sur une offre et contactez le conducteur via la messagerie int�gr�e pour confirmer votre place.',
+      },
+      {
+        question: 'Comment annuler une r�servation ?',
+        answer:
+          'Contactez le conducteur directement via la messagerie. En cas de probl�me, utilisez ce formulaire de contact.',
+      },
+    ],
+  },
+  {
+    title: '<� Bons Plans',
+    items: [
+      {
+        question: 'Qui peut publier un bon plan ou un �v�nement ?',
+        answer:
+          'Tout utilisateur inscrit peut publier un bon plan. Les professionnels (commer�ants, enseignes) peuvent cr�er un compte Pro pour b�n�ficier de fonctionnalit�s suppl�mentaires.',
       },
     ],
   },

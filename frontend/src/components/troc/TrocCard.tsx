@@ -42,7 +42,7 @@ type Props = {
 
 function formatComplement(listing: Props['listing']) {
   if (!listing.troc_accepts_complement_xpf || !listing.troc_complement_max_xpf) return null
-  return `Jusqu’à ${Number(listing.troc_complement_max_xpf).toLocaleString('fr-FR')} XPF de complément`
+  return `Jusqu� ${Number(listing.troc_complement_max_xpf).toLocaleString('fr-FR')} XPF de compl�ment`
 }
 
 function formatWants(values: string[]) {
@@ -68,14 +68,14 @@ export default function TrocCard({ listing, compatibility = listing.compatibilit
           <ListingImage
             src={listing.cover_image ?? listing.photos?.[0] ?? null}
             alt={listing.title}
-            fallbackIcon="🔄"
+            fallbackIcon="="
             sizes="(max-width: 640px) 100vw, 50vw"
             imgClassName="group-hover:scale-105 transition-transform duration-300"
           />
 
           <div className="absolute left-3 top-3 flex flex-wrap gap-2">
             <span className="rounded-full bg-night/85 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
-              🔄 Troc
+              = Troc
             </span>
             {listing.category_name ? (
               <span className="rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-night/70">
@@ -85,7 +85,7 @@ export default function TrocCard({ listing, compatibility = listing.compatibilit
           </div>
 
           <div className="absolute bottom-3 left-3 right-3">
-            <TrocCompatibilityMeter compatibility={compatibility} emptyLabel="Connectez-vous pour voir votre compatibilité" />
+            <TrocCompatibilityMeter compatibility={compatibility} emptyLabel="Connectez-vous pour voir votre compatibilit�" />
           </div>
         </div>
 
@@ -137,7 +137,7 @@ export default function TrocCard({ listing, compatibility = listing.compatibilit
           </div>
 
           <div className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-coral px-4 py-3 text-sm font-semibold text-white transition group-hover:bg-coral/90">
-            Proposer un échange
+            Proposer un �change
             <HeartHandshake className="h-4 w-4" />
           </div>
         </div>

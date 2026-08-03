@@ -20,9 +20,9 @@ type BoostPlan = {
 }
 
 const BOOST_PLANS: BoostPlan[] = [
-  { days: 3, price: 990, label: 'Idéal pour tester' },
+  { days: 3, price: 990, label: 'Id�al pour tester' },
   { days: 7, price: 1990, label: 'Le plus populaire', highlight: true },
-  { days: 30, price: 5900, label: 'Visibilité maximale' },
+  { days: 30, price: 5900, label: 'Visibilit� maximale' },
 ]
 
 export default function BoostModal({
@@ -81,7 +81,7 @@ export default function BoostModal({
         {success ? (
           <div className="flex flex-col items-center justify-center py-10 text-center">
             <CheckCircle2 className="h-14 w-14 text-emerald-600" />
-            <h3 className="mt-4 font-display text-2xl font-bold text-night">Boost activé !</h3>
+            <h3 className="mt-4 font-display text-2xl font-bold text-night">Boost activ� !</h3>
             <p className="mt-2 max-w-md text-sm text-night/60">
               Votre annonce est maintenant mise en avant sur Kalico.
             </p>
@@ -98,8 +98,8 @@ export default function BoostModal({
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Boost</p>
-                <h3 className="mt-1 font-display text-2xl font-bold text-night">⚡ Booster cette annonce</h3>
-                <p className="mt-1 text-sm text-night/60">Votre annonce apparaît en tête des résultats et sur la homepage.</p>
+                <h3 className="mt-1 font-display text-2xl font-bold text-night">� Booster cette annonce</h3>
+                <p className="mt-1 text-sm text-night/60">Votre annonce appara�t en t�te des r�sultats et sur la homepage.</p>
               </div>
               <button
                 type="button"
@@ -147,7 +147,7 @@ export default function BoostModal({
               <p className="mt-1 text-sm text-night/65 line-clamp-2">{listing.title}</p>
               <div className="mt-3 flex items-center justify-between gap-3">
                 <span className="text-sm text-night/60">
-                  {selectedPlan.days} jours · {selectedPlan.price.toLocaleString('fr-FR')} XPF
+                  {selectedPlan.days} jours � {selectedPlan.price.toLocaleString('fr-FR')} XPF
                 </span>
                 <button
                   type="button"

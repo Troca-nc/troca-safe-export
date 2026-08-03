@@ -66,7 +66,7 @@ export default function BusinessProfilePage() {
 
   const averageLabel = useMemo(() => {
     if (!business?.review_count) return 'Aucun avis pour le moment'
-    return `${Number(business.review_avg || 0).toFixed(1)} / 5 · ${business.review_count} avis`
+    return `${Number(business.review_avg || 0).toFixed(1)} / 5 e ${business.review_count} avis`
   }, [business])
 
   const handleSubmitReview = async (event: React.FormEvent) => {
@@ -84,7 +84,7 @@ export default function BusinessProfilePage() {
       })
       setReviews((current) => [data?.data || data, ...current.filter((review) => review.id !== (data?.data?.id || data?.id))])
       setReviewComment('')
-      window.alert('Votre avis a bien été enregistré.')
+      window.alert('Votre avis a bien ete enregistre.')
     } catch (err: any) {
       window.alert(err?.response?.data?.error || 'Impossible de publier votre avis.')
     } finally {
@@ -113,7 +113,7 @@ export default function BusinessProfilePage() {
                 {business?.logo_url ? (
                   <img src={business.logo_url} alt={business?.name || 'Enseigne'} className="h-full w-full object-cover" />
                 ) : (
-                  <span className="text-2xl opacity-40">🏢</span>
+                  <span className="text-2xl opacity-40">🏷️</span>
                 )}
               </div>
               <div>
@@ -122,11 +122,11 @@ export default function BusinessProfilePage() {
                   {business?.badge === 'verified' ? (
                     <span className="inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-coral">
                       <Check className="h-3 w-3" />
-                      Vérifié Kalico
+                      Verifie Kalico
                     </span>
                   ) : business?.badge === 'active' ? (
                     <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-lagoon">
-                      🔵 Actif
+                      =5 Actif
                     </span>
                   ) : null}
                 </div>
@@ -134,7 +134,7 @@ export default function BusinessProfilePage() {
               </div>
             </div>
             <p className="mt-4 max-w-3xl text-sm leading-relaxed text-white/72">
-              {business?.category || 'Commerce local'} · {business?.bon_plan_count || 0} bon plan{Number(business?.bon_plan_count || 0) > 1 ? 's' : ''} publié{Number(business?.bon_plan_count || 0) > 1 ? 's' : ''}
+              {business?.category || 'Commerce local'} e {business?.bon_plan_count || 0} bon plan{Number(business?.bon_plan_count || 0) > 1 ? 's' : ''} publie{Number(business?.bon_plan_count || 0) > 1 ? 's' : ''}
             </p>
           </div>
 
@@ -161,7 +161,7 @@ export default function BusinessProfilePage() {
                 </div>
               ) : (
                 <div className="rounded-[1.5rem] border border-night/8 bg-sand/40 p-6 text-center text-night/60">
-                  Aucune promo en cours. Revenez bientôt.
+                  Aucune promo en cours. Revenez bientet.
                 </div>
               )}
             </section>
@@ -193,7 +193,7 @@ export default function BusinessProfilePage() {
                         {review.comment ? <p className="mt-3 text-sm leading-relaxed text-night/70">{review.comment}</p> : null}
                         {review.reply_text ? (
                           <div className="mt-3 rounded-2xl border border-coral/10 bg-coral/5 p-3 text-sm text-night/70">
-                            <p className="font-semibold text-coral">Réponse de l&apos;enseigne</p>
+                            <p className="font-semibold text-coral">Reponse de l&apos;enseigne</p>
                             <p className="mt-1">{review.reply_text}</p>
                           </div>
                         ) : null}
@@ -216,7 +216,7 @@ export default function BusinessProfilePage() {
                     <h3 className="text-lg font-bold">Laisser un avis</h3>
                   </div>
                   <p className="mt-2 text-sm text-night/60">
-                    Compte âgé de 7 jours minimum requis. Un seul avis par utilisateur et par enseigne.
+                    Compte ege de 7 jours minimum requis. Un seul avis par utilisateur et par enseigne.
                   </p>
 
                   <div className="mt-4">
@@ -231,7 +231,7 @@ export default function BusinessProfilePage() {
                             type="button"
                             onClick={() => setReviewRating(value)}
                             className={`flex h-11 w-11 items-center justify-center rounded-full border transition ${active ? 'border-amber-300 bg-amber-50 text-amber-500' : 'border-night/10 bg-white text-night/35'}`}
-                            aria-label={`${value} étoiles`}
+                            aria-label={`${value} etoiles`}
                           >
                             <BadgeCheck className={`h-4 w-4 ${active ? 'text-amber-500' : ''}`} />
                           </button>
@@ -248,7 +248,7 @@ export default function BusinessProfilePage() {
                       maxLength={500}
                       rows={5}
                       className="input mt-2 w-full"
-                      placeholder="Décrivez votre expérience en quelques mots..."
+                      placeholder="Decrivez votre experience en quelques mots..."
                     />
                   </label>
 

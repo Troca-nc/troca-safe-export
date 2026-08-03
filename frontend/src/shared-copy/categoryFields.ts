@@ -1,6 +1,6 @@
-// ⚠️ COPIE MANUELLE depuis /shared/categoryFields.ts
-// Ce fichier doit être copié à nouveau si l'original est modifié.
-// Ne pas éditer ce fichier séparément de l'original sans reporter le changement des deux côtés.
+// � COPIE MANUELLE depuis /shared/categoryFields.ts
+// Ce fichier doit �tre copi� � nouveau si l'original est modifi�.
+// Ne pas �diter ce fichier s�par�ment de l'original sans reporter le changement des deux c�t�s.
 export interface CategoryFieldOption {
   value: string
   label: string
@@ -187,7 +187,7 @@ const SERVICES_FIELDS: CategoryField[] = [
   },
   { name: 'metadata.tarif_xpf', label: 'Tarif', type: 'number', unit: 'XPF', placeholder: '2500' },
   { name: 'metadata.tarif_description', label: 'Description du tarif', type: 'text', placeholder: 'A partir de 2 500 XPF / h selon la complexite' },
-  { name: 'metadata.zone_intervention', label: 'Zone d’intervention', type: 'text', required: true, placeholder: 'Noumea, Dumbea, Mont-Dore', helper: 'Separez les communes par des virgules' },
+  { name: 'metadata.zone_intervention', label: 'Zone dintervention', type: 'text', required: true, placeholder: 'Noumea, Dumbea, Mont-Dore', helper: 'Separez les communes par des virgules' },
   {
     name: 'metadata.disponibilite',
     label: 'Disponibilite',

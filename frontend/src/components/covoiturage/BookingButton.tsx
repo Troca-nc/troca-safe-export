@@ -49,7 +49,7 @@ export default function BookingButton({
   const buttonLabel = useMemo(() => {
     if (seatsLeft <= 0) return 'Complet'
     if (normalizedMode === 'manual') return 'Demander une place'
-    return 'Réserver une place'
+    return 'R�server une place'
   }, [normalizedMode, seatsLeft])
 
   const submitBooking = async (payloadMessage?: string) => {
@@ -62,16 +62,16 @@ export default function BookingButton({
       })
       const status = String(response.data?.data?.status || '').toLowerCase()
       if (status === 'pending') {
-        setSuccess({ mode: 'manual', label: '⏳ Demande envoyée - réponse sous 24h' })
+        setSuccess({ mode: 'manual', label: '� Demande envoy�e - r�ponse sous 24h' })
       } else {
-        setSuccess({ mode: 'auto', label: '✅ Place réservée !' })
+        setSuccess({ mode: 'auto', label: ' Place r�serv�e !' })
       }
       setOpenRequest(false)
       setMessage('')
       setSpinKey((value) => value + 1)
       await onBooked?.()
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || 'Impossible de réserver ce trajet.')
+      setError(err?.response?.data?.error || err?.message || 'Impossible de r�server ce trajet.')
     } finally {
       setLoading(false)
     }
@@ -102,7 +102,7 @@ export default function BookingButton({
         className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#0A7EA4]/20 bg-white px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] transition hover:-translate-y-0.5 hover:shadow-sm"
       >
         <Sparkles className="h-4 w-4" />
-        Connectez-vous pour réserver
+        Connectez-vous pour r�server
       </Link>
     )
   }
@@ -158,7 +158,7 @@ export default function BookingButton({
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     rows={5}
-                    placeholder="Bonjour, je suis intéressé(e) par cette place..."
+                    placeholder="Bonjour, je suis int�ress�(e) par cette place..."
                     className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#0A7EA4]/35 focus:ring-4 focus:ring-[#0A7EA4]/10"
                   />
                 </label>

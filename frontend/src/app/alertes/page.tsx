@@ -24,7 +24,7 @@ export default function AlertesPage() {
         ) : !isAuthenticated ? (
           <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-lagon">Mes alertes</p>
-            <h1 className="mt-2 text-3xl font-bold text-night font-display">Connectez-vous pour gérer vos alertes</h1>
+            <h1 className="mt-2 text-3xl font-bold text-night font-display">Connectez-vous pour g�rer vos alertes</h1>
             <p className="mt-3 text-sm text-night/55">
               Sauvegardez vos recherches et retrouvez vos alertes sur tous vos appareils.
             </p>
@@ -33,7 +33,7 @@ export default function AlertesPage() {
                 Se connecter
               </Link>
               <Link href="/inscription?next=/alertes" className="btn-secondary rounded-2xl px-4 py-2.5 text-sm">
-                Créer un compte
+                Cr�er un compte
               </Link>
             </div>
           </div>

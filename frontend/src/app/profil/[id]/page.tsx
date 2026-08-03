@@ -1,5 +1,5 @@
 'use client'
-// src/app/profil/[id]/page.tsx — Profil public d'un vendeur
+// src/app/profil/[id]/page.tsx  Profil public d'un vendeur
 
 import { useEffect, useState, type ElementType } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -50,10 +50,10 @@ export default function PublicProfilePage() {
         itemId: id,
         title: `${profile.prenom} ${profile.nom} | Kalico`,
         description: [
-          profile.commune_name ? `Basé à ${profile.commune_name}` : null,
+          profile.commune_name ? `Bas� � ${profile.commune_name}` : null,
           profile.is_pro ? 'Compte professionnel' : 'Profil particulier',
           profile.nb_annonces ? `${profile.nb_annonces} annonce${profile.nb_annonces > 1 ? 's' : ''}` : null,
-        ].filter(Boolean).join(' • '),
+        ].filter(Boolean).join(' " '),
         url: `${SITE_URL}/profil/${id}`,
         imageUrl: null,
       }
@@ -111,12 +111,12 @@ export default function PublicProfilePage() {
               <div className="flex flex-wrap items-center gap-2">
                 {profile.email_verified && (
                   <span className="inline-flex items-center gap-1 rounded-full border border-ocean/20 bg-ocean/8 px-2.5 py-0.5 text-xs font-medium text-ocean">
-                    <MailCheck className="w-3.5 h-3.5" /> Email vérifié
+                    <MailCheck className="w-3.5 h-3.5" /> Email v�rifi�
                   </span>
                 )}
                 {profile.phone_verified && (
                   <span className="inline-flex items-center gap-1 rounded-full border border-jungle/20 bg-jungle/8 px-2.5 py-0.5 text-xs font-medium text-jungle">
-                    <Phone className="w-3.5 h-3.5" /> Téléphone vérifié
+                    <Phone className="w-3.5 h-3.5" /> T�l�phone v�rifi�
                   </span>
                 )}
               </div>
@@ -126,7 +126,7 @@ export default function PublicProfilePage() {
               <p className="text-sm text-night/50 flex items-center gap-1 mb-2">
                 <MapPin className="w-3.5 h-3.5" />
                 {profile.commune_name}
-                {profile.province_name && <span className="text-night/35">· {profile.province_name}</span>}
+                {profile.province_name && <span className="text-night/35">� {profile.province_name}</span>}
               </p>
             )}
             {profile.bio && (
@@ -141,7 +141,7 @@ export default function PublicProfilePage() {
               {profile.avg_response_time_label && (
                 <span className="flex items-center gap-1 text-night/50">
                   <Clock3 className="w-4 h-4" />
-                  Répond en moyenne en {profile.avg_response_time_label}
+                  R�pond en moyenne en {profile.avg_response_time_label}
                 </span>
               )}
               {profile.note_moyenne && (
@@ -183,7 +183,7 @@ export default function PublicProfilePage() {
               tone="text-blue-500"
             />
             <MetricCard
-              label="Favoris reçus"
+              label="Favoris re�us"
               value={Number(profile.total_favoris ?? 0).toLocaleString('fr-FR')}
               icon={Heart}
               tone="text-red-400"
@@ -191,14 +191,14 @@ export default function PublicProfilePage() {
             <MetricCard
               label="Annonces actives"
               value={Number(profile.active_listings_count ?? profile.nb_annonces ?? 0).toLocaleString('fr-FR')}
-              sub={profile.is_pro ? 'Aperçu public du catalogue' : 'Catalogue vendeur'}
+              sub={profile.is_pro ? 'Aper�u public du catalogue' : 'Catalogue vendeur'}
               icon={TrendingUp}
               tone="text-coral"
             />
             <MetricCard
               label="Boosts / mises en avant"
               value={Number(profile.annonces_boostees ?? 0).toLocaleString('fr-FR')}
-              sub={profile.is_pro ? 'Incitation à activer plus de visibilité' : 'Options pro disponibles'}
+              sub={profile.is_pro ? 'Incitation � activer plus de visibilit�' : 'Options pro disponibles'}
               icon={Award}
               tone="text-amber-500"
             />
@@ -253,22 +253,22 @@ export default function PublicProfilePage() {
 
               <div className="p-5 sm:p-6 bg-gradient-to-br from-white to-sand/40">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-ocean/70">Zone de vente</p>
-                <h2 className="mt-1 font-display text-2xl font-bold text-night">Géolocalisation du vendeur</h2>
+                <h2 className="mt-1 font-display text-2xl font-bold text-night">G�olocalisation du vendeur</h2>
                 <p className="mt-2 text-sm text-night/60">
                   {profile.commune_name
-                    ? `Basé à ${profile.commune_name}${profile.province_name ? `, ${profile.province_name}` : ''}.`
-                    : 'Zone de vente non précisée pour le moment.'}
+                    ? `Bas� � ${profile.commune_name}${profile.province_name ? `, ${profile.province_name}` : ''}.`
+                    : 'Zone de vente non pr�cis�e pour le moment.'}
                 </p>
 
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   {profile.email_verified && (
                     <span className="inline-flex items-center justify-center gap-1.5 rounded-2xl border border-ocean/15 bg-ocean/5 px-3 py-2 text-xs font-semibold text-ocean">
-                      <MailCheck className="w-3.5 h-3.5" /> Email vérifié
+                      <MailCheck className="w-3.5 h-3.5" /> Email v�rifi�
                     </span>
                   )}
                   {profile.phone_verified && (
                     <span className="inline-flex items-center justify-center gap-1.5 rounded-2xl border border-jungle/15 bg-jungle/5 px-3 py-2 text-xs font-semibold text-jungle">
-                      <Phone className="w-3.5 h-3.5" /> Téléphone vérifié
+                      <Phone className="w-3.5 h-3.5" /> T�l�phone v�rifi�
                     </span>
                   )}
                 </div>
@@ -294,8 +294,8 @@ export default function PublicProfilePage() {
 
                 {isOwn && profile.is_pro && (
                   <div className="mt-4 rounded-2xl border border-coral/15 bg-coral/5 p-4">
-                    <p className="text-sm font-semibold text-night">Définir votre zone de couverture</p>
-                    <p className="mt-1 text-sm text-night/55">Renforcez votre visibilité sur la commune et la province où vous vendez le plus.</p>
+                    <p className="text-sm font-semibold text-night">D�finir votre zone de couverture</p>
+                    <p className="mt-1 text-sm text-night/55">Renforcez votre visibilit� sur la commune et la province o� vous vendez le plus.</p>
                     <div className="mt-3">
                       <Link href="/parametres" className="btn-primary text-sm px-4 py-2">
                         Ajuster ma zone
@@ -312,10 +312,10 @@ export default function PublicProfilePage() {
           <div className="mb-6 rounded-3xl border border-coral/15 bg-coral/5 p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Visibilité vendeur</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Visibilit� vendeur</p>
                 <h2 className="mt-1 font-display text-2xl font-bold text-night">Booster vos annonces et mettre en avant votre vitrine</h2>
                 <p className="mt-1 text-sm text-night/60 max-w-2xl">
-                  Suivez vos vues, vos favoris et vos annonces boostées, puis activez les options de visibilité pour remonter dans les résultats.
+                  Suivez vos vues, vos favoris et vos annonces boost�es, puis activez les options de visibilit� pour remonter dans les r�sultats.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">

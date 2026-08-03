@@ -52,7 +52,7 @@ function cleanText(value?: string | null, fallback = '') {
     .replace(/\bundefined\b/gi, '')
     .replace(/\bnull\b/gi, '')
     .replace(/\s{2,}/g, ' ')
-    .replace(/\s+—\s*$/, '')
+    .replace(/\s+\s*$/, '')
     .trim()
   return text.length > 0 ? text : fallback
 }
@@ -130,7 +130,7 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
             </span>
           ) : business?.badge === 'active' ? (
             <span className="badge badge-emeraude inline-flex items-center gap-1 text-[11px] shadow-sm">
-              🔵 Actif
+              =5 Actif
             </span>
           ) : null}
         </div>
@@ -160,7 +160,7 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
           ) : null}
         </div>
 
-        <p className="line-clamp-3 text-sm leading-relaxed text-night/65">{cleanText(bonPlan.description, 'Découvrez cette offre locale.')}</p>
+        <p className="line-clamp-3 text-sm leading-relaxed text-night/65">{cleanText(bonPlan.description, 'D�couvrez cette offre locale.')}</p>
 
         <div className="flex items-baseline gap-2">
           {priceBefore ? <span className="text-sm text-night/45 line-through">{priceBefore}</span> : null}

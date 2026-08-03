@@ -26,15 +26,15 @@ function formatName(prenom?: string | null, nom?: string | null) {
 function statusMeta(status: string) {
   switch (status) {
     case 'accepted':
-      return { label: 'Acceptée', className: 'bg-jungle/10 text-jungle' }
+      return { label: 'Accept�e', className: 'bg-jungle/10 text-jungle' }
     case 'declined':
-      return { label: 'Refusée', className: 'bg-night/6 text-night/55' }
+      return { label: 'Refus�e', className: 'bg-night/6 text-night/55' }
     case 'countered':
       return { label: 'Contre-proposition', className: 'bg-blue-50 text-blue-700' }
     case 'completed':
-      return { label: 'Finalisée', className: 'bg-ocean/10 text-ocean' }
+      return { label: 'Finalis�e', className: 'bg-ocean/10 text-ocean' }
     case 'expired':
-      return { label: 'Expirée', className: 'bg-amber-50 text-amber-700' }
+      return { label: 'Expir�e', className: 'bg-amber-50 text-amber-700' }
     case 'seen':
       return { label: 'Vue', className: 'bg-night/6 text-night/55' }
     default:
@@ -145,9 +145,9 @@ export default function TrocProposalsPanel() {
     return (
       <section className="rounded-[2rem] border border-night/8 bg-white p-6 shadow-card">
         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Mes propositions</p>
-        <h2 className="mt-2 text-xl font-bold text-night">Suivez vos échanges structurés</h2>
+        <h2 className="mt-2 text-xl font-bold text-night">Suivez vos �changes structur�s</h2>
         <p className="mt-2 text-sm leading-6 text-night/60">
-          Connectez-vous pour voir les propositions reçues, vos envois, les contre-propositions et les cycles détectés.
+          Connectez-vous pour voir les propositions re�ues, vos envois, les contre-propositions et les cycles d�tect�s.
         </p>
         <button
           type="button"
@@ -165,9 +165,9 @@ export default function TrocProposalsPanel() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Mes propositions</p>
-          <h2 className="mt-2 text-2xl font-bold text-night">Recevez, répondez, contre-proposez</h2>
+          <h2 className="mt-2 text-2xl font-bold text-night">Recevez, r�pondez, contre-proposez</h2>
           <p className="mt-2 text-sm leading-6 text-night/60">
-            Gardez la main sur vos échanges structurés. Une contre-proposition ouvre un nouveau fil sans perdre le contexte.
+            Gardez la main sur vos �changes structur�s. Une contre-proposition ouvre un nouveau fil sans perdre le contexte.
           </p>
         </div>
         <div className="inline-flex rounded-full border border-night/10 bg-[var(--color-background-secondary)] p-1">
@@ -180,7 +180,7 @@ export default function TrocProposalsPanel() {
                 tab === value ? 'bg-white text-night shadow-sm ring-1 ring-black/5' : 'text-night/75 hover:bg-white hover:text-night'
               }`}
             >
-              {value === 'received' ? 'Reçues' : 'Envoyées'}
+              {value === 'received' ? 'Re�ues' : 'Envoy�es'}
             </button>
           ))}
         </div>
@@ -190,8 +190,8 @@ export default function TrocProposalsPanel() {
         {visibleProposals.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-night/10 bg-sand/40 p-6 text-center text-sm text-night/55">
             {tab === 'received'
-              ? 'Aucune proposition reçue pour le moment.'
-              : 'Vous n’avez pas encore envoyé de proposition de troc.'}
+              ? 'Aucune proposition re�ue pour le moment.'
+              : 'Vous navez pas encore envoy� de proposition de troc.'}
           </div>
         ) : visibleProposals.map((proposal) => {
           const meta = statusMeta(proposal.status)
@@ -211,7 +211,7 @@ export default function TrocProposalsPanel() {
                     </span>
                     {hasCounterProposal ? (
                       <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700">
-                        Contre-proposition reçue
+                        Contre-proposition re�ue
                       </span>
                     ) : null}
                   </div>
@@ -220,8 +220,8 @@ export default function TrocProposalsPanel() {
                   </h3>
                   <p className="mt-1 text-sm text-night/60">
                     {isReceived
-                      ? `${proposerName} vous propose un échange`
-                      : `Votre proposition a été envoyée à ${ownerName}`}
+                      ? `${proposerName} vous propose un �change`
+                      : `Votre proposition a �t� envoy�e � ${ownerName}`}
                   </p>
 
                   {proposal.offered_description ? (
@@ -241,7 +241,7 @@ export default function TrocProposalsPanel() {
                     {proposal.expires_at ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 font-medium">
                         <Clock3 className="h-3.5 w-3.5" />
-                        Expire bientôt
+                        Expire bient�t
                       </span>
                     ) : null}
                   </div>
@@ -252,7 +252,7 @@ export default function TrocProposalsPanel() {
                     href={`/troc/${proposal.listing_id}`}
                     className="inline-flex items-center gap-2 rounded-full border border-night/10 bg-white px-3 py-2 text-sm font-semibold text-night/70 transition hover:border-coral/30 hover:text-coral"
                   >
-                    Voir l’annonce
+                    Voir lannonce
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                   {isReceived && ['pending', 'seen', 'countered'].includes(proposal.status) ? (
@@ -305,20 +305,20 @@ export default function TrocProposalsPanel() {
                         onChange={(event) => setCounterDescription(event.target.value)}
                         rows={4}
                         className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10"
-                        placeholder="Décrivez votre contre-proposition..."
+                        placeholder="D�crivez votre contre-proposition..."
                       />
                     </label>
 
                     <label className="block space-y-2">
-                      <span className="text-sm font-medium text-night">Complément XPF</span>
+                      <span className="text-sm font-medium text-night">Compl�ment XPF</span>
                       <select
                         value={counterComplementDirection}
                         onChange={(event) => setCounterComplementDirection(event.target.value as 'none' | 'i_pay' | 'they_pay')}
                         className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10"
                       >
-                        <option value="none">Aucun complément</option>
-                        <option value="i_pay">Je propose un complément</option>
-                        <option value="they_pay">Je demande un complément</option>
+                        <option value="none">Aucun compl�ment</option>
+                        <option value="i_pay">Je propose un compl�ment</option>
+                        <option value="they_pay">Je demande un compl�ment</option>
                       </select>
                     </label>
 
@@ -343,7 +343,7 @@ export default function TrocProposalsPanel() {
                         onChange={(event) => setCounterMessage(event.target.value)}
                         rows={3}
                         className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10"
-                        placeholder="Ajoutez quelques précisions..."
+                        placeholder="Ajoutez quelques pr�cisions..."
                       />
                     </label>
                   </div>

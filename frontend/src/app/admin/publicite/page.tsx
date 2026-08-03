@@ -31,9 +31,9 @@ function formatMoney(value?: number | null) {
 }
 
 function formatDate(value?: string | null) {
-  if (!value) return '—'
+  if (!value) return ''
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return '—'
+  if (Number.isNaN(date.getTime())) return ''
   return new Intl.DateTimeFormat('fr-FR', {
     day: '2-digit',
     month: '2-digit',
@@ -46,11 +46,11 @@ function getTypeLabel(type?: string) {
     case 'bon_plan':
       return 'Bon plan'
     case 'banner':
-      return 'Bannière'
+      return 'Banni�re'
     case 'popup':
       return 'Popup'
     default:
-      return type || '—'
+      return type || ''
   }
 }
 
@@ -63,9 +63,9 @@ function getStatusLabel(status?: string | null) {
     case 'paused':
       return 'Suspendu'
     case 'expired':
-      return 'Expiré'
+      return 'Expir�'
     default:
-      return status || '—'
+      return status || ''
   }
 }
 
@@ -74,12 +74,12 @@ function getAdvertiserLabel(campaign: Campaign) {
     campaign.sponsor_name
     || [campaign.sponsor_first_name, campaign.sponsor_last_name].filter(Boolean).join(' ').trim()
     || campaign.sponsor_email
-    || '—'
+    || ''
   )
 }
 
 function getCategoryLabel(campaign: Campaign) {
-  if (campaign.type === 'banner') return campaign.category_slug || '—'
+  if (campaign.type === 'banner') return campaign.category_slug || ''
   return 'Homepage'
 }
 
@@ -120,7 +120,7 @@ export default function AdminPublicitePage() {
   }, [])
 
   const popupIndicator = useMemo(
-    () => activePopup?.title || defaultPopup?.title || 'Bienvenue Kalico (défaut)',
+    () => activePopup?.title || defaultPopup?.title || 'Bienvenue Kalico (d�faut)',
     [activePopup, defaultPopup]
   )
 
@@ -140,11 +140,11 @@ export default function AdminPublicitePage() {
           <div>
             <p className="inline-flex items-center gap-2 rounded-full border border-nc-lagon/15 bg-nc-lagonLight px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-lagon">
               <Megaphone className="h-3.5 w-3.5" />
-              Administration publicité
+              Administration publicit�
             </p>
             <h1 className="mt-3 font-display text-3xl font-bold text-night">Pilotage des campagnes</h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-night/60">
-              Suivez les campagnes sponsorisées, les revenus du mois et l’état du popup d’accueil depuis un seul écran.
+              Suivez les campagnes sponsoris�es, les revenus du mois et l�tat du popup daccueil depuis un seul �cran.
             </p>
           </div>
           <Link href="/admin" className="btn-secondary rounded-2xl px-4 py-2.5 text-sm">
@@ -157,13 +157,13 @@ export default function AdminPublicitePage() {
         <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">Revenus publicitaires ce mois</p>
           <p className="mt-2 text-3xl font-bold text-night">{formatMoney(revenue)}</p>
-          <p className="mt-1 text-sm text-night/55">Somme des campagnes actives et expirées du mois en cours.</p>
+          <p className="mt-1 text-sm text-night/55">Somme des campagnes actives et expir�es du mois en cours.</p>
         </article>
         <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">Popup actuel</p>
           <p className="mt-2 text-2xl font-bold text-night">{popupIndicator}</p>
           <p className="mt-1 text-sm text-night/55">
-            Une seule campagne popup peut être active à la fois. Le défaut s’affiche si aucune campagne sponsorisée n’est en cours.
+            Une seule campagne popup peut �tre active � la fois. Le d�faut saffiche si aucune campagne sponsoris�e nest en cours.
           </p>
         </article>
       </section>
@@ -171,14 +171,14 @@ export default function AdminPublicitePage() {
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         <div className="flex items-center gap-2 text-sm font-semibold text-night">
           <Sparkles className="h-4 w-4 text-nc-lagon" />
-          Campagnes enregistrées
+          Campagnes enregistr�es
         </div>
 
         {loading ? (
           <p className="mt-4 text-sm text-night/55">Chargement...</p>
         ) : campaigns.length === 0 ? (
           <div className="mt-4 rounded-2xl border border-dashed border-[var(--color-border)] px-6 py-12 text-center text-night/55">
-            Aucune campagne enregistrée.
+            Aucune campagne enregistr�e.
           </div>
         ) : (
           <div className="mt-4 overflow-x-auto rounded-[1.5rem] border border-[var(--color-border)]">
@@ -187,11 +187,11 @@ export default function AdminPublicitePage() {
                 <tr>
                   <th className="px-4 py-3 text-left font-semibold">Type</th>
                   <th className="px-4 py-3 text-left font-semibold">Annonceur</th>
-                  <th className="px-4 py-3 text-left font-semibold">Catégorie</th>
-                  <th className="px-4 py-3 text-left font-semibold">Début</th>
+                  <th className="px-4 py-3 text-left font-semibold">Cat�gorie</th>
+                  <th className="px-4 py-3 text-left font-semibold">D�but</th>
                   <th className="px-4 py-3 text-left font-semibold">Fin</th>
                   <th className="px-4 py-3 text-left font-semibold">Statut</th>
-                  <th className="px-4 py-3 text-left font-semibold">Revenus générés</th>
+                  <th className="px-4 py-3 text-left font-semibold">Revenus g�n�r�s</th>
                   <th className="px-4 py-3 text-left font-semibold">Action</th>
                 </tr>
               </thead>
@@ -227,7 +227,7 @@ export default function AdminPublicitePage() {
                     <td className="px-4 py-3">
                       {campaign.is_default_popup ? (
                         <span className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-3 py-2 text-sm font-semibold text-night/50">
-                          Popup par défaut
+                          Popup par d�faut
                         </span>
                       ) : (
                         <button

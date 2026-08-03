@@ -22,7 +22,7 @@ function createImageElement(file: File) {
     }
     image.onerror = () => {
       URL.revokeObjectURL(url)
-      reject(new Error('Impossible de charger l’image.'))
+      reject(new Error('Impossible de charger limage.'))
     }
     image.src = url
   })

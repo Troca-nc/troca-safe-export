@@ -23,7 +23,7 @@ type FormState = {
 const TRANSPORT_TYPES = [
   { value: 'taxi', label: 'Taxi / VTC' },
   { value: 'navette', label: 'Navette' },
-  { value: 'aeroport', label: 'Transfert aéroport' },
+  { value: 'aeroport', label: 'Transfert a�roport' },
   { value: 'excursion', label: 'Excursion' },
   { value: 'scolaire', label: 'Transport scolaire' },
   { value: 'chauffeur', label: 'Location avec chauffeur' },
@@ -31,19 +31,19 @@ const TRANSPORT_TYPES = [
 ]
 
 const COMMUNES = [
-  'Nouméa',
+  'Noum�a',
   'Mont-Dore',
-  'Dumbéa',
-  'Païta',
+  'Dumb�a',
+  'Pa�ta',
   'Boulouparis',
   'La Foa',
   'Bourail',
-  'Koné',
+  'Kon�',
   'Koumac',
-  'Poindimié',
+  'Poindimi�',
   'Lifou',
-  'Maré',
-  'Ouvéa',
+  'Mar�',
+  'Ouv�a',
   'Autre',
 ]
 
@@ -54,7 +54,7 @@ export default function ProTransportInscriptionPage() {
     company_name: '',
     transport_type: 'taxi',
     description: '',
-    commune: 'Nouméa',
+    commune: 'Noum�a',
     phone: '',
     website: '',
     hours: '',
@@ -102,7 +102,7 @@ export default function ProTransportInscriptionPage() {
       })
       setSuccess(true)
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'La demande a échoué.')
+      setError(err?.response?.data?.error || 'La demande a �chou�.')
     } finally {
       setSaving(false)
     }
@@ -130,7 +130,7 @@ export default function ProTransportInscriptionPage() {
           </div>
           <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl">Devenez transporteur partenaire sur Kalico</h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/75 md:text-base">
-            Déposez votre demande, présentez votre activité et commencez à recevoir des réservations de clients calédoniens.
+            D�posez votre demande, pr�sentez votre activit� et commencez � recevoir des r�servations de clients cal�doniens.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link href="#formulaire" className="btn-primary rounded-2xl px-4 py-2.5">
@@ -145,10 +145,10 @@ export default function ProTransportInscriptionPage() {
         <section id="formulaire" className="mt-8 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm md:p-6">
           {success ? (
             <div className="rounded-[1.75rem] border border-emerald-200 bg-emerald-50 p-6 text-center">
-              <p className="text-lg font-semibold text-emerald-700">✅ Demande envoyée !</p>
-              <p className="mt-2 text-sm text-emerald-700/80">Notre équipe valide votre compte sous 48h.</p>
+              <p className="text-lg font-semibold text-emerald-700"> Demande envoy�e !</p>
+              <p className="mt-2 text-sm text-emerald-700/80">Notre �quipe valide votre compte sous 48h.</p>
               <Link href="/pro" className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] shadow-sm">
-                Retour à l&apos;espace Pro
+                Retour � l&apos;espace Pro
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -156,8 +156,8 @@ export default function ProTransportInscriptionPage() {
             <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
               <div className="md:col-span-2">
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Formulaire</p>
-                <h2 className="mt-1 font-display text-2xl font-bold text-night">Créer mon compte Transport Pro</h2>
-                <p className="mt-1 text-sm text-night/55">Gratuit pour commencer - validé par notre équipe sous 48h.</p>
+                <h2 className="mt-1 font-display text-2xl font-bold text-night">Cr�er mon compte Transport Pro</h2>
+                <p className="mt-1 text-sm text-night/55">Gratuit pour commencer - valid� par notre �quipe sous 48h.</p>
               </div>
 
               <label className="block md:col-span-2">
@@ -171,7 +171,7 @@ export default function ProTransportInscriptionPage() {
               </label>
 
               <label className="block">
-                <span className="mb-1 block text-sm font-semibold text-night">Catégorie *</span>
+                <span className="mb-1 block text-sm font-semibold text-night">Cat�gorie *</span>
                 <select
                   required
                   value={form.transport_type}
@@ -215,7 +215,7 @@ export default function ProTransportInscriptionPage() {
               </label>
 
               <label className="block">
-                <span className="mb-1 block text-sm font-semibold text-night">Téléphone professionnel</span>
+                <span className="mb-1 block text-sm font-semibold text-night">T�l�phone professionnel</span>
                 <input
                   value={form.phone}
                   onChange={(e) => setForm((current) => ({ ...current, phone: e.target.value }))}
@@ -243,7 +243,7 @@ export default function ProTransportInscriptionPage() {
               </label>
 
               <label className="block">
-                <span className="mb-1 block text-sm font-semibold text-night">Numéro RIDET (optionnel)</span>
+                <span className="mb-1 block text-sm font-semibold text-night">Num�ro RIDET (optionnel)</span>
                 <input
                   value={form.ridet}
                   onChange={(e) => setForm((current) => ({ ...current, ridet: e.target.value }))}
@@ -256,7 +256,7 @@ export default function ProTransportInscriptionPage() {
                   <Upload className="h-4 w-4" />
                   {saving ? 'Envoi en cours...' : 'Envoyer ma demande'}
                 </button>
-                <p className="text-sm text-night/55">Votre demande sera vérifiée par notre équipe avant publication.</p>
+                <p className="text-sm text-night/55">Votre demande sera v�rifi�e par notre �quipe avant publication.</p>
               </div>
 
               {error ? <p className="md:col-span-2 text-sm font-medium text-red-600">{error}</p> : null}

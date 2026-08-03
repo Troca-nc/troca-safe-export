@@ -6,7 +6,7 @@ export default function ImmobilierPage() {
     <Suspense fallback={<div className="min-h-screen bg-sand-light" />}>
       <CategoryFeedPage
         title="Immobilier"
-        subtitle="Annonces de vente et de location longue durée pour particuliers et professionnels."
+        subtitle="Annonces de vente et de location longue dur�e pour particuliers et professionnels."
         categorySlug="immobilier"
         accentLabel="Vente et location"
       />

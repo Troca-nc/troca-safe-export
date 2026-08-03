@@ -106,7 +106,7 @@ export default function ProCard({ pro }: { pro: ProCardModel }) {
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-night/60">
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
             <MapPin className="h-3.5 w-3.5 text-coral" />
-            {pro.pro_commune || 'Nouvelle-Calédonie'}
+            {pro.pro_commune || 'Nouvelle-Cal�donie'}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
             <BadgeCheck className="h-3.5 w-3.5 text-amber-500" />
@@ -120,7 +120,7 @@ export default function ProCard({ pro }: { pro: ProCardModel }) {
             Vitrine locale
           </p>
           <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-night/65">
-            {pro.pro_description || 'Découvrez ce professionnel local sur Kalico.'}
+            {pro.pro_description || 'D�couvrez ce professionnel local sur Kalico.'}
           </p>
           <div className="mt-3 flex items-center justify-between gap-3 text-xs text-night/55">
             <span>{listingCount} annonce{listingCount > 1 ? 's' : ''} active{listingCount > 1 ? 's' : ''}</span>
@@ -141,8 +141,8 @@ export default function ProCard({ pro }: { pro: ProCardModel }) {
               {pro.latest_review_comment}
             </p>
             <p className="mt-2 text-xs text-night/50">
-              {pro.latest_review_prenom ? `Par ${pro.latest_review_prenom}` : 'Avis vérifié'}
-              {pro.latest_review_rating ? ` · ${Number(pro.latest_review_rating).toFixed(1)}/5` : ''}
+              {pro.latest_review_prenom ? `Par ${pro.latest_review_prenom}` : 'Avis v�rifi�'}
+              {pro.latest_review_rating ? ` � ${Number(pro.latest_review_rating).toFixed(1)}/5` : ''}
             </p>
           </div>
         ) : null}

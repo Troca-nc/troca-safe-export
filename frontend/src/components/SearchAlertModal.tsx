@@ -102,7 +102,7 @@ export default function SearchAlertModal({
       })
       .catch(() => {
         if (!alive) return
-        setPreview({ total: 0, loading: false, error: 'Impossible de calculer le nombre d’annonces pour le moment.' })
+        setPreview({ total: 0, loading: false, error: 'Impossible de calculer le nombre dannonces pour le moment.' })
       })
 
     return () => {
@@ -133,7 +133,7 @@ export default function SearchAlertModal({
       setSavedCount(Number(created?.nb_results ?? preview.total ?? 0))
     } catch (err) {
       const response = err as { response?: { data?: { error?: string } } }
-      setError(response.response?.data?.error ?? 'Impossible de créer l’alerte pour le moment.')
+      setError(response.response?.data?.error ?? 'Impossible de cr�er lalerte pour le moment.')
     } finally {
       setSaving(false)
     }
@@ -156,7 +156,7 @@ export default function SearchAlertModal({
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-coral/70">Alerte de recherche</p>
               <h2 className="mt-1 text-xl font-bold text-night">
-                {isSuccess ? 'Alerte créée' : 'Créer une alerte'}
+                {isSuccess ? 'Alerte cr��e' : 'Cr�er une alerte'}
               </h2>
             </div>
           </div>
@@ -177,15 +177,15 @@ export default function SearchAlertModal({
                 <p className="text-sm font-semibold text-night">"{alertLabel}"</p>
                 <p className="mt-2 text-sm leading-6 text-night/65">
                   {preview.loading
-                    ? 'Calcul des résultats en cours...'
-                    : preview.error || `${resultCount.toLocaleString('fr-FR')} annonces correspondent actuellement à ces critères.`}
+                    ? 'Calcul des r�sultats en cours...'
+                    : preview.error || `${resultCount.toLocaleString('fr-FR')} annonces correspondent actuellement � ces crit�res.`}
                 </p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_240px]">
                 <div className="space-y-2">
                   <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-night/45">
-                    Fréquence de notification
+                    Fr�quence de notification
                   </label>
                   <div className="space-y-2">
                     {FREQUENCY_OPTIONS.map((option) => (
@@ -214,10 +214,10 @@ export default function SearchAlertModal({
                 </div>
 
                 <div className="rounded-[1.5rem] border border-lagoon/20 bg-lagoon/8 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lagoon">Résumé</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lagoon">R�sum�</p>
                   <div className="mt-3 space-y-2 text-sm text-night/65">
                     <p>
-                      <span className="font-semibold text-night">Résultats actuels</span>
+                      <span className="font-semibold text-night">R�sultats actuels</span>
                       <br />
                       {preview.loading
                         ? 'Chargement...'
@@ -246,17 +246,17 @@ export default function SearchAlertModal({
           ) : (
             <div className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-5">
               <p className="text-sm font-semibold text-emerald-900">
-                {resultCount.toLocaleString('fr-FR')} annonces correspondent actuellement à ces critères.
+                {resultCount.toLocaleString('fr-FR')} annonces correspondent actuellement � ces crit�res.
               </p>
               <p className="mt-2 text-sm leading-6 text-emerald-900/75">
-                Votre alerte a été activée. Un email de confirmation a été envoyé avec le résumé des critères et le lien de gestion.
+                Votre alerte a �t� activ�e. Un email de confirmation a �t� envoy� avec le r�sum� des crit�res et le lien de gestion.
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
                 <a
                   href="/alertes"
                   className="inline-flex items-center justify-center rounded-2xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
                 >
-                  Gérer mes alertes
+                  G�rer mes alertes
                 </a>
                 <button
                   type="button"
@@ -287,7 +287,7 @@ export default function SearchAlertModal({
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-night px-4 py-3 text-sm font-semibold text-white transition hover:bg-night/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {saving ? 'Création…' : 'Activer l’alerte'}
+              {saving ? 'Cr�ation&' : 'Activer lalerte'}
             </button>
           </div>
         ) : null}

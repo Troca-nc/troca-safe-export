@@ -16,12 +16,12 @@ export default function NotFound() {
           <SearchX className="mx-auto mt-5 h-14 w-14 text-[#0A7EA4]" />
           <h1 className="mt-4 font-display text-3xl font-bold">Cette page n'existe pas</h1>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-night/60">
-            La page que vous cherchez a peut-être été déplacée ou supprimée.
+            La page que vous cherchez a peut-�tre �t� d�plac�e ou supprim�e.
           </p>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Link href="/" className="btn-primary inline-flex items-center justify-center rounded-2xl px-5 py-3">
-              Retour à l'accueil
+              Retour � l'accueil
             </Link>
             <Link href="/annonces" className="btn-secondary inline-flex items-center justify-center rounded-2xl px-5 py-3">
               Voir les annonces

@@ -48,9 +48,9 @@ export default function DemoBanner() {
           <div className="flex items-start gap-3">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
             <div className="min-w-0">
-              <p className="font-medium leading-5">Mode démo - aucun paiement réel ne sera débité</p>
+              <p className="font-medium leading-5">Mode d�mo - aucun paiement r�el ne sera d�bit�</p>
               <p className="text-[11px] leading-4 text-amber-900/85">
-                Code SMS <strong>123456</strong> - Compte de départ{' '}
+                Code SMS <strong>123456</strong> - Compte de d�part{' '}
                 <strong>{DEMO_ACCOUNTS.particulier.email}</strong> / <strong>{DEMO_ACCOUNTS.particulier.password}</strong>
               </p>
             </div>

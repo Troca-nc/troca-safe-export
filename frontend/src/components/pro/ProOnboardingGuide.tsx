@@ -28,8 +28,8 @@ type OnboardingStep = {
 const steps: OnboardingStep[] = [
   {
     number: '1',
-    title: 'Complétez vos infos',
-    description: 'Ajoutez le nom de votre entreprise, votre commune et vos coordonnées.',
+    title: 'Compl�tez vos infos',
+    description: 'Ajoutez le nom de votre entreprise, votre commune et vos coordonn�es.',
     href: '/pro/dashboard/parametres',
     cta: 'Renseigner le profil',
     icon: Store,
@@ -37,7 +37,7 @@ const steps: OnboardingStep[] = [
   {
     number: '2',
     title: 'Ajoutez votre logo',
-    description: 'Une identité visuelle claire rassure et rend votre vitrine plus mémorable.',
+    description: 'Une identit� visuelle claire rassure et rend votre vitrine plus m�morable.',
     href: '/pro/dashboard/parametres',
     cta: 'Importer un logo',
     icon: ImageIcon,
@@ -45,15 +45,15 @@ const steps: OnboardingStep[] = [
   {
     number: '3',
     title: 'Soignez votre vitrine',
-    description: 'Rédigez une description courte, vos horaires et votre site web.',
+    description: 'R�digez une description courte, vos horaires et votre site web.',
     href: '/pro/dashboard/parametres',
     cta: 'Personnaliser',
     icon: BadgeCheck,
   },
   {
     number: '4',
-    title: 'Publiez votre première annonce',
-    description: 'Mettez en ligne une offre claire pour commencer à attirer des contacts.',
+    title: 'Publiez votre premi�re annonce',
+    description: 'Mettez en ligne une offre claire pour commencer � attirer des contacts.',
     href: '/pro/dashboard/annonces',
     cta: 'Voir mes annonces',
     icon: Megaphone,
@@ -61,15 +61,15 @@ const steps: OnboardingStep[] = [
   {
     number: '5',
     title: 'Activez vos boosts',
-    description: 'Donnez plus de visibilité à vos annonces les plus importantes.',
+    description: 'Donnez plus de visibilit� � vos annonces les plus importantes.',
     href: '/pro/dashboard/boosts',
-    cta: 'Découvrir les boosts',
+    cta: 'D�couvrir les boosts',
     icon: TrendingUp,
   },
   {
     number: '6',
     title: 'Suivez vos statistiques',
-    description: 'Consultez vos vues, contacts et performances pour piloter votre activité.',
+    description: 'Consultez vos vues, contacts et performances pour piloter votre activit�.',
     href: '/pro/dashboard#stats',
     cta: 'Voir les statistiques',
     icon: BarChart3,
@@ -132,10 +132,10 @@ export default function ProOnboardingGuide() {
     <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Onboarding guidé</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">Complétez votre profil en 6 étapes</h2>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Onboarding guid�</p>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">Compl�tez votre profil en 6 �tapes</h2>
           <p className="mt-2 max-w-2xl text-sm text-night/60">
-            Suivez ce parcours une fois votre compte Pro créé pour lancer votre vitrine sereinement et garder un oeil sur vos performances.
+            Suivez ce parcours une fois votre compte Pro cr�� pour lancer votre vitrine sereinement et garder un oeil sur vos performances.
           </p>
         </div>
         <Link
@@ -150,7 +150,7 @@ export default function ProOnboardingGuide() {
       <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm font-semibold text-night">
-            Progression: {completedSteps.length}/{totalSteps} étapes complétées
+            Progression: {completedSteps.length}/{totalSteps} �tapes compl�t�es
           </p>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">{completionRate}%</p>
         </div>
@@ -187,22 +187,22 @@ export default function ProOnboardingGuide() {
                         ? 'bg-[#0A7EA4] text-white'
                         : 'bg-white text-[#0A7EA4]'
                   }`}
-                  aria-label={`${isCompleted ? 'Décocher' : 'Cocher'} l'étape ${step.number}`}
+                  aria-label={`${isCompleted ? 'D�cocher' : 'Cocher'} l'�tape ${step.number}`}
                 >
                   {isCompleted ? <CheckCircle2 className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
                 </button>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-night/55">
-                      Étape {step.number}
+                      �tape {step.number}
                     </span>
                     {isCompleted ? (
                       <span className="rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
-                        Complété
+                        Compl�t�
                       </span>
                     ) : (
                       <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
-                        À faire
+                        � faire
                       </span>
                     )}
                     {step.highlighted ? (
@@ -232,7 +232,7 @@ export default function ProOnboardingGuide() {
 
       <div className="mt-6 flex items-center gap-2 text-xs font-medium text-night/55">
         <Circle className="h-3.5 w-3.5 text-nc-emeraude" />
-        La première étape est cochée automatiquement lors de votre première visite.
+        La premi�re �tape est coch�e automatiquement lors de votre premi�re visite.
       </div>
     </section>
   )

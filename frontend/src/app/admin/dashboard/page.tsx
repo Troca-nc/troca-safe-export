@@ -107,7 +107,7 @@ function MetricCard({
 }
 
 function formatBytes(bytes?: number) {
-  if (!bytes || Number.isNaN(bytes)) return '—'
+  if (!bytes || Number.isNaN(bytes)) return ''
   const units = ['B', 'KB', 'MB', 'GB']
   let value = bytes
   let unitIndex = 0
@@ -121,7 +121,7 @@ function formatBytes(bytes?: number) {
 }
 
 function formatDuration(ms?: number) {
-  if (ms == null || Number.isNaN(ms)) return '—'
+  if (ms == null || Number.isNaN(ms)) return ''
   if (ms < 1000) return `${Math.round(ms)} ms`
   if (ms < 60_000) return `${(ms / 1000).toFixed(1)} s`
   const minutes = Math.floor(ms / 60_000)
@@ -134,8 +134,8 @@ function formatDuration(ms?: number) {
 }
 
 function formatRequestId(value?: string | null) {
-  if (!value) return '—'
-  return value.length > 18 ? `${value.slice(0, 10)}…${value.slice(-6)}` : value
+  if (!value) return ''
+  return value.length > 18 ? `${value.slice(0, 10)}&${value.slice(-6)}` : value
 }
 
 function formatShareChannelLabel(value: string) {
@@ -246,7 +246,7 @@ function ObservabilitySection({
         <div className="mb-3 flex items-center justify-between gap-2">
           <div>
             <h3 className="text-sm font-semibold text-night">Alertes en direct</h3>
-            <p className="text-xs text-night/50">Flux des alertes critiques, warnings et infos récentes</p>
+            <p className="text-xs text-night/50">Flux des alertes critiques, warnings et infos r�centes</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-night/60">
@@ -281,10 +281,10 @@ function ObservabilitySection({
           {(visibleAlerts.length
             ? visibleAlerts
             : [{
-                ts: '—',
+                ts: '',
                 severity: 'info',
                 title: 'Aucune alerte active',
-                message: 'Le flux restera visible ici dès qu’un incident remonte.',
+                message: 'Le flux restera visible ici d�s quun incident remonte.',
                 requestId: null,
               }]).map((alert, index) => {
             const palette = alert.severity === 'critical'
@@ -304,13 +304,13 @@ function ObservabilitySection({
                   </div>
                   <div className="text-right text-[11px] text-night/50">
                     <p>{alert.category ?? 'system'}</p>
-                    <p>{alert.ts !== '—' ? format(new Date(alert.ts), 'HH:mm:ss') : '—'}</p>
+                    <p>{alert.ts !== '' ? format(new Date(alert.ts), 'HH:mm:ss') : ''}</p>
                   </div>
                 </div>
-                <p className="mt-2 text-sm text-night/70">{alert.message ?? '—'}</p>
+                <p className="mt-2 text-sm text-night/70">{alert.message ?? ''}</p>
                 <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-night/50">
                   <span className="rounded-full bg-white px-2 py-0.5">request_id {formatRequestId(alert.requestId ?? null)}</span>
-                  <span className="rounded-full bg-white px-2 py-0.5">node {alert.nodeId ?? '—'}</span>
+                  <span className="rounded-full bg-white px-2 py-0.5">node {alert.nodeId ?? ''}</span>
                 </div>
               </div>
             )
@@ -328,19 +328,19 @@ function ObservabilitySection({
         <MetricCard
           label="Memoire"
           value={formatBytes(data?.memory?.heapUsed)}
-          hint={`RSS ${formatBytes(data?.memory?.rss)} · heap total ${formatBytes(data?.memory?.heapTotal)}`}
+          hint={`RSS ${formatBytes(data?.memory?.rss)} � heap total ${formatBytes(data?.memory?.heapTotal)}`}
           icon={<MemoryStick size={16} />}
         />
         <MetricCard
           label="Requetes HTTP"
           value={(data?.http.total ?? 0).toLocaleString('fr-FR')}
-          hint={`${data?.http.slow ?? 0} lentes · ${data?.http.errors ?? 0} erreurs 5xx`}
+          hint={`${data?.http.slow ?? 0} lentes � ${data?.http.errors ?? 0} erreurs 5xx`}
           icon={<Activity size={16} />}
         />
         <MetricCard
           label="Temps reel"
           value={`${data?.websocket.connects ?? 0}/${data?.websocket.disconnects ?? 0}`}
-          hint={`${data?.websocket.authErrors ?? 0} erreurs auth · ${data?.websocket.messages ?? 0} messages`}
+          hint={`${data?.websocket.authErrors ?? 0} erreurs auth � ${data?.websocket.messages ?? 0} messages`}
           icon={<Wifi size={16} />}
         />
       </div>
@@ -350,8 +350,8 @@ function ObservabilitySection({
           <div className="mb-4 flex items-start justify-between gap-3">
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-night/50">Partages</p>
-              <h3 className="mt-1 text-sm font-semibold text-night">Répartition par canal</h3>
-              <p className="mt-1 text-xs text-night/50">{(share.total ?? 0).toLocaleString('fr-FR')} clic(s) de partage enregistrés</p>
+              <h3 className="mt-1 text-sm font-semibold text-night">R�partition par canal</h3>
+              <p className="mt-1 text-xs text-night/50">{(share.total ?? 0).toLocaleString('fr-FR')} clic(s) de partage enregistr�s</p>
             </div>
             <span className="rounded-lg bg-coral/10 p-2 text-coral">
               <Share2 size={16} />
@@ -379,7 +379,7 @@ function ObservabilitySection({
               })
             ) : (
               <p className="rounded-xl border border-dashed border-night/10 bg-sand/30 px-3 py-2 text-xs text-night/50">
-                Aucun partage enregistré pour le moment.
+                Aucun partage enregistr� pour le moment.
               </p>
             )}
           </div>
@@ -388,8 +388,8 @@ function ObservabilitySection({
         <div className="rounded-2xl border border-night/8 bg-white p-4">
           <div className="mb-4">
             <p className="text-xs font-medium uppercase tracking-wide text-night/50">Partages</p>
-            <h3 className="mt-1 text-sm font-semibold text-night">Répartition par contenu</h3>
-            <p className="mt-1 text-xs text-night/50">Annonce, profil ou contenu générique</p>
+            <h3 className="mt-1 text-sm font-semibold text-night">R�partition par contenu</h3>
+            <p className="mt-1 text-xs text-night/50">Annonce, profil ou contenu g�n�rique</p>
           </div>
           <div className="space-y-2">
             {shareContentTypes.length ? (
@@ -401,7 +401,7 @@ function ObservabilitySection({
               ))
             ) : (
               <p className="rounded-xl border border-dashed border-night/10 bg-sand/30 px-3 py-2 text-xs text-night/50">
-                Aucune donnée de contenu disponible.
+                Aucune donn�e de contenu disponible.
               </p>
             )}
           </div>
@@ -410,8 +410,8 @@ function ObservabilitySection({
         <div className="rounded-2xl border border-night/8 bg-white p-4">
           <div className="mb-4">
             <p className="text-xs font-medium uppercase tracking-wide text-night/50">Partages</p>
-            <h3 className="mt-1 text-sm font-semibold text-night">Derniers événements</h3>
-            <p className="mt-1 text-xs text-night/50">Historique des clics de partage les plus récents</p>
+            <h3 className="mt-1 text-sm font-semibold text-night">Derniers �v�nements</h3>
+            <p className="mt-1 text-xs text-night/50">Historique des clics de partage les plus r�cents</p>
           </div>
           <div className="overflow-hidden rounded-xl border border-night/8">
             <table className="min-w-full divide-y divide-night/8 text-left text-[11px]">
@@ -420,15 +420,15 @@ function ObservabilitySection({
                   <th className="px-3 py-2 font-medium">Heure</th>
                   <th className="px-3 py-2 font-medium">Canal</th>
                   <th className="px-3 py-2 font-medium">Contenu</th>
-                  <th className="px-3 py-2 font-medium">Réf.</th>
+                  <th className="px-3 py-2 font-medium">R�f.</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-night/8">
                 {(recentShares.length
                   ? recentShares
-                  : [{ ts: '—', channel: 'unknown', contentType: 'unknown', requestId: null }]).map((item, index) => (
+                  : [{ ts: '', channel: 'unknown', contentType: 'unknown', requestId: null }]).map((item, index) => (
                   <tr key={`${item.ts}-${index}`}>
-                    <td className="px-3 py-2 text-night/60">{item.ts !== '—' ? format(new Date(item.ts), 'HH:mm:ss') : '—'}</td>
+                    <td className="px-3 py-2 text-night/60">{item.ts !== '' ? format(new Date(item.ts), 'HH:mm:ss') : ''}</td>
                     <td className="px-3 py-2 text-night">{formatShareChannelLabel(String(item.channel ?? 'unknown'))}</td>
                     <td className="px-3 py-2 text-night/60">{formatShareContentTypeLabel(String(item.contentType ?? 'unknown'))}</td>
                     <td className="px-3 py-2 font-mono text-night/50">{formatRequestId(item.requestId ?? null)}</td>
@@ -459,11 +459,11 @@ function ObservabilitySection({
               <tbody className="divide-y divide-night/8">
                 {(recentErrors.length
                   ? recentErrors
-                  : [{ ts: '—', source: '—', message: 'Aucune erreur recente', requestId: null }]).map((item, index) => (
+                  : [{ ts: '', source: '', message: 'Aucune erreur recente', requestId: null }]).map((item, index) => (
                   <tr key={`${item.ts}-${index}`}>
-                    <td className="px-3 py-2 text-night/60">{item.ts !== '—' ? format(new Date(item.ts), 'HH:mm:ss') : '—'}</td>
+                    <td className="px-3 py-2 text-night/60">{item.ts !== '' ? format(new Date(item.ts), 'HH:mm:ss') : ''}</td>
                     <td className="px-3 py-2 text-night/60">{String(item.source ?? 'app')}</td>
-                    <td className="px-3 py-2 text-night">{String(item.message ?? item.event ?? '—')}</td>
+                    <td className="px-3 py-2 text-night">{String(item.message ?? item.event ?? '')}</td>
                     <td className="px-3 py-2 font-mono text-night/50">
                       {formatRequestId(item.requestId ?? item.request_id ?? null)}
                     </td>
@@ -493,16 +493,16 @@ function ObservabilitySection({
 
       <div className="mt-4 rounded-2xl border border-night/8 bg-sand/30 p-4">
         <div className="mb-4">
-          <h3 className="text-sm font-semibold text-night">Nœuds actifs</h3>
+          <h3 className="text-sm font-semibold text-night">NSuds actifs</h3>
           <p className="text-xs text-night/50">
-            Vue multi-instance pour distinguer l’API, le worker et les autres réplicas.
+            Vue multi-instance pour distinguer lAPI, le worker et les autres r�plicas.
           </p>
         </div>
         <div className="overflow-hidden rounded-2xl border border-night/8 bg-white">
           <table className="min-w-full divide-y divide-night/8 text-left text-xs">
             <thead className="bg-sand/40 text-night/50">
               <tr>
-                <th className="px-3 py-2 font-medium">Nœud</th>
+                <th className="px-3 py-2 font-medium">NSud</th>
                 <th className="px-3 py-2 font-medium">Role</th>
                 <th className="px-3 py-2 font-medium">Host</th>
                 <th className="px-3 py-2 font-medium">PID</th>
@@ -514,9 +514,9 @@ function ObservabilitySection({
                 <tr key={node.id}>
                   <td className="px-3 py-2 font-mono text-night/60">{node.id}</td>
                   <td className="px-3 py-2 text-night">{node.role ?? 'api'}</td>
-                  <td className="px-3 py-2 text-night/60">{node.host ?? '—'}</td>
-                  <td className="px-3 py-2 text-night/60">{node.pid ?? '—'}</td>
-                  <td className="px-3 py-2 text-night/60">{node.updated_at ? format(new Date(node.updated_at), 'HH:mm:ss') : '—'}</td>
+                  <td className="px-3 py-2 text-night/60">{node.host ?? ''}</td>
+                  <td className="px-3 py-2 text-night/60">{node.pid ?? ''}</td>
+                  <td className="px-3 py-2 text-night/60">{node.updated_at ? format(new Date(node.updated_at), 'HH:mm:ss') : ''}</td>
                 </tr>
               )) : (
                 <tr>
@@ -550,13 +550,13 @@ function ObservabilitySection({
             <tbody className="divide-y divide-night/8">
               {(recentRequests.length
                 ? recentRequests
-                : [{ ts: '—', method: '—', path: '—', statusCode: 0, durationMs: 0, requestId: null }]).map((item, index) => (
+                : [{ ts: '', method: '', path: '', statusCode: 0, durationMs: 0, requestId: null }]).map((item, index) => (
                 <tr key={`${item.ts}-${index}`}>
-                  <td className="px-3 py-2 text-night/60">{item.ts !== '—' ? format(new Date(item.ts), 'HH:mm:ss') : '—'}</td>
+                  <td className="px-3 py-2 text-night/60">{item.ts !== '' ? format(new Date(item.ts), 'HH:mm:ss') : ''}</td>
                   <td className="px-3 py-2 font-medium text-night">{item.method}</td>
                   <td className="px-3 py-2 text-night/70">{item.path}</td>
-                  <td className="px-3 py-2 text-night">{item.statusCode ? item.statusCode : '—'}</td>
-                  <td className="px-3 py-2 text-night/60">{item.durationMs ? formatDuration(item.durationMs) : '—'}</td>
+                  <td className="px-3 py-2 text-night">{item.statusCode ? item.statusCode : ''}</td>
+                  <td className="px-3 py-2 text-night/60">{item.durationMs ? formatDuration(item.durationMs) : ''}</td>
                   <td className="px-3 py-2 font-mono text-night/50">{formatRequestId(item.requestId ?? null)}</td>
                 </tr>
               ))}
@@ -569,7 +569,7 @@ function ObservabilitySection({
         <MetricCard
           label="Websocket"
           value={`${data?.websocket.connects ?? 0} connexions`}
-          hint={`${data?.websocket.disconnects ?? 0} deconnexions · ${data?.websocket.messages ?? 0} messages`}
+          hint={`${data?.websocket.disconnects ?? 0} deconnexions � ${data?.websocket.messages ?? 0} messages`}
           icon={<Wifi size={16} />}
         />
         <MetricCard
@@ -581,7 +581,7 @@ function ObservabilitySection({
         <MetricCard
           label="Jobs"
           value={`${data?.jobs.errors ?? 0} erreurs`}
-          hint={`${data?.jobs.started ?? 0} demarres · ${data?.jobs.skipped ?? 0} sautes`}
+          hint={`${data?.jobs.started ?? 0} demarres � ${data?.jobs.skipped ?? 0} sautes`}
           icon={<Cpu size={16} />}
         />
         <MetricCard
@@ -658,7 +658,7 @@ function ObservabilitySection({
                 className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 text-xs font-medium transition-all hover:opacity-80 ${action.color}`}
               >
                 {action.label}
-                <span className="ml-auto">→</span>
+                <span className="ml-auto">�</span>
               </a>
             ))}
           </div>
@@ -675,9 +675,9 @@ function ServiceStatsSection({ services }: { services: any }) {
     <section className="mt-6 rounded-3xl border border-night/8 bg-white p-5 shadow-sm">
       <div className="mb-4">
         <p className="text-xs font-medium uppercase tracking-wide text-night/50">Services</p>
-        <h2 className="mt-1 text-lg font-semibold text-night">Bons plans, évènements et covoiturage</h2>
+        <h2 className="mt-1 text-lg font-semibold text-night">Bons plans, �v�nements et covoiturage</h2>
         <p className="mt-1 text-sm text-night/60">
-          Vue synthétique des nouveaux modules pour piloter l&apos;activité, la croissance et la modération.
+          Vue synth�tique des nouveaux modules pour piloter l&apos;activit�, la croissance et la mod�ration.
         </p>
       </div>
 
@@ -685,19 +685,19 @@ function ServiceStatsSection({ services }: { services: any }) {
         <MetricCard
           label="Bons plans"
           value={`${Number(bonPlans.bon_plans_actifs ?? 0).toLocaleString('fr-FR')} actifs`}
-          hint={`${Number(bonPlans.promotions_total ?? 0).toLocaleString('fr-FR')} promos · ${Number(bonPlans.events_total ?? 0).toLocaleString('fr-FR')} évènements`}
+          hint={`${Number(bonPlans.promotions_total ?? 0).toLocaleString('fr-FR')} promos � ${Number(bonPlans.events_total ?? 0).toLocaleString('fr-FR')} �v�nements`}
           icon={<Sparkles size={16} />}
         />
         <MetricCard
-          label="Évènements"
-          value={`${Number(bonPlans.events_a_venir ?? 0).toLocaleString('fr-FR')} à venir`}
-          hint={`${Number(bonPlans.events_views ?? 0).toLocaleString('fr-FR')} vues · ${Number(bonPlans.events_reservations ?? 0).toLocaleString('fr-FR')} réservations`}
+          label="�v�nements"
+          value={`${Number(bonPlans.events_a_venir ?? 0).toLocaleString('fr-FR')} � venir`}
+          hint={`${Number(bonPlans.events_views ?? 0).toLocaleString('fr-FR')} vues � ${Number(bonPlans.events_reservations ?? 0).toLocaleString('fr-FR')} r�servations`}
           icon={<CalendarDays size={16} />}
         />
         <MetricCard
           label="Covoiturage"
           value={`${Number(bonPlans.rides_active ?? 0).toLocaleString('fr-FR')} trajets`}
-          hint={`${Number(bonPlans.ride_bookings ?? 0).toLocaleString('fr-FR')} réservations · ${Number(bonPlans.rides_verified_drivers ?? 0).toLocaleString('fr-FR')} conducteurs vérifiés`}
+          hint={`${Number(bonPlans.ride_bookings ?? 0).toLocaleString('fr-FR')} r�servations � ${Number(bonPlans.rides_verified_drivers ?? 0).toLocaleString('fr-FR')} conducteurs v�rifi�s`}
           icon={<CarFront size={16} />}
         />
       </div>
@@ -709,14 +709,14 @@ function ServiceStatsSection({ services }: { services: any }) {
             <div className="rounded-xl bg-white px-3 py-2">Vues: {Number(bonPlans.bon_plans_vues ?? 0).toLocaleString('fr-FR')}</div>
             <div className="rounded-xl bg-white px-3 py-2">Partages: {Number(bonPlans.bon_plans_partages ?? 0).toLocaleString('fr-FR')}</div>
             <div className="rounded-xl bg-white px-3 py-2">Contacts: {Number(bonPlans.bon_plans_contacts ?? 0).toLocaleString('fr-FR')}</div>
-            <div className="rounded-xl bg-white px-3 py-2">Expirées: {Number(bonPlans.bon_plans_expired ?? 0).toLocaleString('fr-FR')}</div>
+            <div className="rounded-xl bg-white px-3 py-2">Expir�es: {Number(bonPlans.bon_plans_expired ?? 0).toLocaleString('fr-FR')}</div>
           </div>
         </div>
 
         <div className="rounded-2xl border border-night/8 bg-sand/30 p-4">
           <h3 className="text-sm font-semibold text-night">Covoiturage</h3>
           <div className="mt-3 grid gap-2 text-sm text-night/70 sm:grid-cols-2">
-            <div className="rounded-xl bg-white px-3 py-2">Places réservées: {Number(bonPlans.ride_seats_reserved ?? 0).toLocaleString('fr-FR')}</div>
+            <div className="rounded-xl bg-white px-3 py-2">Places r�serv�es: {Number(bonPlans.ride_seats_reserved ?? 0).toLocaleString('fr-FR')}</div>
             <div className="rounded-xl bg-white px-3 py-2">Places totales: {Number(bonPlans.ride_seats_total ?? 0).toLocaleString('fr-FR')}</div>
             <div className="rounded-xl bg-white px-3 py-2">Prix moyen: {Number(bonPlans.ride_avg_price ?? 0).toLocaleString('fr-FR')} XPF</div>
             <div className="rounded-xl bg-white px-3 py-2">Avis clients: {Number(bonPlans.ride_avg_rating ?? 0).toFixed(1)}/5</div>
@@ -771,21 +771,21 @@ export default function AdminDashboardPage() {
         <div className="mb-6 grid grid-cols-4 gap-4">
           <KpiCard
             label="Annonces actives"
-            value={stats?.annonces_actives?.toLocaleString('fr-FR') ?? '—'}
+            value={stats?.annonces_actives?.toLocaleString('fr-FR') ?? ''}
             delta={stats?.annonces_delta_semaine}
             deltaLabel="cette semaine"
             icon={<FileText size={14} />}
           />
           <KpiCard
             label="Utilisateurs inscrits"
-            value={stats?.utilisateurs_total?.toLocaleString('fr-FR') ?? '—'}
+            value={stats?.utilisateurs_total?.toLocaleString('fr-FR') ?? ''}
             delta={stats?.utilisateurs_delta_mois}
             deltaLabel="ce mois"
             icon={<Users size={14} />}
           />
           <KpiCard
             label="Signalements en attente"
-            value={stats?.signalements_attente ?? '—'}
+            value={stats?.signalements_attente ?? ''}
             delta={stats?.signalements_delta_hier}
             deltaLabel="depuis hier"
             icon={<AlertTriangle size={14} />}
@@ -793,7 +793,7 @@ export default function AdminDashboardPage() {
           />
           <KpiCard
             label="Messages echanges"
-            value={stats?.messages_total?.toLocaleString('fr-FR') ?? '—'}
+            value={stats?.messages_total?.toLocaleString('fr-FR') ?? ''}
             delta={stats?.messages_delta_pct}
             deltaLabel="% cette semaine"
             icon={<MessageCircle size={14} />}

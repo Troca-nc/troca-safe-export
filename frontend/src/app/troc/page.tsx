@@ -4,8 +4,8 @@ import TrocPageClient from './TrocPageClient'
 import { buildPageMetadata } from '@/lib/pageMetadata'
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'Troc - Échanges entre Calédoniens | Kalico',
-  description: 'Trouvez des objets à échanger en Nouvelle-Calédonie. Le Trocomètre vous aide à trouver des échanges de valeur équivalente.',
+  title: 'Troc - �changes entre Cal�doniens | Kalico',
+  description: 'Trouvez des objets � �changer en Nouvelle-Cal�donie. Le Trocom�tre vous aide � trouver des �changes de valeur �quivalente.',
   path: '/troc',
 })
 

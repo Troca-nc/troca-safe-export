@@ -28,7 +28,7 @@ function cleanText(value: unknown, fallback = '') {
     .replace(/\bundefined\b/gi, '')
     .replace(/\bnull\b/gi, '')
     .replace(/\s{2,}/g, ' ')
-    .replace(/\s+—\s*$/, '')
+    .replace(/\s+\s*$/, '')
     .trim()
   return text.length > 0 ? text : fallback
 }
@@ -195,10 +195,10 @@ export default function HomePage() {
           <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-3">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-night/40">
-                Recherches récentes
+                Recherches r�centes
               </p>
               <span className="text-xs text-night/40">
-                5 dernières recherches
+                5 derni�res recherches
               </span>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]">
@@ -226,11 +226,11 @@ export default function HomePage() {
               <BadgeCheck className="h-4 w-4 shrink-0 text-nc-lagon" />
               <span className="text-sm font-semibold text-nc-lagon">Espace Pro</span>
               <span className="truncate text-sm text-night/60">
-                · {Number(proSummary.listings?.active ?? 0).toLocaleString('fr-FR')} annonces actives ·{' '}
+                � {Number(proSummary.listings?.active ?? 0).toLocaleString('fr-FR')} annonces actives �{' '}
                 {Number(proSummary.stats?.views_7d ?? 0).toLocaleString('fr-FR')} vues cette semaine
               </span>
             </div>
-            <span className="text-sm font-semibold text-nc-lagon hover:underline">Tableau de bord →</span>
+            <span className="text-sm font-semibold text-nc-lagon hover:underline">Tableau de bord �</span>
           </Link>
         </section>
       ) : null}
@@ -241,8 +241,8 @@ export default function HomePage() {
         <div className="mb-5 flex items-end justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Pros locaux</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Nos professionnels recommandés</h2>
-            <p className="mt-1 text-sm text-night/55">Des pros calédoniens vérifiés, à portée de message.</p>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Nos professionnels recommand�s</h2>
+            <p className="mt-1 text-sm text-night/55">Des pros cal�doniens v�rifi�s, � port�e de message.</p>
           </div>
           <div className="hidden items-center gap-3 md:flex">
             <Link href="/pros" className="inline-flex items-center gap-1 text-sm font-semibold text-nc-emeraude hover:underline">
@@ -293,7 +293,7 @@ export default function HomePage() {
                 Vous cherchez un professionnel ?
               </h2>
               <p className="mt-1 text-sm text-night/55">
-                Publiez votre besoin en 2 minutes - les pros de votre commune vous répondent.
+                Publiez votre besoin en 2 minutes - les pros de votre commune vous r�pondent.
               </p>
             </div>
           </div>
@@ -318,7 +318,7 @@ export default function HomePage() {
               Annonces disponibles au troc
             </h2>
             <p className="mt-1 text-sm text-night/55">
-              Ces calédoniens acceptent les échanges - trouvez votre bonheur.
+              Ces cal�doniens acceptent les �changes - trouvez votre bonheur.
             </p>
           </div>
           <Link href="/troc" className="hidden items-center gap-1 text-sm font-semibold text-coral hover:underline md:inline-flex">

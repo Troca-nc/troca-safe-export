@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // ============================================================
 //  Kalico — Composant "Annonces similaires"
 //  Affiché en bas de la fiche annonce

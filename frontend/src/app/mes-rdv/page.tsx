@@ -16,7 +16,7 @@ type TabKey = 'all' | 'client' | 'pro'
 const TABS: Array<{ id: TabKey; label: string }> = [
   { id: 'all', label: 'Tous' },
   { id: 'client', label: 'Mes demandes' },
-  { id: 'pro', label: 'Demandes reçues' },
+  { id: 'pro', label: 'Demandes re�ues' },
 ]
 
 function getPartnerId(booking: RdvBookingItem) {
@@ -96,11 +96,11 @@ export default function MesRdvPage() {
       await loadBookings()
       showToast({
         tone: 'success',
-        title: 'Rendez-vous mis à jour',
-        message: 'La réservation a été actualisée.',
+        title: 'Rendez-vous mis � jour',
+        message: 'La r�servation a �t� actualis�e.',
       })
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Impossible de mettre à jour ce rendez-vous.'
+      const message = err?.response?.data?.error || 'Impossible de mettre � jour ce rendez-vous.'
       setError(message)
       showToast({
         tone: 'error',
@@ -126,10 +126,10 @@ export default function MesRdvPage() {
             Mes rendez-vous
           </div>
           <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl">
-            Regroupez vos demandes, vos réponses et vos créneaux au même endroit.
+            Regroupez vos demandes, vos r�ponses et vos cr�neaux au m�me endroit.
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
-            Suivez les rendez-vous que vous avez demandés et les demandes que vous avez reçues, avec un accès direct à la messagerie pour se coordonner rapidement.
+            Suivez les rendez-vous que vous avez demand�s et les demandes que vous avez re�ues, avec un acc�s direct � la messagerie pour se coordonner rapidement.
           </p>
         </section>
 
@@ -143,11 +143,11 @@ export default function MesRdvPage() {
             <p className="mt-2 text-3xl font-bold text-night">{counts.pending.toLocaleString('fr-FR')}</p>
           </article>
           <article className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-            <p className="text-sm font-semibold text-night/55">À venir</p>
+            <p className="text-sm font-semibold text-night/55">� venir</p>
             <p className="mt-2 text-3xl font-bold text-night">{counts.upcoming.toLocaleString('fr-FR')}</p>
           </article>
           <article className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-            <p className="text-sm font-semibold text-night/55">Demandes reçues</p>
+            <p className="text-sm font-semibold text-night/55">Demandes re�ues</p>
             <p className="mt-2 text-3xl font-bold text-night">{counts.pro.toLocaleString('fr-FR')}</p>
           </article>
         </section>
@@ -206,14 +206,14 @@ export default function MesRdvPage() {
                 {tab === 'pro' ? <Clock3 className="h-6 w-6" /> : <Route className="h-6 w-6" />}
               </div>
               <p className="mt-4 text-lg font-semibold text-night">
-                {tab === 'client' ? 'Aucune demande en cours' : tab === 'pro' ? 'Aucune demande reçue' : 'Aucun rendez-vous'}
+                {tab === 'client' ? 'Aucune demande en cours' : tab === 'pro' ? 'Aucune demande re�ue' : 'Aucun rendez-vous'}
               </p>
               <p className="mt-2 text-sm">
                 {tab === 'client'
-                  ? 'Vos demandes de rendez-vous apparaîtront ici après envoi.'
+                  ? 'Vos demandes de rendez-vous appara�tront ici apr�s envoi.'
                   : tab === 'pro'
-                    ? 'Les demandes reçues depuis votre vitrine Pro apparaîtront ici.'
-                    : 'Réservez un rendez-vous depuis une vitrine Pro pour le voir apparaître ici.'}
+                    ? 'Les demandes re�ues depuis votre vitrine Pro appara�tront ici.'
+                    : 'R�servez un rendez-vous depuis une vitrine Pro pour le voir appara�tre ici.'}
               </p>
               <Link href="/pros" className="btn-primary mt-5 inline-flex items-center gap-2 rounded-2xl px-5 py-3">
                 Trouver un professionnel

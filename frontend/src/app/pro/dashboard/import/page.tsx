@@ -249,7 +249,7 @@ export default function ProDashboardImportPage() {
 
       setJob(nextJob)
       setMapping(suggestFieldMapping(nextJob.headers || []))
-      setSuccess(`Fichier chargé: ${nextJob.original_filename}`)
+      setSuccess(`Fichier charg�: ${nextJob.original_filename}`)
       const latestHistory = await importApi.history().catch(() => null)
       const jobs = Array.isArray(latestHistory?.data?.data) ? latestHistory.data.data : []
       setHistory(jobs)
@@ -347,7 +347,7 @@ export default function ProDashboardImportPage() {
               className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
             >
               <Download className="h-4 w-4" />
-              Modèle Excel
+              Mod�le Excel
             </button>
             <Link
               href="/pro/dashboard/catalogue"
@@ -376,7 +376,7 @@ export default function ProDashboardImportPage() {
           <label className="mt-5 flex cursor-pointer flex-col items-center justify-center rounded-[1.75rem] border-2 border-dashed border-[var(--color-border)] bg-[var(--color-background-secondary)]/40 px-6 py-10 text-center transition hover:border-[#0A7EA4]/30 hover:bg-nc-lagonLight/30">
             <Upload className="h-10 w-10 text-[#0A7EA4]" />
             <span className="mt-3 text-lg font-semibold text-night">Choisir un fichier d&apos;import</span>
-            <span className="mt-1 text-sm text-night/55">Une fois le fichier chargé, les colonnes seront détectées automatiquement.</span>
+            <span className="mt-1 text-sm text-night/55">Une fois le fichier charg�, les colonnes seront d�tect�es automatiquement.</span>
             <input
               ref={fileInputRef}
               type="file"
@@ -391,10 +391,10 @@ export default function ProDashboardImportPage() {
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nc-emeraude">Fichier</p>
                 <p className="mt-2 text-sm font-semibold text-night">{job.original_filename}</p>
-                <p className="mt-1 text-xs text-night/55">{job.file_format.toUpperCase()} · {formatFileSize(job.file_size_bytes)}</p>
+                <p className="mt-1 text-xs text-night/55">{job.file_format.toUpperCase()} � {formatFileSize(job.file_size_bytes)}</p>
               </div>
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nc-emeraude">Lignes détectées</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nc-emeraude">Lignes d�tect�es</p>
                 <p className="mt-2 text-2xl font-bold text-night">{job.total_rows}</p>
                 <p className="mt-1 text-xs text-night/55">Le traitement se base sur ces lignes.</p>
               </div>
@@ -437,11 +437,11 @@ export default function ProDashboardImportPage() {
                   <p className="mt-1 text-xl font-bold text-night">{summary.total_rows ?? 0}</p>
                 </div>
                 <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
-                  <p className="text-xs text-night/55">Créations</p>
+                  <p className="text-xs text-night/55">Cr�ations</p>
                   <p className="mt-1 text-xl font-bold text-night">{summary.success_count ?? 0}</p>
                 </div>
                 <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
-                  <p className="text-xs text-night/55">Mises à jour</p>
+                  <p className="text-xs text-night/55">Mises � jour</p>
                   <p className="mt-1 text-xl font-bold text-night">{summary.update_count ?? 0}</p>
                 </div>
                 <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
@@ -465,7 +465,7 @@ export default function ProDashboardImportPage() {
               </div>
             </div>
             <p className="mt-3 text-sm text-night/65">
-              Le système accepte les catégories et communes de secours si elles ne sont pas presentes dans le fichier. Mappez surtout le titre et le prix.
+              Le syst�me accepte les cat�gories et communes de secours si elles ne sont pas presentes dans le fichier. Mappez surtout le titre et le prix.
             </p>
             <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
               {requiredFields.map((field) => (
@@ -504,7 +504,7 @@ export default function ProDashboardImportPage() {
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-night">{item.original_filename}</p>
-                      <p className="mt-1 text-xs text-night/55">{formatDate(item.created_at)} · {item.total_rows} ligne(s)</p>
+                      <p className="mt-1 text-xs text-night/55">{formatDate(item.created_at)} � {item.total_rows} ligne(s)</p>
                     </div>
                     <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${item.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : item.status === 'failed' ? 'bg-rose-100 text-rose-700' : 'bg-nc-lagonLight text-nc-lagon'}`}>
                       {item.status}
@@ -512,7 +512,7 @@ export default function ProDashboardImportPage() {
                   </div>
                 </button>
               )) : (
-                <p className="text-sm text-night/55">Aucun import récent.</p>
+                <p className="text-sm text-night/55">Aucun import r�cent.</p>
               )}
             </div>
           </article>
@@ -542,7 +542,7 @@ export default function ProDashboardImportPage() {
                     </p>
                     <p className="mt-1 text-xs text-night/55">
                       {field.key === 'title'
-                        ? 'Le titre est indispensable pour créer ou mettre à jour un produit.'
+                        ? 'Le titre est indispensable pour cr�er ou mettre � jour un produit.'
                         : field.key === 'price_xpf'
                           ? 'Le prix alimente directement le catalogue et la publication.'
                           : 'Optionnel mais utile pour enrichir le catalogue.'}
@@ -635,7 +635,7 @@ export default function ProDashboardImportPage() {
                 className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
               >
                 <Download className="h-4 w-4" />
-                Télécharger les erreurs CSV
+                T�l�charger les erreurs CSV
               </button>
             ) : null}
           </article>

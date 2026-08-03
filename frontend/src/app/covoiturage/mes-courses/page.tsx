@@ -26,17 +26,17 @@ type RideItem = {
 function statusLabel(status?: string) {
   switch (status) {
     case 'confirmed':
-      return 'Confirmée'
+      return 'Confirm�e'
     case 'completed':
-      return 'Terminée'
+      return 'Termin�e'
     case 'pending':
       return 'En attente'
     case 'refused':
-      return 'Refusée'
+      return 'Refus�e'
     case 'cancelled':
-      return 'Annulée'
+      return 'Annul�e'
     default:
-      return status || 'À venir'
+      return status || '� venir'
   }
 }
 
@@ -125,7 +125,7 @@ export default function MesCoursesPage() {
             <div className="flex items-end justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-emeraude">En tant que passager</p>
-                <h2 className="mt-1 font-display text-2xl font-bold text-night">Mes demandes / réservations</h2>
+                <h2 className="mt-1 font-display text-2xl font-bold text-night">Mes demandes / r�servations</h2>
               </div>
               <span className="rounded-full bg-nc-lagonLight px-3 py-1 text-xs font-semibold text-nc-lagon">{passengerRides.length}</span>
             </div>
@@ -137,7 +137,7 @@ export default function MesCoursesPage() {
                   <article key={ride.id} className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)]/60 p-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <p className="text-base font-semibold text-night">{ride.departure} → {ride.destination}</p>
+                        <p className="text-base font-semibold text-night">{ride.departure} � {ride.destination}</p>
                         <div className="mt-2 flex flex-wrap gap-2 text-xs text-night/55">
                           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
                             <CalendarDays className="h-3.5 w-3.5" />
@@ -174,7 +174,7 @@ export default function MesCoursesPage() {
             <div className="flex items-end justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">En tant que conducteur</p>
-                <h2 className="mt-1 font-display text-2xl font-bold text-night">Demandes reçues</h2>
+                <h2 className="mt-1 font-display text-2xl font-bold text-night">Demandes re�ues</h2>
               </div>
               <span className="rounded-full bg-coral/10 px-3 py-1 text-xs font-semibold text-coral">{driverRides.length}</span>
             </div>
@@ -186,7 +186,7 @@ export default function MesCoursesPage() {
                   <article key={ride.id} className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)]/60 p-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <p className="text-base font-semibold text-night">{ride.departure} → {ride.destination}</p>
+                        <p className="text-base font-semibold text-night">{ride.departure} � {ride.destination}</p>
                         <p className="mt-2 text-sm text-night/60">Passagers: {ride.passengers || 1}</p>
                       </div>
                       <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${statusTone(ride.status)}`}>
@@ -198,7 +198,7 @@ export default function MesCoursesPage() {
                         <User2 className="h-4 w-4 text-[#0A7EA4]" />
                         {ride.client?.prenom || 'Client'}
                       </span>
-                      <span>{ride.payment_status === 'paid' ? 'Payée' : 'À confirmer'}</span>
+                      <span>{ride.payment_status === 'paid' ? 'Pay�e' : '� confirmer'}</span>
                     </div>
                   </article>
                 ))

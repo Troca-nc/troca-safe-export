@@ -1,7 +1,7 @@
 // src/types/upload.types.ts
 
 export interface UploadedImage {
-  key:         string   // clé S3 ex: "annonces/abc123/0.webp"
+  key:         string   // cl� S3 ex: "annonces/abc123/0.webp"
   url:         string   // URL publique CDN
   thumbnail_url?: string | null
   medium_url?: string | null
@@ -9,7 +9,7 @@ export interface UploadedImage {
   variants?:    Record<string, { path?: string; url?: string }>
   width:       number
   height:      number
-  size_bytes:  number   // taille après compression
+  size_bytes:  number   // taille apr�s compression
   order:       number   // position dans l'annonce (0 = principale)
 }
 

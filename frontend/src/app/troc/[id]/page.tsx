@@ -92,7 +92,7 @@ function TrocDetailPageContent() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Troc</p>
             <h1 className="mt-3 text-3xl font-bold text-night">Annonce troc introuvable</h1>
             <p className="mt-3 text-sm leading-6 text-night/60">
-              Cette annonce n’existe plus ou n’est plus disponible.
+              Cette annonce nexiste plus ou nest plus disponible.
             </p>
             <Link href="/troc" className="btn-primary mt-6 inline-flex px-4 py-2.5 text-sm">
               Retourner au feed
@@ -105,7 +105,7 @@ function TrocDetailPageContent() {
 
   const sellerName = [listing.user?.prenom, listing.user?.nom].filter(Boolean).join(' ').trim() || 'Troceur'
   const complementLabel = listing.troc_accepts_complement_xpf && listing.troc_complement_max_xpf > 0
-    ? `Accepte jusqu’à ${Number(listing.troc_complement_max_xpf).toLocaleString('fr-FR')} XPF de complément`
+    ? `Accepte jusqu� ${Number(listing.troc_complement_max_xpf).toLocaleString('fr-FR')} XPF de compl�ment`
     : null
 
   return (
@@ -123,12 +123,12 @@ function TrocDetailPageContent() {
               <ListingImage
                 src={coverImage}
                 alt={listing.title}
-                fallbackIcon="🔄"
+                fallbackIcon="="
                 sizes="(max-width: 1024px) 100vw, 60vw"
               />
               <div className="absolute left-3 top-3 flex flex-wrap gap-2">
                 <span className="rounded-full bg-night/85 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
-                  🔄 Troc
+                  = Troc
                 </span>
                 {listing.category_name ? (
                   <span className="rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-night/70">
@@ -159,9 +159,9 @@ function TrocDetailPageContent() {
                   </div>
                 </div>
                 <div className="rounded-[1.5rem] border border-night/8 bg-sand px-4 py-3 text-right">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">Échange</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">�change</p>
                   <p className="mt-1 text-lg font-bold text-night">
-                    {listing.is_free ? 'Gratuit' : listing.price?.toLocaleString('fr-FR') || listing.prix?.toLocaleString('fr-FR') || 'Prix à débattre'}
+                    {listing.is_free ? 'Gratuit' : listing.price?.toLocaleString('fr-FR') || listing.prix?.toLocaleString('fr-FR') || 'Prix � d�battre'}
                     {!listing.is_free ? <span className="ml-1 text-sm font-normal text-night/55">XPF</span> : null}
                   </p>
                 </div>
@@ -171,8 +171,8 @@ function TrocDetailPageContent() {
                 compatibility={listing.compatibility as unknown as TrocCompatibility | null}
                 emptyLabel={
                   isAuthenticated
-                    ? 'Publiez une annonce troc pour voir votre compatibilité'
-                    : 'Connectez-vous pour voir votre compatibilité'
+                    ? 'Publiez une annonce troc pour voir votre compatibilit�'
+                    : 'Connectez-vous pour voir votre compatibilit�'
                 }
               />
 
@@ -207,13 +207,13 @@ function TrocDetailPageContent() {
 
             <section className="rounded-[1.75rem] border border-night/8 bg-white p-5 shadow-card">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Conseil</p>
-              <h2 className="mt-2 text-lg font-bold text-night">Proposition structurée puis chat</h2>
+              <h2 className="mt-2 text-lg font-bold text-night">Proposition structur�e puis chat</h2>
               <p className="mt-2 text-sm leading-6 text-night/60">
-                Commencez par décrire clairement ce que vous proposez. Une fois la proposition acceptée, la conversation de négociation s’ouvre automatiquement.
+                Commencez par d�crire clairement ce que vous proposez. Une fois la proposition accept�e, la conversation de n�gociation souvre automatiquement.
               </p>
               <div className="mt-4 rounded-2xl bg-night/5 p-4 text-sm text-night/65">
                 <MessageSquareText className="mb-2 h-5 w-5 text-coral" />
-                Le chat arrive après la proposition, pas avant.
+                Le chat arrive apr�s la proposition, pas avant.
               </div>
             </section>
           </aside>

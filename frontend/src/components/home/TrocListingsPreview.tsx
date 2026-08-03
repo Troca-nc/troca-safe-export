@@ -39,9 +39,9 @@ export default function TrocListingsPreview() {
   if (listings.length === 0) {
     return (
       <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] py-12 text-center">
-        <p className="font-semibold text-night">Soyez le premier à proposer un troc !</p>
+        <p className="font-semibold text-night">Soyez le premier � proposer un troc !</p>
         <p className="mt-2 text-sm text-night/55">
-          Publiez une annonce et cochez "Troc possible" pour apparaître ici.
+          Publiez une annonce et cochez "Troc possible" pour appara�tre ici.
         </p>
         <Link
           href="/annonces/nouvelle"
@@ -63,7 +63,7 @@ export default function TrocListingsPreview() {
       </div>
       <div className="mt-4 text-center md:hidden">
         <Link href="/troc" className="text-sm font-semibold text-coral hover:underline">
-          Voir toutes les annonces troc →
+          Voir toutes les annonces troc �
         </Link>
       </div>
     </>

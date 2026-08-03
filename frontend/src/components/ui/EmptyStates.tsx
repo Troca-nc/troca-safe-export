@@ -32,7 +32,7 @@ const CONFIGS: Record<EmptyVariant, { title: string; subtitle: string; cta?: str
   },
   notifications: {
     title: 'Aucune notification',
-    subtitle: 'Les alertes et nouveaux événements apparaîtront ici.',
+    subtitle: 'Les alertes et nouveaux �v�nements appara�tront ici.',
     icon: <Bell className="w-8 h-8" />,
   },
   generic: {

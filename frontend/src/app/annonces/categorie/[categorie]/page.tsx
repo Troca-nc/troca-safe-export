@@ -69,7 +69,7 @@ export default async function CategoryPage({
       <nav aria-label="Fil d'Ariane" className="text-xs text-night/40 flex items-center gap-1 px-4 py-2">
         {breadcrumbs.map((crumb, i) => (
           <span key={crumb.url} className="flex items-center gap-1">
-            {i > 0 && <span aria-hidden>›</span>}
+            {i > 0 && <span aria-hidden>:</span>}
             {i < breadcrumbs.length - 1
               ? <a href={crumb.url} className="hover:text-coral transition-colors">{crumb.name}</a>
               : <span className="text-night/70 font-medium">{crumb.name}</span>
@@ -82,7 +82,7 @@ export default async function CategoryPage({
         <h1 className="text-2xl font-display font-bold text-night flex items-center gap-2">
           <span aria-hidden>{cat.emoji}</span>
           {cat.label}
-          {commune && <span className="text-night/50"> à {commune}</span>}
+          {commune && <span className="text-night/50"> � {commune}</span>}
         </h1>
         <p className="text-sm text-night/50 mt-1">
           {stats.nb_annonces.toLocaleString('fr-FR')} annonce{stats.nb_annonces > 1 ? 's' : ''} disponible{stats.nb_annonces > 1 ? 's' : ''}

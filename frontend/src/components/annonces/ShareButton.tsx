@@ -17,13 +17,13 @@ interface ShareButtonProps {
 }
 
 function buildShareContent(annonce: ShareButtonProps['annonce']) {
-  const location = annonce.commune ? `à ${annonce.commune}` : 'en Nouvelle-Calédonie'
+  const location = annonce.commune ? `� ${annonce.commune}` : 'en Nouvelle-Cal�donie'
   const price = annonce.prix ? `${annonce.prix.toLocaleString('fr-FR')} XPF` : null
   return {
     kind: 'annonce' as const,
     itemId: annonce.id,
     title: `${annonce.titre} | Kalico`,
-    description: [price, location].filter(Boolean).join(' • '),
+    description: [price, location].filter(Boolean).join(' " '),
     url: `${SITE_URL}/annonces/${annonce.id}`,
     imageUrl: annonce.image_url ?? null,
   }

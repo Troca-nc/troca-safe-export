@@ -15,13 +15,13 @@ const DAYS = [
   { value: 7, label: 'Dimanche' },
 ] as const
 
-const VARIABLE_CHIPS = ['{prénom_client}', '{nom_entreprise}', '{heure_retour}']
+const VARIABLE_CHIPS = ['{pr�nom_client}', '{nom_entreprise}', '{heure_retour}']
 const TIME_OPTIONS = ['00:00', '06:00', '08:00', '09:00', '10:00', '12:00', '13:00', '14:00', '15:00', '17:00', '18:00', '20:00', '22:00']
 const DELAY_OPTIONS = [
-  { value: 0, label: 'Répondre immédiatement' },
-  { value: 5, label: 'Après 5 min' },
-  { value: 15, label: 'Après 15 min' },
-  { value: 30, label: 'Après 30 min' },
+  { value: 0, label: 'R�pondre imm�diatement' },
+  { value: 5, label: 'Apr�s 5 min' },
+  { value: 15, label: 'Apr�s 15 min' },
+  { value: 30, label: 'Apr�s 30 min' },
 ] as const
 
 type AutoReplyConfig = {
@@ -37,7 +37,7 @@ type AutoReplyConfig = {
 
 function replacePreviewVariables(message: string) {
   return message
-    .replaceAll('{prénom_client}', 'Emma')
+    .replaceAll('{pr�nom_client}', 'Emma')
     .replaceAll('{nom_entreprise}', 'Atelier Kalo')
     .replaceAll('{heure_retour}', '18:00')
 }
@@ -49,7 +49,7 @@ export default function AutoReplyPage() {
   const [error, setError] = useState('')
   const [isActive, setIsActive] = useState(false)
   const [message, setMessage] = useState(
-    'Bonjour, merci pour votre message !\nJe suis actuellement indisponible mais je reviendrai vers vous dès que possible.\nCordialement, [Votre prénom]'
+    'Bonjour, merci pour votre message !\nJe suis actuellement indisponible mais je reviendrai vers vous d�s que possible.\nCordialement, [Votre pr�nom]'
   )
   const [activeFrom, setActiveFrom] = useState('09:00')
   const [activeUntil, setActiveUntil] = useState('18:00')
@@ -112,7 +112,7 @@ export default function AutoReplyPage() {
       setSaved(true)
       window.setTimeout(() => setSaved(false), 2500)
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible de sauvegarder la réponse automatique.')
+      setError(err?.response?.data?.error || 'Impossible de sauvegarder la r�ponse automatique.')
     } finally {
       setSaving(false)
     }
@@ -127,10 +127,10 @@ export default function AutoReplyPage() {
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Réponse automatique</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-night">Répondez même quand vous êtes occupé</h1>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">R�ponse automatique</p>
+            <h1 className="mt-2 font-display text-3xl font-bold text-night">R�pondez m�me quand vous �tes occup�</h1>
             <p className="mt-2 max-w-3xl text-sm leading-relaxed text-night/60">
-              Configurez un message automatique pour rassurer vos clients et garder le contact, même en dehors de vos horaires.
+              Configurez un message automatique pour rassurer vos clients et garder le contact, m�me en dehors de vos horaires.
             </p>
           </div>
 
@@ -144,7 +144,7 @@ export default function AutoReplyPage() {
             }`}
           >
             {isActive ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
-            {isActive ? 'Réponse automatique activée' : 'Réponse automatique désactivée'}
+            {isActive ? 'R�ponse automatique activ�e' : 'R�ponse automatique d�sactiv�e'}
           </button>
         </div>
       </section>
@@ -155,7 +155,7 @@ export default function AutoReplyPage() {
             <MessageSquareReply className="h-5 w-5 text-[#0A7EA4]" />
             <h2 className="font-display text-2xl font-bold text-night">Message automatique</h2>
           </div>
-          <p className="mt-2 text-sm text-night/55">Variables disponibles: {VARIABLE_CHIPS.join(' · ')}</p>
+          <p className="mt-2 text-sm text-night/55">Variables disponibles: {VARIABLE_CHIPS.join(' � ')}</p>
 
           <div className="mt-4 flex flex-wrap gap-2">
             {VARIABLE_CHIPS.map((chip) => (
@@ -179,15 +179,15 @@ export default function AutoReplyPage() {
             placeholder="Bonjour, merci pour votre message..."
           />
           <div className="mt-2 flex items-center justify-between text-xs text-night/45">
-            <span>{message.length}/500 caractères</span>
+            <span>{message.length}/500 caract�res</span>
             <span className="inline-flex items-center gap-1">
               <Sparkles className="h-3.5 w-3.5" />
-              Aperçu en temps réel
+              Aper�u en temps r�el
             </span>
           </div>
 
           <div className="mt-6 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Aperçu du message</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Aper�u du message</p>
             <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-night/70">{preview}</p>
           </div>
         </div>
@@ -198,7 +198,7 @@ export default function AutoReplyPage() {
               <Clock3 className="h-5 w-5 text-coral" />
               <div>
                 <h2 className="font-display text-2xl font-bold text-night">Plages horaires actives</h2>
-                <p className="text-sm text-night/55">La réponse se déclenche uniquement en dehors de ces horaires.</p>
+                <p className="text-sm text-night/55">La r�ponse se d�clenche uniquement en dehors de ces horaires.</p>
               </div>
             </div>
 
@@ -227,7 +227,7 @@ export default function AutoReplyPage() {
                         >
                           {TIME_OPTIONS.map((time) => <option key={`from-${time}`} value={time}>{time}</option>)}
                         </select>
-                        <span className="text-sm text-night/45">→</span>
+                        <span className="text-sm text-night/45">�</span>
                         <select
                           value={activeUntil}
                           onChange={(e) => setActiveUntil(e.target.value)}
@@ -246,8 +246,8 @@ export default function AutoReplyPage() {
           </section>
 
           <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
-            <h2 className="font-display text-2xl font-bold text-night">Délai de réponse</h2>
-            <p className="mt-2 text-sm text-night/55">Choisissez quand la réponse partira automatiquement.</p>
+            <h2 className="font-display text-2xl font-bold text-night">D�lai de r�ponse</h2>
+            <p className="mt-2 text-sm text-night/55">Choisissez quand la r�ponse partira automatiquement.</p>
             <select
               value={delayMinutes}
               onChange={(e) => setDelayMinutes(Number(e.target.value))}
@@ -270,7 +270,7 @@ export default function AutoReplyPage() {
               {saving ? 'Sauvegarde...' : 'Sauvegarder'}
             </button>
 
-            {saved ? <p className="mt-3 text-sm font-semibold text-emerald-700">✅ Réponse automatique configurée</p> : null}
+            {saved ? <p className="mt-3 text-sm font-semibold text-emerald-700"> R�ponse automatique configur�e</p> : null}
             {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
           </section>
         </div>

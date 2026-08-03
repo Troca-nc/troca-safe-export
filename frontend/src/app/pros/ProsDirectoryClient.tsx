@@ -13,26 +13,26 @@ const FALLBACK_CATEGORY_OPTIONS = [
   'Commerce',
   'Restauration',
   'Transport',
-  'Santé',
+  'Sant�',
   'Immobilier',
   'Informatique',
-  'Événementiel',
+  '�v�nementiel',
   'BTP',
 ]
 
 const FALLBACK_COMMUNE_OPTIONS = [
-  'Nouméa',
-  'Dumbéa',
-  'Païta',
+  'Noum�a',
+  'Dumb�a',
+  'Pa�ta',
   'Mont-Dore',
   'Boulouparis',
   'La Foa',
   'Bourail',
-  'Koné',
+  'Kon�',
   'Koumac',
   'Lifou',
-  'Maré',
-  'Ouvéa',
+  'Mar�',
+  'Ouv�a',
 ]
 
 function getDisplayName(pro: ProCardModel) {
@@ -171,10 +171,10 @@ export default function ProsDirectoryClient() {
               Annuaire des pros
             </p>
             <h1 className="mt-2 font-display text-3xl font-bold text-night sm:text-4xl">
-              Les professionnels vérifiés de Nouvelle-Calédonie
+              Les professionnels v�rifi�s de Nouvelle-Cal�donie
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-night/60 sm:text-base">
-              Parcourez les pros certifiés par Kalico, comparez leur note, leur commune et leur spécialité, puis
+              Parcourez les pros certifi�s par Kalico, comparez leur note, leur commune et leur sp�cialit�, puis
               contactez la bonne vitrine en quelques clics.
             </p>
           </div>
@@ -198,7 +198,7 @@ export default function ProsDirectoryClient() {
 
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Pros vérifiés</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Pros v�rifi�s</p>
             <p className="mt-2 text-2xl font-bold text-night">{formatNumber(pros.length)}</p>
           </div>
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
@@ -206,7 +206,7 @@ export default function ProsDirectoryClient() {
             <p className="mt-2 text-2xl font-bold text-night">{formatNumber(communeOptions.length)}</p>
           </div>
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Résultats affichés</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">R�sultats affich�s</p>
             <p className="mt-2 text-2xl font-bold text-night">{formatNumber(filteredPros.length)}</p>
           </div>
         </div>
@@ -218,7 +218,7 @@ export default function ProsDirectoryClient() {
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Filtres</p>
             <h2 className="mt-1 font-display text-2xl font-bold text-night">Affinez votre recherche</h2>
             <p className="mt-1 text-sm text-night/55">
-              Cherchez par nom, spécialité, commune et niveau de note.
+              Cherchez par nom, sp�cialit�, commune et niveau de note.
             </p>
           </div>
           <button
@@ -227,7 +227,7 @@ export default function ProsDirectoryClient() {
             className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
           >
             <FilterX className="h-4 w-4" />
-            Réinitialiser
+            R�initialiser
           </button>
         </div>
 
@@ -239,20 +239,20 @@ export default function ProsDirectoryClient() {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Nom, entreprise, spécialité..."
+                placeholder="Nom, entreprise, sp�cialit�..."
                 className="input w-full rounded-2xl pl-10"
               />
             </div>
           </label>
 
           <label className="space-y-2">
-            <span className="text-sm font-semibold text-night">Catégorie</span>
+            <span className="text-sm font-semibold text-night">Cat�gorie</span>
             <select
               value={category}
               onChange={(event) => setCategory(event.target.value)}
               className="input w-full rounded-2xl"
             >
-              <option value="">Toutes les catégories</option>
+              <option value="">Toutes les cat�gories</option>
               {categoryOptions.map((value) => (
                 <option key={value} value={value}>
                   {value}
@@ -295,8 +295,8 @@ export default function ProsDirectoryClient() {
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm text-night/55">
           <p>
             {loading
-              ? 'Chargement de l’annuaire...'
-              : `${filteredPros.length} professionnel${filteredPros.length > 1 ? 's' : ''} trouvé${filteredPros.length > 1 ? 's' : ''}`}
+              ? 'Chargement de lannuaire...'
+              : `${filteredPros.length} professionnel${filteredPros.length > 1 ? 's' : ''} trouv�${filteredPros.length > 1 ? 's' : ''}`}
           </p>
           {query || category || commune || minRating ? (
             <p className="rounded-full bg-nc-lagonLight px-3 py-1 text-xs font-semibold text-nc-lagon">
@@ -327,16 +327,16 @@ export default function ProsDirectoryClient() {
           </div>
         ) : (
           <div className="rounded-[2rem] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-12 text-center shadow-sm">
-            <p className="text-lg font-semibold text-night">Aucun professionnel ne correspond à vos filtres</p>
+            <p className="text-lg font-semibold text-night">Aucun professionnel ne correspond � vos filtres</p>
             <p className="mt-2 text-sm text-night/60">
-              Essayez une autre commune, une note plus basse ou réinitialisez votre recherche.
+              Essayez une autre commune, une note plus basse ou r�initialisez votre recherche.
             </p>
             <button
               type="button"
               onClick={resetFilters}
               className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
             >
-              Réinitialiser les filtres
+              R�initialiser les filtres
             </button>
           </div>
         )}

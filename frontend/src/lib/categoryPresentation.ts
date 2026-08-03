@@ -257,26 +257,26 @@ function resolveLegacyIconKey(iconKey?: string | null) {
 }
 
 export const CATEGORY_VISUALS: Record<string, CategoryVisual> = {
-  vehicules: { icon: Car, label: 'Véhicules' },
+  vehicules: { icon: Car, label: 'V�hicules' },
   nautisme: { icon: Anchor, label: 'Nautisme' },
   immobilier: { icon: Home, label: 'Immobilier' },
   emploi: { icon: Briefcase, label: 'Emploi' },
   mode: { icon: Shirt, label: 'Mode' },
   'maison-jardin': { icon: Sofa, label: 'Maison & Jardin' },
   'bricolage-outillage': { icon: Wrench, label: 'Bricolage & Outillage' },
-  'famille-puericulture': { icon: Baby, label: 'Famille & Puériculture' },
-  'electronique-multimedia': { icon: Smartphone, label: 'Électronique & Multimédia' },
+  'famille-puericulture': { icon: Baby, label: 'Famille & Pu�riculture' },
+  'electronique-multimedia': { icon: Smartphone, label: '�lectronique & Multim�dia' },
   loisirs: { icon: Gamepad2, label: 'Loisirs' },
-  'collections-antiquites': { icon: Archive, label: 'Collections & Antiquités' },
+  'collections-antiquites': { icon: Archive, label: 'Collections & Antiquit�s' },
   animaux: { icon: PawPrint, label: 'Animaux' },
   services: { icon: HeartHandshake, label: 'Services' },
-  'materiel-professionnel': { icon: HardHat, label: 'Matériel professionnel' },
+  'materiel-professionnel': { icon: HardHat, label: 'Mat�riel professionnel' },
   divers: { icon: Package, label: 'Divers' },
   // legacy aliases kept for backward compatibility
-  location_courte_duree: { icon: Home, label: 'Locations courte durée' },
+  location_courte_duree: { icon: Home, label: 'Locations courte dur�e' },
   don: { icon: Gift, label: 'Dons' },
   'location-vacances': { icon: MapPin, label: 'Location vacances' },
-  electronique: { icon: Smartphone, label: 'Électronique' },
+  electronique: { icon: Smartphone, label: '�lectronique' },
   famille: { icon: UsersRound, label: 'Famille' },
   troc: { icon: Handshake, label: 'Troc' },
   mobilier: { icon: Sofa, label: 'Maison & Jardin' },
@@ -341,7 +341,7 @@ function resolveIconKey(slug: string, label?: string, iconKey?: string) {
   if (/(collection|antiquit)/.test(text)) return 'gift'
   if (/(loisirs|musique|lecture|jeux|sport|fitness|camping|creatif|modelisme|airsoft|tir)/.test(text)) return 'dumbbell'
   if (/(banque|finance|assurance|prix|tarif|salaire)/.test(text)) return 'banknote'
-  if (/(médical|medical|sante|santé|formation|stage)/.test(text)) return 'stethoscope'
+  if (/(m�dical|medical|sante|sant�|formation|stage)/.test(text)) return 'stethoscope'
   if (/(industrie|environnement)/.test(text)) return 'factory'
 
   return CATEGORY_VISUALS[slug]?.icon ? slug : 'layers'
@@ -349,23 +349,23 @@ function resolveIconKey(slug: string, label?: string, iconKey?: string) {
 
 export const FEATURED_SEARCHES = [
   { label: 'Emploi', slug: 'emploi' },
-  { label: 'Véhicules', slug: 'vehicules' },
+  { label: 'V�hicules', slug: 'vehicules' },
   { label: 'Immobilier', slug: 'immobilier' },
   { label: 'Nautisme', slug: 'nautisme' },
   { label: 'Services', slug: 'services' },
   { label: 'Mode', slug: 'mode' },
   { label: 'Maison & Jardin', slug: 'maison-jardin' },
   { label: 'Bricolage & Outillage', slug: 'bricolage-outillage' },
-  { label: 'Famille & Puériculture', slug: 'famille-puericulture' },
-  { label: 'Électronique & Multimédia', slug: 'electronique-multimedia' },
+  { label: 'Famille & Pu�riculture', slug: 'famille-puericulture' },
+  { label: '�lectronique & Multim�dia', slug: 'electronique-multimedia' },
   { label: 'Loisirs', slug: 'loisirs' },
-  { label: 'Collections & Antiquités', slug: 'collections-antiquites' },
+  { label: 'Collections & Antiquit�s', slug: 'collections-antiquites' },
   { label: 'Animaux', slug: 'animaux' },
-  { label: 'Matériel professionnel', slug: 'materiel-professionnel' },
+  { label: 'Mat�riel professionnel', slug: 'materiel-professionnel' },
   { label: 'Divers', slug: 'divers' },
 ]
 
-export const SEARCH_ALERTS = ['iPhone 15', 'Toyota Hilux', 'Studio Nouméa', 'Canapé', 'PS5', 'Chiot']
+export const SEARCH_ALERTS = ['iPhone 15', 'Toyota Hilux', 'Studio Noum�a', 'Canap�', 'PS5', 'Chiot']
 
 export const FEATURED_CATEGORY_ORDER = [
   'emploi',

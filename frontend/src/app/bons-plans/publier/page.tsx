@@ -12,7 +12,7 @@ import { useAuthStore } from '@/store/authStore'
 const CATEGORIES = [
   { value: 'alimentation', label: 'Alimentation' },
   { value: 'mode', label: 'Mode' },
-  { value: 'beaute', label: 'Beauté' },
+  { value: 'beaute', label: 'Beaute' },
   { value: 'high_tech', label: 'High-Tech' },
   { value: 'auto_moto', label: 'Auto/Moto' },
   { value: 'maison', label: 'Maison' },
@@ -50,7 +50,7 @@ export default function PublishBonPlanPage() {
 
   const baseAmount = durationDays === 7 ? 2900 : 7900
   const proAmount = durationDays === 7 ? 2320 : 6320
-  const discountText = durationDays === 7 ? '2 320 XPF si vous êtes Pro' : '6 320 XPF si vous êtes Pro'
+  const discountText = durationDays === 7 ? '2 320 XPF si vous etes Pro' : '6 320 XPF si vous etes Pro'
   const snapTo10 = (value: string) => {
     if (!value.trim()) return ''
     const parsed = Number(value)
@@ -60,7 +60,7 @@ export default function PublishBonPlanPage() {
 
   const preview = useMemo(() => ({
     title: form.title || 'Titre de la promo',
-    description: form.description || 'La description de votre bon plan apparaîtra ici.',
+    description: form.description || 'La description de votre bon plan apparaetra ici.',
     business_name: form.business_name || 'Votre enseigne',
     image_url: form.image_url || null,
     promo_label: form.promo_label || null,
@@ -101,7 +101,7 @@ export default function PublishBonPlanPage() {
   const uploadCatalogPdf = async (file: File | null) => {
     if (!file) return
     if (file.type !== 'application/pdf') {
-      window.alert('Le catalogue doit être un fichier PDF.')
+      window.alert('Le catalogue doit etre un fichier PDF.')
       return
     }
     try {
@@ -111,7 +111,7 @@ export default function PublishBonPlanPage() {
         setForm((current) => ({ ...current, catalog_pdf_url: url }))
       }
     } catch {
-      window.alert('Impossible de téléverser le PDF.')
+      window.alert('Impossible de televerser le PDF.')
     }
   }
 
@@ -160,7 +160,7 @@ export default function PublishBonPlanPage() {
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-lagoon">Self-service enseigne</p>
             <h1 className="mt-3 font-display text-4xl font-bold">Publier une promo en ligne</h1>
             <p className="mt-3 max-w-3xl text-sm leading-relaxed text-white/72 md:text-base">
-              Créez votre bon plan, choisissez Stripe ou PayPlug, puis votre promo devient visible dès le paiement confirmé.
+              Creez votre bon plan, choisissez Stripe ou PayPlug, puis votre promo devient visible des le paiement confirme.
             </p>
           </div>
 
@@ -168,7 +168,7 @@ export default function PublishBonPlanPage() {
             <div className="p-6 md:p-8">
               <div className="rounded-[1.5rem] border border-coral/15 bg-coral/5 p-5">
                 <p className="font-semibold text-night">Connectez-vous pour continuer.</p>
-                <p className="mt-1 text-sm text-night/60">Nous avons besoin de votre compte pour déclencher le paiement et la publication immédiate.</p>
+                <p className="mt-1 text-sm text-night/60">Nous avons besoin de votre compte pour declencher le paiement et la publication immediate.</p>
                 <button type="button" className="btn-primary mt-4 rounded-2xl px-4 py-3" onClick={() => openAuthModal({ type: 'publish_listing', redirectTo: '/bons-plans/publier' })}>
                   Se connecter
                 </button>
@@ -225,7 +225,7 @@ export default function PublishBonPlanPage() {
                         className="input w-full file:mr-4 file:rounded-full file:border-0 file:bg-[#0A7EA4] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
                       />
                       {form.catalog_pdf_url ? (
-                        <p className="text-xs text-emerald-700">PDF prêt à être publié.</p>
+                        <p className="text-xs text-emerald-700">PDF pret e etre publie.</p>
                       ) : (
                         <p className="text-xs text-night/45">PDF uniquement. Il sera visible sur la fiche du bon plan.</p>
                       )}
@@ -235,13 +235,13 @@ export default function PublishBonPlanPage() {
                       <input value={form.promo_label} onChange={(e) => handleChange('promo_label', e.target.value)} placeholder="-20% sur tout" className="input w-full" />
                     </label>
                     <label className="space-y-1">
-                      <span className="text-sm font-semibold">Catégorie</span>
+                      <span className="text-sm font-semibold">Categorie</span>
                       <select value={form.category} onChange={(e) => handleChange('category', e.target.value)} className="input w-full">
                         {CATEGORIES.map((category) => <option key={category.value} value={category.value}>{category.label}</option>)}
                       </select>
                     </label>
                     <label className="space-y-1">
-                      <span className="text-sm font-semibold">Prix barré XPF</span>
+                      <span className="text-sm font-semibold">Prix barre XPF</span>
                       <input
                         value={form.original_price_xpf}
                         onChange={(e) => handleChange('original_price_xpf', e.target.value)}
@@ -271,7 +271,7 @@ export default function PublishBonPlanPage() {
                       <input value={form.cta_label} onChange={(e) => handleChange('cta_label', e.target.value)} className="input w-full" />
                     </label>
                     <label className="space-y-1">
-                      <span className="text-sm font-semibold">Lien ou téléphone</span>
+                      <span className="text-sm font-semibold">Lien ou telephone</span>
                       <input value={form.cta_url} onChange={(e) => handleChange('cta_url', e.target.value)} className="input w-full" />
                     </label>
                     <label className="space-y-1">
@@ -286,7 +286,7 @@ export default function PublishBonPlanPage() {
                 </section>
 
                 <section className="rounded-[1.5rem] border border-night/8 bg-sand/40 p-5">
-                  <h2 className="mb-4 text-lg font-bold">Durée de publication</h2>
+                  <h2 className="mb-4 text-lg font-bold">Duree de publication</h2>
                   <div className="grid gap-3 md:grid-cols-2">
                     {[
                       { days: 7 as const, label: '7 jours', price: 2900, pro: 2320 },
@@ -327,7 +327,7 @@ export default function PublishBonPlanPage() {
                       onClick={() => setPaymentProvider('payplug')}
                       className={`rounded-[1.25rem] border p-4 text-left transition ${paymentProvider === 'payplug' ? 'border-coral bg-white' : 'border-night/10 bg-white/70'}`}
                     >
-                      <p className="font-semibold">Carte OPT-NC / réseau local</p>
+                      <p className="font-semibold">Carte OPT-NC / reseau local</p>
                       <p className="mt-1 text-sm text-night/60">PayPlug pour les cartes locales et un tunnel plus simple.</p>
                     </button>
                   </div>
@@ -341,7 +341,7 @@ export default function PublishBonPlanPage() {
 
               <aside className="space-y-5">
                 <div className="rounded-[1.5rem] border border-coral/15 bg-coral/5 p-5">
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Aperçu en temps réel</p>
+                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Apereu en temps reel</p>
                   <div className="mt-4 overflow-hidden rounded-[1.25rem] border border-night/8 bg-white shadow-sm">
                     <div className="aspect-[16/9] bg-sand">
                       {preview.image_url ? (
@@ -351,7 +351,7 @@ export default function PublishBonPlanPage() {
                       )}
                     </div>
                     <div className="p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-coral">Catégorie: {preview.category}</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-coral">Categorie: {preview.category}</p>
                       <h3 className="mt-2 text-xl font-bold text-night">{preview.title}</h3>
                       <p className="mt-2 text-sm text-night/65">{preview.description}</p>
                       <div className="mt-4 flex items-center justify-between">
@@ -366,9 +366,9 @@ export default function PublishBonPlanPage() {
                 </div>
 
                 <div className="rounded-[1.5rem] border border-night/8 bg-sand/40 p-5">
-                  <h3 className="text-lg font-bold text-night">Résumé</h3>
+                  <h3 className="text-lg font-bold text-night">Resume</h3>
                   <ul className="mt-3 space-y-2 text-sm text-night/65">
-                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-coral" /> Durée: {durationDays} jours</li>
+                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-coral" /> Duree: {durationDays} jours</li>
                     <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-coral" /> Paiement: {paymentProvider === 'stripe' ? 'Stripe' : 'PayPlug'}</li>
                     <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-coral" /> Prix public: {baseAmount.toLocaleString('fr-FR')} XPF</li>
                     <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-coral" /> Prix Pro: {discountText}</li>
@@ -378,7 +378,7 @@ export default function PublishBonPlanPage() {
                 <div className="rounded-[1.5rem] border border-night/8 bg-white p-5 text-sm text-night/60">
                   <p className="font-semibold text-night">Important</p>
                   <p className="mt-2">
-                    La promo devient visible seulement après paiement confirmé. Le paiement réel est traité par le fournisseur choisi.
+                    La promo devient visible seulement apres paiement confirme. Le paiement reel est traite par le fournisseur choisi.
                   </p>
                   <Link href="/bons-plans" className="mt-4 inline-flex items-center gap-2 font-semibold text-coral">
                     Retour aux bons plans

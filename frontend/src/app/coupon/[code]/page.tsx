@@ -54,7 +54,7 @@ export default function CouponPublicPage() {
         {loading ? (
           <div className="flex flex-col items-center gap-3 text-center">
             <Loader2 className="h-8 w-8 animate-spin text-[#0A7EA4]" />
-            <p className="text-sm text-night/55">Chargement du coupon…</p>
+            <p className="text-sm text-night/55">Chargement du coupon&</p>
           </div>
         ) : coupon?.valid ? (
           <section className="w-full rounded-[2rem] border border-night/10 bg-white p-6 shadow-[0_18px_70px_rgba(8,32,50,0.08)]">
@@ -93,9 +93,9 @@ export default function CouponPublicPage() {
                   <QrCode className="h-12 w-12 text-night/30" />
                 </div>
               )}
-              <p className="max-w-md text-center text-sm text-night/60">Présentez ce QR à la caisse. L’écran reste volontairement blanc pour garantir une bonne lisibilité.</p>
+              <p className="max-w-md text-center text-sm text-night/60">Pr�sentez ce QR � la caisse. L�cran reste volontairement blanc pour garantir une bonne lisibilit�.</p>
               {coupon.valid_until ? (
-                <p className="text-xs font-semibold text-emerald-700">Valable jusqu’au {new Intl.DateTimeFormat('fr-FR').format(new Date(coupon.valid_until))}</p>
+                <p className="text-xs font-semibold text-emerald-700">Valable jusquau {new Intl.DateTimeFormat('fr-FR').format(new Date(coupon.valid_until))}</p>
               ) : null}
             </div>
           </section>
@@ -103,7 +103,7 @@ export default function CouponPublicPage() {
           <section className="w-full rounded-[2rem] border border-night/10 bg-white p-8 text-center shadow-[0_18px_70px_rgba(8,32,50,0.08)]">
             <XCircle className="mx-auto h-12 w-12 text-rose-500" />
             <h1 className="mt-4 text-2xl font-bold text-night">Coupon indisponible</h1>
-            <p className="mt-2 text-sm text-night/60">{coupon?.reason || 'Ce coupon n’est pas valide.'}</p>
+            <p className="mt-2 text-sm text-night/60">{coupon?.reason || 'Ce coupon nest pas valide.'}</p>
           </section>
         )}
       </div>

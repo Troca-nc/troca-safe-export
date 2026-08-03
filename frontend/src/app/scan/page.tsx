@@ -11,7 +11,7 @@ export default function ScanPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [error, setError] = useState('')
-  const [status, setStatus] = useState('En attente de la caméra...')
+  const [status, setStatus] = useState('En attente de la cam�ra...')
   const [isScanning, setIsScanning] = useState(false)
 
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function ScanPage() {
 
         animationFrame = window.requestAnimationFrame(loop)
       } catch (err: any) {
-        setError(err?.message || 'Impossible d’accéder à la caméra.')
+        setError(err?.message || 'Impossible dacc�der � la cam�ra.')
       }
     }
 
@@ -99,7 +99,7 @@ export default function ScanPage() {
           </p>
           <h1 className="mt-4 font-display text-4xl font-bold text-night">Scanner un QR Kalico</h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-night/65">
-            Pointez la caméra vers le QR code généré par la billetterie native pour ouvrir la fiche du billet.
+            Pointez la cam�ra vers le QR code g�n�r� par la billetterie native pour ouvrir la fiche du billet.
           </p>
 
           {error ? (
@@ -116,7 +116,7 @@ export default function ScanPage() {
               <div className="flex items-center gap-3">
                 {isScanning ? <Camera className="h-5 w-5 text-[#0A7EA4]" /> : <Loader2 className="h-5 w-5 animate-spin text-[#0A7EA4]" />}
                 <div>
-                  <p className="text-sm font-semibold text-night">État</p>
+                  <p className="text-sm font-semibold text-night">�tat</p>
                   <p className="text-sm text-night/60">{status}</p>
                 </div>
               </div>
@@ -125,8 +125,8 @@ export default function ScanPage() {
                 <p className="text-sm font-semibold text-night">Conseils</p>
                 <ul className="mt-2 space-y-2 text-sm text-night/65">
                   <li className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" /> Gardez le QR bien au centre.</li>
-                  <li className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" /> La lumière doit être suffisante.</li>
-                  <li className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" /> Le QR peut aussi être saisi manuellement.</li>
+                  <li className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" /> La lumi�re doit �tre suffisante.</li>
+                  <li className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" /> Le QR peut aussi �tre saisi manuellement.</li>
                 </ul>
               </div>
 

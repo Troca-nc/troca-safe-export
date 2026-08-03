@@ -48,19 +48,19 @@ type OfferFormState = {
 const SLOT_LABELS = {
   morning: 'Matin',
   midday: 'Midi',
-  afternoon: 'Après-midi',
-  evening: 'Fin de journée',
+  afternoon: 'Apr�s-midi',
+  evening: 'Fin de journ�e',
 }
 
 function formatMoney(value: number | null | undefined) {
-  if (value == null || !Number.isFinite(Number(value))) return 'À préciser'
+  if (value == null || !Number.isFinite(Number(value))) return '� pr�ciser'
   return `${Number(value).toLocaleString('fr-FR')} XPF`
 }
 
 function formatDateLabel(value: string | null | undefined) {
-  if (!value) return 'À confirmer'
+  if (!value) return '� confirmer'
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'À confirmer'
+  if (Number.isNaN(date.getTime())) return '� confirmer'
   return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' }).format(date)
 }
 
@@ -159,7 +159,7 @@ export default function ProDashboardFretPage() {
         pickup_slot: form.pickup_slot,
         message: form.message.trim() || null,
       })
-      setSuccess('Votre offre a bien été envoyée.')
+      setSuccess('Votre offre a bien �t� envoy�e.')
       await load()
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Impossible de soumettre votre offre pour le moment.')
@@ -174,10 +174,10 @@ export default function ProDashboardFretPage() {
     setSuccess('')
     try {
       await fretApi.markDelivered(requestId)
-      setSuccess('Transport marqué comme livré.')
+      setSuccess('Transport marqu� comme livr�.')
       await load()
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible de marquer ce transport comme livré.')
+      setError(err?.response?.data?.error || 'Impossible de marquer ce transport comme livr�.')
     } finally {
       setDeliveringId(null)
     }
@@ -204,9 +204,9 @@ export default function ProDashboardFretPage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Envoi & Livraison</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-night">Demandes en cours et offres privées</h1>
+            <h1 className="mt-2 font-display text-3xl font-bold text-night">Demandes en cours et offres priv�es</h1>
             <p className="mt-2 text-sm text-night/60">
-              Répondez aux demandes ouvertes, suivez vos offres et marquez vos transports comme livrés depuis le dashboard Pro.
+              R�pondez aux demandes ouvertes, suivez vos offres et marquez vos transports comme livr�s depuis le dashboard Pro.
           </p>
         </div>
           <Link href="/envoi-livraison" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white">
@@ -217,11 +217,11 @@ export default function ProDashboardFretPage() {
         <div className="mt-4 flex flex-wrap gap-2 text-xs text-night/60">
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
             <MapPin className="h-3.5 w-3.5" />
-            {transporter?.pro_commune || 'Nouvelle-Calédonie'}
+            {transporter?.pro_commune || 'Nouvelle-Cal�donie'}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
             <ShieldCheck className="h-3.5 w-3.5" />
-            {transporter?.is_verified ? 'Pro Envoi & Livraison vérifié' : 'Profil à vérifier'}
+            {transporter?.is_verified ? 'Pro Envoi & Livraison v�rifi�' : 'Profil � v�rifier'}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
             <BadgeCheck className="h-3.5 w-3.5" />
@@ -238,7 +238,7 @@ export default function ProDashboardFretPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-emeraude">Demandes en cours</p>
-              <h2 className="mt-1 font-display text-2xl font-bold text-night">Répondre rapidement</h2>
+              <h2 className="mt-1 font-display text-2xl font-bold text-night">R�pondre rapidement</h2>
             </div>
             <span className="rounded-full bg-nc-lagonLight px-3 py-1 text-sm font-semibold text-nc-lagon">
               {availableRequests.length}
@@ -260,8 +260,8 @@ export default function ProDashboardFretPage() {
                 <article key={request.id} className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-semibold text-night">{request.departure_commune?.name || request.departure} → {request.destination_commune?.name || request.destination}</p>
-                      <p className="mt-1 text-xs text-night/55">{request.cargo_type || 'Marchandise'} · {request.volume_bucket} · {request.weight_bucket}</p>
+                      <p className="font-semibold text-night">{request.departure_commune?.name || request.departure} � {request.destination_commune?.name || request.destination}</p>
+                      <p className="mt-1 text-xs text-night/55">{request.cargo_type || 'Marchandise'} � {request.volume_bucket} � {request.weight_bucket}</p>
                     </div>
                     <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getStatusTone(myOffer?.status || 'pending')}`}>
                       {myOffer?.status_label || 'En attente'}
@@ -281,7 +281,7 @@ export default function ProDashboardFretPage() {
 
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     <label className="space-y-1">
-                      <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/55">Prix proposé</span>
+                      <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/55">Prix propos�</span>
                       <input
                         type="number"
                         min="1"
@@ -303,7 +303,7 @@ export default function ProDashboardFretPage() {
                       />
                     </label>
                     <label className="space-y-1 sm:col-span-2">
-                      <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/55">Créneau</span>
+                      <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/55">Cr�neau</span>
                       <select
                         value={form.pickup_slot}
                         onChange={(event) => handleOfferChange(request.id, 'pickup_slot', event.target.value)}
@@ -330,7 +330,7 @@ export default function ProDashboardFretPage() {
 
                   {myOffer ? (
                     <p className="mt-3 text-sm text-night/60">
-                      Votre offre actuelle : {formatMoney(myOffer.amount_xpf)} · {formatDateLabel(myOffer.pickup_date)} · {myOffer.status_label}
+                      Votre offre actuelle : {formatMoney(myOffer.amount_xpf)} � {formatDateLabel(myOffer.pickup_date)} � {myOffer.status_label}
                     </p>
                   ) : null}
 
@@ -357,14 +357,14 @@ export default function ProDashboardFretPage() {
         <div className="space-y-4">
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-emeraude">Mes offres</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Historique des réponses</h2>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Historique des r�ponses</h2>
             <div className="mt-4 space-y-3">
               {myOffers.length ? myOffers.map((offer) => (
                 <div key={offer.id} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-semibold text-night">{offer.request_departure || 'Départ'} → {offer.request_destination || 'Arrivée'}</p>
-                      <p className="mt-1 text-xs text-night/55">{formatDateLabel(offer.pickup_date)} · {offer.pickup_slot_label}</p>
+                      <p className="font-semibold text-night">{offer.request_departure || 'D�part'} � {offer.request_destination || 'Arriv�e'}</p>
+                      <p className="mt-1 text-xs text-night/55">{formatDateLabel(offer.pickup_date)} � {offer.pickup_slot_label}</p>
                     </div>
                     <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getStatusTone(offer.status)}`}>
                       {offer.status_label}
@@ -374,22 +374,22 @@ export default function ProDashboardFretPage() {
                 </div>
               )) : (
                 <p className="rounded-2xl border border-dashed border-[var(--color-border)] bg-sand/40 p-4 text-sm text-night/55">
-                  Aucune offre envoyée pour le moment.
+                  Aucune offre envoy�e pour le moment.
                 </p>
               )}
             </div>
           </article>
 
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Confirmés</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Mes transports confirmés</h2>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Confirm�s</p>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Mes transports confirm�s</h2>
             <div className="mt-4 space-y-3">
               {confirmedTransports.length ? confirmedTransports.map((request) => (
                 <div key={request.id} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-semibold text-night">{request.departure_commune?.name || request.departure} → {request.destination_commune?.name || request.destination}</p>
-                      <p className="mt-1 text-xs text-night/55">{formatDateLabel(request.selected_offer?.pickup_date)} · {request.selected_offer?.pickup_slot}</p>
+                      <p className="font-semibold text-night">{request.departure_commune?.name || request.departure} � {request.destination_commune?.name || request.destination}</p>
+                      <p className="mt-1 text-xs text-night/55">{formatDateLabel(request.selected_offer?.pickup_date)} � {request.selected_offer?.pickup_slot}</p>
                     </div>
                     <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getStatusTone(request.status)}`}>
                       {request.status_label}
@@ -404,13 +404,13 @@ export default function ProDashboardFretPage() {
                       className="mt-3 inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
                     >
                       {deliveringId === request.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                      Marquer comme livré
+                      Marquer comme livr�
                     </button>
                   ) : null}
                 </div>
               )) : (
                 <p className="rounded-2xl border border-dashed border-[var(--color-border)] bg-sand/40 p-4 text-sm text-night/55">
-                  Aucun transport confirmé pour le moment.
+                  Aucun transport confirm� pour le moment.
                 </p>
               )}
             </div>

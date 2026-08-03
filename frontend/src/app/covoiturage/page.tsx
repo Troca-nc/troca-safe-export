@@ -165,9 +165,9 @@ function formatTimeLabel(value?: string | null) {
 }
 
 function formatRouteLabel(ride: Ride) {
-  const departure = ride.departure_commune_name || ride.departure || 'Départ'
-  const destination = ride.destination_commune_name || ride.destination || 'Arrivée'
-  return `${departure} → ${destination}`
+  const departure = ride.departure_commune_name || ride.departure || 'D�part'
+  const destination = ride.destination_commune_name || ride.destination || 'Arriv�e'
+  return `${departure} � ${destination}`
 }
 
 function sortRides(rides: Ride[], sortBy: string) {
@@ -207,21 +207,21 @@ function RideCard({
     <article className="rounded-[1.75rem] border border-[var(--color-border)] border-l-4 border-l-nc-corail bg-[var(--color-surface)] p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex flex-wrap items-center gap-2">
         <span className="badge-corail rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">
-          {ride.is_featured ? 'Boosté' : 'Covoiturage'}
+          {ride.is_featured ? 'Boost�' : 'Covoiturage'}
         </span>
         {recurrenceLabel ? (
           <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
-            ↻ {recurrenceLabel}
+            � {recurrenceLabel}
           </span>
         ) : null}
         {ride.is_verified_driver ? (
           <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
-            Conducteur vérifié
+            Conducteur v�rifi�
           </span>
         ) : null}
         {ride.women_only ? (
           <span className="rounded-full border border-fuchsia-200 bg-fuchsia-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-fuchsia-700">
-            Réservé aux femmes
+            R�serv� aux femmes
           </span>
         ) : null}
         <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text-secondary)]">
@@ -233,7 +233,7 @@ function RideCard({
         <div className="min-w-0">
           <h3 className="text-xl font-semibold text-[var(--color-text-primary)]">{formatRouteLabel(ride)}</h3>
           <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-            {formatTimeLabel(ride.ride_time)} · {ride.vehicle || 'Véhicule détaillé'} · {ride.seats_remaining ?? 0} place{(ride.seats_remaining ?? 0) > 1 ? 's' : ''} restante{(ride.seats_remaining ?? 0) > 1 ? 's' : ''}
+            {formatTimeLabel(ride.ride_time)} � {ride.vehicle || 'V�hicule d�taill�'} � {ride.seats_remaining ?? 0} place{(ride.seats_remaining ?? 0) > 1 ? 's' : ''} restante{(ride.seats_remaining ?? 0) > 1 ? 's' : ''}
           </p>
         </div>
         <div className="rounded-2xl bg-nc-corailLight px-3 py-2 text-right">
@@ -243,12 +243,12 @@ function RideCard({
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2 text-xs text-[var(--color-text-secondary)]">
-        <span className="rounded-full bg-[var(--color-background-secondary)] px-2.5 py-1">Départ: {ride.departure}</span>
-        <span className="rounded-full bg-[var(--color-background-secondary)] px-2.5 py-1">Arrivée: {ride.destination}</span>
-        <span className="rounded-full bg-[var(--color-background-secondary)] px-2.5 py-1">Note {rating > 0 ? `${rating.toFixed(1)}/5` : '—'}</span>
+        <span className="rounded-full bg-[var(--color-background-secondary)] px-2.5 py-1">D�part: {ride.departure}</span>
+        <span className="rounded-full bg-[var(--color-background-secondary)] px-2.5 py-1">Arriv�e: {ride.destination}</span>
+        <span className="rounded-full bg-[var(--color-background-secondary)] px-2.5 py-1">Note {rating > 0 ? `${rating.toFixed(1)}/5` : ''}</span>
         {ride.is_direct === false ? (
           <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-700">
-            🚏 Via {Array.isArray(ride.via_stops) && ride.via_stops.length ? ride.via_stops.slice(0, 3).join(', ') : 'route compatible'}
+            =� Via {Array.isArray(ride.via_stops) && ride.via_stops.length ? ride.via_stops.slice(0, 3).join(', ') : 'route compatible'}
           </span>
         ) : null}
       </div>
@@ -490,18 +490,18 @@ export default function CovoituragePage() {
       })
 
       setPublishNotice({
-        title: form.recurrence_enabled ? 'Série publiée' : 'Trajet publié',
+        title: form.recurrence_enabled ? 'S�rie publi�e' : 'Trajet publi�',
         description: form.recurrence_enabled
-          ? 'Votre série récurrente est désormais en ligne. Elle sera visible sur les créneaux choisis.'
-          : 'Votre trajet est désormais visible dans la liste des covoiturages disponibles.',
+          ? 'Votre s�rie r�currente est d�sormais en ligne. Elle sera visible sur les cr�neaux choisis.'
+          : 'Votre trajet est d�sormais visible dans la liste des covoiturages disponibles.',
         details:
           form.recurrence_enabled && recurrenceSummary
             ? [
-                `${recurrenceSummary.occurrences} trajet${recurrenceSummary.occurrences > 1 ? 's' : ''} programmés`,
-                `Jusqu’au ${recurrenceSummary.untilLabel}`,
+                `${recurrenceSummary.occurrences} trajet${recurrenceSummary.occurrences > 1 ? 's' : ''} programm�s`,
+                `Jusquau ${recurrenceSummary.untilLabel}`,
                 recurrenceSummary.dayLabel,
               ]
-            : ['Votre trajet est prêt à être consulté et réservé.'],
+            : ['Votre trajet est pr�t � �tre consult� et r�serv�.'],
       })
 
       await refreshRides()
@@ -521,7 +521,7 @@ export default function CovoituragePage() {
           <section className="mb-6 rounded-[2rem] border border-emerald-200 bg-emerald-50 p-5 text-emerald-950 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">Publication réussie</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">Publication r�ussie</p>
                 <h2 className="mt-1 text-xl font-bold text-emerald-950">{publishNotice.title}</h2>
                 <p className="mt-2 text-sm text-emerald-900/75">{publishNotice.description}</p>
               </div>
@@ -551,7 +551,7 @@ export default function CovoituragePage() {
           </div>
           <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl">Trouver un trajet, publier une place, voyager serein.</h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
-            Trouvez un trajet ou proposez une place - simple, local, entre Calédoniens.
+            Trouvez un trajet ou proposez une place - simple, local, entre Cal�doniens.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link href="/connexion" className="btn-primary rounded-2xl px-4 py-2.5">
@@ -596,11 +596,11 @@ export default function CovoituragePage() {
                   className="grid gap-4 md:grid-cols-2"
                 >
                   <label className="block">
-                    <span className="mb-1 block text-sm font-semibold text-night">Départ</span>
+                    <span className="mb-1 block text-sm font-semibold text-night">D�part</span>
                     <input
                       value={filters.departure}
                       onChange={(e) => setFilters((prev) => ({ ...prev, departure: e.target.value }))}
-                      placeholder="Nouméa"
+                      placeholder="Noum�a"
                       className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none"
                     />
                   </label>
@@ -629,7 +629,7 @@ export default function CovoituragePage() {
                       onChange={(e) => setWomenOnlyFilter(e.target.checked)}
                       className="h-4 w-4 rounded border-night/20 text-coral"
                     />
-                    <span>Afficher seulement les trajets réservés aux femmes</span>
+                    <span>Afficher seulement les trajets r�serv�s aux femmes</span>
                   </label>
                   <div className="md:col-span-2">
                     <div className="flex flex-wrap gap-3">
@@ -669,16 +669,16 @@ export default function CovoituragePage() {
 
                 <div className="mt-6 border-t border-[var(--color-border)] pt-5">
                   <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-corail">Trier les résultats</p>
+                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-corail">Trier les r�sultats</p>
                     {hasFilters ? <p className="text-xs text-night/55">Filtres actifs pour un tri plus rapide.</p> : null}
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {[
-                      { value: 'time', label: 'Départ' },
+                      { value: 'time', label: 'D�part' },
                       { value: 'city', label: 'Ville' },
                       { value: 'rating', label: 'Note conducteur' },
                       { value: 'price_asc', label: 'Prix croissant' },
-                      { value: 'price_desc', label: 'Prix décroissant' },
+                      { value: 'price_desc', label: 'Prix d�croissant' },
                     ].map((opt) => (
                       <button
                         key={opt.value}
@@ -719,7 +719,7 @@ export default function CovoituragePage() {
                           <Car className="h-6 w-6" />
                         </div>
                         <p className="mt-4 text-lg font-semibold text-night">Aucun trajet disponible pour le moment</p>
-                        <p className="mt-2 text-sm">Soyez le premier à proposer un trajet en NC.</p>
+                        <p className="mt-2 text-sm">Soyez le premier � proposer un trajet en NC.</p>
                         <button
                           type="button"
                           onClick={() => setActiveTab('publish')}
@@ -750,7 +750,7 @@ export default function CovoituragePage() {
                   </div>
 
                   <label className="block">
-                    <span className="mb-1 block text-sm font-semibold text-night">Départ</span>
+                    <span className="mb-1 block text-sm font-semibold text-night">D�part</span>
                     <input
                       required
                       value={form.departure}
@@ -813,7 +813,7 @@ export default function CovoituragePage() {
                     />
                   </label>
                   <label className="block md:col-span-2">
-                    <span className="mb-1 block text-sm font-semibold text-night">Véhicule et confort</span>
+                    <span className="mb-1 block text-sm font-semibold text-night">V�hicule et confort</span>
                     <input
                       value={form.vehicle}
                       onChange={(e) => setForm((prev) => ({ ...prev, vehicle: e.target.value }))}
@@ -822,13 +822,13 @@ export default function CovoituragePage() {
                     />
                   </label>
                   <div className="md:col-span-2">
-                    <span className="mb-2 block text-sm font-semibold text-night">Mode de réservation</span>
+                    <span className="mb-2 block text-sm font-semibold text-night">Mode de r�servation</span>
                     <div className="grid gap-3 md:grid-cols-2">
                       {[
                         {
                           value: 'auto',
                           title: 'R?servation automatique',
-                          description: 'La place est bloquée instantanément',
+                          description: 'La place est bloqu�e instantan�ment',
                         },
                         {
                           value: 'manual',
@@ -865,14 +865,14 @@ export default function CovoituragePage() {
                       onChange={(e) => setForm((prev) => ({ ...prev, women_only: e.target.checked }))}
                       className="h-4 w-4 rounded border-night/20 text-coral"
                     />
-                    <span>Réserver ce trajet aux femmes</span>
+                    <span>R�server ce trajet aux femmes</span>
                   </label>
                   <div className="md:col-span-2 rounded-3xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
-                        <p className="text-sm font-semibold text-night">Trajet récurrent</p>
+                        <p className="text-sm font-semibold text-night">Trajet r�current</p>
                         <p className="mt-1 text-xs text-night/60">
-                          Publiez une seule fois, puis générez automatiquement les prochains trajets.
+                          Publiez une seule fois, puis g�n�rez automatiquement les prochains trajets.
                         </p>
                       </div>
                       <label className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-3 py-2 text-sm font-semibold text-night">
@@ -894,7 +894,7 @@ export default function CovoituragePage() {
                     {form.recurrence_enabled ? (
                       <div className="mt-4 grid gap-4 md:grid-cols-2">
                         <label className="block">
-                          <span className="mb-1 block text-sm font-semibold text-night">Fréquence</span>
+                          <span className="mb-1 block text-sm font-semibold text-night">Fr�quence</span>
                           <select
                             value={form.recurrence_type}
                             onChange={(e) =>
@@ -920,7 +920,7 @@ export default function CovoituragePage() {
                         </label>
                         {form.recurrence_type === 'weekly' ? (
                           <div className="md:col-span-2">
-                            <span className="mb-2 block text-sm font-semibold text-night">Jours de départ</span>
+                            <span className="mb-2 block text-sm font-semibold text-night">Jours de d�part</span>
                             <div className="flex flex-wrap gap-2">
                               {WEEKDAY_OPTIONS.map((weekday) => {
                                 const isActive = form.recurrence_days.includes(weekday.value)
@@ -953,20 +953,20 @@ export default function CovoituragePage() {
                     ) : null}
                     {form.recurrence_enabled ? (
                       <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Récapitulatif</p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">R�capitulatif</p>
                         <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-night">
-                          <span className="rounded-full bg-white px-3 py-1 font-semibold text-emerald-700">Trajet récurrent</span>
+                          <span className="rounded-full bg-white px-3 py-1 font-semibold text-emerald-700">Trajet r�current</span>
                           {recurrenceDraftSummary ? (
                             <>
-                              <span>•</span>
-                              <span>Jusqu’au {recurrenceDraftSummary.untilLabel}</span>
-                              <span>•</span>
+                              <span>"</span>
+                              <span>Jusquau {recurrenceDraftSummary.untilLabel}</span>
+                              <span>"</span>
                               <span>{recurrenceDraftSummary.dayLabel}</span>
-                              <span>•</span>
-                              <span>{recurrenceDraftSummary.occurrences} trajet{recurrenceDraftSummary.occurrences > 1 ? 's' : ''} programmés</span>
+                              <span>"</span>
+                              <span>{recurrenceDraftSummary.occurrences} trajet{recurrenceDraftSummary.occurrences > 1 ? 's' : ''} programm�s</span>
                             </>
                           ) : (
-                            <span>Choisissez une date de début et une date de fin pour prévisualiser la série.</span>
+                            <span>Choisissez une date de d�but et une date de fin pour pr�visualiser la s�rie.</span>
                           )}
                         </div>
                       </div>
@@ -979,7 +979,7 @@ export default function CovoituragePage() {
                       value={form.description}
                       onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                       rows={5}
-                      placeholder="Étapes, bagages, musique, règles de confort, point de rendez-vous..."
+                      placeholder="�tapes, bagages, musique, r�gles de confort, point de rendez-vous..."
                       className="w-full rounded-3xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none"
                     />
                   </label>
@@ -1014,7 +1014,7 @@ export default function CovoituragePage() {
                       }
                       className="btn-secondary inline-flex items-center gap-2 rounded-2xl px-5 py-3"
                     >
-                      Réinitialiser
+                      R�initialiser
                     </button>
                   </div>
                 </form>
@@ -1028,7 +1028,7 @@ export default function CovoituragePage() {
                           Se connecter
                         </Link>
                         <Link href="/inscription" className="btn-secondary inline-flex justify-center rounded-2xl px-4 py-2.5">
-                          Créer un compte
+                          Cr�er un compte
                         </Link>
                       </div>
                     </div>
@@ -1067,7 +1067,7 @@ export default function CovoituragePage() {
                       <option value="">Tous les types</option>
                       <option value="taxi">Taxi / VTC</option>
                       <option value="navette">Navette</option>
-                      <option value="aeroport">Transfert aéroport</option>
+                      <option value="aeroport">Transfert a�roport</option>
                       <option value="excursion">Excursion</option>
                       <option value="scolaire">Transport scolaire</option>
                       <option value="chauffeur">Location avec chauffeur</option>
@@ -1079,7 +1079,7 @@ export default function CovoituragePage() {
                     <input
                       value={transportFilters.departure}
                       onChange={(e) => setTransportFilters((prev) => ({ ...prev, departure: e.target.value }))}
-                      placeholder="Nouméa, Dumbéa..."
+                      placeholder="Noum�a, Dumb�a..."
                       className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none"
                     />
                   </label>
@@ -1088,7 +1088,7 @@ export default function CovoituragePage() {
                     <input
                       value={transportFilters.destination}
                       onChange={(e) => setTransportFilters((prev) => ({ ...prev, destination: e.target.value }))}
-                      placeholder="Aéroport, Bourail..."
+                      placeholder="A�roport, Bourail..."
                       className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none"
                     />
                   </label>
@@ -1155,7 +1155,7 @@ export default function CovoituragePage() {
                       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#0A7EA4]/10 text-[#0A7EA4]">
                         <Users className="h-6 w-6" />
                       </div>
-                      <p className="mt-4 text-lg font-semibold text-night">Aucun transporteur trouvé</p>
+                      <p className="mt-4 text-lg font-semibold text-night">Aucun transporteur trouv�</p>
                       <p className="mt-2 text-sm">Essayez de changer la zone, le type ou la date de recherche.</p>
                     </div>
                   )}
@@ -1169,12 +1169,12 @@ export default function CovoituragePage() {
               <div className="sticky top-20 rounded-[2rem] border border-night/8 border-l-4 border-l-nc-corail bg-white p-5 shadow-card">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nc-corail">Annonces boostées</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nc-corail">Annonces boost�es</p>
                     <h2 className="mt-1 text-lg font-semibold text-night">Les plus visibles maintenant</h2>
                   </div>
                   <div className="inline-flex items-center gap-2 rounded-full bg-sand px-3 py-1 text-xs font-semibold text-night/65">
                     <BadgeCheck className="h-4 w-4 text-amber-500" />
-                    {featuredRides.length} coup(s) de cœur
+                    {featuredRides.length} coup(s) de cSur
                   </div>
                 </div>
 
@@ -1193,10 +1193,10 @@ export default function CovoituragePage() {
                             <Car className="h-5 w-5" />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-nc-corail">Boosté</p>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-nc-corail">Boost�</p>
                             <h3 className="truncate text-sm font-semibold text-night">{formatRouteLabel(ride)}</h3>
                             <p className="mt-1 text-xs text-night/55">
-                              {ride.driver_prenom || 'Conducteur local'} · {ride.price_xpf.toLocaleString('fr-FR')} XPF
+                              {ride.driver_prenom || 'Conducteur local'} � {ride.price_xpf.toLocaleString('fr-FR')} XPF
                             </p>
                           </div>
                         </div>
@@ -1212,14 +1212,14 @@ export default function CovoituragePage() {
 
             <div className="rounded-[2rem] border border-night/8 bg-[linear-gradient(135deg,_rgba(10,126,164,0.92),_rgba(46,139,87,0.88))] p-5 text-white shadow-card">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/80">Publiez votre annonce</p>
-              <p className="mt-2 text-lg font-semibold">Touchez des milliers de Calédoniens</p>
+              <p className="mt-2 text-lg font-semibold">Touchez des milliers de Cal�doniens</p>
               <p className="mt-2 text-sm text-white/75">Un trajet visible, une mise en relation simple, sans logique de paiement.</p>
               <button
                 type="button"
                 onClick={() => setActiveTab('publish')}
                 className="btn-primary mt-4 inline-flex w-full justify-center rounded-2xl px-4 py-2.5"
               >
-                Déposer une annonce
+                D�poser une annonce
               </button>
             </div>
 
@@ -1228,7 +1228,7 @@ export default function CovoituragePage() {
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-nc-corail" />
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-corail">Conducteurs vérifiés</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-corail">Conducteurs v�rifi�s</p>
                     <h3 className="mt-1 text-sm font-semibold text-night">Les profils les plus rassurants</h3>
                   </div>
                 </div>
@@ -1238,7 +1238,7 @@ export default function CovoituragePage() {
                       <p className="text-sm font-semibold text-night">{driver.name}</p>
                       <p className="mt-1 text-xs text-night/55">{driver.route}</p>
                       <p className="mt-2 text-xs font-semibold uppercase tracking-[0.16em] text-nc-corail">
-                        {driver.score > 0 ? `${driver.score.toFixed(1)}/5 de note` : 'Conducteur vérifié'}
+                        {driver.score > 0 ? `${driver.score.toFixed(1)}/5 de note` : 'Conducteur v�rifi�'}
                       </p>
                     </div>
                   ))}

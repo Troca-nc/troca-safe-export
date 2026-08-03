@@ -5,7 +5,7 @@ import ProLaunchPack from '@/components/pro/ProLaunchPack'
 export const metadata: Metadata = {
   title: 'Pack lancement Pro | Kalico',
   description:
-    'Complétez votre démarrage Pro en 6 étapes avec votre vitrine, vos produits, vos rendez-vous et vos premiers boosts.',
+    'Compl�tez votre d�marrage Pro en 6 �tapes avec votre vitrine, vos produits, vos rendez-vous et vos premiers boosts.',
 }
 
 export default function PackLancementPage() {

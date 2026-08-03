@@ -19,10 +19,10 @@ export default function MaintenancePage() {
         </div>
         <h1 className="mt-5 font-display text-3xl font-bold">Maintenance en cours</h1>
         <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-night/60">
-          Nous préparons Kalico pour le lancement. Le service sera de retour prochainement.
+          Nous pr�parons Kalico pour le lancement. Le service sera de retour prochainement.
         </p>
         <p className="mt-5 rounded-2xl bg-[var(--color-background-secondary)] px-4 py-3 text-sm font-semibold text-night">
-          Retour estimé : après validation de production.
+          Retour estim� : apr�s validation de production.
         </p>
       </section>
     </main>

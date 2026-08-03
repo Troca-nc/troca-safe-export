@@ -80,7 +80,7 @@ function ImageCard({
         <div className="absolute inset-0 bg-night/55 flex flex-col justify-end p-3">
           <div className="mb-2">
             <div className="flex items-center justify-between text-[10px] text-white/80 mb-1">
-              <span>Envoi…</span>
+              <span>Envoi&</span>
               <span>{Math.max(0, Math.min(100, progress))}%</span>
             </div>
             <div className="h-1.5 bg-white/15 rounded-full overflow-hidden">
@@ -97,14 +97,14 @@ function ImageCard({
       {status === 'error' && (
         <div className="absolute inset-0 bg-night/65 flex flex-col items-center justify-center gap-2 p-3 text-center">
           <AlertCircle size={18} className="text-red-300" />
-          <p className="text-[11px] text-white font-medium">Échec de l’envoi</p>
+          <p className="text-[11px] text-white font-medium">�chec de lenvoi</p>
           <p className="text-[10px] text-white/75 line-clamp-2">{error ?? 'Ressayez pour relancer cette image.'}</p>
           <button
             type="button"
             onClick={onRetry}
             className="rounded-full bg-white px-3 py-1 text-[10px] font-semibold text-night shadow-sm"
           >
-            Réessayer
+            R�essayer
           </button>
         </div>
       )}
@@ -112,7 +112,7 @@ function ImageCard({
       {status === 'done' && (
         <div className="absolute top-1.5 left-1.5 bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1">
           <CheckCircle size={10} />
-          Uploadé
+          Upload�
         </div>
       )}
 
@@ -265,7 +265,7 @@ export default function ImageUploader({ annonce_id, initial = [], onChange, clas
           }`}
           role="button"
           tabIndex={0}
-          aria-label="Zone de dépôt des photos"
+          aria-label="Zone de d�p�t des photos"
           aria-describedby="upload-help"
         >
           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${
@@ -275,19 +275,19 @@ export default function ImageUploader({ annonce_id, initial = [], onChange, clas
           </div>
           <div className="text-center">
             <p className="font-medium text-night/70 text-sm">
-              {dragOver ? 'Déposer les photos ici' : 'Glissez vos photos ou cliquez'}
+              {dragOver ? 'D�poser les photos ici' : 'Glissez vos photos ou cliquez'}
             </p>
             <p className="text-xs text-night/40 mt-1">
-              JPEG, PNG, WebP, HEIC · Max {UPLOAD_CONFIG.max_size_mb}Mo · {UPLOAD_CONFIG.max_files} photos max
+              JPEG, PNG, WebP, HEIC � Max {UPLOAD_CONFIG.max_size_mb}Mo � {UPLOAD_CONFIG.max_files} photos max
             </p>
           </div>
           <div className="flex items-center gap-3 text-[10px] text-night/40">
             <span className="flex items-center gap-1"><CheckCircle size={10} className="text-emerald-500" /> Envoi par lot individuel</span>
-            <span className="flex items-center gap-1"><CheckCircle size={10} className="text-emerald-500" /> Aperçu immédiat</span>
+            <span className="flex items-center gap-1"><CheckCircle size={10} className="text-emerald-500" /> Aper�u imm�diat</span>
             <span className="flex items-center gap-1"><CheckCircle size={10} className="text-emerald-500" /> Retry par image</span>
           </div>
           <p className="sr-only" id="upload-help">
-            Utilisez la touche Entrée pour ajouter des photos et les flèches gauche et droite pour réordonner les images déjà ajoutées.
+            Utilisez la touche Entr�e pour ajouter des photos et les fl�ches gauche et droite pour r�ordonner les images d�j� ajout�es.
           </p>
         </div>
       )}
@@ -309,7 +309,7 @@ export default function ImageUploader({ annonce_id, initial = [], onChange, clas
 
       <div className="flex items-center justify-between text-[11px] text-night/40">
         <span>{images.length}/{UPLOAD_CONFIG.max_files} photos</span>
-        {images.length > 1 && <span>Glissez pour réordonner · La 1ère photo est la principale</span>}
+        {images.length > 1 && <span>Glissez pour r�ordonner � La 1�re photo est la principale</span>}
       </div>
 
       <input
