@@ -202,7 +202,7 @@ export default function TransporterDetailPage() {
                   <div className="mt-2 flex flex-wrap gap-2 text-sm text-night/60">
                     <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
                       <MapPin className="h-3.5 w-3.5" />
-                      {transporter.pro_commune || serviceZones[0] || 'Nouvelle-Cal�donie'}
+                      {transporter.pro_commune || serviceZones[0] || 'Nouvelle-Calédonie'}
                     </span>
                     <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
                       <BadgeCheck className="h-3.5 w-3.5 text-amber-500" />
@@ -221,7 +221,7 @@ export default function TransporterDetailPage() {
             </div>
 
             <p className="mt-5 max-w-3xl text-sm leading-relaxed text-night/65">
-              {transporter.vehicle_description || 'Transport local en Nouvelle-Cal�donie.'}
+              {transporter.vehicle_description || 'Transport local en Nouvelle-Calédonie.'}
             </p>
 
             <div className="mt-4 flex flex-wrap gap-2">

@@ -24,7 +24,7 @@ const SORT_OPTIONS = [
 const CONDITION_OPTIONS = [
   { value: 'new', label: 'Neuf' },
   { value: 'like_new', label: 'Comme neuf' },
-  { value: 'good', label: 'Bon �tat' },
+  { value: 'good', label: 'Bon État' },
   { value: 'fair', label: 'Correct' },
   { value: 'for_parts', label: 'Pour pi�ces' },
 ]
@@ -289,7 +289,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
           <aside className="hidden lg:block">
             <div className="card p-5 sticky top-20 space-y-6">
               <div className="rounded-2xl border border-night/8 bg-sand/20 p-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-night/40">Cat�gorie</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-night/40">Catégorie</p>
                 <p className="mt-1 text-sm font-semibold text-night">{selectedCategoryLabel}</p>
                 <p className="mt-1 text-xs text-night/45">Ce feed est pr�-filtr� sur cette cat�gorie.</p>
               </div>
@@ -448,7 +448,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
               </div>
 
               <div>
-                <h3 className="font-semibold text-night text-sm mb-3">�tat</h3>
+                <h3 className="font-semibold text-night text-sm mb-3">État</h3>
                 <div className="space-y-1">
                   {CONDITION_OPTIONS.map((opt) => (
                     <label key={opt.value} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-sand cursor-pointer">

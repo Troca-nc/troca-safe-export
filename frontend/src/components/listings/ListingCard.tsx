@@ -67,7 +67,7 @@ interface Props {
 const CONDITION_LABELS: Record<string, string> = {
   new: 'Neuf',
   like_new: 'Comme neuf',
-  good: 'Bon �tat',
+  good: 'Bon État',
   fair: 'Correct',
   for_parts: 'Pour pi�ces',
 }
@@ -306,7 +306,7 @@ export default function ListingCard({ listing, className = '', boosted, featured
   const locationZone = typeof listing.metadata?.quartier_zone === 'string' ? String(listing.metadata.quartier_zone).trim() : ''
   const locationText = listing.commune_name
     ? `${listing.commune_name}${locationZone ? ` �� ${locationZone}` : ''}`
-    : 'Nouvelle-Cal�donie'
+    : 'Nouvelle-Calédonie'
   const isProVerified = Boolean(
     (listing.author?.is_pro && listing.author?.pro_verified)
     || (listing.is_pro && listing.seller_pro_verified)

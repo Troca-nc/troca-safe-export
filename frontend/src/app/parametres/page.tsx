@@ -146,7 +146,7 @@ function AbonnementSection() {
             </div>
           )}
 
-          {/* Messages �tat */}
+          {/* Messages État */}
           {cancelled && (
             <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">
               <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
@@ -601,7 +601,7 @@ export default function ParametresPage() {
       <Header />
       <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="mb-6">
-          <h1 className="font-display font-bold text-2xl text-night">Param�tres</h1>
+          <h1 className="font-display font-bold text-2xl text-night">Paramètres</h1>
           <p className="text-night/50 text-sm mt-1">G�rez votre compte et vos donn�es personnelles</p>
         </div>
 
@@ -642,7 +642,7 @@ export default function ParametresPage() {
           {/* Suppression compte */}
           <SuppressionSection />
 
-          {/* D�connexion */}
+          {/* Déconnexion */}
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 py-3 text-sm text-night/50 hover:text-red-500 transition-colors"

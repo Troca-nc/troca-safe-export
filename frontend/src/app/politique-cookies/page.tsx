@@ -23,7 +23,7 @@ export default function PolitiqueCookiesPage() {
 
         <h2>1. Ce qui reste actif</h2>
         <p>
-          Les cookies essentiels sont n�cessaires au fonctionnement du site. Ils g�rent la connexion, la s�curit�, le maintien de session et
+          Les cookies essentiels sont n�cessaires au fonctionnement du site. Ils g�rent la connexion, la sécurité, le maintien de session et
           certaines pr�f�rences techniques.
         </p>
 
@@ -36,7 +36,7 @@ export default function PolitiqueCookiesPage() {
         <h2>3. Stockage local et pr�f�rences</h2>
         <p>
           Kalico peut utiliser sessionStorage ou localStorage pour des usages fonctionnels limit�s : m�moriser quune popup a d�j� �t� vue,
-          conserver un tour de visite guid�e ou garder un �tat de navigation utile. Ces donn�es restent dans votre navigateur et peuvent �tre
+          conserver un tour de visite guid�e ou garder un État de navigation utile. Ces donn�es restent dans votre navigateur et peuvent �tre
           supprim�es depuis vos param�tres ou votre navigateur.
         </p>
 

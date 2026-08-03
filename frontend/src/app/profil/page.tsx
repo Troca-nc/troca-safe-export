@@ -242,7 +242,7 @@ function ProfilePageContent() {
           { value: '18', label: 'messages' },
           { value: '24', label: 'favoris' },
         ],
-        tabs: ['Annonces', 'Avis re�us', 'Favoris', 'Messages', 'Param�tres'],
+        tabs: ['Annonces', 'Avis re�us', 'Favoris', 'Messages', 'Paramètres'],
         hint: "Tu vois l'espace classique d'un utilisateur qui d�pose une annonce.",
       },
       pro: {
@@ -253,7 +253,7 @@ function ProfilePageContent() {
           { value: '1.2k', label: 'vues' },
           { value: '4.9', label: 'note' },
         ],
-        tabs: ['Annonces', 'Avis re�us', 'Statistiques', 'Boosts', 'Param�tres'],
+        tabs: ['Annonces', 'Avis re�us', 'Statistiques', 'Boosts', 'Paramètres'],
         hint: 'Tu vois un compte orient� business avec indicateurs de performance.',
       },
       bon_plan: {
@@ -264,7 +264,7 @@ function ProfilePageContent() {
           { value: '5', label: 'b�n�fices' },
           { value: '12', label: 'diffusions' },
         ],
-        tabs: ['Annonces', 'Avis re�us', 'Campagnes', 'Statistiques', 'Param�tres'],
+        tabs: ['Annonces', 'Avis re�us', 'Campagnes', 'Statistiques', 'Paramètres'],
         hint: 'Tu vois une interface pens�e pour une promo, un �v�nement ou une annonce sponsoris�e.',
       },
     }[demoKey]
@@ -295,7 +295,7 @@ function ProfilePageContent() {
               </div>
               <div className="flex flex-wrap gap-2">
                 <Link href={demoKey === 'pro' ? '/parametres' : '/annonces/nouvelle'} className="btn-primary px-4 py-2 text-sm">
-                  {demoKey === 'pro' ? 'Configurer mon espace pro' : 'D�poser ma premi�re annonce'}
+                  {demoKey === 'pro' ? 'Configurer mon espace pro' : 'Déposer ma premi�re annonce'}
                 </Link>
                 <Link href="/annonces" className="btn-ghost px-4 py-2 text-sm">
                   Explorer les annonces
@@ -314,9 +314,9 @@ function ProfilePageContent() {
   const securityPanel = activeTab === 'securite' ? (
     <div className="card border-coral/15 bg-coral/5 p-5">
       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">S�curit� et connexion</p>
-      <h2 className="mt-2 text-xl font-bold text-night">Votre s�curit� est active sur ce compte</h2>
+      <h2 className="mt-2 text-xl font-bold text-night">Votre sécurité est active sur ce compte</h2>
       <p className="mt-2 text-sm text-night/60">
-        Vous pouvez modifier votre mot de passe, v�rifier vos appareils actifs et consulter les options de r�cup�ration dans Param�tres.
+        Vous pouvez modifier votre mot de passe, v�rifier vos appareils actifs et consulter les options de r�cup�ration dans Paramètres.
       </p>
       <div className="mt-4 flex flex-wrap gap-3">
         <Link href="/parametres#donnees" className="btn-primary px-4 py-2 text-sm">
@@ -334,7 +334,7 @@ function ProfilePageContent() {
       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Notifications</p>
       <h2 className="mt-2 text-xl font-bold text-night">Les notifications sont g�r�es depuis le compte</h2>
       <p className="mt-2 text-sm text-night/60">
-        Les alertes de recherche, les messages et les r�ponses dannonces restent visibles dans votre espace. Les r�glages d�taill�s sont accessibles depuis Param�tres de notification.
+        Les alertes de recherche, les messages et les r�ponses dannonces restent visibles dans votre espace. Les r�glages d�taill�s sont accessibles depuis Paramètres de notification.
       </p>
       <div className="mt-4 flex flex-wrap gap-3">
         <Link href="/parametres/notifications" className="btn-primary px-4 py-2 text-sm">
@@ -358,7 +358,7 @@ function ProfilePageContent() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Bons Plans</p>
               <h3 className="mt-1 text-lg font-bold text-night">Tout est regroup� dans le centre de pr�f�rences</h3>
               <p className="mt-1 text-sm text-night/60">
-                Les promos, cat�gories, enseignes et canaux sont maintenant g�r�s dans Param�tres de notification pour �viter les doublons.
+                Les promos, cat�gories, enseignes et canaux sont maintenant g�r�s dans Paramètres de notification pour �viter les doublons.
               </p>
             </div>
             <Link href="/parametres/notifications#bons-plans" className="btn-primary px-4 py-2 text-sm">
@@ -418,7 +418,7 @@ function ProfilePageContent() {
                 </Link>
               ) : (
                 <Link href="/annonces/nouvelle" className="btn-primary px-4 py-2 text-sm">
-                  D�poser ma premi�re annonce
+                  Déposer ma premi�re annonce
                 </Link>
               )}
               <Link href="/annonces" className="btn-ghost px-4 py-2 text-sm">
@@ -628,7 +628,7 @@ function ProfilePageContent() {
                 <p className="text-sm">Vous n'avez pas encore d'annonce. Publiez la v�tre.</p>
                 {isOwn && (
                   <Link href="/annonces/nouvelle" className="btn-primary text-sm mt-4 inline-flex">
-                    D�poser une annonce
+                    Déposer une annonce
                   </Link>
                 )}
               </div>

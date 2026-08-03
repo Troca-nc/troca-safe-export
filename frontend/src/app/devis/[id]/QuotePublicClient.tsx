@@ -134,7 +134,7 @@ export default function QuotePublicClient({ quote, token }: QuotePublicClientPro
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Professionnel</p>
                   <p className="mt-1 text-lg font-semibold text-night">{quote.pro.display_name}</p>
                   <p className="mt-1 text-sm text-night/60">{quote.pro.pro_company_name || quote.pro.pro_category || 'Professionnel Kalico'}</p>
-                  <p className="mt-1 text-sm text-night/60">{quote.pro.pro_commune || 'Nouvelle-Cal�donie'}</p>
+                  <p className="mt-1 text-sm text-night/60">{quote.pro.pro_commune || 'Nouvelle-Calédonie'}</p>
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Client</p>

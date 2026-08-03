@@ -346,7 +346,7 @@ export default function CovoiturageReservationsPage() {
         <section className="rounded-[2rem] border border-night/8 border-b-4 border-b-nc-corail bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.18))] px-6 py-8 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)]">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-corail">
             <CheckCircle2 className="h-3.5 w-3.5" />
-            Mes r�servations
+            Mes réservations
           </div>
           <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl">Suivez vos trajets et vos demandes au m�me endroit.</h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">

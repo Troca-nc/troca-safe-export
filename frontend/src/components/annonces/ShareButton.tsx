@@ -17,7 +17,7 @@ interface ShareButtonProps {
 }
 
 function buildShareContent(annonce: ShareButtonProps['annonce']) {
-  const location = annonce.commune ? `� ${annonce.commune}` : 'en Nouvelle-Cal�donie'
+  const location = annonce.commune ? `� ${annonce.commune}` : 'en Nouvelle-Calédonie'
   const price = annonce.prix ? `${annonce.prix.toLocaleString('fr-FR')} XPF` : null
   return {
     kind: 'annonce' as const,

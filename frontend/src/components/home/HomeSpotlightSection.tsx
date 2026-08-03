@@ -215,7 +215,7 @@ export function HomeSpotlightSection({
         label: 'Covoiturage',
         href: '/covoiturage',
         items: rideItems,
-        badge: 'Mobilit�',
+        badge: 'Mobilité',
         intro: 'Les trajets r�cents et les places encore ouvertes.',
         tone: 'corail',
       },
@@ -242,9 +242,9 @@ export function HomeSpotlightSection({
   const emptyState =
     active.key === 'premium'
       ? {
-          title: 'Les meilleures annonces appara�tront ici',
-          subtitle: 'Boostez votre annonce pour appara�tre en t�te de page.',
-          cta: 'D�poser une annonce',
+          title: 'Les meilleures annonces apparaîtront ici',
+          subtitle: 'Boostez votre annonce pour apparaître en tête de page.',
+          cta: 'Déposer une annonce',
           href: '/annonces/nouvelle',
         }
       : active.key === 'latest'
@@ -351,15 +351,15 @@ export function HomeSpotlightSection({
                 title={primary?.title || 'Contenu'}
                 subtitle={
                   isListingTab
-                    ? `${primaryListing?.category_name || 'Annonce locale'} � ${primaryListing?.commune_name || 'Nouvelle-Cal�donie'}`
+                    ? `${primaryListing?.category_name || 'Annonce locale'} � ${primaryListing?.commune_name || 'Nouvelle-Calédonie'}`
                     : `${(primaryService?.description || '').slice(0, 120)}${(primaryService?.description?.length || 0) > 120 ? '...' : ''}`
                 }
                 meta={
                   isListingTab
                     ? `${getListingLabel(primaryListing || { id: 0, title: '', price: null })} � ${formatRelative(primaryListing?.published_at || primaryListing?.created_at)}`
-                    : `${formatDateLabel(primaryService?.event_date)} � ${primaryService?.commune_name || primaryService?.location_name || 'Nouvelle-Cal�donie'}`
+                    : `${formatDateLabel(primaryService?.event_date)} � ${primaryService?.commune_name || primaryService?.location_name || 'Nouvelle-Calédonie'}`
                 }
-                primaryLabel={isListingTab ? 'Ouvrir' : 'D�couvrir'}
+                primaryLabel={isListingTab ? 'Ouvrir' : 'Découvrir'}
                 accent={active.key === 'premium' || active.key === 'promos' || active.key === 'events'}
                 tone={activeTone.card}
               />
@@ -385,7 +385,7 @@ export function HomeSpotlightSection({
                         <p className="truncate text-sm font-semibold text-[var(--color-text-primary)]">{item.title}</p>
                         <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
                           {isListing
-                            ? `${item.category_name || 'Annonce'} � ${item.commune_name || 'Nouvelle-Cal�donie'}`
+                            ? `${item.category_name || 'Annonce'} � ${item.commune_name || 'Nouvelle-Calédonie'}`
                             : `${formatDateLabel(item.event_date)} � ${item.commune_name || item.location_name || 'Local'}`}
                         </p>
                       </div>

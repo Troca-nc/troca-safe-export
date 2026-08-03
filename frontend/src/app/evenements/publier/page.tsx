@@ -228,7 +228,7 @@ export default function EventPublishPage() {
                     </select>
                   </label>
                   <label className="space-y-1">
-                    <span className="text-sm font-semibold">Cat�gorie</span>
+                    <span className="text-sm font-semibold">Catégorie</span>
                     <select value={form.category} onChange={(e) => updateField('category', e.target.value)} className="input w-full">
                       <option value="concert">Concert</option>
                       <option value="festival">Festival</option>

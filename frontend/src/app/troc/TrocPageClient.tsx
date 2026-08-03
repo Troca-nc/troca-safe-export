@@ -24,9 +24,9 @@ import type { ListingFilters } from '@/hooks/useListingFilters'
 const PAGE_SIZE = 3
 
 const COMMUNES = [
-  'Noum�a',
+  'Nouméa',
   'Mont-Dore',
-  'Dumb�a',
+  'Dumbéa',
   'Pa�ta',
   'Boulouparis',
   'La Foa',
@@ -360,7 +360,7 @@ export default function TrocPage() {
         <form onSubmit={handleMarketSearch} className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
           <div className="grid gap-3 lg:grid-cols-[1.1fr_0.9fr_0.8fr_auto]">
             <label className="grid gap-1">
-              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/50">Cat�gorie</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/50">Catégorie</span>
               <select
                 value={marketCategory}
                 onChange={(e) => setMarketCategory(e.target.value)}
@@ -453,7 +453,7 @@ export default function TrocPage() {
       <section className="mx-auto max-w-4xl px-4 pb-12">
         <div className="mb-5">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Troc�m�tre</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">� Troc�m�tre - Trouvez un �quivalent</h2>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">� Troc�m�tre - Trouvez un �quivalent</h2>
           <p className="mt-1 text-sm text-night/55">
             Vous avez post� une annonce troc ? Entrez son prix et d�couvrez 3 annonces de valeur �quivalente pr�tes � l&apos;�change.
           </p>
@@ -524,7 +524,7 @@ export default function TrocPage() {
                 />
               </label>
               <label className="grid gap-1">
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/50">Cat�gorie souhait�e</span>
+                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/50">Catégorie souhait�e</span>
                 <select
                   value={freeCategory}
                   onChange={(e) => setFreeCategory(e.target.value)}

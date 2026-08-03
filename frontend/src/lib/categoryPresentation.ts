@@ -257,7 +257,7 @@ function resolveLegacyIconKey(iconKey?: string | null) {
 }
 
 export const CATEGORY_VISUALS: Record<string, CategoryVisual> = {
-  vehicules: { icon: Car, label: 'V�hicules' },
+  vehicules: { icon: Car, label: 'Véhicules' },
   nautisme: { icon: Anchor, label: 'Nautisme' },
   immobilier: { icon: Home, label: 'Immobilier' },
   emploi: { icon: Briefcase, label: 'Emploi' },
@@ -349,7 +349,7 @@ function resolveIconKey(slug: string, label?: string, iconKey?: string) {
 
 export const FEATURED_SEARCHES = [
   { label: 'Emploi', slug: 'emploi' },
-  { label: 'V�hicules', slug: 'vehicules' },
+  { label: 'Véhicules', slug: 'vehicules' },
   { label: 'Immobilier', slug: 'immobilier' },
   { label: 'Nautisme', slug: 'nautisme' },
   { label: 'Services', slug: 'services' },
@@ -365,7 +365,7 @@ export const FEATURED_SEARCHES = [
   { label: 'Divers', slug: 'divers' },
 ]
 
-export const SEARCH_ALERTS = ['iPhone 15', 'Toyota Hilux', 'Studio Noum�a', 'Canap�', 'PS5', 'Chiot']
+export const SEARCH_ALERTS = ['iPhone 15', 'Toyota Hilux', 'Studio Nouméa', 'Canap�', 'PS5', 'Chiot']
 
 export const FEATURED_CATEGORY_ORDER = [
   'emploi',

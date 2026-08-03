@@ -23,7 +23,7 @@ const QUICK_LINKS = [
   { href: '/annonces', label: 'Annonces' },
   { href: '/annonces/nouvelle', label: 'Bon plan' },
   { href: '/messages', label: 'Messages' },
-  { href: '/parametres', label: 'Param�tres' },
+  { href: '/parametres', label: 'Paramètres' },
   { href: '/profil', label: 'Profil' },
   { href: '/admin/dashboard', label: 'Admin' },
 ]
@@ -260,7 +260,7 @@ export default function DemoQaPage() {
                   </div>
                   <div className="rounded-2xl bg-sand p-4">
                     <p className="text-sm font-semibold text-night">Mobile</p>
-                    <p className="mt-1 text-sm text-night/60">Navigation tactile, retour arri�re et �tat d�mo.</p>
+                    <p className="mt-1 text-sm text-night/60">Navigation tactile, retour arri�re et État d�mo.</p>
                   </div>
                 </div>
 
@@ -275,7 +275,7 @@ export default function DemoQaPage() {
                     onClick={() => logout()}
                     className="mt-4 btn-ghost inline-flex items-center gap-2 rounded-2xl px-4 py-2.5"
                   >
-                    D�connexion rapide
+                    Déconnexion rapide
                   </button>
                 ) : null}
               </div>

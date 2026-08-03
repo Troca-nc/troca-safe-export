@@ -109,7 +109,7 @@ interface Props {
 const CONDITION_LABELS: Record<string, string> = {
   new: 'Neuf',
   like_new: 'Comme neuf',
-  good: 'Bon �tat',
+  good: 'Bon État',
   fair: 'Correct',
   for_parts: 'Pour pi�ces',
 }

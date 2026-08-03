@@ -113,7 +113,7 @@ export default function BusinessProfilePage() {
                 {business?.logo_url ? (
                   <img src={business.logo_url} alt={business?.name || 'Enseigne'} className="h-full w-full object-cover" />
                 ) : (
-                  <span className="text-2xl opacity-40">🏷️</span>
+                  <span className="text-2xl opacity-40">🎭</span>
                 )}
               </div>
               <div>

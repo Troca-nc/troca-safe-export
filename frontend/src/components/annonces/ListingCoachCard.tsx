@@ -48,7 +48,7 @@ function buildAdvice(photoCount: number, description: string): AdvicePayload {
     photoCount >= 3
       ? [
           'Gardez une photo principale nette et lumineuse.',
-          'Ajoutez un gros plan pour montrer les d�tails ou l�tat.',
+          'Ajoutez un gros plan pour montrer les d�tails ou lÉtat.',
           'Compl�tez avec une vue densemble pour rassurer.',
         ]
       : photoCount === 2
@@ -67,7 +67,7 @@ function buildAdvice(photoCount: number, description: string): AdvicePayload {
     descriptionLength >= 180
       ? [
           'Votre description est d�j� d�taill�e: relisez juste le premier paragraphe.',
-          'V�rifiez que le prix, l�tat et le lieu sont visibles rapidement.',
+          'V�rifiez que le prix, lÉtat et le lieu sont visibles rapidement.',
         ]
       : descriptionLength >= 80
         ? [
@@ -75,7 +75,7 @@ function buildAdvice(photoCount: number, description: string): AdvicePayload {
             'Pr�cisez le mode de remise ou la disponibilit� si utile.',
           ]
         : [
-            'Ajoutez 2 � 3 phrases sur l�tat, lhistorique et la raison de vente.',
+            'Ajoutez 2 � 3 phrases sur lÉtat, lhistorique et la raison de vente.',
             'Mentionnez ce qui rassure: entretien, accessoires, facture, livraison.',
           ]
 

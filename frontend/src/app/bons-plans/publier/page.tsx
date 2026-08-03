@@ -347,7 +347,7 @@ export default function PublishBonPlanPage() {
                       {preview.image_url ? (
                         <img src={preview.image_url} alt={preview.title} className="h-full w-full object-cover" />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-4xl opacity-30">🏷️</div>
+                        <div className="flex h-full w-full items-center justify-center text-4xl opacity-30">🎭</div>
                       )}
                     </div>
                     <div className="p-4">

@@ -116,7 +116,7 @@ export default function ProDashboardTransportPage() {
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Transport Pro</p>
             <h1 className="mt-2 font-display text-3xl font-bold text-night">Bienvenue dans votre espace transport</h1>
             <p className="mt-2 text-sm text-night/60">
-              G�rez vos r�servations, suivez vos revenus et vos courses du jour.
+              G�rez vos réservations, suivez vos revenus et vos courses du jour.
             </p>
           </div>
           <Link href="/covoiturage?tab=transport" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white">
@@ -127,7 +127,7 @@ export default function ProDashboardTransportPage() {
         <div className="mt-4 flex flex-wrap gap-2 text-xs text-night/60">
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
             <MapPin className="h-3.5 w-3.5" />
-            {transporter?.pro_commune || 'Nouvelle-Cal�donie'}
+            {transporter?.pro_commune || 'Nouvelle-Calédonie'}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
             <Users className="h-3.5 w-3.5" />

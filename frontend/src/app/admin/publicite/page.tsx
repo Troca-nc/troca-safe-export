@@ -144,7 +144,7 @@ export default function AdminPublicitePage() {
             </p>
             <h1 className="mt-3 font-display text-3xl font-bold text-night">Pilotage des campagnes</h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-night/60">
-              Suivez les campagnes sponsoris�es, les revenus du mois et l�tat du popup daccueil depuis un seul �cran.
+              Suivez les campagnes sponsoris�es, les revenus du mois et lÉtat du popup daccueil depuis un seul �cran.
             </p>
           </div>
           <Link href="/admin" className="btn-secondary rounded-2xl px-4 py-2.5 text-sm">
@@ -187,7 +187,7 @@ export default function AdminPublicitePage() {
                 <tr>
                   <th className="px-4 py-3 text-left font-semibold">Type</th>
                   <th className="px-4 py-3 text-left font-semibold">Annonceur</th>
-                  <th className="px-4 py-3 text-left font-semibold">Cat�gorie</th>
+                  <th className="px-4 py-3 text-left font-semibold">Catégorie</th>
                   <th className="px-4 py-3 text-left font-semibold">D�but</th>
                   <th className="px-4 py-3 text-left font-semibold">Fin</th>
                   <th className="px-4 py-3 text-left font-semibold">Statut</th>

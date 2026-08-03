@@ -81,7 +81,7 @@ function inferIconKey(name: string, slug: string, path: string[] = []) {
   if (/(sacs|pochettes|porte-monnaie|portemonnaie|trousses|banane|bandouliere|bandouli�re|sacs a main|sacs a dos|sacs de voyage|sacs de sport)/.test(text)) {
     return 'shopping-bag'
   }
-  if (/(beaute|beaut�|parfums|maquillage|bijoux|montres|foulards|ceintures|chapeaux|casquettes|lunettes|accessoires cheveux|accessoires de beaut)/.test(text)) {
+  if (/(beaute|beaut�|parfums|maquillage|bijoux|montres|foulards|ceintures|chapeaux|casquettes|lunettes|accessoires cheveux|accessoires de beaut�)/.test(text)) {
     return 'sparkles'
   }
 

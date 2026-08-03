@@ -1,11 +1,11 @@
-﻿// lib/tours.config.ts
+// lib/tours.config.ts
 //
-// Deux parcours indépendants :
+// Deux parcours indpendants :
 // - Particulier : 7 tours
 // - Pro : 11 tours, dont 4 exclusivement pro
 //
-// Les clés sont communes entre les deux parcours quand le sujet est le même ;
-// la persistance est scoppée côté hook avec `accountType:tourKey`.
+// Les cls sont communes entre les deux parcours quand le sujet est le mme ;
+// la persistance est scoppe ct hook avec `accountType:tourKey`.
 
 export type TourStep = {
   title: string
@@ -22,130 +22,130 @@ export type TourDefinition = {
 export const TOURS: Record<string, TourDefinition> = {
   annonces: {
     key: 'annonces',
-    icon: '📰',
+    icon: '=',
     eyebrow: 'Découvrir Kalico',
     steps: [
       {
         title: 'Parcourez les annonces locales',
-        description: 'Repérez rapidement ce qui se vend près de chez vous avec les infos essentielles en avant.',
+        description: 'Reprez rapidement ce qui se vend prs de chez vous avec les infos essentielles en avant.',
       },
       {
         title: 'Filtrez selon votre besoin',
-        description: 'Catégorie, commune et prix vous aident à trouver l’annonce la plus pertinente.',
+        description: 'Catégorie, commune et prix vous aident  trouver lannonce la plus pertinente.',
       },
       {
         title: 'Contactez le vendeur directement',
-        description: 'Tout reste simple pour poser une question ou lancer l’échange sans friction.',
+        description: 'Tout reste simple pour poser une question ou lancer lchange sans friction.',
       },
     ],
   },
   troc: {
     key: 'troc',
-    icon: '🔁',
+    icon: '=',
     eyebrow: 'Découvrir Kalico',
     steps: [
       {
-        title: 'Échangez vos objets en local',
-        description: 'Publiez ce que vous n’utilisez plus et trouvez une seconde vie à ce qui vous intéresse.',
+        title: 'changez vos objets en local',
+        description: 'Publiez ce que vous nutilisez plus et trouvez une seconde vie  ce qui vous intresse.',
       },
       {
         title: 'Comparez les propositions',
-        description: 'Les échanges restent clairs, avec une approche simple et rapide pour les deux parties.',
+        description: 'Les changes restent clairs, avec une approche simple et rapide pour les deux parties.',
       },
       {
         title: 'Finalisez sans perdre de temps',
-        description: 'Messagerie et historique vous aident à garder les échanges bien organisés.',
+        description: 'Messagerie et historique vous aident  garder les changes bien organiss.',
       },
     ],
   },
   bons_plans: {
     key: 'bons_plans',
-    icon: '🏷️',
+    icon: '🎭',
     eyebrow: 'Bons plans',
     steps: [
       {
         title: 'Trouvez des offres et promos locales',
-        description: 'Les bons plans mettent en avant les réductions, avantages et éditions limitées du moment.',
+        description: 'Les bons plans mettent en avant les rductions, avantages et ditions limites du moment.',
       },
       {
         title: 'Suivez les campagnes visibles',
-        description: 'Les annonces sponsorisées remontent là où les habitants regardent en premier.',
+        description: 'Les annonces sponsorises remontent l o les habitants regardent en premier.',
       },
       {
-        title: 'Gardez un œil sur les nouveautés',
-        description: 'Vous voyez plus vite ce qui mérite une visite ou une réservation.',
+        title: 'Gardez un Sil sur les nouveauts',
+        description: 'Vous voyez plus vite ce qui mrite une visite ou une rservation.',
       },
     ],
   },
   evenementiel: {
     key: 'evenementiel',
-    icon: '🎉',
-    eyebrow: 'Événements',
+    icon: '🎭',
+    eyebrow: 'vnements',
     steps: [
       {
-        title: 'Repérez les événements du territoire',
-        description: 'Concerts, ateliers, marchés ou soirées : tout se découvre au même endroit.',
+        title: 'Reprez les vnements du territoire',
+        description: 'Concerts, ateliers, marchs ou soires : tout se dcouvre au mme endroit.',
       },
       {
         title: 'Touchez la bonne commune',
-        description: 'Les informations locales aident à savoir rapidement si l’événement vous concerne.',
+        description: 'Les informations locales aident  savoir rapidement si lvnement vous concerne.',
       },
       {
-        title: 'Passez à l’action sans détour',
-        description: 'Chaque fiche est pensée pour vous permettre de décider vite.',
+        title: 'Passez  laction sans dtour',
+        description: 'Chaque fiche est pense pour vous permettre de dcider vite.',
       },
     ],
   },
   covoiturage: {
     key: 'covoiturage',
-    icon: '🚗',
+    icon: '=',
     eyebrow: 'Covoiturage',
     steps: [
       {
-        title: 'Trouvez un trajet partagé',
-        description: 'Repérez un départ proche de chez vous et une arrivée qui colle à votre besoin.',
+        title: 'Trouvez un trajet partag',
+        description: 'Reprez un dpart proche de chez vous et une arrive qui colle  votre besoin.',
       },
       {
-        title: 'Réservez votre place',
-        description: 'Les disponibilités visibles en direct simplifient la prise de décision.',
+        title: 'Rservez votre place',
+        description: 'Les disponibilits visibles en direct simplifient la prise de dcision.',
       },
       {
-        title: 'Voyagez à moindre coût',
+        title: 'Voyagez  moindre cot',
         description: 'Le partage des frais rend les longs trajets plus accessibles pour tous.',
       },
     ],
   },
   fret_livraison: {
     key: 'fret_livraison',
-    icon: '📦',
+    icon: '=',
     eyebrow: 'Envoi & Livraison',
     steps: [
       {
-        title: 'Déposez une demande d’envoi ou de livraison',
+        title: 'Dposez une demande denvoi ou de livraison',
         description: 'Indiquez le trajet, le volume et la date pour lancer la mise en relation.',
       },
       {
-        title: 'Comparez les offres reçues',
-        description: "Prix en XPF, créneau de prise en charge et avis du transporteur s’affichent clairement.",
+        title: 'Comparez les offres reues',
+        description: "Prix en XPF, crneau de prise en charge et avis du transporteur saffichent clairement.",
       },
       {
         title: 'Suivez votre livraison',
-        description: 'Vous gardez l’historique et l’état de la demande dans votre espace.',
+        description: 'Vous gardez lhistorique et lÉtat de la demande dans votre espace.',
       },
     ],
   },
   contacter_pro: {
     key: 'contacter_pro',
-    icon: '💬',
+    icon: '=',
     eyebrow: "Appels d'offres",
     steps: [
       {
-        title: 'Décrivez votre besoin pour recevoir des devis',
-        description: 'Décrivez votre besoin simplement pour obtenir un retour clair et rapide.',
+        title: 'Dcrivez votre besoin pour recevoir des devis',
+        description: 'Dcrivez votre besoin simplement pour obtenir un retour clair et rapide.',
       },
       {
-        title: 'Échangez en confiance',
-        description: 'La messagerie et les réponses structurées évitent de perdre les informations utiles.',
+        title: 'changez en confiance',
+        description: 'La messagerie et les rponses structures vitent de perdre les informations utiles.',
       },
       {
         title: 'Choisissez le bon professionnel',
@@ -155,50 +155,50 @@ export const TOURS: Record<string, TourDefinition> = {
   },
   vitrine_pro: {
     key: 'vitrine_pro',
-    icon: '🏪',
+    icon: '🎭',
     eyebrow: 'Vitrine Pro',
     steps: [
       {
-        title: 'Mettez en avant votre activité',
-        description: 'Votre vitrine montre qui vous êtes, ce que vous faites et comment vous joindre.',
+        title: 'Mettez en avant votre activit',
+        description: 'Votre vitrine montre qui vous tes, ce que vous faites et comment vous joindre.',
       },
       {
         title: 'Rassurez vos futurs clients',
-        description: 'Une présentation claire aide à transformer une visite en contact utile.',
+        description: 'Une prsentation claire aide  transformer une visite en contact utile.',
       },
       {
         title: 'Diffusez vos preuves sociales',
-        description: 'Avis, photos et descriptions donnent envie de vous écrire plutôt qu’un autre.',
+        description: 'Avis, photos et descriptions donnent envie de vous crire plutt quun autre.',
       },
     ],
   },
   stocks_pro: {
     key: 'stocks_pro',
-    icon: '📦',
+    icon: '=',
     eyebrow: 'Catalogue',
     steps: [
       {
         title: 'Publiez vos produits et vos stocks',
-        description: 'Montrez en direct ce qui est disponible sans avoir à mettre à jour plusieurs canaux.',
+        description: 'Montrez en direct ce qui est disponible sans avoir  mettre  jour plusieurs canaux.',
       },
       {
-        title: 'Évitez les allers-retours inutiles',
-        description: 'Un stock lisible réduit les échanges répétitifs et accélère la conversion.',
+        title: 'vitez les allers-retours inutiles',
+        description: 'Un stock lisible rduit les changes rptitifs et acclre la conversion.',
       },
       {
         title: 'Gardez une vue simple de vos produits',
-        description: 'Tout reste centralisé pour suivre vos références avec clarté.',
+        description: 'Tout reste centralis pour suivre vos rfrences avec clart.',
       },
     ],
   },
   calendrier_rdv: {
     key: 'calendrier_rdv',
-    icon: '📅',
+    icon: '=',
     eyebrow: 'Rendez-vous',
     steps: [
       {
-        title: 'Proposez vos créneaux de rendez-vous',
-        description: 'Le calendrier vous permet d’ouvrir des disponibilités visibles par vos clients.',
+        title: 'Proposez vos crneaux de rendez-vous',
+        description: 'Le calendrier vous permet douvrir des disponibilits visibles par vos clients.',
       },
       {
         title: 'Organisez vos confirmations',
@@ -206,41 +206,41 @@ export const TOURS: Record<string, TourDefinition> = {
       },
       {
         title: 'Gardez un planning lisible',
-        description: 'Vous suivez plus facilement ce qui est confirmé, en attente ou livré.',
+        description: 'Vous suivez plus facilement ce qui est confirm, en attente ou livr.',
       },
     ],
   },
   disponibilites_pro: {
     key: 'disponibilites_pro',
-    icon: '⏰',
-    eyebrow: 'Disponibilités',
+    icon: '',
+    eyebrow: 'Disponibilits',
     steps: [
       {
-        title: 'Annoncez vos disponibilités',
-        description: 'Votre activité apparaît plus clairement quand vos horaires sont visibles au bon endroit.',
+        title: 'Annoncez vos disponibilits',
+        description: 'Votre activit apparat plus clairement quand vos horaires sont visibles au bon endroit.',
       },
       {
-        title: 'Réduisez les frictions',
-        description: 'Les clients savent quand vous êtes joignable avant même de vous écrire.',
+        title: 'Rduisez les frictions',
+        description: 'Les clients savent quand vous tes joignable avant mme de vous crire.',
       },
       {
-        title: 'Restez cohérent sur tous les canaux',
-        description: 'Une vue simple des créneaux évite les messages inutiles.',
+        title: 'Restez cohrent sur tous les canaux',
+        description: 'Une vue simple des crneaux vite les messages inutiles.',
       },
     ],
   },
   immobilier: {
     key: 'immobilier',
-    icon: '🏠',
+    icon: '🎭',
     eyebrow: 'Découvrir Kalico',
     steps: [
       {
-        title: 'Cherchez un bien par zone précise',
-        description: 'Province, commune et quartier vous aident à affiner votre recherche sans perte de temps.',
+        title: 'Cherchez un bien par zone prcise',
+        description: 'Province, commune et quartier vous aident  affiner votre recherche sans perte de temps.',
       },
       {
         title: "Contactez directement l'annonceur",
-        description: 'La messagerie intégrée garde tout au même endroit pour comparer plus sereinement.',
+        description: 'La messagerie intgre garde tout au mme endroit pour comparer plus sereinement.',
       },
       {
         title: 'Sauvegardez vos favoris',
@@ -250,7 +250,7 @@ export const TOURS: Record<string, TourDefinition> = {
   },
   vehicules: {
     key: 'vehicules',
-    icon: '🚙',
+    icon: '=',
     eyebrow: 'Découvrir Kalico',
     steps: [
       {
@@ -259,40 +259,40 @@ export const TOURS: Record<string, TourDefinition> = {
       },
       {
         title: 'Comparez rapidement les offres',
-        description: 'Repérez les annonces les plus pertinentes sans vous perdre dans les détails.',
+        description: 'Reprez les annonces les plus pertinentes sans vous perdre dans les dtails.',
       },
       {
         title: 'Contactez le vendeur en direct',
-        description: 'La prise de contact reste simple pour accélérer la transaction.',
+        description: 'La prise de contact reste simple pour acclrer la transaction.',
       },
     ],
   },
   construction_artisan: {
     key: 'construction_artisan',
-    icon: '🛠️',
+    icon: '=',
     eyebrow: 'Artisanat & BTP',
     steps: [
       {
-        title: 'Montrez vos chantiers et vos réalisations',
-        description: 'Mettez en avant vos chantiers, votre portfolio et vos spécialités dès la première visite.',
+        title: 'Montrez vos chantiers et vos ralisations',
+        description: 'Mettez en avant vos chantiers, votre portfolio et vos spcialits ds la premire visite.',
       },
       {
         title: 'Recevez des demandes de devis',
-        description: 'Les particuliers détaillent leur besoin et peuvent vous contacter directement depuis Kalico.',
+        description: 'Les particuliers dtaillent leur besoin et peuvent vous contacter directement depuis Kalico.',
       },
       {
         title: 'Transformez la visite en contact utile',
-        description: 'Entre vitrine Pro, devis et prise de rendez-vous, tout est pensé pour générer des prospects.',
+        description: 'Entre vitrine Pro, devis et prise de rendez-vous, tout est pens pour gnrer des prospects.',
       },
     ],
   },
   mecanique_auto: {
     key: 'mecanique_auto',
-    icon: '🔧',
+    icon: '🚗',
     eyebrow: 'Auto / Moto',
     steps: [
       {
-        title: 'Présentez vos réparations et entretiens',
+        title: 'Prsentez vos rparations et entretiens',
         description: 'Un espace clair pour vos services auto, motos et diagnostics.',
       },
       {
@@ -300,8 +300,8 @@ export const TOURS: Record<string, TourDefinition> = {
         description: 'Devis, messages et réservations se regroupent dans un seul tableau de bord.',
       },
       {
-        title: 'Gardez les clients informés',
-        description: 'Réponses rapides et historique des demandes renforcent la confiance.',
+        title: 'Gardez les clients informs',
+        description: 'Rponses rapides et historique des demandes renforcent la confiance.',
       },
     ],
   },
@@ -334,32 +334,32 @@ export const PRO_TOUR_ORDER: string[] = [
 export const DEFAULT_TOUR_ORDER: string[] = PARTICULIER_TOUR_ORDER
 
 export const CATEGORY_TO_TOUR: Record<string, string> = {
-  'Fret / Livraison / Déménagement / Transport': 'fret_livraison',
+  'Fret / Livraison / Dmnagement / Transport': 'fret_livraison',
   'Construction / Artisan / Second oeuvre': 'construction_artisan',
   'Artisan BTP': 'construction_artisan',
-  'Mécanique / Réparation auto': 'mecanique_auto',
+  'Mcanique / Rparation auto': 'mecanique_auto',
   'Garage / Auto / Moto': 'mecanique_auto',
-  'Location / Vente de véhicules': 'vehicules',
+  'Location / Vente de vhicules': 'vehicules',
   Véhicules: 'vehicules',
-  Événementiel: 'evenementiel',
-  'Bon plans & événements': 'bons_plans',
+  vnementiel: 'evenementiel',
+  'Bon plans & vnements': 'bons_plans',
   'Bons Plans': 'bons_plans',
   Services: 'contacter_pro',
-  Commerçant: 'stocks_pro',
+  Commerant: 'stocks_pro',
   Restaurateur: 'vitrine_pro',
   Garagiste: 'mecanique_auto',
   Paysagiste: 'construction_artisan',
   'Prestataire IT': 'vitrine_pro',
-  'Agence immobilière': 'immobilier',
-  'Activité nautique': 'vitrine_pro',
+  'Agence immobilire': 'immobilier',
+  'Activit nautique': 'vitrine_pro',
   Transporteur: 'fret_livraison',
-  'Professionnel de santé': 'calendrier_rdv',
-  'Organisateur d’événements': 'evenementiel',
+  'Professionnel de sant': 'calendrier_rdv',
+  'Organisateur dvnements': 'evenementiel',
   Agriculteur: 'stocks_pro',
   Commerce: 'stocks_pro',
   Restauration: 'vitrine_pro',
   Transport: 'fret_livraison',
-  Santé: 'calendrier_rdv',
+  Sant: 'calendrier_rdv',
   BTP: 'construction_artisan',
   Informatique: 'vitrine_pro',
   Plateforme: 'vitrine_pro',

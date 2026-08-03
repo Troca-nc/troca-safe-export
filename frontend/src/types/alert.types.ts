@@ -23,7 +23,7 @@ export interface AlertFilters {
 export interface SearchAlert {
   id:          number
   user_id:     number
-  label:       string         // ex: "Toyota Hilux Noum�a"
+  label:       string         // ex: "Toyota Hilux Nouméa"
   filters:     AlertFilters
   frequency:   AlertFrequency
   status:      AlertStatus
@@ -73,14 +73,14 @@ export function buildAlertLabel(filters: AlertFilters): string {
   const parts: string[] = []
   if (filters.q) parts.push(filters.q)
   if (filters.categorie) parts.push(filters.categorie)
-  else if (filters.categorie_id) parts.push(`Cat�gorie ${filters.categorie_id}`)
+  else if (filters.categorie_id) parts.push(`Catégorie ${filters.categorie_id}`)
   if (filters.commune) parts.push(filters.commune)
   else if (filters.commune_id) parts.push(`Commune ${filters.commune_id}`)
   if (filters.condition) {
     const conditionLabel = {
       new: 'Neuf',
       like_new: 'Comme neuf',
-      good: 'Bon �tat',
+      good: 'Bon État',
       fair: 'Correct',
       for_parts: 'Pour pi�ces',
     }[filters.condition]

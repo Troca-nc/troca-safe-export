@@ -117,7 +117,7 @@ export default function WelcomeToast() {
             router.push('/annonces/nouvelle')
           }}
         >
-          D�poser une annonce
+          Déposer une annonce
           <ArrowRight className="h-4 w-4" />
         </button>
 

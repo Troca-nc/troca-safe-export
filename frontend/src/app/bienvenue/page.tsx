@@ -20,7 +20,7 @@ const CONFIG: Record<Role, {
     title: 'Bienvenue chez Kalico',
     subtitle: 'Votre compte particulier est pr�t. Vous pouvez d�j� publier, chercher et discuter.',
     icon: UserRound,
-    cta: { label: 'D�poser ma premi�re annonce', href: '/annonces/nouvelle' },
+    cta: { label: 'Déposer ma premi�re annonce', href: '/annonces/nouvelle' },
     items: ['Compl�ter votre profil', 'Ajouter une photo', 'Publier votre annonce'],
     badge: 'Compte particulier cr��',
   },

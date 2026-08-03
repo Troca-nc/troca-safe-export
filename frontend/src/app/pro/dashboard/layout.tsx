@@ -44,7 +44,7 @@ const NAV_ITEMS = [
   { href: '/pro/dashboard/transport', label: 'Transport', icon: Building2 },
   { href: '/pro/dashboard/envoi-livraison', label: 'Envoi & Livraison', icon: Truck },
   { href: '/pro/[id]', label: 'Ma vitrine', icon: Building2 },
-  { href: '/pro/dashboard/parametres', label: 'Param�tres Pro', icon: Settings2 },
+  { href: '/pro/dashboard/parametres', label: 'Paramètres Pro', icon: Settings2 },
 ] as const
 
 function isActivePath(pathname: string, href: string) {

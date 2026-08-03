@@ -35,9 +35,9 @@ const PRO_CATEGORIES = [
 ] as const
 
 const COMMUNES = [
-  'Noum�a',
+  'Nouméa',
   'Mont-Dore',
-  'Dumb�a',
+  'Dumbéa',
   'Pa�ta',
   'Boulouparis',
   'La Foa',
@@ -118,9 +118,9 @@ export default function ProDashboardSettingsPage() {
   const previewProfile = useMemo(
     () => ({
       name: form.company_name || user?.first_name || 'Votre entreprise',
-      category: form.category || 'Cat�gorie',
+      category: form.category || 'Catégorie',
       description: form.description || 'Votre description appara?tra ici.',
-      commune: form.commune || 'Noum�a',
+      commune: form.commune || 'Nouméa',
       website: form.website || '',
       phone: form.phone || '',
       hours: form.hours || 'Horaires ? compl?ter',
@@ -310,7 +310,7 @@ export default function ProDashboardSettingsPage() {
         portfolio_photos: portfolioPhotos,
         quote_template: quoteTemplate,
       })
-      setSuccess(' Param�tres enregistr�s avec succ�s.')
+      setSuccess(' Paramètres enregistr�s avec succ�s.')
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Impossible denregistrer vos param�tres pour le moment.')
     } finally {
@@ -326,7 +326,7 @@ export default function ProDashboardSettingsPage() {
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
           <div className="flex items-end justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Param�tres Pro</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Paramètres Pro</p>
               <h1 className="mt-2 font-display text-3xl font-bold text-night">Ma vitrine professionnelle</h1>
               <p className="mt-2 text-sm text-night/60">Mettez � jour votre marque, vos coordonn�es et vos visuels.</p>
             </div>
@@ -368,7 +368,7 @@ export default function ProDashboardSettingsPage() {
               <input value={form.company_name} onChange={(e) => handleChange('company_name', e.target.value)} className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm" />
             </label>
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-night">Cat�gorie</span>
+              <span className="text-sm font-semibold text-night">Catégorie</span>
               <select value={form.category} onChange={(e) => handleChange('category', e.target.value)} className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm">
                 <option value="">Choisir un secteur</option>
                 {PRO_CATEGORIES.map((item) => (

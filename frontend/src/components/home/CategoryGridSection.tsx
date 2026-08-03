@@ -7,7 +7,7 @@ import { FALLBACK_CATEGORIES, type CategoryNode } from '@/lib/categoryCatalog'
 import { getCategoryIcon } from '@/lib/categoryPresentation'
 
 const PRIMARY_CATEGORY_ITEMS = [
-  { slug: 'vehicules', label: 'V�hicules' },
+  { slug: 'vehicules', label: 'Véhicules' },
   { slug: 'immobilier', label: 'Immobilier' },
   { slug: 'electronique-multimedia', label: '�lectronique' },
   { slug: 'mode', label: 'Mode' },
@@ -32,7 +32,7 @@ export default function CategoryGridSection() {
     <section className="mx-auto max-w-7xl px-4 pb-12">
       <div className="mb-5 flex items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Cat�gories principales</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Catégories principales</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">Acc�dez vite aux rayons les plus utiles</h2>
         </div>
         <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">

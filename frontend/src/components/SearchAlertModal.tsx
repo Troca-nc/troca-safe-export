@@ -256,7 +256,7 @@ export default function SearchAlertModal({
                   href="/alertes"
                   className="inline-flex items-center justify-center rounded-2xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
                 >
-                  G�rer mes alertes
+                  Gérer mes alertes
                 </a>
                 <button
                   type="button"

@@ -68,7 +68,7 @@ function formatCondition(condition: PreviewDraft['condition']) {
   const labels: Record<PreviewDraft['condition'], string> = {
     new: 'Neuf',
     like_new: 'Comme neuf',
-    good: 'Bon �tat',
+    good: 'Bon État',
     fair: 'Correct',
     for_parts: 'Pour pi�ces',
   }
@@ -192,7 +192,7 @@ export default function ListingPreviewPage() {
             <div className="flex flex-wrap items-center gap-2 text-xs text-night/45">
               <span className="inline-flex items-center gap-1 rounded-full bg-night/5 px-3 py-1">
                 <MapPin className="h-3 w-3" />
-                {preview.commune_name ?? 'Nouvelle-Cal�donie'}
+                {preview.commune_name ?? 'Nouvelle-Calédonie'}
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-night/5 px-3 py-1">
                 <CalendarDays className="h-3 w-3" />
@@ -220,7 +220,7 @@ export default function ListingPreviewPage() {
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">R�sum�</p>
               <div className="mt-4 space-y-3 text-sm text-night/65">
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-night/45">Cat�gorie</span>
+                  <span className="text-night/45">Catégorie</span>
                   <span className="font-semibold text-night">{preview.category_name ?? 'Non s�lectionn�e'}</span>
                 </div>
                 <div className="flex items-center justify-between gap-4">

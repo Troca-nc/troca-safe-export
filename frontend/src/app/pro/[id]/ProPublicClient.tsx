@@ -273,7 +273,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews, s
         `Produit : ${product.title}`,
         product.brand ? `Marque : ${product.brand}` : null,
         product.unit_label ? `Format : ${product.unit_label}` : null,
-        product.catalog_category_name ? `Cat�gorie catalogue : ${product.catalog_category_name}` : null,
+        product.catalog_category_name ? `Catégorie catalogue : ${product.catalog_category_name}` : null,
         product.price_type ? `Type de prix : ${product.price_type}` : null,
         '',
         `Bonjour, je souhaite en savoir plus sur ce produit "${product.title}".`,
@@ -332,7 +332,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews, s
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-night/60">
                       <span className="inline-flex items-center gap-1">
                         <MapPin className="h-4 w-4 text-coral" />
-                        {profile.pro_commune || 'Nouvelle-Cal�donie'}
+                        {profile.pro_commune || 'Nouvelle-Calédonie'}
                       </span>
                       <span className="inline-flex items-center gap-1">
                         <Store className="h-4 w-4 text-coral" />
@@ -350,7 +350,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews, s
                       </span>
                       <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
                         <MapPin className="h-4 w-4 text-[#0A7EA4]" />
-                        {profile.pro_commune || 'Nouvelle-Cal�donie'}
+                        {profile.pro_commune || 'Nouvelle-Calédonie'}
                       </span>
                       {productCount > 0 ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
@@ -669,7 +669,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews, s
                           <div>
                             <h3 className="line-clamp-1 text-lg font-semibold text-night">{product.title}</h3>
                             <p className="mt-1 text-sm text-night/55">
-                              {product.category_name || 'Catalogue'} � {product.commune_name || profile.pro_commune || 'Nouvelle-Cal�donie'}
+                              {product.category_name || 'Catalogue'} � {product.commune_name || profile.pro_commune || 'Nouvelle-Calédonie'}
                             </p>
                           </div>
 
@@ -802,7 +802,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews, s
               <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Coordonn�es</p>
                 <div className="mt-4 space-y-3 text-sm text-night/65">
-                  <p><span className="font-semibold text-night">Commune :</span> {profile.pro_commune || 'Nouvelle-Cal�donie'}</p>
+                  <p><span className="font-semibold text-night">Commune :</span> {profile.pro_commune || 'Nouvelle-Calédonie'}</p>
                   <p><span className="font-semibold text-night">Site web :</span> {profile.pro_website || 'Non renseign�'}</p>
                   <p><span className="font-semibold text-night">Horaires :</span> {profile.pro_hours || 'Non renseign�s'}</p>
                 </div>

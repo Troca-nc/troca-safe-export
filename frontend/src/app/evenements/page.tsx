@@ -70,7 +70,7 @@ function CinemaCard({ event }: { event: EventItem }) {
   const external = Boolean(event.booking_url || event.link_url || event.website_url)
   return (
     <article className="rounded-2xl border border-[var(--color-border)] bg-[linear-gradient(180deg,_#ffffff,_#f8fbfd)] p-4 shadow-sm">
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-nc-emeraude">🎬 Cinéma</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-nc-emeraude">🎭 Cin�ma</p>
       <h3 className="mt-2 text-base font-bold text-night">{event.title}</h3>
       <p className="mt-1 text-sm text-night/60">{event.commune_name || event.location_name || 'Nouvelle-Caledonie'}</p>
       <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-night/65">

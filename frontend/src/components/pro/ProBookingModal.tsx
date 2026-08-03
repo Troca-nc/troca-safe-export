@@ -382,7 +382,7 @@ export default function ProBookingModal({
                     value={form.commune}
                     onChange={(event) => setForm((current) => ({ ...current, commune: event.target.value }))}
                     className="input w-full rounded-2xl"
-                    placeholder="Noum�a, Dumb�a..."
+                    placeholder="Nouméa, Dumbéa..."
                   />
                 </label>
 

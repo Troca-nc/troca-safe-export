@@ -691,13 +691,13 @@ function ServiceStatsSection({ services }: { services: any }) {
         <MetricCard
           label="�v�nements"
           value={`${Number(bonPlans.events_a_venir ?? 0).toLocaleString('fr-FR')} � venir`}
-          hint={`${Number(bonPlans.events_views ?? 0).toLocaleString('fr-FR')} vues � ${Number(bonPlans.events_reservations ?? 0).toLocaleString('fr-FR')} r�servations`}
+          hint={`${Number(bonPlans.events_views ?? 0).toLocaleString('fr-FR')} vues � ${Number(bonPlans.events_reservations ?? 0).toLocaleString('fr-FR')} réservations`}
           icon={<CalendarDays size={16} />}
         />
         <MetricCard
           label="Covoiturage"
           value={`${Number(bonPlans.rides_active ?? 0).toLocaleString('fr-FR')} trajets`}
-          hint={`${Number(bonPlans.ride_bookings ?? 0).toLocaleString('fr-FR')} r�servations � ${Number(bonPlans.rides_verified_drivers ?? 0).toLocaleString('fr-FR')} conducteurs v�rifi�s`}
+          hint={`${Number(bonPlans.ride_bookings ?? 0).toLocaleString('fr-FR')} réservations � ${Number(bonPlans.rides_verified_drivers ?? 0).toLocaleString('fr-FR')} conducteurs v�rifi�s`}
           icon={<CarFront size={16} />}
         />
       </div>

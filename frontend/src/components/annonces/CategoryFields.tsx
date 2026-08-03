@@ -187,7 +187,7 @@ const SERVICES_FIELDS: CategoryField[] = [
   },
   { name: 'metadata.tarif_xpf', label: 'Tarif', type: 'number', unit: 'XPF', placeholder: '2500' },
   { name: 'metadata.tarif_description', label: 'Description du tarif', type: 'text', placeholder: '� partir de 2 500 XPF / h selon la complexit�' },
-  { name: 'metadata.zone_intervention', label: 'Zone dintervention', type: 'text', required: true, placeholder: 'Noum�a, Dumb�a, Mont-Dore' },
+  { name: 'metadata.zone_intervention', label: 'Zone dintervention', type: 'text', required: true, placeholder: 'Nouméa, Dumbéa, Mont-Dore' },
   {
     name: 'metadata.disponibilite',
     label: 'Disponibilit�',
@@ -205,11 +205,11 @@ const SERVICES_FIELDS: CategoryField[] = [
 const DON_FIELDS: CategoryField[] = [
   {
     name: 'metadata.etat',
-    label: "�tat de l'objet",
+    label: "État de l'objet",
     type: 'radio',
     required: true,
     options: [
-      { value: 'bon', label: 'Bon �tat' },
+      { value: 'bon', label: 'Bon État' },
       { value: 'usage', label: 'Usage' },
       { value: 'a_reparer', label: '� r�parer' },
     ],
@@ -225,7 +225,7 @@ const DON_FIELDS: CategoryField[] = [
       { value: 'autre', label: 'Autre' },
     ],
   },
-  { name: 'metadata.commune_remise', label: 'Commune de remise', type: 'text', required: true, placeholder: 'Noum�a' },
+  { name: 'metadata.commune_remise', label: 'Commune de remise', type: 'text', required: true, placeholder: 'Nouméa' },
   { name: 'metadata.remise_en_main_propre', label: 'Remise en main propre', type: 'checkbox', helper: 'Les dons restent en remise directe' },
 ]
 
@@ -268,11 +268,11 @@ const IMMOBILIER_V2_FIELDS: CategoryField[] = [
   { name: 'metadata.annee_construction', label: 'Ann�e de construction', type: 'number', placeholder: '1998' },
   {
     name: 'metadata.etat_bien',
-    label: '�tat du bien',
+    label: 'État du bien',
     type: 'radio',
     options: [
       { value: 'neuf', label: 'Neuf' },
-      { value: 'bon', label: 'Bon �tat' },
+      { value: 'bon', label: 'Bon État' },
       { value: 'a_renover', label: '� r�nover' },
     ],
   },

@@ -81,8 +81,8 @@ export default function MentionsLegalesPage() {
 
         <h2>8. Droit applicable</h2>
         <p>
-          Le pr�sent site est soumis au droit fran�ais applicable en Nouvelle-Cal�donie. Tout litige relatif � son utilisation sera soumis
-          � la comp�tence des juridictions comp�tentes de Noum�a, sauf disposition l�gale imp�rative contraire.
+          Le pr�sent site est soumis au droit fran�ais applicable en Nouvelle-Calédonie. Tout litige relatif � son utilisation sera soumis
+          � la comp�tence des juridictions comp�tentes de Nouméa, sauf disposition l�gale imp�rative contraire.
         </p>
       </LegalLayout>
     </>

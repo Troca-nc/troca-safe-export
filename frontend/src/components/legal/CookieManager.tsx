@@ -120,7 +120,7 @@ export default function CookieManager() {
           </p>
           <h2 className="mt-3 font-display text-3xl font-bold text-night">G�rer mes cookies</h2>
           <p className="mt-2 text-sm leading-relaxed text-night/65">
-            Choisissez en un clin d&apos;Sil ce que vous autorisez. Les cookies essentiels restent actifs pour la connexion et la s�curit�.
+            Choisissez en un clin d&apos;Sil ce que vous autorisez. Les cookies essentiels restent actifs pour la connexion et la sécurité.
           </p>
         </div>
 
@@ -137,7 +137,7 @@ export default function CookieManager() {
         <div className="rounded-2xl border border-night/10 bg-sand/40 p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Essentiels</p>
           <p className="mt-2 text-sm font-medium text-night">Toujours actifs</p>
-          <p className="mt-1 text-sm text-night/55">Connexion, s�curit� et pr�f�rences de base.</p>
+          <p className="mt-1 text-sm text-night/55">Connexion, sécurité et pr�f�rences de base.</p>
         </div>
 
         <CookieToggle

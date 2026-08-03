@@ -103,7 +103,7 @@ function EventCard({ item }: { item: DirectoryItem }) {
         <div className="mt-4 grid gap-2 text-xs font-semibold text-night/65 sm:grid-cols-2">
           <span className="rounded-full bg-sand px-2.5 py-1">
             <MapPin className="mr-1 inline h-3.5 w-3.5 text-coral" />
-            {item.commune_name || item.location_name || 'Nouvelle-Cal�donie'}
+            {item.commune_name || item.location_name || 'Nouvelle-Calédonie'}
           </span>
           <span className="rounded-full bg-sand px-2.5 py-1">
             <CalendarDays className="mr-1 inline h-3.5 w-3.5 text-coral" />
@@ -308,13 +308,13 @@ export default function BonsPlansPage() {
         <div className="overflow-hidden rounded-[2rem] border border-night/8 border-b-4 border-b-nc-emeraude bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.16))] px-6 py-8 text-white shadow-[0_24px_80px_rgba(8,32,50,0.14)] md:px-8 md:py-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-emeraude">
             <Sparkles className="h-3.5 w-3.5" />
-            Bons plans & �v�nements
+            Bons plans & Événements
           </div>
           <h1 className="mt-4 max-w-3xl font-display text-4xl font-bold leading-tight md:text-5xl">
-            Promos locales et agenda culturel de Nouvelle-Cal�donie, au m�me endroit.
+            Promos locales et agenda culturel de Nouvelle-Calédonie, au m�me endroit.
           </h1>
           <p className="mt-4 max-w-3xl text-sm leading-relaxed text-white/72 md:text-base">
-            Retrouvez les bons plans du moment et lagenda culturel de la Nouvelle-Cal�donie sans changer de navigation.
+            Retrouvez les bons plans du moment et lagenda culturel de la Nouvelle-Calédonie sans changer de navigation.
           </p>
         </div>
       </section>
@@ -322,8 +322,8 @@ export default function BonsPlansPage() {
       <div className="mx-auto max-w-7xl px-4 pb-8">
         <div className="flex flex-wrap gap-2">
           {[
-            { id: 'promos', label: '<� Promotions' },
-            { id: 'evenements', label: '<� �v�nements' },
+            { id: 'promos', label: '🎭 Promotions' },
+            { id: 'evenements', label: '🎭 �v�nements' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -493,7 +493,7 @@ export default function BonsPlansPage() {
                     Concerts, march�s, expos, conf�rences - ajoutez votre �v�nement pour le faire conna�tre.
                   </p>
                   <Link href="/bons-plans/publier" className="btn-primary mt-5 inline-flex items-center gap-2">
-                    Cr�er un �v�nement
+                    Créer un événement
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>

@@ -45,7 +45,7 @@ const SORT_LABEL_BY_VALUE: Record<string, string> = SORT_OPTIONS.reduce((acc, op
 const CONDITION_OPTIONS = [
   { value: 'new',       label: 'Neuf' },
   { value: 'like_new',  label: 'Comme neuf' },
-  { value: 'good',      label: 'Bon �tat' },
+  { value: 'good',      label: 'Bon État' },
   { value: 'fair',      label: 'Correct' },
   { value: 'for_parts', label: 'Pour pi�ces' },
 ]
@@ -144,7 +144,7 @@ function CategoryTreeNode({
           <span className="block font-semibold">{category.name}</span>
           {children.length > 0 ? (
             <span className={`block text-[11px] ${isSelected ? 'text-white/65' : 'text-night/45'}`}>
-              {isExpanded ? 'Sous-cat�gories ouvertes' : `${children.length} sous-cat�gorie${children.length > 1 ? 's' : ''}`}
+              {isExpanded ? 'Sous-catégories ouvertes' : `${children.length} sous-cat�gorie${children.length > 1 ? 's' : ''}`}
             </span>
           ) : null}
         </span>
@@ -219,7 +219,7 @@ function CategoryTreeBrowser({
 
       {selectedCategoryLabel ? (
         <div className="rounded-2xl border border-nc-lagon/20 bg-nc-lagon/8 px-3 py-3 text-sm text-night">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-nc-lagon">Cat�gorie active</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-nc-lagon">Catégorie active</p>
           <p className="mt-1 font-semibold">{selectedCategoryLabel}</p>
         </div>
       ) : null}
@@ -626,9 +626,9 @@ function FilterSidebar({
           aria-expanded={!collapsedSections.condition}
         >
           <div>
-            <h3 className="text-sm font-semibold text-night">�tat</h3>
+            <h3 className="text-sm font-semibold text-night">État</h3>
             <p className="mt-1 text-xs text-night/45">
-              Affinez selon l�tat du produit.
+              Affinez selon lÉtat du produit.
             </p>
           </div>
           <ChevronDown className={`h-4 w-4 text-night/35 transition-transform ${collapsedSections.condition ? '' : 'rotate-180'}`} />
@@ -1169,9 +1169,9 @@ function ListingsPageContent() {
   // Sidebar filtres
   const LegacyFilterSidebar = () => (
       <div className="space-y-6">
-      {/* Cat�gories */}
+      {/* Catégories */}
       <div>
-        <h3 className="font-semibold text-night text-sm mb-3">Cat�gorie</h3>
+        <h3 className="font-semibold text-night text-sm mb-3">Catégorie</h3>
         <div className="space-y-3 rounded-2xl border border-night/8 bg-white/80 p-3 shadow-sm">
           <button
             type="button"
@@ -1187,7 +1187,7 @@ function ListingsPageContent() {
 
           {selectedCategoryLabel ? (
             <div className="rounded-2xl border border-nc-lagon/20 bg-nc-lagon/8 px-3 py-3 text-sm text-night">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-nc-lagon">Cat�gorie active</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-nc-lagon">Catégorie active</p>
               <p className="mt-1 font-semibold">{selectedCategoryLabel}</p>
             </div>
           ) : null}
@@ -1491,9 +1491,9 @@ function ListingsPageContent() {
           aria-expanded={!collapsedSections.condition}
         >
           <div>
-            <h3 className="font-semibold text-night text-sm">�tat</h3>
+            <h3 className="font-semibold text-night text-sm">État</h3>
             <p className="mt-1 text-xs text-night/45">
-              Affinez selon l�tat du produit.
+              Affinez selon lÉtat du produit.
             </p>
           </div>
           <ChevronDown className={`h-4 w-4 text-night/35 transition-transform ${collapsedSections.condition ? '' : 'rotate-180'}`} />
@@ -1692,7 +1692,7 @@ function ListingsPageContent() {
               onClick={() => setMobileCategoriesOpen((current) => !current)}
             >
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-coral/80">Cat�gories</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-coral/80">Catégories</p>
                 <p className="mt-1 text-sm font-semibold text-night">
                   {selectedCategoryLabel ?? 'Toutes les cat�gories'}
                 </p>
@@ -1834,7 +1834,7 @@ function ListingsPageContent() {
                 <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
                   <div className="space-y-3 p-5 lg:p-6">
                     <div className="inline-flex items-center rounded-full border border-nc-lagon/20 bg-nc-lagon/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-lagon">
-                      Sponsoris�
+                      Sponsorisé
                     </div>
                     <h3 className="font-display text-2xl font-bold text-night">
                       {categoryBanner.title || 'Mettez votre offre en avant'}
@@ -1847,7 +1847,7 @@ function ListingsPageContent() {
                         href={categoryBanner.link_url || '/annonces'}
                         className="inline-flex items-center justify-center rounded-2xl bg-nc-lagon px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-sm"
                       >
-                        {categoryBanner.cta_text || 'D�couvrir'}
+                        {categoryBanner.cta_text || 'Découvrir'}
                       </a>
                     </div>
                   </div>

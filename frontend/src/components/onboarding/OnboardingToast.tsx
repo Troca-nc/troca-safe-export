@@ -26,7 +26,7 @@ const FEATURES: OnboardingFeature[] = [
     title: 'D�posez votre premi�re annonce',
     description: 'Publiez en quelques minutes et touchez des acheteurs locaux.',
     href: '/deposer',
-    cta: 'D�poser une annonce',
+    cta: 'Déposer une annonce',
   },
   {
     key: 'search_alerts',

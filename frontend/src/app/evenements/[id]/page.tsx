@@ -212,7 +212,7 @@ export default function EventDetailPage() {
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full bg-sand px-3 py-1.5">
                     <MapPin className="h-4 w-4 text-coral" />
-                    {event.venue_name || event.commune_name || 'Nouvelle-Cal�donie'}
+                    {event.venue_name || event.commune_name || 'Nouvelle-Calédonie'}
                   </span>
                 </div>
 

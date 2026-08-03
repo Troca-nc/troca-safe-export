@@ -58,11 +58,11 @@ function cleanText(value?: string | null, fallback = '') {
 }
 
 function daysLeftLabel(value?: string | null) {
-  if (!value) return 'Bientôt fini'
+  if (!value) return 'Bient�t fini'
   const end = new Date(value)
-  if (Number.isNaN(end.getTime())) return 'Bientôt fini'
+  if (Number.isNaN(end.getTime())) return 'Bient�t fini'
   const days = Math.max(0, Math.ceil((end.getTime() - Date.now()) / 86_400_000))
-  return days <= 0 ? 'Terminé' : `Plus que ${days} jour${days > 1 ? 's' : ''}`
+  return days <= 0 ? 'Termin�' : `Plus que ${days} jour${days > 1 ? 's' : ''}`
 }
 
 function getCategoryTone(bonPlan: BonPlanCardModel) {
@@ -98,7 +98,7 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
         {bonPlan.image_url ? (
           <Image src={bonPlan.image_url} alt={bonPlan.title} fill className="object-cover" sizes="(max-width: 640px) 90vw, 33vw" />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-4xl opacity-30">🏷️</div>
+          <div className="flex h-full w-full items-center justify-center text-4xl opacity-30">🎭</div>
         )}
 
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
@@ -126,7 +126,7 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
           {business?.badge === 'verified' ? (
             <span className="badge badge-emeraude inline-flex items-center gap-1 text-[11px] shadow-sm">
               <Check className="h-3 w-3" />
-              Vérifié Kalico
+              V�rifi� Kalico
             </span>
           ) : business?.badge === 'active' ? (
             <span className="badge badge-emeraude inline-flex items-center gap-1 text-[11px] shadow-sm">

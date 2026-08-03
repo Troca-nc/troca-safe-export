@@ -226,7 +226,7 @@ export default function TrocCyclePage() {
                     ) : null}
                   </div>
                   <h3 className="mt-3 line-clamp-2 text-lg font-bold text-night">{listing.title}</h3>
-              <p className="mt-2 text-sm text-night/60">{listing.commune_name ?? 'Nouvelle-Cal�donie'}</p>
+              <p className="mt-2 text-sm text-night/60">{listing.commune_name ?? 'Nouvelle-Calédonie'}</p>
                   {index < listings.length - 1 ? (
                     <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-night/60">
                       <ArrowRight className="h-3.5 w-3.5 text-coral" />

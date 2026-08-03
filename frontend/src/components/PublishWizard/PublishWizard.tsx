@@ -306,7 +306,7 @@ function PublicationPreview({
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lagoon">Cat�gorie</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lagoon">Catégorie</p>
           <p className="mt-2 text-sm font-semibold text-white">{selectedCategory?.name || '� choisir'}</p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
@@ -841,13 +841,13 @@ export default function PublishWizard() {
                   <input
                     value={draft.title}
                     onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
-                    placeholder="Ex. iPhone 14 en excellent �tat"
+                    placeholder="Ex. iPhone 14 en excellent État"
                     className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/20"
                   />
                 </label>
 
                 <div className="space-y-2">
-                  <span className="text-sm font-semibold text-night">Cat�gorie *</span>
+                  <span className="text-sm font-semibold text-night">Catégorie *</span>
                   <div className="rounded-[1.5rem] border border-night/10 bg-sand/30 p-4">
                     <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
                       <Layers3 className="h-3.5 w-3.5 text-lagoon" />
@@ -880,7 +880,7 @@ export default function PublishWizard() {
                         <div className="flex items-center justify-between gap-3">
                           <div>
                             <p className="text-sm font-semibold text-night">
-                              {activeCategoryNode ? activeCategoryNode.name : 'Cat�gories principales'}
+                              {activeCategoryNode ? activeCategoryNode.name : 'Catégories principales'}
                             </p>
                             <p className="mt-1 text-xs text-night/45">
                               {activeCategoryNode
@@ -929,7 +929,7 @@ export default function PublishWizard() {
                                   <span className={`mt-1 block text-xs ${selected ? 'text-white/70' : 'text-night/45'}`}>
                                     {children.length > 0
                                       ? `${children.length} sous-cat�gorie${children.length > 1 ? 's' : ''}`
-                                      : 'Cat�gorie finale'}
+                                      : 'Catégorie finale'}
                                   </span>
                                 </span>
                               </button>
@@ -939,7 +939,7 @@ export default function PublishWizard() {
 
                         {selectedCategoryPath.length > 0 ? (
                           <div className="rounded-2xl border border-nc-lagon/20 bg-nc-lagon/8 px-4 py-3 text-sm text-night">
-                            <p className="font-semibold text-night">Cat�gorie finale s�lectionn�e</p>
+                            <p className="font-semibold text-night">Catégorie finale s�lectionn�e</p>
                             <p className="mt-1 text-night/65">
                               {selectedCategoryPath.map((node) => node.name).join(' / ')}
                             </p>
@@ -956,7 +956,7 @@ export default function PublishWizard() {
                     value={draft.description}
                     onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))}
                     rows={6}
-                    placeholder="D�crivez l'�tat, l'historique, les accessoires inclus et ce qui rassure l'acheteur."
+                    placeholder="D�crivez l'État, l'historique, les accessoires inclus et ce qui rassure l'acheteur."
                     className="w-full rounded-3xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/20"
                   />
                 </label>
@@ -1107,7 +1107,7 @@ export default function PublishWizard() {
                   </label>
 
                   <label className="block space-y-2">
-                    <span className="text-sm font-semibold text-night">�tat</span>
+                    <span className="text-sm font-semibold text-night">État</span>
                     <select
                       value={draft.condition}
                       onChange={(event) => setDraft((current) => ({ ...current, condition: event.target.value as WizardDraft['condition'] }))}
@@ -1115,7 +1115,7 @@ export default function PublishWizard() {
                     >
                       <option value="new">Neuf</option>
                       <option value="like_new">Comme neuf</option>
-                      <option value="good">Bon �tat</option>
+                      <option value="good">Bon État</option>
                       <option value="fair">Correct</option>
                       <option value="for_parts">Pour pi�ces</option>
                     </select>

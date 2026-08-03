@@ -12,7 +12,7 @@ const DEMO_OPTIONS: Array<{
   icon: typeof UserRound
 }> = [
   { key: 'visitor', label: 'Visiteur', description: 'Voir le site sans �tre connect�', icon: UserRound },
-  { key: 'particulier', label: 'Particulier', description: 'D�poser une annonce classique', icon: UserCheck },
+  { key: 'particulier', label: 'Particulier', description: 'Déposer une annonce classique', icon: UserCheck },
   { key: 'pro', label: 'Compte Pro', description: "Voir l'espace vendeur professionnel", icon: Store },
   { key: 'bon_plan', label: 'Bon plan', description: 'Simuler un annonceur sponsoris�', icon: Megaphone },
 ]

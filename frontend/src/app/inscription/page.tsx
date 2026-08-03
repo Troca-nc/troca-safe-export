@@ -72,7 +72,7 @@ const PLAN_FEATURES = [
 
 const PANEL_STATS = [
   { value: '0 F', label: 'Pour publier' },
-  { value: '17', label: 'Cat�gories' },
+  { value: '17', label: 'Catégories' },
   { value: '100%', label: 'Local NC' },
 ] as const
 
@@ -112,7 +112,7 @@ const PANEL_FEATURES = [
 const TRUST_ITEMS = [
   { icon: ShieldCheck, label: 'Paiement s�curis�' },
   { icon: Lock, label: 'Donn�es locales' },
-  { icon: CheckCircle2, label: 'Pros v�rifi�s' },
+  { icon: CheckCircle2, label: 'Pros vérifiés' },
 ] as const
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() || ''
@@ -811,7 +811,7 @@ export default function RegisterPage() {
                 className="signup-panel-anim mx-auto max-w-[300px] font-display text-[15px] italic leading-6 text-[var(--color-text-secondary)] dark:text-white/65"
                 style={{ animationDelay: '180ms', fontFamily: 'var(--font-display), Georgia, serif' }}
               >
-                Nouvelle-Cal�donie dans l'�me, Kalico dans la poche.
+                Nouvelle-Calédonie dans l'�me, Kalico dans la poche.
               </p>
 
               <div

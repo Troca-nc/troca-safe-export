@@ -217,7 +217,7 @@ export default function ProDashboardFretPage() {
         <div className="mt-4 flex flex-wrap gap-2 text-xs text-night/60">
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
             <MapPin className="h-3.5 w-3.5" />
-            {transporter?.pro_commune || 'Nouvelle-Cal�donie'}
+            {transporter?.pro_commune || 'Nouvelle-Calédonie'}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
             <ShieldCheck className="h-3.5 w-3.5" />

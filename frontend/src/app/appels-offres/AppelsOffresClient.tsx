@@ -151,7 +151,7 @@ function ProQuoteCard({
           <div className="text-right text-xs text-night/60">
             <p className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
               <MapPin className="h-3.5 w-3.5 text-coral" />
-              {pro.pro_commune || 'Nouvelle-Cal�donie'}
+              {pro.pro_commune || 'Nouvelle-Calédonie'}
             </p>
           </div>
         </div>
@@ -168,7 +168,7 @@ function ProQuoteCard({
         </div>
 
         <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-night/65">
-          {pro.pro_description || 'D�couvrir ce professionnel et lui envoyer une demande adapt�e.'}
+          {pro.pro_description || 'Découvrir ce professionnel et lui envoyer une demande adapt�e.'}
         </p>
 
         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
@@ -207,7 +207,7 @@ function MyRequestCard({ request }: { request: QuoteRequestMineItem }) {
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="rounded-2xl bg-white px-4 py-3">
-          <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Cat�gorie</p>
+          <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Catégorie</p>
           <p className="mt-1 font-semibold text-night">{request.category_name}</p>
         </div>
         <div className="rounded-2xl bg-white px-4 py-3">
@@ -402,7 +402,7 @@ export default function AppelsOffresClient() {
     if (!requestForm.category_slug) {
       showToast({
         tone: 'error',
-        title: 'Cat�gorie requise',
+        title: 'Catégorie requise',
         message: 'Choisissez une cat�gorie principale.',
       })
       return
@@ -572,7 +572,7 @@ export default function AppelsOffresClient() {
               </label>
 
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-night">Cat�gorie *</span>
+                <span className="text-sm font-semibold text-night">Catégorie *</span>
                 <select
                   value={requestForm.category_slug}
                   onChange={(event) => setRequestForm((current) => ({ ...current, category_slug: event.target.value }))}
@@ -746,7 +746,7 @@ export default function AppelsOffresClient() {
                       >
                         <p className="font-semibold text-night">{getDisplayName(pro)}</p>
                         <p className="mt-1 text-xs text-night/55">{pro.pro_category || 'Professionnel local'}</p>
-                        <p className="mt-1 text-xs text-night/45">{pro.pro_commune || 'Nouvelle-Cal�donie'}</p>
+                        <p className="mt-1 text-xs text-night/45">{pro.pro_commune || 'Nouvelle-Calédonie'}</p>
                       </button>
                     )
                   })}
@@ -890,7 +890,7 @@ export default function AppelsOffresClient() {
             </div>
           </label>
           <label className="space-y-2">
-            <span className="text-sm font-semibold text-night">Cat�gorie</span>
+            <span className="text-sm font-semibold text-night">Catégorie</span>
             <select
               value={categoryFilter}
               onChange={(event) => setCategoryFilter(event.target.value)}

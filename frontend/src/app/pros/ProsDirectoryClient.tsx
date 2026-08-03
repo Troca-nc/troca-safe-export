@@ -21,8 +21,8 @@ const FALLBACK_CATEGORY_OPTIONS = [
 ]
 
 const FALLBACK_COMMUNE_OPTIONS = [
-  'Noum�a',
-  'Dumb�a',
+  'Nouméa',
+  'Dumbéa',
   'Pa�ta',
   'Mont-Dore',
   'Boulouparis',
@@ -171,7 +171,7 @@ export default function ProsDirectoryClient() {
               Annuaire des pros
             </p>
             <h1 className="mt-2 font-display text-3xl font-bold text-night sm:text-4xl">
-              Les professionnels v�rifi�s de Nouvelle-Cal�donie
+              Les professionnels v�rifi�s de Nouvelle-Calédonie
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-night/60 sm:text-base">
               Parcourez les pros certifi�s par Kalico, comparez leur note, leur commune et leur sp�cialit�, puis
@@ -198,7 +198,7 @@ export default function ProsDirectoryClient() {
 
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Pros v�rifi�s</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Pros vérifiés</p>
             <p className="mt-2 text-2xl font-bold text-night">{formatNumber(pros.length)}</p>
           </div>
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
@@ -246,7 +246,7 @@ export default function ProsDirectoryClient() {
           </label>
 
           <label className="space-y-2">
-            <span className="text-sm font-semibold text-night">Cat�gorie</span>
+            <span className="text-sm font-semibold text-night">Catégorie</span>
             <select
               value={category}
               onChange={(event) => setCategory(event.target.value)}

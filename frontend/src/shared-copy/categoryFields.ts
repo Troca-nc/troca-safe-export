@@ -1,4 +1,4 @@
-// � COPIE MANUELLE depuis /shared/categoryFields.ts
+// � COPIE MANUELLE depuis /shared/categoryFields.ts
 // Ce fichier doit �tre copi� � nouveau si l'original est modifi�.
 // Ne pas �diter ce fichier s�par�ment de l'original sans reporter le changement des deux c�t�s.
 export interface CategoryFieldOption {

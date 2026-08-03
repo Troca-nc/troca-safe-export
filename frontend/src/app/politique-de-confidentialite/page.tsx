@@ -21,13 +21,13 @@ const rows: DataRowProps[] = [
   {
     label: 'Identit� et compte',
     examples: 'Email, pr�nom, nom, t�l�phone, avatar, mot de passe hach�, type de compte, r�le demo, compte particulier ou Pro',
-    purpose: 'Cr�ation de compte, authentification, s�curit�, r�cup�ration de session et assistance.',
+    purpose: 'Cr�ation de compte, authentification, sécurité, r�cup�ration de session et assistance.',
     basis: 'Contrat, int�r�t l�gitime, obligation l�gale',
     retention: 'Dur�e du compte + d�lais l�gaux applicables',
   },
   {
     label: 'Profil et activit� Pro',
-    examples: 'Cat�gorie Pro, entreprise, site web, horaires, commune, logo, banni�re, vitrine, catalogue, stocks, disponibilit�s, documents Pro',
+    examples: 'Catégorie Pro, entreprise, site web, horaires, commune, logo, banni�re, vitrine, catalogue, stocks, disponibilit�s, documents Pro',
     purpose: 'Afficher lespace professionnel, permettre la d�couverte des prestations et g�rer les outils Pro.',
     basis: 'Contrat',
     retention: 'Dur�e du compte Pro + suppression / archivage selon les obligations',
@@ -62,7 +62,7 @@ const rows: DataRowProps[] = [
   },
   {
     label: 'Pr�f�rences et parcours',
-    examples: 'tours_seen, mode d�mo, consentements cookies, pr�f�rences de notifications, �tat de session, stockage local',
+    examples: 'tours_seen, mode d�mo, consentements cookies, pr�f�rences de notifications, État de session, stockage local',
     purpose: 'M�moriser les visites guid�es, �viter les r�p�titions et conserver vos choix de confort dutilisation.',
     basis: 'Consentement, int�r�t l�gitime',
     retention: 'Jusquau retrait du consentement ou � la suppression du compte',
@@ -147,7 +147,7 @@ export default function PolitiqueConfidentialitePage() {
           <li>Envoi demails transactionnels : le service SMTP configur� par Kalico.</li>
         </ul>
 
-        <h2>5. Transferts hors Nouvelle-Cal�donie</h2>
+        <h2>5. Transferts hors Nouvelle-Calédonie</h2>
         <p>
           Certains prestataires techniques peuvent traiter des donn�es depuis l�tranger. Kalico limite ces transferts aux besoins strictement
           n�cessaires au service et sappuie sur les garanties contractuelles disponibles chez ces prestataires.
@@ -168,7 +168,7 @@ export default function PolitiqueConfidentialitePage() {
         <h2>8. Notifications, emails, SMS et push</h2>
         <p>
           Kalico envoie des notifications transactionnelles lorsque cela est n�cessaire au fonctionnement du service : nouveaux messages, r�ponses
-          � une annonce, devis re�us, appels doffres, fret, confirmation de paiement ou de r�servation, s�curit� du compte et rappels utiles.
+          � une annonce, devis re�us, appels doffres, fret, confirmation de paiement ou de r�servation, sécurité du compte et rappels utiles.
         </p>
         <p>
           Les alertes de recherche, les rapports de performance, les notifications promotionnelles ou publicitaires et certains rappels Pro sont
@@ -184,7 +184,7 @@ export default function PolitiqueConfidentialitePage() {
         <h2>10. Dur�e de conservation</h2>
         <p>
           Les dur�es de conservation varient selon la nature des donn�es et les obligations l�gales applicables. Lorsquun compte est supprim�,
-          certaines donn�es peuvent �tre anonymis�es ou conserv�es temporairement pour des raisons l�gales, comptables ou de s�curit�.
+          certaines donn�es peuvent �tre anonymis�es ou conserv�es temporairement pour des raisons l�gales, comptables ou de sécurité.
         </p>
       </LegalLayout>
     </>

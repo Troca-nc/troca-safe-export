@@ -243,10 +243,10 @@ export default function ProDashboardListingsPage() {
                         ) : null}
                       </div>
                       <p className="mt-1 text-sm text-night/60">
-                        {listing.category_name || 'Cat�gorie'} � {formatPrice(listing.price ?? listing.prix)}
+                        {listing.category_name || 'Catégorie'} � {formatPrice(listing.price ?? listing.prix)}
                       </p>
                       <p className="mt-1 text-xs text-night/45">
-                        {listing.commune_name || 'Nouvelle-Cal�donie'} � publi�e le {formatDate(listing.created_at || listing.published_at)}
+                        {listing.commune_name || 'Nouvelle-Calédonie'} � publi�e le {formatDate(listing.created_at || listing.published_at)}
                       </p>
                       <p className="mt-2 text-sm text-night/60">
                         �x� {Number(listing.total_views ?? 0)} � �x� {Number(listing.total_contacts ?? 0)} � {Number(listing.conversion_rate ?? 0).toFixed(1)}%

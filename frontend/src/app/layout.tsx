@@ -17,12 +17,12 @@ import { DEFAULT_OG_IMAGE, SITE_LOCALE, SITE_NAME, SITE_TWITTER, SITE_URL } from
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'Kalico - Petites annonces Nouvelle-Cal�donie',
-  description: 'La premi�re plateforme de petites annonces d�di�e � la Nouvelle-Cal�donie. Achetez, vendez, louez en toute confiance.',
+  title: 'Kalico - Petites annonces Nouvelle-Calédonie',
+  description: 'La premi�re plateforme de petites annonces d�di�e � la Nouvelle-Calédonie. Achetez, vendez, louez en toute confiance.',
   keywords: 'annonces, nouvelle-cal�donie, noumea, vente, achat, immobilier, v�hicules',
   openGraph: {
     title: SITE_NAME,
-    description: 'Petites annonces Nouvelle-Cal�donie',
+    description: 'Petites annonces Nouvelle-Calédonie',
     url: SITE_URL,
     locale: SITE_LOCALE,
     type: 'website',
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: SITE_NAME,
-    description: 'Petites annonces Nouvelle-Cal�donie',
+    description: 'Petites annonces Nouvelle-Calédonie',
     images: [DEFAULT_OG_IMAGE],
     site: SITE_TWITTER,
   },
@@ -57,7 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className="bg-[var(--color-bg-page)] text-[var(--color-text-primary)] font-body antialiased overflow-x-clip pt-16 md:overflow-x-visible">
+      <body className="bg-[var(--color-bg-page)] text-[var(--color-text-primary)] font-body antialiased overflow-x-clip pt-20 md:overflow-x-visible">
         <ThemeProvider>
           <ReactQueryProvider>
             <JsonLd data={buildOrganizationSchema()} />

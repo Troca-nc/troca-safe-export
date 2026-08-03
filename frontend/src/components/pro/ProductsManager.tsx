@@ -565,7 +565,7 @@ export default function ProductsManager() {
       }
       await loadCatalogCategories()
       resetCatalogCategoryForm()
-      setSuccess({ title: catalogCategoryEditingId ? 'Cat�gorie catalogue mise � jour.' : 'Cat�gorie catalogue cr��e.' })
+      setSuccess({ title: catalogCategoryEditingId ? 'Catégorie catalogue mise � jour.' : 'Catégorie catalogue cr��e.' })
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Impossible denregistrer cette cat�gorie catalogue.')
     } finally {
@@ -582,7 +582,7 @@ export default function ProductsManager() {
       if (catalogCategoryEditingId === categoryId) {
         resetCatalogCategoryForm()
       }
-      setSuccess({ title: 'Cat�gorie catalogue supprim�e.' })
+      setSuccess({ title: 'Catégorie catalogue supprim�e.' })
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Impossible de supprimer cette cat�gorie catalogue.')
     } finally {
@@ -680,7 +680,7 @@ export default function ProductsManager() {
           <div className="mt-5 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)]/40 p-4">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Cat�gories du catalogue</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Catégories du catalogue</p>
                 <h3 className="mt-1 font-semibold text-night">Organisez vos produits par famille</h3>
               </div>
               {catalogCategoryEditingId ? (
@@ -861,7 +861,7 @@ export default function ProductsManager() {
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-night">Cat�gorie *</span>
+              <span className="text-sm font-semibold text-night">Catégorie *</span>
               <select
                 value={form.category_id}
                 onChange={(event) => setForm((current) => ({ ...current, category_id: event.target.value }))}
@@ -878,7 +878,7 @@ export default function ProductsManager() {
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-night">Cat�gorie catalogue *</span>
+              <span className="text-sm font-semibold text-night">Catégorie catalogue *</span>
               <select
                 value={form.catalog_category_id}
                 onChange={(event) => setForm((current) => ({ ...current, catalog_category_id: event.target.value }))}
@@ -1237,7 +1237,7 @@ export default function ProductsManager() {
                         ) : null}
                       </div>
                       <p className="mt-1 text-sm text-night/60">
-                        {product.category_name || 'Cat�gorie'} � {product.catalog_category_name || 'Catalogue'} � {product.commune_name || 'Commune'} � {formatProductPrice(product)}
+                        {product.category_name || 'Catégorie'} � {product.catalog_category_name || 'Catalogue'} � {product.commune_name || 'Commune'} � {formatProductPrice(product)}
                       </p>
                       <p className="mt-1 text-sm text-night/60">
                         {formatStockQuantity(product.stock_quantity)}

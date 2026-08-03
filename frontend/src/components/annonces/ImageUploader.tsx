@@ -275,7 +275,7 @@ export default function ImageUploader({ annonce_id, initial = [], onChange, clas
           </div>
           <div className="text-center">
             <p className="font-medium text-night/70 text-sm">
-              {dragOver ? 'D�poser les photos ici' : 'Glissez vos photos ou cliquez'}
+              {dragOver ? 'Déposer les photos ici' : 'Glissez vos photos ou cliquez'}
             </p>
             <p className="text-xs text-night/40 mt-1">
               JPEG, PNG, WebP, HEIC � Max {UPLOAD_CONFIG.max_size_mb}Mo � {UPLOAD_CONFIG.max_files} photos max

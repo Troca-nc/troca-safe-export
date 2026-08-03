@@ -217,7 +217,7 @@ export default function SellerStatsDashboard() {
           <p className="text-sm font-medium text-amber-800 mb-2">
             Passez Pro pour acc�der � toutes vos statistiques
           </p>
-          <a href="/pro" className="text-xs text-amber-700 underline">D�couvrir les offres Pro �</a>
+          <a href="/pro" className="text-xs text-amber-700 underline">Découvrir les offres Pro �</a>
         </div>
       )}
     </div>

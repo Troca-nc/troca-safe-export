@@ -161,7 +161,7 @@ function CampaignForm({
     description: '',
     image_url: '',
     link_url: '',
-    cta_text: 'D�couvrir',
+    cta_text: 'Découvrir',
     duration_days: String(durationOptions[0]?.value || 7),
     pricing_mode: 'one_shot',
     pricing_plan: 'essential',
@@ -209,7 +209,7 @@ function CampaignForm({
         description: '',
         image_url: '',
         link_url: '',
-        cta_text: 'D�couvrir',
+        cta_text: 'Découvrir',
       }))
       setStatus('success')
       setFeedback('Campagne cr��e avec succ�s.')
@@ -250,7 +250,7 @@ function CampaignForm({
             value={form.cta_text}
             onChange={(event) => setForm((current) => ({ ...current, cta_text: event.target.value }))}
             className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-4 py-3 text-sm"
-            placeholder="D�couvrir"
+            placeholder="Découvrir"
           />
         </label>
 
@@ -793,7 +793,7 @@ export default function ProDashboardPublicitePage() {
                 <tr>
                   <th className="px-4 py-3 text-left font-semibold">Type</th>
                   <th className="px-4 py-3 text-left font-semibold">Titre</th>
-                  <th className="px-4 py-3 text-left font-semibold">Cat�gorie</th>
+                  <th className="px-4 py-3 text-left font-semibold">Catégorie</th>
                   <th className="px-4 py-3 text-left font-semibold">D�but</th>
                   <th className="px-4 py-3 text-left font-semibold">Fin</th>
                   <th className="px-4 py-3 text-left font-semibold">Prix</th>

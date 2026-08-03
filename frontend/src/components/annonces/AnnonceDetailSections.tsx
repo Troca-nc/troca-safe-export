@@ -188,7 +188,7 @@ export function ListingHeroCard({
           </Link>
           <span className="inline-flex items-center gap-1 rounded-full bg-night/5 px-3 py-1">
             <MapPin size={12} />
-            {listing.commune_name ?? 'Nouvelle-Cal�donie'}
+            {listing.commune_name ?? 'Nouvelle-Calédonie'}
           </span>
           {trustScore != null && (
             <span className="inline-flex items-center gap-1 rounded-full bg-jungle/10 px-3 py-1 text-jungle">
@@ -294,7 +294,7 @@ export function SellerSidebar({
             {(listing.user.seller_commune_name || listing.user.seller_province_name) && (
               <p className="mt-1 flex items-center gap-1 text-xs text-night/50">
                 <MapPin size={12} />
-                {listing.user.seller_commune_name ?? 'Nouvelle-Cal�donie'}
+                {listing.user.seller_commune_name ?? 'Nouvelle-Calédonie'}
                 {listing.user.seller_province_name && (
                   <span className="text-night/35">� {listing.user.seller_province_name}</span>
                 )}
@@ -601,7 +601,7 @@ export function SecurityTipsCard() {
     <div className="bg-[var(--color-warning)]/10 rounded-3xl border border-[var(--color-warning)]/30 p-5">
       <div className="flex items-center gap-2 mb-2 text-[var(--color-warning)]">
         <AlertTriangle size={16} />
-        <h2 className="font-semibold">Conseils de s�curit�</h2>
+        <h2 className="font-semibold">Conseils de sécurité</h2>
       </div>
       <ul className="space-y-2 text-sm text-[var(--color-warning)] leading-6">
         <li>- N'envoyez jamais d'argent avant d'avoir v�rifi� l'annonce et le vendeur.</li>

@@ -34,7 +34,7 @@ const PROFILE_CONFIG: Record<
     title: 'Particulier',
     subtitle: 'D�pose une annonce simple et rapide',
     accent: 'from-coral/20 to-[var(--color-surface)]',
-    badge: 'D�poser une annonce',
+    badge: 'Déposer une annonce',
     depositLabel: 'Annonce classique',
     accountLabel: 'Mon compte particulier',
     accountHint: 'Publier, suivre les messages et garder ses favoris.',
@@ -63,7 +63,7 @@ const ACCOUNT_ITEMS = [
   { icon: Package, label: 'Mes annonces', href: '/profil?tab=listings' },
   { icon: Heart, label: 'Favoris', href: '/favoris' },
   { icon: MessageCircle, label: 'Messages', href: '/messages' },
-  { icon: Settings, label: 'Param�tres', href: '/parametres' },
+  { icon: Settings, label: 'Paramètres', href: '/parametres' },
 ]
 
 const PROFILE_LABELS: Record<Exclude<DemoProfileKey, 'visitor'>, string> = {
@@ -238,7 +238,7 @@ export default function ProfileDemoPreview({
                   </p>
                 </div>
                 <Link href="/annonces/nouvelle" className="btn-primary px-4 py-2 text-sm">
-                  D�poser une annonce
+                  Déposer une annonce
                 </Link>
               </div>
             </div>
@@ -253,7 +253,7 @@ export default function ProfileDemoPreview({
                   : { title: 'Message � traiter', meta: 'Les �changes safficheront ici.' },
                 activeProfile === 'bon_plan'
                   ? { title: 'Statistiques � suivre', meta: 'Suivi de visibilit� et clics.' }
-                  : { title: 'Param�tres � compl�ter', meta: 'Retrouvez vos pr�f�rences ici.' },
+                  : { title: 'Paramètres � compl�ter', meta: 'Retrouvez vos pr�f�rences ici.' },
               ].map((item) => (
                 <div key={item.title} className="rounded-2xl border border-night/10 bg-white dark:bg-[var(--color-surface)] p-4 shadow-sm">
                   <p className="text-sm font-semibold text-night">{item.title}</p>

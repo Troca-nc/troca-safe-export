@@ -86,7 +86,7 @@ export default function TrocProposalForm({ listingId, listingTitle }: Props) {
           onChange={(event) => setOfferedDescription(event.target.value)}
           rows={4}
           className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10"
-          placeholder="D�crivez lobjet, l�tat, la marque, les accessoires inclus..."
+          placeholder="D�crivez lobjet, lÉtat, la marque, les accessoires inclus..."
           maxLength={2000}
           required
         />

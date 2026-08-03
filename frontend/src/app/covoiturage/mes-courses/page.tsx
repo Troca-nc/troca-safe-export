@@ -125,7 +125,7 @@ export default function MesCoursesPage() {
             <div className="flex items-end justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-emeraude">En tant que passager</p>
-                <h2 className="mt-1 font-display text-2xl font-bold text-night">Mes demandes / r�servations</h2>
+                <h2 className="mt-1 font-display text-2xl font-bold text-night">Mes demandes / réservations</h2>
               </div>
               <span className="rounded-full bg-nc-lagonLight px-3 py-1 text-xs font-semibold text-nc-lagon">{passengerRides.length}</span>
             </div>

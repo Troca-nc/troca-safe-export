@@ -555,7 +555,7 @@ export default function ProDashboardRdvPage() {
                   </div>
 
                   <p className="mt-3 text-sm text-night/65">
-                    {booking.commune || booking.pro.pro_commune || 'Nouvelle-Cal�donie'}
+                    {booking.commune || booking.pro.pro_commune || 'Nouvelle-Calédonie'}
                   </p>
 
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -1066,7 +1066,7 @@ export default function ProDashboardRdvPage() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Demandes re�ues</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Traitez les r�servations entrantes</h2>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Traitez les réservations entrantes</h2>
             <p className="mt-2 text-sm text-night/60">
               Confirmez, refusez ou suivez les demandes envoy�es depuis votre vitrine.
             </p>

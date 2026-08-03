@@ -30,7 +30,7 @@ const FAQ_GROUPS: FaqGroup[] = [
       {
         question: 'Comment supprimer mon compte ?',
         answer:
-          'Rendez-vous dans Param�tres � Mon compte � Supprimer mon compte. Cette action est irr�versible et supprime toutes vos annonces et donn�es personnelles.',
+          'Rendez-vous dans Paramètres � Mon compte � Supprimer mon compte. Cette action est irr�versible et supprime toutes vos annonces et donn�es personnelles.',
       },
     ],
   },
@@ -80,7 +80,7 @@ const FAQ_GROUPS: FaqGroup[] = [
     ],
   },
   {
-    title: '=� S�curit� des transactions',
+    title: '=� S�curit� des transactions',
     items: [
       {
         question: 'Comment �viter les arnaques ?',
@@ -115,7 +115,7 @@ const FAQ_GROUPS: FaqGroup[] = [
     ],
   },
   {
-    title: '<� Bons Plans',
+    title: '🎭 Bons Plans',
     items: [
       {
         question: 'Qui peut publier un bon plan ou un �v�nement ?',

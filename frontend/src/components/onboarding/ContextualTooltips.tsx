@@ -67,7 +67,7 @@ function findDepositTarget() {
   const candidates = Array.from(document.querySelectorAll<HTMLElement>('button, a'))
   return candidates.find((element) => {
     const text = getTextMatch(element)
-    return isVisibleElement(element) && (text === 'D�poser' || text.includes('D�poser'))
+    return isVisibleElement(element) && (text === 'Déposer' || text.includes('Déposer'))
   }) ?? null
 }
 
@@ -122,7 +122,7 @@ export default function ContextualTooltips() {
         }
 
         const text = getTextMatch(element)
-        return (text === 'D�poser' || text.includes('D�poser')) && (target === element || element.contains(target))
+        return (text === 'Déposer' || text.includes('Déposer')) && (target === element || element.contains(target))
       })
 
       if (!nextKey) return

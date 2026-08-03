@@ -30,13 +30,13 @@ export default function AuthMapPanel() {
               <Image src="/brand/kalico1.svg" alt="Kalico" fill sizes="176px" className="object-cover" priority />
             </span>
             <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.34em] text-white/55">
-              Nouvelle-Cal�donie
+              Nouvelle-Calédonie
             </p>
             <h2 className="mt-4 max-w-2xl text-3xl font-semibold leading-tight text-white md:text-[2.5rem]">
               Tout Kalico, en une seule inscription.
             </h2>
             <p className="mt-4 max-w-xl text-sm leading-6 text-white/72 md:text-base">
-              La seule plateforme locale qui couvre les annonces, le covoiturage entre les communes, les devis Pro et lenvoi & livraison - en XPF, pour la Nouvelle-Cal�donie.
+              La seule plateforme locale qui couvre les annonces, le covoiturage entre les communes, les devis Pro et lenvoi & livraison - en XPF, pour la Nouvelle-Calédonie.
             </p>
           </div>
 

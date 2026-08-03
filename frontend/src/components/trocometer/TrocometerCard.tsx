@@ -55,7 +55,7 @@ export default function TrocometerCard({ listing, delayMs = 0, fadeOut = false, 
   }, [delayMs, fadeOut, listing.id])
 
   const price = getListingPrice(listing)
-  const locationLabel = listing.commune_name || listing.location_name || 'Nouvelle-Cal�donie'
+  const locationLabel = listing.commune_name || listing.location_name || 'Nouvelle-Calédonie'
   const image = listing.cover_image ?? listing.photos?.[0] ?? null
 
   return (

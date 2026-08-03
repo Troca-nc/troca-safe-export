@@ -233,7 +233,7 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
               <p className="mt-1 text-sm text-night/60">{data.description}</p>
             </div>
             <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Cat�gorie</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Catégorie</p>
               <p className="mt-2 text-sm font-semibold text-night">{data.category_name}</p>
               <p className="mt-1 text-sm text-night/60">{data.mode === 'open' ? 'Ouvert � tous les pros' : 'Ciblage de pros sp�cifiques'}</p>
             </div>

@@ -18,7 +18,7 @@ const STORAGE_PREFIX = 'kalico_checklist_'
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
 
 const ITEMS: Array<{ key: ChecklistKey; label: string; href: string }> = [
-  { key: 'annonce', label: 'D�poser ma premi�re annonce', href: '/annonces/nouvelle' },
+  { key: 'annonce', label: 'Déposer ma premi�re annonce', href: '/annonces/nouvelle' },
   { key: 'profil', label: 'Compl�ter mon profil', href: '/profil' },
   { key: 'alerte', label: 'Activer mes alertes', href: '/alertes' },
   { key: 'explore', label: 'Explorer les fonctionnalit�s Pro', href: '/pro' },

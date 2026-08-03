@@ -116,7 +116,7 @@ export default function ScanPage() {
               <div className="flex items-center gap-3">
                 {isScanning ? <Camera className="h-5 w-5 text-[#0A7EA4]" /> : <Loader2 className="h-5 w-5 animate-spin text-[#0A7EA4]" />}
                 <div>
-                  <p className="text-sm font-semibold text-night">�tat</p>
+                  <p className="text-sm font-semibold text-night">État</p>
                   <p className="text-sm text-night/60">{status}</p>
                 </div>
               </div>

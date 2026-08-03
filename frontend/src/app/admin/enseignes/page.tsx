@@ -148,7 +148,7 @@ export default function AdminBusinessesPage() {
                         </span>
                       </div>
                       <p className="text-xs text-night/50">
-                        {business.category || 'Cat�gorie inconnue'} � {business.bon_plan_count ?? 0} bons plans � {business.review_count ?? 0} avis
+                        {business.category || 'Catégorie inconnue'} � {business.bon_plan_count ?? 0} bons plans � {business.review_count ?? 0} avis
                       </p>
                     </div>
                   </div>

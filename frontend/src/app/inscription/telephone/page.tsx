@@ -74,7 +74,7 @@ function SocialPhoneCompletionContent() {
                 Ajoutez votre num�ro de t�l�phone
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-night/60">
-                Le t�l�phone est utilis� pour la r�cup�ration de mot de passe par SMS et pour renforcer la s�curit� de votre compte.
+                Le t�l�phone est utilis� pour la r�cup�ration de mot de passe par SMS et pour renforcer la sécurité de votre compte.
               </p>
             </div>
 
@@ -111,7 +111,7 @@ function SocialPhoneCompletionContent() {
               Pourquoi ce num�ro ?
             </p>
             <h2 className="mt-3 text-2xl font-semibold leading-tight">
-              R�cup�ration plus simple, s�curit� renforc�e
+              R�cup�ration plus simple, sécurité renforc�e
             </h2>
             <p className="mt-3 text-sm leading-6 text-white/70">
               En cas d'oubli de mot de passe, vous pourrez recevoir un SMS de r�initialisation. Si le t�l�phone n'est pas v�rifi�, la r�cup�ration bascule automatiquement par email.

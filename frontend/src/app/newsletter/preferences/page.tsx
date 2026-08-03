@@ -10,8 +10,8 @@ import { newsletterApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 
 const COMMUNES = [
-  'Noum�a',
-  'Dumb�a',
+  'Nouméa',
+  'Dumbéa',
   'Mont-Dore',
   'Pa�ta',
   'Boulouparis',

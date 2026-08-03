@@ -113,7 +113,7 @@ const METIER_CARDS = [
     details: [
       {
         title: '�v�nements',
-        description: 'Publiez votre �v�nement dans l\'agenda Kalico visible par toute la Nouvelle-Cal�donie.',
+        description: 'Publiez votre �v�nement dans l\'agenda Kalico visible par toute la Nouvelle-Calédonie.',
       },
       {
         title: 'Billetterie avec QR code',
@@ -205,7 +205,7 @@ const WHY_PRO_ITEMS = [
   {
     icon: FileText,
     title: 'Moins de va-et-vient',
-    description: 'Devis, r�servations et messages au m�me endroit.',
+    description: 'Devis, réservations et messages au m�me endroit.',
   },
   {
     icon: Shield,
@@ -337,7 +337,7 @@ export default function AbonnementPage() {
           <h1 className="font-display text-4xl font-bold leading-tight md:text-5xl">
             La plateforme des professionnels
             <br />
-            en Nouvelle-Cal�donie
+            en Nouvelle-Calédonie
           </h1>
           <p className="mx-auto mt-4 max-w-3xl text-sm leading-6 text-white/70 md:text-base">
             Gratuit pour commencer sans friction. Pro pour les professionnels qui veulent plus de

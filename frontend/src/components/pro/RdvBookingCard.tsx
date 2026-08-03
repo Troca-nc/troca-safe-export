@@ -174,7 +174,7 @@ export default function RdvBookingCard({
         </p>
         <p className="flex items-center gap-2">
           <MapPin className="h-4 w-4 text-[#0A7EA4]" />
-          {booking.commune || booking.pro.pro_commune || 'Nouvelle-Cal�donie'}
+          {booking.commune || booking.pro.pro_commune || 'Nouvelle-Calédonie'}
         </p>
         <p className="flex items-center gap-2">
           <UserRound className="h-4 w-4 text-[#0A7EA4]" />

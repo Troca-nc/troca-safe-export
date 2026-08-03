@@ -37,7 +37,7 @@ export interface PhoneVerificationState {
   success?:   string
 }
 
-// Pr�fixes t�l�phoniques Nouvelle-Cal�donie
+// Pr�fixes t�l�phoniques Nouvelle-Calédonie
 export const NC_PHONE_PREFIXES = [
   { label: 'NC +687', value: '+687' },
   { label: 'FR +33',  value: '+33' },

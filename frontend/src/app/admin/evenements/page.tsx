@@ -110,7 +110,7 @@ function CinemaAdminPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-night">{event.title}</p>
-                      <p className="mt-1 text-xs text-night/55">{event.venue_name || 'Cin�ma'} � {event.commune_name || 'Nouvelle-Cal�donie'}</p>
+                      <p className="mt-1 text-xs text-night/55">{event.venue_name || 'Cin�ma'} � {event.commune_name || 'Nouvelle-Calédonie'}</p>
                       <p className="mt-2 text-xs text-night/60">
                         {event.event_date || 'Date ?'} {event.event_time ? `� ${event.event_time}` : ''} {event.version ? `� ${event.version}` : ''} {event.is_3d ? '� 3D' : ''}
                       </p>

@@ -63,7 +63,7 @@ const steps: OnboardingStep[] = [
     title: 'Activez vos boosts',
     description: 'Donnez plus de visibilit� � vos annonces les plus importantes.',
     href: '/pro/dashboard/boosts',
-    cta: 'D�couvrir les boosts',
+    cta: 'Découvrir les boosts',
     icon: TrendingUp,
   },
   {

@@ -198,7 +198,7 @@ export default function DocumentUploader({
             className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-            D�poser le document
+            Déposer le document
           </button>
         </div>
 
@@ -206,7 +206,7 @@ export default function DocumentUploader({
           <div className="flex items-center justify-between gap-3">
             <div>
               <h3 className="text-base font-semibold text-night">Historique des justificatifs</h3>
-              <p className="text-sm text-night/55">Suivez l�tat de chaque d�p�t.</p>
+              <p className="text-sm text-night/55">Suivez lÉtat de chaque d�p�t.</p>
             </div>
             <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/40">{documents.length} document{documents.length > 1 ? 's' : ''}</span>
           </div>

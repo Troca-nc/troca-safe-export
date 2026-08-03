@@ -619,7 +619,7 @@ export default function NotificationPreferencesPage() {
                 <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <label className="block text-sm font-semibold text-night">Cat�gories favorites</label>
+                      <label className="block text-sm font-semibold text-night">Catégories favorites</label>
                       <p className="mt-1 text-xs leading-relaxed text-night/55">
                         Cochez une ou plusieurs familles pour filtrer les promotions utiles.
                       </p>

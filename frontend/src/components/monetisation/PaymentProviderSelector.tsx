@@ -27,7 +27,7 @@ const OPTIONS: Array<{
   {
     value: 'payplug',
     title: 'Carte OPT-NC / r�seau local',
-    subtitle: 'Cartes locales en Nouvelle-Cal�donie',
+    subtitle: 'Cartes locales en Nouvelle-Calédonie',
     note: 'Id�al pour les paiements locaux via PayPlug.',
     icon: Landmark,
   },

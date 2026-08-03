@@ -65,6 +65,73 @@ const cleanupPairs = [
   [ch(0x00e2, 0x20ac, 0x2013), '-'],
   [ch(0x00e2, 0x20ac, 0x2014), '-'],
   [ch(0x00c2, 0x00a0), ' '],
+  ['V�hicules', 'Véhicules'],
+  ['Communes, tribus, �les', 'Communes, tribus, îles'],
+  ['Pros v�rifi�s', 'Pros vérifiés'],
+  ['Les premi�res annonces arrivent bient�t.', 'Les premières annonces arrivent bientôt.'],
+  ['Les meilleures annonces appara�tront ici', 'Les meilleures annonces apparaîtront ici'],
+  ['Boostez votre annonce pour appara�tre en t�te de page.', 'Boostez votre annonce pour apparaître en tête de page.'],
+  ['D�poser une annonce', 'Déposer une annonce'],
+  ['G�rer mes alertes', 'Gérer mes alertes'],
+  ['Cat�gorie', 'Catégorie'],
+  ['Cat�gories', 'Catégories'],
+  ['Sponsoris�', 'Sponsorisé'],
+  ['D�couvrir', 'Découvrir'],
+  ['G�rer les campagnes', 'Gérer les campagnes'],
+  ['Bons plans & ï¿½vï¿½nements', 'Bons plans & Événements'],
+  ['mobilitï¿½', 'mobilité'],
+  ['trajets ï¿½ partager', 'trajets à partager'],
+  ['ï¿½0tat', 'État'],
+  ['Noumï¿½a', 'Nouméa'],
+  ['Dumbï¿½a', 'Dumbéa'],
+  ['Canapï¿½', 'Canapé'],
+  ['mots-clï¿½s', 'mots-clés'],
+  ['modï¿½le', 'modèle'],
+  ['Derniï¿½re', 'Dernière'],
+  ['rï¿½servations', 'réservations'],
+  ['sï¿½curitï¿½', 'sécurité'],
+  ['ï¿½changes', 'échanges'],
+  ['V\uFFFDhicules', 'Véhicules'],
+  ['Nouvelle-Cal�donie', 'Nouvelle-Calédonie'],
+  ['Annonces, services et pros locaux partout en Nouvelle-Cal�donie. De Nouméa aux Loyaut�, de Koné à l&apos;île des Pins.', 'Annonces, services et pros locaux partout en Nouvelle-Calédonie. De Nouméa aux Loyauté, de Koné à l&apos;île des Pins.'],
+  ['Les utilisateurs peuvent enregistrer des mots-cl�s pour suivre ce qui compte vraiment: un mod�le pr�cis, une commune, une gamme de prix ou une cat�gorie.', 'Les utilisateurs peuvent enregistrer des mots-clés pour suivre ce qui compte vraiment: un modèle précis, une commune, une gamme de prix ou une catégorie.'],
+  ['Promotions, culture et mobilit� locale', 'Promotions, culture et mobilité locale'],
+  ['Le prochain �v�nement NC m�rite d&apos;�tre ici.', 'Le prochain événement NC mérite d\'être ici.'],
+  ['Concerts, march�s, conf�rences - tout y est.', 'Concerts, marchés, conférences - tout y est.'],
+  ['Cr�er un �v�nement', 'Créer un événement'],
+  ['Mobilit�', 'Mobilité'],
+  ['pensés pour la recherche rapide, les réservations simples et la sécurité des �changes.', 'pensés pour la recherche rapide, les réservations simples et la sécurité des échanges.'],
+  ['D�poser', 'Déposer'],
+  ['Param�tres', 'Paramètres'],
+  ['D�connexion', 'Déconnexion'],
+  ['Communes, tribus, \uFFFDles', 'Communes, tribus, îles'],
+  ['Pros v\uFFFDrifi\uFFFDs', 'Pros vérifiés'],
+  ['Les premi\uFFFDres annonces arrivent bient\uFFFDt.', 'Les premières annonces arrivent bientôt.'],
+  ['Les meilleures annonces appara\uFFFDtront ici', 'Les meilleures annonces apparaîtront ici'],
+  ['Boostez votre annonce pour appara\uFFFDtre en t\uFFFDte de page.', 'Boostez votre annonce pour apparaître en tête de page.'],
+  ['D\uFFFDposer une annonce', 'Déposer une annonce'],
+  ['Gardez vos recherches en m\uFFFDmoire', 'Gardez vos recherches en mémoire'],
+  ['Publi\uFFFD par', 'Publié par'],
+  ['Derni\uFFFDre place', 'Dernière place'],
+  ['V\uFFFDhicule d\uFFFDtaill\uFFFD', 'Véhicule détaillé'],
+  ['Fiabilit\uFFFD', 'Fiabilité'],
+  ['Trajet v\uFFFDrifi\uFFFD', 'Trajet vérifié'],
+  ['Sponsoris\uFFFD', 'Sponsorisé'],
+  ['Une visibilit\uFFFD locale payante, affich\uFFFDe au bon moment sur Kalico.', 'Une visibilité locale payante, affichée au bon moment sur Kalico.'],
+  ['D\uFFFDcouvrir', 'Découvrir'],
+  ['G\uFFFDrer les campagnes', 'Gérer les campagnes'],
+  ['Bons plans & \uFFFDv\uFFFDnements', 'Bons plans & Événements'],
+  ['trajets \uFFFD partager', 'trajets à partager'],
+  ['Ajouter la v\uFFFDtre', 'Ajouter la vôtre'],
+  ['pens\uFFFDs', 'pensés'],
+  ['r\uFFFDservations', 'réservations'],
+  ['s\uFFFDcurit\uFFFD', 'sécurité'],
+  ['\uFFFDtat', 'État'],
+  ['Noum\uFFFDa', 'Nouméa'],
+  ['Dumb\uFFFDa', 'Dumbéa'],
+  ['Cat\uFFFDgorie', 'Catégorie'],
+  ['Cat\uFFFDgories', 'Catégories'],
+  ['Sous-cat\uFFFDgorie', 'Sous-catégorie'],
 ]
 
 const directPairs = [
@@ -107,6 +174,15 @@ function fixText(input) {
   let output = input
   let total = 0
 
+  if (output.startsWith('\uFEFF')) {
+    output = output.slice(1)
+    total += 1
+  }
+  if (output.startsWith('\uFFFD')) {
+    output = output.slice(1)
+    total += 1
+  }
+
   const normalized = normalizeLatin1(output)
   if (normalized.count > 0) {
     output = normalized.text
@@ -124,6 +200,13 @@ function fixText(input) {
   const emoji = applyReplacements(output, emojiPairs)
   output = emoji.text
   total += emoji.count
+
+  const tagReplacement = applyReplacements(output, [
+    ['<\uFFFD', '🎭'],
+    ['\u000f', ''],
+  ])
+  output = tagReplacement.text
+  total += tagReplacement.count
 
   return { output, total }
 }

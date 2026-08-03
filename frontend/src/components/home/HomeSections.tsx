@@ -49,11 +49,11 @@ type HomeListing = {
 }
 
 const HERO_CATEGORY_PILLS = [
-  { slug: 'vehicules', label: '�xa� V�hicules' },
-  { slug: 'immobilier', label: '�x�� Immobilier' },
-  { slug: 'services', label: '�x:� Services' },
-  { slug: 'electronique-multimedia', label: '�x�S� High-tech' },
-  { slug: 'maison-jardin', label: '�x�� Jardin' },
+  { slug: 'vehicules', label: 'Véhicules' },
+  { slug: 'immobilier', label: 'Immobilier' },
+  { slug: 'services', label: 'Services' },
+  { slug: 'electronique-multimedia', label: 'High-tech' },
+  { slug: 'maison-jardin', label: 'Jardin' },
 ] as const
 
 
@@ -66,11 +66,11 @@ const HERO_FEATURES = [
   {
     icon: MapPin,
     title: 'Toute la NC couverte',
-    subtitle: 'Communes, tribus, �les',
+    subtitle: 'Communes, tribus, îles',
   },
   {
     icon: ShieldCheck,
-    title: 'Pros v�rifi�s',
+    title: 'Pros vérifiés',
     subtitle: 'Artisans et services de confiance',
   },
 ] as const
@@ -205,10 +205,10 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
             </span>
 
             <h1 className="mt-4 max-w-2xl font-display text-4xl font-bold leading-tight text-[#17313d] md:text-6xl dark:text-white">
-              Ce qui se vend en NC, c&apos;est ici.
+              Les premières annonces arrivent. La vôtre aussi ?
             </h1>
 
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#39505b] md:text-lg dark:text-white/80">Annonces, services et pros locaux partout en Nouvelle-Calédonie. De Nouméa aux Loyauté, de Koné à l&apos;île des Pins.</p>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#39505b] md:text-lg dark:text-white/80">Annonces, services et pros locaux partout en Nouvelle-Calédonie. De Nouméa aux Loyaut�, de Kon� � l&apos;�le des Pins.</p>
 
             <form onSubmit={onSubmit} className="mt-6 flex w-full max-w-2xl flex-col gap-3 sm:flex-row">
               <div className="relative min-w-0 flex-1">
@@ -248,7 +248,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
               cards.map((listing) => <HeroListingCard key={String(listing.id)} listing={listing} />)
             ) : (
               <div className="flex min-h-[360px] items-center justify-center rounded-[1.75rem] border border-dashed border-[#d8c8b5] bg-white/55 px-6 py-10 text-center text-sm text-[#39505b] dark:border-white/10 dark:bg-white/5 dark:text-white/65">
-                <p>Les premi�res annonces arrivent bient�t.</p>
+                <p>Les premières annonces arrivent bientôt.</p>
               </div>
             )}
           </div>
@@ -343,7 +343,7 @@ export function FeaturedListingsSection({
       <div className="mb-5 flex items-end justify-between gap-4">
         <div className="section-lagon">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Annonces en vedette</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les annonces les plus visibles en ce moment</h2>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les cat�gories que les gens cherchent vraiment</h2>
         </div>
         <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
           Tout voir <ArrowRight className="h-4 w-4" />
@@ -361,12 +361,12 @@ export function FeaturedListingsSection({
           </div>
         ) : (
           <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] py-14 text-center text-night/45">
-            <p className="text-sm font-semibold text-night">Les meilleures annonces appara�tront ici</p>
+            <p className="text-sm font-semibold text-night">Les meilleures annonces apparaîtront ici</p>
             <p className="mt-2 text-sm text-night/65">
-              Boostez votre annonce pour appara�tre en t�te de page.
+              Boostez votre annonce pour apparaître en tête de page.
             </p>
             <Link href="/annonces/nouvelle" className="btn-primary mt-4 inline-block">
-              D�poser une annonce
+              Déposer une annonce
             </Link>
           </div>
         )}
@@ -382,13 +382,13 @@ export function SearchAlertsSection() {
         <div className="min-w-0">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-lagon">
             <Sparkles className="h-3.5 w-3.5" />
-            Coups de c�&�Sur
+            Coups de cSur
           </div>
           <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
-            Gardez vos recherches en m�moire et recevez une alerte quand une offre correspond.
+            Gardez vos recherches en mémoire et recevez une alerte quand une offre correspond.
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
-            Les utilisateurs peuvent enregistrer des mots-cl�s pour suivre ce qui compte vraiment: un mod�le pr�cis, une commune, une gamme de prix ou une cat�gorie.
+            Les utilisateurs peuvent enregistrer des mots-clés pour suivre ce qui compte vraiment: un modèle précis, une commune, une gamme de prix ou une catégorie.
           </p>
           <div className="mt-5 flex flex-wrap gap-2 pb-1 sm:flex-nowrap sm:overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {SEARCH_ALERTS.map((term) => (
@@ -411,15 +411,15 @@ export function SearchAlertsSection() {
             </div>
             <div className="rounded-2xl bg-white/10 p-4">
               <p className="text-sm font-semibold">"Studio"</p>
-              <p className="mt-1 text-sm text-white/65">Dumb�a / Nouméa, location ou vente</p>
+              <p className="mt-1 text-sm text-white/65">Dumbéa / Nouméa, location ou vente</p>
             </div>
             <div className="rounded-2xl bg-white/10 p-4">
               <p className="text-sm font-semibold">"iPhone"</p>
-              <p className="mt-1 text-sm text-white/65">�0tat bon ou comme neuf, en Nouvelle-Calédonie</p>
+              <p className="mt-1 text-sm text-white/65">État bon ou comme neuf, en Nouvelle-Calédonie</p>
             </div>
           </div>
           <Link href="/alertes" className="btn-primary mt-5 inline-flex w-full items-center justify-center gap-2">
-            G�rer mes alertes
+            Gérer mes alertes
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -457,7 +457,7 @@ function CategoryTreeRow({
         <span className="min-w-0 flex-1">
           <span className="block font-semibold text-[var(--color-text-primary)]">{category.name}</span>
           <span className="block text-xs text-[var(--color-text-secondary)]">
-            {depth === 0 ? 'Famille ouverte' : 'Sous-cat�gorie ouverte'}
+            {depth === 0 ? 'Famille ouverte' : 'Sous-catégorie ouverte'}
           </span>
         </span>
         <ChevronRight className="h-4 w-4 shrink-0 text-nc-lagon" />
@@ -534,7 +534,7 @@ function CategoryCard({
           <Visual className="h-7 w-7" />
         </span>
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Cat�gorie</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Catégorie</p>
           <h3 className="mt-1 text-lg font-semibold text-night">{category.name}</h3>
         </div>
       </div>
@@ -734,7 +734,7 @@ function BonPlanCard({ item }: { item: BonPlanItem }) {
 
       <div className="mt-4 space-y-1 text-sm text-night/55">
         <p>{formatDateLabel(item.event_date)}</p>
-        <p>{item.author_prenom ? `Publi� par ${item.author_prenom}` : 'Publication locale'}</p>
+        <p>{item.author_prenom ? `Publié par ${item.author_prenom}` : 'Publication locale'}</p>
         {item.contact_name ? <p>Contact: {item.contact_name}</p> : null}
       </div>
     </article>
@@ -772,7 +772,7 @@ function CovoiturageCard({
         </span>
         {seatsRemaining <= 1 ? (
           <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-700">
-            Derni�re place
+            Dernière place
           </span>
         ) : null}
       </div>
@@ -781,7 +781,7 @@ function CovoiturageCard({
         {item.departure} - {item.destination}
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-night/60">
-        {dateLabel} � {timeLabel} �� {item.vehicle || 'V�hicule d�taill�'} �� {item.price_xpf.toLocaleString('fr-FR')} XPF / place
+        {dateLabel} � {timeLabel} � {item.vehicle || 'Véhicule détaillé'} � {item.price_xpf.toLocaleString('fr-FR')} XPF / place
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-night/65">
@@ -792,7 +792,7 @@ function CovoiturageCard({
 
       <div className="mt-4 space-y-1 text-sm text-night/55">
         <p>{item.driver_prenom ? `Conducteur: ${item.driver_prenom}` : 'Conducteur local'}</p>
-        <p>{item.trust_score != null ? `Fiabilit�: ${item.trust_score}/100` : 'Trajet v�rifi�'}</p>
+        <p>{item.trust_score != null ? `Fiabilité: ${item.trust_score}/100` : 'Trajet vérifié'}</p>
       </div>
     </article>
   )
@@ -815,7 +815,7 @@ function SponsoredCampaignCard({ item }: { item: CampaignItem }) {
         ) : null}
         <div className="absolute left-3 top-3">
           <span className="badge badge-sable rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] shadow-sm">
-            Sponsoris�
+            Sponsorisé
           </span>
         </div>
       </div>
@@ -823,13 +823,13 @@ function SponsoredCampaignCard({ item }: { item: CampaignItem }) {
       <div className="space-y-3 p-4">
         <h3 className="line-clamp-2 text-lg font-semibold text-night">{item.title}</h3>
         <p className="line-clamp-3 text-sm leading-relaxed text-night/65">
-          {item.description || 'Une visibilit� locale payante, affich�e au bon moment sur Kalico.'}
+          {item.description || 'Une visibilité locale payante, affichée au bon moment sur Kalico.'}
         </p>
         <a
           href={href}
           className="inline-flex w-full items-center justify-center rounded-2xl bg-nc-sable px-4 py-3 text-sm font-semibold text-white transition hover:bg-nc-sable/90"
         >
-          {item.cta_text || 'D�couvrir'}
+          {item.cta_text || 'Découvrir'}
         </a>
       </div>
     </article>
@@ -875,11 +875,11 @@ export function BonPlanSection({
           <div>
             <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-sable">Sponsoris�</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-sable">Sponsorisé</p>
                 <h3 className="mt-1 text-2xl font-bold text-white">Les bons plans mis en avant</h3>
               </div>
               <Link href="/pro/dashboard/publicite" className="text-sm font-semibold text-nc-sable hover:underline">
-                G�rer les campagnes
+                Gérer les campagnes
               </Link>
             </div>
             <div className="grid gap-3 md:grid-cols-3">
@@ -892,12 +892,12 @@ export function BonPlanSection({
 
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="section-lagon">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/80">Bons plans & �v�nements</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/80">Bons plans & Événements</p>
             <h3 className="mt-1 font-display text-2xl font-bold text-white md:text-3xl">
-              Promotions, culture et mobilit� locale
+              Promotions, culture et mobilité locale
             </h3>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
-              Une seule vue claire pour les offres du moment, l'agenda culturel et les trajets � partager.
+              Une seule vue claire pour les offres du moment, l'agenda culturel et les trajets à partager.
             </p>
           </div>
           <Link href="/bons-plans" className="hidden items-center gap-1 text-sm font-semibold text-white hover:underline md:inline-flex">
@@ -913,7 +913,7 @@ export function BonPlanSection({
                 <h4 className="mt-1 text-2xl font-bold text-white">Les offres qui marchent maintenant</h4>
               </div>
               <Link href="/annonces/nouvelle" className="text-sm font-semibold text-nc-emeraude hover:underline">
-                Ajouter la v�tre
+                Ajouter la vôtre
               </Link>
             </div>
             {loading ? (
@@ -932,7 +932,7 @@ export function BonPlanSection({
               <div className="rounded-[1.5rem] border border-white/10 bg-white/8 px-5 py-8 text-center text-white/80">
 <div className="mx-auto flex max-w-md flex-col items-center">
   <span className="mb-3 text-2xl animate-pulse motion-reduce:animate-none" aria-hidden="true">🎭</span>
-  <p className="font-display text-lg font-medium text-night dark:text-white">Le prochain événement NC mérite d&apos;être ici.</p>
+  <p className="font-display text-lg font-medium text-night dark:text-white">Le prochain �v�nement NC m�rite d'�tre ici.</p>
   <p className="mt-2 text-sm text-[var(--color-text-secondary)]">Concerts, marchés, conférences - tout y est.</p>
   <Link href="/evenements/nouveau" className="btn-primary mt-4 inline-flex items-center justify-center">
     Créer un événement
@@ -946,7 +946,7 @@ export function BonPlanSection({
         <div className="rounded-[1.5rem] border border-white/10 border-b-4 border-b-nc-corail bg-white/5 p-5">
           <div className="mb-3 flex items-end justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-corail">Mobilit�</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-corail">Mobilité</p>
               <h4 className="mt-1 text-2xl font-bold text-white">Covoiturage local et interurbain</h4>
             </div>
             <Link href="/covoiturage" className="text-sm font-semibold text-nc-corail hover:underline">
@@ -955,7 +955,7 @@ export function BonPlanSection({
           </div>
           <p className="max-w-3xl text-sm leading-relaxed text-white/70 md:text-base">
             Trouvez un trajet, proposez une place ou consultez les profils de confiance. Les trajets sont
-            pens�s pour la recherche rapide, les r�servations simples et la s�curit� des �changes.
+            pensés pour la recherche rapide, les réservations simples et la sécurité des �changes.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link href="/covoiturage" className="btn-primary rounded-2xl px-4 py-2.5">
@@ -981,7 +981,7 @@ export function BonPlanSection({
             <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/8 px-5 py-8 text-center text-white/80">
               <div className="mx-auto flex max-w-md flex-col items-center">
                 <span className="mb-3 text-2xl animate-pulse motion-reduce:animate-none" aria-hidden="true">
-                    🎭
+                    =�
                   </span>
                 <p className="font-display text-lg font-medium text-night dark:text-white">
                   Le premier trajet, c&apos;est souvent le plus utile.

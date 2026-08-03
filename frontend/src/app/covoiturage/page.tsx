@@ -233,7 +233,7 @@ function RideCard({
         <div className="min-w-0">
           <h3 className="text-xl font-semibold text-[var(--color-text-primary)]">{formatRouteLabel(ride)}</h3>
           <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-            {formatTimeLabel(ride.ride_time)} � {ride.vehicle || 'V�hicule d�taill�'} � {ride.seats_remaining ?? 0} place{(ride.seats_remaining ?? 0) > 1 ? 's' : ''} restante{(ride.seats_remaining ?? 0) > 1 ? 's' : ''}
+            {formatTimeLabel(ride.ride_time)} � {ride.vehicle || 'Véhicule détaillé'} � {ride.seats_remaining ?? 0} place{(ride.seats_remaining ?? 0) > 1 ? 's' : ''} restante{(ride.seats_remaining ?? 0) > 1 ? 's' : ''}
           </p>
         </div>
         <div className="rounded-2xl bg-nc-corailLight px-3 py-2 text-right">
@@ -600,7 +600,7 @@ export default function CovoituragePage() {
                     <input
                       value={filters.departure}
                       onChange={(e) => setFilters((prev) => ({ ...prev, departure: e.target.value }))}
-                      placeholder="Noum�a"
+                      placeholder="Nouméa"
                       className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none"
                     />
                   </label>
@@ -1079,7 +1079,7 @@ export default function CovoituragePage() {
                     <input
                       value={transportFilters.departure}
                       onChange={(e) => setTransportFilters((prev) => ({ ...prev, departure: e.target.value }))}
-                      placeholder="Noum�a, Dumb�a..."
+                      placeholder="Nouméa, Dumbéa..."
                       className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none"
                     />
                   </label>
@@ -1219,7 +1219,7 @@ export default function CovoituragePage() {
                 onClick={() => setActiveTab('publish')}
                 className="btn-primary mt-4 inline-flex w-full justify-center rounded-2xl px-4 py-2.5"
               >
-                D�poser une annonce
+                Déposer une annonce
               </button>
             </div>
 

@@ -187,7 +187,7 @@ export default function ReviewInvitePage() {
               Ce lien d&apos;avis est invalide, expir� ou a d�j� �t� utilis�.
             </p>
             <Link href="/pro" className="btn-primary mt-6 inline-flex items-center gap-2 px-5 py-3 text-sm">
-              D�couvrir l&apos;espace Pro
+              Découvrir l&apos;espace Pro
             </Link>
           </div>
         </div>
@@ -228,7 +228,7 @@ export default function ReviewInvitePage() {
                     </span>
                   </div>
                   <p className="mt-2 text-sm text-night/60">
-                    {invite.pro.pro_category || 'Professionnel local'} � {invite.pro.pro_commune || 'Nouvelle-Cal�donie'}
+                    {invite.pro.pro_category || 'Professionnel local'} � {invite.pro.pro_commune || 'Nouvelle-Calédonie'}
                   </p>
                   <p className="mt-3 max-w-3xl text-sm leading-relaxed text-night/65">
                     {invite.pro.pro_description || 'Partagez votre exp�rience avec ce professionnel local.'}

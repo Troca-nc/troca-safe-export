@@ -53,7 +53,7 @@ export default function CguPage() {
         <p>
           Le covoiturage publi� sur Kalico rel�ve dun usage entre particuliers ou, lorsque linterface le permet, dun transport d�clar� par
           un professionnel autoris�. Lutilisateur doit sassurer du respect de la r�glementation applicable, de lassurance et des r�gles
-          de s�curit�.
+          de sécurité.
         </p>
 
         <h2>5. Bons plans, publicit� et visibilit� sponsoris�e</h2>
@@ -90,7 +90,7 @@ export default function CguPage() {
         <h2>8. Notifications et communications</h2>
         <p>
           Kalico peut envoyer des notifications in-app, emails, SMS et push lorsque cela est n�cessaire au fonctionnement du service :
-          inscriptions, confirmations, messages, r�ponses � des demandes, rendez-vous, confirmations de paiement, s�curit� du compte,
+          inscriptions, confirmations, messages, r�ponses � des demandes, rendez-vous, confirmations de paiement, sécurité du compte,
           ou informations utiles li�es aux fonctionnalit�s activ�es.
         </p>
         <p>
@@ -116,7 +116,7 @@ export default function CguPage() {
           <li>Contourner les r�gles de publication, de mod�ration ou de paiement.</li>
           <li>Usurper lidentit� dun tiers ou cr�er de faux comptes.</li>
           <li>Extraire, scraper ou r�utiliser les donn�es de la plateforme de mani�re non autoris�e.</li>
-          <li>Utiliser Kalico pour des usages contraires � la loi ou � la s�curit� des autres utilisateurs.</li>
+          <li>Utiliser Kalico pour des usages contraires � la loi ou � la sécurité des autres utilisateurs.</li>
         </ul>
 
         <h2>12. Responsabilit�</h2>
@@ -128,7 +128,7 @@ export default function CguPage() {
         <h2>13. Suspension et r�siliation</h2>
         <p>
           Kalico peut suspendre ou r�silier un compte en cas de non-respect des CGU, de comportement abusif, dusage frauduleux ou de
-          n�cessit� de s�curit�. Lutilisateur peut �galement demander la suppression de son compte via les param�tres.
+          n�cessit� de sécurité. Lutilisateur peut �galement demander la suppression de son compte via les param�tres.
         </p>
 
         <h2>14. Donn�es personnelles</h2>
@@ -139,7 +139,7 @@ export default function CguPage() {
 
         <h2>15. Droit applicable</h2>
         <p>
-          Les pr�sentes CGU sont soumises au droit applicable en Nouvelle-Cal�donie et, le cas �ch�ant, au droit fran�ais pour les mati�res
+          Les pr�sentes CGU sont soumises au droit applicable en Nouvelle-Calédonie et, le cas �ch�ant, au droit fran�ais pour les mati�res
           relevant de ce cadre.
         </p>
       </LegalLayout>

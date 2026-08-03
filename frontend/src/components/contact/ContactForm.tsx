@@ -160,7 +160,7 @@ export default function ContactForm() {
 
         <div className="grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-sm font-semibold text-night">Cat�gorie</span>
+            <span className="text-sm font-semibold text-night">Catégorie</span>
             <select
               value={form.category}
               onChange={(event) => handleChange('category', event.target.value as ContactCategory)}

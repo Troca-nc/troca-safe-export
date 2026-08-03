@@ -106,7 +106,7 @@ export default function ProCard({ pro }: { pro: ProCardModel }) {
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-night/60">
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
             <MapPin className="h-3.5 w-3.5 text-coral" />
-            {pro.pro_commune || 'Nouvelle-Cal�donie'}
+            {pro.pro_commune || 'Nouvelle-Calédonie'}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
             <BadgeCheck className="h-3.5 w-3.5 text-amber-500" />

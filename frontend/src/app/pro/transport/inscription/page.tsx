@@ -31,9 +31,9 @@ const TRANSPORT_TYPES = [
 ]
 
 const COMMUNES = [
-  'Noum�a',
+  'Nouméa',
   'Mont-Dore',
-  'Dumb�a',
+  'Dumbéa',
   'Pa�ta',
   'Boulouparis',
   'La Foa',
@@ -54,7 +54,7 @@ export default function ProTransportInscriptionPage() {
     company_name: '',
     transport_type: 'taxi',
     description: '',
-    commune: 'Noum�a',
+    commune: 'Nouméa',
     phone: '',
     website: '',
     hours: '',
@@ -130,7 +130,7 @@ export default function ProTransportInscriptionPage() {
           </div>
           <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl">Devenez transporteur partenaire sur Kalico</h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/75 md:text-base">
-            D�posez votre demande, pr�sentez votre activit� et commencez � recevoir des r�servations de clients cal�doniens.
+            D�posez votre demande, pr�sentez votre activit� et commencez � recevoir des réservations de clients cal�doniens.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link href="#formulaire" className="btn-primary rounded-2xl px-4 py-2.5">
@@ -171,7 +171,7 @@ export default function ProTransportInscriptionPage() {
               </label>
 
               <label className="block">
-                <span className="mb-1 block text-sm font-semibold text-night">Cat�gorie *</span>
+                <span className="mb-1 block text-sm font-semibold text-night">Catégorie *</span>
                 <select
                   required
                   value={form.transport_type}
