@@ -1,7 +1,7 @@
 // src/store/authStore.ts
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { authApi, saveTokens, clearTokens } from '@/lib/api'
+import { authApi, clearTokens, isStoredAccessTokenValid, saveTokens } from '@/lib/api'
 import { useFavorisStore } from '@/store/favorisStore'
 import { getStoredAccessToken, getStoredRefreshToken } from '@/lib/tokenStorage'
 import { DEMO_ACCOUNTS, inferDemoAccount, isDemoEmail } from '@/lib/demoApi'
@@ -272,6 +272,18 @@ export const useAuthStore = create<AuthState>()(
         demoProfile: state.demoProfile,
       }),
       onRehydrateStorage: () => (state) => {
+        if (typeof window !== 'undefined') {
+          const storedAccessToken = getStoredAccessToken()
+          const shouldClearRealAuth = !state?.demoProfile && (!storedAccessToken || !isStoredAccessTokenValid(storedAccessToken))
+
+          if (shouldClearRealAuth) {
+            clearTokens()
+            useFavorisStore.getState().clear()
+            clearRealAuthBackup()
+            useAuthStore.setState({ user: null, isAuthenticated: false, demoProfile: null })
+          }
+        }
+
         state?.setHasHydrated(true)
       },
     }

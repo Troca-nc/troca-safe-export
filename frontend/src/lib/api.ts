@@ -50,7 +50,32 @@ function stableSerialize(value: unknown): string {
 
 function getAuthToken() {
   if (typeof window === 'undefined') return ''
-  return getStoredAccessToken()
+  const token = getStoredAccessToken()
+  if (!isStoredAccessTokenValid(token)) {
+    if (token) {
+      clearTokens()
+    }
+    return ''
+  }
+  return token
+}
+
+export function isStoredAccessTokenValid(token?: string | null) {
+  if (typeof token !== 'string' || token.trim() === '') return false
+
+  const parts = token.trim().split('.')
+  if (parts.length !== 3) return false
+
+  try {
+    const payloadSegment = parts[1]
+      .replace(/-/g, '+')
+      .replace(/_/g, '/')
+      .padEnd(Math.ceil(parts[1].length / 4) * 4, '=')
+    const payload = JSON.parse(atob(payloadSegment))
+    return typeof payload?.exp === 'number' && payload.exp * 1000 > Date.now()
+  } catch {
+    return false
+  }
 }
 
 function getRequestId() {
@@ -160,7 +185,7 @@ export function clearApiCache() {
 // Intercepteur requete : ajoute le Bearer token
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (typeof window !== 'undefined') {
-    const token = getStoredAccessToken()
+    const token = getAuthToken()
     if (token) config.headers.Authorization = `Bearer ${token}`
 
     const method = String(config.method || 'get').toUpperCase()
