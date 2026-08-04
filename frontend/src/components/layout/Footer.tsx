@@ -8,8 +8,8 @@ import { Mail, Shield, FileText, Lock, MessageCircle } from 'lucide-react'
 import NewsletterForm from '@/components/layout/NewsletterForm'
 
 const links = [
-  { href: '/mentions-legales', label: 'Mentions l�gales', icon: FileText },
-  { href: '/politique-de-confidentialite', label: 'Confidentialit�', icon: Lock },
+  { href: '/mentions-legales', label: 'Mentions légales', icon: FileText },
+  { href: '/politique-de-confidentialite', label: 'Confidentialité', icon: Lock },
   { href: '/cgu', label: 'CGU', icon: FileText },
   { href: '/cgv', label: 'CGV', icon: Shield },
   { href: '/politique-cookies', label: 'Cookies', icon: Lock },
@@ -44,7 +44,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="max-w-xl text-sm leading-relaxed text-night/60">
-              Petites annonces en Nouvelle-Calédonie. Achetez, vendez, �changez et contactez des vendeurs locaux depuis le web ou le mobile.
+              Petites annonces en Nouvelle-Calédonie. Achetez, vendez, échangez et contactez des vendeurs locaux depuis le web ou le mobile.
             </p>
           </div>
 
@@ -67,7 +67,7 @@ export default function Footer() {
                 className="inline-flex items-center gap-2 text-left text-sm text-night/60 transition-colors hover:text-coral"
               >
                 <Lock className="h-4 w-4" />
-                G�rer mes cookies
+                Gérer mes cookies
               </button>
               <a
                 href="mailto:contact@kalico.nc"
@@ -86,20 +86,20 @@ export default function Footer() {
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Newsletter</p>
               <h2 className="mt-1 font-display text-2xl font-bold text-night">Recevez notre newsletter</h2>
               <p className="mt-2 text-sm leading-relaxed text-night/60">
-                Les meilleures annonces, bons plans et pros locaux directement dans votre bo�te mail.
+                Les meilleures annonces, bons plans et pros locaux directement dans votre boîte mail.
               </p>
             </div>
 
             <div>
               <NewsletterForm />
               <p className="mt-2 text-xs text-night/40">
-                Pas de spam. D�sinscription en un clic.
+                Pas de spam. Désinscription en un clic.
               </p>
             </div>
           </div>
         </section>
         <div className="mt-8 flex flex-col gap-2 border-t border-[var(--color-border)] pt-4 text-xs text-night/40 sm:flex-row sm:items-center sm:justify-between">
-          <p>� 2026 Kalico � Nouvelle-Calédonie dans l'�me, Kalico dans la poche.</p>
+          <p>© 2026 Kalico - Nouvelle-Calédonie dans l'âme, Kalico dans la poche.</p>
           <p>Nouvelle-Calédonie.</p>
         </div>
       </div>

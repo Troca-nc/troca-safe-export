@@ -932,7 +932,7 @@ export function BonPlanSection({
               <div className="rounded-[1.5rem] border border-white/10 bg-white/8 px-5 py-8 text-center text-white/80">
 <div className="mx-auto flex max-w-md flex-col items-center">
   <span className="mb-3 text-2xl animate-pulse motion-reduce:animate-none" aria-hidden="true">🎭</span>
-  <p className="font-display text-lg font-medium text-night dark:text-white">Le prochain �v�nement NC m�rite d'�tre ici.</p>
+  <p className="font-display text-lg font-medium text-night dark:text-white">Le prochain événement NC mérite d'être ici.</p>
   <p className="mt-2 text-sm text-[var(--color-text-secondary)]">Concerts, marchés, conférences - tout y est.</p>
   <Link href="/evenements/nouveau" className="btn-primary mt-4 inline-flex items-center justify-center">
     Créer un événement
@@ -955,7 +955,7 @@ export function BonPlanSection({
           </div>
           <p className="max-w-3xl text-sm leading-relaxed text-white/70 md:text-base">
             Trouvez un trajet, proposez une place ou consultez les profils de confiance. Les trajets sont
-            pensés pour la recherche rapide, les réservations simples et la sécurité des �changes.
+            pensés pour la recherche rapide, les réservations simples et la sécurité des échanges.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link href="/covoiturage" className="btn-primary rounded-2xl px-4 py-2.5">
