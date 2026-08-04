@@ -205,7 +205,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
             </span>
 
             <h1 className="mt-4 max-w-2xl font-display text-4xl font-bold leading-tight text-[#17313d] md:text-6xl dark:text-white">
-              Les premiÃ¨res annonces arrivent. La vÃ´tre aussi ?
+              Les premières annonces arrivent. La vôtre aussi ?
             </h1>
 
             <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#39505b] md:text-lg dark:text-white/80">Annonces, services et pros locaux partout en Nouvelle-CalÃ©donie. De NoumÃ©a aux LoyautÃ©, de KonÃ© Ã  l&apos;Ã®le des Pins.</p>
@@ -336,9 +336,7 @@ export function FeaturedListingsSection({
   listings: any[]
   loading: boolean
 }) {
-  if (!loading && listings.length === 0) return null
-
-  return (
+    return (
     <section id="featured-listings" className="bg-[var(--color-surface)]">
       <div className="mx-auto max-w-7xl px-4 pb-10 pt-10" data-reveal="true">
       <div className="mb-5 flex items-end justify-between gap-4">
@@ -362,12 +360,10 @@ export function FeaturedListingsSection({
           </div>
         ) : (
           <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] py-14 text-center text-night/45">
-            <p className="text-sm font-semibold text-night">Les meilleures annonces apparaÃ®tront ici</p>
-            <p className="mt-2 text-sm text-night/65">
-              Boostez votre annonce pour apparaÃ®tre en tÃªte de page.
-            </p>
+            <p className="text-sm font-semibold text-night">Les meilleures annonces apparaîtront ici</p>
+            <p className="mt-2 text-sm text-night/65">Boostez votre annonce pour apparaître en tête de page.</p>
             <Link href="/annonces/nouvelle" className="btn-primary mt-4 inline-block">
-              DÃ©poser une annonce
+              Déposer la première annonce
             </Link>
           </div>
         )}
