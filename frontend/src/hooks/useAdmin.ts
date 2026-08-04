@@ -131,7 +131,7 @@ async function fetchAdminObservability(): Promise<AdminObservabilitySnapshot> {
 
   const payload = await response.json().catch(() => null)
   if (!response.ok) {
-    throw new Error(payload?.error || 'Impossible de charger lobservabilit�')
+    throw new Error(payload?.error || 'Impossible de charger lobservabilitï¿½')
   }
 
   return payload?.data ?? payload
@@ -248,7 +248,7 @@ export function useAdminObservability() {
       setLastUpdatedAt(new Date().toISOString())
       return snapshot
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Impossible de charger lobservabilit�'
+      const message = err instanceof Error ? err.message : 'Impossible de charger lobservabilitï¿½'
       setError(message)
       return null
     } finally {

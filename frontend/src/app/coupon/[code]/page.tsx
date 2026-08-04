@@ -93,7 +93,7 @@ export default function CouponPublicPage() {
                   <QrCode className="h-12 w-12 text-night/30" />
                 </div>
               )}
-              <p className="max-w-md text-center text-sm text-night/60">Pr�sentez ce QR � la caisse. L�cran reste volontairement blanc pour garantir une bonne lisibilit�.</p>
+              <p className="max-w-md text-center text-sm text-night/60">Prï¿½sentez ce QR ï¿½ la caisse. Lï¿½cran reste volontairement blanc pour garantir une bonne lisibilitï¿½.</p>
               {coupon.valid_until ? (
                 <p className="text-xs font-semibold text-emerald-700">Valable jusquau {new Intl.DateTimeFormat('fr-FR').format(new Date(coupon.valid_until))}</p>
               ) : null}

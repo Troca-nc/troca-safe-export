@@ -6,7 +6,7 @@ export function isDemoMode() {
   return process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
 }
 
-export function showDemoToast(message = 'D�sactiv� en mode d�mo') {
+export function showDemoToast(message = 'Dï¿½sactivï¿½ en mode dï¿½mo') {
   if (typeof window === 'undefined') return
   window.dispatchEvent(new CustomEvent(DEMO_TOAST_EVENT, { detail: { message } }))
 }

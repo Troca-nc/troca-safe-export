@@ -8,7 +8,7 @@ function getApiBase() {
 export async function GET(request: NextRequest) {
   const authorization = request.headers.get('authorization') || ''
   if (!authorization.startsWith('Bearer ')) {
-    return NextResponse.json({ error: 'Acc�s administrateur requis' }, { status: 401 })
+    return NextResponse.json({ error: 'Accï¿½s administrateur requis' }, { status: 401 })
   }
 
   const apiBase = getApiBase()
@@ -21,12 +21,12 @@ export async function GET(request: NextRequest) {
   })
 
   if (!meResponse.ok) {
-    return NextResponse.json({ error: 'Acc�s administrateur requis' }, { status: 403 })
+    return NextResponse.json({ error: 'Accï¿½s administrateur requis' }, { status: 403 })
   }
 
   const mePayload = await meResponse.json().catch(() => null)
   if (!mePayload?.data?.is_admin) {
-    return NextResponse.json({ error: 'Acc�s administrateur requis' }, { status: 403 })
+    return NextResponse.json({ error: 'Accï¿½s administrateur requis' }, { status: 403 })
   }
 
   const internalToken = process.env.INTERNAL_API_TOKEN?.trim()
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
   const payload = await observabilityResponse.json().catch(() => null)
   if (!observabilityResponse.ok) {
     return NextResponse.json(
-      { error: payload?.error || 'Impossible de charger lobservabilit�' },
+      { error: payload?.error || 'Impossible de charger lobservabilitï¿½' },
       { status: observabilityResponse.status || 502 }
     )
   }

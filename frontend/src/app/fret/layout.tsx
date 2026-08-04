@@ -4,7 +4,7 @@ import { buildPageMetadata } from '@/lib/pageMetadata'
 
 export const metadata: Metadata = buildPageMetadata({
   title: 'Fret & Transport NC | Kalico',
-  description: 'Transport de marchandises, d�m�nagement et retours � vide en Nouvelle-Calédonie.',
+  description: 'Transport de marchandises, dï¿½mï¿½nagement et retours ï¿½ vide en Nouvelle-CalÃ©donie.',
   path: '/fret',
 })
 

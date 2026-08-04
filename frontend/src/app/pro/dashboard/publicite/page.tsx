@@ -56,9 +56,9 @@ function formatMoney(value?: number | null) {
 }
 
 function formatDate(value?: string | null) {
-  if (!value) return '� confirmer'
+  if (!value) return 'ï¿½ confirmer'
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return '� confirmer'
+  if (Number.isNaN(date.getTime())) return 'ï¿½ confirmer'
   return new Intl.DateTimeFormat('fr-FR', {
     day: '2-digit',
     month: '2-digit',
@@ -71,7 +71,7 @@ function getTypeLabel(type?: string) {
     case 'bon_plan':
       return 'Bon plan'
     case 'banner':
-      return 'Banni�re'
+      return 'Banniï¿½re'
     case 'popup':
       return 'Popup'
     default:
@@ -88,7 +88,7 @@ function getStatusLabel(status?: string | null) {
     case 'paused':
       return 'Suspendu'
     case 'expired':
-      return 'Expir�'
+      return 'Expirï¿½'
     default:
       return status || ''
   }
@@ -99,7 +99,7 @@ function getSectionLabel(type: CampaignType) {
     case 'bon_plan':
       return 'Bons Plans'
     case 'banner':
-      return 'Banni�re cat�gorie'
+      return 'Banniï¿½re catï¿½gorie'
     case 'popup':
       return 'Popup homepage'
   }
@@ -161,7 +161,7 @@ function CampaignForm({
     description: '',
     image_url: '',
     link_url: '',
-    cta_text: 'Découvrir',
+    cta_text: 'DÃ©couvrir',
     duration_days: String(durationOptions[0]?.value || 7),
     pricing_mode: 'one_shot',
     pricing_plan: 'essential',
@@ -209,14 +209,14 @@ function CampaignForm({
         description: '',
         image_url: '',
         link_url: '',
-        cta_text: 'Découvrir',
+        cta_text: 'DÃ©couvrir',
       }))
       setStatus('success')
-      setFeedback('Campagne cr��e avec succ�s.')
+      setFeedback('Campagne crï¿½ï¿½e avec succï¿½s.')
     } catch (error) {
       console.error(error)
       setStatus('error')
-      setFeedback("La campagne n'a pas pu �tre cr��e.")
+      setFeedback("La campagne n'a pas pu ï¿½tre crï¿½ï¿½e.")
     }
   }
 
@@ -224,11 +224,11 @@ function CampaignForm({
     <form onSubmit={submit} className="space-y-4 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">Cr�er une campagne</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">Crï¿½er une campagne</p>
           <h3 className="mt-1 text-lg font-bold text-night">{getSectionLabel(type)}</h3>
         </div>
         <div className="rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-3 py-1 text-xs font-semibold text-night/60">
-          {type === 'bon_plan' ? 'Paiement s�curis�' : 'Visibilit� sponsoris�e'}
+          {type === 'bon_plan' ? 'Paiement sï¿½curisï¿½' : 'Visibilitï¿½ sponsorisï¿½e'}
         </div>
       </div>
 
@@ -239,7 +239,7 @@ function CampaignForm({
             value={form.title}
             onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
             className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-4 py-3 text-sm"
-            placeholder="Ex. R�duction sur les packs de rentr�e"
+            placeholder="Ex. Rï¿½duction sur les packs de rentrï¿½e"
             required
           />
         </label>
@@ -250,7 +250,7 @@ function CampaignForm({
             value={form.cta_text}
             onChange={(event) => setForm((current) => ({ ...current, cta_text: event.target.value }))}
             className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-4 py-3 text-sm"
-            placeholder="Découvrir"
+            placeholder="DÃ©couvrir"
           />
         </label>
 
@@ -286,7 +286,7 @@ function CampaignForm({
 
         {includeCategorySlug ? (
           <label className="space-y-2">
-            <span className="text-sm font-semibold text-night">Slug cat�gorie *</span>
+            <span className="text-sm font-semibold text-night">Slug catï¿½gorie *</span>
             <input
               value={form.category_slug}
               onChange={(event) => setForm((current) => ({ ...current, category_slug: event.target.value }))}
@@ -311,7 +311,7 @@ function CampaignForm({
           </label>
         ) : (
           <label className="space-y-2">
-            <span className="text-sm font-semibold text-night">Dur�e</span>
+            <span className="text-sm font-semibold text-night">Durï¿½e</span>
             <select
               value={form.duration_days}
               onChange={(event) => setForm((current) => ({ ...current, duration_days: event.target.value }))}
@@ -336,7 +336,7 @@ function CampaignForm({
             >
               <option value="essential">Essentiel</option>
               <option value="standard">Standard</option>
-              <option value="unlimited">Illimit�</option>
+              <option value="unlimited">Illimitï¿½</option>
             </select>
           </label>
         ) : null}
@@ -357,15 +357,15 @@ function CampaignForm({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-night/55">
           {type === 'bon_plan'
-            ? 'Les campagnes sont activ�es apr�s paiement s�curis�.'
-            : 'La campagne sera plac�e en file si aucun emplacement nest disponible.'}
+            ? 'Les campagnes sont activï¿½es aprï¿½s paiement sï¿½curisï¿½.'
+            : 'La campagne sera placï¿½e en file si aucun emplacement nest disponible.'}
         </p>
         <button
           type="submit"
           disabled={status === 'saving'}
           className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#076b8d] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {status === 'saving' ? 'Cr�ation...' : 'Cr�er la campagne'}
+          {status === 'saving' ? 'Crï¿½ation...' : 'Crï¿½er la campagne'}
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
@@ -488,10 +488,10 @@ export default function ProDashboardPublicitePage() {
       const data = response.data?.data ?? null
       setWeeklySelection(data)
       setSelectedWeeklyIds(Array.isArray(data?.selected_campaign_ids) ? data.selected_campaign_ids : [])
-      setWeeklyFeedback('Votre s�lection hebdomadaire a �t� enregistr�e.')
+      setWeeklyFeedback('Votre sï¿½lection hebdomadaire a ï¿½tï¿½ enregistrï¿½e.')
     } catch (error) {
       console.error(error)
-      setWeeklyFeedback('Impossible denregistrer la s�lection pour le moment.')
+      setWeeklyFeedback('Impossible denregistrer la sï¿½lection pour le moment.')
     } finally {
       setSavingWeeklySelection(false)
     }
@@ -504,12 +504,12 @@ export default function ProDashboardPublicitePage() {
           <div className="space-y-3">
             <p className="inline-flex items-center gap-2 rounded-full border border-nc-lagon/15 bg-nc-lagonLight px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-lagon">
               <Megaphone className="h-3.5 w-3.5" />
-              Publicit�
+              Publicitï¿½
             </p>
             <div className="space-y-2">
-              <h1 className="font-display text-3xl font-bold text-night">Pilotez vos campagnes sponsoris�es</h1>
+              <h1 className="font-display text-3xl font-bold text-night">Pilotez vos campagnes sponsorisï¿½es</h1>
               <p className="max-w-3xl text-sm leading-relaxed text-night/60">
-                Retrouvez vos offres, les tarifs publics et lensemble de vos campagnes en cours au m�me endroit.
+                Retrouvez vos offres, les tarifs publics et lensemble de vos campagnes en cours au mï¿½me endroit.
               </p>
             </div>
           </div>
@@ -527,14 +527,14 @@ export default function ProDashboardPublicitePage() {
           <p className="mt-1 text-sm text-night/55">Campagnes One shot et abonnements</p>
         </article>
         <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">Banni�res</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">Banniï¿½res</p>
           <p className="mt-2 text-2xl font-bold text-night">{counts.banner}</p>
-          <p className="mt-1 text-sm text-night/55">Visibilit� sur les cat�gories</p>
+          <p className="mt-1 text-sm text-night/55">Visibilitï¿½ sur les catï¿½gories</p>
         </article>
         <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">Popups</p>
           <p className="mt-2 text-2xl font-bold text-night">{counts.popup}</p>
-          <p className="mt-1 text-sm text-night/55">Une seule campagne active � la fois</p>
+          <p className="mt-1 text-sm text-night/55">Une seule campagne active ï¿½ la fois</p>
         </article>
       </section>
 
@@ -542,7 +542,7 @@ export default function ProDashboardPublicitePage() {
         <div className="grid gap-3 md:grid-cols-3">
           {([
             { id: 'bon_plan', label: 'Bons Plans', sub: 'One shot / Abonnement' },
-            { id: 'banner', label: 'Banni�re cat�gorie', sub: 'Tarif par dur�e' },
+            { id: 'banner', label: 'Banniï¿½re catï¿½gorie', sub: 'Tarif par durï¿½e' },
             { id: 'popup', label: 'Popup homepage', sub: 'File dattente si besoin' },
           ] as Array<{ id: CampaignSectionId; label: string; sub: string }>).map((item) => {
             const isActive = activeSection === item.id
@@ -570,7 +570,7 @@ export default function ProDashboardPublicitePage() {
         active={activeSection === 'bon_plan'}
         eyebrow="Bons Plans"
         title="Prix One shot et Abonnement"
-        description="Choisissez une mise en avant ponctuelle ou un abonnement mensuel pour garder votre activit� visible en continu."
+        description="Choisissez une mise en avant ponctuelle ou un abonnement mensuel pour garder votre activitï¿½ visible en continu."
       >
         <div className="grid gap-4 lg:grid-cols-2">
           <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
@@ -597,7 +597,7 @@ export default function ProDashboardPublicitePage() {
             <div className="mb-4 flex items-center justify-between gap-3">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-lagon">Abonnement</p>
-                <h3 className="mt-1 text-lg font-bold text-night">Pr�sence continue</h3>
+                <h3 className="mt-1 text-lg font-bold text-night">Prï¿½sence continue</h3>
               </div>
               <TimerReset className="h-5 w-5 text-nc-lagon" />
             </div>
@@ -605,7 +605,7 @@ export default function ProDashboardPublicitePage() {
               {[
                 { label: 'Essentiel', price: '1 800 XPF / mois' },
                 { label: 'Standard', price: '2 500 XPF / mois' },
-                { label: 'Illimit�', price: '4 000 XPF / mois' },
+                { label: 'Illimitï¿½', price: '4 000 XPF / mois' },
               ].map((item) => (
                 <PricingRow key={item.label} label={item.label} price={item.price} />
               ))}
@@ -616,24 +616,24 @@ export default function ProDashboardPublicitePage() {
         <div className="rounded-[1.75rem] border border-[#0A7EA4]/15 bg-[#0A7EA4]/6 p-5 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-lagon">Illimit�</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-lagon">Illimitï¿½</p>
               <h3 className="mt-1 text-lg font-bold text-night">Choisissez vos 2 bons plans de la semaine</h3>
               <p className="mt-2 max-w-3xl text-sm leading-relaxed text-night/60">
-                Ces campagnes apparaissent en priorit� sur laccueil. Chaque lundi, nous vous rappelons de
-                s�lectionner vos 2 mises en avant. Si vous ne le faites pas, les 2 plus r�centes seront retenues
-                automatiquement mardi � 12h.
+                Ces campagnes apparaissent en prioritï¿½ sur laccueil. Chaque lundi, nous vous rappelons de
+                sï¿½lectionner vos 2 mises en avant. Si vous ne le faites pas, les 2 plus rï¿½centes seront retenues
+                automatiquement mardi ï¿½ 12h.
               </p>
             </div>
             <span className="inline-flex items-center gap-2 rounded-full border border-[#0A7EA4]/15 bg-white px-3 py-1 text-xs font-semibold text-[#0A7EA4]">
               <Sparkles className="h-3.5 w-3.5" />
-              {weeklySelectedCampaigns.length}/{weeklySelection?.limit || 2} s�lectionn�{(weeklySelection?.limit || 2) > 1 ? 's' : ''}
+              {weeklySelectedCampaigns.length}/{weeklySelection?.limit || 2} sï¿½lectionnï¿½{(weeklySelection?.limit || 2) > 1 ? 's' : ''}
             </span>
           </div>
 
           <div className="mt-4 grid gap-3 lg:grid-cols-2">
             {weeklyBonPlanCampaigns.length === 0 ? (
               <div className="rounded-[1.5rem] border border-dashed border-[#0A7EA4]/20 bg-white/80 p-5 text-sm text-night/60 lg:col-span-2">
-                Aucun bon plan mensuel illimit� nest actif pour le moment. Cr�ez dabord une campagne Abonnement pour pouvoir la s�lectionner chaque semaine.
+                Aucun bon plan mensuel illimitï¿½ nest actif pour le moment. Crï¿½ez dabord une campagne Abonnement pour pouvoir la sï¿½lectionner chaque semaine.
               </div>
             ) : (
               weeklyBonPlanCampaigns.map((campaign) => {
@@ -655,10 +655,10 @@ export default function ProDashboardPublicitePage() {
                           {campaign.category_slug || 'Homepage'}
                         </p>
                         <h4 className="text-base font-bold text-night">{campaign.title}</h4>
-                        <p className="text-sm text-night/60 line-clamp-2">{campaign.description || 'Campagne illimit�e'}</p>
+                        <p className="text-sm text-night/60 line-clamp-2">{campaign.description || 'Campagne illimitï¿½e'}</p>
                       </div>
                       <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${checked ? 'bg-[#0A7EA4] text-white' : 'bg-white text-night/60'}`}>
-                        {checked ? 'S�lectionn�e' : 'S�lectionner'}
+                        {checked ? 'Sï¿½lectionnï¿½e' : 'Sï¿½lectionner'}
                       </span>
                     </div>
                   </button>
@@ -678,7 +678,7 @@ export default function ProDashboardPublicitePage() {
               className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#076b8d] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <CheckCircle2 className="h-4 w-4" />
-              {savingWeeklySelection ? 'Enregistrement...' : 'Enregistrer ma s�lection'}
+              {savingWeeklySelection ? 'Enregistrement...' : 'Enregistrer ma sï¿½lection'}
             </button>
           </div>
 
@@ -703,9 +703,9 @@ export default function ProDashboardPublicitePage() {
       <SectionPanel
         id="banner"
         active={activeSection === 'banner'}
-        eyebrow="Banni�re cat�gorie"
-        title="Tarifs pour une visibilit� cibl�e"
-        description="Touchez les internautes d�j� pr�sents dans une cat�gorie pr�cise avec un emplacement visuel simple et lisible."
+        eyebrow="Banniï¿½re catï¿½gorie"
+        title="Tarifs pour une visibilitï¿½ ciblï¿½e"
+        description="Touchez les internautes dï¿½jï¿½ prï¿½sents dans une catï¿½gorie prï¿½cise avec un emplacement visuel simple et lisible."
       >
         <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -738,12 +738,12 @@ export default function ProDashboardPublicitePage() {
         active={activeSection === 'popup'}
         eyebrow="Popup homepage"
         title="Le popup daccueil et sa file dattente"
-        description="Un seul popup peut �tre actif � la fois. Si une campagne est d�j� en cours, la nouvelle bascule automatiquement en attente."
+        description="Un seul popup peut ï¿½tre actif ï¿½ la fois. Si une campagne est dï¿½jï¿½ en cours, la nouvelle bascule automatiquement en attente."
       >
         <div className="rounded-[1.75rem] border border-amber-200 bg-amber-50 p-5 shadow-sm">
           <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-amber-800">
             <CheckCircle2 className="h-4 w-4" />
-            1 seul popup actif � la fois - votre campagne sera mise en file dattente si un popup est d�j� en cours.
+            1 seul popup actif ï¿½ la fois - votre campagne sera mise en file dattente si un popup est dï¿½jï¿½ en cours.
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {[
@@ -773,7 +773,7 @@ export default function ProDashboardPublicitePage() {
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">Campagnes</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Liste des campagnes enregistr�es</h2>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Liste des campagnes enregistrï¿½es</h2>
           </div>
           <p className="text-sm text-night/55">
             {loading ? 'Chargement...' : `${activeCampaigns.length} campagne${activeCampaigns.length > 1 ? 's' : ''} suivie${activeCampaigns.length > 1 ? 's' : ''}`}
@@ -784,7 +784,7 @@ export default function ProDashboardPublicitePage() {
           <p className="mt-4 text-sm text-night/55">Chargement...</p>
         ) : campaigns.length === 0 ? (
           <div className="mt-4 rounded-2xl border border-dashed border-[var(--color-border)] px-6 py-12 text-center text-night/55">
-            Aucune campagne enregistr�e pour le moment.
+            Aucune campagne enregistrï¿½e pour le moment.
           </div>
         ) : (
           <div className="mt-4 overflow-x-auto rounded-[1.5rem] border border-[var(--color-border)]">
@@ -793,8 +793,8 @@ export default function ProDashboardPublicitePage() {
                 <tr>
                   <th className="px-4 py-3 text-left font-semibold">Type</th>
                   <th className="px-4 py-3 text-left font-semibold">Titre</th>
-                  <th className="px-4 py-3 text-left font-semibold">Catégorie</th>
-                  <th className="px-4 py-3 text-left font-semibold">D�but</th>
+                  <th className="px-4 py-3 text-left font-semibold">CatÃ©gorie</th>
+                  <th className="px-4 py-3 text-left font-semibold">Dï¿½but</th>
                   <th className="px-4 py-3 text-left font-semibold">Fin</th>
                   <th className="px-4 py-3 text-left font-semibold">Prix</th>
                   <th className="px-4 py-3 text-left font-semibold">Statut</th>

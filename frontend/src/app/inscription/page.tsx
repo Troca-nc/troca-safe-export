@@ -33,14 +33,14 @@ import { useAuthStore } from '@/store/authStore'
 
 const schema = z
   .object({
-    first_name: z.string().min(2, 'Pr�nom requis'),
+    first_name: z.string().min(2, 'Prï¿½nom requis'),
     last_name: z.string().min(2, 'Nom requis'),
     email: z.string().email('Adresse e-mail invalide'),
-    phone: z.string().regex(/^(\+687|0)[0-9]{6}$/, 'Num�ro NC invalide'),
+    phone: z.string().regex(/^(\+687|0)[0-9]{6}$/, 'Numï¿½ro NC invalide'),
     commune_id: z.string().optional(),
     password: z
       .string()
-      .min(8, 'Au moins 8 caract�res')
+      .min(8, 'Au moins 8 caractï¿½res')
       .regex(/[A-Z]/, 'Au moins une majuscule')
       .regex(/[0-9]/, 'Au moins un chiffre'),
     password_confirm: z.string(),
@@ -56,15 +56,15 @@ type ProfileChoice = 'particulier' | 'pro'
 type BillingCycle = 'monthly' | 'annual'
 
 const STEPS: Array<{ id: Step; label: string; helper: string }> = [
-  { id: 1, label: 'Profil', helper: 'Compte et acc�s' },
-  { id: 2, label: 'Identit�', helper: 'Vos informations' },
+  { id: 1, label: 'Profil', helper: 'Compte et accï¿½s' },
+  { id: 2, label: 'Identitï¿½', helper: 'Vos informations' },
   { id: 3, label: 'Formule', helper: 'Votre compte' },
 ]
 
 const COMMUNE_PLACEHOLDER = 'Choisir une commune'
 
 const PLAN_FEATURES = [
-  { label: 'Annonces actives', free: '5', pro: '��~' },
+  { label: 'Annonces actives', free: '5', pro: 'ï¿½ï¿½~' },
   { label: 'Photos par annonce', free: '6', pro: '12' },
   { label: 'Badge visible', free: 'Non', pro: 'Oui' },
   { label: 'Statistiques', free: 'Non', pro: 'Oui' },
@@ -72,7 +72,7 @@ const PLAN_FEATURES = [
 
 const PANEL_STATS = [
   { value: '0 F', label: 'Pour publier' },
-  { value: '17', label: 'Catégories' },
+  { value: '17', label: 'CatÃ©gories' },
   { value: '100%', label: 'Local NC' },
 ] as const
 
@@ -85,34 +85,34 @@ const PANEL_FEATURES = [
   {
     icon: ArrowLeftRight,
     title: 'Troc',
-    description: "�changez ce que vous avez contre ce qu'il vous faut.",
+    description: "ï¿½changez ce que vous avez contre ce qu'il vous faut.",
   },
   {
     icon: Car,
     title: 'Covoiturage',
-    description: 'Trajets entre communes, r�servation simple.',
+    description: 'Trajets entre communes, rï¿½servation simple.',
   },
   {
     icon: FileText,
     title: 'Devis Pro',
-    description: 'Cr�ez et envoyez vos devis en XPF avec TGC.',
+    description: 'Crï¿½ez et envoyez vos devis en XPF avec TGC.',
   },
   {
     icon: Truck,
     title: 'Livraison',
-    description: 'Colis et fret entre communes et vers les �les.',
+    description: 'Colis et fret entre communes et vers les ï¿½les.',
   },
   {
     icon: CalendarHeart,
-    title: 'Bons plans et �v�nements',
-    description: 'Offres locales, concerts, march�s pr�s de chez vous.',
+    title: 'Bons plans et ï¿½vï¿½nements',
+    description: 'Offres locales, concerts, marchï¿½s prï¿½s de chez vous.',
   },
 ] as const
 
 const TRUST_ITEMS = [
-  { icon: ShieldCheck, label: 'Paiement s�curis�' },
-  { icon: Lock, label: 'Donn�es locales' },
-  { icon: CheckCircle2, label: 'Pros vérifiés' },
+  { icon: ShieldCheck, label: 'Paiement sï¿½curisï¿½' },
+  { icon: Lock, label: 'Donnï¿½es locales' },
+  { icon: CheckCircle2, label: 'Pros vÃ©rifiÃ©s' },
 ] as const
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() || ''
@@ -133,13 +133,13 @@ function strengthLabel(score: number) {
   if (score <= 1) return 'Faible'
   if (score === 2) return 'Moyen'
   if (score === 3) return 'Fort'
-  return 'Tr�s fort'
+  return 'Trï¿½s fort'
 }
 
 function PasswordRules({ password }: { password: string }) {
   const score = passwordScore(password)
   const labels = [
-    { ok: password.length >= 8, label: '8 caract�res' },
+    { ok: password.length >= 8, label: '8 caractï¿½res' },
     { ok: /[A-Z]/.test(password), label: '1 majuscule' },
     { ok: /[0-9]/.test(password), label: '1 chiffre' },
     { ok: /[^A-Za-z0-9]/.test(password), label: '1 symbole' },
@@ -148,7 +148,7 @@ function PasswordRules({ password }: { password: string }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Solidit� du mot de passe</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Soliditï¿½ du mot de passe</p>
         <p className="text-xs font-semibold text-night/55">{strengthLabel(score)}</p>
       </div>
       <div className="grid grid-cols-4 gap-2">
@@ -197,20 +197,20 @@ function getRegistrationError(err: any): RegistrationError {
 
   if (raw.includes('email') || raw.includes('already exists')) {
     return {
-      message: 'Cet email est d�j� utilis�. Connectez-vous ou utilisez un autre email.',
+      message: 'Cet email est dï¿½jï¿½ utilisï¿½. Connectez-vous ou utilisez un autre email.',
       ctaHref: '/connexion',
-      ctaLabel: 'Se connecter � ',
+      ctaLabel: 'Se connecter ï¿½ ',
     }
   }
 
   if (raw.includes('network') || raw.includes('fetch')) {
     return {
-      message: 'Connexion impossible. V�rifiez votre r�seau et r�essayez.',
+      message: 'Connexion impossible. Vï¿½rifiez votre rï¿½seau et rï¿½essayez.',
     }
   }
 
   return {
-    message: 'Une erreur est survenue. R�essayez dans un moment.',
+    message: 'Une erreur est survenue. Rï¿½essayez dans un moment.',
   }
 }
 
@@ -342,7 +342,7 @@ export default function RegisterPage() {
       const { password_confirm: _passwordConfirm, ...payload } = data
       if (turnstileEnabled && !turnstileToken) {
         setServerError({
-          message: "Veuillez confirmer que vous n'�tes pas un robot.",
+          message: "Veuillez confirmer que vous n'ï¿½tes pas un robot.",
         })
         return
       }
@@ -401,7 +401,7 @@ export default function RegisterPage() {
               <div className="max-w-2xl">
                 <h1 className="mt-2 font-display text-4xl font-bold text-night md:text-5xl">Rejoindre Kalico</h1>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-night/60 md:text-base">
-                  Trois �tapes, deux minutes. Votre annonce peut �tre en ligne d�s maintenant.
+                  Trois ï¿½tapes, deux minutes. Votre annonce peut ï¿½tre en ligne dï¿½s maintenant.
                 </p>
               </div>
             </div>
@@ -419,7 +419,7 @@ export default function RegisterPage() {
                   <p>{serverError.message}</p>
                   {serverError.ctaHref ? (
                     <Link href={serverError.ctaHref} className="mt-1 inline-flex items-center gap-1 font-semibold underline underline-offset-2">
-                      {serverError.ctaLabel || 'Se connecter � '}
+                      {serverError.ctaLabel || 'Se connecter ï¿½ '}
                     </Link>
                   ) : null}
                 </div>
@@ -432,9 +432,9 @@ export default function RegisterPage() {
                   <section className="space-y-4 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">�tape 1</p>
-                        <h2 className="mt-2 text-2xl font-semibold text-night">Cr�ez votre compte</h2>
-                        <p className="mt-1 text-sm text-night/55">E-mail, mot de passe et acc�s rapide avec Google si vous le souhaitez.</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">ï¿½tape 1</p>
+                        <h2 className="mt-2 text-2xl font-semibold text-night">Crï¿½ez votre compte</h2>
+                        <p className="mt-1 text-sm text-night/55">E-mail, mot de passe et accï¿½s rapide avec Google si vous le souhaitez.</p>
                       </div>
                     </div>
 
@@ -466,7 +466,7 @@ export default function RegisterPage() {
                             {...register('password')}
                             type={showPassword ? 'text' : 'password'}
                             className="input h-12 w-full pr-12"
-                            placeholder="Cr�ez un mot de passe"
+                            placeholder="Crï¿½ez un mot de passe"
                           />
                           <button
                             type="button"
@@ -487,7 +487,7 @@ export default function RegisterPage() {
                           {...register('password_confirm')}
                           type={showPassword ? 'text' : 'password'}
                           className="input h-12 w-full"
-                          placeholder="R�p�tez le mot de passe"
+                          placeholder="Rï¿½pï¿½tez le mot de passe"
                         />
                         {errors.password_confirm ? <p className="field-error">{errors.password_confirm.message}</p> : null}
                       </label>
@@ -500,7 +500,7 @@ export default function RegisterPage() {
                       </Link>{' '}
                       et notre{' '}
                       <Link href="/politique-de-confidentialite" className="underline underline-offset-2 hover:text-night/70">
-                        politique de confidentialit�
+                        politique de confidentialitï¿½
                       </Link>
                       .
                     </p>
@@ -510,7 +510,7 @@ export default function RegisterPage() {
                 {step === 2 ? (
                   <section className="space-y-5 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">�tape 2</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">ï¿½tape 2</p>
                       <h2 className="mt-2 text-2xl font-semibold text-night">Parlez-nous de vous</h2>
                       <p className="mt-1 text-sm text-night/55">Juste l'essentiel pour commencer.</p>
                     </div>
@@ -536,8 +536,8 @@ export default function RegisterPage() {
 
                       <div className="grid gap-4 md:grid-cols-2">
                         <label className="space-y-2">
-                          <span className="field-label">Pr�nom</span>
-                          <input {...register('first_name')} className="input h-12 w-full" placeholder="Votre pr�nom" />
+                          <span className="field-label">Prï¿½nom</span>
+                          <input {...register('first_name')} className="input h-12 w-full" placeholder="Votre prï¿½nom" />
                           {errors.first_name ? <p className="field-error">{errors.first_name.message}</p> : null}
                         </label>
                         <label className="space-y-2">
@@ -547,11 +547,11 @@ export default function RegisterPage() {
                         </label>
 
                         <label className="space-y-2 md:col-span-2">
-                          <span className="field-label">T�l�phone mobile</span>
+                          <span className="field-label">Tï¿½lï¿½phone mobile</span>
                           <input {...register('phone')} className="input h-12 w-full" placeholder="+687..." />
                           {errors.phone ? <p className="field-error">{errors.phone.message}</p> : null}
                           <p className="text-xs text-night/45">
-                            N�cessaire pour la r�cup�ration de mot de passe si vous choisissez l'option SMS.
+                            Nï¿½cessaire pour la rï¿½cupï¿½ration de mot de passe si vous choisissez l'option SMS.
                           </p>
                         </label>
 
@@ -574,14 +574,14 @@ export default function RegisterPage() {
                         active={selectedProfile === 'particulier'}
                         icon={UserRound}
                         title="Particulier"
-                        description="J'ach�te, je vends, je troque et je publie pour un usage personnel."
+                        description="J'achï¿½te, je vends, je troque et je publie pour un usage personnel."
                         onClick={() => setSelectedProfile('particulier')}
                       />
                       <AccountTypeCard
                         active={selectedProfile === 'pro'}
                         icon={Store}
                         title="Professionnel"
-                        description="Enseigne, commerce, agence ou vendeur r�gulier qui veut plus de visibilit�."
+                        description="Enseigne, commerce, agence ou vendeur rï¿½gulier qui veut plus de visibilitï¿½."
                         onClick={() => setSelectedProfile('pro')}
                       />
                     </div>
@@ -591,10 +591,10 @@ export default function RegisterPage() {
                 {step === 3 && selectedProfile === 'pro' ? (
                   <section className="space-y-5 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">�tape 3</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">ï¿½tape 3</p>
                       <h2 className="mt-2 text-2xl font-semibold text-night">Choisissez votre plan</h2>
                       <p className="mt-1 text-sm text-night/55">
-                        Vous pouvez commencer gratuitement ou profiter du Pro quand votre activit� le justifie.
+                        Vous pouvez commencer gratuitement ou profiter du Pro quand votre activitï¿½ le justifie.
                       </p>
                     </div>
 
@@ -605,7 +605,7 @@ export default function RegisterPage() {
                         disabled={isSubmitting}
                         className="btn-primary w-full"
                       >
-                        {isSubmitting ? 'Cr�ation...' : 'Commencer gratuitement'}
+                        {isSubmitting ? 'Crï¿½ation...' : 'Commencer gratuitement'}
                       </button>
 
                       <button
@@ -614,7 +614,7 @@ export default function RegisterPage() {
                         className="inline-flex items-center gap-1 text-sm font-semibold text-coral hover:underline"
                         aria-expanded={showProOptions}
                       >
-                        Voir les options Pro � 
+                        Voir les options Pro ï¿½ 
                       </button>
                     </div>
 
@@ -637,7 +637,7 @@ export default function RegisterPage() {
                               </li>
                               <li className="flex items-center gap-2">
                                 <X className="h-4 w-4 text-night/35" />
-                                60 jours de visibilit�
+                                60 jours de visibilitï¿½
                               </li>
                             </ul>
                           </article>
@@ -645,7 +645,7 @@ export default function RegisterPage() {
                           <article className="pulse-once rounded-[1.75rem] border border-coral/20 bg-[linear-gradient(180deg,rgba(10,126,164,0.08),rgba(255,255,255,1))] p-5 shadow-lg shadow-coral/10">
                             <div className="flex items-center justify-between gap-3">
                               <span className="inline-flex items-center rounded-full bg-coral px-3 py-1 text-xs font-semibold text-white">
-                                Recommand�
+                                Recommandï¿½
                               </span>
                               <button
                                 type="button"
@@ -664,7 +664,7 @@ export default function RegisterPage() {
                             {billingCycle === 'annual' ? (
                               <p className="mt-2 text-sm font-semibold text-jungle">2 mois offerts</p>
                             ) : (
-                              <p className="mt-2 text-sm text-night/55">Paiement flexible, � tout moment.</p>
+                              <p className="mt-2 text-sm text-night/55">Paiement flexible, ï¿½ tout moment.</p>
                             )}
 
                             <div className="mt-5 space-y-3">
@@ -697,7 +697,7 @@ export default function RegisterPage() {
                             <div className="mt-5 grid gap-3 rounded-2xl border border-coral/15 bg-coral/5 p-4 text-sm text-night/65">
                               <div className="flex items-center justify-between gap-3">
                                 <span>Annonces</span>
-                                <strong className="text-coral">��~ vs 5</strong>
+                                <strong className="text-coral">ï¿½ï¿½~ vs 5</strong>
                               </div>
                               <div className="flex items-center justify-between gap-3">
                                 <span>Photos</span>
@@ -732,9 +732,9 @@ export default function RegisterPage() {
                     ) : null}
 
                     <p className="text-center text-sm text-night/55">
-                      Pas encore d�cid� ?{' '}
+                      Pas encore dï¿½cidï¿½ ?{' '}
                       <button type="button" onClick={() => setSelectedProfile('particulier')} className="font-semibold text-coral hover:underline">
-                        Commencez gratuitement � 
+                        Commencez gratuitement ï¿½ 
                       </button>
                     </p>
                   </section>
@@ -760,12 +760,12 @@ export default function RegisterPage() {
                   </button>
                 ) : step === 2 ? (
                   <button type="button" onClick={nextFromStep2} className="btn-primary px-5 py-3">
-                    {canSubmitAtStep2 ? 'Cr�er mon compte' : 'Continuer'}
+                    {canSubmitAtStep2 ? 'Crï¿½er mon compte' : 'Continuer'}
                     <ArrowRight className="h-4 w-4" />
                   </button>
                 ) : (
                   <button type="submit" disabled={isSubmitting} className="btn-primary px-5 py-3 disabled:cursor-not-allowed disabled:opacity-60">
-                    {isSubmitting ? 'Cr�ation...' : 'Cr�er mon compte'}
+                    {isSubmitting ? 'Crï¿½ation...' : 'Crï¿½er mon compte'}
                   </button>
                 )}
               </div>
@@ -803,7 +803,7 @@ export default function RegisterPage() {
                   style={{ fontFamily: 'var(--font-display), Georgia, serif' }}
                 >
                   <span className="block">Ce que vous pouvez faire</span>
-                  <span className="block text-coral">d�s maintenant.</span>
+                  <span className="block text-coral">dï¿½s maintenant.</span>
                 </h2>
               </div>
 
@@ -811,7 +811,7 @@ export default function RegisterPage() {
                 className="signup-panel-anim mx-auto max-w-[300px] font-display text-[15px] italic leading-6 text-[var(--color-text-secondary)] dark:text-white/65"
                 style={{ animationDelay: '180ms', fontFamily: 'var(--font-display), Georgia, serif' }}
               >
-                Nouvelle-Calédonie dans l'�me, Kalico dans la poche.
+                Nouvelle-CalÃ©donie dans l'ï¿½me, Kalico dans la poche.
               </p>
 
               <div

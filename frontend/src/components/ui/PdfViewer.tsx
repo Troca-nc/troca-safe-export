@@ -74,14 +74,14 @@ export default function PdfViewer({ url, onClose, title = 'Catalogue PDF' }: Pdf
             className="inline-flex h-10 items-center gap-2 rounded-2xl border border-[var(--color-border)] px-3 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
           >
             <Download className="h-4 w-4" />
-            T�l�charger
+            Tï¿½lï¿½charger
           </a>
           <button
             type="button"
             onClick={prevPage}
             disabled={currentPage <= 1}
             className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] text-night transition hover:bg-[var(--color-background-secondary)] disabled:cursor-not-allowed disabled:opacity-40"
-            aria-label="Page pr�c�dente"
+            aria-label="Page prï¿½cï¿½dente"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -99,7 +99,7 @@ export default function PdfViewer({ url, onClose, title = 'Catalogue PDF' }: Pdf
               type="button"
               onClick={() => setZoom(zoom - 0.25)}
               className="inline-flex h-10 w-10 items-center justify-center text-night transition hover:bg-[var(--color-background-secondary)]"
-              aria-label="R�duire le zoom"
+              aria-label="Rï¿½duire le zoom"
             >
               <Minus className="h-4 w-4" />
             </button>
@@ -117,7 +117,7 @@ export default function PdfViewer({ url, onClose, title = 'Catalogue PDF' }: Pdf
             type="button"
             onClick={toggleFullscreen}
             className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] text-night transition hover:bg-[var(--color-background-secondary)]"
-            aria-label="Plein �cran"
+            aria-label="Plein ï¿½cran"
           >
             <Maximize2 className="h-4 w-4" />
           </button>
@@ -137,7 +137,7 @@ export default function PdfViewer({ url, onClose, title = 'Catalogue PDF' }: Pdf
           <div className="max-w-xl rounded-[1.5rem] border border-amber-200 bg-amber-50 p-5 text-center text-sm text-amber-800">
             <p className="font-semibold">Impossible de charger le PDF.</p>
             <a href={url} target="_blank" rel="noreferrer" className="mt-3 inline-flex rounded-2xl bg-[#0A7EA4] px-4 py-2.5 font-semibold text-white">
-              T�l�charger le fichier
+              Tï¿½lï¿½charger le fichier
             </a>
           </div>
         ) : pageImage ? (
@@ -148,7 +148,7 @@ export default function PdfViewer({ url, onClose, title = 'Catalogue PDF' }: Pdf
           />
         ) : (
           <div className="rounded-[1.5rem] border border-dashed border-[var(--color-border)] bg-white px-6 py-10 text-sm text-night/55">
-            Aucun aper�u disponible.
+            Aucun aperï¿½u disponible.
           </div>
         )}
       </div>

@@ -34,17 +34,17 @@ const NAV_ITEMS = [
   { href: '/pro/dashboard/rdv', label: 'Rendez-vous', icon: CalendarDays },
   { href: '/pro/dashboard/annonces', label: 'Mes annonces', icon: Store },
   { href: '/pro/dashboard/boosts', label: 'Boosts', icon: Bell },
-  { href: '/pro/dashboard/publicite', label: 'Publicit�', icon: Megaphone },
+  { href: '/pro/dashboard/publicite', label: 'Publicitï¿½', icon: Megaphone },
   { href: '/pro/dashboard/factures', label: 'Factures', icon: FileText },
   { href: '/pro/dashboard/devis', label: 'Devis', icon: FileSignature },
   { href: '/pro/dashboard/coupons', label: 'Coupons', icon: QrCode },
   { href: '/pro/dashboard/parrainage', label: 'Parrainage', icon: Users2 },
   { href: '/pro/dashboard/pack-lancement', label: 'Pack lancement', icon: Rocket },
-  { href: '/pro/dashboard/auto-reply', label: 'R�ponse auto', icon: MessageCircle },
+  { href: '/pro/dashboard/auto-reply', label: 'Rï¿½ponse auto', icon: MessageCircle },
   { href: '/pro/dashboard/transport', label: 'Transport', icon: Building2 },
   { href: '/pro/dashboard/envoi-livraison', label: 'Envoi & Livraison', icon: Truck },
   { href: '/pro/[id]', label: 'Ma vitrine', icon: Building2 },
-  { href: '/pro/dashboard/parametres', label: 'Paramètres Pro', icon: Settings2 },
+  { href: '/pro/dashboard/parametres', label: 'ParamÃ¨tres Pro', icon: Settings2 },
 ] as const
 
 function isActivePath(pathname: string, href: string) {

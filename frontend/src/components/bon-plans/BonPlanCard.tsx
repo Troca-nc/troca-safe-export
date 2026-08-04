@@ -58,11 +58,11 @@ function cleanText(value?: string | null, fallback = '') {
 }
 
 function daysLeftLabel(value?: string | null) {
-  if (!value) return 'Bient�t fini'
+  if (!value) return 'Bientï¿½t fini'
   const end = new Date(value)
-  if (Number.isNaN(end.getTime())) return 'Bient�t fini'
+  if (Number.isNaN(end.getTime())) return 'Bientï¿½t fini'
   const days = Math.max(0, Math.ceil((end.getTime() - Date.now()) / 86_400_000))
-  return days <= 0 ? 'Termin�' : `Plus que ${days} jour${days > 1 ? 's' : ''}`
+  return days <= 0 ? 'Terminï¿½' : `Plus que ${days} jour${days > 1 ? 's' : ''}`
 }
 
 function getCategoryTone(bonPlan: BonPlanCardModel) {
@@ -98,7 +98,7 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
         {bonPlan.image_url ? (
           <Image src={bonPlan.image_url} alt={bonPlan.title} fill className="object-cover" sizes="(max-width: 640px) 90vw, 33vw" />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-4xl opacity-30">🎭</div>
+          <div className="flex h-full w-full items-center justify-center text-4xl opacity-30">ð­</div>
         )}
 
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
@@ -126,7 +126,7 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
           {business?.badge === 'verified' ? (
             <span className="badge badge-emeraude inline-flex items-center gap-1 text-[11px] shadow-sm">
               <Check className="h-3 w-3" />
-              V�rifi� Kalico
+              Vï¿½rifiï¿½ Kalico
             </span>
           ) : business?.badge === 'active' ? (
             <span className="badge badge-emeraude inline-flex items-center gap-1 text-[11px] shadow-sm">
@@ -160,7 +160,7 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
           ) : null}
         </div>
 
-        <p className="line-clamp-3 text-sm leading-relaxed text-night/65">{cleanText(bonPlan.description, 'D�couvrez cette offre locale.')}</p>
+        <p className="line-clamp-3 text-sm leading-relaxed text-night/65">{cleanText(bonPlan.description, 'Dï¿½couvrez cette offre locale.')}</p>
 
         <div className="flex items-baseline gap-2">
           {priceBefore ? <span className="text-sm text-night/45 line-through">{priceBefore}</span> : null}

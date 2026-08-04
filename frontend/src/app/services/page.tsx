@@ -6,7 +6,7 @@ export default function ServicesPage() {
     <Suspense fallback={<div className="min-h-screen bg-sand-light" />}>
       <CategoryFeedPage
         title="Services entre particuliers"
-        subtitle="Jardinage, r�paration, cours, m�nage, informatique et autres services locaux."
+        subtitle="Jardinage, rï¿½paration, cours, mï¿½nage, informatique et autres services locaux."
         categorySlug="services"
         accentLabel="Prestations locales"
       />

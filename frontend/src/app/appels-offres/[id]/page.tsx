@@ -6,8 +6,8 @@ type PageProps = {
 }
 
 export const metadata = {
-  title: "D�tail de la demande � Kalico NC",
-  description: "Consultez le d�tail d'une demande d'appel d'offres et acc�dez rapidement au devis ou � la vitrine du professionnel.",
+  title: "Dï¿½tail de la demande ï¿½ Kalico NC",
+  description: "Consultez le dï¿½tail d'une demande d'appel d'offres et accï¿½dez rapidement au devis ou ï¿½ la vitrine du professionnel.",
 }
 
 export default async function AppelsOffresDetailPage({ params }: PageProps) {

@@ -1,6 +1,6 @@
 'use client'
 // ============================================================
-//  Kalico  Gestion du th�me (clair / sombre)
+//  Kalico  Gestion du thï¿½me (clair / sombre)
 // ============================================================
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'

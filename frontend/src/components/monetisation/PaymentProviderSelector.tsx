@@ -20,15 +20,15 @@ const OPTIONS: Array<{
   {
     value: 'stripe',
     title: 'Carte bancaire internationale',
-    subtitle: 'Visa, Mastercard, Amex et cartes �trang�res',
-    note: 'Paiement s�curis� et rapide via Stripe.',
+    subtitle: 'Visa, Mastercard, Amex et cartes ï¿½trangï¿½res',
+    note: 'Paiement sï¿½curisï¿½ et rapide via Stripe.',
     icon: CreditCard,
   },
   {
     value: 'payplug',
-    title: 'Carte OPT-NC / r�seau local',
-    subtitle: 'Cartes locales en Nouvelle-Calédonie',
-    note: 'Id�al pour les paiements locaux via PayPlug.',
+    title: 'Carte OPT-NC / rï¿½seau local',
+    subtitle: 'Cartes locales en Nouvelle-CalÃ©donie',
+    note: 'Idï¿½al pour les paiements locaux via PayPlug.',
     icon: Landmark,
   },
 ]
@@ -39,7 +39,7 @@ export function PaymentProviderSelector({ value, onChange, className = '' }: Pay
       <div className="mb-3">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">Moyen de paiement</p>
         <p className="mt-1 text-sm text-night/55">
-          Choisissez le tunnel le plus adapt� � votre carte. Vous pourrez changer d&apos;option avant la confirmation.
+          Choisissez le tunnel le plus adaptï¿½ ï¿½ votre carte. Vous pourrez changer d&apos;option avant la confirmation.
         </p>
       </div>
 
@@ -73,7 +73,7 @@ export function PaymentProviderSelector({ value, onChange, className = '' }: Pay
                   {active && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.15em] text-coral">
                       <Check size={10} />
-                      S�lectionn�
+                      Sï¿½lectionnï¿½
                     </span>
                   )}
                 </span>

@@ -17,12 +17,12 @@ import { DEFAULT_OG_IMAGE, SITE_LOCALE, SITE_NAME, SITE_TWITTER, SITE_URL } from
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'Kalico - Petites annonces Nouvelle-Calédonie',
-  description: 'La premi�re plateforme de petites annonces d�di�e � la Nouvelle-Calédonie. Achetez, vendez, louez en toute confiance.',
-  keywords: 'annonces, nouvelle-cal�donie, noumea, vente, achat, immobilier, v�hicules',
+  title: 'Kalico - Petites annonces Nouvelle-CalÃ©donie',
+  description: 'La premiï¿½re plateforme de petites annonces dï¿½diï¿½e ï¿½ la Nouvelle-CalÃ©donie. Achetez, vendez, louez en toute confiance.',
+  keywords: 'annonces, nouvelle-calï¿½donie, noumea, vente, achat, immobilier, vï¿½hicules',
   openGraph: {
     title: SITE_NAME,
-    description: 'Petites annonces Nouvelle-Calédonie',
+    description: 'Petites annonces Nouvelle-CalÃ©donie',
     url: SITE_URL,
     locale: SITE_LOCALE,
     type: 'website',
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: SITE_NAME,
-    description: 'Petites annonces Nouvelle-Calédonie',
+    description: 'Petites annonces Nouvelle-CalÃ©donie',
     images: [DEFAULT_OG_IMAGE],
     site: SITE_TWITTER,
   },

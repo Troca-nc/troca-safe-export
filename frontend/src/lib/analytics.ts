@@ -93,7 +93,7 @@ export async function trackEvent(
     return response.status >= 200 && response.status < 300
   } catch {
     if (process.env.NODE_ENV === 'development') {
-      console.warn('[analytics] impossible denregistrer l�v�nement')
+      console.warn('[analytics] impossible denregistrer lï¿½vï¿½nement')
     }
     return false
   }

@@ -22,7 +22,7 @@ import Link from 'next/link'
 
 const TABS = [
   { id: 'listings', label: 'Annonces',     icon: <Package   className="w-4 h-4" /> },
-  { id: 'reviews',  label: 'Avis re�us',   icon: <BadgeCheck className="w-4 h-4" /> },
+  { id: 'reviews',  label: 'Avis reï¿½us',   icon: <BadgeCheck className="w-4 h-4" /> },
 ]
 
 type SubscriptionStatus = {
@@ -40,9 +40,9 @@ function getSubscriptionStatusMeta(status?: SubscriptionStatus | null) {
   if (status.status === 'payment_failed') {
     return {
       tone: 'danger' as const,
-      label: 'Paiement �chou�',
-      description: 'Mettez � jour votre moyen de paiement pour conserver vos avantages Pro.',
-      cta: { href: '/parametres#factures', label: 'Mettre � jour mon moyen de paiement' },
+      label: 'Paiement ï¿½chouï¿½',
+      description: 'Mettez ï¿½ jour votre moyen de paiement pour conserver vos avantages Pro.',
+      cta: { href: '/parametres#factures', label: 'Mettre ï¿½ jour mon moyen de paiement' },
       icon: AlertTriangle,
     }
   }
@@ -50,9 +50,9 @@ function getSubscriptionStatusMeta(status?: SubscriptionStatus | null) {
   if (status.status === 'expired') {
     return {
       tone: 'danger' as const,
-      label: 'Abonnement expir�',
-      description: 'Votre abonnement a expir�. R�activez-le pour retrouver vos avantages Pro.',
-      cta: { href: '/abonnement', label: 'R�activer mon abonnement' },
+      label: 'Abonnement expirï¿½',
+      description: 'Votre abonnement a expirï¿½. Rï¿½activez-le pour retrouver vos avantages Pro.',
+      cta: { href: '/abonnement', label: 'Rï¿½activer mon abonnement' },
       icon: AlertTriangle,
     }
   }
@@ -61,7 +61,7 @@ function getSubscriptionStatusMeta(status?: SubscriptionStatus | null) {
     return {
       tone: 'warning' as const,
       label: `Expire dans ${status.days_remaining} jour${status.days_remaining > 1 ? 's' : ''}`,
-      description: 'Votre abonnement arrive � �ch�ance. Renouvelez pour �viter une interruption.',
+      description: 'Votre abonnement arrive ï¿½ ï¿½chï¿½ance. Renouvelez pour ï¿½viter une interruption.',
       cta: { href: '/abonnement', label: 'Renouveler maintenant' },
       icon: Clock3,
     }
@@ -81,7 +81,7 @@ function ProfilePageContent() {
   const searchParams = useSearchParams()
   const { user: me, demoProfile, authReady } = useAuthSessionSync()
 
-  // Si pas d'id dans l'URL �  mon profil
+  // Si pas d'id dans l'URL ï¿½  mon profil
   const profileId = params?.id || me?.id
   const isOwn     = !params?.id || params.id === me?.id
   const demoActive = Boolean(demoProfile || me?.demo_role || inferDemoAccount(me?.email))
@@ -210,19 +210,19 @@ function ProfilePageContent() {
           <div className="w-full rounded-[2rem] border border-night/8 bg-white dark:bg-[var(--color-surface)] p-8 shadow-card">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Profil</p>
             <h1 className="mt-3 font-display text-3xl font-bold text-night">
-              {profileId ? 'Chargement de votre profil' : 'Connectez-vous pour acc�der � votre espace.'}
+              {profileId ? 'Chargement de votre profil' : 'Connectez-vous pour accï¿½der ï¿½ votre espace.'}
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-night/60">
               {profileId
-                ? 'Votre espace personnel est en cours de chargement. Si la page reste vide, reconnectez-vous pour r�initialiser la session.'
-                : 'Vous devez �tre connect� pour consulter ou modifier votre profil. Utilisez votre compte Kalico pour acc�der � cet espace.'}
+                ? 'Votre espace personnel est en cours de chargement. Si la page reste vide, reconnectez-vous pour rï¿½initialiser la session.'
+                : 'Vous devez ï¿½tre connectï¿½ pour consulter ou modifier votre profil. Utilisez votre compte Kalico pour accï¿½der ï¿½ cet espace.'}
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link href="/connexion" className="btn-primary px-4 py-2 text-sm">
                 Se connecter
               </Link>
               <Link href="/inscription" className="btn-secondary px-4 py-2 text-sm">
-                Cr�er un compte
+                Crï¿½er un compte
               </Link>
             </div>
           </div>
@@ -242,30 +242,30 @@ function ProfilePageContent() {
           { value: '18', label: 'messages' },
           { value: '24', label: 'favoris' },
         ],
-        tabs: ['Annonces', 'Avis re�us', 'Favoris', 'Messages', 'Paramètres'],
-        hint: "Tu vois l'espace classique d'un utilisateur qui d�pose une annonce.",
+        tabs: ['Annonces', 'Avis reï¿½us', 'Favoris', 'Messages', 'ParamÃ¨tres'],
+        hint: "Tu vois l'espace classique d'un utilisateur qui dï¿½pose une annonce.",
       },
       pro: {
         title: 'Espace professionnel',
-        subtitle: 'Suivi de performance et visibilit�',
+        subtitle: 'Suivi de performance et visibilitï¿½',
         stats: [
           { value: '47', label: 'annonces' },
           { value: '1.2k', label: 'vues' },
           { value: '4.9', label: 'note' },
         ],
-        tabs: ['Annonces', 'Avis re�us', 'Statistiques', 'Boosts', 'Paramètres'],
-        hint: 'Tu vois un compte orient� business avec indicateurs de performance.',
+        tabs: ['Annonces', 'Avis reï¿½us', 'Statistiques', 'Boosts', 'ParamÃ¨tres'],
+        hint: 'Tu vois un compte orientï¿½ business avec indicateurs de performance.',
       },
       bon_plan: {
         title: 'Espace bon plan',
         subtitle: 'Campagnes locales et mises en avant',
         stats: [
           { value: '8', label: 'campagnes' },
-          { value: '5', label: 'b�n�fices' },
+          { value: '5', label: 'bï¿½nï¿½fices' },
           { value: '12', label: 'diffusions' },
         ],
-        tabs: ['Annonces', 'Avis re�us', 'Campagnes', 'Statistiques', 'Paramètres'],
-        hint: 'Tu vois une interface pens�e pour une promo, un �v�nement ou une annonce sponsoris�e.',
+        tabs: ['Annonces', 'Avis reï¿½us', 'Campagnes', 'Statistiques', 'ParamÃ¨tres'],
+        hint: 'Tu vois une interface pensï¿½e pour une promo, un ï¿½vï¿½nement ou une annonce sponsorisï¿½e.',
       },
     }[demoKey]
 
@@ -280,22 +280,22 @@ function ProfilePageContent() {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Onboarding du compte</p>
                 <h2 className="mt-1 font-display text-2xl font-bold text-night">
                   {demoKey === 'pro'
-                    ? 'Votre espace professionnel est pr�t'
+                    ? 'Votre espace professionnel est prï¿½t'
                     : demoKey === 'bon_plan'
-                      ? 'Votre espace bon plan est pr�t'
-                      : 'Votre espace particulier est pr�t'}
+                      ? 'Votre espace bon plan est prï¿½t'
+                      : 'Votre espace particulier est prï¿½t'}
                 </h2>
                 <p className="mt-1 text-sm text-night/60">
                   {demoKey === 'pro'
-                    ? 'Compl�tez les infos soci�t�, activez les options de visibilit� et pr�parez vos annonces.'
+                    ? 'Complï¿½tez les infos sociï¿½tï¿½, activez les options de visibilitï¿½ et prï¿½parez vos annonces.'
                     : demoKey === 'bon_plan'
-                      ? 'Programmez vos promos, affichez vos campagnes et mesurez la visibilit�.'
-                      : 'Compl�tez votre profil, publiez une annonce et �changez avec les acheteurs.'}
+                      ? 'Programmez vos promos, affichez vos campagnes et mesurez la visibilitï¿½.'
+                      : 'Complï¿½tez votre profil, publiez une annonce et ï¿½changez avec les acheteurs.'}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Link href={demoKey === 'pro' ? '/parametres' : '/annonces/nouvelle'} className="btn-primary px-4 py-2 text-sm">
-                  {demoKey === 'pro' ? 'Configurer mon espace pro' : 'Déposer ma premi�re annonce'}
+                  {demoKey === 'pro' ? 'Configurer mon espace pro' : 'DÃ©poser ma premiï¿½re annonce'}
                 </Link>
                 <Link href="/annonces" className="btn-ghost px-4 py-2 text-sm">
                   Explorer les annonces
@@ -313,14 +313,14 @@ function ProfilePageContent() {
 
   const securityPanel = activeTab === 'securite' ? (
     <div className="card border-coral/15 bg-coral/5 p-5">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">S�curit� et connexion</p>
-      <h2 className="mt-2 text-xl font-bold text-night">Votre sécurité est active sur ce compte</h2>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Sï¿½curitï¿½ et connexion</p>
+      <h2 className="mt-2 text-xl font-bold text-night">Votre sÃ©curitÃ© est active sur ce compte</h2>
       <p className="mt-2 text-sm text-night/60">
-        Vous pouvez modifier votre mot de passe, v�rifier vos appareils actifs et consulter les options de r�cup�ration dans Paramètres.
+        Vous pouvez modifier votre mot de passe, vï¿½rifier vos appareils actifs et consulter les options de rï¿½cupï¿½ration dans ParamÃ¨tres.
       </p>
       <div className="mt-4 flex flex-wrap gap-3">
         <Link href="/parametres#donnees" className="btn-primary px-4 py-2 text-sm">
-          G�rer mes donn�es
+          Gï¿½rer mes donnï¿½es
         </Link>
         <Link href="/parametres#cookies" className="btn-ghost px-4 py-2 text-sm">
           Consentement cookies
@@ -332,13 +332,13 @@ function ProfilePageContent() {
   const notificationsPanel = activeTab === 'notifications' ? (
     <div className="card border-coral/15 bg-coral/5 p-5">
       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Notifications</p>
-      <h2 className="mt-2 text-xl font-bold text-night">Les notifications sont g�r�es depuis le compte</h2>
+      <h2 className="mt-2 text-xl font-bold text-night">Les notifications sont gï¿½rï¿½es depuis le compte</h2>
       <p className="mt-2 text-sm text-night/60">
-        Les alertes de recherche, les messages et les r�ponses dannonces restent visibles dans votre espace. Les r�glages d�taill�s sont accessibles depuis Paramètres de notification.
+        Les alertes de recherche, les messages et les rï¿½ponses dannonces restent visibles dans votre espace. Les rï¿½glages dï¿½taillï¿½s sont accessibles depuis ParamÃ¨tres de notification.
       </p>
       <div className="mt-4 flex flex-wrap gap-3">
         <Link href="/parametres/notifications" className="btn-primary px-4 py-2 text-sm">
-          Ouvrir les param�tres
+          Ouvrir les paramï¿½tres
         </Link>
         <Link href="/alertes" className="btn-ghost px-4 py-2 text-sm">
           Mes alertes
@@ -356,13 +356,13 @@ function ProfilePageContent() {
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Bons Plans</p>
-              <h3 className="mt-1 text-lg font-bold text-night">Tout est regroup� dans le centre de pr�f�rences</h3>
+              <h3 className="mt-1 text-lg font-bold text-night">Tout est regroupï¿½ dans le centre de prï¿½fï¿½rences</h3>
               <p className="mt-1 text-sm text-night/60">
-                Les promos, cat�gories, enseignes et canaux sont maintenant g�r�s dans Paramètres de notification pour �viter les doublons.
+                Les promos, catï¿½gories, enseignes et canaux sont maintenant gï¿½rï¿½s dans ParamÃ¨tres de notification pour ï¿½viter les doublons.
               </p>
             </div>
             <Link href="/parametres/notifications#bons-plans" className="btn-primary px-4 py-2 text-sm">
-              Ouvrir les pr�f�rences
+              Ouvrir les prï¿½fï¿½rences
             </Link>
           </div>
         </div>
@@ -377,7 +377,7 @@ function ProfilePageContent() {
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Favoris</p>
           <h2 className="mt-2 text-xl font-bold text-night">Mes favoris</h2>
           <p className="mt-2 text-sm text-night/60">
-            Retrouvez ici les annonces que vous avez mises en m�moire pour les consulter plus tard.
+            Retrouvez ici les annonces que vous avez mises en mï¿½moire pour les consulter plus tard.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -403,12 +403,12 @@ function ProfilePageContent() {
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Onboarding du compte</p>
               <h2 className="mt-1 font-display text-2xl font-bold text-night">
-                {profile?.is_pro ? 'Votre espace professionnel est pr�t' : 'Votre espace particulier est pr�t'}
+                {profile?.is_pro ? 'Votre espace professionnel est prï¿½t' : 'Votre espace particulier est prï¿½t'}
               </h2>
               <p className="mt-1 text-sm text-night/60">
                 {profile?.is_pro
-                  ? 'Compl�tez les infos soci�t�, activez les options de visibilit� et pr�parez vos annonces.'
-                  : 'Compl�tez votre profil, publiez une annonce et �changez avec les acheteurs.'}
+                  ? 'Complï¿½tez les infos sociï¿½tï¿½, activez les options de visibilitï¿½ et prï¿½parez vos annonces.'
+                  : 'Complï¿½tez votre profil, publiez une annonce et ï¿½changez avec les acheteurs.'}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -418,7 +418,7 @@ function ProfilePageContent() {
                 </Link>
               ) : (
                 <Link href="/annonces/nouvelle" className="btn-primary px-4 py-2 text-sm">
-                  Déposer ma premi�re annonce
+                  DÃ©poser ma premiï¿½re annonce
                 </Link>
               )}
               <Link href="/annonces" className="btn-ghost px-4 py-2 text-sm">
@@ -454,9 +454,9 @@ function ProfilePageContent() {
                   <p className="text-sm text-night/60">{subscriptionMeta.description}</p>
                   <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/75 dark:bg-[var(--color-surface)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-night/60">
                     {subscriptionStatus?.plan === 'pro' ? 'Pro' : 'Gratuit'}
-                    {subscriptionStatus?.payment_provider ? ` � ${subscriptionStatus.payment_provider.toUpperCase()}` : ''}
+                    {subscriptionStatus?.payment_provider ? ` ï¿½ ${subscriptionStatus.payment_provider.toUpperCase()}` : ''}
                     {typeof subscriptionStatus?.days_remaining === 'number' && subscriptionStatus.days_remaining > 0
-                      ? ` � ${subscriptionStatus.days_remaining} j`
+                      ? ` ï¿½ ${subscriptionStatus.days_remaining} j`
                       : ''}
                   </div>
                 </div>
@@ -483,7 +483,7 @@ function ProfilePageContent() {
 
         <ProfileDemoPreview mode="account" profile={demoKey} />
 
-        {/* ���� Carte profil ������������������������������������������������������ */}
+        {/* ï¿½ï¿½ï¿½ï¿½ Carte profil ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */}
         <div className="card p-6">
           <div className="flex flex-col sm:flex-row gap-5">
 
@@ -507,7 +507,7 @@ function ProfilePageContent() {
               <form onSubmit={handleSubmit(onSave)} className="flex-1 space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium text-night/60 mb-1 block">Pr�nom</label>
+                    <label className="text-xs font-medium text-night/60 mb-1 block">Prï¿½nom</label>
                     <input {...register('first_name')} className="input text-sm" />
                   </div>
                   <div>
@@ -516,11 +516,11 @@ function ProfilePageContent() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-night/60 mb-1 block">T�l�phone</label>
+                  <label className="text-xs font-medium text-night/60 mb-1 block">Tï¿½lï¿½phone</label>
                   <input {...register('phone')} placeholder="+687123456" className="input text-sm" />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-night/60 mb-1 block">Pr�sentation</label>
+                  <label className="text-xs font-medium text-night/60 mb-1 block">Prï¿½sentation</label>
                   <textarea {...register('bio')} rows={3} placeholder="Parlez un peu de vous&" className="input text-sm resize-none" />
                 </div>
                 <div className="flex gap-2">
@@ -546,7 +546,7 @@ function ProfilePageContent() {
                       <div className="flex items-center gap-2 mt-1">
                         <RatingRow rating={profile.rating} />
                         <span className="text-sm text-night/60">
-                          {parseFloat(profile.rating).toFixed(1)} � {profile.rating_count} avis
+                          {parseFloat(profile.rating).toFixed(1)} ï¿½ {profile.rating_count} avis
                         </span>
                       </div>
                     )}
@@ -569,7 +569,7 @@ function ProfilePageContent() {
                     <div className="flex flex-wrap gap-1.5 mt-3">
                       {profile.is_verified && (
                         <span className="badge bg-jungle/10 text-jungle text-xs">
-                          <CheckCircle2 className="w-3 h-3" /> Compte v�rifi�
+                          <CheckCircle2 className="w-3 h-3" /> Compte vï¿½rifiï¿½
                         </span>
                       )}
                       <span className="badge bg-sand text-night/50 text-xs">
@@ -599,7 +599,7 @@ function ProfilePageContent() {
           </div>
         </div>
 
-        {/* ���� Onglets ������������������������������������������������������������������ */}
+        {/* ï¿½ï¿½ï¿½ï¿½ Onglets ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */}
         <div className="flex w-full gap-1 overflow-x-auto rounded-2xl border border-night/10 bg-[var(--color-background-secondary)] p-1">
           {TABS.map((t) => (
             <button
@@ -619,16 +619,16 @@ function ProfilePageContent() {
           )}
         </div>
 
-        {/* ���� Contenu onglets �������������������������������������������������� */}
+        {/* ï¿½ï¿½ï¿½ï¿½ Contenu onglets ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */}
         {tab === 'listings' && (
           <div>
             {listings.length === 0 ? (
               <div className="text-center py-16 text-night/40">
                 <Package className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Vous n'avez pas encore d'annonce. Publiez la v�tre.</p>
+                <p className="text-sm">Vous n'avez pas encore d'annonce. Publiez la vï¿½tre.</p>
                 {isOwn && (
                   <Link href="/annonces/nouvelle" className="btn-primary text-sm mt-4 inline-flex">
-                    Déposer une annonce
+                    DÃ©poser une annonce
                   </Link>
                 )}
               </div>
@@ -645,7 +645,7 @@ function ProfilePageContent() {
             {reviews.length === 0 ? (
               <div className="text-center py-16 text-night/40">
                 <BadgeCheck className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Vos premiers avis appara�tront ici.</p>
+                <p className="text-sm">Vos premiers avis apparaï¿½tront ici.</p>
               </div>
             ) : (
               reviews.map((rev) => (

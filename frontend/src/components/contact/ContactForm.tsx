@@ -47,7 +47,7 @@ function replyHint(category: ContactCategory) {
     case 'pro':
       return 'Ajoutez le nom de votre societe ou la vitrine concernee.'
     default:
-      return 'Reponse sous 24 a 48 heures ouvr�es en moyenne.'
+      return 'Reponse sous 24 a 48 heures ouvrï¿½es en moyenne.'
   }
 }
 
@@ -92,11 +92,11 @@ export default function ContactForm() {
         website: form.website.trim(),
       })
 
-      setSuccess('Votre message a bien �t� envoy�. Nous vous r�pondrons d�s que possible.')
+      setSuccess('Votre message a bien ï¿½tï¿½ envoyï¿½. Nous vous rï¿½pondrons dï¿½s que possible.')
       showToast({
         tone: 'success',
-        title: 'Message envoy�',
-        message: 'Votre demande de support a bien �t� transmise � l�quipe Kalico.',
+        title: 'Message envoyï¿½',
+        message: 'Votre demande de support a bien ï¿½tï¿½ transmise ï¿½ lï¿½quipe Kalico.',
       })
       setForm((current) => ({
         ...INITIAL_STATE,
@@ -104,7 +104,7 @@ export default function ContactForm() {
         email: current.email,
       }))
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Une erreur est survenue, veuillez r�essayer.'
+      const message = err?.response?.data?.error || 'Une erreur est survenue, veuillez rï¿½essayer.'
       setError(message)
       showToast({
         tone: 'error',
@@ -123,11 +123,11 @@ export default function ContactForm() {
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Nous contacter</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">Envoyez votre demande au support</h2>
           <p className="mt-2 text-sm leading-relaxed text-night/60">
-            Remplissez le formulaire ci-dessous pour une r�ponse structur�e. Les comptes connect�s ont leurs informations pr�-remplies.
+            Remplissez le formulaire ci-dessous pour une rï¿½ponse structurï¿½e. Les comptes connectï¿½s ont leurs informations prï¿½-remplies.
           </p>
         </div>
         <div className="rounded-3xl border border-nc-lagon/15 bg-nc-lagonLight px-4 py-3 text-[#0A7EA4]">
-          <p className="text-sm font-semibold">R�ponse rapide</p>
+          <p className="text-sm font-semibold">Rï¿½ponse rapide</p>
           <p className="mt-1 text-xs text-[#0A7EA4]/75">{replyHint(form.category)}</p>
         </div>
       </div>
@@ -160,7 +160,7 @@ export default function ContactForm() {
 
         <div className="grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-sm font-semibold text-night">Catégorie</span>
+            <span className="text-sm font-semibold text-night">CatÃ©gorie</span>
             <select
               value={form.category}
               onChange={(event) => handleChange('category', event.target.value as ContactCategory)}
@@ -192,7 +192,7 @@ export default function ContactForm() {
             value={form.message}
             onChange={(event) => handleChange('message', event.target.value)}
             className="input min-h-40 w-full rounded-2xl"
-            placeholder="D�crivez votre demande avec un maximum de d�tails utiles."
+            placeholder="Dï¿½crivez votre demande avec un maximum de dï¿½tails utiles."
             required
           />
         </label>
@@ -208,7 +208,7 @@ export default function ContactForm() {
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-night/50">
-            En envoyant ce formulaire, vous acceptez que l�quipe Kalico traite votre demande pour vous r�pondre.
+            En envoyant ce formulaire, vous acceptez que lï¿½quipe Kalico traite votre demande pour vous rï¿½pondre.
           </p>
           <button
             type="submit"
@@ -221,7 +221,7 @@ export default function ContactForm() {
         </div>
 
         {success ? (
-          <FeedbackAlert tone="success" title="Message envoy�">
+          <FeedbackAlert tone="success" title="Message envoyï¿½">
             {success}
           </FeedbackAlert>
         ) : null}
@@ -237,17 +237,17 @@ export default function ContactForm() {
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
           <Mail className="h-5 w-5 text-[#0A7EA4]" />
           <p className="mt-2 text-sm font-semibold text-night">contact@kalico.nc</p>
-          <p className="mt-1 text-xs text-night/55">Support g�n�ral et questions produit.</p>
+          <p className="mt-1 text-xs text-night/55">Support gï¿½nï¿½ral et questions produit.</p>
         </div>
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
           <ShieldCheck className="h-5 w-5 text-nc-emeraude" />
           <p className="mt-2 text-sm font-semibold text-night">privacy@kalico.nc</p>
-          <p className="mt-1 text-xs text-night/55">Demandes RGPD et confidentialit�.</p>
+          <p className="mt-1 text-xs text-night/55">Demandes RGPD et confidentialitï¿½.</p>
         </div>
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
           <PhoneCall className="h-5 w-5 text-coral" />
-          <p className="mt-2 text-sm font-semibold text-night">24h � 48h ouvr�es</p>
-          <p className="mt-1 text-xs text-night/55">Temps de r�ponse moyen sur les demandes standard.</p>
+          <p className="mt-2 text-sm font-semibold text-night">24h ï¿½ 48h ouvrï¿½es</p>
+          <p className="mt-1 text-xs text-night/55">Temps de rï¿½ponse moyen sur les demandes standard.</p>
         </div>
       </div>
     </section>

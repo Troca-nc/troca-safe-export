@@ -6,7 +6,7 @@ export default function DonsPage() {
     <Suspense fallback={<div className="min-h-screen bg-sand-light" />}>
       <CategoryFeedPage
         title="Dons d'objets"
-        subtitle="Des objets offerts gratuitement, sans transaction financi�re, pour une plateforme plus responsable."
+        subtitle="Des objets offerts gratuitement, sans transaction financiï¿½re, pour une plateforme plus responsable."
         categorySlug="don"
         accentLabel="Gratuit"
       />

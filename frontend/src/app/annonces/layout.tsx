@@ -3,7 +3,7 @@ import { buildPageMetadata } from '@/lib/pageMetadata'
 
 export const metadata: Metadata = buildPageMetadata({
   title: 'Annonces - Kalico NC',
-  description: 'Parcourez les petites annonces de Nouvelle-Calédonie : v�hicules, immobilier, emploi, �lectronique et bien plus.',
+  description: 'Parcourez les petites annonces de Nouvelle-CalÃ©donie : vï¿½hicules, immobilier, emploi, ï¿½lectronique et bien plus.',
   path: '/annonces',
 })
 

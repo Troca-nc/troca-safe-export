@@ -109,7 +109,7 @@ export default function TrocCyclePage() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Troc</p>
             <h1 className="mt-3 text-3xl font-bold text-night">Connectez-vous pour voir ce cycle</h1>
             <p className="mt-3 text-sm leading-6 text-night/60">
-              Les cycles de troc sont r�serv�s aux participants concern�s.
+              Les cycles de troc sont rï¿½servï¿½s aux participants concernï¿½s.
             </p>
             <button
               type="button"
@@ -176,10 +176,10 @@ export default function TrocCyclePage() {
                 {formatTimeRemaining(cycle.expires_at)}
               </div>
               <h1 className="mt-4 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-                = Troc en cha�ne
+                = Troc en chaï¿½ne
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-white/70 sm:text-base">
-                Trois annonces compatibles peuvent sencha�ner. Chaque participant confirme sa part avant douvrir le chat de groupe.
+                Trois annonces compatibles peuvent senchaï¿½ner. Chaque participant confirme sa part avant douvrir le chat de groupe.
               </p>
             </div>
 
@@ -226,7 +226,7 @@ export default function TrocCyclePage() {
                     ) : null}
                   </div>
                   <h3 className="mt-3 line-clamp-2 text-lg font-bold text-night">{listing.title}</h3>
-              <p className="mt-2 text-sm text-night/60">{listing.commune_name ?? 'Nouvelle-Calédonie'}</p>
+              <p className="mt-2 text-sm text-night/60">{listing.commune_name ?? 'Nouvelle-CalÃ©donie'}</p>
                   {index < listings.length - 1 ? (
                     <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-night/60">
                       <ArrowRight className="h-3.5 w-3.5 text-coral" />
@@ -241,23 +241,23 @@ export default function TrocCyclePage() {
 
         <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_0.9fr]">
           <div className="rounded-[1.75rem] border border-night/8 bg-white p-5 shadow-card sm:p-6">
-            <h2 className="text-xl font-bold text-night">D�tail de chaque �change</h2>
+            <h2 className="text-xl font-bold text-night">Dï¿½tail de chaque ï¿½change</h2>
             <div className="mt-4 space-y-3">
               {listings.length === 3 ? (
                 <>
                   <div className="rounded-2xl bg-sand/40 px-4 py-3 text-sm text-night/70">
-                    {formatName(listings[0].seller_prenom, listings[0].seller_nom)} donne <strong>{listings[0].title}</strong> � {formatName(listings[1].seller_prenom, listings[1].seller_nom)}.
+                    {formatName(listings[0].seller_prenom, listings[0].seller_nom)} donne <strong>{listings[0].title}</strong> ï¿½ {formatName(listings[1].seller_prenom, listings[1].seller_nom)}.
                   </div>
                   <div className="rounded-2xl bg-sand/40 px-4 py-3 text-sm text-night/70">
-                    {formatName(listings[1].seller_prenom, listings[1].seller_nom)} donne <strong>{listings[1].title}</strong> � {formatName(listings[2].seller_prenom, listings[2].seller_nom)}.
+                    {formatName(listings[1].seller_prenom, listings[1].seller_nom)} donne <strong>{listings[1].title}</strong> ï¿½ {formatName(listings[2].seller_prenom, listings[2].seller_nom)}.
                   </div>
                   <div className="rounded-2xl bg-sand/40 px-4 py-3 text-sm text-night/70">
-                    {formatName(listings[2].seller_prenom, listings[2].seller_nom)} donne <strong>{listings[2].title}</strong> � {formatName(listings[0].seller_prenom, listings[0].seller_nom)}.
+                    {formatName(listings[2].seller_prenom, listings[2].seller_nom)} donne <strong>{listings[2].title}</strong> ï¿½ {formatName(listings[0].seller_prenom, listings[0].seller_nom)}.
                   </div>
                 </>
               ) : (
                 <div className="rounded-2xl border border-dashed border-night/10 bg-sand/40 px-4 py-3 text-sm text-night/60">
-                  Ce cycle n�cessite trois annonces pour afficher la boucle compl�te.
+                  Ce cycle nï¿½cessite trois annonces pour afficher la boucle complï¿½te.
                 </div>
               )}
             </div>
@@ -270,8 +270,8 @@ export default function TrocCyclePage() {
                   const name = formatName(listings[index]?.seller_prenom, listings[index]?.seller_nom)
                   return (
                     <div key={participantId} className="flex items-center gap-2 text-sm text-night/65">
-                      <span>{confirmed ? '' : '�'}</span>
-                      <span>{name} {confirmed ? 'a confirm�' : 'na pas encore confirm�'}</span>
+                      <span>{confirmed ? '' : 'ï¿½'}</span>
+                      <span>{name} {confirmed ? 'a confirmï¿½' : 'na pas encore confirmï¿½'}</span>
                     </div>
                   )
                 })}
@@ -284,7 +284,7 @@ export default function TrocCyclePage() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Action</p>
               <h2 className="mt-2 text-xl font-bold text-night">Confirmer votre participation</h2>
               <p className="mt-2 text-sm leading-6 text-night/60">
-                En confirmant, vous acceptez dorganiser l�change avec les autres participants. Kalico nassure pas la remise des objets.
+                En confirmant, vous acceptez dorganiser lï¿½change avec les autres participants. Kalico nassure pas la remise des objets.
               </p>
               <button
                 type="button"
@@ -293,13 +293,13 @@ export default function TrocCyclePage() {
                 className="btn-primary mt-5 inline-flex w-full items-center justify-center px-4 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <CheckCircle2 className="mr-2 h-4 w-4" />
-                {allConfirmed ? 'Cycle d�j� confirm�' : 'Je confirme ma participation'}
+                {allConfirmed ? 'Cycle dï¿½jï¿½ confirmï¿½' : 'Je confirme ma participation'}
               </button>
             </div>
 
             {allConfirmed ? (
               <div className="rounded-[1.75rem] border border-jungle/20 bg-jungle/8 p-5 text-jungle">
-                <p className="text-sm font-semibold">Tout le monde a confirm� !</p>
+                <p className="text-sm font-semibold">Tout le monde a confirmï¿½ !</p>
                 <p className="mt-2 text-sm leading-6 text-jungle/80">
                   Ouvrez maintenant le chat de groupe pour organiser les remises.
                 </p>

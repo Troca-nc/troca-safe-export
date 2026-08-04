@@ -46,8 +46,8 @@ type Filter = 'all' | 'active' | 'expired' | 'boosted'
 const FILTERS: Array<{ id: Filter; label: string }> = [
   { id: 'all', label: 'Toutes' },
   { id: 'active', label: 'Actives' },
-  { id: 'expired', label: 'Expir�es' },
-  { id: 'boosted', label: 'Boost�es' },
+  { id: 'expired', label: 'Expirï¿½es' },
+  { id: 'boosted', label: 'Boostï¿½es' },
 ]
 
 function formatPrice(value?: number | null) {
@@ -65,9 +65,9 @@ function formatDate(value?: string | null) {
 function getStatusLabel(status?: string | null) {
   const normalized = String(status || '').toLowerCase()
   if (normalized === 'draft') return { label: 'Brouillon', tone: 'bg-sand text-night/65' }
-  if (normalized === 'reserved') return { label: 'R�serv�e', tone: 'bg-amber-50 text-amber-700' }
+  if (normalized === 'reserved') return { label: 'Rï¿½servï¿½e', tone: 'bg-amber-50 text-amber-700' }
   if (normalized === 'inactive' || normalized === 'sold' || normalized === 'expired') {
-    return { label: 'Expir�e', tone: 'bg-amber-50 text-amber-700' }
+    return { label: 'Expirï¿½e', tone: 'bg-amber-50 text-amber-700' }
   }
   return { label: 'Actif', tone: 'bg-emerald-50 text-emerald-700' }
 }
@@ -148,7 +148,7 @@ export default function ProDashboardListingsPage() {
   }
 
   const handleDelete = async (listingId: string | number) => {
-    if (!window.confirm('Supprimer d�finitivement cette annonce ?')) return
+    if (!window.confirm('Supprimer dï¿½finitivement cette annonce ?')) return
     setDeletingId(listingId)
     setActionError('')
     try {
@@ -178,7 +178,7 @@ export default function ProDashboardListingsPage() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Mes annonces</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-night">G�rez vos annonces en un coup d'�il</h1>
+            <h1 className="mt-2 font-display text-3xl font-bold text-night">Gï¿½rez vos annonces en un coup d'ï¿½il</h1>
             <p className="mt-2 text-sm text-night/60">Filtrez, renouvelez, boostez et supprimez vos annonces depuis votre espace Pro.</p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-nc-lagonLight px-3 py-1.5 text-sm font-semibold text-nc-lagon">
@@ -238,18 +238,18 @@ export default function ProDashboardListingsPage() {
                         <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${status.tone}`}>{status.label}</span>
                         {boosted ? (
                           <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
-                            �a� Boost�e
+                            ï¿½aï¿½ Boostï¿½e
                           </span>
                         ) : null}
                       </div>
                       <p className="mt-1 text-sm text-night/60">
-                        {listing.category_name || 'Catégorie'} � {formatPrice(listing.price ?? listing.prix)}
+                        {listing.category_name || 'CatÃ©gorie'} ï¿½ {formatPrice(listing.price ?? listing.prix)}
                       </p>
                       <p className="mt-1 text-xs text-night/45">
-                        {listing.commune_name || 'Nouvelle-Calédonie'} � publi�e le {formatDate(listing.created_at || listing.published_at)}
+                        {listing.commune_name || 'Nouvelle-CalÃ©donie'} ï¿½ publiï¿½e le {formatDate(listing.created_at || listing.published_at)}
                       </p>
                       <p className="mt-2 text-sm text-night/60">
-                        �x� {Number(listing.total_views ?? 0)} � �x� {Number(listing.total_contacts ?? 0)} � {Number(listing.conversion_rate ?? 0).toFixed(1)}%
+                        ï¿½xï¿½ {Number(listing.total_views ?? 0)} ï¿½ ï¿½xï¿½ {Number(listing.total_contacts ?? 0)} ï¿½ {Number(listing.conversion_rate ?? 0).toFixed(1)}%
                       </p>
                     </div>
                   </div>
@@ -298,7 +298,7 @@ export default function ProDashboardListingsPage() {
           <div className="rounded-[2rem] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-12 text-center text-night/55 sm:px-6">
             <Search className="mx-auto h-8 w-8 text-night/25" />
             <p className="mt-3 text-lg font-semibold text-night">Aucune annonce pour ce filtre</p>
-            <p className="mt-2 text-sm">Essayez une autre cat�gorie ou cr�ez une nouvelle annonce.</p>
+            <p className="mt-2 text-sm">Essayez une autre catï¿½gorie ou crï¿½ez une nouvelle annonce.</p>
           </div>
         )}
       </section>
@@ -312,7 +312,7 @@ export default function ProDashboardListingsPage() {
             className="inline-flex items-center gap-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)] disabled:opacity-50"
           >
             <ChevronLeft className="h-4 w-4" />
-            Pr�c�dent
+            Prï¿½cï¿½dent
           </button>
           <span className="w-full text-center text-sm text-night/55 sm:w-auto">
             Page {currentPage} / {totalPages}

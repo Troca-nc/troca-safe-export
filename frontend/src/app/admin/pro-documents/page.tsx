@@ -45,8 +45,8 @@ function formatFileSize(bytes?: number | null) {
 
 function getStatusBadge(status: string) {
   const normalized = String(status || '').toLowerCase()
-  if (normalized === 'validated') return { label: 'Valid�', tone: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
-  if (normalized === 'rejected') return { label: 'Refus�', tone: 'bg-rose-50 text-rose-700 border-rose-200' }
+  if (normalized === 'validated') return { label: 'Validï¿½', tone: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
+  if (normalized === 'rejected') return { label: 'Refusï¿½', tone: 'bg-rose-50 text-rose-700 border-rose-200' }
   return { label: 'En attente', tone: 'bg-amber-50 text-amber-700 border-amber-200' }
 }
 
@@ -79,7 +79,7 @@ function AdminProDocumentsContent() {
   }), [documents])
 
   const handleValidate = async (id: number, status: 'validated' | 'rejected') => {
-    const rejection_reason = status === 'rejected' ? window.prompt('Raison du refus ?')?.trim() || 'Document refus�' : undefined
+    const rejection_reason = status === 'rejected' ? window.prompt('Raison du refus ?')?.trim() || 'Document refusï¿½' : undefined
     setActionId(id)
     setError('')
     try {
@@ -100,7 +100,7 @@ function AdminProDocumentsContent() {
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-corail">Admin</p>
             <h1 className="mt-2 font-display text-4xl font-bold md:text-5xl">Justificatifs Pro</h1>
             <p className="mt-4 text-sm leading-relaxed text-white/72 md:text-base">
-              Validez ou refusez les documents d�pos�s par les professionnels sans quitter le panneau dadministration.
+              Validez ou refusez les documents dï¿½posï¿½s par les professionnels sans quitter le panneau dadministration.
             </p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-sm font-semibold text-nc-corail">
@@ -113,8 +113,8 @@ function AdminProDocumentsContent() {
           {[
             { label: 'Total', value: stats.total },
             { label: 'En attente', value: stats.pending },
-            { label: 'Valid�s', value: stats.validated },
-            { label: 'Refus�s', value: stats.rejected },
+            { label: 'Validï¿½s', value: stats.validated },
+            { label: 'Refusï¿½s', value: stats.rejected },
           ].map((item) => (
             <div key={item.label} className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">{item.label}</p>
@@ -135,8 +135,8 @@ function AdminProDocumentsContent() {
       ) : documents.length === 0 ? (
         <div className="rounded-[2rem] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-14 text-center text-night/55 shadow-sm">
           <ShieldCheck className="mx-auto h-8 w-8 text-night/25" />
-          <p className="mt-3 text-lg font-semibold text-night">Aucun justificatif � traiter</p>
-          <p className="mt-2 text-sm">Les nouveaux d�p�ts appara�tront ici d�s quun professionnel en enverra un.</p>
+          <p className="mt-3 text-lg font-semibold text-night">Aucun justificatif ï¿½ traiter</p>
+          <p className="mt-2 text-sm">Les nouveaux dï¿½pï¿½ts apparaï¿½tront ici dï¿½s quun professionnel en enverra un.</p>
         </div>
       ) : (
         <div className="grid gap-4">
@@ -156,7 +156,7 @@ function AdminProDocumentsContent() {
                     </div>
                     <h2 className="mt-3 text-xl font-semibold text-night">{doc.label || doc.file_name || 'Justificatif'}</h2>
                     <p className="mt-1 text-sm text-night/60">
-                      {doc.pro_name} � {doc.pro_email}{doc.pro_commune ? ` � ${doc.pro_commune}` : ''}
+                      {doc.pro_name} ï¿½ {doc.pro_email}{doc.pro_commune ? ` ï¿½ ${doc.pro_commune}` : ''}
                     </p>
 
                     <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -169,11 +169,11 @@ function AdminProDocumentsContent() {
                         <p className="mt-1 font-semibold text-night">{formatFileSize(doc.file_size)}</p>
                       </div>
                       <div className="rounded-2xl bg-[var(--color-background-secondary)] px-4 py-3">
-                        <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">D�pos�</p>
+                        <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Dï¿½posï¿½</p>
                         <p className="mt-1 font-semibold text-night">{formatDate(doc.uploaded_at)}</p>
                       </div>
                       <div className="rounded-2xl bg-[var(--color-background-secondary)] px-4 py-3">
-                        <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Valid�</p>
+                        <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Validï¿½</p>
                         <p className="mt-1 font-semibold text-night">{formatDate(doc.validated_at)}</p>
                       </div>
                     </div>

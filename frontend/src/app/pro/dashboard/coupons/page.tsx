@@ -93,11 +93,11 @@ export default function CouponsPage() {
         valid_until: form.valid_until || null,
       })
       const created = response.data?.data as CouponItem | undefined
-      setSuccess(created ? `Coupon ${created.code} cr��.` : 'Coupon cr��.')
+      setSuccess(created ? `Coupon ${created.code} crï¿½ï¿½.` : 'Coupon crï¿½ï¿½.')
       setForm(INITIAL_FORM)
       await loadCoupons()
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible de cr�er le coupon.')
+      setError(err?.response?.data?.error || 'Impossible de crï¿½er le coupon.')
     } finally {
       setSaving(false)
     }
@@ -105,15 +105,15 @@ export default function CouponsPage() {
 
   const copyCode = async (code: string) => {
     await navigator.clipboard.writeText(code)
-    setSuccess(`Code ${code} copi�.`)
+    setSuccess(`Code ${code} copiï¿½.`)
   }
 
   return (
     <div className="space-y-6">
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Mes coupons</p>
-        <h1 className="mt-2 font-display text-3xl font-bold text-night">Cr�er et g�rer des coupons</h1>
-        <p className="mt-2 text-sm text-night/60">G�n�rez un code court, un QR scannable et un lien public pour vos clients.</p>
+        <h1 className="mt-2 font-display text-3xl font-bold text-night">Crï¿½er et gï¿½rer des coupons</h1>
+        <p className="mt-2 text-sm text-night/60">Gï¿½nï¿½rez un code court, un QR scannable et un lien public pour vos clients.</p>
       </section>
 
       {error ? <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}
@@ -136,7 +136,7 @@ export default function CouponsPage() {
               <textarea value={form.description} onChange={(e) => handleChange('description', e.target.value)} rows={4} className="input w-full rounded-2xl border border-[var(--color-border)] px-4 py-3 text-sm" />
             </label>
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-night">Type de r�duction</span>
+              <span className="text-sm font-semibold text-night">Type de rï¿½duction</span>
               <select value={form.discount_type} onChange={(e) => handleChange('discount_type', e.target.value)} className="input w-full rounded-2xl border border-[var(--color-border)] px-4 py-3 text-sm">
                 <option value="fixed_xpf">Montant fixe</option>
                 <option value="percent">Pourcentage</option>
@@ -155,7 +155,7 @@ export default function CouponsPage() {
             </label>
             <label className="space-y-2">
               <span className="text-sm font-semibold text-night">Utilisations max</span>
-              <input value={form.max_uses} onChange={(e) => handleChange('max_uses', e.target.value)} inputMode="numeric" placeholder="Illimit�" className="input w-full rounded-2xl border border-[var(--color-border)] px-4 py-3 text-sm" />
+              <input value={form.max_uses} onChange={(e) => handleChange('max_uses', e.target.value)} inputMode="numeric" placeholder="Illimitï¿½" className="input w-full rounded-2xl border border-[var(--color-border)] px-4 py-3 text-sm" />
             </label>
             <label className="space-y-2">
               <span className="text-sm font-semibold text-night">Par utilisateur</span>
@@ -173,13 +173,13 @@ export default function CouponsPage() {
 
           <button type="submit" disabled={saving} className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a] disabled:cursor-not-allowed disabled:opacity-60">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <QrCode className="h-4 w-4" />}
-            G�n�rer le coupon
+            Gï¿½nï¿½rer le coupon
           </button>
         </form>
 
         <div className="space-y-4 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-bold text-night">Coupons cr��s</h2>
+            <h2 className="text-lg font-bold text-night">Coupons crï¿½ï¿½s</h2>
             <span className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">{coupons.length} coupon{coupons.length > 1 ? 's' : ''}</span>
           </div>
 
@@ -199,7 +199,7 @@ export default function CouponsPage() {
                       <p className="mt-1 text-xs text-night/55">{coupon.description || 'Aucune description'}</p>
                     </div>
                     <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${coupon.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
-                      {coupon.is_active ? 'Actif' : 'D�sactiv�'}
+                      {coupon.is_active ? 'Actif' : 'Dï¿½sactivï¿½'}
                     </span>
                   </div>
 
@@ -207,7 +207,7 @@ export default function CouponsPage() {
                     <span className="rounded-full bg-white px-2.5 py-1 font-semibold text-night">{coupon.code}</span>
                     <span className="rounded-full bg-white px-2.5 py-1 font-semibold text-night">{formatDiscount(coupon)}</span>
                     <span className="rounded-full bg-white px-2.5 py-1">Utilisations {coupon.uses_count ?? 0}{coupon.max_uses ? ` / ${coupon.max_uses}` : ''}</span>
-                    <span className="rounded-full bg-white px-2.5 py-1">Validit� {coupon.valid_until ? new Date(coupon.valid_until).toLocaleDateString('fr-FR') : 'illimit�e'}</span>
+                    <span className="rounded-full bg-white px-2.5 py-1">Validitï¿½ {coupon.valid_until ? new Date(coupon.valid_until).toLocaleDateString('fr-FR') : 'illimitï¿½e'}</span>
                   </div>
 
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -230,7 +230,7 @@ export default function CouponsPage() {
                       className="inline-flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700"
                     >
                       <Power className="h-4 w-4" />
-                      D�sactiver
+                      Dï¿½sactiver
                     </button>
                   </div>
 

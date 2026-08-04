@@ -51,7 +51,7 @@ type QuoteRequestDetail = {
 }
 
 function formatMoney(value?: number | null) {
-  if (value == null || !Number.isFinite(Number(value))) return 'Non pr�cis�'
+  if (value == null || !Number.isFinite(Number(value))) return 'Non prï¿½cisï¿½'
   return `${Number(value).toLocaleString('fr-FR')} XPF`
 }
 
@@ -62,18 +62,18 @@ function buildBudgetLabel(min?: number | null, max?: number | null) {
     return `${formatMoney(minValue)} - ${formatMoney(maxValue)}`
   }
   if (minValue > 0) {
-    return `� partir de ${formatMoney(minValue)}`
+    return `ï¿½ partir de ${formatMoney(minValue)}`
   }
   if (maxValue > 0) {
-    return `Jusqu� ${formatMoney(maxValue)}`
+    return `Jusquï¿½ ${formatMoney(maxValue)}`
   }
-  return 'Budget non pr�cis�'
+  return 'Budget non prï¿½cisï¿½'
 }
 
 function formatDateLabel(value?: string | null) {
-  if (!value) return '� pr�ciser'
+  if (!value) return 'ï¿½ prï¿½ciser'
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return '� pr�ciser'
+  if (Number.isNaN(date.getTime())) return 'ï¿½ prï¿½ciser'
   return new Intl.DateTimeFormat('fr-FR', {
     day: 'numeric',
     month: 'short',
@@ -97,9 +97,9 @@ function getRequestStatusLabel(status?: string | null) {
     case 'open':
       return 'Ouverte'
     case 'closed':
-      return 'Ferm�e'
+      return 'Fermï¿½e'
     case 'cancelled':
-      return 'Annul�e'
+      return 'Annulï¿½e'
     default:
       return status || 'Inconnue'
   }
@@ -151,16 +151,16 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
       await quoteRequestsApi.selectOffer(data.id, { offer_id: offerId })
       showToast({
         tone: 'success',
-        title: 'Offre s�lectionn�e',
-        message: 'La demande a bien �t� attribu�e au professionnel choisi.',
+        title: 'Offre sï¿½lectionnï¿½e',
+        message: 'La demande a bien ï¿½tï¿½ attribuï¿½e au professionnel choisi.',
       })
       const refreshed = await quoteRequestsApi.getById(requestId)
       setData(refreshed.data?.data || null)
     } catch (err: any) {
       showToast({
         tone: 'error',
-        title: 'S�lection impossible',
-        message: err?.response?.data?.error || 'Impossible de s�lectionner cette offre.',
+        title: 'Sï¿½lection impossible',
+        message: err?.response?.data?.error || 'Impossible de sï¿½lectionner cette offre.',
       })
     } finally {
       setSelectingId(null)
@@ -180,7 +180,7 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         <p className="text-lg font-semibold text-night">Connectez-vous pour voir cette demande.</p>
         <p className="mt-2 text-sm text-night/60">
-          Cette page est r�serv�e au demandeur qui a cr�� lappel doffres.
+          Cette page est rï¿½servï¿½e au demandeur qui a crï¿½ï¿½ lappel doffres.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link href={`/connexion?next=/appels-offres/${requestId}`} className="rounded-2xl bg-[#0A7EA4] px-4 py-3 text-sm font-semibold text-white">
@@ -211,10 +211,10 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">D�tail de la demande</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Dï¿½tail de la demande</p>
             <h1 className="mt-2 font-display text-3xl font-bold text-night">{data.title}</h1>
             <p className="mt-3 text-sm text-night/60">
-              Publi�e le {formatDateLabel(data.created_at)} � {data.offers_count} offre{data.offers_count > 1 ? 's' : ''} re�ue{data.offers_count > 1 ? 's' : ''}
+              Publiï¿½e le {formatDateLabel(data.created_at)} ï¿½ {data.offers_count} offre{data.offers_count > 1 ? 's' : ''} reï¿½ue{data.offers_count > 1 ? 's' : ''}
             </p>
           </div>
           <Link href="/appels-offres" className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]">
@@ -233,9 +233,9 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
               <p className="mt-1 text-sm text-night/60">{data.description}</p>
             </div>
             <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Catégorie</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">CatÃ©gorie</p>
               <p className="mt-2 text-sm font-semibold text-night">{data.category_name}</p>
-              <p className="mt-1 text-sm text-night/60">{data.mode === 'open' ? 'Ouvert � tous les pros' : 'Ciblage de pros sp�cifiques'}</p>
+              <p className="mt-1 text-sm text-night/60">{data.mode === 'open' ? 'Ouvert ï¿½ tous les pros' : 'Ciblage de pros spï¿½cifiques'}</p>
             </div>
             <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Commune</p>
@@ -245,7 +245,7 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
               </p>
               <p className="mt-1 text-sm text-night/60">{getRequestStatusLabel(data.status)}</p>
               <p className="mt-2 text-sm leading-relaxed text-night/55">
-                Votre demande reste ouverte jusqu&apos;� ce que vous choisissiez une offre. Les pros ont g�n�ralement 48h pour vous r�pondre.
+                Votre demande reste ouverte jusqu&apos;ï¿½ ce que vous choisissiez une offre. Les pros ont gï¿½nï¿½ralement 48h pour vous rï¿½pondre.
               </p>
             </div>
             <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
@@ -266,11 +266,11 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
                 <ShieldCheck className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Acc�s</p>
-                <h2 className="mt-1 font-display text-xl font-bold text-night">R�serv� au demandeur</h2>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Accï¿½s</p>
+                <h2 className="mt-1 font-display text-xl font-bold text-night">Rï¿½servï¿½ au demandeur</h2>
                 <p className="mt-1 text-sm text-night/60">
                   {isRequester
-                    ? 'Vous �tes bien lauteur de cette demande.'
+                    ? 'Vous ï¿½tes bien lauteur de cette demande.'
                     : 'Vous consultez cette demande en lecture seule.'}
                 </p>
               </div>
@@ -288,8 +288,8 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Offres re�ues</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Comparez les r�ponses et choisissez</h2>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Offres reï¿½ues</p>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Comparez les rï¿½ponses et choisissez</h2>
           </div>
           <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-3 py-1 text-xs font-semibold text-night/60">
             {data.status === 'open' ? 'Demande ouverte' : getRequestStatusLabel(data.status)}
@@ -299,7 +299,7 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
         {!data.offers.length ? (
           <div className="mt-5 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-background-secondary)] p-6 text-center">
             <p className="text-lg font-semibold text-night">Aucune offre pour linstant.</p>
-            <p className="mt-2 text-sm text-night/55">Les professionnels voient la demande et peuvent r�pondre depuis leur dashboard.</p>
+            <p className="mt-2 text-sm text-night/55">Les professionnels voient la demande et peuvent rï¿½pondre depuis leur dashboard.</p>
           </div>
         ) : (
           <div className="mt-5 grid gap-4 lg:grid-cols-2">
@@ -325,7 +325,7 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
                       <h3 className="mt-1 text-lg font-semibold text-night">{formatMoney(offer.amount_xpf)}</h3>
                     </div>
                     <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getStatusTone(offer.status)}`}>
-                      {selected ? 'S�lectionn�e' : rejected ? 'Non retenue' : 'En attente'}
+                      {selected ? 'Sï¿½lectionnï¿½e' : rejected ? 'Non retenue' : 'En attente'}
                     </span>
                   </div>
 
@@ -338,12 +338,12 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
                       </p>
                     </div>
                     <div className="rounded-2xl bg-white px-4 py-3">
-                      <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">D�lai</p>
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Dï¿½lai</p>
                       <p className="mt-1 font-semibold text-night">{offer.delay_days} jours</p>
                     </div>
                     <div className="rounded-2xl bg-white px-4 py-3 sm:col-span-2">
                       <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Message</p>
-                      <p className="mt-1 text-sm text-night/65">{offer.message || 'Aucun message compl�mentaire.'}</p>
+                      <p className="mt-1 text-sm text-night/65">{offer.message || 'Aucun message complï¿½mentaire.'}</p>
                     </div>
                   </div>
 

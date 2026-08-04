@@ -20,7 +20,7 @@ function buildDisplayName(profile: NonNullable<Awaited<ReturnType<typeof fetchPr
 function buildDescription(profile: NonNullable<Awaited<ReturnType<typeof fetchProPublicProfile>>>, displayName: string) {
   const parts = [
     profile.pro_category ? `${profile.pro_category}` : null,
-    profile.pro_commune ? `� ${profile.pro_commune}` : null,
+    profile.pro_commune ? `ï¿½ ${profile.pro_commune}` : null,
     profile.product_count ? `${profile.product_count} produit${Number(profile.product_count) > 1 ? 's' : ''} dans son catalogue` : null,
     profile.pro_description ? profile.pro_description.replace(/\s+/g, ' ').trim() : null,
   ].filter(Boolean)
@@ -28,7 +28,7 @@ function buildDescription(profile: NonNullable<Awaited<ReturnType<typeof fetchPr
   const base = `${displayName} sur Kalico.`
   const description = parts.length > 0
     ? `${base} ${parts.join(' " ')}`
-    : `${base} D�couvrez sa vitrine professionnelle, ses annonces et ses avis.`
+    : `${base} Dï¿½couvrez sa vitrine professionnelle, ses annonces et ses avis.`
 
   return description.length > 160 ? `${description.slice(0, 157).trimEnd()}&` : description
 }

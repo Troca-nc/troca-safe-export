@@ -208,7 +208,7 @@ export default function ProScoreWidget({
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Pilotage</p>
           <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Score de performance de votre vitrine</h2>
           <p className="mt-2 text-sm leading-relaxed text-night/60">
-            Ce score synth�tique vous indique si votre vitrine avance bien et quelles actions peuvent encore faire progresser vos resultats.
+            Ce score synthï¿½tique vous indique si votre vitrine avance bien et quelles actions peuvent encore faire progresser vos resultats.
           </p>
         </div>
 

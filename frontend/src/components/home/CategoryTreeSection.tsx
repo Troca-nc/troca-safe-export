@@ -164,7 +164,7 @@ export default function CategoryTreeSection() {
             Tous les rayons
           </p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">
-            L&apos;arbre complet des cat�gories
+            L&apos;arbre complet des catï¿½gories
           </h2>
         </div>
         <Link

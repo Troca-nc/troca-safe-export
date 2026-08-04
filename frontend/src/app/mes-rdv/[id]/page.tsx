@@ -3,8 +3,8 @@ import type { Metadata } from 'next'
 import BookingDetailClient from './BookingDetailClient'
 
 export const metadata: Metadata = {
-  title: 'Rendez-vous s�curis� | Kalico',
-  description: 'Consultez le d�tail dun rendez-vous Kalico via un lien s�curis�.',
+  title: 'Rendez-vous sï¿½curisï¿½ | Kalico',
+  description: 'Consultez le dï¿½tail dun rendez-vous Kalico via un lien sï¿½curisï¿½.',
 }
 
 type PageProps = {

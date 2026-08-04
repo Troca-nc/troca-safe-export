@@ -25,7 +25,7 @@ export default function Error({
         <AlertTriangle className="mx-auto mt-5 h-14 w-14 text-amber-500" />
         <h1 className="mt-4 font-display text-3xl font-bold">Une erreur inattendue s'est produite</h1>
         <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-night/60">
-          Notre �quipe a �t� notifi�e. Vous pouvez essayer de rafra�chir la page.
+          Notre ï¿½quipe a ï¿½tï¿½ notifiï¿½e. Vous pouvez essayer de rafraï¿½chir la page.
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <button
@@ -33,10 +33,10 @@ export default function Error({
             onClick={reset}
             className="btn-primary inline-flex items-center justify-center rounded-2xl px-5 py-3"
           >
-            R�essayer
+            Rï¿½essayer
           </button>
           <Link href="/" className="btn-secondary inline-flex items-center justify-center rounded-2xl px-5 py-3">
-            Retour � l'accueil
+            Retour ï¿½ l'accueil
           </Link>
         </div>
       </section>

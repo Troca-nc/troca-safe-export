@@ -177,10 +177,10 @@ export default function QuoteBuilder({
 
       showToast({
         tone: 'success',
-        title: mode === 'send' ? 'Devis envoy�' : 'Brouillon enregistr�',
+        title: mode === 'send' ? 'Devis envoyï¿½' : 'Brouillon enregistrï¿½',
         message: mode === 'send'
           ? `${proName} peut maintenant consulter ce devis.`
-          : 'Le devis a �t� sauvegard� en brouillon.',
+          : 'Le devis a ï¿½tï¿½ sauvegardï¿½ en brouillon.',
       })
       onFinished?.()
       onClose()
@@ -189,7 +189,7 @@ export default function QuoteBuilder({
       setError(message)
       showToast({
         tone: 'error',
-        title: 'Devis non enregistr�',
+        title: 'Devis non enregistrï¿½',
         message,
       })
     } finally {
@@ -207,7 +207,7 @@ export default function QuoteBuilder({
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-emeraude">QuoteBuilder</p>
             <h2 className="mt-1 font-display text-2xl font-bold text-night">Nouveau devis pour {proName}</h2>
-            <p className="mt-1 text-sm text-night/55">Cr�ez un brouillon, puis envoyez-le au client avec un lien s�curis�.</p>
+            <p className="mt-1 text-sm text-night/55">Crï¿½ez un brouillon, puis envoyez-le au client avec un lien sï¿½curisï¿½.</p>
           </div>
           <button
             type="button"
@@ -246,7 +246,7 @@ export default function QuoteBuilder({
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="space-y-2">
-                  <span className="text-sm font-semibold text-night">T�l�phone</span>
+                  <span className="text-sm font-semibold text-night">Tï¿½lï¿½phone</span>
                   <input
                     value={form.requester_phone}
                     onChange={(event) => setForm((current) => ({ ...current, requester_phone: event.target.value }))}
@@ -260,7 +260,7 @@ export default function QuoteBuilder({
                     value={form.commune}
                     onChange={(event) => setForm((current) => ({ ...current, commune: event.target.value }))}
                     className="input w-full rounded-2xl"
-                    placeholder="Nouméa, Dumbéa..."
+                    placeholder="NoumÃ©a, DumbÃ©a..."
                   />
                 </label>
               </div>
@@ -271,7 +271,7 @@ export default function QuoteBuilder({
                   value={form.subject}
                   onChange={(event) => setForm((current) => ({ ...current, subject: event.target.value }))}
                   className="input w-full rounded-2xl"
-                  placeholder="Ex. r�novation salle de bain"
+                  placeholder="Ex. rï¿½novation salle de bain"
                 />
               </label>
 
@@ -282,7 +282,7 @@ export default function QuoteBuilder({
                   value={form.client_note}
                   onChange={(event) => setForm((current) => ({ ...current, client_note: event.target.value }))}
                   className="input w-full rounded-2xl py-3"
-                  placeholder="Contexte, urgence, contraintes, pr�cisions..."
+                  placeholder="Contexte, urgence, contraintes, prï¿½cisions..."
                 />
               </label>
 
@@ -300,7 +300,7 @@ export default function QuoteBuilder({
                   </select>
                 </label>
                 <label className="space-y-2">
-                  <span className="text-sm font-semibold text-night">Validit�</span>
+                  <span className="text-sm font-semibold text-night">Validitï¿½</span>
                   <select
                     value={form.validity_days}
                     onChange={(event) => setForm((current) => ({ ...current, validity_days: event.target.value }))}
@@ -322,7 +322,7 @@ export default function QuoteBuilder({
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Lignes</p>
-                    <h3 className="font-display text-xl font-bold text-night">D�taillez les prestations</h3>
+                    <h3 className="font-display text-xl font-bold text-night">Dï¿½taillez les prestations</h3>
                   </div>
                   <button
                     type="button"
@@ -351,12 +351,12 @@ export default function QuoteBuilder({
 
                       <div className="mt-4 grid gap-4 md:grid-cols-[1.4fr_1fr_0.7fr_0.7fr]">
                         <label className="space-y-2">
-                          <span className="text-xs font-semibold text-night/60">Libell�</span>
+                          <span className="text-xs font-semibold text-night/60">Libellï¿½</span>
                           <input
                             value={item.label}
                             onChange={(event) => updateItem(item.id, { label: event.target.value })}
                             className="input w-full rounded-2xl"
-                            placeholder="Prestation, produit, mat�riel..."
+                            placeholder="Prestation, produit, matï¿½riel..."
                           />
                         </label>
                         <label className="space-y-2">
@@ -365,11 +365,11 @@ export default function QuoteBuilder({
                             value={item.description}
                             onChange={(event) => updateItem(item.id, { description: event.target.value })}
                             className="input w-full rounded-2xl"
-                            placeholder="D�tails compl�mentaires"
+                            placeholder="Dï¿½tails complï¿½mentaires"
                           />
                         </label>
                         <label className="space-y-2">
-                          <span className="text-xs font-semibold text-night/60">Qt�</span>
+                          <span className="text-xs font-semibold text-night/60">Qtï¿½</span>
                           <input
                             type="number"
                             min={1}
@@ -408,9 +408,9 @@ export default function QuoteBuilder({
 
           <aside className="min-h-0 overflow-y-auto px-6 py-6">
             <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Aper�u</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Aperï¿½u</p>
               <h3 className="mt-1 font-display text-2xl font-bold text-night">{form.subject || 'Devis'}</h3>
-              <p className="mt-1 text-sm text-night/60">{form.requester_name || 'Client'} � {form.commune || 'Commune'}</p>
+              <p className="mt-1 text-sm text-night/60">{form.requester_name || 'Client'} ï¿½ {form.commune || 'Commune'}</p>
 
               <div className="mt-5 space-y-3">
                 {items.map((item, index) => (

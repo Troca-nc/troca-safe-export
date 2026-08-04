@@ -1,8 +1,8 @@
 'use client'
 // ============================================================
 //  Kalico  Composant "Annonces similaires"
-//  Affich� en bas de la fiche annonce
-//  M�me cat�gorie + m�me commune en priorit�, sinon m�me cat�gorie
+//  Affichï¿½ en bas de la fiche annonce
+//  Mï¿½me catï¿½gorie + mï¿½me commune en prioritï¿½, sinon mï¿½me catï¿½gorie
 // ============================================================
 
 import { useEffect, useState } from 'react'
@@ -33,9 +33,9 @@ interface Props {
 const CONDITION_SHORT: Record<string, string> = {
   new:       'Neuf',
   like_new:  'Comme neuf',
-  good:      'Bon État',
+  good:      'Bon Ãtat',
   fair:      'Correct',
-  for_parts: 'Pi�ces',
+  for_parts: 'Piï¿½ces',
 }
 
 export default function AnnonceSimilaires({ annonceId, categorieId, communeId, titre }: Props) {
@@ -47,7 +47,7 @@ export default function AnnonceSimilaires({ annonceId, categorieId, communeId, t
       category_id: categorieId,
       limit:       8,
       sort:        'date',
-      exclude_id:  annonceId, // le backend ignorera cette annonce dans les r�sultats
+      exclude_id:  annonceId, // le backend ignorera cette annonce dans les rï¿½sultats
     }
     if (communeId) {
       params.commune_id = communeId
@@ -55,9 +55,9 @@ export default function AnnonceSimilaires({ annonceId, categorieId, communeId, t
 
     listingsApi.search(params)
       .then(({ data }) => {
-        // Filtrer l'annonce actuelle c�t� client (double sécurité)
+        // Filtrer l'annonce actuelle cï¿½tï¿½ client (double sÃ©curitÃ©)
         const items = (data.data ?? []).filter((l: Listing) => String(l.id) !== String(annonceId))
-        // Trier : m�me commune d'abord
+        // Trier : mï¿½me commune d'abord
         items.sort((a: Listing, b: Listing) => {
           const aLocal = communeId && Number(a.commune_id) === Number(communeId) ? 1 : 0
           const bLocal = communeId && Number(b.commune_id) === Number(communeId) ? 1 : 0
@@ -88,7 +88,7 @@ export default function AnnonceSimilaires({ annonceId, categorieId, communeId, t
           href={`/annonces?category_id=${categorieId}`}
           className="text-sm text-coral hover:underline"
         >
-          Voir tout �
+          Voir tout ï¿½
         </Link>
       </div>
 
@@ -110,7 +110,7 @@ export default function AnnonceSimilaires({ annonceId, categorieId, communeId, t
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-3xl">
-                  🎭
+                  ð­
                 </div>
               )}
               {l.is_boosted && (

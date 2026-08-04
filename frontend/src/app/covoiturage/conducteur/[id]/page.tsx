@@ -89,9 +89,9 @@ type DriverProfilePayload = {
 }
 
 function formatDate(value?: string | null) {
-  if (!value) return 'Date non renseign�e'
+  if (!value) return 'Date non renseignï¿½e'
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'Date non renseign�e'
+  if (Number.isNaN(date.getTime())) return 'Date non renseignï¿½e'
   return new Intl.DateTimeFormat('fr-FR', {
     day: 'numeric',
     month: 'short',
@@ -105,9 +105,9 @@ function formatTime(value?: string | null) {
 }
 
 function formatRoute(ride: DriverRide) {
-  const departure = ride.departure_commune_name || ride.departure || 'D�part'
-  const destination = ride.destination_commune_name || ride.destination || 'Arriv�e'
-  return `${departure} � ${destination}`
+  const departure = ride.departure_commune_name || ride.departure || 'Dï¿½part'
+  const destination = ride.destination_commune_name || ride.destination || 'Arrivï¿½e'
+  return `${departure} ï¿½ ${destination}`
 }
 
 function getInitials(value?: string | null) {
@@ -172,7 +172,7 @@ export default function DriverPublicProfilePage() {
   const profile = payload?.profile ?? null
   const vehicle = payload?.vehicle ?? null
   const trustScore = Number(profile?.trust_score ?? 0)
-  const memberSince = profile?.member_since ? formatDate(profile.member_since) : 'Membre r�cent'
+  const memberSince = profile?.member_since ? formatDate(profile.member_since) : 'Membre rï¿½cent'
 
   const reviewCount = useMemo(() => {
     return Number(profile?.reviews_count ?? reviews.length ?? 0)
@@ -244,7 +244,7 @@ export default function DriverPublicProfilePage() {
                   <div className="mt-2 flex flex-wrap gap-2 text-sm text-night/60">
                     <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
                       <MapPin className="h-3.5 w-3.5" />
-                      {profile.commune_name || profile.province_name || 'Nouvelle-Calédonie'}
+                      {profile.commune_name || profile.province_name || 'Nouvelle-CalÃ©donie'}
                     </span>
                     <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 ${getTrustTone(score)}`}>
                       <BadgeCheck className="h-3.5 w-3.5" />
@@ -277,19 +277,19 @@ export default function DriverPublicProfilePage() {
               <p className="mt-5 max-w-3xl text-sm leading-relaxed text-night/65">{profile.bio}</p>
             ) : (
               <p className="mt-5 max-w-3xl text-sm leading-relaxed text-night/55">
-                Ce conducteur partage ses trajets en Nouvelle-Calédonie. Consultez son v�hicule, son historique et les avis avant de r�server.
+                Ce conducteur partage ses trajets en Nouvelle-CalÃ©donie. Consultez son vï¿½hicule, son historique et les avis avant de rï¿½server.
               </p>
             )}
 
             <div className="mt-4 flex flex-wrap gap-2">
               {profile.email_verified ? (
                 <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-3 py-1.5 text-xs font-medium text-night/70">
-                  Email v�rifi�
+                  Email vï¿½rifiï¿½
                 </span>
               ) : null}
               {profile.phone_verified ? (
                 <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-3 py-1.5 text-xs font-medium text-night/70">
-                  T�l�phone v�rifi�
+                  Tï¿½lï¿½phone vï¿½rifiï¿½
                 </span>
               ) : null}
               {profile.is_pro ? (
@@ -312,7 +312,7 @@ export default function DriverPublicProfilePage() {
             <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-lagon">V�hicule</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-lagon">Vï¿½hicule</p>
                   <h2 className="mt-1 font-display text-2xl font-bold text-night">Ce quil propose</h2>
                 </div>
                 <Car className="h-6 w-6 text-[#0A7EA4]" />
@@ -320,16 +320,16 @@ export default function DriverPublicProfilePage() {
 
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">V�hicule</p>
-                  <p className="mt-2 text-lg font-semibold text-night">{vehicle?.vehicle || 'V�hicule non renseign�'}</p>
-                  <p className="mt-2 text-sm leading-relaxed text-night/60">{vehicle?.vehicle_description || 'Informations v�hicule � venir.'}</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Vï¿½hicule</p>
+                  <p className="mt-2 text-lg font-semibold text-night">{vehicle?.vehicle || 'Vï¿½hicule non renseignï¿½'}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-night/60">{vehicle?.vehicle_description || 'Informations vï¿½hicule ï¿½ venir.'}</p>
                 </div>
 
                 <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Capacit� & confort</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Capacitï¿½ & confort</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-night/70 shadow-sm">
-                      {vehicle?.vehicle_capacity ? `${vehicle.vehicle_capacity} places` : 'Capacit� non pr�cis�e'}
+                      {vehicle?.vehicle_capacity ? `${vehicle.vehicle_capacity} places` : 'Capacitï¿½ non prï¿½cisï¿½e'}
                     </span>
                     {vehicle?.luggage_allowed ? (
                       <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-night/70 shadow-sm">
@@ -338,7 +338,7 @@ export default function DriverPublicProfilePage() {
                     ) : null}
                     {vehicle?.music_allowed ? (
                       <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-night/70 shadow-sm">
-                        Musique autoris�e
+                        Musique autorisï¿½e
                       </span>
                     ) : null}
                     {vehicle?.no_smoking ? (
@@ -348,7 +348,7 @@ export default function DriverPublicProfilePage() {
                     ) : null}
                     {vehicle?.animals_allowed ? (
                       <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-night/70 shadow-sm">
-                        Animaux accept�s
+                        Animaux acceptï¿½s
                       </span>
                     ) : null}
                   </div>
@@ -373,7 +373,7 @@ export default function DriverPublicProfilePage() {
                         <div>
                           <p className="text-sm font-semibold text-night">{formatRoute(ride)}</p>
                           <p className="mt-1 text-xs text-night/55">
-                            {formatDate(ride.ride_date)} � {formatTime(ride.ride_time)}
+                            {formatDate(ride.ride_date)} ï¿½ {formatTime(ride.ride_time)}
                           </p>
                         </div>
                         <div className="rounded-2xl bg-nc-corailLight px-3 py-2 text-right">
@@ -389,10 +389,10 @@ export default function DriverPublicProfilePage() {
                           {ride.seats_remaining != null ? `${ride.seats_remaining} place${ride.seats_remaining > 1 ? 's' : ''} restante${ride.seats_remaining > 1 ? 's' : ''}` : 'Places disponibles'}
                         </span>
                         <span className="rounded-full bg-white px-2.5 py-1 shadow-sm">
-                          {ride.booking_mode === 'manual' ? 'Sur acceptation' : 'R�servation imm�diate'}
+                          {ride.booking_mode === 'manual' ? 'Sur acceptation' : 'Rï¿½servation immï¿½diate'}
                         </span>
                         <span className="rounded-full bg-white px-2.5 py-1 shadow-sm">
-                          {ride.status || 'Publi�'}
+                          {ride.status || 'Publiï¿½'}
                         </span>
                       </div>
                     </article>
@@ -400,7 +400,7 @@ export default function DriverPublicProfilePage() {
                 </div>
               ) : (
                 <div className="mt-5 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-background-secondary)] p-6 text-sm text-night/60">
-                  Aucun trajet r�cent nest encore affich�.
+                  Aucun trajet rï¿½cent nest encore affichï¿½.
                 </div>
               )}
             </section>
@@ -439,7 +439,7 @@ export default function DriverPublicProfilePage() {
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="text-sm font-semibold text-night">{review.reviewer_prenom || 'Passager'}</p>
-                          <p className="text-xs text-night/50">{review.created_at ? formatDate(review.created_at) : 'Avis r�cent'}</p>
+                          <p className="text-xs text-night/50">{review.created_at ? formatDate(review.created_at) : 'Avis rï¿½cent'}</p>
                         </div>
                         <div className="inline-flex items-center gap-1 text-amber-500">
                           {Array.from({ length: 5 }).map((_, index) => (
@@ -453,7 +453,7 @@ export default function DriverPublicProfilePage() {
                       {review.comment ? <p className="mt-3 text-sm leading-relaxed text-night/65">{review.comment}</p> : null}
                       {review.departure || review.destination ? (
                         <p className="mt-3 text-xs text-night/45">
-                          {review.departure || 'D�part'} � {review.destination || 'Arriv�e'}
+                          {review.departure || 'Dï¿½part'} ï¿½ {review.destination || 'Arrivï¿½e'}
                         </p>
                       ) : null}
                     </article>
@@ -470,16 +470,16 @@ export default function DriverPublicProfilePage() {
               <div className="flex items-center gap-3">
                 <MessageCircle className="h-6 w-6 text-[#0A7EA4]" />
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-lagon">R�sum�</p>
-                  <h2 className="mt-1 font-display text-2xl font-bold text-night">� retenir avant de r�server</h2>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-lagon">Rï¿½sumï¿½</p>
+                  <h2 className="mt-1 font-display text-2xl font-bold text-night">ï¿½ retenir avant de rï¿½server</h2>
                 </div>
               </div>
 
               <div className="mt-4 space-y-3 text-sm text-night/65">
-                <p>" {Number(profile.rides_as_driver ?? 0)} trajets r�alis�s comme conducteur.</p>
-                <p>" {Number(profile.rides_as_passenger ?? 0)} trajets r�alis�s comme passager.</p>
+                <p>" {Number(profile.rides_as_driver ?? 0)} trajets rï¿½alisï¿½s comme conducteur.</p>
+                <p>" {Number(profile.rides_as_passenger ?? 0)} trajets rï¿½alisï¿½s comme passager.</p>
                 <p>" {Number(profile.rides_total ?? rides.length ?? 0)} trajets publics visibles.</p>
-                <p>" Le v�hicule et les habitudes de trajet sont d�taill�s au-dessus.</p>
+                <p>" Le vï¿½hicule et les habitudes de trajet sont dï¿½taillï¿½s au-dessus.</p>
               </div>
 
               <Link href="/covoiturage" className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a]">

@@ -24,7 +24,7 @@ export default function ReviewSummary({ rating = 0, count = 0, verifiedCount = 0
     <div className={`rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm ${className}`}>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">R�sum� des avis</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Rï¿½sumï¿½ des avis</p>
           <h3 className="mt-1 font-display text-2xl font-bold text-night">{value.toFixed(1)}/5</h3>
           <div className="mt-2">
             <RatingRow rating={value} />
@@ -36,7 +36,7 @@ export default function ReviewSummary({ rating = 0, count = 0, verifiedCount = 0
             <p className="mt-1 font-semibold text-night">{Number(count ?? 0).toLocaleString('fr-FR')}</p>
           </div>
           <div className="rounded-2xl bg-[var(--color-background-secondary)] px-4 py-3">
-            <p className="text-xs uppercase tracking-[0.16em] text-night/45">V�rifi�s</p>
+            <p className="text-xs uppercase tracking-[0.16em] text-night/45">Vï¿½rifiï¿½s</p>
             <p className="mt-1 font-semibold text-night">{Number(verifiedCount ?? 0).toLocaleString('fr-FR')}</p>
           </div>
         </div>

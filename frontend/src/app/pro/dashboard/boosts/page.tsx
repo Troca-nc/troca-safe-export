@@ -78,7 +78,7 @@ export default function ProDashboardBoostsPage() {
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Boosts</p>
             <h1 className="mt-2 font-display text-3xl font-bold text-night">Historique des boosts</h1>
-            <p className="mt-2 text-sm text-night/60">Suivez vos boosts actifs et vos anciennes campagnes de visibilit�.</p>
+            <p className="mt-2 text-sm text-night/60">Suivez vos boosts actifs et vos anciennes campagnes de visibilitï¿½.</p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-nc-lagonLight px-3 py-1.5 text-sm font-semibold text-nc-lagon">
             <BadgeCheck className="h-4 w-4" />
@@ -139,7 +139,7 @@ export default function ProDashboardBoostsPage() {
           <div className="rounded-[1.75rem] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-12 text-center text-night/55">
             <Zap className="mx-auto h-8 w-8 text-[#0A7EA4]" />
             <p className="mt-3 text-lg font-semibold text-night">Aucun boost actif pour le moment</p>
-            <p className="mt-2 text-sm">Boostez une annonce pour la faire remonter sur la homepage et dans sa cat�gorie.</p>
+            <p className="mt-2 text-sm">Boostez une annonce pour la faire remonter sur la homepage et dans sa catï¿½gorie.</p>
           </div>
         )}
       </section>
@@ -157,7 +157,7 @@ export default function ProDashboardBoostsPage() {
                 <tr>
                   <th className="px-4 py-3 text-left font-semibold">Date</th>
                   <th className="px-4 py-3 text-left font-semibold">Annonce</th>
-                  <th className="px-4 py-3 text-left font-semibold">Dur�e</th>
+                  <th className="px-4 py-3 text-left font-semibold">Durï¿½e</th>
                   <th className="px-4 py-3 text-left font-semibold">Prix</th>
                   <th className="px-4 py-3 text-left font-semibold">Statut</th>
                 </tr>
@@ -177,7 +177,7 @@ export default function ProDashboardBoostsPage() {
                             ? 'bg-amber-50 text-amber-700'
                             : 'bg-sand text-night/60'
                       }`}>
-                        {boost.status === 'active' ? 'Actif' : boost.status === 'expired' ? 'Expir�' : 'Annul�'}
+                        {boost.status === 'active' ? 'Actif' : boost.status === 'expired' ? 'Expirï¿½' : 'Annulï¿½'}
                       </span>
                     </td>
                   </tr>

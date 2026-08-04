@@ -23,7 +23,7 @@ function FavoriListItem({
 }) {
   const savedAgo = item.savedAt
     ? formatDistanceToNow(new Date(item.savedAt), { locale: fr, addSuffix: true })
-    : 'r�cemment'
+    : 'rï¿½cemment'
 
   return (
     <div className="group flex gap-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm transition-shadow hover:shadow-md">
@@ -36,7 +36,7 @@ function FavoriListItem({
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-2xl opacity-30">=�</div>
+            <div className="flex h-full w-full items-center justify-center text-2xl opacity-30">=ï¿½</div>
           )}
         </div>
       </Link>
@@ -55,7 +55,7 @@ function FavoriListItem({
               <span className="text-sm font-normal text-night/50">XPF</span>
             </>
           ) : (
-            <span className="text-sm italic text-night/40">Prix � d�battre</span>
+            <span className="text-sm italic text-night/40">Prix ï¿½ dï¿½battre</span>
           )}
         </p>
 
@@ -71,7 +71,7 @@ function FavoriListItem({
           ) : null}
           <span className="ml-auto flex items-center gap-1">
             <Clock className="h-3 w-3" />
-            Sauvegard� {savedAgo}
+            Sauvegardï¿½ {savedAgo}
           </span>
         </div>
       </div>
@@ -100,14 +100,14 @@ function EmptyFavoris({
         <Heart className="h-9 w-9 text-coral/50" />
       </div>
       <h2 className="mb-2 text-xl font-bold text-night font-display">
-        {filtered ? 'Aucun favori correspondant' : 'Aucun favori sauvegard�'}
+        {filtered ? 'Aucun favori correspondant' : 'Aucun favori sauvegardï¿½'}
       </h2>
       <p className="mx-auto mb-6 max-w-xs text-sm text-night/50">
         {filtered
           ? 'Essayez de modifier votre recherche ou vos filtres.'
           : isGuest
-            ? 'Sauvegardez vos annonces pr�f�r�es puis cr�ez un compte pour les retrouver sur tous vos appareils.'
-            : "Appuyez sur le d d'une annonce pour la retrouver ici � tout moment."}
+            ? 'Sauvegardez vos annonces prï¿½fï¿½rï¿½es puis crï¿½ez un compte pour les retrouver sur tous vos appareils.'
+            : "Appuyez sur le d d'une annonce pour la retrouver ici ï¿½ tout moment."}
       </p>
       <div className="flex flex-wrap items-center justify-center gap-3">
         <Link href="/annonces" className="btn-primary px-6 py-2.5">
@@ -115,7 +115,7 @@ function EmptyFavoris({
         </Link>
         {isGuest ? (
           <Link href="/inscription?next=/favoris" className="rounded-2xl border border-[var(--color-border)] px-6 py-2.5 text-sm font-semibold text-night transition hover:bg-night/5">
-            Cr�er un compte
+            Crï¿½er un compte
           </Link>
         ) : null}
       </div>
@@ -219,16 +219,16 @@ export default function FavorisPage() {
       <div className="mx-auto max-w-6xl px-4 py-8">
         {!isAuthenticated ? (
           <div className="mb-6 rounded-[2rem] border border-[#0A7EA4]/15 bg-nc-lagonLight p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-lagon">Vos favoris sont l�</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-lagon">Vos favoris sont lï¿½</p>
             <h2 className="mt-1 text-2xl font-bold text-night font-display">
-              Consultez et pr�parez vos favoris avant de cr�er un compte
+              Consultez et prï¿½parez vos favoris avant de crï¿½er un compte
             </h2>
             <p className="mt-1 text-sm text-night/55">
-              Vos annonces sauvegard�es restent visibles ici. Cr�ez un compte pour les synchroniser sur tous vos appareils.
+              Vos annonces sauvegardï¿½es restent visibles ici. Crï¿½ez un compte pour les synchroniser sur tous vos appareils.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <Link href="/inscription?next=/favoris" className="btn-primary rounded-2xl px-4 py-2.5 text-sm">
-                Cr�er un compte
+                Crï¿½er un compte
               </Link>
               <Link href="/connexion?next=/favoris" className="btn-secondary rounded-2xl px-4 py-2.5 text-sm">
                 Se connecter
@@ -244,7 +244,7 @@ export default function FavorisPage() {
               Mes favoris
             </h1>
             <p className="mt-0.5 text-sm text-night/50">
-              {items.length} annonce{items.length > 1 ? 's' : ''} sauvegard�e{items.length > 1 ? 's' : ''}
+              {items.length} annonce{items.length > 1 ? 's' : ''} sauvegardï¿½e{items.length > 1 ? 's' : ''}
             </p>
           </div>
 
@@ -278,7 +278,7 @@ export default function FavorisPage() {
                     onClick={() => setSearch('')}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-night/30 hover:text-night/60"
                   >
-                    �
+                    ï¿½
                   </button>
                 ) : null}
               </div>
@@ -289,10 +289,10 @@ export default function FavorisPage() {
                   onChange={(event) => setSort(event.target.value as SortKey)}
                   className="input cursor-pointer appearance-none py-2 pl-9 pr-8 text-sm"
                 >
-                  <option value="savedAt_desc">Plus r�cents</option>
+                  <option value="savedAt_desc">Plus rï¿½cents</option>
                   <option value="savedAt_asc">Plus anciens</option>
                   <option value="prix_asc">Prix croissant</option>
-                  <option value="prix_desc">Prix d�croissant</option>
+                  <option value="prix_desc">Prix dï¿½croissant</option>
                 </select>
                 <ArrowUpDown className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-night/35" />
               </div>
@@ -316,7 +316,7 @@ export default function FavorisPage() {
 
               {search ? (
                 <p className="text-sm text-night/50">
-                  {filtered.length} r�sultat{filtered.length > 1 ? 's' : ''}
+                  {filtered.length} rï¿½sultat{filtered.length > 1 ? 's' : ''}
                 </p>
               ) : null}
             </div>
@@ -339,7 +339,7 @@ export default function FavorisPage() {
                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-4xl opacity-30">=�</div>
+                          <div className="flex h-full w-full items-center justify-center text-4xl opacity-30">=ï¿½</div>
                         )}
                         <button
                           onClick={(event) => {
@@ -363,7 +363,7 @@ export default function FavorisPage() {
                               <span className="text-sm font-normal text-night/50">XPF</span>
                             </>
                           ) : (
-                            <span className="text-sm italic text-night/40">Prix � d�battre</span>
+                            <span className="text-sm italic text-night/40">Prix ï¿½ dï¿½battre</span>
                           )}
                         </p>
                         {item.commune ? (

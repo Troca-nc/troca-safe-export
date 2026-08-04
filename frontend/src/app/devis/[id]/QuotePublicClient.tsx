@@ -14,18 +14,18 @@ function formatMoney(value: number) {
 }
 
 function formatDate(value?: string | null) {
-  if (!value) return 'Non pr�cis�e'
+  if (!value) return 'Non prï¿½cisï¿½e'
   return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(value))
 }
 
 function formatStatus(status: string) {
   const value = String(status || '').toLowerCase()
   if (value === 'draft') return 'Brouillon'
-  if (value === 'sent') return 'Envoy�'
-  if (value === 'viewed') return 'Consult�'
-  if (value === 'accepted') return 'Accept�'
-  if (value === 'refused') return 'Refus�'
-  if (value === 'expired') return 'Expir�'
+  if (value === 'sent') return 'Envoyï¿½'
+  if (value === 'viewed') return 'Consultï¿½'
+  if (value === 'accepted') return 'Acceptï¿½'
+  if (value === 'refused') return 'Refusï¿½'
+  if (value === 'expired') return 'Expirï¿½'
   if (value === 'converted') return 'Converti'
   return status || 'Inconnu'
 }
@@ -53,12 +53,12 @@ export default function QuotePublicClient({ quote, token }: QuotePublicClientPro
       anchor.click()
       anchor.remove()
       window.URL.revokeObjectURL(url)
-      showToast({ tone: 'success', title: 'PDF t�l�charg�', message: 'Le devis a �t� enregistr� en PDF.' })
+      showToast({ tone: 'success', title: 'PDF tï¿½lï¿½chargï¿½', message: 'Le devis a ï¿½tï¿½ enregistrï¿½ en PDF.' })
     } catch (error: any) {
       showToast({
         tone: 'error',
-        title: 'T�l�chargement impossible',
-        message: error?.response?.data?.error || 'Impossible de t�l�charger le PDF pour le moment.',
+        title: 'Tï¿½lï¿½chargement impossible',
+        message: error?.response?.data?.error || 'Impossible de tï¿½lï¿½charger le PDF pour le moment.',
       })
     } finally {
       setBusy(null)
@@ -72,8 +72,8 @@ export default function QuotePublicClient({ quote, token }: QuotePublicClientPro
       setLocalStatus('accepted')
       showToast({
         tone: 'success',
-        title: 'Devis accept�',
-        message: 'Le professionnel a �t� notifi�.',
+        title: 'Devis acceptï¿½',
+        message: 'Le professionnel a ï¿½tï¿½ notifiï¿½.',
       })
     } catch (error: any) {
       showToast({
@@ -93,8 +93,8 @@ export default function QuotePublicClient({ quote, token }: QuotePublicClientPro
       setLocalStatus('refused')
       showToast({
         tone: 'success',
-        title: 'Devis refus�',
-        message: 'Le professionnel a �t� notifi�.',
+        title: 'Devis refusï¿½',
+        message: 'Le professionnel a ï¿½tï¿½ notifiï¿½.',
       })
     } catch (error: any) {
       showToast({
@@ -118,7 +118,7 @@ export default function QuotePublicClient({ quote, token }: QuotePublicClientPro
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Devis</p>
             <h1 className="mt-2 font-display text-3xl font-bold text-night">{quote.quote_number}</h1>
             <p className="mt-2 text-sm text-night/60">
-              {quote.pro.display_name} � {quote.subject}
+              {quote.pro.display_name} ï¿½ {quote.subject}
             </p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-3 py-1.5 text-sm font-semibold text-night">
@@ -134,7 +134,7 @@ export default function QuotePublicClient({ quote, token }: QuotePublicClientPro
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Professionnel</p>
                   <p className="mt-1 text-lg font-semibold text-night">{quote.pro.display_name}</p>
                   <p className="mt-1 text-sm text-night/60">{quote.pro.pro_company_name || quote.pro.pro_category || 'Professionnel Kalico'}</p>
-                  <p className="mt-1 text-sm text-night/60">{quote.pro.pro_commune || 'Nouvelle-Calédonie'}</p>
+                  <p className="mt-1 text-sm text-night/60">{quote.pro.pro_commune || 'Nouvelle-CalÃ©donie'}</p>
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Client</p>
@@ -184,8 +184,8 @@ export default function QuotePublicClient({ quote, token }: QuotePublicClientPro
                 </div>
               </div>
               <div className="mt-4 grid gap-2 text-sm text-night/60">
-                <p><strong>Validit� :</strong> {formatDate(quote.valid_until)}</p>
-                <p><strong>Envoy� :</strong> {formatDate(quote.sent_at)}</p>
+                <p><strong>Validitï¿½ :</strong> {formatDate(quote.valid_until)}</p>
+                <p><strong>Envoyï¿½ :</strong> {formatDate(quote.sent_at)}</p>
                 <p><strong>Vu :</strong> {formatDate(quote.viewed_at)}</p>
               </div>
             </section>
@@ -200,7 +200,7 @@ export default function QuotePublicClient({ quote, token }: QuotePublicClientPro
                   className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)] disabled:opacity-60"
                 >
                   {busy === 'download' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                  T�l�charger PDF
+                  Tï¿½lï¿½charger PDF
                 </button>
 
                 {canDecide ? (
@@ -259,8 +259,8 @@ export default function QuotePublicClient({ quote, token }: QuotePublicClientPro
       ) : null}
 
       <div className="mt-6 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-        <FeedbackAlert tone="info" title="Devis s�curis�">
-          Ce lien permet dafficher et de g�rer votre devis sans passer par une inscription suppl�mentaire.
+        <FeedbackAlert tone="info" title="Devis sï¿½curisï¿½">
+          Ce lien permet dafficher et de gï¿½rer votre devis sans passer par une inscription supplï¿½mentaire.
         </FeedbackAlert>
       </div>
     </main>

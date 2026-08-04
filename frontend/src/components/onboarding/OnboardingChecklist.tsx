@@ -18,10 +18,10 @@ const STORAGE_PREFIX = 'kalico_checklist_'
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
 
 const ITEMS: Array<{ key: ChecklistKey; label: string; href: string }> = [
-  { key: 'annonce', label: 'Déposer ma premi�re annonce', href: '/annonces/nouvelle' },
-  { key: 'profil', label: 'Compl�ter mon profil', href: '/profil' },
+  { key: 'annonce', label: 'DÃ©poser ma premiï¿½re annonce', href: '/annonces/nouvelle' },
+  { key: 'profil', label: 'Complï¿½ter mon profil', href: '/profil' },
   { key: 'alerte', label: 'Activer mes alertes', href: '/alertes' },
-  { key: 'explore', label: 'Explorer les fonctionnalit�s Pro', href: '/pro' },
+  { key: 'explore', label: 'Explorer les fonctionnalitï¿½s Pro', href: '/pro' },
 ]
 
 const defaultState = (): ChecklistState => ({
@@ -151,7 +151,7 @@ export default function OnboardingChecklist() {
         type="button"
         onClick={() => setOpen((value) => !value)}
         className={styles.fab}
-        aria-label={`Checklist onboarding - ${remainingCount} t�che${remainingCount > 1 ? 's' : ''} restante${remainingCount > 1 ? 's' : ''}`}
+        aria-label={`Checklist onboarding - ${remainingCount} tï¿½che${remainingCount > 1 ? 's' : ''} restante${remainingCount > 1 ? 's' : ''}`}
         aria-expanded={open}
         aria-controls="onboarding-checklist-panel"
       >
@@ -160,9 +160,9 @@ export default function OnboardingChecklist() {
       </button>
 
       {open ? (
-        <div ref={panelRef} id="onboarding-checklist-panel" className={styles.panel} role="dialog" aria-label="Pour bien d�marrer">
+        <div ref={panelRef} id="onboarding-checklist-panel" className={styles.panel} role="dialog" aria-label="Pour bien dï¿½marrer">
           <div className={styles.panelHeader}>
-            <p className="text-sm font-medium text-[var(--color-text-primary)]">Pour bien d�marrer</p>
+            <p className="text-sm font-medium text-[var(--color-text-primary)]">Pour bien dï¿½marrer</p>
             <button type="button" className={styles.panelClose} onClick={() => setOpen(false)} aria-label="Fermer la checklist">
               <ChevronUp className="h-4 w-4" />
             </button>

@@ -174,7 +174,7 @@ export default function TransporterDetailPage() {
       <main className="mx-auto max-w-7xl px-4 py-8 md:py-12">
         <Link href="/covoiturage?tab=transport" className="inline-flex items-center gap-2 text-sm font-semibold text-[#0A7EA4] hover:underline">
           <ArrowLeft className="h-4 w-4" />
-          Retour � la recherche
+          Retour ï¿½ la recherche
         </Link>
 
         <section className="mt-4 overflow-hidden rounded-[2rem] border border-night/8 bg-[var(--color-surface)] shadow-sm">
@@ -202,7 +202,7 @@ export default function TransporterDetailPage() {
                   <div className="mt-2 flex flex-wrap gap-2 text-sm text-night/60">
                     <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
                       <MapPin className="h-3.5 w-3.5" />
-                      {transporter.pro_commune || serviceZones[0] || 'Nouvelle-Calédonie'}
+                      {transporter.pro_commune || serviceZones[0] || 'Nouvelle-CalÃ©donie'}
                     </span>
                     <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
                       <BadgeCheck className="h-3.5 w-3.5 text-amber-500" />
@@ -221,7 +221,7 @@ export default function TransporterDetailPage() {
             </div>
 
             <p className="mt-5 max-w-3xl text-sm leading-relaxed text-night/65">
-              {transporter.vehicle_description || 'Transport local en Nouvelle-Calédonie.'}
+              {transporter.vehicle_description || 'Transport local en Nouvelle-CalÃ©donie.'}
             </p>
 
             <div className="mt-4 flex flex-wrap gap-2">
@@ -232,7 +232,7 @@ export default function TransporterDetailPage() {
               ))}
               {transporter.pro_phone ? (
                 <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-3 py-1.5 text-xs font-medium text-night/70">
-                  T�l�phone: {transporter.pro_phone}
+                  Tï¿½lï¿½phone: {transporter.pro_phone}
                 </span>
               ) : null}
               {transporter.pro_hours ? (
@@ -256,8 +256,8 @@ export default function TransporterDetailPage() {
               year={todayCalendar.year}
               availableDates={transporter.available_dates ?? []}
               unavailableDates={transporter.unavailable_dates ?? []}
-              title="Disponibilit�s"
-              description="Consultez la disponibilit� du transporteur sur le mois en cours."
+              title="Disponibilitï¿½s"
+              description="Consultez la disponibilitï¿½ du transporteur sur le mois en cours."
             />
 
             <article id="devis" className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
@@ -267,7 +267,7 @@ export default function TransporterDetailPage() {
               </div>
               <form onSubmit={handleQuote} className="grid gap-4 md:grid-cols-2">
                 <label className="block">
-                  <span className="mb-1 block text-sm font-semibold text-night">D�part</span>
+                  <span className="mb-1 block text-sm font-semibold text-night">Dï¿½part</span>
                   <input value={quoteForm.departure} onChange={(e) => setQuoteForm((current) => ({ ...current, departure: e.target.value }))} className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none" />
                 </label>
                 <label className="block">
@@ -296,9 +296,9 @@ export default function TransporterDetailPage() {
               {error ? <p className="mt-4 text-sm font-medium text-red-600">{error}</p> : null}
               {quoteResult ? (
                 <div className="mt-4 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-                  <p className="font-semibold">Devis estim� : {Number(quoteResult.total_price_xpf ?? 0).toLocaleString('fr-FR')} XPF</p>
-                  <p className="mt-1">Dur�e estim�e : {quoteResult.estimated_duration_minutes} minutes</p>
-                  <p className="mt-1">Distance estim�e : {Number(quoteResult.distance_km ?? 0).toFixed(1)} km</p>
+                  <p className="font-semibold">Devis estimï¿½ : {Number(quoteResult.total_price_xpf ?? 0).toLocaleString('fr-FR')} XPF</p>
+                  <p className="mt-1">Durï¿½e estimï¿½e : {quoteResult.estimated_duration_minutes} minutes</p>
+                  <p className="mt-1">Distance estimï¿½e : {Number(quoteResult.distance_km ?? 0).toFixed(1)} km</p>
                 </div>
               ) : null}
             </article>
@@ -310,17 +310,17 @@ export default function TransporterDetailPage() {
               <div className="mt-4 space-y-3 text-sm text-night/65">
                 <div className="flex items-center gap-2">
                   <Clock3 className="h-4 w-4 text-[#0A7EA4]" />
-                  R�ponse rapide et r�servation simple
+                  Rï¿½ponse rapide et rï¿½servation simple
                 </div>
                 <div className="flex items-center gap-2">
                   <CalendarDays className="h-4 w-4 text-[#0A7EA4]" />
-                  R�servez un trajet directement depuis Kalico
+                  Rï¿½servez un trajet directement depuis Kalico
                 </div>
               </div>
             </article>
 
             <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Avis r�cents</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Avis rï¿½cents</p>
               <div className="mt-4 space-y-4">
                 {reviews.length > 0 ? reviews.slice(0, 3).map((review) => (
                   <div key={review.id} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)]/70 p-4">

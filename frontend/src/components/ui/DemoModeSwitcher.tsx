@@ -11,10 +11,10 @@ const DEMO_OPTIONS: Array<{
   description: string
   icon: typeof UserRound
 }> = [
-  { key: 'visitor', label: 'Visiteur', description: 'Voir le site sans �tre connect�', icon: UserRound },
-  { key: 'particulier', label: 'Particulier', description: 'Déposer une annonce classique', icon: UserCheck },
+  { key: 'visitor', label: 'Visiteur', description: 'Voir le site sans ï¿½tre connectï¿½', icon: UserRound },
+  { key: 'particulier', label: 'Particulier', description: 'DÃ©poser une annonce classique', icon: UserCheck },
   { key: 'pro', label: 'Compte Pro', description: "Voir l'espace vendeur professionnel", icon: Store },
-  { key: 'bon_plan', label: 'Bon plan', description: 'Simuler un annonceur sponsoris�', icon: Megaphone },
+  { key: 'bon_plan', label: 'Bon plan', description: 'Simuler un annonceur sponsorisï¿½', icon: Megaphone },
 ]
 
 const PROFILE_TONE: Record<Exclude<DemoProfileKey, 'visitor'> | 'visitor', {
@@ -40,10 +40,10 @@ export default function DemoModeSwitcher() {
 
   if (!showDemoBar) return null
 
-  const currentLabel = activeOption?.label ?? 'Mode r�el'
+  const currentLabel = activeOption?.label ?? 'Mode rï¿½el'
   const currentDescription = activeOption
-    ? (user ? `${user.first_name} ${user.last_name}`.trim() : 'Aucun profil d�mo actif')
-    : 'Aucun profil d�mo actif'
+    ? (user ? `${user.first_name} ${user.last_name}`.trim() : 'Aucun profil dï¿½mo actif')
+    : 'Aucun profil dï¿½mo actif'
   const tone = PROFILE_TONE[activeProfile as keyof typeof PROFILE_TONE] ?? PROFILE_TONE.visitor
 
   return (
@@ -63,13 +63,13 @@ export default function DemoModeSwitcher() {
             <Sparkles className="h-4 w-4" />
           </span>
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-coral/80">Mode d�mo</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-coral/80">Mode dï¿½mo</p>
             <p className="text-sm font-semibold text-night">{currentLabel}</p>
             <p className="text-xs text-night/55">{currentDescription}</p>
           </div>
         </div>
         <div className={`hidden rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] sm:inline-flex ${tone.chip}`}>
-          {demoProfile || inferredProfile ? 'Profil actif' : 'Mode r�el'}
+          {demoProfile || inferredProfile ? 'Profil actif' : 'Mode rï¿½el'}
         </div>
         <ChevronDown className={`h-4 w-4 text-night/45 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
@@ -78,14 +78,14 @@ export default function DemoModeSwitcher() {
         <>
           <button
             type="button"
-            aria-label="Fermer le s�lecteur de profil"
+            aria-label="Fermer le sï¿½lecteur de profil"
             className="fixed inset-0 z-30 cursor-default"
             onClick={() => setOpen(false)}
           />
           <div
             id="demo-mode-menu"
             role="menu"
-            aria-label="S�lecteur de mode d�mo"
+            aria-label="Sï¿½lecteur de mode dï¿½mo"
             onKeyDown={(e) => { if (e.key === 'Escape') setOpen(false) }}
             className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-2xl border border-night/10 bg-white shadow-[0_18px_60px_rgba(8,32,50,0.14)]"
           >
@@ -104,8 +104,8 @@ export default function DemoModeSwitcher() {
                 <Sparkles className="h-4 w-4" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-night">Mode r�el</p>
-                <p className="text-xs text-night/55">Revenir � votre session actuelle ou au compte connect�.</p>
+                <p className="text-sm font-semibold text-night">Mode rï¿½el</p>
+                <p className="text-xs text-night/55">Revenir ï¿½ votre session actuelle ou au compte connectï¿½.</p>
               </div>
             </button>
             {DEMO_OPTIONS.map((option) => {

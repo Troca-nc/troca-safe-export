@@ -28,7 +28,7 @@ export default function NewsletterForm() {
   if (status === 'success') {
     return (
       <p className="mt-3 text-sm font-semibold text-nc-lagon">
-         Vous �tes abonn� !
+         Vous ï¿½tes abonnï¿½ !
       </p>
     )
   }

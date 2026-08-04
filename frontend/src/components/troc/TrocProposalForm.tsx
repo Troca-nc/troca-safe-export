@@ -30,7 +30,7 @@ export default function TrocProposalForm({ listingId, listingTitle }: Props) {
     setError(null)
 
     if (!offeredDescription.trim()) {
-      setError('D�crivez au moins ce que vous proposez pour que la proposition soit valide.')
+      setError('Dï¿½crivez au moins ce que vous proposez pour que la proposition soit valide.')
       return
     }
 
@@ -53,7 +53,7 @@ export default function TrocProposalForm({ listingId, listingTitle }: Props) {
         complement_xpf: complementDirection === 'none' ? 0 : snapTo10(Number(complementXpf || 0)),
         message: message.trim(),
       })
-      setSuccess('Votre proposition a �t� envoy�e.')
+      setSuccess('Votre proposition a ï¿½tï¿½ envoyï¿½e.')
       setOfferedDescription('')
       setComplementDirection('none')
       setComplementXpf(0)
@@ -66,16 +66,16 @@ export default function TrocProposalForm({ listingId, listingTitle }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-[1.75rem] border border-night/8 bg-white p-5 shadow-card">
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Proposition structur�e</p>
-        <h3 className="mt-2 text-xl font-bold text-night">Proposer un �change pour {listingTitle}</h3>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Proposition structurï¿½e</p>
+        <h3 className="mt-2 text-xl font-bold text-night">Proposer un ï¿½change pour {listingTitle}</h3>
         <p className="mt-2 text-sm leading-6 text-night/60">
-          D�crivez ce que vous offrez avant de d�marrer la discussion. Cest plus clair pour tout le monde.
+          Dï¿½crivez ce que vous offrez avant de dï¿½marrer la discussion. Cest plus clair pour tout le monde.
         </p>
       </div>
 
       {!isAuthenticated ? (
         <div className="rounded-2xl border border-coral/20 bg-coral/8 p-4 text-sm text-night/70">
-          Connectez-vous pour envoyer une proposition. Votre brouillon reste visible ici apr�s connexion.
+          Connectez-vous pour envoyer une proposition. Votre brouillon reste visible ici aprï¿½s connexion.
         </div>
       ) : null}
 
@@ -86,7 +86,7 @@ export default function TrocProposalForm({ listingId, listingTitle }: Props) {
           onChange={(event) => setOfferedDescription(event.target.value)}
           rows={4}
           className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10"
-          placeholder="D�crivez lobjet, lÉtat, la marque, les accessoires inclus..."
+          placeholder="Dï¿½crivez lobjet, lÃtat, la marque, les accessoires inclus..."
           maxLength={2000}
           required
         />
@@ -94,23 +94,23 @@ export default function TrocProposalForm({ listingId, listingTitle }: Props) {
 
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block space-y-2">
-          <span className="text-sm font-medium text-night">Compl�ment XPF</span>
+          <span className="text-sm font-medium text-night">Complï¿½ment XPF</span>
           <select
             value={complementDirection}
             onChange={(event) => setComplementDirection(event.target.value as 'none' | 'i_pay' | 'they_pay')}
             className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10"
           >
-            <option value="none">Aucun compl�ment</option>
-            <option value="i_pay">Je propose un compl�ment</option>
-            <option value="they_pay">Je demande un compl�ment</option>
+            <option value="none">Aucun complï¿½ment</option>
+            <option value="i_pay">Je propose un complï¿½ment</option>
+            <option value="they_pay">Je demande un complï¿½ment</option>
           </select>
         </label>
 
         <label className="block space-y-2">
           <span className="text-sm font-medium text-night">
             {complementDirection === 'they_pay'
-              ? 'Montant demand�'
-              : 'Montant propos�'}
+              ? 'Montant demandï¿½'
+              : 'Montant proposï¿½'}
           </span>
           <input
             type="number"

@@ -39,7 +39,7 @@ function buildProposalMessage(selectedListing: TrocometerListing, targetListing:
   const selectedPrice = formatPrice(getListingPrice(selectedListing))
   const targetPrice = formatPrice(getListingPrice(targetListing))
 
-  return `Bonjour, je serais int�ress�(e) par un �change de mon ${selectedTitle} (prix : ${selectedPrice}) contre votre ${targetTitle} (prix : ${targetPrice}). �tes-vous d'accord pour un troc ?`
+  return `Bonjour, je serais intï¿½ressï¿½(e) par un ï¿½change de mon ${selectedTitle} (prix : ${selectedPrice}) contre votre ${targetTitle} (prix : ${targetPrice}). ï¿½tes-vous d'accord pour un troc ?`
 }
 
 function encodeTrocProposalMessage(payload: {
@@ -149,9 +149,9 @@ export default function TrocProposalModal({
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
               <CheckCircle2 className="h-8 w-8" />
             </div>
-            <h3 className="mt-4 text-2xl font-bold text-night">Proposition envoy�e !</h3>
+            <h3 className="mt-4 text-2xl font-bold text-night">Proposition envoyï¿½e !</h3>
             <p className="mt-2 text-sm leading-6 text-night/60">
-              Vous serez notifi�(e) d�s que {recipientName} r�pondra � votre proposition.
+              Vous serez notifiï¿½(e) dï¿½s que {recipientName} rï¿½pondra ï¿½ votre proposition.
             </p>
             <button
               type="button"
@@ -179,7 +179,7 @@ export default function TrocProposalModal({
                   <ListingImage
                     src={selectedImage}
                     alt={getTitle(selectedListing)}
-                    fallbackIcon="=�"
+                    fallbackIcon="=ï¿½"
                     className="h-full w-full"
                     imgClassName="h-full w-full"
                   />
@@ -212,7 +212,7 @@ export default function TrocProposalModal({
             </div>
 
             <label className="mt-5 block space-y-2">
-              <span className="text-sm font-semibold text-night">Message propos�</span>
+              <span className="text-sm font-semibold text-night">Message proposï¿½</span>
               <textarea
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}

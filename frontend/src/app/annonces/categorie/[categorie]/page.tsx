@@ -82,7 +82,7 @@ export default async function CategoryPage({
         <h1 className="text-2xl font-display font-bold text-night flex items-center gap-2">
           <span aria-hidden>{cat.emoji}</span>
           {cat.label}
-          {commune && <span className="text-night/50"> � {commune}</span>}
+          {commune && <span className="text-night/50"> ï¿½ {commune}</span>}
         </h1>
         <p className="text-sm text-night/50 mt-1">
           {stats.nb_annonces.toLocaleString('fr-FR')} annonce{stats.nb_annonces > 1 ? 's' : ''} disponible{stats.nb_annonces > 1 ? 's' : ''}

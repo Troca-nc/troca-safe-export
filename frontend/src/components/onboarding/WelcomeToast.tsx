@@ -106,7 +106,7 @@ export default function WelcomeToast() {
       </button>
 
       <p className={styles.title}>{title}</p>
-      <p className={styles.subtitle}>Kalico est � vous.</p>
+      <p className={styles.subtitle}>Kalico est ï¿½ vous.</p>
 
       <div className={styles.actions}>
         <button
@@ -117,7 +117,7 @@ export default function WelcomeToast() {
             router.push('/annonces/nouvelle')
           }}
         >
-          Déposer une annonce
+          DÃ©poser une annonce
           <ArrowRight className="h-4 w-4" />
         </button>
 

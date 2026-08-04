@@ -72,26 +72,26 @@ function inferIconKey(name: string, slug: string, path: string[] = []) {
   if (/(parkings)/.test(text)) return 'parking'
   if (/(bureaux|commerces|docks|entrepots)/.test(text)) return 'office'
 
-  if (/(manteaux|vestes|blazers|tailleurs|hauts|t-shirts|chemises|pulls|sweats|robes|jupes|pantalons|leggings|shorts|combinaisons|lingerie|pyjamas|maillots de bain|vetements de sport|v�tements de sport)/.test(text)) {
+  if (/(manteaux|vestes|blazers|tailleurs|hauts|t-shirts|chemises|pulls|sweats|robes|jupes|pantalons|leggings|shorts|combinaisons|lingerie|pyjamas|maillots de bain|vetements de sport|vï¿½tements de sport)/.test(text)) {
     return 'shirt'
   }
   if (/(chaussures|baskets|sandales|mocassins|bottes|claquettes|tongs|chaussons)/.test(text)) {
     return 'shoe'
   }
-  if (/(sacs|pochettes|porte-monnaie|portemonnaie|trousses|banane|bandouliere|bandouli�re|sacs a main|sacs a dos|sacs de voyage|sacs de sport)/.test(text)) {
+  if (/(sacs|pochettes|porte-monnaie|portemonnaie|trousses|banane|bandouliere|bandouliï¿½re|sacs a main|sacs a dos|sacs de voyage|sacs de sport)/.test(text)) {
     return 'shopping-bag'
   }
-  if (/(beaute|beaut�|parfums|maquillage|bijoux|montres|foulards|ceintures|chapeaux|casquettes|lunettes|accessoires cheveux|accessoires de beaut�)/.test(text)) {
+  if (/(beaute|beautï¿½|parfums|maquillage|bijoux|montres|foulards|ceintures|chapeaux|casquettes|lunettes|accessoires cheveux|accessoires de beautï¿½)/.test(text)) {
     return 'sparkles'
   }
 
-  if (/(animaux|chiens|chats|chevaux|rongeurs|adoption|perdus|trouves|trouv�s)/.test(text)) return 'paw'
-  if (/(services|depannages|demenagement|livraison|cours particuliers|administratif|garde d'enfants|soins|sports|sante|sant�|beaute|beaut�|bien-etre|bien-�tre)/.test(text)) return 'handshake'
+  if (/(animaux|chiens|chats|chevaux|rongeurs|adoption|perdus|trouves|trouvï¿½s)/.test(text)) return 'paw'
+  if (/(services|depannages|demenagement|livraison|cours particuliers|administratif|garde d'enfants|soins|sports|sante|santï¿½|beaute|beautï¿½|bien-etre|bien-ï¿½tre)/.test(text)) return 'handshake'
   if (/(agriculture|espaces verts|jardinage|piscine|spa|plantes|semences)/.test(text)) return 'sprout'
   if (/(btp|construction|travaux|depannages|outillage|bricolage)/.test(text)) return 'hammer'
-  if (/(telecom|internet|medias|m�dias|photo|son|audio|electronique|multimedia|multim�dia|smartphone|ordinateur|tv|television|t�l�vision)/.test(text)) return 'smartphone'
-  if (/(collections|antiquites|antiquit�s)/.test(text)) return 'gift'
-  if (/(loisirs|musique|lecture|jeux|sport|fitness|camping|creatifs|cr�atifs|modelisme|mod�lisme|airsoft|tir)/.test(text)) return 'dumbbell'
+  if (/(telecom|internet|medias|mï¿½dias|photo|son|audio|electronique|multimedia|multimï¿½dia|smartphone|ordinateur|tv|television|tï¿½lï¿½vision)/.test(text)) return 'smartphone'
+  if (/(collections|antiquites|antiquitï¿½s)/.test(text)) return 'gift'
+  if (/(loisirs|musique|lecture|jeux|sport|fitness|camping|creatifs|crï¿½atifs|modelisme|modï¿½lisme|airsoft|tir)/.test(text)) return 'dumbbell'
 
   return ROOT_ICON_MAP[slug] || 'layers'
 }

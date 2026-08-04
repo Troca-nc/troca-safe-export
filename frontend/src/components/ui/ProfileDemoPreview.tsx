@@ -32,16 +32,16 @@ const PROFILE_CONFIG: Record<
 > = {
   particulier: {
     title: 'Particulier',
-    subtitle: 'D�pose une annonce simple et rapide',
+    subtitle: 'Dï¿½pose une annonce simple et rapide',
     accent: 'from-coral/20 to-[var(--color-surface)]',
-    badge: 'Déposer une annonce',
+    badge: 'DÃ©poser une annonce',
     depositLabel: 'Annonce classique',
     accountLabel: 'Mon compte particulier',
     accountHint: 'Publier, suivre les messages et garder ses favoris.',
   },
   pro: {
     title: 'Compte Pro',
-    subtitle: 'Gestion du catalogue, statistiques et visibilit�',
+    subtitle: 'Gestion du catalogue, statistiques et visibilitï¿½',
     accent: 'from-ocean/20 to-[var(--color-surface)]',
     badge: 'Espace vendeur pro',
     depositLabel: 'Vitrine professionnelle',
@@ -50,12 +50,12 @@ const PROFILE_CONFIG: Record<
   },
   bon_plan: {
     title: 'Annonceur Bon Plan',
-    subtitle: 'Promo, �v�nement ou mise en avant locale',
+    subtitle: 'Promo, ï¿½vï¿½nement ou mise en avant locale',
     accent: 'from-lagoon/20 to-[var(--color-surface)]',
-    badge: 'Bon plan sponsoris�',
-    depositLabel: 'Contenu sponsoris�',
+    badge: 'Bon plan sponsorisï¿½',
+    depositLabel: 'Contenu sponsorisï¿½',
     accountLabel: 'Espace bon plan',
-    accountHint: 'Programmer une promo, suivre la visibilit� et la diffusion.',
+    accountHint: 'Programmer une promo, suivre la visibilitï¿½ et la diffusion.',
   },
 }
 
@@ -63,7 +63,7 @@ const ACCOUNT_ITEMS = [
   { icon: Package, label: 'Mes annonces', href: '/profil?tab=listings' },
   { icon: Heart, label: 'Favoris', href: '/favoris' },
   { icon: MessageCircle, label: 'Messages', href: '/messages' },
-  { icon: Settings, label: 'Paramètres', href: '/parametres' },
+  { icon: Settings, label: 'ParamÃ¨tres', href: '/parametres' },
 ]
 
 const PROFILE_LABELS: Record<Exclude<DemoProfileKey, 'visitor'>, string> = {
@@ -91,9 +91,9 @@ export default function ProfileDemoPreview({
             <UsersRound className="h-5 w-5" />
           </span>
           <div>
-            <p className="text-sm font-semibold text-night">Choisissez un profil pour voir l'aper�u.</p>
+            <p className="text-sm font-semibold text-night">Choisissez un profil pour voir l'aperï¿½u.</p>
             <p className="text-sm text-night/60">
-              Choisissez un profil d�mo dans le header pour voir la publication et le compte comme un vrai utilisateur.
+              Choisissez un profil dï¿½mo dans le header pour voir la publication et le compte comme un vrai utilisateur.
             </p>
           </div>
         </div>
@@ -130,7 +130,7 @@ export default function ProfileDemoPreview({
             <BadgeCheck className="h-4 w-4" />
           </span>
           <div>
-                        {/* Profil actif supprim� pour garder le contexte */}
+                        {/* Profil actif supprimï¿½ pour garder le contexte */}
             <p className="text-sm font-semibold text-night">{profileLabel}</p>
           </div>
         </div>
@@ -146,7 +146,7 @@ export default function ProfileDemoPreview({
           <p className="text-sm text-night/60">{config.subtitle}</p>
         </div>
         <span className="rounded-full border border-night/10 bg-white dark:bg-[var(--color-surface)] px-3 py-1 text-xs font-semibold text-night/70">
-          {mode === 'deposit' ? 'Comment votre annonce appara�t' : 'Votre espace personnel'}
+          {mode === 'deposit' ? 'Comment votre annonce apparaï¿½t' : 'Votre espace personnel'}
         </span>
       </div>
 
@@ -159,7 +159,7 @@ export default function ProfileDemoPreview({
             </div>
             <div className="mt-3 space-y-2">
               <div className="rounded-xl border border-night/10 bg-sand px-3 py-2 text-sm text-night/70">Titre de l'annonce</div>
-              <div className="rounded-xl border border-night/10 bg-sand px-3 py-2 text-sm text-night/70">Prix et n�gociation</div>
+              <div className="rounded-xl border border-night/10 bg-sand px-3 py-2 text-sm text-night/70">Prix et nï¿½gociation</div>
               <div className="rounded-xl border border-night/10 bg-sand px-3 py-2 text-sm text-night/70">Commune / province</div>
               <div className="rounded-xl border border-night/10 bg-sand px-3 py-2 text-sm text-night/70">Photos + description</div>
             </div>
@@ -170,7 +170,7 @@ export default function ProfileDemoPreview({
             <div className="mt-4 space-y-2">
               <div className="flex items-center gap-2 rounded-xl bg-coral/5 px-3 py-2 text-sm text-night">
                 <ShieldCheck className="h-4 w-4 text-coral" />
-                {activeProfile === 'bon_plan' ? 'Mention sponsoris�e obligatoire' : 'V�rification du compte recommand�e'}
+                {activeProfile === 'bon_plan' ? 'Mention sponsorisï¿½e obligatoire' : 'Vï¿½rification du compte recommandï¿½e'}
               </div>
               <div className="flex items-center gap-2 rounded-xl bg-night/5 px-3 py-2 text-sm text-night">
                 <Megaphone className="h-4 w-4 text-night/55" />
@@ -232,13 +232,13 @@ export default function ProfileDemoPreview({
             <div className="mt-4 rounded-2xl border border-night/10 bg-white dark:bg-[var(--color-surface)] p-4 shadow-sm">
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-night">Vous n'avez pas encore d'annonce. Publiez la v�tre.</p>
+                  <p className="text-sm font-semibold text-night">Vous n'avez pas encore d'annonce. Publiez la vï¿½tre.</p>
                   <p className="mt-1 text-sm text-night/60">
                     Votre compte particulier n&apos;a pas encore d&apos;annonce active. Le bouton ci-dessous vous envoie directement vers la page de publication.
                   </p>
                 </div>
                 <Link href="/annonces/nouvelle" className="btn-primary px-4 py-2 text-sm">
-                  Déposer une annonce
+                  DÃ©poser une annonce
                 </Link>
               </div>
             </div>
@@ -246,14 +246,14 @@ export default function ProfileDemoPreview({
             <div className="mt-4 grid gap-4 lg:grid-cols-3">
               {[
                 activeProfile === 'bon_plan'
-                  ? { title: 'Campagne � cr�er', meta: 'Programmez votre premi�re mise en avant.' }
-                  : { title: 'Annonce � publier', meta: 'Pr�parez votre premi�re publication.' },
+                  ? { title: 'Campagne ï¿½ crï¿½er', meta: 'Programmez votre premiï¿½re mise en avant.' }
+                  : { title: 'Annonce ï¿½ publier', meta: 'Prï¿½parez votre premiï¿½re publication.' },
                 activeProfile === 'bon_plan'
-                  ? { title: 'Diffusion en attente', meta: 'Le contenu sponsoris� sera visible ici.' }
-                  : { title: 'Message � traiter', meta: 'Les �changes safficheront ici.' },
+                  ? { title: 'Diffusion en attente', meta: 'Le contenu sponsorisï¿½ sera visible ici.' }
+                  : { title: 'Message ï¿½ traiter', meta: 'Les ï¿½changes safficheront ici.' },
                 activeProfile === 'bon_plan'
-                  ? { title: 'Statistiques � suivre', meta: 'Suivi de visibilit� et clics.' }
-                  : { title: 'Paramètres � compl�ter', meta: 'Retrouvez vos pr�f�rences ici.' },
+                  ? { title: 'Statistiques ï¿½ suivre', meta: 'Suivi de visibilitï¿½ et clics.' }
+                  : { title: 'ParamÃ¨tres ï¿½ complï¿½ter', meta: 'Retrouvez vos prï¿½fï¿½rences ici.' },
               ].map((item) => (
                 <div key={item.title} className="rounded-2xl border border-night/10 bg-white dark:bg-[var(--color-surface)] p-4 shadow-sm">
                   <p className="text-sm font-semibold text-night">{item.title}</p>

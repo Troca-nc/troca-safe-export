@@ -5,16 +5,16 @@ import { ArrowRight, BadgeCheck, BarChart3, Briefcase, CalendarDays, Camera, Fil
 
 const highlights = [
   { icon: Store, title: 'Annonces', text: 'Publiez un produit ou un service en quelques minutes.' },
-  { icon: RefreshCw, title: 'Troc', text: '�changez, proposez et trouvez une seconde vie aux objets.' },
-  { icon: Route, title: 'Covoiturage', text: 'Trajets entre communes, r�servation simple, filtre femmes disponible.' },
-  { icon: FileText, title: 'Devis Pro', text: 'Cr�ez et envoyez des devis en XPF avec TGC int�gr�e, depuis votre dashboard Pro.' },
+  { icon: RefreshCw, title: 'Troc', text: 'ï¿½changez, proposez et trouvez une seconde vie aux objets.' },
+  { icon: Route, title: 'Covoiturage', text: 'Trajets entre communes, rï¿½servation simple, filtre femmes disponible.' },
+  { icon: FileText, title: 'Devis Pro', text: 'Crï¿½ez et envoyez des devis en XPF avec TGC intï¿½grï¿½e, depuis votre dashboard Pro.' },
 ]
 
 const quickWins = [
-  { icon: Truck, title: 'Envoi & Livraison', text: 'Transport de colis, d�m�nagement et marchandises entre les communes.' },
-  { icon: Briefcase, title: 'Pro', text: 'Cr�ez et envoyez des devis en XPF avec TGC int�gr�e.' },
-  { icon: CalendarDays, title: '�v�nements', text: 'Mettez en avant ce qui se passe pr�s de chez vous.' },
-  { icon: BarChart3, title: 'Visibilit�', text: 'Vos annonces remontent dans une exp�rience locale claire.' },
+  { icon: Truck, title: 'Envoi & Livraison', text: 'Transport de colis, dï¿½mï¿½nagement et marchandises entre les communes.' },
+  { icon: Briefcase, title: 'Pro', text: 'Crï¿½ez et envoyez des devis en XPF avec TGC intï¿½grï¿½e.' },
+  { icon: CalendarDays, title: 'ï¿½vï¿½nements', text: 'Mettez en avant ce qui se passe prï¿½s de chez vous.' },
+  { icon: BarChart3, title: 'Visibilitï¿½', text: 'Vos annonces remontent dans une expï¿½rience locale claire.' },
 ]
 
 export default function AuthMapPanel() {
@@ -30,13 +30,13 @@ export default function AuthMapPanel() {
               <Image src="/brand/kalico1.svg" alt="Kalico" fill sizes="176px" className="object-cover" priority />
             </span>
             <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.34em] text-white/55">
-              Nouvelle-Calédonie
+              Nouvelle-CalÃ©donie
             </p>
             <h2 className="mt-4 max-w-2xl text-3xl font-semibold leading-tight text-white md:text-[2.5rem]">
               Tout Kalico, en une seule inscription.
             </h2>
             <p className="mt-4 max-w-xl text-sm leading-6 text-white/72 md:text-base">
-              La seule plateforme locale qui couvre les annonces, le covoiturage entre les communes, les devis Pro et lenvoi & livraison - en XPF, pour la Nouvelle-Calédonie.
+              La seule plateforme locale qui couvre les annonces, le covoiturage entre les communes, les devis Pro et lenvoi & livraison - en XPF, pour la Nouvelle-CalÃ©donie.
             </p>
           </div>
 
@@ -60,7 +60,7 @@ export default function AuthMapPanel() {
             <div className="flex items-center justify-between gap-4">
               <div className="text-left">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/50">Ce que Kalico rassemble</p>
-                <p className="mt-1 text-sm text-white/78">Un terrain de jeu utile pour lancer, vendre et d�velopper</p>
+                <p className="mt-1 text-sm text-white/78">Un terrain de jeu utile pour lancer, vendre et dï¿½velopper</p>
               </div>
               <BadgeCheck className="h-6 w-6 text-nc-lagon" />
             </div>
@@ -83,8 +83,8 @@ export default function AuthMapPanel() {
 
             <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-white/16 bg-white/8 px-4 py-[14px] text-left">
               <div>
-                <p className="text-sm font-semibold text-white">Publier, �changer, r�server, d�velopper.</p>
-                <p className="mt-1 text-xs leading-5 text-white/70">D�s votre inscription, votre compte est actif sur toutes les fonctionnalit�s - aucune �tape cach�e.</p>
+                <p className="text-sm font-semibold text-white">Publier, ï¿½changer, rï¿½server, dï¿½velopper.</p>
+                <p className="mt-1 text-xs leading-5 text-white/70">Dï¿½s votre inscription, votre compte est actif sur toutes les fonctionnalitï¿½s - aucune ï¿½tape cachï¿½e.</p>
               </div>
               <ArrowRight className="h-5 w-5 shrink-0 text-nc-lagon" />
             </div>

@@ -11,7 +11,7 @@ import TurnstileChallenge from '@/components/auth/TurnstileChallenge'
 import { authApi } from '@/lib/api'
 
 const schema = z.object({
-  identifier: z.string().trim().min(3, 'Entrez votre email ou num�ro de t�l�phone'),
+  identifier: z.string().trim().min(3, 'Entrez votre email ou numï¿½ro de tï¿½lï¿½phone'),
 })
 
 type FormData = z.infer<typeof schema>
@@ -38,14 +38,14 @@ export default function ForgotPasswordPage() {
     setError('')
     try {
       if (turnstileEnabled && !turnstileToken) {
-        setError('Veuillez compl�ter la v�rification anti-bot.')
+        setError('Veuillez complï¿½ter la vï¿½rification anti-bot.')
         return
       }
 
       await authApi.forgotPassword(identifier, turnstileToken || undefined)
       setSent(true)
     } catch {
-      // On affiche toujours un message neutre pour �viter l'�num�ration de comptes.
+      // On affiche toujours un message neutre pour ï¿½viter l'ï¿½numï¿½ration de comptes.
       setSent(true)
     }
   }
@@ -56,7 +56,7 @@ export default function ForgotPasswordPage() {
       <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
           <Link href="/connexion" className="inline-flex items-center gap-1.5 text-sm text-night/50 hover:text-coral mb-6 transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Retour � la connexion
+            <ArrowLeft className="w-4 h-4" /> Retour ï¿½ la connexion
           </Link>
 
           {!sent ? (
@@ -64,9 +64,9 @@ export default function ForgotPasswordPage() {
               <div className="w-12 h-12 bg-coral/10 rounded-2xl flex items-center justify-center mb-5">
                 <LeadingIcon className="w-6 h-6 text-coral" />
               </div>
-              <h1 className="font-display font-bold text-2xl text-night mb-2">Mot de passe oubli� ?</h1>
+              <h1 className="font-display font-bold text-2xl text-night mb-2">Mot de passe oubliï¿½ ?</h1>
               <p className="text-night/50 text-sm mb-6">
-                Entrez votre email ou votre num�ro de t�l�phone. Si le num�ro est v�rifi�, nous privil�gierons le SMS ; sinon, nous enverrons un email de r�initialisation valable 1 heure.
+                Entrez votre email ou votre numï¿½ro de tï¿½lï¿½phone. Si le numï¿½ro est vï¿½rifiï¿½, nous privilï¿½gierons le SMS ; sinon, nous enverrons un email de rï¿½initialisation valable 1 heure.
               </p>
 
               {error && (
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-night mb-1.5">Email ou t�l�phone</label>
+                  <label className="block text-sm font-medium text-night mb-1.5">Email ou tï¿½lï¿½phone</label>
                   <div className="relative">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                       {looksLikePhone ? (
@@ -100,12 +100,12 @@ export default function ForgotPasswordPage() {
                 </div>
 
                 <div className="rounded-2xl border border-night/10 bg-sand/40 p-4">
-                  <p className="text-sm font-semibold text-night">V�rification anti-bot</p>
+                  <p className="text-sm font-semibold text-night">Vï¿½rification anti-bot</p>
                   <p className="mt-1 text-xs text-night/55">
-                    Cette �tape prot�ge la r�initialisation sans g�ner les utilisateurs r�els.
+                    Cette ï¿½tape protï¿½ge la rï¿½initialisation sans gï¿½ner les utilisateurs rï¿½els.
                   </p>
                   <div className="mt-3">
-                    <TurnstileChallenge action="forgot_password" label="R�initialisation" onTokenChange={setTurnstileToken} />
+                    <TurnstileChallenge action="forgot_password" label="Rï¿½initialisation" onTokenChange={setTurnstileToken} />
                   </div>
                 </div>
 
@@ -124,15 +124,15 @@ export default function ForgotPasswordPage() {
               <div className="w-16 h-16 bg-jungle/10 rounded-full flex items-center justify-center mx-auto mb-5">
                 <CheckCircle2 className="w-8 h-8 text-jungle" />
               </div>
-              <h2 className="font-display font-bold text-xl text-night mb-2">Message envoy� !</h2>
+              <h2 className="font-display font-bold text-xl text-night mb-2">Message envoyï¿½ !</h2>
               <p className="text-night/55 text-sm mb-6 leading-relaxed">
-                Si un compte Kalico est associ� � <strong>{getValues('identifier')}</strong>, vous recevrez un lien de r�initialisation par SMS ou par email selon vos coordonn�es v�rifi�es.
+                Si un compte Kalico est associï¿½ ï¿½ <strong>{getValues('identifier')}</strong>, vous recevrez un lien de rï¿½initialisation par SMS ou par email selon vos coordonnï¿½es vï¿½rifiï¿½es.
               </p>
               <p className="text-xs text-night/35 mb-6">
-                V�rifiez vos spams si vous ne recevez rien. Le lien expire dans 1 heure.
+                Vï¿½rifiez vos spams si vous ne recevez rien. Le lien expire dans 1 heure.
               </p>
               <Link href="/connexion" className="btn-primary justify-center py-2.5">
-                Retour � la connexion
+                Retour ï¿½ la connexion
               </Link>
             </div>
           )}

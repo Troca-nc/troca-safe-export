@@ -47,7 +47,7 @@ function buildAttachments(messages: Message[], currentUserId: number | null): At
       acc.push({
         id: message.id,
         kind: 'document' as const,
-        title: message.attachment_name || 'Document partag�',
+        title: message.attachment_name || 'Document partagï¿½',
         url: documentUrl,
         createdAt: message.created_at,
         isMine,
@@ -59,7 +59,7 @@ function buildAttachments(messages: Message[], currentUserId: number | null): At
       acc.push({
         id: message.id,
         kind: 'image' as const,
-        title: 'Image partag�e',
+        title: 'Image partagï¿½e',
         url: message.photo_url,
         createdAt: message.created_at,
         isMine,
@@ -84,7 +84,7 @@ function buildAttachments(messages: Message[], currentUserId: number | null): At
       acc.push({
         id: message.id,
         kind: 'document' as const,
-        title: 'Document partag�',
+        title: 'Document partagï¿½',
         url: docUrl,
         createdAt: message.created_at,
         isMine,
@@ -168,8 +168,8 @@ function MediaSidebar({
       <div className="card sticky top-4 p-4">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-night/40">Acc�s rapide</p>
-            <h2 className="font-semibold text-night">M�dias partag�s</h2>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-night/40">Accï¿½s rapide</p>
+            <h2 className="font-semibold text-night">Mï¿½dias partagï¿½s</h2>
           </div>
           <button type="button" onClick={onOpenConversations} className="btn-ghost px-3 py-2 text-xs">
             Discussions
@@ -195,8 +195,8 @@ function MediaSidebar({
           {attachments.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-night/10 bg-sand/50 px-4 py-6 text-center">
               <Files className="mx-auto mb-2 h-5 w-5 text-night/30" />
-              <p className="text-sm font-medium text-night">Aucun m�dia partag�</p>
-              <p className="mt-1 text-xs text-night/40">Les images, documents et vocaux appara�tront ici.</p>
+              <p className="text-sm font-medium text-night">Aucun mï¿½dia partagï¿½</p>
+              <p className="mt-1 text-xs text-night/40">Les images, documents et vocaux apparaï¿½tront ici.</p>
             </div>
           ) : (
             attachments.slice().reverse().map((item) => (
@@ -244,7 +244,7 @@ function ListingSidebar({ conversation }: { conversation: Conversation | null })
     return (
       <aside className="hidden xl:flex">
         <div className="card sticky top-4 w-full p-5">
-          <p className="text-sm text-night/50">S�lectionnez une conversation pour voir lannonce li�e.</p>
+          <p className="text-sm text-night/50">Sï¿½lectionnez une conversation pour voir lannonce liï¿½e.</p>
         </div>
       </aside>
     )
@@ -257,7 +257,7 @@ function ListingSidebar({ conversation }: { conversation: Conversation | null })
       <div className="card sticky top-4 space-y-4 p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-night/40">Annonce li�e</p>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-night/40">Annonce liï¿½e</p>
             <h2 className="truncate font-semibold text-night">{conversation.annonce.titre}</h2>
           </div>
           <Link href={`/annonces/${conversation.annonce.id}`} className="btn-ghost px-3 py-2 text-xs">
@@ -269,10 +269,10 @@ function ListingSidebar({ conversation }: { conversation: Conversation | null })
           <div className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-amber-800">
             <div className="flex items-center gap-2 text-sm font-semibold">
               <ShieldAlert className="h-4 w-4" />
-              Cette annonce a expir�
+              Cette annonce a expirï¿½
             </div>
             <p className="mt-1 text-xs">
-              Les �changes restent visibles, mais lannonce nest plus active.
+              Les ï¿½changes restent visibles, mais lannonce nest plus active.
             </p>
           </div>
         )}
@@ -295,7 +295,7 @@ function ListingSidebar({ conversation }: { conversation: Conversation | null })
           <div className="rounded-2xl border border-night/8 bg-white px-4 py-3">
             <p className="text-[11px] uppercase tracking-[0.18em] text-night/40">Prix</p>
             <p className="mt-1 text-xl font-semibold text-coral">
-              {formatMoney(conversation.annonce.prix) ?? 'Prix non communiqu�'}
+              {formatMoney(conversation.annonce.prix) ?? 'Prix non communiquï¿½'}
             </p>
           </div>
 
@@ -303,7 +303,7 @@ function ListingSidebar({ conversation }: { conversation: Conversation | null })
             <div className="rounded-2xl border border-night/8 bg-white px-4 py-3">
               <p className="text-[11px] uppercase tracking-[0.18em] text-night/40">Statut</p>
               <p className={`mt-1 text-sm font-semibold ${inactive ? 'text-amber-700' : 'text-emerald-700'}`}>
-                {inactive ? 'Expir�e' : 'Active'}
+                {inactive ? 'Expirï¿½e' : 'Active'}
               </p>
             </div>
             <div className="rounded-2xl border border-night/8 bg-white px-4 py-3">
@@ -337,7 +337,7 @@ function MobileTabs({
         <div className="grid grid-cols-3 items-center gap-1 rounded-[1.35rem] border border-night/10 bg-[var(--color-background-secondary)] p-1 sm:ml-auto">
           {[
             { id: 'chat', label: 'Chat' },
-            { id: 'media', label: 'M�dias' },
+            { id: 'media', label: 'Mï¿½dias' },
             { id: 'listing', label: 'Annonce' },
           ].map((item) => (
             <button
@@ -514,15 +514,15 @@ export default function MessagesPage() {
               Connectez-vous pour consulter vos conversations
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-night/60">
-              Retrouvez vos �changes, pi�ces jointes, offres et demandes depuis n'importe quel appareil.
-              Connectez-vous pour acc�der � votre messagerie s�curis�e.
+              Retrouvez vos ï¿½changes, piï¿½ces jointes, offres et demandes depuis n'importe quel appareil.
+              Connectez-vous pour accï¿½der ï¿½ votre messagerie sï¿½curisï¿½e.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link href="/connexion?next=/messages" className="btn-primary px-4 py-2 text-sm">
                 Se connecter
               </Link>
               <Link href="/inscription?next=/messages" className="btn-secondary px-4 py-2 text-sm">
-                Cr�er un compte
+                Crï¿½er un compte
               </Link>
             </div>
           </div>
@@ -540,12 +540,12 @@ export default function MessagesPage() {
               <MessageCircle className="h-8 w-8" />
             </div>
             <h2 className="font-display text-2xl font-bold text-night">
-              {convs.length === 0 ? 'Aucune conversation pour le moment' : 'S�lectionnez une conversation'}
+              {convs.length === 0 ? 'Aucune conversation pour le moment' : 'Sï¿½lectionnez une conversation'}
             </h2>
             <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-night/55">
               {convs.length === 0
-                ? 'D�s quun acheteur ou un vendeur vous �crira depuis une annonce, lhistorique appara�tra ici avec les photos, offres et documents partag�s.'
-                : 'Ouvrez une discussion depuis le tiroir pour suivre vos �changes, envoyer un message et retrouver les pi�ces jointes.'}
+                ? 'Dï¿½s quun acheteur ou un vendeur vous ï¿½crira depuis une annonce, lhistorique apparaï¿½tra ici avec les photos, offres et documents partagï¿½s.'
+                : 'Ouvrez une discussion depuis le tiroir pour suivre vos ï¿½changes, envoyer un message et retrouver les piï¿½ces jointes.'}
             </p>
             <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
               <button
@@ -560,7 +560,7 @@ export default function MessagesPage() {
               </Link>
             </div>
             <div className="mt-5 flex flex-wrap justify-center gap-2">
-              <span className="rounded-full bg-sand px-3 py-1 text-[11px] font-medium text-night/60">Messages s�curis�s</span>
+              <span className="rounded-full bg-sand px-3 py-1 text-[11px] font-medium text-night/60">Messages sï¿½curisï¿½s</span>
               <span className="rounded-full bg-sand px-3 py-1 text-[11px] font-medium text-night/60">Offres de troc</span>
               <span className="rounded-full bg-sand px-3 py-1 text-[11px] font-medium text-night/60">Photos et documents</span>
             </div>
@@ -597,8 +597,8 @@ export default function MessagesPage() {
               <p className="truncate font-semibold text-night">
                 {activeConversation.other_user.prenom} {activeConversation.other_user.nom}
               </p>
-              {typing && <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">En train d�crire</span>}
-              {inactiveListing && <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">Annonce expir�e</span>}
+              {typing && <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">En train dï¿½crire</span>}
+              {inactiveListing && <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">Annonce expirï¿½e</span>}
             </div>
             <div className="flex items-center gap-2 text-xs text-night/45">
               <span>{activeConversation.annonce.titre}</span>
@@ -619,7 +619,7 @@ export default function MessagesPage() {
                 </span>
                 {participantMeta.avg_response_time_label && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-nc-lagonLight px-2.5 py-1 font-medium text-nc-lagonText">
-                    R�pond en moyenne en {participantMeta.avg_response_time_label}
+                    Rï¿½pond en moyenne en {participantMeta.avg_response_time_label}
                   </span>
                 )}
                 {participantMeta.note_moyenne != null && (
@@ -636,7 +636,7 @@ export default function MessagesPage() {
           <div className="flex items-center gap-2">
             <span className={`text-[11px] ${connected ? 'text-emerald-600' : 'text-night/30'}`}>
               {connected
-                ? 'Connect�'
+                ? 'Connectï¿½'
                 : connectionState === 'reconnecting'
                   ? `Reconnexion& ${Math.max(1, Math.ceil((reconnectInMs ?? 1000) / 1000))}s`
                   : 'Hors ligne'}
@@ -653,7 +653,7 @@ export default function MessagesPage() {
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-emerald-800">Proposition de troc</p>
                 <p className="mt-1 text-sm leading-6 text-emerald-900/75">
-                  Cette conversation concerne un �change entre annonces. Vous pouvez proposer, accepter ou refuser un troc.
+                  Cette conversation concerne un ï¿½change entre annonces. Vous pouvez proposer, accepter ou refuser un troc.
                 </p>
               </div>
             </div>
@@ -668,7 +668,7 @@ export default function MessagesPage() {
                 onClick={handleLoadMore}
                 className="text-xs font-medium text-coral hover:underline"
               >
-                Charger les messages pr�c�dents
+                Charger les messages prï¿½cï¿½dents
               </button>
             </div>
           )}
@@ -724,8 +724,8 @@ export default function MessagesPage() {
           <div className="rounded-[28px] border border-night/10 bg-surface p-4 shadow-card">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-night/40">M�dias</p>
-                <h3 className="font-semibold text-night">Partag�s dans cette discussion</h3>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-night/40">Mï¿½dias</p>
+                <h3 className="font-semibold text-night">Partagï¿½s dans cette discussion</h3>
               </div>
               <button type="button" onClick={() => setPanel('chat')} className="btn-ghost px-3 py-2 text-xs">
                 Retour au chat
@@ -735,7 +735,7 @@ export default function MessagesPage() {
               {attachments.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-night/10 bg-sand/50 px-4 py-6 text-center">
                   <Files className="mx-auto mb-2 h-5 w-5 text-night/30" />
-                  <p className="text-sm font-medium text-night">Aucun m�dia partag�</p>
+                  <p className="text-sm font-medium text-night">Aucun mï¿½dia partagï¿½</p>
                 </div>
               ) : (
                 attachments.slice().reverse().map((item) => (
@@ -786,7 +786,7 @@ export default function MessagesPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-night/40">Annonce li�e</p>
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-night/40">Annonce liï¿½e</p>
                     <h3 className="truncate font-semibold text-night">{activeConversation.annonce.titre}</h3>
                   </div>
                   <Link href={`/annonces/${activeConversation.annonce.id}`} className="btn-ghost px-3 py-2 text-xs">
@@ -796,7 +796,7 @@ export default function MessagesPage() {
 
                 {inactiveListing && (
                   <div className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-amber-800">
-                    Cette annonce a expir�
+                    Cette annonce a expirï¿½
                   </div>
                 )}
 
@@ -817,12 +817,12 @@ export default function MessagesPage() {
                 <div className="rounded-2xl bg-sand px-4 py-3">
                   <p className="text-[11px] uppercase tracking-[0.18em] text-night/40">Prix</p>
                   <p className="mt-1 text-xl font-semibold text-coral">
-                    {formatMoney(activeConversation.annonce.prix) ?? 'Prix non communiqu�'}
+                    {formatMoney(activeConversation.annonce.prix) ?? 'Prix non communiquï¿½'}
                   </p>
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-night/50">S�lectionnez une conversation pour voir lannonce.</p>
+              <p className="text-sm text-night/50">Sï¿½lectionnez une conversation pour voir lannonce.</p>
             )}
           </div>
         </div>
@@ -878,7 +878,7 @@ export default function MessagesPage() {
           <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-modal" onClick={(event) => event.stopPropagation()}>
             <h3 className="mb-1 text-lg font-semibold text-night">Faire une contre-offre</h3>
             <p className="mb-3 text-sm text-night/50">
-              Offre re�ue : {counterOffer.amount.toLocaleString('fr-FR')} XPF
+              Offre reï¿½ue : {counterOffer.amount.toLocaleString('fr-FR')} XPF
             </p>
             <div className="flex gap-2">
               <button type="button" className="btn-ghost flex-1" onClick={() => setCounterOffer(null)}>

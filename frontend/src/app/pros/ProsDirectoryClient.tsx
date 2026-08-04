@@ -13,26 +13,26 @@ const FALLBACK_CATEGORY_OPTIONS = [
   'Commerce',
   'Restauration',
   'Transport',
-  'Sant�',
+  'Santï¿½',
   'Immobilier',
   'Informatique',
-  '�v�nementiel',
+  'ï¿½vï¿½nementiel',
   'BTP',
 ]
 
 const FALLBACK_COMMUNE_OPTIONS = [
-  'Nouméa',
-  'Dumbéa',
-  'Pa�ta',
+  'NoumÃ©a',
+  'DumbÃ©a',
+  'Paï¿½ta',
   'Mont-Dore',
   'Boulouparis',
   'La Foa',
   'Bourail',
-  'Kon�',
+  'Konï¿½',
   'Koumac',
   'Lifou',
-  'Mar�',
-  'Ouv�a',
+  'Marï¿½',
+  'Ouvï¿½a',
 ]
 
 function getDisplayName(pro: ProCardModel) {
@@ -171,10 +171,10 @@ export default function ProsDirectoryClient() {
               Annuaire des pros
             </p>
             <h1 className="mt-2 font-display text-3xl font-bold text-night sm:text-4xl">
-              Les professionnels v�rifi�s de Nouvelle-Calédonie
+              Les professionnels vï¿½rifiï¿½s de Nouvelle-CalÃ©donie
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-night/60 sm:text-base">
-              Parcourez les pros certifi�s par Kalico, comparez leur note, leur commune et leur sp�cialit�, puis
+              Parcourez les pros certifiï¿½s par Kalico, comparez leur note, leur commune et leur spï¿½cialitï¿½, puis
               contactez la bonne vitrine en quelques clics.
             </p>
           </div>
@@ -198,7 +198,7 @@ export default function ProsDirectoryClient() {
 
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Pros vérifiés</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Pros vÃ©rifiÃ©s</p>
             <p className="mt-2 text-2xl font-bold text-night">{formatNumber(pros.length)}</p>
           </div>
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
@@ -206,7 +206,7 @@ export default function ProsDirectoryClient() {
             <p className="mt-2 text-2xl font-bold text-night">{formatNumber(communeOptions.length)}</p>
           </div>
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">R�sultats affich�s</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Rï¿½sultats affichï¿½s</p>
             <p className="mt-2 text-2xl font-bold text-night">{formatNumber(filteredPros.length)}</p>
           </div>
         </div>
@@ -218,7 +218,7 @@ export default function ProsDirectoryClient() {
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Filtres</p>
             <h2 className="mt-1 font-display text-2xl font-bold text-night">Affinez votre recherche</h2>
             <p className="mt-1 text-sm text-night/55">
-              Cherchez par nom, sp�cialit�, commune et niveau de note.
+              Cherchez par nom, spï¿½cialitï¿½, commune et niveau de note.
             </p>
           </div>
           <button
@@ -227,7 +227,7 @@ export default function ProsDirectoryClient() {
             className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
           >
             <FilterX className="h-4 w-4" />
-            R�initialiser
+            Rï¿½initialiser
           </button>
         </div>
 
@@ -239,20 +239,20 @@ export default function ProsDirectoryClient() {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Nom, entreprise, sp�cialit�..."
+                placeholder="Nom, entreprise, spï¿½cialitï¿½..."
                 className="input w-full rounded-2xl pl-10"
               />
             </div>
           </label>
 
           <label className="space-y-2">
-            <span className="text-sm font-semibold text-night">Catégorie</span>
+            <span className="text-sm font-semibold text-night">CatÃ©gorie</span>
             <select
               value={category}
               onChange={(event) => setCategory(event.target.value)}
               className="input w-full rounded-2xl"
             >
-              <option value="">Toutes les cat�gories</option>
+              <option value="">Toutes les catï¿½gories</option>
               {categoryOptions.map((value) => (
                 <option key={value} value={value}>
                   {value}
@@ -296,7 +296,7 @@ export default function ProsDirectoryClient() {
           <p>
             {loading
               ? 'Chargement de lannuaire...'
-              : `${filteredPros.length} professionnel${filteredPros.length > 1 ? 's' : ''} trouv�${filteredPros.length > 1 ? 's' : ''}`}
+              : `${filteredPros.length} professionnel${filteredPros.length > 1 ? 's' : ''} trouvï¿½${filteredPros.length > 1 ? 's' : ''}`}
           </p>
           {query || category || commune || minRating ? (
             <p className="rounded-full bg-nc-lagonLight px-3 py-1 text-xs font-semibold text-nc-lagon">
@@ -327,16 +327,16 @@ export default function ProsDirectoryClient() {
           </div>
         ) : (
           <div className="rounded-[2rem] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-12 text-center shadow-sm">
-            <p className="text-lg font-semibold text-night">Aucun professionnel ne correspond � vos filtres</p>
+            <p className="text-lg font-semibold text-night">Aucun professionnel ne correspond ï¿½ vos filtres</p>
             <p className="mt-2 text-sm text-night/60">
-              Essayez une autre commune, une note plus basse ou r�initialisez votre recherche.
+              Essayez une autre commune, une note plus basse ou rï¿½initialisez votre recherche.
             </p>
             <button
               type="button"
               onClick={resetFilters}
               className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a]"
             >
-              R�initialiser les filtres
+              Rï¿½initialiser les filtres
             </button>
           </div>
         )}

@@ -27,9 +27,9 @@ const DEMO_PROFILE_HREF = '/pro/vitrine-exemple'
 
 const STATS = [
   { value: '33', label: 'communes couvertes' },
-  { value: '1', label: 'seul compte, toutes les fonctionnalit�s' },
+  { value: '1', label: 'seul compte, toutes les fonctionnalitï¿½s' },
   { value: 'XPF', label: 'paiement local' },
-  { value: '11%', label: 'TGC int�gr�e dans les devis' },
+  { value: '11%', label: 'TGC intï¿½grï¿½e dans les devis' },
 ] as const
 
 type FeatureKey = 'vitrine' | 'devis' | 'rdv' | 'transport' | 'fret' | 'visibilite'
@@ -47,37 +47,37 @@ const FEATURE_SECTIONS: FeatureSection[] = [
   {
     key: 'vitrine',
     eyebrow: 'Vitrine & Catalogue',
-    title: 'Votre espace pro. Vos clients. Vos r�sultats.',
-    description: 'Un espace public clair pour pr�senter votre activit�, rassurer vos clients et convertir plus vite.',
+    title: 'Votre espace pro. Vos clients. Vos rï¿½sultats.',
+    description: 'Un espace public clair pour prï¿½senter votre activitï¿½, rassurer vos clients et convertir plus vite.',
     bullets: [
-      'Profil public avec logo, description, horaires et coordonn�es',
+      'Profil public avec logo, description, horaires et coordonnï¿½es',
       'Catalogue produits et services avec photos',
-      'Avis clients v�rifi�s',
-      'Prise de rendez-vous int�gr�e',
+      'Avis clients vï¿½rifiï¿½s',
+      'Prise de rendez-vous intï¿½grï¿½e',
     ],
     accent: 'lagon',
   },
   {
     key: 'devis',
     eyebrow: 'Devis & Facturation',
-    title: 'R�pondez vite, en XPF, avec la bonne structure',
-    description: 'Cr�ez des devis propres, envoyez-les l� o� il faut et suivez leur statut sans perdre le fil.',
+    title: 'Rï¿½pondez vite, en XPF, avec la bonne structure',
+    description: 'Crï¿½ez des devis propres, envoyez-les lï¿½ oï¿½ il faut et suivez leur statut sans perdre le fil.',
     bullets: [
-      'Cr�ation de devis en XPF avec TGC automatique',
+      'Crï¿½ation de devis en XPF avec TGC automatique',
       'Envoi par e-mail ou messagerie Kalico',
-      'Suivi des statuts envoy�s / accept�s / refus�s',
+      'Suivi des statuts envoyï¿½s / acceptï¿½s / refusï¿½s',
       'Export PDF en un clic',
     ],
     accent: 'corail',
   },
   {
     key: 'rdv',
-    eyebrow: 'R�servations & RDV',
-    title: 'Un planning simple pour remplir vos cr�neaux',
-    description: 'Laissez vos clients r�server plus facilement et centralisez les r�ponses sans bricolage.',
+    eyebrow: 'Rï¿½servations & RDV',
+    title: 'Un planning simple pour remplir vos crï¿½neaux',
+    description: 'Laissez vos clients rï¿½server plus facilement et centralisez les rï¿½ponses sans bricolage.',
     bullets: [
-      'Calendrier de disponibilit�s',
-      'R�servation en ligne par les clients',
+      'Calendrier de disponibilitï¿½s',
+      'Rï¿½servation en ligne par les clients',
       'Notifications automatiques',
       'Historique complet des rendez-vous',
     ],
@@ -86,14 +86,14 @@ const FEATURE_SECTIONS: FeatureSection[] = [
   {
     key: 'transport',
     eyebrow: 'Transport Pro',
-    title: 'Courses, réservations et suivi m�tier',
-    description: 'Pens� pour les transporteurs et conducteurs qui veulent organiser leur activit� proprement.',
+    title: 'Courses, rÃ©servations et suivi mï¿½tier',
+    description: 'Pensï¿½ pour les transporteurs et conducteurs qui veulent organiser leur activitï¿½ proprement.',
     bullets: [
       'Inscription transporteur professionnel',
-      'Gestion des courses et réservations',
-      'Profil conducteur v�rifi�',
+      'Gestion des courses et rÃ©servations',
+      'Profil conducteur vï¿½rifiï¿½',
       'Statistiques et revenus',
-      'Int�gration avec /covoiturage et /envoi-livraison',
+      'Intï¿½gration avec /covoiturage et /envoi-livraison',
     ],
     accent: 'amber',
   },
@@ -101,25 +101,25 @@ const FEATURE_SECTIONS: FeatureSection[] = [
     key: 'fret',
     eyebrow: 'Envoi & Livraison',
     title: 'Transport de marchandises, devis et demandes',
-    description: 'Un module d�di� pour les pros qui font bouger des colis, du stock ou du mat�riel.',
+    description: 'Un module dï¿½diï¿½ pour les pros qui font bouger des colis, du stock ou du matï¿½riel.',
     bullets: [
       'Annonces de transport de marchandises',
       'Estimation volume / poids / urgence',
-      'Mise en relation avec les exp�diteurs',
+      'Mise en relation avec les expï¿½diteurs',
       'Gestion des demandes denvoi et livraison',
     ],
     accent: 'lagon',
   },
   {
     key: 'visibilite',
-    eyebrow: 'Visibilit� & Boosts',
+    eyebrow: 'Visibilitï¿½ & Boosts',
     title: 'Soyez visible quand les clients cherchent.',
     description: 'Boostez quand vous en avez besoin.',
     bullets: [
-      'Annonces prioritaires dans les r�sultats',
-      'Badge Pro v�rifi� sur toutes les surfaces',
+      'Annonces prioritaires dans les rï¿½sultats',
+      'Badge Pro vï¿½rifiï¿½ sur toutes les surfaces',
       'Statistiques de vues et de contacts',
-      'Syst�me de boosts ponctuels',
+      'Systï¿½me de boosts ponctuels',
     ],
     accent: 'corail',
   },
@@ -134,7 +134,7 @@ const SECTOR_CARDS = [
   {
     icon: Car,
     title: 'Auto / Moto',
-    description: 'Annonces v�hicules et devis r�paration',
+    description: 'Annonces vï¿½hicules et devis rï¿½paration',
   },
   {
     icon: Hammer,
@@ -144,7 +144,7 @@ const SECTOR_CARDS = [
   {
     icon: ChefHat,
     title: 'Restauration',
-    description: 'Menu, réservations et bons plans',
+    description: 'Menu, rÃ©servations et bons plans',
   },
   {
     icon: Users,
@@ -154,11 +154,11 @@ const SECTOR_CARDS = [
   {
     icon: Truck,
     title: 'Envoi & Livraison',
-    description: 'Demandes, offres et suivi dexp�ditions',
+    description: 'Demandes, offres et suivi dexpï¿½ditions',
   },
   {
     icon: Home,
-    title: 'Services � domicile',
+    title: 'Services ï¿½ domicile',
     description: 'RDV, catalogue et avis clients',
   },
   {
@@ -173,10 +173,10 @@ const COMPARISON_ROWS = [
   ['Messagerie', true, true],
   ['Vitrine publique', false, true],
   ['Devis & factures', false, true],
-  ['R�servations / RDV', false, true],
+  ['Rï¿½servations / RDV', false, true],
   ['Transport Pro & Livraison', false, true],
-  ['Badge Pro v�rifi�', false, true],
-  ['Boosts & priorit�', false, true],
+  ['Badge Pro vï¿½rifiï¿½', false, true],
+  ['Boosts & prioritï¿½', false, true],
   ['Statistiques', false, true],
   ['Support prioritaire', false, true],
 ] as const
@@ -220,7 +220,7 @@ function HeroDashboardMockup() {
           </div>
           <span className="inline-flex items-center gap-1 rounded-full bg-nc-lagonLight px-3 py-1 text-[11px] font-semibold text-nc-lagon">
             <BadgeCheck className="h-3.5 w-3.5" />
-            Pro v�rifi�
+            Pro vï¿½rifiï¿½
           </span>
         </div>
 
@@ -238,7 +238,7 @@ function HeroDashboardMockup() {
           <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
             <p className="text-[11px] uppercase tracking-[0.18em] text-white/45">Boosts</p>
             <p className="mt-2 text-2xl font-bold text-white">4</p>
-            <p className="mt-1 text-xs text-white/55">En cours / programm�s</p>
+            <p className="mt-1 text-xs text-white/55">En cours / programmï¿½s</p>
           </div>
         </div>
 
@@ -274,9 +274,9 @@ function HeroDashboardMockup() {
               <span className="rounded-full bg-[var(--color-success)]/15 px-2.5 py-1 text-[11px] font-semibold text-[var(--color-success)]">3 actives</span>
             </div>
             {[
-              ['R�fection terrasse', 'Boost actif jusqu\'� demain'],
+              ['Rï¿½fection terrasse', 'Boost actif jusqu\'ï¿½ demain'],
               ['Pose de cuisine', '12 vues aujourd\'hui'],
-              ['Devis cl�ture', '2 r�ponses en attente'],
+              ['Devis clï¿½ture', '2 rï¿½ponses en attente'],
             ].map(([title, subtitle]) => (
               <article key={title} className="rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.04)] p-3">
                 <div className="flex items-center gap-3">
@@ -306,7 +306,7 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
             <div>
               <p className="text-[11px] uppercase tracking-[0.2em] text-white/60">Fiche publique</p>
               <h3 className="mt-2 text-xl font-semibold">Atelier Kalico</h3>
-              <p className="mt-1 text-sm text-white/70">Artisan BTP � Dumbéa</p>
+              <p className="mt-1 text-sm text-white/70">Artisan BTP ï¿½ DumbÃ©a</p>
             </div>
             <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold">4.9 / 5</span>
           </div>
@@ -328,10 +328,10 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
           </div>
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-night">Avis v�rifi�s</p>
+              <p className="text-sm font-semibold text-night">Avis vï¿½rifiï¿½s</p>
               <p className="text-xs font-semibold text-nc-emeraude">14 nouveaux</p>
             </div>
-            <p className="mt-2 text-sm text-night/60">R�ponse rapide, vitrine claire et devis pr�cis.</p>
+            <p className="mt-2 text-sm text-night/60">Rï¿½ponse rapide, vitrine claire et devis prï¿½cis.</p>
           </div>
         </div>
       </div>
@@ -343,20 +343,20 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
       <div className="overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
         <div className="rounded-[1.25rem] bg-[linear-gradient(135deg,_rgba(8,32,50,0.96),_rgba(10,126,164,0.18))] p-4 text-white">
           <p className="text-[11px] uppercase tracking-[0.22em] text-white/60">Nouveau devis</p>
-          <h3 className="mt-2 text-xl font-semibold">Menuiserie int�rieure</h3>
-          <p className="mt-1 text-sm text-white/70">Client � Nouméa � total estim�</p>
+          <h3 className="mt-2 text-xl font-semibold">Menuiserie intï¿½rieure</h3>
+          <p className="mt-1 text-sm text-white/70">Client ï¿½ NoumÃ©a ï¿½ total estimï¿½</p>
         </div>
         <div className="mt-4 space-y-3">
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
             <p className="text-xs uppercase tracking-[0.18em] text-night/45">Lignes</p>
             <div className="mt-3 space-y-2 text-sm text-night/70">
               <div className="flex justify-between"><span>Main d'Suvre</span><span>48 000 XPF</span></div>
-              <div className="flex justify-between"><span>Mat�riel</span><span>76 500 XPF</span></div>
+              <div className="flex justify-between"><span>Matï¿½riel</span><span>76 500 XPF</span></div>
               <div className="flex justify-between"><span>TGC 11%</span><span>13 695 XPF</span></div>
             </div>
           </div>
           <div className="flex items-center justify-between rounded-2xl border border-nc-lagon-border bg-nc-lagonLight p-3">
-            <p className="text-sm font-semibold text-nc-lagon-text">PDF pr�t � envoyer</p>
+            <p className="text-sm font-semibold text-nc-lagon-text">PDF prï¿½t ï¿½ envoyer</p>
             <FileText className="h-4 w-4 text-nc-lagon" />
           </div>
         </div>
@@ -370,7 +370,7 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[11px] uppercase tracking-[0.22em] text-night/45">Planning</p>
-            <h3 className="mt-1 text-xl font-semibold text-night">Ao�t 2026</h3>
+            <h3 className="mt-1 text-xl font-semibold text-night">Aoï¿½t 2026</h3>
           </div>
           <CalendarDays className="h-5 w-5 text-nc-lagon" />
         </div>
@@ -388,7 +388,7 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
           ))}
         </div>
         <div className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3 text-sm text-night/65">
-          3 réservations confirm�es aujourdhui
+          3 rÃ©servations confirmï¿½es aujourdhui
         </div>
       </div>
     )
@@ -406,9 +406,9 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
         </div>
         <div className="mt-4 space-y-3">
           {[
-            ['Nouméa � Bourail', '07:30 � 4 passagers'],
-            ['Dumbéa � Pa�ta', '10:15 � confirm�'],
-            ['Lifou � Nouméa', '18:00 � retour pr�vu'],
+            ['NoumÃ©a ï¿½ Bourail', '07:30 ï¿½ 4 passagers'],
+            ['DumbÃ©a ï¿½ Paï¿½ta', '10:15 ï¿½ confirmï¿½'],
+            ['Lifou ï¿½ NoumÃ©a', '18:00 ï¿½ retour prï¿½vu'],
           ].map(([title, subtitle]) => (
             <div key={title} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
               <p className="text-sm font-semibold text-night">{title}</p>
@@ -439,16 +439,16 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
       <div className="overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
         <div className="rounded-[1.25rem] bg-[linear-gradient(135deg,_rgba(8,32,50,0.96),_rgba(10,126,164,0.18))] p-4 text-white">
           <p className="text-[11px] uppercase tracking-[0.22em] text-white/60">Demande Envoi & Livraison</p>
-          <h3 className="mt-2 text-xl font-semibold">Nouméa � Kon�</h3>
-          <p className="mt-1 text-sm text-white/70">2.5 m� � 380 kg � express</p>
+          <h3 className="mt-2 text-xl font-semibold">NoumÃ©a ï¿½ Konï¿½</h3>
+          <p className="mt-1 text-sm text-white/70">2.5 mï¿½ ï¿½ 380 kg ï¿½ express</p>
         </div>
         <div className="mt-4 space-y-3">
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-night">
               <MapPin className="h-4 w-4 text-coral" />
-              Capacit� recommand�e
+              Capacitï¿½ recommandï¿½e
             </div>
-            <p className="mt-2 text-sm text-night/60">Fourgon, utilitaire ou camion l�ger selon le volume.</p>
+            <p className="mt-2 text-sm text-night/60">Fourgon, utilitaire ou camion lï¿½ger selon le volume.</p>
           </div>
           <div className="grid grid-cols-1 gap-2 text-center sm:grid-cols-3">
             <div className="rounded-2xl bg-nc-lagonLight p-3">
@@ -457,7 +457,7 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
             </div>
             <div className="rounded-2xl bg-nc-emeraudeLight p-3">
               <p className="text-lg font-bold text-nc-emeraude">24h</p>
-              <p className="text-[11px] text-nc-emeraude-text">r�ponse</p>
+              <p className="text-[11px] text-nc-emeraude-text">rï¿½ponse</p>
             </div>
             <div className="rounded-2xl bg-coral/10 p-3">
               <p className="text-lg font-bold text-coral">NC</p>
@@ -472,7 +472,7 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
   return (
     <div className="overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
       <div className="rounded-[1.25rem] bg-[linear-gradient(135deg,_rgba(8,32,50,0.96),_rgba(10,126,164,0.18))] p-4 text-white">
-        <p className="text-[11px] uppercase tracking-[0.22em] text-white/60">Visibilit�</p>
+        <p className="text-[11px] uppercase tracking-[0.22em] text-white/60">Visibilitï¿½</p>
         <h3 className="mt-2 text-xl font-semibold">Boosts en cours</h3>
       </div>
       <div className="mt-4 space-y-3">
@@ -488,7 +488,7 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
           </div>
         </div>
         <div className="rounded-2xl bg-nc-lagonLight p-3 text-sm font-semibold text-nc-lagon">
-          4 boosts actifs � badge Pro v�rifi� partout
+          4 boosts actifs ï¿½ badge Pro vï¿½rifiï¿½ partout
         </div>
       </div>
     </div>
@@ -505,9 +505,9 @@ function FeatureTabs() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-24 md:py-28">
       <SectionHeading
-        eyebrow="Preview fonctionnalit�s"
+        eyebrow="Preview fonctionnalitï¿½s"
         title="Tout ce que Kalico Pro rassemble"
-        description="Chaque bloc montre un usage r�el, pour que les prospects comprennent vite ce quils gagnent en passant Pro."
+        description="Chaque bloc montre un usage rï¿½el, pour que les prospects comprennent vite ce quils gagnent en passant Pro."
       />
 
       <div className="mt-8 hidden lg:block">
@@ -603,9 +603,9 @@ function SectorsGrid() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-24 md:py-28">
       <SectionHeading
-        eyebrow="Secteurs cibl�s"
-        title="Un seul profil pour tous vos m�tiers."
-        description="Des usages concrets pour les m�tiers qui ont besoin de visibilit�, de rendez-vous, de devis ou de logistique."
+        eyebrow="Secteurs ciblï¿½s"
+        title="Un seul profil pour tous vos mï¿½tiers."
+        description="Des usages concrets pour les mï¿½tiers qui ont besoin de visibilitï¿½, de rendez-vous, de devis ou de logistique."
       />
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -634,8 +634,8 @@ function ComparisonTable() {
     <section className="mx-auto max-w-7xl px-4 py-24 md:py-28">
       <SectionHeading
         eyebrow="Offre"
-        title="Des offres claires pour d�marrer"
-        description="Un point dentr�e simple, puis un plan Pro pens� pour ceux qui veulent vraiment d�velopper leur activit�."
+        title="Des offres claires pour dï¿½marrer"
+        description="Un point dentrï¿½e simple, puis un plan Pro pensï¿½ pour ceux qui veulent vraiment dï¿½velopper leur activitï¿½."
       />
 
       <div className="mt-8 overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
@@ -643,7 +643,7 @@ function ComparisonTable() {
           <table className="w-full min-w-[720px] border-collapse text-left text-sm">
             <thead className="bg-[var(--color-background-secondary)]">
               <tr>
-                <th className="px-5 py-4 font-semibold text-night">Fonctionnalit�</th>
+                <th className="px-5 py-4 font-semibold text-night">Fonctionnalitï¿½</th>
                 <th className="px-5 py-4 text-center font-semibold text-night">Gratuit</th>
                 <th className="px-5 py-4 text-center font-semibold text-night">Pro</th>
               </tr>
@@ -673,10 +673,10 @@ function ComparisonTable() {
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-nc-emeraude">Formule Pro</p>
               <p className="mt-2 text-2xl font-bold text-night">4 900 XPF / mois</p>
-              <p className="mt-1 text-sm text-night/60">Sans engagement. R�siliable � tout moment.</p>
+              <p className="mt-1 text-sm text-night/60">Sans engagement. Rï¿½siliable ï¿½ tout moment.</p>
             </div>
             <Link href="/pro/inscription" className="btn-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm">
-              Cr�er mon espace Pro
+              Crï¿½er mon espace Pro
               <ArrowRight className="h-4 w-4" />
             </Link>
             <p className="text-sm text-nc-lagon md:ml-4 md:max-w-md">
@@ -700,16 +700,16 @@ function FinalCta() {
         }}
       >
         <div className="max-w-3xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white/70">Derni�re �tape</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white/70">Derniï¿½re ï¿½tape</p>
           <h2 className="mt-2 font-display text-3xl font-bold text-white sm:text-4xl">
-            Pr�t � d�velopper votre activit� en NC ?
+            Prï¿½t ï¿½ dï¿½velopper votre activitï¿½ en NC ?
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">
-            Cr�ez votre espace Pro en 5 minutes. Commencez gratuitement, passez Pro quand vous voulez.
+            Crï¿½ez votre espace Pro en 5 minutes. Commencez gratuitement, passez Pro quand vous voulez.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link href="/pro/inscription" className="btn-primary inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm">
-              Cr�er mon espace Pro
+              Crï¿½er mon espace Pro
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link href={DEMO_PROFILE_HREF} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
@@ -743,15 +743,15 @@ export default function ProLandingPage() {
                 Espace Professionnel
               </div>
               <h1 className="mt-5 font-display text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
-                Votre espace pro. Vos clients. Vos r�sultats.
+                Votre espace pro. Vos clients. Vos rï¿½sultats.
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">
-                Vitrine, devis, réservations, transport, envoi & livraison - tout ce quil faut pour d�velopper votre business local.
+                Vitrine, devis, rÃ©servations, transport, envoi & livraison - tout ce quil faut pour dï¿½velopper votre business local.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link href="/pro/inscription" className="btn-primary inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold shadow-lg shadow-nc-lagon/25">
-                  Cr�er mon espace Pro
+                  Crï¿½er mon espace Pro
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
@@ -767,9 +767,9 @@ export default function ProLandingPage() {
 
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
                 {[
-                  'Badge Pro v�rifi�',
-                  'Devis et réservations int�gr�s',
-                  'Transport et livraison connect�s',
+                  'Badge Pro vï¿½rifiï¿½',
+                  'Devis et rÃ©servations intï¿½grï¿½s',
+                  'Transport et livraison connectï¿½s',
                 ].map((item) => (
                   <div key={item} className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white/85 backdrop-blur-sm">
                     <CheckCircle2 className="h-4 w-4 text-nc-lagon" />

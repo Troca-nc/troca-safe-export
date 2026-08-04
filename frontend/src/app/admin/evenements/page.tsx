@@ -51,7 +51,7 @@ function CinemaAdminPage() {
     try {
       const response = await adminApi.runCinemaScraper()
       const report = Array.isArray(response.data?.data) ? response.data.data : []
-      setMessage(`Scraper lanc�. ${report.length} cin�ma(s) trait�(s).`)
+      setMessage(`Scraper lancï¿½. ${report.length} cinï¿½ma(s) traitï¿½(s).`)
       await load()
     } catch (err: any) {
       setMessage(err?.response?.data?.error || 'Impossible de lancer le scraper.')
@@ -66,13 +66,13 @@ function CinemaAdminPage() {
         <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Admin cin�ma</p>
-              <h1 className="mt-2 font-display text-3xl font-bold text-night">S�ances cin�ma</h1>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Admin cinï¿½ma</p>
+              <h1 className="mt-2 font-display text-3xl font-bold text-night">Sï¿½ances cinï¿½ma</h1>
               <p className="mt-2 text-sm text-night/60">
-                Visualisez les s�ances import�es et relancez le scraper quand la grille a chang�.
+                Visualisez les sï¿½ances importï¿½es et relancez le scraper quand la grille a changï¿½.
               </p>
               <Link href="/evenements/publier?category=cinema" className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]">
-                Ajouter une s�ance manuelle
+                Ajouter une sï¿½ance manuelle
               </Link>
             </div>
             <button
@@ -90,15 +90,15 @@ function CinemaAdminPage() {
 
         <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-bold text-night">Cin�ma</h2>
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">{events.length} s�ance{events.length > 1 ? 's' : ''}</span>
+            <h2 className="text-lg font-bold text-night">Cinï¿½ma</h2>
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">{events.length} sï¿½ance{events.length > 1 ? 's' : ''}</span>
           </div>
 
           {loading ? (
             <div className="mt-4 h-40 animate-pulse rounded-2xl bg-sand/60" />
           ) : events.length === 0 ? (
             <div className="mt-4 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5 text-sm text-night/55">
-              Aucune s�ance cin�ma import�e pour le moment.
+              Aucune sï¿½ance cinï¿½ma importï¿½e pour le moment.
             </div>
           ) : (
             <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -110,12 +110,12 @@ function CinemaAdminPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-night">{event.title}</p>
-                      <p className="mt-1 text-xs text-night/55">{event.venue_name || 'Cin�ma'} � {event.commune_name || 'Nouvelle-Calédonie'}</p>
+                      <p className="mt-1 text-xs text-night/55">{event.venue_name || 'Cinï¿½ma'} ï¿½ {event.commune_name || 'Nouvelle-CalÃ©donie'}</p>
                       <p className="mt-2 text-xs text-night/60">
-                        {event.event_date || 'Date ?'} {event.event_time ? `� ${event.event_time}` : ''} {event.version ? `� ${event.version}` : ''} {event.is_3d ? '� 3D' : ''}
+                        {event.event_date || 'Date ?'} {event.event_time ? `ï¿½ ${event.event_time}` : ''} {event.version ? `ï¿½ ${event.version}` : ''} {event.is_3d ? 'ï¿½ 3D' : ''}
                       </p>
                       <p className="mt-1 text-xs text-night/50">
-                        {event.price_normal_xpf ? `${Number(event.price_normal_xpf).toLocaleString('fr-FR')} XPF` : 'Tarif non communiqu�'}
+                        {event.price_normal_xpf ? `${Number(event.price_normal_xpf).toLocaleString('fr-FR')} XPF` : 'Tarif non communiquï¿½'}
                       </p>
                     </div>
                   </div>

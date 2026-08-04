@@ -151,7 +151,7 @@ export default function NotificationBell() {
 
             {error && notifs.length > 0 && (
               <div className="mx-4 mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-                {error} Les notifications d�j� charg�es restent visibles.
+                {error} Les notifications dï¿½jï¿½ chargï¿½es restent visibles.
               </div>
             )}
 
@@ -210,7 +210,7 @@ export default function NotificationBell() {
             className="block border-t border-[var(--color-border)] py-3 text-center text-xs text-night/40 transition-colors hover:text-coral"
             role="menuitem"
           >
-            G�rer les notifications
+            Gï¿½rer les notifications
           </Link>
         </div>
       )}

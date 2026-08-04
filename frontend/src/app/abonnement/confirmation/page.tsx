@@ -87,7 +87,7 @@ function ConfirmationContent() {
     }
 
     if (!sessionId && !paymentId) {
-      setResult({ status: 'invalid', error: 'Param�tre de paiement manquant' })
+      setResult({ status: 'invalid', error: 'Paramï¿½tre de paiement manquant' })
       return
     }
 
@@ -137,7 +137,7 @@ function ConfirmationContent() {
           setResult({
             status: 'invalid',
             provider,
-            error: 'Nous navons pas pu confirmer votre abonnement. R�essayez ou contactez-nous.',
+            error: 'Nous navons pas pu confirmer votre abonnement. Rï¿½essayez ou contactez-nous.',
           })
         }
       }
@@ -178,17 +178,17 @@ function ConfirmationContent() {
             </div>
             <h1 className="mb-2 text-3xl font-bold text-night">Validation en cours...</h1>
             <p className="mb-2 text-sm text-night/60">
-              Nous v�rifions votre abonnement Pro. Cela peut prendre quelques secondes sur r�seau mobile lent.
+              Nous vï¿½rifions votre abonnement Pro. Cela peut prendre quelques secondes sur rï¿½seau mobile lent.
             </p>
             <p className="mb-8 text-xs text-night/40">
               Tentative {attempts}/10
             </p>
             <div className="rounded-2xl border border-night/5 bg-white p-4 text-left text-sm text-night/60 shadow-sm">
-              <p className="mb-2 font-semibold text-night">Pendant ce temps, gardez en t�te :</p>
+              <p className="mb-2 font-semibold text-night">Pendant ce temps, gardez en tï¿½te :</p>
               <ul className="list-disc space-y-2 pl-5">
-                <li>Votre paiement est d�j� engag�.</li>
-                <li>La synchronisation peut �tre un peu plus lente sur connexion mobile.</li>
-                <li>La page se rafra�chira automatiquement quand le statut sera pr�t.</li>
+                <li>Votre paiement est dï¿½jï¿½ engagï¿½.</li>
+                <li>La synchronisation peut ï¿½tre un peu plus lente sur connexion mobile.</li>
+                <li>La page se rafraï¿½chira automatiquement quand le statut sera prï¿½t.</li>
               </ul>
             </div>
           </div>
@@ -206,9 +206,9 @@ function ConfirmationContent() {
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
               <AlertCircle className="h-10 w-10 text-red-500" />
             </div>
-            <h1 className="mb-2 text-2xl font-bold text-night">Abonnement non v�rifi�</h1>
+            <h1 className="mb-2 text-2xl font-bold text-night">Abonnement non vï¿½rifiï¿½</h1>
             <p className="mb-8 text-sm text-night/60">
-              {result.error || 'Nous navons pas pu confirmer votre abonnement. R�essayez ou contactez-nous.'}
+              {result.error || 'Nous navons pas pu confirmer votre abonnement. Rï¿½essayez ou contactez-nous.'}
             </p>
             <div className="flex flex-col gap-3">
               <button
@@ -216,7 +216,7 @@ function ConfirmationContent() {
                 onClick={() => window.location.reload()}
                 className="btn-primary py-3"
               >
-                R�essayer
+                Rï¿½essayer
               </button>
               <Link href="/contact" className="btn-secondary py-3">
                 Contacter le support
@@ -254,43 +254,43 @@ function ConfirmationContent() {
           </div>
 
           <h1 className="mb-4 text-3xl font-bold text-night">
-            {isTrial ? "14 jours d'essai activ�s !" : 'Abonnement Pro activ� !'}
+            {isTrial ? "14 jours d'essai activï¿½s !" : 'Abonnement Pro activï¿½ !'}
           </h1>
 
           <div className="mb-8 rounded-2xl border border-night/5 bg-white p-5 text-left shadow-sm">
             <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-night">
               <ShieldCheck className="h-4 w-4 text-green-500" />
-              Ce que votre abonnement d�bloque
+              Ce que votre abonnement dï¿½bloque
             </div>
             <ul className="space-y-3 text-sm text-night/70">
               <li className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
-                Publier des annonces Pro avec plus de visibilit�
+                Publier des annonces Pro avec plus de visibilitï¿½
               </li>
               <li className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
-                Acc�der aux outils de suivi et aux factures
+                Accï¿½der aux outils de suivi et aux factures
               </li>
               <li className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
-                Renforcer la cr�dibilit� de votre profil vendeur
+                Renforcer la crï¿½dibilitï¿½ de votre profil vendeur
               </li>
             </ul>
             {trialEnd && (
               <div className="mt-4 rounded-xl bg-green-50 px-3 py-2 text-xs text-green-700">
-                P�riode d'essai active jusqu'au <strong>{trialEnd}</strong>.
+                Pï¿½riode d'essai active jusqu'au <strong>{trialEnd}</strong>.
               </div>
             )}
             {periodEnd && !trialEnd && (
               <div className="mt-4 rounded-xl bg-sand px-3 py-2 text-xs text-night/70">
-                Renouvellement pr�vu le <strong>{periodEnd}</strong>.
+                Renouvellement prï¿½vu le <strong>{periodEnd}</strong>.
               </div>
             )}
           </div>
 
           <div className="flex flex-col gap-3">
             <Link href="/annonces/nouvelle" className="btn-primary flex items-center justify-center gap-2 py-3">
-              Publier ma premi�re annonce Pro
+              Publier ma premiï¿½re annonce Pro
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link href="/parametres#factures" className="btn-secondary flex items-center justify-center gap-2 py-3">

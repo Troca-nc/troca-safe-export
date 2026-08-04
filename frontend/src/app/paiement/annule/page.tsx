@@ -17,13 +17,13 @@ export default function PaiementAnnulePage() {
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-50">
           <XCircle className="w-10 h-10 text-red-400" />
         </div>
-        <h1 className="font-display text-3xl font-bold text-night mb-2">Paiement annul�</h1>
+        <h1 className="font-display text-3xl font-bold text-night mb-2">Paiement annulï¿½</h1>
         <p className="text-night/60 mb-8 text-sm">
-          Aucun montant n'a �t� d�bit�. Vous pouvez r�essayer � tout moment.
+          Aucun montant n'a ï¿½tï¿½ dï¿½bitï¿½. Vous pouvez rï¿½essayer ï¿½ tout moment.
         </p>
         <div className="flex flex-col gap-3">
-          <Link href="/pro" className="btn-primary justify-center py-3">R�essayer</Link>
-          <Link href="/" className="btn-secondary justify-center py-3">Retour � l'accueil</Link>
+          <Link href="/pro" className="btn-primary justify-center py-3">Rï¿½essayer</Link>
+          <Link href="/" className="btn-secondary justify-center py-3">Retour ï¿½ l'accueil</Link>
         </div>
       </div>
     </div>

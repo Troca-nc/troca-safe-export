@@ -10,24 +10,24 @@ import { newsletterApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 
 const COMMUNES = [
-  'Nouméa',
-  'Dumbéa',
+  'NoumÃ©a',
+  'DumbÃ©a',
   'Mont-Dore',
-  'Pa�ta',
+  'Paï¿½ta',
   'Boulouparis',
   'La Foa',
   'Bourail',
-  'Kon�',
+  'Konï¿½',
   'Koumac',
-  'Poindimi�',
+  'Poindimiï¿½',
   'Lifou',
-  'Mar�',
-  'Ouv�a',
+  'Marï¿½',
+  'Ouvï¿½a',
   'Autre',
 ]
 
 const FREQUENCIES = [
-  { value: 'weekly', label: 'Hebdomadaire (recommand�)' },
+  { value: 'weekly', label: 'Hebdomadaire (recommandï¿½)' },
   { value: 'monthly', label: 'Bimensuelle' },
   { value: 'off', label: 'Quotidienne' },
 ] as const
@@ -91,7 +91,7 @@ export default function NewsletterPreferencesPage() {
         frequency,
       })
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible de sauvegarder vos pr�f�rences.')
+      setError(err?.response?.data?.error || 'Impossible de sauvegarder vos prï¿½fï¿½rences.')
     } finally {
       setSaving(false)
     }
@@ -156,8 +156,8 @@ export default function NewsletterPreferencesPage() {
           </div>
 
           <div className="mt-6">
-            <h3 className="font-display text-xl font-bold text-night">Mes cat�gories favorites</h3>
-            <p className="mt-1 text-sm text-night/55">Laissez vide pour recevoir toutes les cat�gories.</p>
+            <h3 className="font-display text-xl font-bold text-night">Mes catï¿½gories favorites</h3>
+            <p className="mt-1 text-sm text-night/55">Laissez vide pour recevoir toutes les catï¿½gories.</p>
             <div className="mt-4 flex flex-wrap gap-2">
               {categoryOptions.map((category) => {
                 const active = categories.includes(category)
@@ -180,7 +180,7 @@ export default function NewsletterPreferencesPage() {
 
         <div className="space-y-6">
           <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
-            <h2 className="font-display text-2xl font-bold text-night">Fr�quence</h2>
+            <h2 className="font-display text-2xl font-bold text-night">Frï¿½quence</h2>
             <div className="mt-4 space-y-2">
               {FREQUENCIES.map((item) => (
                 <label key={item.value} className="flex cursor-pointer items-center gap-3 rounded-2xl border border-[var(--color-border)] px-4 py-3">
@@ -199,18 +199,18 @@ export default function NewsletterPreferencesPage() {
           <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h2 className="font-display text-2xl font-bold text-night">Aper�u</h2>
+                <h2 className="font-display text-2xl font-bold text-night">Aperï¿½u</h2>
                 <p className="text-sm text-night/55">Visualisez le contenu avant envoi.</p>
               </div>
               <button type="button" onClick={handlePreview} disabled={previewLoading} className="btn-secondary rounded-2xl px-4 py-2.5 text-sm">
                 <Eye className="h-4 w-4" />
-                {previewLoading ? 'Chargement...' : 'Voir un aper�u'}
+                {previewLoading ? 'Chargement...' : 'Voir un aperï¿½u'}
               </button>
             </div>
 
             {preview ? (
               <div className="mt-4 space-y-3 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-                <p className="text-sm font-semibold text-night">Annonces s�lectionn�es</p>
+                <p className="text-sm font-semibold text-night">Annonces sï¿½lectionnï¿½es</p>
                 <div className="grid gap-3">
                   {(preview.items || []).slice(0, 4).map((item: any, index: number) => (
                     <div key={index} className="rounded-2xl bg-[var(--color-surface)] p-3">
@@ -231,7 +231,7 @@ export default function NewsletterPreferencesPage() {
               className="btn-primary mt-4 w-full rounded-2xl px-4 py-3 text-sm"
             >
               <Check className="h-4 w-4" />
-              Sauvegarder mes pr�f�rences
+              Sauvegarder mes prï¿½fï¿½rences
             </button>
 
             <button
@@ -239,14 +239,14 @@ export default function NewsletterPreferencesPage() {
               onClick={handleUnsubscribe}
               className="mt-3 w-full rounded-2xl border border-transparent px-4 py-3 text-sm text-night/45 hover:text-night/70"
             >
-              Se d�sabonner de toutes les newsletters
+              Se dï¿½sabonner de toutes les newsletters
             </button>
           </section>
         </div>
       </section>
 
       <Link href="/newsletter/unsubscribe" className="text-sm text-night/45 hover:text-coral">
-        G�rer le d�sabonnement via le lien email
+        Gï¿½rer le dï¿½sabonnement via le lien email
       </Link>
     </div>
   )

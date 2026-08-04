@@ -22,17 +22,17 @@ type ProDocument = {
 
 const DOCUMENT_TYPES = [
   { value: 'rc_pro', label: 'RC Professionnelle' },
-  { value: 'assurance_decennale', label: 'Assurance D�cennale' },
+  { value: 'assurance_decennale', label: 'Assurance Dï¿½cennale' },
   { value: 'certification', label: 'Certification' },
-  { value: 'diplome', label: 'Dipl�me' },
+  { value: 'diplome', label: 'Diplï¿½me' },
   { value: 'extrait_ridet', label: 'Extrait RIDET' },
   { value: 'autre', label: 'Autre' },
 ] as const
 
 function getStatusMeta(status: string) {
   const normalized = String(status || '').toLowerCase()
-  if (normalized === 'validated') return { label: 'Valid�', tone: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
-  if (normalized === 'rejected') return { label: 'Refus�', tone: 'bg-rose-50 text-rose-700 border-rose-200' }
+  if (normalized === 'validated') return { label: 'Validï¿½', tone: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
+  if (normalized === 'rejected') return { label: 'Refusï¿½', tone: 'bg-rose-50 text-rose-700 border-rose-200' }
   return { label: 'En attente', tone: 'bg-amber-50 text-amber-700 border-amber-200' }
 }
 
@@ -89,7 +89,7 @@ export default function DocumentUploader({
 
   const handleUpload = async () => {
     if (!file) {
-      setError('Choisissez un fichier � d�poser.')
+      setError('Choisissez un fichier ï¿½ dï¿½poser.')
       return
     }
 
@@ -127,9 +127,9 @@ export default function DocumentUploader({
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Mes justificatifs professionnels</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">D�posez vos documents pour acc�l�rer la v�rification</h2>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">Dï¿½posez vos documents pour accï¿½lï¿½rer la vï¿½rification</h2>
           <p className="mt-2 text-sm text-night/60">
-            RC Pro, d�cennale, certifications, dipl�mes, extrait RIDET. Les fichiers image sont compress�s avant lenvoi.
+            RC Pro, dï¿½cennale, certifications, diplï¿½mes, extrait RIDET. Les fichiers image sont compressï¿½s avant lenvoi.
           </p>
         </div>
         <div className="inline-flex items-center gap-2 rounded-full border border-nc-lagon/15 bg-nc-lagonLight px-3 py-1.5 text-sm font-semibold text-nc-lagon">
@@ -161,7 +161,7 @@ export default function DocumentUploader({
           </label>
 
           <label className="mt-4 block space-y-2">
-            <span className="text-sm font-semibold text-night">Libell�</span>
+            <span className="text-sm font-semibold text-night">Libellï¿½</span>
             <input
               type="text"
               value={label}
@@ -179,14 +179,14 @@ export default function DocumentUploader({
               onChange={(event) => void handlePickFile(event.target.files?.[0] ?? null)}
               className="block w-full rounded-2xl border border-dashed border-[var(--color-border)] bg-white px-4 py-3 text-sm file:mr-4 file:rounded-full file:border-0 file:bg-[#0A7EA4] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-[#065f7a]"
             />
-            <p className="text-xs text-night/45">PDF, JPG, PNG ou WebP. Maximum recommand� : 10 Mo.</p>
+            <p className="text-xs text-night/45">PDF, JPG, PNG ou WebP. Maximum recommandï¿½ : 10 Mo.</p>
           </label>
 
           {file ? (
             <div className="mt-4 rounded-2xl border border-night/8 bg-white px-4 py-3 text-sm text-night/70">
               <p className="font-semibold text-night">{file.name}</p>
               <p className="mt-1 text-xs text-night/45">
-                {file.type || 'Fichier'} � {formatFileSize(file.size)}
+                {file.type || 'Fichier'} ï¿½ {formatFileSize(file.size)}
               </p>
             </div>
           ) : null}
@@ -198,7 +198,7 @@ export default function DocumentUploader({
             className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-            Déposer le document
+            DÃ©poser le document
           </button>
         </div>
 
@@ -206,7 +206,7 @@ export default function DocumentUploader({
           <div className="flex items-center justify-between gap-3">
             <div>
               <h3 className="text-base font-semibold text-night">Historique des justificatifs</h3>
-              <p className="text-sm text-night/55">Suivez lÉtat de chaque d�p�t.</p>
+              <p className="text-sm text-night/55">Suivez lÃtat de chaque dï¿½pï¿½t.</p>
             </div>
             <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/40">{documents.length} document{documents.length > 1 ? 's' : ''}</span>
           </div>
@@ -217,7 +217,7 @@ export default function DocumentUploader({
             <div className="mt-4 rounded-2xl border border-dashed border-night/12 bg-sand/20 p-5 text-sm text-night/55">
               <FileText className="h-5 w-5 text-coral" />
               <p className="mt-3 font-semibold text-night">Aucun document pour le moment.</p>
-              <p className="mt-1 text-sm text-night/55">D�posez un premier justificatif pour lancer la v�rification.</p>
+              <p className="mt-1 text-sm text-night/55">Dï¿½posez un premier justificatif pour lancer la vï¿½rification.</p>
             </div>
           ) : (
             <div className="mt-4 space-y-3">
@@ -240,7 +240,7 @@ export default function DocumentUploader({
                           {doc.label || doc.file_name || 'Justificatif'}
                         </h4>
                         <p className="mt-1 text-xs text-night/55">
-                          {doc.file_name || 'Fichier'} � {formatFileSize(doc.file_size)}
+                          {doc.file_name || 'Fichier'} ï¿½ {formatFileSize(doc.file_size)}
                         </p>
                         {doc.rejection_reason ? (
                           <p className="mt-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">

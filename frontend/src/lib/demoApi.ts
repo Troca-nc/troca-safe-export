@@ -9,7 +9,7 @@ export const DEMO_ACCOUNTS: Record<DemoAccountKey, { email: string; password: st
     email: 'particulier@demo.kalico.nc',
     password: 'Demo1234!',
     label: 'Particulier',
-    description: 'Publier, discuter et g�rer ses favoris.',
+    description: 'Publier, discuter et gï¿½rer ses favoris.',
   },
   pro: {
     email: 'pro@demo.kalico.nc',
@@ -21,13 +21,13 @@ export const DEMO_ACCOUNTS: Record<DemoAccountKey, { email: string; password: st
     email: 'bonplan@demo.kalico.nc',
     password: 'Demo1234!',
     label: 'Bon plan',
-    description: 'Promos, �v�nements et campagnes sponsoris�es.',
+    description: 'Promos, ï¿½vï¿½nements et campagnes sponsorisï¿½es.',
   },
   admin: {
     email: 'admin@demo.kalico.nc',
     password: 'Demo1234!',
     label: 'Administrateur',
-    description: 'Mod�ration, dashboards et parcours de supervision.',
+    description: 'Modï¿½ration, dashboards et parcours de supervision.',
   },
 }
 

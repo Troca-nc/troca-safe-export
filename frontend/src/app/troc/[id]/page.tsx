@@ -105,7 +105,7 @@ function TrocDetailPageContent() {
 
   const sellerName = [listing.user?.prenom, listing.user?.nom].filter(Boolean).join(' ').trim() || 'Troceur'
   const complementLabel = listing.troc_accepts_complement_xpf && listing.troc_complement_max_xpf > 0
-    ? `Accepte jusqu� ${Number(listing.troc_complement_max_xpf).toLocaleString('fr-FR')} XPF de compl�ment`
+    ? `Accepte jusquï¿½ ${Number(listing.troc_complement_max_xpf).toLocaleString('fr-FR')} XPF de complï¿½ment`
     : null
 
   return (
@@ -159,9 +159,9 @@ function TrocDetailPageContent() {
                   </div>
                 </div>
                 <div className="rounded-[1.5rem] border border-night/8 bg-sand px-4 py-3 text-right">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">�change</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">ï¿½change</p>
                   <p className="mt-1 text-lg font-bold text-night">
-                    {listing.is_free ? 'Gratuit' : listing.price?.toLocaleString('fr-FR') || listing.prix?.toLocaleString('fr-FR') || 'Prix � d�battre'}
+                    {listing.is_free ? 'Gratuit' : listing.price?.toLocaleString('fr-FR') || listing.prix?.toLocaleString('fr-FR') || 'Prix ï¿½ dï¿½battre'}
                     {!listing.is_free ? <span className="ml-1 text-sm font-normal text-night/55">XPF</span> : null}
                   </p>
                 </div>
@@ -171,8 +171,8 @@ function TrocDetailPageContent() {
                 compatibility={listing.compatibility as unknown as TrocCompatibility | null}
                 emptyLabel={
                   isAuthenticated
-                    ? 'Publiez une annonce troc pour voir votre compatibilit�'
-                    : 'Connectez-vous pour voir votre compatibilit�'
+                    ? 'Publiez une annonce troc pour voir votre compatibilitï¿½'
+                    : 'Connectez-vous pour voir votre compatibilitï¿½'
                 }
               />
 
@@ -207,13 +207,13 @@ function TrocDetailPageContent() {
 
             <section className="rounded-[1.75rem] border border-night/8 bg-white p-5 shadow-card">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Conseil</p>
-              <h2 className="mt-2 text-lg font-bold text-night">Proposition structur�e puis chat</h2>
+              <h2 className="mt-2 text-lg font-bold text-night">Proposition structurï¿½e puis chat</h2>
               <p className="mt-2 text-sm leading-6 text-night/60">
-                Commencez par d�crire clairement ce que vous proposez. Une fois la proposition accept�e, la conversation de n�gociation souvre automatiquement.
+                Commencez par dï¿½crire clairement ce que vous proposez. Une fois la proposition acceptï¿½e, la conversation de nï¿½gociation souvre automatiquement.
               </p>
               <div className="mt-4 rounded-2xl bg-night/5 p-4 text-sm text-night/65">
                 <MessageSquareText className="mb-2 h-5 w-5 text-coral" />
-                Le chat arrive apr�s la proposition, pas avant.
+                Le chat arrive aprï¿½s la proposition, pas avant.
               </div>
             </section>
           </aside>

@@ -9,7 +9,7 @@ import { buildPageMetadata } from '@/lib/pageMetadata'
 
 export const metadata: Metadata = buildPageMetadata({
   title: 'Contact & FAQ - Kalico NC',
-  description: "Une question ? Consultez notre FAQ ou contactez l'�quipe Kalico.",
+  description: "Une question ? Consultez notre FAQ ou contactez l'ï¿½quipe Kalico.",
   path: '/contact',
 })
 
@@ -49,7 +49,7 @@ export default function ContactPage() {
 
           <Card title="Donnees personnelles">
             <p>
-              Pour toute demande d&apos;acc�s, de rectification, de suppression ou de limitation de
+              Pour toute demande d&apos;accï¿½s, de rectification, de suppression ou de limitation de
               traitement.
             </p>
             <p>
@@ -61,7 +61,7 @@ export default function ContactPage() {
 
           <Card title="Juridique et mentions">
             <p>
-              Pour les mentions l�gales, les sujets de propri�t� intellectuelle ou les demandes
+              Pour les mentions lï¿½gales, les sujets de propriï¿½tï¿½ intellectuelle ou les demandes
               relatives aux CGU.
             </p>
             <p>
@@ -73,13 +73,13 @@ export default function ContactPage() {
 
           <Card title="Signaler une annonce">
             <p>
-              Utilisez directement le bouton &quot;Signaler&quot; pr�sent sur chaque annonce pour
-              d�clencher une mod�ration rapide.
+              Utilisez directement le bouton &quot;Signaler&quot; prï¿½sent sur chaque annonce pour
+              dï¿½clencher une modï¿½ration rapide.
             </p>
             <p>
               Consultez aussi la page{' '}
               <Link href="/securite" className="text-coral underline">
-                S�curit�
+                Sï¿½curitï¿½
               </Link>
               .
             </p>
@@ -91,7 +91,7 @@ export default function ContactPage() {
         </section>
 
         <div className="mt-8 text-sm text-night/65">
-          Vous n&apos;avez pas trouv� votre r�ponse ?{' '}
+          Vous n&apos;avez pas trouvï¿½ votre rï¿½ponse ?{' '}
           <a href="#formulaire-contact" className="font-semibold text-coral underline">
             Contactez-nous directement
           </a>

@@ -1,8 +1,8 @@
 // lib/useTourEngine.ts
 //
-// G�re : quel tour afficher, � quelle �tape, et la persistance de ce qui a
-// d�j� �t� vu. La persistance est scopp�e par type de compte afin que les
-// parcours Particulier et Pro restent ind�pendants.
+// Gï¿½re : quel tour afficher, ï¿½ quelle ï¿½tape, et la persistance de ce qui a
+// dï¿½jï¿½ ï¿½tï¿½ vu. La persistance est scoppï¿½e par type de compte afin que les
+// parcours Particulier et Pro restent indï¿½pendants.
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -63,7 +63,7 @@ async function syncSeenToBackend(tourKey: string) {
       body: JSON.stringify({ tourKey }),
     })
   } catch {
-    // �chec silencieux : localStorage reste la source de secours.
+    // ï¿½chec silencieux : localStorage reste la source de secours.
   }
 }
 

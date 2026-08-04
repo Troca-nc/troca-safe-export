@@ -6,14 +6,14 @@ import { SITE_URL } from '@/types/seo.types'
 export const metadata: Metadata = {
   title: 'Devenir Pro - Kalico NC',
   description:
-    'Cr�ez votre espace Pro sur Kalico : vitrine, devis, réservations, transport, envoi & livraison et visibilit� locale en Nouvelle-Calédonie.',
+    'Crï¿½ez votre espace Pro sur Kalico : vitrine, devis, rÃ©servations, transport, envoi & livraison et visibilitï¿½ locale en Nouvelle-CalÃ©donie.',
   alternates: {
     canonical: `${SITE_URL}/pro`,
   },
   openGraph: {
     title: 'Devenir Pro - Kalico NC',
     description:
-      'Cr�ez votre espace Pro sur Kalico : vitrine, devis, réservations, transport, envoi & livraison et visibilit� locale en Nouvelle-Calédonie.',
+      'Crï¿½ez votre espace Pro sur Kalico : vitrine, devis, rÃ©servations, transport, envoi & livraison et visibilitï¿½ locale en Nouvelle-CalÃ©donie.',
     url: `${SITE_URL}/pro`,
     siteName: 'Kalico',
     locale: 'fr_NC',
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Devenir Pro - Kalico NC',
     description:
-      'Cr�ez votre espace Pro sur Kalico : vitrine, devis, réservations, transport, envoi & livraison et visibilit� locale en Nouvelle-Calédonie.',
+      'Crï¿½ez votre espace Pro sur Kalico : vitrine, devis, rÃ©servations, transport, envoi & livraison et visibilitï¿½ locale en Nouvelle-CalÃ©donie.',
   },
 }
 

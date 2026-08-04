@@ -4,7 +4,7 @@ import { buildPageMetadata } from '@/lib/pageMetadata'
 
 export const metadata = buildPageMetadata({
   title: "Appels d'offres - Kalico NC",
-  description: 'Publiez votre besoin en 2 minutes. Les pros cal�doniens v�rifi�s vous r�pondent.',
+  description: 'Publiez votre besoin en 2 minutes. Les pros calï¿½doniens vï¿½rifiï¿½s vous rï¿½pondent.',
   path: '/appels-offres',
 })
 

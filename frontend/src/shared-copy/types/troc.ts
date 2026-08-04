@@ -1,6 +1,6 @@
-// � COPIE MANUELLE depuis /shared/types/troc.ts
-// Ce fichier doit �tre copi� � nouveau si l'original est modifi�.
-// Ne pas �diter ce fichier s�par�ment de l'original sans reporter le changement des deux c�t�s.
+// ï¿½ COPIE MANUELLE depuis /shared/types/troc.ts
+// Ce fichier doit ï¿½tre copiï¿½ ï¿½ nouveau si l'original est modifiï¿½.
+// Ne pas ï¿½diter ce fichier sï¿½parï¿½ment de l'original sans reporter le changement des deux cï¿½tï¿½s.
 export type TrocStatus = 'open' | 'negotiating' | 'completed' | 'cancelled';
 export type ProposalStatus = 'pending' | 'seen' | 'accepted' | 'declined' | 'countered' | 'expired' | 'completed';
 export type ComplementDirection = 'none' | 'i_pay' | 'they_pay';

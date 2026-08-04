@@ -19,9 +19,9 @@ export default function DemoModeNotice({ className = '' }: DemoModeNoticeProps) 
     >
       <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
       <div>
-        <p className="text-sm font-semibold">Mode d�monstration</p>
+        <p className="text-sm font-semibold">Mode dï¿½monstration</p>
         <p className="text-sm leading-6">
-          Aucun paiement r�el ne sera effectu�. Le tunnel reste visible pour tester le parcours.
+          Aucun paiement rï¿½el ne sera effectuï¿½. Le tunnel reste visible pour tester le parcours.
         </p>
       </div>
     </div>

@@ -88,7 +88,7 @@ export default function AdminBusinessesPage() {
           <Store className="h-5 w-5 text-coral" />
           <div>
             <h1 className="text-xl font-bold text-night">Enseignes</h1>
-            <p className="text-sm text-night/60">V�rification manuelle, badges et mod�ration des avis signal�s.</p>
+            <p className="text-sm text-night/60">Vï¿½rification manuelle, badges et modï¿½ration des avis signalï¿½s.</p>
           </div>
         </div>
       </div>
@@ -97,8 +97,8 @@ export default function AdminBusinessesPage() {
         <div className="mb-4 flex flex-wrap gap-2">
           {[
             { id: 'all', label: 'Toutes' },
-            { id: 'active', label: '� v�rifier' },
-            { id: 'verified', label: 'V�rifi�es' },
+            { id: 'active', label: 'ï¿½ vï¿½rifier' },
+            { id: 'verified', label: 'Vï¿½rifiï¿½es' },
           ].map((item) => (
             <button
               key={item.id}
@@ -119,7 +119,7 @@ export default function AdminBusinessesPage() {
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-night/50">Catalogue enseignes</p>
-                <h2 className="mt-1 text-lg font-semibold text-night">Tri�es par activit�</h2>
+                <h2 className="mt-1 text-lg font-semibold text-night">Triï¿½es par activitï¿½</h2>
               </div>
               <span className="rounded-full bg-sand px-3 py-1 text-xs font-medium text-night/60">{visibleBusinesses.length} enseignes</span>
             </div>
@@ -144,11 +144,11 @@ export default function AdminBusinessesPage() {
                               ? 'bg-blue-50 text-blue-700'
                               : 'bg-sand text-night/50'
                         }`}>
-                          {business.badge === 'verified' ? 'V�rifi�e' : business.badge === 'active' ? 'Active' : 'Aucun paiement'}
+                          {business.badge === 'verified' ? 'Vï¿½rifiï¿½e' : business.badge === 'active' ? 'Active' : 'Aucun paiement'}
                         </span>
                       </div>
                       <p className="text-xs text-night/50">
-                        {business.category || 'Catégorie inconnue'} � {business.bon_plan_count ?? 0} bons plans � {business.review_count ?? 0} avis
+                        {business.category || 'CatÃ©gorie inconnue'} ï¿½ {business.bon_plan_count ?? 0} bons plans ï¿½ {business.review_count ?? 0} avis
                       </p>
                     </div>
                   </div>
@@ -158,11 +158,11 @@ export default function AdminBusinessesPage() {
                       {Number(business.review_avg ?? 0).toFixed(1)}
                     </span>
                     {business.badge === 'verified' ? (
-                      <button onClick={() => void unverify(business.id)} className="btn-ghost px-3 py-2 text-xs">R�voquer</button>
+                      <button onClick={() => void unverify(business.id)} className="btn-ghost px-3 py-2 text-xs">Rï¿½voquer</button>
                     ) : (
                       <button onClick={() => void verify(business.id)} className="btn-primary px-3 py-2 text-xs">
                         <CheckCircle2 className="h-3.5 w-3.5" />
-                        V�rifier
+                        Vï¿½rifier
                       </button>
                     )}
                   </div>
@@ -174,24 +174,24 @@ export default function AdminBusinessesPage() {
           <section className="rounded-3xl border border-night/8 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-night/50">Avis signal�s</p>
-                <h2 className="mt-1 text-lg font-semibold text-night">� mod�rer</h2>
+                <p className="text-xs font-medium uppercase tracking-wide text-night/50">Avis signalï¿½s</p>
+                <h2 className="mt-1 text-lg font-semibold text-night">ï¿½ modï¿½rer</h2>
               </div>
               <AlertTriangle className="h-5 w-5 text-amber-500" />
             </div>
             <div className="space-y-3">
               {reported.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-night/10 p-6 text-center text-sm text-night/50">
-                  Aucun avis signal� pour le moment.
+                  Aucun avis signalï¿½ pour le moment.
                 </div>
               ) : reported.map((review) => (
                 <div key={review.id} className="rounded-2xl border border-night/8 p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-night">{review.business_name}</p>
-                      <p className="text-xs text-night/50">{review.user_name} � {review.rating ?? ''}</p>
+                      <p className="text-xs text-night/50">{review.user_name} ï¿½ {review.rating ?? ''}</p>
                     </div>
-                    <span className="rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-600">Signal�</span>
+                    <span className="rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-600">Signalï¿½</span>
                   </div>
                   <p className="mt-3 text-sm text-night/70">{review.comment || ''}</p>
                   <p className="mt-2 text-xs text-night/40">{review.report_reason || 'Signalement automatique ou manuel'}</p>

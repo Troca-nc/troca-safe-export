@@ -21,7 +21,7 @@ export default function GlobalError({
           <p className="text-sm uppercase tracking-[0.2em] text-coral font-semibold mb-3">Erreur critique</p>
           <h1 className="text-3xl font-bold mb-3">Une erreur critique a interrompu lapplication</h1>
           <p className="text-night/70 mb-6">
-            Nous avons pr�par� un �cran de secours pour �viter une page blanche. Tu peux r�essayer ou revenir � laccueil.
+            Nous avons prï¿½parï¿½ un ï¿½cran de secours pour ï¿½viter une page blanche. Tu peux rï¿½essayer ou revenir ï¿½ laccueil.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
@@ -29,13 +29,13 @@ export default function GlobalError({
               onClick={reset}
               className="inline-flex items-center justify-center rounded-full bg-coral px-5 py-3 text-white font-semibold hover:bg-coral-dark transition-colors"
             >
-              R�essayer
+              Rï¿½essayer
             </button>
             <Link
               href="/"
               className="inline-flex items-center justify-center rounded-full border border-night/15 px-5 py-3 text-night font-semibold hover:bg-night/5 transition-colors"
             >
-              Retour � laccueil
+              Retour ï¿½ laccueil
             </Link>
           </div>
         </div>

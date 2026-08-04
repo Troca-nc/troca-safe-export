@@ -170,19 +170,19 @@ const URGENCY_OPTIONS = Object.entries(URGENCY_BUCKETS as Record<string, BucketO
 
 const DELIVERY_TABS = [
   { id: 'colis', label: 'Colis & Envoi' },
-  { id: 'demenagement', label: 'D�m�nagement' },
+  { id: 'demenagement', label: 'Dï¿½mï¿½nagement' },
   { id: 'fret_pro', label: 'Fret Pro' },
 ] as const
 
 function formatMoney(value: number | null | undefined) {
-  if (value == null || !Number.isFinite(Number(value))) return '� pr�ciser'
+  if (value == null || !Number.isFinite(Number(value))) return 'ï¿½ prï¿½ciser'
   return `${Number(value).toLocaleString('fr-FR')} XPF`
 }
 
 function formatDateLabel(value: string | null | undefined) {
-  if (!value) return '� confirmer'
+  if (!value) return 'ï¿½ confirmer'
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return '� confirmer'
+  if (Number.isNaN(date.getTime())) return 'ï¿½ confirmer'
   return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' }).format(date)
 }
 
@@ -205,7 +205,7 @@ function flattenCommunes(provinces: Array<{ name: string; communes: Array<{ id: 
 }
 
 function getRequestTitle(request: FretRequest) {
-  return `${request.departure_commune?.name || request.departure} � ${request.destination_commune?.name || request.destination}`
+  return `${request.departure_commune?.name || request.departure} ï¿½ ${request.destination_commune?.name || request.destination}`
 }
 
 function getStatusTone(status: string) {
@@ -408,7 +408,7 @@ export default function FreightPage() {
     }
 
     if (departureCommune.id === destinationCommune.id) {
-      setError('Le d�part et larriv�e doivent �tre diff�rents.')
+      setError('Le dï¿½part et larrivï¿½e doivent ï¿½tre diffï¿½rents.')
       return
     }
 
@@ -440,7 +440,7 @@ export default function FreightPage() {
       const estimateMin = Number(estimateData?.estimated_min_xpf ?? 0)
       const estimateMax = Number(estimateData?.estimated_max_xpf ?? 0)
 
-      setNotice('Votre demande a �t� envoy�e aux transporteurs disponibles. Vous recevrez leurs offres dans lheure.')
+      setNotice('Votre demande a ï¿½tï¿½ envoyï¿½e aux transporteurs disponibles. Vous recevrez leurs offres dans lheure.')
       if (created?.id) {
         setSelectedRequestId(created.id)
       }
@@ -459,10 +459,10 @@ export default function FreightPage() {
     setError('')
     try {
       await fretApi.selectOffer(requestId, offerId)
-      setNotice('Loffre a �t� s�lectionn�e. Les confirmations ont �t� envoy�es.')
+      setNotice('Loffre a ï¿½tï¿½ sï¿½lectionnï¿½e. Les confirmations ont ï¿½tï¿½ envoyï¿½es.')
       await refreshRequests(requestId)
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible de s�lectionner cette offre pour le moment.')
+      setError(err?.response?.data?.error || 'Impossible de sï¿½lectionner cette offre pour le moment.')
     }
   }
 
@@ -489,7 +489,7 @@ export default function FreightPage() {
         title: 'Transport Envoi & Livraison',
         comment: state.comment.trim(),
       })
-      setNotice('Votre avis a bien �t� publi�.')
+      setNotice('Votre avis a bien ï¿½tï¿½ publiï¿½.')
       setReviewForms((current) => ({
         ...current,
         [request.id]: { rating: '5', comment: '' },
@@ -511,15 +511,15 @@ export default function FreightPage() {
             <Truck className="h-3.5 w-3.5" />
             Envoi & Livraison
           </p>
-          <h1 className="mt-4 font-display text-4xl font-bold">D�crivez votre envoi, les pros r�pondent rapidement</h1>
+          <h1 className="mt-4 font-display text-4xl font-bold">Dï¿½crivez votre envoi, les pros rï¿½pondent rapidement</h1>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-white/75 md:text-base">
-            D�part, arriv�e, volume, poids et urgence : votre demande est envoy�e aux pros Envoi & Livraison actifs,
+            Dï¿½part, arrivï¿½e, volume, poids et urgence : votre demande est envoyï¿½e aux pros Envoi & Livraison actifs,
             puis vous comparez les offres et choisissez librement le transporteur.
           </p>
           <div className="mt-5 flex flex-wrap gap-2 text-xs text-white/80">
             <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1">
               <ShieldCheck className="h-3.5 w-3.5" />
-              Offres priv�es
+              Offres privï¿½es
             </span>
             <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1">
               <Clock3 className="h-3.5 w-3.5" />
@@ -537,11 +537,11 @@ export default function FreightPage() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Demandeur</p>
-                <h2 className="mt-1 font-display text-2xl font-bold text-night">Cr�er une demande</h2>
+                <h2 className="mt-1 font-display text-2xl font-bold text-night">Crï¿½er une demande</h2>
               </div>
               <div className="rounded-2xl bg-nc-lagonLight px-3 py-2 text-right">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-lagon">Estimation</p>
-                <p className="text-lg font-bold text-night">{estimate ? `${formatMoney(estimate.estimated_min_xpf)} - ${formatMoney(estimate.estimated_max_xpf)}` : '� calculer'}</p>
+                <p className="text-lg font-bold text-night">{estimate ? `${formatMoney(estimate.estimated_min_xpf)} - ${formatMoney(estimate.estimated_max_xpf)}` : 'ï¿½ calculer'}</p>
               </div>
             </div>
 
@@ -565,7 +565,7 @@ export default function FreightPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-night">Commune de d�part</span>
+                <span className="text-sm font-semibold text-night">Commune de dï¿½part</span>
                 <select
                   value={form.departure_commune_id}
                   onChange={(event) => setForm((current) => ({ ...current, departure_commune_id: event.target.value }))}
@@ -575,13 +575,13 @@ export default function FreightPage() {
                   <option value="">{loadingCommunes ? 'Chargement...' : 'Choisir une commune'}</option>
                   {communes.map((commune) => (
                     <option key={commune.id} value={commune.id}>
-                      {commune.name} � {commune.provinceName}
+                      {commune.name} ï¿½ {commune.provinceName}
                     </option>
                   ))}
                 </select>
               </label>
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-night">Commune darriv�e</span>
+                <span className="text-sm font-semibold text-night">Commune darrivï¿½e</span>
                 <select
                   value={form.destination_commune_id}
                   onChange={(event) => setForm((current) => ({ ...current, destination_commune_id: event.target.value }))}
@@ -591,7 +591,7 @@ export default function FreightPage() {
                   <option value="">{loadingCommunes ? 'Chargement...' : 'Choisir une commune'}</option>
                   {communes.map((commune) => (
                     <option key={commune.id} value={commune.id}>
-                      {commune.name} � {commune.provinceName}
+                      {commune.name} ï¿½ {commune.provinceName}
                     </option>
                   ))}
                 </select>
@@ -604,7 +604,7 @@ export default function FreightPage() {
                   {activeTab === 'colis'
                     ? 'Description du colis'
                     : activeTab === 'demenagement'
-                      ? 'D�tail du volume � d�placer'
+                      ? 'Dï¿½tail du volume ï¿½ dï¿½placer'
                       : 'Type de marchandise'}
                 </span>
                 <input
@@ -615,8 +615,8 @@ export default function FreightPage() {
                     activeTab === 'colis'
                       ? 'Ex. ordinateur portable, vase, cartons...'
                       : activeTab === 'demenagement'
-                        ? 'Ex. canap�, lit, meubles, �lectrom�nager...'
-                        : 'Ex. mobilier, cartons, mat�riaux...'
+                        ? 'Ex. canapï¿½, lit, meubles, ï¿½lectromï¿½nager...'
+                        : 'Ex. mobilier, cartons, matï¿½riaux...'
                   }
                 />
               </label>
@@ -630,8 +630,8 @@ export default function FreightPage() {
                       className="input w-full rounded-2xl"
                     >
                       <option value="lt_5">Moins de 5 kg</option>
-                      <option value="range_5_15">5 � 15 kg</option>
-                      <option value="range_15_50">15 � 50 kg</option>
+                      <option value="range_5_15">5 ï¿½ 15 kg</option>
+                      <option value="range_15_50">15 ï¿½ 50 kg</option>
                     </select>
                   </label>
                   <label className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-sand/40 px-4 py-3">
@@ -648,19 +648,19 @@ export default function FreightPage() {
               {activeTab === 'demenagement' ? (
                 <>
                   <label className="space-y-2">
-                    <span className="text-sm font-semibold text-night">Volume estim�</span>
+                    <span className="text-sm font-semibold text-night">Volume estimï¿½</span>
                     <select
                       value={form.volume}
                       onChange={(event) => setForm((current) => ({ ...current, volume: event.target.value }))}
                       className="input w-full rounded-2xl"
                     >
-                      <option value="lt_10">Moins de 10 m�</option>
-                      <option value="range_10_30">10 � 30 m�</option>
-                      <option value="gt_30">Plus de 30 m�</option>
+                      <option value="lt_10">Moins de 10 mï¿½</option>
+                      <option value="range_10_30">10 ï¿½ 30 mï¿½</option>
+                      <option value="gt_30">Plus de 30 mï¿½</option>
                     </select>
                   </label>
                   <label className="space-y-2">
-                    <span className="text-sm font-semibold text-night">�tage au d�part</span>
+                    <span className="text-sm font-semibold text-night">ï¿½tage au dï¿½part</span>
                     <select
                       value={form.etage_depart}
                       onChange={(event) => setForm((current) => ({ ...current, etage_depart: event.target.value }))}
@@ -675,7 +675,7 @@ export default function FreightPage() {
                     </select>
                   </label>
                   <label className="space-y-2">
-                    <span className="text-sm font-semibold text-night">�tage � l'arriv�e</span>
+                    <span className="text-sm font-semibold text-night">ï¿½tage ï¿½ l'arrivï¿½e</span>
                     <select
                       value={form.etage_arrivee}
                       onChange={(event) => setForm((current) => ({ ...current, etage_arrivee: event.target.value }))}
@@ -696,10 +696,10 @@ export default function FreightPage() {
                       onChange={(event) => setForm((current) => ({ ...current, manutention: event.target.checked }))}
                       className="h-4 w-4 rounded border-night/20"
                     />
-                    <span className="text-sm font-semibold text-night">Manutention souhait�e</span>
+                    <span className="text-sm font-semibold text-night">Manutention souhaitï¿½e</span>
                   </label>
                   <label className="space-y-2">
-                    <span className="text-sm font-semibold text-night">Nombre de pi�ces</span>
+                    <span className="text-sm font-semibold text-night">Nombre de piï¿½ces</span>
                     <select
                       value={form.nb_pieces}
                       onChange={(event) => setForm((current) => ({ ...current, nb_pieces: event.target.value }))}
@@ -716,7 +716,7 @@ export default function FreightPage() {
               ) : null}
               <label className="space-y-2">
                 <span className="text-sm font-semibold text-night">
-                  {activeTab === 'colis' ? 'Poids estim�' : 'Volume estim�'}
+                  {activeTab === 'colis' ? 'Poids estimï¿½' : 'Volume estimï¿½'}
                 </span>
                 <select
                   value={form.volume_bucket}
@@ -730,7 +730,7 @@ export default function FreightPage() {
               </label>
               <label className="space-y-2">
                 <span className="text-sm font-semibold text-night">
-                  {activeTab === 'colis' ? 'Urgence' : 'Poids estim�'}
+                  {activeTab === 'colis' ? 'Urgence' : 'Poids estimï¿½'}
                 </span>
                 <select
                   value={form.weight_bucket}
@@ -746,7 +746,7 @@ export default function FreightPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-night">Date souhait�e / urgence</span>
+                <span className="text-sm font-semibold text-night">Date souhaitï¿½e / urgence</span>
                 <select
                   value={form.urgency}
                   onChange={(event) => setForm((current) => ({ ...current, urgency: event.target.value as FretFormState['urgency'] }))}
@@ -774,17 +774,17 @@ export default function FreightPage() {
               <label className="space-y-2">
                 <span className="text-sm font-semibold text-night">
                   {activeTab === 'colis'
-                    ? 'Description compl�mentaire'
+                    ? 'Description complï¿½mentaire'
                     : activeTab === 'demenagement'
-                      ? 'Pr�cisions compl�mentaires'
-                      : 'Description compl�mentaire'}
+                      ? 'Prï¿½cisions complï¿½mentaires'
+                      : 'Description complï¿½mentaire'}
                 </span>
               <textarea
                 rows={4}
                 value={form.description}
                 onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
                 className="input w-full rounded-2xl py-3"
-                placeholder="Pr�cisez les contraintes, lacc�s, le chargement..."
+                placeholder="Prï¿½cisez les contraintes, laccï¿½s, le chargement..."
               />
             </label>
 
@@ -800,7 +800,7 @@ export default function FreightPage() {
                 />
               </label>
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-night">T�l�phone</span>
+                <span className="text-sm font-semibold text-night">Tï¿½lï¿½phone</span>
                 <input
                   type="tel"
                   value={form.contact_phone}
@@ -813,16 +813,16 @@ export default function FreightPage() {
 
             <div className="grid gap-3 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4 sm:grid-cols-3">
               <div className="rounded-2xl bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Route de r�f�rence</p>
-                <p className="mt-1 text-lg font-bold text-night">{estimate ? formatMoney(estimate.route_reference_xpf) : '� calculer'}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Route de rï¿½fï¿½rence</p>
+                <p className="mt-1 text-lg font-bold text-night">{estimate ? formatMoney(estimate.route_reference_xpf) : 'ï¿½ calculer'}</p>
               </div>
               <div className="rounded-2xl bg-white p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Fourchette indicative</p>
-                <p className="mt-1 text-lg font-bold text-night">{estimate ? `${formatMoney(estimate.estimated_min_xpf)} - ${formatMoney(estimate.estimated_max_xpf)}` : '� calculer'}</p>
+                <p className="mt-1 text-lg font-bold text-night">{estimate ? `${formatMoney(estimate.estimated_min_xpf)} - ${formatMoney(estimate.estimated_max_xpf)}` : 'ï¿½ calculer'}</p>
               </div>
               <div className="rounded-2xl bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Distance estim�e</p>
-                <p className="mt-1 text-lg font-bold text-night">{estimate ? `${Math.round(estimate.distance_km)} km` : '� calculer'}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Distance estimï¿½e</p>
+                <p className="mt-1 text-lg font-bold text-night">{estimate ? `${Math.round(estimate.distance_km)} km` : 'ï¿½ calculer'}</p>
               </div>
             </div>
 
@@ -843,7 +843,7 @@ export default function FreightPage() {
             <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Fen�tre de r�ponse</p>
+                  <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Fenï¿½tre de rï¿½ponse</p>
                   <h2 className="mt-1 font-display text-2xl font-bold text-night">Votre demande en cours</h2>
                 </div>
                 {activeRequest ? (
@@ -859,7 +859,7 @@ export default function FreightPage() {
                     <div className="flex items-center justify-between gap-3">
                       <div>
                         <p className="text-sm font-semibold text-night">{getRequestTitle(activeRequest)}</p>
-                        <p className="mt-1 text-xs text-night/55">{activeRequest.cargo_type || 'Marchandise'} � {activeRequest.volume_bucket} � {activeRequest.weight_bucket}</p>
+                        <p className="mt-1 text-xs text-night/55">{activeRequest.cargo_type || 'Marchandise'} ï¿½ {activeRequest.volume_bucket} ï¿½ {activeRequest.weight_bucket}</p>
                       </div>
                       <div className="rounded-2xl bg-nc-lagonLight px-3 py-2 text-right">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-lagon">Statut</p>
@@ -885,14 +885,14 @@ export default function FreightPage() {
                       </span>
                     </div>
                     <p className="mt-3 text-sm text-night/65">
-                      Votre demande a �t� envoy�e aux transporteurs disponibles. Les r�ponses arrivent sans compte � rebours, puis le choix reste enti�rement manuel.
+                      Votre demande a ï¿½tï¿½ envoyï¿½e aux transporteurs disponibles. Les rï¿½ponses arrivent sans compte ï¿½ rebours, puis le choix reste entiï¿½rement manuel.
                     </p>
                   </div>
 
                   {activeRequest.offers.length ? (
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <p className="text-sm font-semibold text-night">Offres re�ues</p>
+                        <p className="text-sm font-semibold text-night">Offres reï¿½ues</p>
                         <p className="text-xs text-night/55">{latestOfferCount} visible(s) pour vous</p>
                       </div>
                       {activeRequest.offers.map((offer) => {
@@ -907,7 +907,7 @@ export default function FreightPage() {
                                   {offer.transporter.is_verified ? (
                                     <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
                                       <BadgeCheck className="h-3 w-3" />
-                                      Pro Envoi & Livraison v�rifi�
+                                      Pro Envoi & Livraison vï¿½rifiï¿½
                                     </span>
                                   ) : null}
                                 </div>
@@ -955,22 +955,22 @@ export default function FreightPage() {
                     </div>
                   ) : (
                     <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-sand/35 p-5 text-sm text-night/60">
-                      Aucune offre re�ue pour linstant. Les transporteurs disponibles re�oivent d�j� la demande.
+                      Aucune offre reï¿½ue pour linstant. Les transporteurs disponibles reï¿½oivent dï¿½jï¿½ la demande.
                     </div>
                   )}
                 </div>
               ) : (
                 <div className="mt-4 rounded-2xl border border-dashed border-[var(--color-border)] bg-sand/35 p-5 text-sm text-night/60">
-                  Envoyez votre premi�re demande pour voir ici la fen�tre de r�ponse, les offres re�ues et lhorodatage de s�lection.
+                  Envoyez votre premiï¿½re demande pour voir ici la fenï¿½tre de rï¿½ponse, les offres reï¿½ues et lhorodatage de sï¿½lection.
                 </div>
               )}
             </div>
 
             <div className="rounded-[2rem] border border-[var(--color-border)] bg-[linear-gradient(135deg,_rgba(214,240,246,0.55),_rgba(255,255,255,0.98))] p-5 shadow-sm">
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Conseil</p>
-              <h3 className="mt-1 font-display text-2xl font-bold text-night">Plus vous d�crivez pr�cis�ment, plus les offres sont pertinentes</h3>
+              <h3 className="mt-1 font-display text-2xl font-bold text-night">Plus vous dï¿½crivez prï¿½cisï¿½ment, plus les offres sont pertinentes</h3>
               <p className="mt-2 text-sm leading-relaxed text-night/60">
-                Volume, poids, urgence et description compl�tent la r�f�rence de trajet. Les transporteurs peuvent ainsi r�pondre plus vite avec un prix r�aliste.
+                Volume, poids, urgence et description complï¿½tent la rï¿½fï¿½rence de trajet. Les transporteurs peuvent ainsi rï¿½pondre plus vite avec un prix rï¿½aliste.
               </p>
               <div className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm font-semibold text-night">
                 <Package className="h-4 w-4 text-[#0A7EA4]" />
@@ -989,11 +989,11 @@ export default function FreightPage() {
             <div className="flex flex-wrap gap-2 text-xs text-night/55">
               <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                Avis apr�s livraison
+                Avis aprï¿½s livraison
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
                 <MessageSquare className="h-3.5 w-3.5" />
-                Offres priv�es
+                Offres privï¿½es
               </span>
             </div>
           </div>
@@ -1016,7 +1016,7 @@ export default function FreightPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="font-semibold text-night">{getRequestTitle(request)}</p>
-                        <p className="mt-1 text-xs text-night/55">{request.cargo_type || 'Marchandise'} � {request.volume_bucket} � {request.weight_bucket}</p>
+                        <p className="mt-1 text-xs text-night/55">{request.cargo_type || 'Marchandise'} ï¿½ {request.volume_bucket} ï¿½ {request.weight_bucket}</p>
                       </div>
                       <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getStatusTone(request.status)}`}>
                         {request.status_label || request.status}
@@ -1026,7 +1026,7 @@ export default function FreightPage() {
                     <div className="mt-3 flex flex-wrap gap-2 text-xs text-night/60">
                       <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1">
                         <Clock3 className="h-3.5 w-3.5" />
-                        {request.delivered_at ? 'Livr�' : request.status === 'closed' ? 'En attente du choix' : 'Demande ouverte'}
+                        {request.delivered_at ? 'Livrï¿½' : request.status === 'closed' ? 'En attente du choix' : 'Demande ouverte'}
                       </span>
                       <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1">
                         <MapPin className="h-3.5 w-3.5" />
@@ -1039,7 +1039,7 @@ export default function FreightPage() {
                     </div>
 
                     <p className="mt-3 text-sm text-night/65">
-                      Budget max : {formatMoney(request.budget_max_xpf)} � Offre indicative : {estimateFreightQuote({
+                      Budget max : {formatMoney(request.budget_max_xpf)} ï¿½ Offre indicative : {estimateFreightQuote({
                         departureSlug: request.departure_commune?.slug || '',
                         destinationSlug: request.destination_commune?.slug || '',
                         volumeBucket: request.volume_bucket as keyof typeof VOLUME_BUCKETS,
@@ -1057,7 +1057,7 @@ export default function FreightPage() {
                     {selectedOffer ? (
                       <div className="mt-3 rounded-2xl border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-800">
                         <p className="font-semibold">Offre retenue : {getTransporterLabel(selectedOffer)}</p>
-                        <p className="mt-1">{formatMoney(selectedOffer.amount_xpf)} � {formatDateLabel(selectedOffer.pickup_date)} � {selectedOffer.pickup_slot_label}</p>
+                        <p className="mt-1">{formatMoney(selectedOffer.amount_xpf)} ï¿½ {formatDateLabel(selectedOffer.pickup_date)} ï¿½ {selectedOffer.pickup_slot_label}</p>
                       </div>
                     ) : null}
 
@@ -1093,7 +1093,7 @@ export default function FreightPage() {
                               value={reviewState.comment}
                               onChange={(event) => handleReviewChange(request.id, 'comment', event.target.value)}
                               className="input w-full rounded-2xl py-2"
-                              placeholder="Votre retour apr�s livraison..."
+                              placeholder="Votre retour aprï¿½s livraison..."
                             />
                           </label>
                           <button
@@ -1119,7 +1119,7 @@ export default function FreightPage() {
               </div>
               <p className="mt-4 text-lg font-semibold text-night">Aucune demande pour linstant</p>
               <p className="mt-2 text-sm">
-                Vos demandes envoi & livraison et leur statut appara�tront ici apr�s votre premier envoi.
+                Vos demandes envoi & livraison et leur statut apparaï¿½tront ici aprï¿½s votre premier envoi.
               </p>
             </div>
           )}

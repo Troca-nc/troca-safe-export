@@ -23,22 +23,22 @@ const EXIT_ANIMATION_MS = 300
 const FEATURES: OnboardingFeature[] = [
   {
     key: 'listing_first_post',
-    title: 'D�posez votre premi�re annonce',
+    title: 'Dï¿½posez votre premiï¿½re annonce',
     description: 'Publiez en quelques minutes et touchez des acheteurs locaux.',
     href: '/deposer',
-    cta: 'Déposer une annonce',
+    cta: 'DÃ©poser une annonce',
   },
   {
     key: 'search_alerts',
     title: 'Activez les alertes de recherche',
-    description: 'Recevez une alerte d�s quune annonce correspond � ce que vous cherchez.',
+    description: 'Recevez une alerte dï¿½s quune annonce correspond ï¿½ ce que vous cherchez.',
     href: '/alertes',
-    cta: 'Cr�er une alerte',
+    cta: 'Crï¿½er une alerte',
   },
   {
     key: 'discover_pros',
-    title: 'D�couvrez les pros locaux',
-    description: 'Comparez des professionnels v�rifi�s pr�s de chez vous.',
+    title: 'Dï¿½couvrez les pros locaux',
+    description: 'Comparez des professionnels vï¿½rifiï¿½s prï¿½s de chez vous.',
     href: '/pros',
     cta: 'Voir les pros',
   },

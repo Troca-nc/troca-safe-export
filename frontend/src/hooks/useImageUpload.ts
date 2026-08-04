@@ -168,7 +168,7 @@ export function useImageUpload(initial: UploadedImage[] = []) {
           )
         })
         .catch((error: unknown) => {
-          const message = error instanceof Error ? error.message : '�chec de lenvoi'
+          const message = error instanceof Error ? error.message : 'ï¿½chec de lenvoi'
           updateItems((current) =>
             current.map((item) =>
               item.id === nextItem.id
@@ -275,7 +275,7 @@ export function useImageUpload(initial: UploadedImage[] = []) {
   }, [items])
 
   const errors = useMemo(
-    () => items.filter((item) => item.status === 'error').map((item) => item.error || '�chec de lenvoi'),
+    () => items.filter((item) => item.status === 'error').map((item) => item.error || 'ï¿½chec de lenvoi'),
     [items]
   )
 

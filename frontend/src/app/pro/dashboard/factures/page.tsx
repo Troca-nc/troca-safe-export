@@ -80,7 +80,7 @@ export default function ProDashboardInvoicesPage() {
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Factures</p>
             <h1 className="mt-2 font-display text-3xl font-bold text-night">Mes factures</h1>
-            <p className="mt-2 text-sm text-night/60">T�l�chargez vos justificatifs PDF et suivez vos paiements.</p>
+            <p className="mt-2 text-sm text-night/60">Tï¿½lï¿½chargez vos justificatifs PDF et suivez vos paiements.</p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-nc-lagonLight px-3 py-1.5 text-sm font-semibold text-nc-lagon">
             <BadgeCheck className="h-4 w-4" />
@@ -94,7 +94,7 @@ export default function ProDashboardInvoicesPage() {
           <table className="min-w-full divide-y divide-[var(--color-border)] text-sm">
             <thead className="bg-[var(--color-background-secondary)] text-night/60">
               <tr>
-                <th className="px-4 py-3 text-left font-semibold">N� Facture</th>
+                <th className="px-4 py-3 text-left font-semibold">Nï¿½ Facture</th>
                 <th className="px-4 py-3 text-left font-semibold">Date</th>
                 <th className="px-4 py-3 text-left font-semibold">Description</th>
                 <th className="px-4 py-3 text-left font-semibold">Montant</th>
@@ -117,7 +117,7 @@ export default function ProDashboardInvoicesPage() {
                           ? 'bg-amber-50 text-amber-700'
                           : 'bg-sand text-night/60'
                     }`}>
-                      {invoice.status === 'paid' ? 'Pay�' : invoice.status === 'pending' ? 'En attente' : 'Annul�'}
+                      {invoice.status === 'paid' ? 'Payï¿½' : invoice.status === 'pending' ? 'En attente' : 'Annulï¿½'}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -128,7 +128,7 @@ export default function ProDashboardInvoicesPage() {
                       className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)] disabled:opacity-60"
                     >
                       {downloadingId === invoice.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                      T�l�charger PDF
+                      Tï¿½lï¿½charger PDF
                     </button>
                   </td>
                 </tr>
@@ -140,7 +140,7 @@ export default function ProDashboardInvoicesPage() {
         <div className="rounded-[1.75rem] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-14 text-center text-night/55">
           <FileText className="mx-auto h-8 w-8 text-night/25" />
           <p className="mt-3 text-lg font-semibold text-night">Aucune facture disponible</p>
-          <p className="mt-2 text-sm">Vos prochaines factures appara�tront ici apr�s un boost ou un paiement.</p>
+          <p className="mt-2 text-sm">Vos prochaines factures apparaï¿½tront ici aprï¿½s un boost ou un paiement.</p>
         </div>
       )}
     </div>

@@ -2,8 +2,8 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 
 const navLinks = [
-  { href: '/mentions-legales', label: 'Mentions l�gales' },
-  { href: '/politique-de-confidentialite', label: 'Confidentialit�' },
+  { href: '/mentions-legales', label: 'Mentions lï¿½gales' },
+  { href: '/politique-de-confidentialite', label: 'Confidentialitï¿½' },
   { href: '/cgu', label: 'CGU' },
   { href: '/cgv', label: 'CGV' },
   { href: '/politique-cookies', label: 'Cookies' },
@@ -23,7 +23,7 @@ export default function LegalLayout({ title, lastUpdated, children }: LegalLayou
           {title}
         </p>
         <h1 className="mt-2 text-3xl font-bold text-night">{title}</h1>
-        <p className="mt-2 text-sm text-night/45">Derni�re mise � jour : {lastUpdated}</p>
+        <p className="mt-2 text-sm text-night/45">Derniï¿½re mise ï¿½ jour : {lastUpdated}</p>
       </div>
 
       <nav className="mb-8 flex flex-wrap gap-3 text-sm">

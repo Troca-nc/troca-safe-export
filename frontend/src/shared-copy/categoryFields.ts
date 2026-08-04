@@ -1,6 +1,6 @@
-// � COPIE MANUELLE depuis /shared/categoryFields.ts
-// Ce fichier doit �tre copi� � nouveau si l'original est modifi�.
-// Ne pas �diter ce fichier s�par�ment de l'original sans reporter le changement des deux c�t�s.
+// ï¿½ COPIE MANUELLE depuis /shared/categoryFields.ts
+// Ce fichier doit ï¿½tre copiï¿½ ï¿½ nouveau si l'original est modifiï¿½.
+// Ne pas ï¿½diter ce fichier sï¿½parï¿½ment de l'original sans reporter le changement des deux cï¿½tï¿½s.
 export interface CategoryFieldOption {
   value: string
   label: string

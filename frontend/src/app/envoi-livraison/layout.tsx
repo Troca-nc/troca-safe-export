@@ -4,7 +4,7 @@ import { buildPageMetadata } from '@/lib/pageMetadata'
 
 export const metadata: Metadata = buildPageMetadata({
   title: 'Envoi & Livraison | Kalico',
-  description: 'Envoi de colis, d�m�nagement et fret pro en Nouvelle-Calédonie.',
+  description: 'Envoi de colis, dï¿½mï¿½nagement et fret pro en Nouvelle-CalÃ©donie.',
   path: '/envoi-livraison',
 })
 

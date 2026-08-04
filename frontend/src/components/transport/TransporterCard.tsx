@@ -100,12 +100,12 @@ export default function TransporterCard({
         </div>
 
         <h3 className="text-base font-semibold text-night">{displayName}</h3>
-        <p className="mt-1 text-xs text-night/60">{transporter.vehicle_description || 'Transport local en Nouvelle-Calédonie'}</p>
+        <p className="mt-1 text-xs text-night/60">{transporter.vehicle_description || 'Transport local en Nouvelle-CalÃ©donie'}</p>
 
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-night/60">
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
             <MapPin className="h-3.5 w-3.5 text-coral" />
-            {transporter.pro_commune || transporter.service_zones?.[0] || 'Nouvelle-Calédonie'}
+            {transporter.pro_commune || transporter.service_zones?.[0] || 'Nouvelle-CalÃ©donie'}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
             <BadgeCheck className="h-3.5 w-3.5 text-amber-500" />
@@ -127,7 +127,7 @@ export default function TransporterCard({
         <div className="mt-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)]/70 p-3">
           <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-night/45">
             <Users className="h-3.5 w-3.5 text-[#0A7EA4]" />
-            � partir de
+            ï¿½ partir de
           </p>
           <div className="mt-2 flex items-center justify-between gap-3 text-xs text-night/55">
             <span>{formatPrice(transporter.base_price_xpf)}</span>
@@ -138,7 +138,7 @@ export default function TransporterCard({
               href={detailHref || `/covoiturage/transport/${transporter.id}`}
               className="inline-flex flex-1 items-center justify-center gap-1 rounded-2xl border border-[#0A7EA4]/20 bg-white px-3 py-2 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/5"
             >
-              Voir disponibilit�s
+              Voir disponibilitï¿½s
             </Link>
             <Link
               href={quoteHref || `/covoiturage/transport/${transporter.id}#devis`}

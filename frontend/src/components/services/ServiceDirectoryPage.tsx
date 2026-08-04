@@ -98,7 +98,7 @@ function ServiceCard({
     <article className={`rounded-[1.5rem] border border-night/8 border-l-4 ${featured ? `border-nc-${isPromo ? 'emeraude' : 'sable'}/20 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(255,245,242,0.94))]` : 'border-night/8 bg-white'} p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md`}>
       <div className="flex flex-wrap items-center gap-2">
         <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${isPromo ? 'badge-emeraude' : 'badge-sable'}`}>
-          {isPromo ? 'Promotion' : '�v�nement'}
+          {isPromo ? 'Promotion' : 'ï¿½vï¿½nement'}
         </span>
         {featured ? (
           <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-700">
@@ -121,7 +121,7 @@ function ServiceCard({
       <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-night/65">{item.description}</p>
 
       <div className="mt-4 grid gap-2 text-xs font-semibold text-night/65 sm:grid-cols-2">
-        <span className="rounded-full bg-sand px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-Calédonie'}</span>
+        <span className="rounded-full bg-sand px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-CalÃ©donie'}</span>
         <span className="rounded-full bg-sand px-2.5 py-1">
           <CalendarDays className="mr-1 inline h-3.5 w-3.5 text-coral" />
           {formatDateLabel(item.event_date, isPromo ? 'Expiration libre' : 'Date libre')}
@@ -154,7 +154,7 @@ function ServiceCard({
           <>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Heure / lieu</p>
             <p className="mt-1 text-sm font-semibold text-night">
-              {formatDateLabel(item.event_date, 'Date � confirmer')}
+              {formatDateLabel(item.event_date, 'Date ï¿½ confirmer')}
             </p>
             <p className="mt-1 text-sm text-night/60">{item.location_name || item.commune_name || 'Lieu local'}</p>
           </>
@@ -351,7 +351,7 @@ export function ServiceDirectoryPage({
                     }}
                     className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${timeFilter === 'upcoming' ? 'border-nc-sable bg-nc-sable text-white' : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'}`}
                   >
-                    � venir
+                    ï¿½ venir
                   </button>
                   <button
                     type="button"
@@ -397,21 +397,21 @@ export function ServiceDirectoryPage({
         ) : (
           <div className="rounded-[1.75rem] border border-night/8 bg-white p-6 text-night/70">
             <p className="text-lg font-semibold text-night">
-              {mode === 'event' ? 'Aucun �v�nement � venir pour linstant' : 'Aucun contenu disponible pour le moment'}
+              {mode === 'event' ? 'Aucun ï¿½vï¿½nement ï¿½ venir pour linstant' : 'Aucun contenu disponible pour le moment'}
             </p>
             <p className="mt-2 text-sm">
               {mode === 'event'
-                ? 'Partagez un concert, un march� ou une animation locale.'
-                : 'Essayez une autre recherche ou publiez le premier contenu de cette cat�gorie.'}
+                ? 'Partagez un concert, un marchï¿½ ou une animation locale.'
+                : 'Essayez une autre recherche ou publiez le premier contenu de cette catï¿½gorie.'}
             </p>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
               <Link href="/annonces/nouvelle" className="btn-primary inline-flex items-center gap-2">
-                {mode === 'event' ? 'Créer un événement' : 'Publier'}
+                {mode === 'event' ? 'CrÃ©er un Ã©vÃ©nement' : 'Publier'}
                 <ArrowRight className="h-4 w-4" />
               </Link>
               {error ? (
                 <button type="button" onClick={() => void loadDirectory()} className="btn-ghost">
-                  R�essayer
+                  Rï¿½essayer
                 </button>
               ) : null}
             </div>
@@ -427,10 +427,10 @@ export function ServiceDirectoryPage({
                 {mode === 'promo' ? 'Apercu' : 'Selection'}
               </p>
               <h3 className="mt-1 font-display text-2xl font-bold text-night">
-                {mode === 'promo' ? 'Promotions � la une' : '�v�nements � venir'}
+                {mode === 'promo' ? 'Promotions ï¿½ la une' : 'ï¿½vï¿½nements ï¿½ venir'}
               </h3>
             </div>
-            <Link href={mode === 'promo' ? '/bons-plans' : '/�v�nements'} className={`inline-flex items-center gap-1 text-sm font-semibold ${modeTone === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-sable'} hover:underline`}>
+            <Link href={mode === 'promo' ? '/bons-plans' : '/ï¿½vï¿½nements'} className={`inline-flex items-center gap-1 text-sm font-semibold ${modeTone === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-sable'} hover:underline`}>
               Voir tout
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -441,7 +441,7 @@ export function ServiceDirectoryPage({
               <div key={item.id} className={`rounded-[1.5rem] border p-4 ${index === 0 ? `border-nc-${modeTone}/20 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(255,245,242,0.94))]` : 'border-night/8 bg-sand-light'}`}>
                 <div className="flex items-center gap-2">
                   <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${modeTone === 'emeraude' ? 'badge-emeraude' : 'badge-sable'}`}>
-                    {mode === 'promo' ? 'Promo' : '�v�nement'}
+                    {mode === 'promo' ? 'Promo' : 'ï¿½vï¿½nement'}
                   </span>
                   {index === 0 ? (
                     <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-700">
@@ -455,10 +455,10 @@ export function ServiceDirectoryPage({
                 <p className="mt-3 text-base font-semibold text-night">{item.title}</p>
                 <p className="mt-2 text-sm text-night/65">
                   {mode === 'promo'
-                    ? `${item.promo_price_xpf ? formatCurrency(item.promo_price_xpf) : formatCurrency(item.price_xpf)}${item.discount_pct ? ` � -${item.discount_pct}%` : ''}`
-                    : `${formatDateLabel(item.event_date, 'Date � venir')} � ${item.contact_name || 'Organisateur local'}`}
+                    ? `${item.promo_price_xpf ? formatCurrency(item.promo_price_xpf) : formatCurrency(item.price_xpf)}${item.discount_pct ? ` ï¿½ -${item.discount_pct}%` : ''}`
+                    : `${formatDateLabel(item.event_date, 'Date ï¿½ venir')} ï¿½ ${item.contact_name || 'Organisateur local'}`}
                 </p>
-            <Link href={mode === 'promo' ? '/bons-plans' : '/�v�nements'} className={`mt-4 inline-flex items-center gap-1 text-sm font-semibold ${modeTone === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-sable'}`}>
+            <Link href={mode === 'promo' ? '/bons-plans' : '/ï¿½vï¿½nements'} className={`mt-4 inline-flex items-center gap-1 text-sm font-semibold ${modeTone === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-sable'}`}>
                   Ouvrir
                   <ArrowRight className="h-4 w-4" />
                 </Link>

@@ -71,8 +71,8 @@ export default function RideReviewModal({
       setSuccess(true)
       showToast({
         tone: 'success',
-        title: 'Avis publi�',
-        message: `Merci, votre avis sur ${driverName} a bien �t� ajout�.`,
+        title: 'Avis publiï¿½',
+        message: `Merci, votre avis sur ${driverName} a bien ï¿½tï¿½ ajoutï¿½.`,
       })
       await onSubmitted?.()
       setTimeout(() => onClose(), 1500)
@@ -81,7 +81,7 @@ export default function RideReviewModal({
       setError(message)
       showToast({
         tone: 'error',
-        title: 'Avis non publi�',
+        title: 'Avis non publiï¿½',
         message,
       })
     } finally {
@@ -96,10 +96,10 @@ export default function RideReviewModal({
       <div className="w-full max-w-lg rounded-[2rem] bg-[var(--color-surface)] p-6 shadow-2xl transition duration-200">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-lagon">Apr�s trajet</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-lagon">Aprï¿½s trajet</p>
             <h2 className="mt-1 font-display text-2xl font-bold text-night">Notez votre conducteur</h2>
             <p className="mt-1 text-sm text-night/60">
-              Votre avis aide les autres passagers � voyager en confiance.
+              Votre avis aide les autres passagers ï¿½ voyager en confiance.
             </p>
           </div>
           <button
@@ -113,22 +113,22 @@ export default function RideReviewModal({
 
         {success ? (
           <div className="mt-5">
-            <FeedbackAlert tone="success" title="Avis publi�">
-              <p>Merci, votre avis a �t� publi� !</p>
+            <FeedbackAlert tone="success" title="Avis publiï¿½">
+              <p>Merci, votre avis a ï¿½tï¿½ publiï¿½ !</p>
               <p className="mt-1 text-sm text-emerald-700/80">
-                {driverName} et la communaut� Kalico vous remercient.
+                {driverName} et la communautï¿½ Kalico vous remercient.
               </p>
             </FeedbackAlert>
           </div>
         ) : (
           <>
             <div className="mt-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Trajet concern�</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Trajet concernï¿½</p>
               <p className="mt-2 text-sm font-semibold text-night">
-                {booking.ride.departure} � {booking.ride.destination}
+                {booking.ride.departure} ï¿½ {booking.ride.destination}
               </p>
               <p className="mt-1 text-xs text-night/55">
-                {booking.ride.ride_date} � {String(booking.ride.ride_time || '').slice(0, 5)}
+                {booking.ride.ride_date} ï¿½ {String(booking.ride.ride_time || '').slice(0, 5)}
               </p>
             </div>
 
@@ -144,7 +144,7 @@ export default function RideReviewModal({
                       type="button"
                       onClick={() => setRating(value)}
                       className="rounded-full p-1 transition hover:scale-105"
-                      aria-label={`${value} �toile${value > 1 ? 's' : ''}`}
+                      aria-label={`${value} ï¿½toile${value > 1 ? 's' : ''}`}
                     >
                       <BadgeCheck className={`h-8 w-8 ${active ? 'text-amber-500' : 'text-amber-200'}`} />
                     </button>
@@ -158,7 +158,7 @@ export default function RideReviewModal({
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="D�crivez votre exp�rience en quelques mots..."
+                placeholder="Dï¿½crivez votre expï¿½rience en quelques mots..."
                 className="mt-2 min-h-[120px] w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] px-4 py-3 text-sm text-[var(--color-text-primary)] outline-none transition focus:border-[#0A7EA4] focus:ring-2 focus:ring-[#0A7EA4]/20"
               />
             </label>

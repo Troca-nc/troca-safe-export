@@ -22,7 +22,7 @@ type ListingImageProps = {
 export default function ListingImage({
   src,
   alt,
-  fallbackIcon = '=�',
+  fallbackIcon = '=ï¿½',
   className = '',
   imgClassName = '',
   fill = true,

@@ -1,6 +1,6 @@
 // src/types/admin.types.ts
-export type StatutAnnonce = 'active' | 'expir�e' | 'signal�e' | 'suspendue' | 'vendue'
-export type StatutUser    = 'v�rifi�' | 'en_attente' | 'suspendu' | 'pro'
+export type StatutAnnonce = 'active' | 'expirï¿½e' | 'signalï¿½e' | 'suspendue' | 'vendue'
+export type StatutUser    = 'vï¿½rifiï¿½' | 'en_attente' | 'suspendu' | 'pro'
 export type TypeSignalement = 'arnaque' | 'spam' | 'illicite' | 'haineux' | 'autre'
 export type UrgenceSignalement = 'haute' | 'moyenne' | 'basse'
 export type ActionModeration = 'supprimer_annonce' | 'suspendre_user' | 'avertir' | 'ignorer'

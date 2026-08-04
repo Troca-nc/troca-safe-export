@@ -30,8 +30,8 @@ export default function AvailabilityCalendar({
   year = new Date().getFullYear(),
   availableDates = [],
   unavailableDates = [],
-  title = 'Calendrier de disponibilit�s',
-  description = 'Jours disponibles et indisponibles sur le mois s�lectionn�.',
+  title = 'Calendrier de disponibilitï¿½s',
+  description = 'Jours disponibles et indisponibles sur le mois sï¿½lectionnï¿½.',
 }: AvailabilityCalendarProps) {
   const availableSet = normalizeSet(availableDates)
   const unavailableSet = normalizeSet(unavailableDates)
@@ -50,7 +50,7 @@ export default function AvailabilityCalendar({
         </div>
         <div className="inline-flex items-center gap-2 rounded-full bg-sand px-3 py-1 text-xs font-semibold text-night/60">
           <CalendarDays className="h-4 w-4 text-[#0A7EA4]" />
-          Disponibilit�s
+          Disponibilitï¿½s
         </div>
       </div>
 
@@ -117,7 +117,7 @@ export function AvailabilityMonthNav({
         type="button"
         onClick={onPrevious}
         className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-night/70 transition hover:bg-[var(--color-background-secondary)]"
-        aria-label="Mois pr�c�dent"
+        aria-label="Mois prï¿½cï¿½dent"
       >
         <ChevronLeft className="h-4 w-4" />
       </button>

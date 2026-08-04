@@ -116,9 +116,9 @@ function fromDatetimeLocalValue(value: string) {
 }
 
 function formatDateTime(iso: string | null) {
-  if (!iso) return 'Non planifi�'
+  if (!iso) return 'Non planifiï¿½'
   const date = new Date(iso)
-  if (Number.isNaN(date.getTime())) return 'Non planifi�'
+  if (Number.isNaN(date.getTime())) return 'Non planifiï¿½'
   return new Intl.DateTimeFormat('fr-FR', {
     dateStyle: 'full',
     timeStyle: 'short',
@@ -141,8 +141,8 @@ function DashboardSkeleton() {
 const STEP_META: LaunchPackStepMeta[] = [
   {
     step_key: 'profile_complete',
-    title: 'Compl�tez vos infos',
-    description: 'Ajoutez le nom de votre entreprise, votre commune et vos coordonn�es.',
+    title: 'Complï¿½tez vos infos',
+    description: 'Ajoutez le nom de votre entreprise, votre commune et vos coordonnï¿½es.',
     href: '/pro/dashboard/parametres',
     cta: 'Renseigner le profil',
     icon: Store,
@@ -150,7 +150,7 @@ const STEP_META: LaunchPackStepMeta[] = [
   {
     step_key: 'logo_added',
     title: 'Ajoutez votre logo',
-    description: 'Une identit� visuelle claire rassure et rend votre vitrine plus m�morable.',
+    description: 'Une identitï¿½ visuelle claire rassure et rend votre vitrine plus mï¿½morable.',
     href: '/pro/dashboard/parametres',
     cta: 'Importer un logo',
     icon: ImageIcon,
@@ -158,23 +158,23 @@ const STEP_META: LaunchPackStepMeta[] = [
   {
     step_key: 'storefront_complete',
     title: 'Soignez votre vitrine',
-    description: 'R�digez une description courte, vos horaires et votre site web.',
+    description: 'Rï¿½digez une description courte, vos horaires et votre site web.',
     href: '/pro/dashboard/parametres',
     cta: 'Personnaliser',
     icon: BadgeCheck,
   },
   {
     step_key: 'first_listing',
-    title: 'Publiez votre premi�re annonce',
-    description: 'Mettez en ligne une offre claire pour commencer � attirer des contacts.',
+    title: 'Publiez votre premiï¿½re annonce',
+    description: 'Mettez en ligne une offre claire pour commencer ï¿½ attirer des contacts.',
     href: '/pro/dashboard/annonces',
     cta: 'Voir mes annonces',
     icon: Megaphone,
   },
   {
     step_key: 'booking_quote_ready',
-    title: 'Pr�parez vos rendez-vous et devis',
-    description: 'Activez la r�servation et pr�parez votre template de devis.',
+    title: 'Prï¿½parez vos rendez-vous et devis',
+    description: 'Activez la rï¿½servation et prï¿½parez votre template de devis.',
     href: '/pro/dashboard/rdv',
     cta: 'Voir les rendez-vous',
     icon: CalendarDays,
@@ -182,7 +182,7 @@ const STEP_META: LaunchPackStepMeta[] = [
   {
     step_key: 'stats_followup',
     title: 'Suivez vos statistiques',
-    description: 'Consultez vos vues, contacts et performances pour piloter votre activit�.',
+    description: 'Consultez vos vues, contacts et performances pour piloter votre activitï¿½.',
     href: '/pro/dashboard#stats',
     cta: 'Voir les statistiques',
     icon: BarChart3,
@@ -251,15 +251,15 @@ export default function ProLaunchPack() {
       await loadPack()
       showToast({
         tone: 'success',
-        title: '�tape valid�e',
-        message: 'Votre progression de lancement a �t� mise � jour.',
+        title: 'ï¿½tape validï¿½e',
+        message: 'Votre progression de lancement a ï¿½tï¿½ mise ï¿½ jour.',
       })
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Impossible de valider cette �tape.'
+      const message = err?.response?.data?.error || 'Impossible de valider cette ï¿½tape.'
       setError(message)
       showToast({
         tone: 'error',
-        title: '�tape non valid�e',
+        title: 'ï¿½tape non validï¿½e',
         message,
       })
     } finally {
@@ -284,15 +284,15 @@ export default function ProLaunchPack() {
       await loadPack()
       showToast({
         tone: 'success',
-        title: 'Appel planifi�',
-        message: 'Votre appel onboarding a bien �t� enregistr�.',
+        title: 'Appel planifiï¿½',
+        message: 'Votre appel onboarding a bien ï¿½tï¿½ enregistrï¿½.',
       })
     } catch (err: any) {
       const message = err?.response?.data?.error || 'Impossible de planifier cet appel.'
       setError(message)
       showToast({
         tone: 'error',
-        title: 'Appel non planifi�',
+        title: 'Appel non planifiï¿½',
         message,
       })
     } finally {
@@ -318,9 +318,9 @@ export default function ProLaunchPack() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Pack de lancement</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-night">Pr�parez votre d�marrage Pro en 6 �tapes</h1>
+            <h1 className="mt-2 font-display text-3xl font-bold text-night">Prï¿½parez votre dï¿½marrage Pro en 6 ï¿½tapes</h1>
             <p className="mt-3 text-sm leading-relaxed text-night/60">
-              Ce parcours vous aide � configurer votre vitrine, publier vos premi�res offres, activer vos outils de conversion et suivre vos premiers r�sultats sans vous disperser.
+              Ce parcours vous aide ï¿½ configurer votre vitrine, publier vos premiï¿½res offres, activer vos outils de conversion et suivre vos premiers rï¿½sultats sans vous disperser.
             </p>
           </div>
           <div className="rounded-2xl border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-3">
@@ -332,7 +332,7 @@ export default function ProLaunchPack() {
         <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm font-semibold text-night">
-              Progression: {data?.progress?.completed_steps ?? 0}/{data?.progress?.total_steps ?? steps.length} �tapes compl�t�es
+              Progression: {data?.progress?.completed_steps ?? 0}/{data?.progress?.total_steps ?? steps.length} ï¿½tapes complï¿½tï¿½es
             </p>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">{completionRate}%</p>
           </div>
@@ -355,10 +355,10 @@ export default function ProLaunchPack() {
               <CheckCircle2 className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-700">Pack termin�</p>
-              <h2 className="mt-1 font-display text-2xl font-bold">Votre vitrine est pr�te � convertir</h2>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-700">Pack terminï¿½</p>
+              <h2 className="mt-1 font-display text-2xl font-bold">Votre vitrine est prï¿½te ï¿½ convertir</h2>
               <p className="mt-2 text-sm text-emerald-800/80">
-                Vous pouvez continuer � optimiser votre compte, mais les �tapes de lancement sont d�sormais compl�t�es.
+                Vous pouvez continuer ï¿½ optimiser votre compte, mais les ï¿½tapes de lancement sont dï¿½sormais complï¿½tï¿½es.
               </p>
             </div>
           </div>
@@ -390,7 +390,7 @@ export default function ProLaunchPack() {
                           ? 'bg-[#0A7EA4] text-white'
                           : 'bg-white text-[#0A7EA4]'
                     }`}
-                    aria-label={`${step.completed ? '�tape valid�e' : 'Marquer comme fait'} : ${step.title}`}
+                    aria-label={`${step.completed ? 'ï¿½tape validï¿½e' : 'Marquer comme fait'} : ${step.title}`}
                   >
                     {step.completed ? (
                       <CheckCircle2 className="h-5 w-5" />
@@ -403,20 +403,20 @@ export default function ProLaunchPack() {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-night/55">
-                        �tape
+                        ï¿½tape
                       </span>
                       {step.completed ? (
                         <span className="rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
-                          Compl�t�e
+                          Complï¿½tï¿½e
                         </span>
                       ) : (
                         <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
-                          � faire
+                          ï¿½ faire
                         </span>
                       )}
                       {step.highlighted ? (
                         <span className="rounded-full bg-[#0A7EA4] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
-                          Priorit�
+                          Prioritï¿½
                         </span>
                       ) : null}
                     </div>
@@ -462,7 +462,7 @@ export default function ProLaunchPack() {
               </div>
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Ce que vous obtenez</p>
-                <h2 className="mt-1 font-display text-xl font-bold text-night">Une vitrine pr�te � convertir</h2>
+                <h2 className="mt-1 font-display text-xl font-bold text-night">Une vitrine prï¿½te ï¿½ convertir</h2>
               </div>
             </div>
 
@@ -473,11 +473,11 @@ export default function ProLaunchPack() {
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 text-nc-emeraude" />
-                Des premi�res annonces pr�tes � recevoir des contacts
+                Des premiï¿½res annonces prï¿½tes ï¿½ recevoir des contacts
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 text-nc-emeraude" />
-                Des rendez-vous et devis configur�s pour convertir plus vite
+                Des rendez-vous et devis configurï¿½s pour convertir plus vite
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 text-nc-emeraude" />
@@ -498,7 +498,7 @@ export default function ProLaunchPack() {
             </div>
 
             <p className="mt-3 text-sm leading-relaxed text-night/60">
-              R�servez un cr�neau pour faire le point avec l'�quipe Kalico et acc�l�rer votre d�marrage.
+              Rï¿½servez un crï¿½neau pour faire le point avec l'ï¿½quipe Kalico et accï¿½lï¿½rer votre dï¿½marrage.
             </p>
 
             <div className="mt-4 space-y-3">
@@ -513,12 +513,12 @@ export default function ProLaunchPack() {
               </label>
 
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-night">T�l�phone</span>
+                <span className="text-sm font-semibold text-night">Tï¿½lï¿½phone</span>
                 <input
                   value={callForm.call_phone}
                   onChange={(event) => setCallForm((current) => ({ ...current, call_phone: event.target.value }))}
                   className="input w-full rounded-2xl"
-                  placeholder="Num�ro � rappeler"
+                  placeholder="Numï¿½ro ï¿½ rappeler"
                 />
               </label>
 
@@ -529,7 +529,7 @@ export default function ProLaunchPack() {
                   onChange={(event) => setCallForm((current) => ({ ...current, call_notes: event.target.value }))}
                   rows={4}
                   className="input w-full rounded-2xl py-3"
-                  placeholder="Points � aborder pendant l'appel..."
+                  placeholder="Points ï¿½ aborder pendant l'appel..."
                 />
               </label>
 
@@ -544,9 +544,9 @@ export default function ProLaunchPack() {
               </button>
 
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4 text-sm text-night/70">
-                <p className="font-semibold text-night">Appel planifi�</p>
+                <p className="font-semibold text-night">Appel planifiï¿½</p>
                 <p className="mt-1">{formatDateTime(data?.pack?.call_scheduled_at ?? null)}</p>
-                {data?.pack?.call_phone ? <p className="mt-1">T�l�phone: {data.pack.call_phone}</p> : null}
+                {data?.pack?.call_phone ? <p className="mt-1">Tï¿½lï¿½phone: {data.pack.call_phone}</p> : null}
                 {data?.pack?.call_notes ? <p className="mt-1 whitespace-pre-line">{data.pack.call_notes}</p> : null}
               </div>
             </div>
@@ -556,14 +556,14 @@ export default function ProLaunchPack() {
 
       <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
         <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Prochaine �tape</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Prochaine ï¿½tape</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">
-            {nextStep ? nextStep.title : 'Vous avez compl�t� le parcours'}
+            {nextStep ? nextStep.title : 'Vous avez complï¿½tï¿½ le parcours'}
           </h2>
           <p className="mt-2 text-sm text-night/60">
             {nextStep
               ? nextStep.description
-              : 'Continuez � optimiser votre compte gr�ce � vos annonces, vos rendez-vous et vos devis.'}
+              : 'Continuez ï¿½ optimiser votre compte grï¿½ce ï¿½ vos annonces, vos rendez-vous et vos devis.'}
           </p>
         </article>
 
@@ -579,7 +579,7 @@ export default function ProLaunchPack() {
               Ajouter un produit
             </Link>
             <Link href="/pro/dashboard/rdv" className="rounded-2xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]">
-              G�rer les rendez-vous
+              Gï¿½rer les rendez-vous
             </Link>
             <Link href="/pro/dashboard/devis" className="rounded-2xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]">
               Voir les devis
@@ -590,7 +590,7 @@ export default function ProLaunchPack() {
 
       <div className="flex items-center gap-2 text-xs font-medium text-night/55">
         <Circle className="h-3.5 w-3.5 text-nc-emeraude" />
-        Le pack de lancement est d�sormais pilot� par le serveur pour garder votre progression sur tous vos appareils.
+        Le pack de lancement est dï¿½sormais pilotï¿½ par le serveur pour garder votre progression sur tous vos appareils.
       </div>
     </section>
   )

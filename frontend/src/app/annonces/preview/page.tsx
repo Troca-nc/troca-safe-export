@@ -68,9 +68,9 @@ function formatCondition(condition: PreviewDraft['condition']) {
   const labels: Record<PreviewDraft['condition'], string> = {
     new: 'Neuf',
     like_new: 'Comme neuf',
-    good: 'Bon État',
+    good: 'Bon Ãtat',
     fair: 'Correct',
-    for_parts: 'Pour pi�ces',
+    for_parts: 'Pour piï¿½ces',
   }
 
   return labels[condition]
@@ -88,7 +88,7 @@ export default function ListingPreviewPage() {
   const priceLabel = useMemo(() => {
     if (!preview) return ''
     if (preview.draft.is_free) return 'Gratuit'
-    if (!preview.draft.price) return 'Prix � d�battre'
+    if (!preview.draft.price) return 'Prix ï¿½ dï¿½battre'
     return `${Number(preview.draft.price).toLocaleString('fr-FR')} XPF`
   }, [preview])
 
@@ -109,11 +109,11 @@ export default function ListingPreviewPage() {
           <div className="rounded-[2rem] border border-night/8 bg-white p-6 shadow-sm md:p-8">
             <div className="inline-flex items-center gap-2 rounded-full border border-coral/15 bg-coral/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-coral">
               <Eye className="h-3.5 w-3.5" />
-              Pr�visualisation introuvable
+              Prï¿½visualisation introuvable
             </div>
-            <h1 className="mt-4 text-3xl font-bold text-night">Aucune annonce � pr�visualiser</h1>
+            <h1 className="mt-4 text-3xl font-bold text-night">Aucune annonce ï¿½ prï¿½visualiser</h1>
             <p className="mt-3 text-sm leading-6 text-night/60">
-              Retournez � la publication pour g�n�rer un brouillon de pr�visualisation.
+              Retournez ï¿½ la publication pour gï¿½nï¿½rer un brouillon de prï¿½visualisation.
             </p>
             <button
               type="button"
@@ -121,7 +121,7 @@ export default function ListingPreviewPage() {
               className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-night px-4 py-3 text-sm font-semibold text-white transition hover:bg-night/90"
             >
               <ArrowLeft className="h-4 w-4" />
-              Revenir � la publication
+              Revenir ï¿½ la publication
             </button>
           </div>
         </main>
@@ -140,9 +140,9 @@ export default function ListingPreviewPage() {
                 <Sparkles className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-night">Mode pr�visualisation</p>
+                <p className="text-sm font-semibold text-night">Mode prï¿½visualisation</p>
                 <p className="text-sm text-night/60">
-                  Cette annonce n&apos;est pas encore publi�e.
+                  Cette annonce n&apos;est pas encore publiï¿½e.
                 </p>
               </div>
             </div>
@@ -169,7 +169,7 @@ export default function ListingPreviewPage() {
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-6xl text-night/20">
-                    =�
+                    =ï¿½
                   </div>
                 )}
               </div>
@@ -192,7 +192,7 @@ export default function ListingPreviewPage() {
             <div className="flex flex-wrap items-center gap-2 text-xs text-night/45">
               <span className="inline-flex items-center gap-1 rounded-full bg-night/5 px-3 py-1">
                 <MapPin className="h-3 w-3" />
-                {preview.commune_name ?? 'Nouvelle-Calédonie'}
+                {preview.commune_name ?? 'Nouvelle-CalÃ©donie'}
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-night/5 px-3 py-1">
                 <CalendarDays className="h-3 w-3" />
@@ -217,22 +217,22 @@ export default function ListingPreviewPage() {
 
           <aside className="space-y-4">
             <div className="rounded-[2rem] border border-night/8 bg-white p-5 shadow-sm">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">R�sum�</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Rï¿½sumï¿½</p>
               <div className="mt-4 space-y-3 text-sm text-night/65">
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-night/45">Catégorie</span>
-                  <span className="font-semibold text-night">{preview.category_name ?? 'Non s�lectionn�e'}</span>
+                  <span className="text-night/45">CatÃ©gorie</span>
+                  <span className="font-semibold text-night">{preview.category_name ?? 'Non sï¿½lectionnï¿½e'}</span>
                 </div>
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-night/45">Commune</span>
-                  <span className="font-semibold text-night">{preview.commune_name ?? 'Non s�lectionn�e'}</span>
+                  <span className="font-semibold text-night">{preview.commune_name ?? 'Non sï¿½lectionnï¿½e'}</span>
                 </div>
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-night/45">Photos</span>
                   <span className="font-semibold text-night">{preview.photos.length}</span>
                 </div>
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-night/45">Prix n�gociable</span>
+                  <span className="text-night/45">Prix nï¿½gociable</span>
                   <span className="font-semibold text-night">{preview.draft.price_negotiable ? 'Oui' : 'Non'}</span>
                 </div>
                 <div className="flex items-center justify-between gap-4">
@@ -257,7 +257,7 @@ export default function ListingPreviewPage() {
             <div className="rounded-[2rem] border border-night/8 bg-[linear-gradient(180deg,_rgba(8,32,50,0.98),_rgba(8,32,50,0.9))] p-5 text-white shadow-[0_24px_80px_rgba(8,32,50,0.18)]">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-lagoon">Conseil final</p>
               <p className="mt-3 text-sm leading-6 text-white/70">
-                V�rifiez le cadrage des photos et les informations de prix avant de publier.
+                Vï¿½rifiez le cadrage des photos et les informations de prix avant de publier.
               </p>
               <button
                 type="button"

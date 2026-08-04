@@ -42,7 +42,7 @@ type Props = {
 
 function formatComplement(listing: Props['listing']) {
   if (!listing.troc_accepts_complement_xpf || !listing.troc_complement_max_xpf) return null
-  return `Jusqu� ${Number(listing.troc_complement_max_xpf).toLocaleString('fr-FR')} XPF de compl�ment`
+  return `Jusquï¿½ ${Number(listing.troc_complement_max_xpf).toLocaleString('fr-FR')} XPF de complï¿½ment`
 }
 
 function formatWants(values: string[]) {
@@ -85,7 +85,7 @@ export default function TrocCard({ listing, compatibility = listing.compatibilit
           </div>
 
           <div className="absolute bottom-3 left-3 right-3">
-            <TrocCompatibilityMeter compatibility={compatibility} emptyLabel="Connectez-vous pour voir votre compatibilit�" />
+            <TrocCompatibilityMeter compatibility={compatibility} emptyLabel="Connectez-vous pour voir votre compatibilitï¿½" />
           </div>
         </div>
 
@@ -137,7 +137,7 @@ export default function TrocCard({ listing, compatibility = listing.compatibilit
           </div>
 
           <div className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-coral px-4 py-3 text-sm font-semibold text-white transition group-hover:bg-coral/90">
-            Proposer un �change
+            Proposer un ï¿½change
             <HeartHandshake className="h-4 w-4" />
           </div>
         </div>

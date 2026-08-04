@@ -24,7 +24,7 @@ function getProposalMetadata(message: Message) {
 function TextBubble({ message, isMine }: { message: Message; isMine: boolean }) {
   const receivedClass = 'bg-nc-lagonLight border border-nc-lagonBorder text-nc-lagonText'
   const sentClass = 'bg-coral text-white'
-  const documentLabel = message.attachment_name || 'Document partag�'
+  const documentLabel = message.attachment_name || 'Document partagï¿½'
   const documentUrl = message.attachment_download_url || message.attachment_url || '#'
   const documentMime = (message.attachment_mime_type || '').toLowerCase()
   const documentIsImage = documentMime.startsWith('image/')
@@ -52,7 +52,7 @@ function TextBubble({ message, isMine }: { message: Message; isMine: boolean }) 
                   <div className={`rounded-2xl border px-4 py-3 ${isMine ? 'border-white/20 bg-white/10' : 'border-night/10 bg-white'}`}>
                     <div className="flex items-center justify-center gap-2 text-sm font-semibold">
                       <FileText size={16} />
-                      Aper�u PDF
+                      Aperï¿½u PDF
                     </div>
                     <p className={`mt-1 text-[11px] ${isMine ? 'text-white/75' : 'text-night/50'}`}>
                       Ouvrez pour consulter le document
@@ -96,7 +96,7 @@ function TextBubble({ message, isMine }: { message: Message; isMine: boolean }) 
               }`}
             >
               <ExternalLink size={13} />
-              T�l�charger le fichier
+              Tï¿½lï¿½charger le fichier
             </a>
           </div>
         </div>
@@ -106,7 +106,7 @@ function TextBubble({ message, isMine }: { message: Message; isMine: boolean }) 
         <a href={message.photo_url} target="_blank" rel="noopener noreferrer" className="block">
           <img
             src={message.photo_url}
-            alt="Photo partag�e"
+            alt="Photo partagï¿½e"
             className={`max-h-[240px] max-w-[240px] cursor-pointer rounded-2xl object-cover ${
               isMine ? 'rounded-br-sm' : 'rounded-bl-sm border border-nc-lagonBorder'
             }`}
@@ -170,10 +170,10 @@ function OfferBubble({
 
   const statusConfig = {
     pending: { label: 'En attente', color: 'text-amber-600 bg-amber-50 border-amber-200' },
-    accepted: { label: 'Accept�e', color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
-    declined: { label: 'Refus�e', color: 'text-red-600 bg-red-50 border-red-200' },
+    accepted: { label: 'Acceptï¿½e', color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
+    declined: { label: 'Refusï¿½e', color: 'text-red-600 bg-red-50 border-red-200' },
     countered: { label: 'Contre-offre', color: 'text-blue-600 bg-blue-50 border-blue-200' },
-    expired: { label: 'Expir�e', color: 'text-night/40 bg-sand border-night/10' },
+    expired: { label: 'Expirï¿½e', color: 'text-night/40 bg-sand border-night/10' },
   } as const
   const s = statusConfig[offer.status]
 
@@ -193,7 +193,7 @@ function OfferBubble({
         </p>
         {offer.expires_at && isPending && (
           <p className="mt-1 text-[10px] text-night/40">
-            Expire le {format(parseISO(offer.expires_at), 'd MMM � HH:mm', { locale: fr })}
+            Expire le {format(parseISO(offer.expires_at), 'd MMM ï¿½ HH:mm', { locale: fr })}
           </p>
         )}
       </div>
@@ -241,10 +241,10 @@ function TrocProposalBubble({
   const statusConfig = {
     pending: { label: 'En attente', className: 'bg-amber-50 text-amber-700' },
     seen: { label: 'Vue', className: 'bg-sand text-night/55' },
-    accepted: { label: 'Troc accept�', className: 'bg-emerald-50 text-emerald-700' },
-    declined: { label: 'Proposition d�clin�e', className: 'bg-red-50 text-red-700' },
+    accepted: { label: 'Troc acceptï¿½', className: 'bg-emerald-50 text-emerald-700' },
+    declined: { label: 'Proposition dï¿½clinï¿½e', className: 'bg-red-50 text-red-700' },
     countered: { label: 'Contre-proposition', className: 'bg-blue-50 text-blue-700' },
-    completed: { label: 'Troc finalis�', className: 'bg-jungle/10 text-jungle' },
+    completed: { label: 'Troc finalisï¿½', className: 'bg-jungle/10 text-jungle' },
   } as const
   const statusMeta = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending
 
@@ -254,7 +254,7 @@ function TrocProposalBubble({
         <TrendingUp size={16} className="text-coral" />
         <span className="text-sm font-semibold text-night">Proposition de troc</span>
         <span className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-medium ${statusMeta.className}`}>
-          {isMine && isPending ? 'En attente de r�ponse&' : statusMeta.label}
+          {isMine && isPending ? 'En attente de rï¿½ponse&' : statusMeta.label}
         </span>
       </div>
 
@@ -264,19 +264,19 @@ function TrocProposalBubble({
             <ListingImage
               src={proposerImage || null}
               alt={proposerTitle}
-              fallbackIcon="=�"
+              fallbackIcon="=ï¿½"
               className="h-full w-full"
             />
           </div>
           <p className="mt-2 line-clamp-2 text-sm font-semibold text-night">{proposerTitle}</p>
           <p className="mt-1 text-sm font-bold text-[#0A7EA4]">
-            {proposerPrice != null ? `${proposerPrice.toLocaleString('fr-FR')} XPF` : 'Prix non communiqu�'}
+            {proposerPrice != null ? `${proposerPrice.toLocaleString('fr-FR')} XPF` : 'Prix non communiquï¿½'}
           </p>
         </div>
 
         <div className="flex justify-center">
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-coral/10 text-coral">
-            �
+            ï¿½
           </div>
         </div>
 
@@ -291,7 +291,7 @@ function TrocProposalBubble({
           </div>
           <p className="mt-2 line-clamp-2 text-sm font-semibold text-night">{targetTitle}</p>
           <p className="mt-1 text-sm font-bold text-[#0A7EA4]">
-            {targetPrice != null ? `${targetPrice.toLocaleString('fr-FR')} XPF` : 'Prix non communiqu�'}
+            {targetPrice != null ? `${targetPrice.toLocaleString('fr-FR')} XPF` : 'Prix non communiquï¿½'}
           </p>
         </div>
       </div>
@@ -324,12 +324,12 @@ function TrocProposalBubble({
       ) : (
         <div className="border-t border-night/8 px-4 py-3 text-sm text-night/55">
           {status === 'accepted'
-            ? ' Troc accept�'
+            ? ' Troc acceptï¿½'
             : status === 'declined'
-              ? 'L Proposition d�clin�e'
+              ? 'L Proposition dï¿½clinï¿½e'
               : isMine
-                ? 'En attente de r�ponse&'
-                : 'R�ponse trait�e'}
+                ? 'En attente de rï¿½ponse&'
+                : 'Rï¿½ponse traitï¿½e'}
         </div>
       )}
     </div>

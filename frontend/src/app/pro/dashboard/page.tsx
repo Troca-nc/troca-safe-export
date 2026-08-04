@@ -182,7 +182,7 @@ export default function ProDashboardPage() {
           </div>
           <div className="inline-flex items-center gap-2 self-start rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
             <BadgeCheck className="h-4 w-4" />
-            Pro v�rifi� 
+            Pro vï¿½rifiï¿½ 
           </div>
         </div>
       </section>
@@ -191,9 +191,9 @@ export default function ProDashboardPage() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Pack de lancement</p>
-            <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Acc�l�rez votre d�marrage Pro avec un parcours guid�</h2>
+            <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Accï¿½lï¿½rez votre dï¿½marrage Pro avec un parcours guidï¿½</h2>
             <p className="mt-2 text-sm text-night/65">
-              Retrouvez vos �tapes prioritaires, de la vitrine � la premi�re annonce, en passant par le catalogue, les rendez-vous et les devis.
+              Retrouvez vos ï¿½tapes prioritaires, de la vitrine ï¿½ la premiï¿½re annonce, en passant par le catalogue, les rendez-vous et les devis.
             </p>
           </div>
           <Link href="/pro/dashboard/pack-lancement" className="btn-primary inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm sm:w-auto">
@@ -224,7 +224,7 @@ export default function ProDashboardPage() {
         />
         <KpiCard
           icon={MessageCircle}
-          title="Contacts re�us"
+          title="Contacts reï¿½us"
           value={`${stats.contacts_total.toLocaleString('fr-FR')}`}
           subtitle={`+${stats.contacts_7d.toLocaleString('fr-FR')} cette semaine`}
           tone="emeraude"
@@ -233,12 +233,12 @@ export default function ProDashboardPage() {
           icon={TrendingUp}
           title="Taux de conversion"
           value={`${Number(stats.avg_conversion_rate ?? 0).toFixed(1)}%`}
-          subtitle="Vues � contacts"
+          subtitle="Vues ï¿½ contacts"
           tone="corail"
         />
         <KpiCard
           icon={Zap}
-          title="D�penses boosts"
+          title="Dï¿½penses boosts"
           value={`${Number(data?.spend_30d_xpf ?? 0).toLocaleString('fr-FR')} XPF`}
           subtitle="Ce mois-ci"
           tone="amber"
@@ -253,9 +253,9 @@ export default function ProDashboardPage() {
             </div>
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Catalogue produit</p>
-              <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Cr�ez votre vitrine de produits</h2>
+              <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Crï¿½ez votre vitrine de produits</h2>
               <p className="mt-2 text-sm text-night/60">
-                Centralisez vos fiches produits fixes, suivez le stock et publiez une annonce ponctuelle quand vous voulez booster une r�f�rence.
+                Centralisez vos fiches produits fixes, suivez le stock et publiez une annonce ponctuelle quand vous voulez booster une rï¿½fï¿½rence.
               </p>
             </div>
           </div>
@@ -296,7 +296,7 @@ export default function ProDashboardPage() {
             <div className="flex items-end justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Annonces</p>
-                <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Vos chiffres cl�s</h2>
+                <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Vos chiffres clï¿½s</h2>
               </div>
               <span className="rounded-full bg-nc-lagonLight px-3 py-1 text-xs font-semibold text-nc-lagon">
                 {listings.active}/{listings.total} actives
@@ -304,11 +304,11 @@ export default function ProDashboardPage() {
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
               <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
-                <p className="text-night/55">Boost�es</p>
+                <p className="text-night/55">Boostï¿½es</p>
                 <p className="mt-1 text-xl font-bold text-night">{listings.boosted}</p>
               </div>
               <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
-                <p className="text-night/55">Expir�es</p>
+                <p className="text-night/55">Expirï¿½es</p>
                 <p className="mt-1 text-xl font-bold text-night">{listings.expired}</p>
               </div>
             </div>
@@ -371,10 +371,10 @@ export default function ProDashboardPage() {
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Messages � traiter</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Messages ï¿½ traiter</p>
             <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Vos messages non lus</h2>
             <p className="mt-2 text-sm text-night/60">
-              Vue consolid�e des messages en attente, avec les clients � rappeler en priorit�.
+              Vue consolidï¿½e des messages en attente, avec les clients ï¿½ rappeler en prioritï¿½.
             </p>
           </div>
           <Link href="/messages" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10 sm:w-auto">
@@ -389,7 +389,7 @@ export default function ProDashboardPage() {
             <p className="mt-2 text-2xl font-bold text-night sm:text-3xl">{unreadMessages.toLocaleString('fr-FR')}</p>
           </article>
           <article className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-            <p className="text-sm font-semibold text-night/55">Clients diff�rents</p>
+            <p className="text-sm font-semibold text-night/55">Clients diffï¿½rents</p>
             <p className="mt-2 text-2xl font-bold text-night sm:text-3xl">{unreadClients.toLocaleString('fr-FR')}</p>
           </article>
           <article className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
@@ -400,8 +400,8 @@ export default function ProDashboardPage() {
 
         <div className="mt-5">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Priorit�</p>
-            <span className="text-xs font-medium text-night/45">5 conversations maximum affich�es</span>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Prioritï¿½</p>
+            <span className="text-xs font-medium text-night/45">5 conversations maximum affichï¿½es</span>
           </div>
           {unreadThreads.length ? (
             <div className="space-y-3">
@@ -433,7 +433,7 @@ export default function ProDashboardPage() {
                           </span>
                         </div>
                         <p className="mt-1 text-sm text-night/60">
-                          {thread.listing_title || 'Annonce'} � Conversation #{thread.conversation_id}
+                          {thread.listing_title || 'Annonce'} ï¿½ Conversation #{thread.conversation_id}
                         </p>
                         {thread.last_unread_message ? (
                           <p className="mt-2 line-clamp-2 text-sm text-night/70">{thread.last_unread_message}</p>
@@ -442,7 +442,7 @@ export default function ProDashboardPage() {
                     </div>
                     <div className="flex flex-wrap items-center gap-2 md:justify-end">
                       <Link href={`/messages?user=${thread.buyer_id}`} className="rounded-2xl border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]">
-                        R�pondre
+                        Rï¿½pondre
                       </Link>
                       <Link href={`/messages?conv=${thread.conversation_id}`} className="btn-primary rounded-2xl px-4 py-2 text-sm">
                         Ouvrir
@@ -468,7 +468,7 @@ export default function ProDashboardPage() {
               <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Vos meilleures annonces</h2>
             </div>
             <Link href="/pro/dashboard/annonces" className="hidden items-center gap-1 text-sm font-semibold text-coral hover:underline md:inline-flex">
-              G�rer les annonces <ArrowRight className="h-4 w-4" />
+              Gï¿½rer les annonces <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
           {data?.top_listings?.length ? (
@@ -483,7 +483,7 @@ export default function ProDashboardPage() {
                   <div className="min-w-0 flex-1">
                     <h3 className="line-clamp-1 text-sm font-semibold text-night">{listing.title || listing.titre}</h3>
                     <p className="mt-1 text-sm text-night/60">
-                      =A {Number(listing.total_views ?? 0)} vues � =� {Number(listing.total_contacts ?? 0)} contacts � {Number(listing.conversion_rate ?? 0).toFixed(1)}%
+                      =A {Number(listing.total_views ?? 0)} vues ï¿½ =ï¿½ {Number(listing.total_contacts ?? 0)} contacts ï¿½ {Number(listing.conversion_rate ?? 0).toFixed(1)}%
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <Link href={`/annonces/${listing.id}`} className="rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-night transition hover:bg-[var(--color-background-secondary)]">
@@ -503,15 +503,15 @@ export default function ProDashboardPage() {
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-[var(--color-border)] p-4 text-sm text-night/60">
-              Aucune donn�e disponible pour le moment.
+              Aucune donnï¿½e disponible pour le moment.
             </div>
           )}
         </article>
 
         <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-5">
           <div className="mb-4">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Contacts r�cents</p>
-            <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Derniers contacts re�us</h2>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Contacts rï¿½cents</p>
+            <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Derniers contacts reï¿½us</h2>
           </div>
           {data?.recent_contacts?.length ? (
             <div className="space-y-3">
@@ -527,7 +527,7 @@ export default function ProDashboardPage() {
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-[var(--color-border)] p-4 text-sm text-night/60">
-              Aucun contact r�cent.
+              Aucun contact rï¿½cent.
             </div>
           )}
         </article>

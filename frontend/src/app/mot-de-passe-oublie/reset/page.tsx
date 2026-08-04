@@ -1,6 +1,6 @@
 'use client'
 // ============================================================
-//  Kalico Web  Page r�initialisation mot de passe
+//  Kalico Web  Page rï¿½initialisation mot de passe
 // ============================================================
 
 import { Suspense, useState, useEffect } from 'react'
@@ -15,7 +15,7 @@ import axios from 'axios'
 import { API_ORIGIN } from '@/lib/api'
 
 const schema = z.object({
-  password: z.string().min(8, 'Minimum 8 caract�res'),
+  password: z.string().min(8, 'Minimum 8 caractï¿½res'),
   confirm:  z.string(),
 }).refine(d => d.password === d.confirm, {
   message: 'Les mots de passe ne correspondent pas',
@@ -48,9 +48,9 @@ function ResetPasswordContent() {
       setSuccess(true)
       setTimeout(() => router.push('/connexion'), 3000)
     } catch (err: any) {
-      const msg = err?.response?.data?.error ?? 'Lien invalide ou expir�.'
+      const msg = err?.response?.data?.error ?? 'Lien invalide ou expirï¿½.'
       setError(msg)
-      if (msg.toLowerCase().includes('expir�') || msg.toLowerCase().includes('invalide')) {
+      if (msg.toLowerCase().includes('expirï¿½') || msg.toLowerCase().includes('invalide')) {
         setTokenErr(true)
       }
     }
@@ -62,13 +62,13 @@ function ResetPasswordContent() {
       <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-md">
 
-          {/* Lien expir� / invalide */}
+          {/* Lien expirï¿½ / invalide */}
           {tokenErr && !success && (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
               <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-              <h1 className="text-xl font-bold text-gray-900 mb-2">Lien invalide ou expir�</h1>
+              <h1 className="text-xl font-bold text-gray-900 mb-2">Lien invalide ou expirï¿½</h1>
               <p className="text-gray-500 mb-6 text-sm">
-                Ce lien de r�initialisation est invalide ou a expir� (validit� 1 heure).
+                Ce lien de rï¿½initialisation est invalide ou a expirï¿½ (validitï¿½ 1 heure).
               </p>
               <Link
                 href="/mot-de-passe-oublie"
@@ -79,13 +79,13 @@ function ResetPasswordContent() {
             </div>
           )}
 
-          {/* Succ�s */}
+          {/* Succï¿½s */}
           {success && (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
               <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-4" />
-              <h1 className="text-xl font-bold text-gray-900 mb-2">Mot de passe modifi� !</h1>
+              <h1 className="text-xl font-bold text-gray-900 mb-2">Mot de passe modifiï¿½ !</h1>
               <p className="text-gray-500 text-sm">
-                Vous allez �tre redirig� vers la connexion dans 3 secondes&
+                Vous allez ï¿½tre redirigï¿½ vers la connexion dans 3 secondes&
               </p>
             </div>
           )}
@@ -99,7 +99,7 @@ function ResetPasswordContent() {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-gray-900">Nouveau mot de passe</h1>
-                  <p className="text-sm text-gray-500">Choisissez un mot de passe s�curis�</p>
+                  <p className="text-sm text-gray-500">Choisissez un mot de passe sï¿½curisï¿½</p>
                 </div>
               </div>
 
@@ -120,7 +120,7 @@ function ResetPasswordContent() {
                     <input
                       {...register('password')}
                       type={showPwd ? 'text' : 'password'}
-                      placeholder="8 caract�res minimum"
+                      placeholder="8 caractï¿½res minimum"
                       className={`w-full border rounded-xl px-4 py-3 pr-11 text-sm outline-none transition
                         ${errors.password ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-blue-500'}`}
                     />
@@ -146,7 +146,7 @@ function ResetPasswordContent() {
                     <input
                       {...register('confirm')}
                       type={showConf ? 'text' : 'password'}
-                      placeholder="R�p�tez le mot de passe"
+                      placeholder="Rï¿½pï¿½tez le mot de passe"
                       className={`w-full border rounded-xl px-4 py-3 pr-11 text-sm outline-none transition
                         ${errors.confirm ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-blue-500'}`}
                     />
@@ -176,7 +176,7 @@ function ResetPasswordContent() {
 
           <p className="text-center text-sm text-gray-400 mt-6">
             <Link href="/connexion" className="hover:text-blue-600 transition">
-              � Retour � la connexion
+              ï¿½ Retour ï¿½ la connexion
             </Link>
           </p>
         </div>

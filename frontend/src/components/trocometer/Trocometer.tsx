@@ -198,7 +198,7 @@ export default function Trocometer() {
 
     const price = getListingPrice(selectedListing)
     if (price <= 0) {
-      setStatusMessage('S�lectionnez une annonce avec un prix valide.')
+      setStatusMessage('Sï¿½lectionnez une annonce avec un prix valide.')
       return
     }
 
@@ -231,7 +231,7 @@ export default function Trocometer() {
       setRenderSeed((value) => value + 1)
 
       if (filtered.length === 0) {
-        setStatusMessage('Aucun troc disponible dans cette gamme - revenez bient�t !')
+        setStatusMessage('Aucun troc disponible dans cette gamme - revenez bientï¿½t !')
       } else if (filtered.length < PAGE_SIZE) {
         setStatusMessage(`Seulement ${filtered.length} troc(s) disponible(s) dans cette gamme de prix.`)
       } else {
@@ -241,7 +241,7 @@ export default function Trocometer() {
       setMatches([])
       setPageIndex(0)
       setRenderSeed((value) => value + 1)
-      setStatusMessage('Aucun troc disponible dans cette gamme - revenez bient�t !')
+      setStatusMessage('Aucun troc disponible dans cette gamme - revenez bientï¿½t !')
     } finally {
       setSearching(false)
     }
@@ -267,7 +267,7 @@ export default function Trocometer() {
         <div className="bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.16))] px-6 py-6 text-white">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em]">
             <Scale className="h-3.5 w-3.5" />
-            Troc�m�tre
+            Trocï¿½mï¿½tre
           </div>
           <h3 className="mt-4 font-display text-2xl font-bold">Que vaut votre objet en troc ?</h3>
           <p className="mt-2 text-sm text-white/70">Chargement de votre session&</p>
@@ -285,18 +285,18 @@ export default function Trocometer() {
         <div className="bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.16))] px-6 py-6 text-white">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em]">
             <Scale className="h-3.5 w-3.5" />
-            Troc�m�tre
+            Trocï¿½mï¿½tre
           </div>
           <h3 className="mt-4 font-display text-2xl font-bold">Que vaut votre objet en troc ?</h3>
           <p className="mt-2 max-w-2xl text-sm text-white/70">
-            Choisissez une de vos annonces et d�couvrez 3 objets de valeur �quivalente pr�ts � �tre �chang�s.
+            Choisissez une de vos annonces et dï¿½couvrez 3 objets de valeur ï¿½quivalente prï¿½ts ï¿½ ï¿½tre ï¿½changï¿½s.
           </p>
         </div>
         <div className="p-6">
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center">
-            <p className="text-lg font-semibold text-night">Connectez-vous pour utiliser le Troc�m�tre</p>
+            <p className="text-lg font-semibold text-night">Connectez-vous pour utiliser le Trocï¿½mï¿½tre</p>
             <p className="mt-2 text-sm text-night/60">
-              Acc�dez � vos annonces et trouvez les meilleurs trocs de la communaut� cal�donienne.
+              Accï¿½dez ï¿½ vos annonces et trouvez les meilleurs trocs de la communautï¿½ calï¿½donienne.
             </p>
             <Link
               href="/connexion"
@@ -316,12 +316,12 @@ export default function Trocometer() {
       <div className="bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.16))] px-6 py-6 text-white md:px-8">
         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/90">
           <Scale className="h-3.5 w-3.5" />
-          Troc�m�tre
+          Trocï¿½mï¿½tre
         </div>
         <h3 className="mt-4 font-display text-2xl font-bold md:text-3xl">Que vaut votre objet en troc ?</h3>
         <p className="mt-2 max-w-2xl text-sm text-white/70 md:text-base">
-          Choisissez une de vos annonces, lancez la recherche, puis parcourez trois trocs � la fois dans une
-          fourchette de valeur de �30%.
+          Choisissez une de vos annonces, lancez la recherche, puis parcourez trois trocs ï¿½ la fois dans une
+          fourchette de valeur de ï¿½30%.
         </p>
       </div>
 
@@ -343,7 +343,7 @@ export default function Trocometer() {
                       <ListingImage
                         src={selectedListing.cover_image ?? selectedListing.photos?.[0] ?? null}
                         alt={selectedListing.title}
-                        fallbackIcon=">�"
+                        fallbackIcon=">ï¿½"
                         className="h-full w-full"
                       />
                     </span>
@@ -378,7 +378,7 @@ export default function Trocometer() {
                         <ListingImage
                           src={listing.cover_image ?? listing.photos?.[0] ?? null}
                           alt={listing.title}
-                          fallbackIcon=">�"
+                          fallbackIcon=">ï¿½"
                           className="h-full w-full"
                         />
                       </span>
@@ -412,9 +412,9 @@ export default function Trocometer() {
 
         {!loadingOwnListings && ownListingCount === 0 ? (
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5 text-center">
-            <p className="text-lg font-semibold text-night">Aucune de vos annonces nest pr�te pour le Troc�m�tre</p>
+            <p className="text-lg font-semibold text-night">Aucune de vos annonces nest prï¿½te pour le Trocï¿½mï¿½tre</p>
             <p className="mt-2 text-sm text-night/60">
-              Publiez une annonce avec un prix pour commencer � trouver des �changes de m�me valeur.
+              Publiez une annonce avec un prix pour commencer ï¿½ trouver des ï¿½changes de mï¿½me valeur.
             </p>
             <Link href="/annonces/nouvelle" className="btn-primary mt-4 inline-flex rounded-2xl px-5 py-3 text-sm">
               Publier une annonce
@@ -446,11 +446,11 @@ export default function Trocometer() {
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-6 text-center">
             <p className="text-lg font-semibold text-night">
               {statusMessage.includes('Aucun troc disponible')
-                ? 'Aucun troc disponible dans cette gamme - revenez bient�t !'
+                ? 'Aucun troc disponible dans cette gamme - revenez bientï¿½t !'
                 : statusMessage}
             </p>
             <p className="mt-2 text-sm text-night/60">
-              Essayez une autre annonce ou revenez plus tard pour d�couvrir de nouvelles opportunit�s.
+              Essayez une autre annonce ou revenez plus tard pour dï¿½couvrir de nouvelles opportunitï¿½s.
             </p>
           </div>
         ) : null}

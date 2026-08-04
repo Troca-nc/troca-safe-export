@@ -92,7 +92,7 @@ export function usePhoneVerification(onVerified?: (telephone: string) => void) {
         deliveryChannel: channel,
         loading: false,
         error: '',
-        success: data.message || 'Code envoy�',
+        success: data.message || 'Code envoyï¿½',
         cooldown: Number(data.cooldown ?? 60),
         expires_at: typeof data.expires_at === 'string' ? data.expires_at : null,
       })
@@ -126,7 +126,7 @@ export function usePhoneVerification(onVerified?: (telephone: string) => void) {
           step: 'verified',
           loading: false,
           error: '',
-          success: data.message || 'T�l�phone v�rifi�',
+          success: data.message || 'Tï¿½lï¿½phone vï¿½rifiï¿½',
           cooldown: 0,
         }))
         onVerified?.(state.telephone)
@@ -136,11 +136,11 @@ export function usePhoneVerification(onVerified?: (telephone: string) => void) {
       setState((current) => ({
         ...current,
         loading: false,
-        error: data?.error || 'Code incorrect ou expir�',
+        error: data?.error || 'Code incorrect ou expirï¿½',
       }))
       return false
     } catch (error) {
-      const message = getErrorMessage(error, 'R�essayez')
+      const message = getErrorMessage(error, 'Rï¿½essayez')
       setState((current) => ({
         ...current,
         loading: false,
@@ -171,7 +171,7 @@ export function usePhoneVerification(onVerified?: (telephone: string) => void) {
         deliveryChannel: nextChannel,
         loading: false,
         error: '',
-        success: data.message || 'Code renvoy�',
+        success: data.message || 'Code renvoyï¿½',
         cooldown: Number(data.cooldown ?? 60),
         expires_at: typeof data.expires_at === 'string' ? data.expires_at : current.expires_at,
       }))

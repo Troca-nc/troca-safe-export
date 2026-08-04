@@ -34,7 +34,7 @@ type SlotForm = {
 const DEFAULT_SETTINGS: SettingsForm = {
   is_enabled: false,
   title: 'Prendre rendez-vous',
-  subtitle: 'R�servez un cr�neau directement avec ce professionnel.',
+  subtitle: 'Rï¿½servez un crï¿½neau directement avec ce professionnel.',
   location_label: 'Lieu du rendez-vous',
   location_text: '',
   instructions: '',
@@ -98,7 +98,7 @@ function formatSlot(slot: Pick<ProPublicBookingSlot, 'starts_at'> & { ends_at?: 
         minute: '2-digit',
       }).format(endsAt)
     : null
-  return `${date} � ${endTime || '...'}`
+  return `${date} ï¿½ ${endTime || '...'}`
 }
 
 export default function ProDashboardRdvPage() {
@@ -205,18 +205,18 @@ export default function ProDashboardRdvPage() {
     if (!reminderType) {
       return {
         title: 'Prochain rendez-vous',
-        subtitle: `${target.requester_name} � ${formatSlot(target)}`,
+        subtitle: `${target.requester_name} ï¿½ ${formatSlot(target)}`,
         href: '/mes-rdv',
         tone: 'bg-nc-lagonLight text-nc-lagon',
       }
     }
 
     const sentAt = reminderType === 'H-2' ? target.reminder_2h_sent_at : target.reminder_24h_sent_at
-    const label = sentAt ? `${reminderType} envoy�` : `${reminderType} � venir`
+    const label = sentAt ? `${reminderType} envoyï¿½` : `${reminderType} ï¿½ venir`
 
     return {
       title: `Prochain rappel ${reminderType}`,
-      subtitle: `${target.requester_name} � ${formatSlot(target)}`,
+      subtitle: `${target.requester_name} ï¿½ ${formatSlot(target)}`,
       href: '/mes-rdv',
       tone: sentAt ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700',
       label,
@@ -258,15 +258,15 @@ export default function ProDashboardRdvPage() {
       await loadDashboard()
       showToast({
         tone: 'success',
-        title: 'R�glages enregistr�s',
-        message: 'Votre prise de rendez-vous est � jour.',
+        title: 'Rï¿½glages enregistrï¿½s',
+        message: 'Votre prise de rendez-vous est ï¿½ jour.',
       })
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Impossible denregistrer les r�glages.'
+      const message = err?.response?.data?.error || 'Impossible denregistrer les rï¿½glages.'
       setError(message)
       showToast({
         tone: 'error',
-        title: 'R�glages non enregistr�s',
+        title: 'Rï¿½glages non enregistrï¿½s',
         message,
       })
     } finally {
@@ -276,7 +276,7 @@ export default function ProDashboardRdvPage() {
 
   const handleCreateSlot = async () => {
     if (!slotForm.starts_at || !slotForm.ends_at) {
-      setError('Merci de renseigner un cr�neau complet.')
+      setError('Merci de renseigner un crï¿½neau complet.')
       return
     }
 
@@ -292,15 +292,15 @@ export default function ProDashboardRdvPage() {
       await loadDashboard()
       showToast({
         tone: 'success',
-        title: 'Cr�neau publi�',
-        message: 'Les visiteurs peuvent d�sormais r�server ce cr�neau.',
+        title: 'Crï¿½neau publiï¿½',
+        message: 'Les visiteurs peuvent dï¿½sormais rï¿½server ce crï¿½neau.',
       })
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Impossible de cr�er ce cr�neau.'
+      const message = err?.response?.data?.error || 'Impossible de crï¿½er ce crï¿½neau.'
       setError(message)
       showToast({
         tone: 'error',
-        title: 'Cr�neau non cr��',
+        title: 'Crï¿½neau non crï¿½ï¿½',
         message,
       })
     } finally {
@@ -316,15 +316,15 @@ export default function ProDashboardRdvPage() {
       await loadDashboard()
       showToast({
         tone: 'success',
-        title: 'Cr�neau supprim�',
-        message: 'Le cr�neau a �t� retir� de la vitrine.',
+        title: 'Crï¿½neau supprimï¿½',
+        message: 'Le crï¿½neau a ï¿½tï¿½ retirï¿½ de la vitrine.',
       })
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Impossible de supprimer ce cr�neau.'
+      const message = err?.response?.data?.error || 'Impossible de supprimer ce crï¿½neau.'
       setError(message)
       showToast({
         tone: 'error',
-        title: 'Cr�neau non supprim�',
+        title: 'Crï¿½neau non supprimï¿½',
         message,
       })
     } finally {
@@ -334,7 +334,7 @@ export default function ProDashboardRdvPage() {
 
   const handleAddException = async () => {
     if (!exceptionForm.exception_date) {
-      setError('Merci de choisir une date dindisponibilit�.')
+      setError('Merci de choisir une date dindisponibilitï¿½.')
       return
     }
 
@@ -354,15 +354,15 @@ export default function ProDashboardRdvPage() {
       await loadDashboard()
       showToast({
         tone: 'success',
-        title: 'Indisponibilit� ajout�e',
-        message: 'Le calendrier public a �t� mis � jour.',
+        title: 'Indisponibilitï¿½ ajoutï¿½e',
+        message: 'Le calendrier public a ï¿½tï¿½ mis ï¿½ jour.',
       })
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Impossible de cr�er cette exception.'
+      const message = err?.response?.data?.error || 'Impossible de crï¿½er cette exception.'
       setError(message)
       showToast({
         tone: 'error',
-        title: 'Exception non ajout�e',
+        title: 'Exception non ajoutï¿½e',
         message,
       })
     } finally {
@@ -378,11 +378,11 @@ export default function ProDashboardRdvPage() {
       await loadDashboard()
       showToast({
         tone: 'success',
-        title: 'Indisponibilit� supprim�e',
-        message: 'Le cr�neau redeviendra publiquement r�servable.',
+        title: 'Indisponibilitï¿½ supprimï¿½e',
+        message: 'Le crï¿½neau redeviendra publiquement rï¿½servable.',
       })
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Impossible de supprimer cette indisponibilit�.'
+      const message = err?.response?.data?.error || 'Impossible de supprimer cette indisponibilitï¿½.'
       setError(message)
       showToast({
         tone: 'error',
@@ -444,11 +444,11 @@ export default function ProDashboardRdvPage() {
       await loadDashboard()
       showToast({
         tone: 'success',
-        title: 'Rendez-vous actualis�',
-        message: 'La r�servation a �t� mise � jour.',
+        title: 'Rendez-vous actualisï¿½',
+        message: 'La rï¿½servation a ï¿½tï¿½ mise ï¿½ jour.',
       })
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Impossible de mettre � jour cette r�servation.'
+      const message = err?.response?.data?.error || 'Impossible de mettre ï¿½ jour cette rï¿½servation.'
       setError(message)
       showToast({
         tone: 'error',
@@ -479,14 +479,14 @@ export default function ProDashboardRdvPage() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Rendez-vous en ligne</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-night">G�rez vos cr�neaux et vos demandes</h1>
+            <h1 className="mt-2 font-display text-3xl font-bold text-night">Gï¿½rez vos crï¿½neaux et vos demandes</h1>
             <p className="mt-2 text-sm text-night/60">
-              Activez la r�servation en ligne, publiez vos cr�neaux et traitez les demandes re�ues depuis votre vitrine.
+              Activez la rï¿½servation en ligne, publiez vos crï¿½neaux et traitez les demandes reï¿½ues depuis votre vitrine.
             </p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-[#0A7EA4]/15 bg-nc-lagonLight px-3 py-1.5 text-sm font-semibold text-[#0A7EA4]">
             <CalendarDays className="h-4 w-4" />
-            {stats.slots} cr�neau{stats.slots > 1 ? 'x' : ''} publi�{stats.slots > 1 ? 's' : ''}
+            {stats.slots} crï¿½neau{stats.slots > 1 ? 'x' : ''} publiï¿½{stats.slots > 1 ? 's' : ''}
           </div>
         </div>
       </section>
@@ -499,7 +499,7 @@ export default function ProDashboardRdvPage() {
 
       <section className="grid gap-4 md:grid-cols-4">
         <article className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-          <p className="text-sm font-semibold text-night/55">Cr�neaux publi�s</p>
+          <p className="text-sm font-semibold text-night/55">Crï¿½neaux publiï¿½s</p>
           <p className="mt-2 text-3xl font-bold text-night">{stats.slots}</p>
         </article>
         <article className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
@@ -507,11 +507,11 @@ export default function ProDashboardRdvPage() {
           <p className="mt-2 text-3xl font-bold text-night">{stats.pending}</p>
         </article>
         <article className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-          <p className="text-sm font-semibold text-night/55">Confirm�s</p>
+          <p className="text-sm font-semibold text-night/55">Confirmï¿½s</p>
           <p className="mt-2 text-3xl font-bold text-night">{stats.confirmed}</p>
         </article>
         <article className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-          <p className="text-sm font-semibold text-night/55">Termin�s</p>
+          <p className="text-sm font-semibold text-night/55">Terminï¿½s</p>
           <p className="mt-2 text-3xl font-bold text-night">{stats.completed}</p>
         </article>
       </section>
@@ -522,7 +522,7 @@ export default function ProDashboardRdvPage() {
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Aujourdhui</p>
               <h2 className="mt-1 font-display text-2xl font-bold text-night">Votre timeline du jour</h2>
-              <p className="mt-1 text-sm text-night/60">Les rendez-vous � venir aujourdhui, class�s par heure.</p>
+              <p className="mt-1 text-sm text-night/60">Les rendez-vous ï¿½ venir aujourdhui, classï¿½s par heure.</p>
             </div>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white px-3 py-1.5 text-sm font-semibold text-[#0A7EA4] shadow-sm">
               <Clock3 className="h-4 w-4" />
@@ -550,12 +550,12 @@ export default function ProDashboardRdvPage() {
                       </p>
                     </div>
                     <span className="rounded-full bg-[#0A7EA4]/10 px-3 py-1 text-xs font-semibold text-[#0A7EA4]">
-                      {isPending ? 'En attente' : isCompleted ? 'Termin�' : booking.status}
+                      {isPending ? 'En attente' : isCompleted ? 'Terminï¿½' : booking.status}
                     </span>
                   </div>
 
                   <p className="mt-3 text-sm text-night/65">
-                    {booking.commune || booking.pro.pro_commune || 'Nouvelle-Calédonie'}
+                    {booking.commune || booking.pro.pro_commune || 'Nouvelle-CalÃ©donie'}
                   </p>
 
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -635,7 +635,7 @@ export default function ProDashboardRdvPage() {
         <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">R�glages</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Rï¿½glages</p>
               <h2 className="mt-1 font-display text-2xl font-bold text-night">Configurer la prise de rendez-vous</h2>
             </div>
             <button
@@ -658,16 +658,16 @@ export default function ProDashboardRdvPage() {
                 className="h-4 w-4 rounded border-[var(--color-border)] text-[#0A7EA4] focus:ring-[#0A7EA4]/20"
               />
               <span>
-                <span className="block text-sm font-semibold text-night">Activer la r�servation en ligne</span>
+                <span className="block text-sm font-semibold text-night">Activer la rï¿½servation en ligne</span>
                 <span className="mt-1 block text-xs text-night/55">
-                  Vos visiteurs pourront r�server un cr�neau visible depuis votre vitrine.
+                  Vos visiteurs pourront rï¿½server un crï¿½neau visible depuis votre vitrine.
                 </span>
               </span>
             </label>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-night">Titre de la r�servation</span>
+                <span className="text-sm font-semibold text-night">Titre de la rï¿½servation</span>
                 <input
                   value={settingsForm.title}
                   onChange={(event) => setSettingsForm((current) => ({ ...current, title: event.target.value }))}
@@ -681,14 +681,14 @@ export default function ProDashboardRdvPage() {
                   value={settingsForm.subtitle}
                   onChange={(event) => setSettingsForm((current) => ({ ...current, subtitle: event.target.value }))}
                   className="input w-full rounded-2xl"
-                  placeholder="R�servez un cr�neau directement..."
+                  placeholder="Rï¿½servez un crï¿½neau directement..."
                 />
               </label>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-night">Libell� du lieu</span>
+                <span className="text-sm font-semibold text-night">Libellï¿½ du lieu</span>
                 <input
                   value={settingsForm.location_label}
                   onChange={(event) => setSettingsForm((current) => ({ ...current, location_label: event.target.value }))}
@@ -702,7 +702,7 @@ export default function ProDashboardRdvPage() {
                   value={settingsForm.location_text || ''}
                   onChange={(event) => setSettingsForm((current) => ({ ...current, location_text: event.target.value }))}
                   className="input w-full rounded-2xl"
-                  placeholder="� l'atelier / au bureau / sur site"
+                  placeholder="ï¿½ l'atelier / au bureau / sur site"
                 />
               </label>
             </div>
@@ -714,13 +714,13 @@ export default function ProDashboardRdvPage() {
                 onChange={(event) => setSettingsForm((current) => ({ ...current, instructions: event.target.value }))}
                 rows={4}
                 className="input w-full rounded-2xl py-3"
-                placeholder="Ajoutez les documents � pr�parer, les consignes, le stationnement..."
+                placeholder="Ajoutez les documents ï¿½ prï¿½parer, les consignes, le stationnement..."
               />
             </label>
 
             <div className="grid gap-4 sm:grid-cols-3">
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-night">Dur�e d'un cr�neau (min)</span>
+                <span className="text-sm font-semibold text-night">Durï¿½e d'un crï¿½neau (min)</span>
                 <input
                   type="number"
                   min={15}
@@ -731,7 +731,7 @@ export default function ProDashboardRdvPage() {
                 />
               </label>
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-night">Pr�venance min. (h)</span>
+                <span className="text-sm font-semibold text-night">Prï¿½venance min. (h)</span>
                 <input
                   type="number"
                   min={0}
@@ -742,7 +742,7 @@ export default function ProDashboardRdvPage() {
                 />
               </label>
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-night">Jours max. � l'avance</span>
+                <span className="text-sm font-semibold text-night">Jours max. ï¿½ l'avance</span>
                 <input
                   type="number"
                   min={1}
@@ -757,8 +757,8 @@ export default function ProDashboardRdvPage() {
             <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-night">Services r�servable</p>
-                  <p className="mt-1 text-xs text-night/55">Ajoutez vos prestations pour guider le client vers le bon cr�neau.</p>
+                  <p className="text-sm font-semibold text-night">Services rï¿½servable</p>
+                  <p className="mt-1 text-xs text-night/55">Ajoutez vos prestations pour guider le client vers le bon crï¿½neau.</p>
                 </div>
                 <button
                   type="button"
@@ -796,7 +796,7 @@ export default function ProDashboardRdvPage() {
                           />
                         </label>
                         <label className="block space-y-2">
-                          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Dur�e (min)</span>
+                          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Durï¿½e (min)</span>
                           <input
                             type="number"
                             min={15}
@@ -839,7 +839,7 @@ export default function ProDashboardRdvPage() {
                   ))
                 ) : (
                   <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-white px-4 py-5 text-sm text-night/55">
-                    Aucun service ajout� pour le moment.
+                    Aucun service ajoutï¿½ pour le moment.
                   </div>
                 )}
               </div>
@@ -849,7 +849,7 @@ export default function ProDashboardRdvPage() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold text-night">Horaires hebdomadaires</p>
-                  <p className="mt-1 text-xs text-night/55">Activez ou fermez chaque jour selon vos disponibilit�s.</p>
+                  <p className="mt-1 text-xs text-night/55">Activez ou fermez chaque jour selon vos disponibilitï¿½s.</p>
                 </div>
               </div>
 
@@ -874,7 +874,7 @@ export default function ProDashboardRdvPage() {
                         value={entry.label || ''}
                         onChange={(event) => handleUpdateWeeklyHour(dayIndex, { label: event.target.value })}
                         className="input w-full rounded-2xl"
-                        placeholder="Libell�"
+                        placeholder="Libellï¿½"
                       />
                       <input
                         type="time"
@@ -902,14 +902,14 @@ export default function ProDashboardRdvPage() {
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
             <div className="flex items-end justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Nouveau cr�neau</p>
-                <h2 className="mt-1 font-display text-2xl font-bold text-night">Publier un cr�neau visible</h2>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Nouveau crï¿½neau</p>
+                <h2 className="mt-1 font-display text-2xl font-bold text-night">Publier un crï¿½neau visible</h2>
               </div>
             </div>
 
             <div className="mt-4 space-y-4">
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-night">D�but</span>
+                <span className="text-sm font-semibold text-night">Dï¿½but</span>
                 <input
                   type="datetime-local"
                   value={slotForm.starts_at}
@@ -940,7 +940,7 @@ export default function ProDashboardRdvPage() {
               </label>
 
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-night">Libell� (optionnel)</span>
+                <span className="text-sm font-semibold text-night">Libellï¿½ (optionnel)</span>
                 <input
                   value={slotForm.label}
                   onChange={(event) => setSlotForm((current) => ({ ...current, label: event.target.value }))}
@@ -956,13 +956,13 @@ export default function ProDashboardRdvPage() {
                 className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a] disabled:opacity-60"
               >
                 {savingSlot ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                Publier le cr�neau
+                Publier le crï¿½neau
               </button>
             </div>
           </article>
 
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Mes cr�neaux</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Mes crï¿½neaux</p>
             {data?.slots?.length ? (
               <div className="mt-4 space-y-3">
                 {data.slots.map((slot) => (
@@ -987,14 +987,14 @@ export default function ProDashboardRdvPage() {
               </div>
             ) : (
               <div className="mt-4 rounded-2xl border border-dashed border-[var(--color-border)] p-4 text-sm text-night/60">
-                Aucun cr�neau publi� pour le moment.
+                Aucun crï¿½neau publiï¿½ pour le moment.
               </div>
             )}
           </article>
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Indisponibilit�s</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Indisponibilitï¿½s</p>
             <p className="mt-1 text-sm text-night/60">
-              Bloquez un jour entier ou notez une raison temporaire pour masquer la r�servation en ligne.
+              Bloquez un jour entier ou notez une raison temporaire pour masquer la rï¿½servation en ligne.
             </p>
 
             <div className="mt-4 space-y-3">
@@ -1014,7 +1014,7 @@ export default function ProDashboardRdvPage() {
                   value={exceptionForm.reason}
                   onChange={(event) => setExceptionForm((current) => ({ ...current, reason: event.target.value }))}
                   className="input w-full rounded-2xl"
-                  placeholder="Vacances, fermeture, d�placement..."
+                  placeholder="Vacances, fermeture, dï¿½placement..."
                 />
               </label>
 
@@ -1054,7 +1054,7 @@ export default function ProDashboardRdvPage() {
                 </div>
               ) : (
                 <div className="rounded-2xl border border-dashed border-[var(--color-border)] p-4 text-sm text-night/60">
-                  Aucune indisponibilit� enregistr�e.
+                  Aucune indisponibilitï¿½ enregistrï¿½e.
                 </div>
               )}
             </div>
@@ -1065,10 +1065,10 @@ export default function ProDashboardRdvPage() {
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Demandes re�ues</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Traitez les réservations entrantes</h2>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Demandes reï¿½ues</p>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Traitez les rÃ©servations entrantes</h2>
             <p className="mt-2 text-sm text-night/60">
-              Confirmez, refusez ou suivez les demandes envoy�es depuis votre vitrine.
+              Confirmez, refusez ou suivez les demandes envoyï¿½es depuis votre vitrine.
             </p>
           </div>
           <Link href="/mes-rdv" className="inline-flex items-center gap-2 rounded-2xl border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10">
@@ -1093,7 +1093,7 @@ export default function ProDashboardRdvPage() {
             </div>
           ) : (
             <FeedbackAlert tone="info" title="Aucune demande pour le moment">
-              Les demandes de rendez-vous re�ues depuis votre vitrine appara�tront ici d�s qu&apos;un visiteur r�servera un cr�neau.
+              Les demandes de rendez-vous reï¿½ues depuis votre vitrine apparaï¿½tront ici dï¿½s qu&apos;un visiteur rï¿½servera un crï¿½neau.
             </FeedbackAlert>
           )}
         </div>

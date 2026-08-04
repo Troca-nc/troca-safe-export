@@ -46,7 +46,7 @@ export default function NewListingPage() {
             </div>
             <h1 className="mt-4 text-3xl font-bold text-night">Publier une annonce</h1>
             <p className="mt-3 text-sm leading-6 text-night/60">
-              Connectez-vous pour conserver votre brouillon, joindre vos photos et publier sans perdre vos donn�es.
+              Connectez-vous pour conserver votre brouillon, joindre vos photos et publier sans perdre vos donnï¿½es.
             </p>
             <button
               type="button"
@@ -199,7 +199,7 @@ function SimpleBonPlanPage() {
       !form.title.trim() && 'Veuillez renseigner un titre.',
       !form.description.trim() && 'Veuillez renseigner une description.',
       !form.commune_id && 'Veuillez choisir une commune.',
-      !form.location_name.trim() && 'Veuillez pr�ciser un lieu exact.',
+      !form.location_name.trim() && 'Veuillez prï¿½ciser un lieu exact.',
       !form.event_date && 'Veuillez choisir une date.',
     ].filter(Boolean) as string[]
 
@@ -243,8 +243,8 @@ function SimpleBonPlanPage() {
       setCreatedId(created?.id ?? null)
       setSuccessMessage(
         created?.free_included
-          ? 'Bon plan publi� gratuitement dans le cadre de votre offre Pro du mois.'
-          : 'Bon plan publi� avec succ�s.'
+          ? 'Bon plan publiï¿½ gratuitement dans le cadre de votre offre Pro du mois.'
+          : 'Bon plan publiï¿½ avec succï¿½s.'
       )
       setForm(INITIAL_FORM)
       try {
@@ -256,8 +256,8 @@ function SimpleBonPlanPage() {
     } catch (err: any) {
       setError(
         err?.message === 'timeout'
-          ? 'Le service de publication ne r�pond pas pour le moment. R�essayez dans quelques instants.'
-          : err?.response?.data?.error || 'La publication du bon plan a �chou�. Veuillez v�rifier les champs puis recommencer.'
+          ? 'Le service de publication ne rï¿½pond pas pour le moment. Rï¿½essayez dans quelques instants.'
+          : err?.response?.data?.error || 'La publication du bon plan a ï¿½chouï¿½. Veuillez vï¿½rifier les champs puis recommencer.'
       )
     } finally {
       setSubmitting(false)
@@ -289,8 +289,8 @@ function SimpleBonPlanPage() {
             </div>
             <h1 className="mt-3 font-display text-3xl font-bold text-night md:text-4xl">Publier un bon plan local</h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-night/60 md:text-base">
-              Partagez une promo, un concert, une ouverture ou un petit �v�nement local. Les particuliers paient peu,
-              les pros ont plus de visibilit�, et les abonn�s Pro ont un bon plan offert chaque mois.
+              Partagez une promo, un concert, une ouverture ou un petit ï¿½vï¿½nement local. Les particuliers paient peu,
+              les pros ont plus de visibilitï¿½, et les abonnï¿½s Pro ont un bon plan offert chaque mois.
             </p>
           </div>
           <Link href="/annonces" className="hidden items-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-2.5 text-sm font-semibold text-night shadow-sm transition hover:-translate-y-0.5 md:inline-flex">
@@ -330,7 +330,7 @@ function SimpleBonPlanPage() {
 
         {successMessage ? (
           <div className="mb-6 rounded-[1.5rem] border border-[var(--color-success)]/30 bg-[var(--color-success)]/10 p-5 text-[var(--color-success)]">
-            <p className="font-semibold">Bon plan publi�</p>
+            <p className="font-semibold">Bon plan publiï¿½</p>
             <p className="mt-1 text-sm">{successMessage}</p>
             <div className="mt-4 flex flex-wrap gap-3">
               <Link href="/" className="btn-primary rounded-2xl px-4 py-2.5">
@@ -340,7 +340,7 @@ function SimpleBonPlanPage() {
                 Parcourir les annonces
               </Link>
             </div>
-            {createdId ? <p className="mt-3 text-xs opacity-70">R�f�rence: #{createdId}</p> : null}
+            {createdId ? <p className="mt-3 text-xs opacity-70">Rï¿½fï¿½rence: #{createdId}</p> : null}
           </div>
         ) : null}
 
@@ -367,7 +367,7 @@ function SimpleBonPlanPage() {
               </label>
 
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-night">Dur�e</span>
+                <span className="text-sm font-semibold text-night">Durï¿½e</span>
                 <select
                   value={form.duration_days}
                   onChange={(e) => handleChange('duration_days', Number(e.target.value) as 3 | 7)}
@@ -439,11 +439,11 @@ function SimpleBonPlanPage() {
                   />
                 </label>
                 <label className="space-y-2">
-                  <span className="text-sm font-semibold text-night">T�l�phone</span>
+                  <span className="text-sm font-semibold text-night">Tï¿½lï¿½phone</span>
                   <input
                     value={form.contact_phone}
                     onChange={(e) => handleChange('contact_phone', e.target.value)}
-                    placeholder="Num�ro de contact"
+                    placeholder="Numï¿½ro de contact"
                     className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm outline-none"
                   />
                 </label>
@@ -471,7 +471,7 @@ function SimpleBonPlanPage() {
                     value={form.conditions}
                     onChange={(e) => handleChange('conditions', e.target.value)}
                     rows={3}
-                    placeholder="Conditions, date limite, r�servation, acc�s..."
+                    placeholder="Conditions, date limite, rï¿½servation, accï¿½s..."
                     className="w-full rounded-3xl border border-night/10 bg-white px-4 py-3 text-sm outline-none"
                   />
                 </label>
@@ -497,7 +497,7 @@ function SimpleBonPlanPage() {
                 className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/20"
               >
                 <option value="promo">Promo</option>
-                <option value="event">�v�nement</option>
+                <option value="event">ï¿½vï¿½nement</option>
                 <option value="concert">Concert</option>
                 <option value="other">Autre</option>
               </select>
@@ -508,7 +508,7 @@ function SimpleBonPlanPage() {
               <textarea
                 value={form.description}
                 onChange={(e) => handleChange('description', e.target.value)}
-                placeholder="D�crivez l'offre, l'heure, le lieu, les conditions et tout ce qui aide le visiteur � comprendre."
+                placeholder="Dï¿½crivez l'offre, l'heure, le lieu, les conditions et tout ce qui aide le visiteur ï¿½ comprendre."
                 rows={6}
                 required
                 className="w-full rounded-3xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/20"
@@ -550,7 +550,7 @@ function SimpleBonPlanPage() {
               <label className="space-y-2">
                 <span className="flex items-center gap-2 text-sm font-semibold text-night">
                   <CalendarDays className="h-4 w-4 text-coral" />
-                  Date de l&apos;�v�nement
+                  Date de l&apos;ï¿½vï¿½nement
                 </span>
                 <input
                   type="date"
@@ -598,8 +598,8 @@ function SimpleBonPlanPage() {
               <p className="mt-4 text-sm uppercase tracking-[0.18em] text-white/45">Estimation</p>
               <p className="mt-2 text-4xl font-bold text-white">{formatPrice(estimatedPrice)}</p>
               <p className="mt-3 text-sm leading-relaxed text-white/70">
-                Le prix est calcul� selon le profil choisi et la dur�e. Si vous �tes Pro et que votre bon plan offert
-                du mois est encore disponible, le tarif peut tomber � 0 XPF.
+                Le prix est calculï¿½ selon le profil choisi et la durï¿½e. Si vous ï¿½tes Pro et que votre bon plan offert
+                du mois est encore disponible, le tarif peut tomber ï¿½ 0 XPF.
               </p>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -617,17 +617,17 @@ function SimpleBonPlanPage() {
             </div>
 
             <div className="rounded-[2rem] border border-night/8 bg-white p-5 shadow-card">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">R�sum�</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Rï¿½sumï¿½</p>
               <div className="mt-4 space-y-3 text-sm text-night/65">
                 <p><span className="font-semibold text-night">Profil:</span> {form.target_audience === 'pro' ? 'Professionnel' : 'Particulier'}</p>
-                <p><span className="font-semibold text-night">Dur�e:</span> {form.duration_days} jours</p>
+                <p><span className="font-semibold text-night">Durï¿½e:</span> {form.duration_days} jours</p>
                 <p><span className="font-semibold text-night">Type:</span> {form.kind}</p>
-                <p><span className="font-semibold text-night">Commune:</span> {selectedCommune?.name || '� compl�ter'}</p>
-                <p><span className="font-semibold text-night">Lieu:</span> {form.location_name.trim() || 'Non renseign�'}</p>
+                <p><span className="font-semibold text-night">Commune:</span> {selectedCommune?.name || 'ï¿½ complï¿½ter'}</p>
+                <p><span className="font-semibold text-night">Lieu:</span> {form.location_name.trim() || 'Non renseignï¿½'}</p>
               </div>
               <div className="mt-4 rounded-2xl bg-sand p-4 text-sm text-night/65">
                 <Clock3 className="mb-2 h-4 w-4 text-coral" />
-                La publication reste visible pendant la dur�e choisie, puis expire automatiquement.
+                La publication reste visible pendant la durï¿½e choisie, puis expire automatiquement.
               </div>
             </div>
           </aside>

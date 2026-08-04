@@ -53,7 +53,7 @@ function loadTurnstileScript() {
 export default function TurnstileChallenge({
   onTokenChange,
   action,
-  label = 'V�rification anti-bot',
+  label = 'Vï¿½rification anti-bot',
   className = '',
 }: Props) {
   const siteKey = useMemo(() => {
@@ -129,7 +129,7 @@ export default function TurnstileChallenge({
   if (!siteKey) {
     return (
       <div className={`rounded-xl border border-night/10 bg-sand/50 px-4 py-3 text-xs text-night/55 ${className}`}>
-        {label} d�sactiv�e en mode local.
+        {label} dï¿½sactivï¿½e en mode local.
       </div>
     )
   }
@@ -138,9 +138,9 @@ export default function TurnstileChallenge({
     <div className={className}>
       <p className="mb-2 text-xs font-medium text-night/55">{label}</p>
       <div ref={containerRef} className="min-h-[78px]" />
-      {status === 'loading' && <p className="mt-2 text-[11px] text-night/45">Chargement du contr�le anti-bot&</p>}
+      {status === 'loading' && <p className="mt-2 text-[11px] text-night/45">Chargement du contrï¿½le anti-bot&</p>}
       {status === 'error' && (
-        <p className="mt-2 text-[11px] text-red-600">Impossible de charger la v�rification anti-bot.</p>
+        <p className="mt-2 text-[11px] text-red-600">Impossible de charger la vï¿½rification anti-bot.</p>
       )}
     </div>
   )

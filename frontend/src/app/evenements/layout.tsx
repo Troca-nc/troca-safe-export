@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import { buildPageMetadata } from '@/lib/pageMetadata'
 
 export const metadata: Metadata = buildPageMetadata({
-  title: '�v�nements en Nouvelle-Calédonie | Kalico',
-  description: 'Concerts, march�s, expositions, sports - tout lagenda cal�donien sur Kalico.',
+  title: 'ï¿½vï¿½nements en Nouvelle-CalÃ©donie | Kalico',
+  description: 'Concerts, marchï¿½s, expositions, sports - tout lagenda calï¿½donien sur Kalico.',
   path: '/evenements',
 })
 

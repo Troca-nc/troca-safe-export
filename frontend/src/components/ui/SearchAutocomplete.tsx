@@ -1,7 +1,7 @@
 'use client'
 // ============================================================
 //  Kalico  Barre de recherche avec autocomplete
-//  Suggestions : annonces r�centes + cat�gories + communes
+//  Suggestions : annonces rï¿½centes + catï¿½gories + communes
 // ============================================================
 
 import { useState, useEffect, useRef, useCallback } from 'react'
@@ -131,7 +131,7 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher&', classN
           })
         }
 
-        // Suggestion cat�gorie si texte > 2 chars
+        // Suggestion catï¿½gorie si texte > 2 chars
         if (q.length > 2) {
           items.push({
             type:  'categorie',
@@ -235,7 +235,7 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher&', classN
             value={q}
             autoFocus={autoFocus}
             placeholder={placeholder}
-            aria-label="Rechercher une annonce, une commune ou une cat�gorie"
+            aria-label="Rechercher une annonce, une commune ou une catï¿½gorie"
             aria-autocomplete="list"
             aria-expanded={open}
             aria-controls={listboxId}
@@ -272,7 +272,7 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher&', classN
           {!q && suggestions.length > 0 && (
             <div className="flex items-center justify-between px-4 py-2 border-b border-night/6">
               <span className="text-[11px] text-night/40 font-medium uppercase tracking-wide">
-                Recherches r�centes
+                Recherches rï¿½centes
               </span>
               <button
                 type="button"
@@ -309,7 +309,7 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher&', classN
               {ICONS[s.type]}
               <span className="flex-1 min-w-0">
                 <span className="block text-sm text-night truncate">
-                  {/* Highlight du texte tap� */}
+                  {/* Highlight du texte tapï¿½ */}
                   {q && s.type !== 'historique'
                     ? highlightMatch(s.label, q)
                     : s.label
@@ -322,10 +322,10 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher&', classN
             </button>
           ))}
 
-          {/* Aucun r�sultat */}
+          {/* Aucun rï¿½sultat */}
           {!loading && q && suggestions.length === 0 && (
             <div className="px-4 py-3 text-sm text-night/60 text-center" aria-live="polite">
-              Aucune suggestion pour � {q} �
+              Aucune suggestion pour ï¿½ {q} ï¿½
             </div>
           )}
 
@@ -337,7 +337,7 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher&', classN
               className="w-full flex items-center gap-2 px-4 py-3 text-sm text-coral font-medium border-t border-night/6 hover:bg-coral/5 transition-colors"
             >
               <Search size={14} />
-              Voir tous les r�sultats pour � {q} �
+              Voir tous les rï¿½sultats pour ï¿½ {q} ï¿½
             </button>
           )}
         </div>

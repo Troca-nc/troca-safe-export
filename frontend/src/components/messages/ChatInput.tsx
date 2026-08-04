@@ -257,7 +257,7 @@ export default function ChatInput({
       }, 1000)
     } catch (error) {
       console.error('[chat-audio]', error)
-      setAudioError('Impossible dacc�der au micro')
+      setAudioError('Impossible daccï¿½der au micro')
     }
   }, [recording, disabled, uploading])
 
@@ -280,7 +280,7 @@ export default function ChatInput({
     ? `Enregistrement ${Math.max(1, Math.ceil(recordingMs / 1000))}s`
     : 'Maintenir pour enregistrer'
   const pendingDocumentLabel = pendingDocument
-    ? `${pendingDocument.mimeType || 'Document'}${formatBytes(pendingDocument.sizeBytes) ? ` � ${formatBytes(pendingDocument.sizeBytes)}` : ''}`
+    ? `${pendingDocument.mimeType || 'Document'}${formatBytes(pendingDocument.sizeBytes) ? ` ï¿½ ${formatBytes(pendingDocument.sizeBytes)}` : ''}`
     : null
   const pendingDocumentKind = pendingDocument?.mimeType?.startsWith('image/')
     ? 'image'
@@ -303,7 +303,7 @@ export default function ChatInput({
           </div>
           {annoncePrix != null && (
             <p className="text-[10px] text-night/40 mb-2">
-              Prix affich� : {annoncePrix.toLocaleString('fr-FR')} XPF
+              Prix affichï¿½ : {annoncePrix.toLocaleString('fr-FR')} XPF
             </p>
           )}
           <div className="flex gap-2">
@@ -341,7 +341,7 @@ export default function ChatInput({
                     onClick={() => setOfferAmt(String(amount))}
                     className="text-[10px] border border-night/10 rounded-full px-2 py-0.5 text-night/50 hover:border-coral hover:text-coral transition-colors"
                   >
-                    -{Math.round((1 - ratio) * 100)}% � {amount.toLocaleString('fr-FR')}
+                    -{Math.round((1 - ratio) * 100)}% ï¿½ {amount.toLocaleString('fr-FR')}
                   </button>
                 )
               })}
@@ -363,7 +363,7 @@ export default function ChatInput({
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-night">{pendingDocument.name}</p>
               <p className="truncate text-xs text-night/55">{pendingDocumentLabel}</p>
-              <p className="mt-1 text-[11px] text-night/45">Pr�visualisation avant envoi</p>
+              <p className="mt-1 text-[11px] text-night/45">Prï¿½visualisation avant envoi</p>
             </div>
             <button
               type="button"
@@ -384,7 +384,7 @@ export default function ChatInput({
               />
             ) : pendingDocumentKind === 'pdf' && pendingDocumentPreviewUrl ? (
               <iframe
-                title={`Aper�u ${pendingDocument.name}`}
+                title={`Aperï¿½u ${pendingDocument.name}`}
                 src={pendingDocumentPreviewUrl}
                 className="h-48 w-full border-0 bg-sand"
               />
@@ -394,8 +394,8 @@ export default function ChatInput({
                   <FileText size={20} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-night">Aper�u du document</p>
-                  <p className="text-xs text-night/50">Le fichier sera transmis apr�s validation</p>
+                  <p className="text-sm font-semibold text-night">Aperï¿½u du document</p>
+                  <p className="text-xs text-night/50">Le fichier sera transmis aprï¿½s validation</p>
                 </div>
               </div>
             )}
@@ -465,7 +465,7 @@ export default function ChatInput({
           className={`p-2.5 rounded-xl transition-all shrink-0 disabled:opacity-30 ${
             recording ? 'bg-rose-500 text-white' : 'bg-night text-white hover:bg-ocean'
           }`}
-          aria-label={recording ? 'Arr�ter lenregistrement' : 'Maintenir pour enregistrer un message vocal'}
+          aria-label={recording ? 'Arrï¿½ter lenregistrement' : 'Maintenir pour enregistrer un message vocal'}
         >
           {recording ? <Square size={16} /> : <Mic size={16} />}
         </button>

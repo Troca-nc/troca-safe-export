@@ -60,7 +60,7 @@ export default function NotificationsPage() {
             if (!alive) return
             setItems((prev) => prev.map((item) => ({ ...item, read: true })))
           } catch {
-            // On garde la liste visible m�me si le marquage global �choue.
+            // On garde la liste visible mï¿½me si le marquage global ï¿½choue.
           } finally {
             if (alive) setMarkingAllRead(false)
           }
@@ -106,7 +106,7 @@ export default function NotificationsPage() {
               </p>
               <h1 className="mt-2 text-2xl font-display font-semibold text-night">Votre centre de notifications</h1>
               <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-                Retrouvez ici les messages, alertes et rappels importants li�s � votre compte.
+                Retrouvez ici les messages, alertes et rappels importants liï¿½s ï¿½ votre compte.
               </p>
             </div>
 
@@ -153,7 +153,7 @@ export default function NotificationsPage() {
                   onClick={() => router.refresh()}
                   className="btn-secondary mt-5 inline-flex items-center px-4 py-2 text-sm"
                 >
-                  R�essayer
+                  Rï¿½essayer
                 </button>
               </div>
             ) : items.length === 0 ? (
@@ -161,7 +161,7 @@ export default function NotificationsPage() {
                 <Bell className="mx-auto h-12 w-12 text-[var(--color-text-tertiary)]" />
                 <p className="mt-4 text-lg font-semibold text-night">Vous n'avez pas encore de notification.</p>
                 <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-                  Les alertes, r�ponses et rappels li�s � votre activit� appara�tront ici.
+                  Les alertes, rï¿½ponses et rappels liï¿½s ï¿½ votre activitï¿½ apparaï¿½tront ici.
                 </p>
               </div>
             ) : (

@@ -246,7 +246,7 @@ function ObservabilitySection({
         <div className="mb-3 flex items-center justify-between gap-2">
           <div>
             <h3 className="text-sm font-semibold text-night">Alertes en direct</h3>
-            <p className="text-xs text-night/50">Flux des alertes critiques, warnings et infos r�centes</p>
+            <p className="text-xs text-night/50">Flux des alertes critiques, warnings et infos rï¿½centes</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-night/60">
@@ -284,7 +284,7 @@ function ObservabilitySection({
                 ts: '',
                 severity: 'info',
                 title: 'Aucune alerte active',
-                message: 'Le flux restera visible ici d�s quun incident remonte.',
+                message: 'Le flux restera visible ici dï¿½s quun incident remonte.',
                 requestId: null,
               }]).map((alert, index) => {
             const palette = alert.severity === 'critical'
@@ -328,19 +328,19 @@ function ObservabilitySection({
         <MetricCard
           label="Memoire"
           value={formatBytes(data?.memory?.heapUsed)}
-          hint={`RSS ${formatBytes(data?.memory?.rss)} � heap total ${formatBytes(data?.memory?.heapTotal)}`}
+          hint={`RSS ${formatBytes(data?.memory?.rss)} ï¿½ heap total ${formatBytes(data?.memory?.heapTotal)}`}
           icon={<MemoryStick size={16} />}
         />
         <MetricCard
           label="Requetes HTTP"
           value={(data?.http.total ?? 0).toLocaleString('fr-FR')}
-          hint={`${data?.http.slow ?? 0} lentes � ${data?.http.errors ?? 0} erreurs 5xx`}
+          hint={`${data?.http.slow ?? 0} lentes ï¿½ ${data?.http.errors ?? 0} erreurs 5xx`}
           icon={<Activity size={16} />}
         />
         <MetricCard
           label="Temps reel"
           value={`${data?.websocket.connects ?? 0}/${data?.websocket.disconnects ?? 0}`}
-          hint={`${data?.websocket.authErrors ?? 0} erreurs auth � ${data?.websocket.messages ?? 0} messages`}
+          hint={`${data?.websocket.authErrors ?? 0} erreurs auth ï¿½ ${data?.websocket.messages ?? 0} messages`}
           icon={<Wifi size={16} />}
         />
       </div>
@@ -350,8 +350,8 @@ function ObservabilitySection({
           <div className="mb-4 flex items-start justify-between gap-3">
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-night/50">Partages</p>
-              <h3 className="mt-1 text-sm font-semibold text-night">R�partition par canal</h3>
-              <p className="mt-1 text-xs text-night/50">{(share.total ?? 0).toLocaleString('fr-FR')} clic(s) de partage enregistr�s</p>
+              <h3 className="mt-1 text-sm font-semibold text-night">Rï¿½partition par canal</h3>
+              <p className="mt-1 text-xs text-night/50">{(share.total ?? 0).toLocaleString('fr-FR')} clic(s) de partage enregistrï¿½s</p>
             </div>
             <span className="rounded-lg bg-coral/10 p-2 text-coral">
               <Share2 size={16} />
@@ -379,7 +379,7 @@ function ObservabilitySection({
               })
             ) : (
               <p className="rounded-xl border border-dashed border-night/10 bg-sand/30 px-3 py-2 text-xs text-night/50">
-                Aucun partage enregistr� pour le moment.
+                Aucun partage enregistrï¿½ pour le moment.
               </p>
             )}
           </div>
@@ -388,8 +388,8 @@ function ObservabilitySection({
         <div className="rounded-2xl border border-night/8 bg-white p-4">
           <div className="mb-4">
             <p className="text-xs font-medium uppercase tracking-wide text-night/50">Partages</p>
-            <h3 className="mt-1 text-sm font-semibold text-night">R�partition par contenu</h3>
-            <p className="mt-1 text-xs text-night/50">Annonce, profil ou contenu g�n�rique</p>
+            <h3 className="mt-1 text-sm font-semibold text-night">Rï¿½partition par contenu</h3>
+            <p className="mt-1 text-xs text-night/50">Annonce, profil ou contenu gï¿½nï¿½rique</p>
           </div>
           <div className="space-y-2">
             {shareContentTypes.length ? (
@@ -401,7 +401,7 @@ function ObservabilitySection({
               ))
             ) : (
               <p className="rounded-xl border border-dashed border-night/10 bg-sand/30 px-3 py-2 text-xs text-night/50">
-                Aucune donn�e de contenu disponible.
+                Aucune donnï¿½e de contenu disponible.
               </p>
             )}
           </div>
@@ -410,8 +410,8 @@ function ObservabilitySection({
         <div className="rounded-2xl border border-night/8 bg-white p-4">
           <div className="mb-4">
             <p className="text-xs font-medium uppercase tracking-wide text-night/50">Partages</p>
-            <h3 className="mt-1 text-sm font-semibold text-night">Derniers �v�nements</h3>
-            <p className="mt-1 text-xs text-night/50">Historique des clics de partage les plus r�cents</p>
+            <h3 className="mt-1 text-sm font-semibold text-night">Derniers ï¿½vï¿½nements</h3>
+            <p className="mt-1 text-xs text-night/50">Historique des clics de partage les plus rï¿½cents</p>
           </div>
           <div className="overflow-hidden rounded-xl border border-night/8">
             <table className="min-w-full divide-y divide-night/8 text-left text-[11px]">
@@ -420,7 +420,7 @@ function ObservabilitySection({
                   <th className="px-3 py-2 font-medium">Heure</th>
                   <th className="px-3 py-2 font-medium">Canal</th>
                   <th className="px-3 py-2 font-medium">Contenu</th>
-                  <th className="px-3 py-2 font-medium">R�f.</th>
+                  <th className="px-3 py-2 font-medium">Rï¿½f.</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-night/8">
@@ -495,7 +495,7 @@ function ObservabilitySection({
         <div className="mb-4">
           <h3 className="text-sm font-semibold text-night">NSuds actifs</h3>
           <p className="text-xs text-night/50">
-            Vue multi-instance pour distinguer lAPI, le worker et les autres r�plicas.
+            Vue multi-instance pour distinguer lAPI, le worker et les autres rï¿½plicas.
           </p>
         </div>
         <div className="overflow-hidden rounded-2xl border border-night/8 bg-white">
@@ -569,7 +569,7 @@ function ObservabilitySection({
         <MetricCard
           label="Websocket"
           value={`${data?.websocket.connects ?? 0} connexions`}
-          hint={`${data?.websocket.disconnects ?? 0} deconnexions � ${data?.websocket.messages ?? 0} messages`}
+          hint={`${data?.websocket.disconnects ?? 0} deconnexions ï¿½ ${data?.websocket.messages ?? 0} messages`}
           icon={<Wifi size={16} />}
         />
         <MetricCard
@@ -581,7 +581,7 @@ function ObservabilitySection({
         <MetricCard
           label="Jobs"
           value={`${data?.jobs.errors ?? 0} erreurs`}
-          hint={`${data?.jobs.started ?? 0} demarres � ${data?.jobs.skipped ?? 0} sautes`}
+          hint={`${data?.jobs.started ?? 0} demarres ï¿½ ${data?.jobs.skipped ?? 0} sautes`}
           icon={<Cpu size={16} />}
         />
         <MetricCard
@@ -658,7 +658,7 @@ function ObservabilitySection({
                 className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 text-xs font-medium transition-all hover:opacity-80 ${action.color}`}
               >
                 {action.label}
-                <span className="ml-auto">�</span>
+                <span className="ml-auto">ï¿½</span>
               </a>
             ))}
           </div>
@@ -675,9 +675,9 @@ function ServiceStatsSection({ services }: { services: any }) {
     <section className="mt-6 rounded-3xl border border-night/8 bg-white p-5 shadow-sm">
       <div className="mb-4">
         <p className="text-xs font-medium uppercase tracking-wide text-night/50">Services</p>
-        <h2 className="mt-1 text-lg font-semibold text-night">Bons plans, �v�nements et covoiturage</h2>
+        <h2 className="mt-1 text-lg font-semibold text-night">Bons plans, ï¿½vï¿½nements et covoiturage</h2>
         <p className="mt-1 text-sm text-night/60">
-          Vue synth�tique des nouveaux modules pour piloter l&apos;activit�, la croissance et la mod�ration.
+          Vue synthï¿½tique des nouveaux modules pour piloter l&apos;activitï¿½, la croissance et la modï¿½ration.
         </p>
       </div>
 
@@ -685,19 +685,19 @@ function ServiceStatsSection({ services }: { services: any }) {
         <MetricCard
           label="Bons plans"
           value={`${Number(bonPlans.bon_plans_actifs ?? 0).toLocaleString('fr-FR')} actifs`}
-          hint={`${Number(bonPlans.promotions_total ?? 0).toLocaleString('fr-FR')} promos � ${Number(bonPlans.events_total ?? 0).toLocaleString('fr-FR')} �v�nements`}
+          hint={`${Number(bonPlans.promotions_total ?? 0).toLocaleString('fr-FR')} promos ï¿½ ${Number(bonPlans.events_total ?? 0).toLocaleString('fr-FR')} ï¿½vï¿½nements`}
           icon={<Sparkles size={16} />}
         />
         <MetricCard
-          label="�v�nements"
-          value={`${Number(bonPlans.events_a_venir ?? 0).toLocaleString('fr-FR')} � venir`}
-          hint={`${Number(bonPlans.events_views ?? 0).toLocaleString('fr-FR')} vues � ${Number(bonPlans.events_reservations ?? 0).toLocaleString('fr-FR')} réservations`}
+          label="ï¿½vï¿½nements"
+          value={`${Number(bonPlans.events_a_venir ?? 0).toLocaleString('fr-FR')} ï¿½ venir`}
+          hint={`${Number(bonPlans.events_views ?? 0).toLocaleString('fr-FR')} vues ï¿½ ${Number(bonPlans.events_reservations ?? 0).toLocaleString('fr-FR')} rÃ©servations`}
           icon={<CalendarDays size={16} />}
         />
         <MetricCard
           label="Covoiturage"
           value={`${Number(bonPlans.rides_active ?? 0).toLocaleString('fr-FR')} trajets`}
-          hint={`${Number(bonPlans.ride_bookings ?? 0).toLocaleString('fr-FR')} réservations � ${Number(bonPlans.rides_verified_drivers ?? 0).toLocaleString('fr-FR')} conducteurs v�rifi�s`}
+          hint={`${Number(bonPlans.ride_bookings ?? 0).toLocaleString('fr-FR')} rÃ©servations ï¿½ ${Number(bonPlans.rides_verified_drivers ?? 0).toLocaleString('fr-FR')} conducteurs vï¿½rifiï¿½s`}
           icon={<CarFront size={16} />}
         />
       </div>
@@ -709,14 +709,14 @@ function ServiceStatsSection({ services }: { services: any }) {
             <div className="rounded-xl bg-white px-3 py-2">Vues: {Number(bonPlans.bon_plans_vues ?? 0).toLocaleString('fr-FR')}</div>
             <div className="rounded-xl bg-white px-3 py-2">Partages: {Number(bonPlans.bon_plans_partages ?? 0).toLocaleString('fr-FR')}</div>
             <div className="rounded-xl bg-white px-3 py-2">Contacts: {Number(bonPlans.bon_plans_contacts ?? 0).toLocaleString('fr-FR')}</div>
-            <div className="rounded-xl bg-white px-3 py-2">Expir�es: {Number(bonPlans.bon_plans_expired ?? 0).toLocaleString('fr-FR')}</div>
+            <div className="rounded-xl bg-white px-3 py-2">Expirï¿½es: {Number(bonPlans.bon_plans_expired ?? 0).toLocaleString('fr-FR')}</div>
           </div>
         </div>
 
         <div className="rounded-2xl border border-night/8 bg-sand/30 p-4">
           <h3 className="text-sm font-semibold text-night">Covoiturage</h3>
           <div className="mt-3 grid gap-2 text-sm text-night/70 sm:grid-cols-2">
-            <div className="rounded-xl bg-white px-3 py-2">Places r�serv�es: {Number(bonPlans.ride_seats_reserved ?? 0).toLocaleString('fr-FR')}</div>
+            <div className="rounded-xl bg-white px-3 py-2">Places rï¿½servï¿½es: {Number(bonPlans.ride_seats_reserved ?? 0).toLocaleString('fr-FR')}</div>
             <div className="rounded-xl bg-white px-3 py-2">Places totales: {Number(bonPlans.ride_seats_total ?? 0).toLocaleString('fr-FR')}</div>
             <div className="rounded-xl bg-white px-3 py-2">Prix moyen: {Number(bonPlans.ride_avg_price ?? 0).toLocaleString('fr-FR')} XPF</div>
             <div className="rounded-xl bg-white px-3 py-2">Avis clients: {Number(bonPlans.ride_avg_rating ?? 0).toFixed(1)}/5</div>

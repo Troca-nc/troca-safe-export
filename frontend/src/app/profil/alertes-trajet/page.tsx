@@ -140,12 +140,12 @@ export default function AlertesTrajetPage() {
           </div>
           <h1 className="mt-3 text-3xl font-bold">Mes alertes covoiturage</h1>
           <p className="mt-2 text-sm text-night/60">
-            Recevez une notification d�s qu'un trajet publi� correspond � vos habitudes.
+            Recevez une notification dï¿½s qu'un trajet publiï¿½ correspond ï¿½ vos habitudes.
           </p>
 
           <div className="mt-6 grid gap-3 md:grid-cols-2">
-            <input value={fromCommune} onChange={(e) => setFromCommune(e.target.value)} placeholder="D�part" className="input" />
-            <input value={toCommune} onChange={(e) => setToCommune(e.target.value)} placeholder="Arriv�e" className="input" />
+            <input value={fromCommune} onChange={(e) => setFromCommune(e.target.value)} placeholder="Dï¿½part" className="input" />
+            <input value={toCommune} onChange={(e) => setToCommune(e.target.value)} placeholder="Arrivï¿½e" className="input" />
             <select value={jourSemaine} onChange={(e) => setJourSemaine(e.target.value)} className="input md:col-span-2">
               {DAYS.map((day) => (
                 <option key={day.value || 'any'} value={day.value}>{day.label}</option>
@@ -173,7 +173,7 @@ export default function AlertesTrajetPage() {
             className="btn-primary mt-5 inline-flex items-center gap-2 disabled:opacity-60"
           >
             <Plus className="h-4 w-4" />
-            Cr�er l'alerte
+            Crï¿½er l'alerte
           </button>
           <p className="mt-2 text-xs text-night/45">Limite: 3 alertes actives par utilisateur.</p>
         </div>
@@ -186,11 +186,11 @@ export default function AlertesTrajetPage() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h2 className="text-lg font-semibold">
-                    {item.from_commune || 'Tous d�parts'} � {item.to_commune || 'Toutes destinations'}
+                    {item.from_commune || 'Tous dï¿½parts'} ï¿½ {item.to_commune || 'Toutes destinations'}
                   </h2>
                   <p className="mt-1 text-sm text-night/55">
                     {item.jour_semaine == null ? "N'importe quel jour" : DAYS.find((day) => Number(day.value) === item.jour_semaine)?.label}
-                    {item.heure_min ? ` � ${item.heure_min}` : ''}
+                    {item.heure_min ? ` ï¿½ ${item.heure_min}` : ''}
                     {item.heure_max ? ` - ${item.heure_max}` : ''}
                   </p>
                 </div>

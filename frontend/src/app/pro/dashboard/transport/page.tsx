@@ -116,7 +116,7 @@ export default function ProDashboardTransportPage() {
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Transport Pro</p>
             <h1 className="mt-2 font-display text-3xl font-bold text-night">Bienvenue dans votre espace transport</h1>
             <p className="mt-2 text-sm text-night/60">
-              G�rez vos réservations, suivez vos revenus et vos courses du jour.
+              Gï¿½rez vos rÃ©servations, suivez vos revenus et vos courses du jour.
             </p>
           </div>
           <Link href="/covoiturage?tab=transport" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white">
@@ -127,7 +127,7 @@ export default function ProDashboardTransportPage() {
         <div className="mt-4 flex flex-wrap gap-2 text-xs text-night/60">
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
             <MapPin className="h-3.5 w-3.5" />
-            {transporter?.pro_commune || 'Nouvelle-Calédonie'}
+            {transporter?.pro_commune || 'Nouvelle-CalÃ©donie'}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
             <Users className="h-3.5 w-3.5" />
@@ -137,8 +137,8 @@ export default function ProDashboardTransportPage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Courses termin�es" value={String(data?.rides_completed_count ?? 0)} helper="Depuis louverture du compte" />
-        <StatCard label="Revenu total" value={`${Number(data?.revenue_total_xpf ?? 0).toLocaleString('fr-FR')} XPF`} helper="Montants pay�s" />
+        <StatCard label="Courses terminï¿½es" value={String(data?.rides_completed_count ?? 0)} helper="Depuis louverture du compte" />
+        <StatCard label="Revenu total" value={`${Number(data?.revenue_total_xpf ?? 0).toLocaleString('fr-FR')} XPF`} helper="Montants payï¿½s" />
         <StatCard label="Revenu 30 jours" value={`${Number(data?.revenue_30d_xpf ?? 0).toLocaleString('fr-FR')} XPF`} helper="Derniers encaissements" />
         <StatCard label="Avis clients" value={`${Number(data?.avg_rating ?? 0).toFixed(1)}/5`} helper="Note sur 5" />
       </section>
@@ -150,7 +150,7 @@ export default function ProDashboardTransportPage() {
           <div className="mt-4 space-y-3">
             {todayRides.length > 0 ? todayRides.map((ride) => (
               <div key={ride.id} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)]/70 p-4">
-                <p className="font-semibold text-night">{ride.departure} � {ride.destination}</p>
+                <p className="font-semibold text-night">{ride.departure} ï¿½ {ride.destination}</p>
                 <div className="mt-2 flex flex-wrap gap-2 text-xs text-night/55">
                   <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
                     <CalendarDays className="h-3.5 w-3.5" />
@@ -169,16 +169,16 @@ export default function ProDashboardTransportPage() {
         </article>
 
         <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">� venir</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">ï¿½ venir</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">Prochaines courses</h2>
           <div className="mt-4 space-y-3">
             {upcomingRides.length > 0 ? upcomingRides.map((ride) => (
               <div key={ride.id} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)]/70 p-4">
-                <p className="font-semibold text-night">{ride.departure} � {ride.destination}</p>
-                <p className="mt-1 text-sm text-night/60">{ride.ride_date} � {ride.ride_time}</p>
+                <p className="font-semibold text-night">{ride.departure} ï¿½ {ride.destination}</p>
+                <p className="mt-1 text-sm text-night/60">{ride.ride_date} ï¿½ {ride.ride_time}</p>
               </div>
             )) : (
-              <p className="rounded-2xl border border-dashed border-[var(--color-border)] bg-sand/40 p-4 text-sm text-night/55">Aucune course � venir.</p>
+              <p className="rounded-2xl border border-dashed border-[var(--color-border)] bg-sand/40 p-4 text-sm text-night/55">Aucune course ï¿½ venir.</p>
             )}
           </div>
         </article>

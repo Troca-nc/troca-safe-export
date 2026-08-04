@@ -24,19 +24,19 @@ import type { ListingFilters } from '@/hooks/useListingFilters'
 const PAGE_SIZE = 3
 
 const COMMUNES = [
-  'Nouméa',
+  'NoumÃ©a',
   'Mont-Dore',
-  'Dumbéa',
-  'Pa�ta',
+  'DumbÃ©a',
+  'Paï¿½ta',
   'Boulouparis',
   'La Foa',
   'Bourail',
-  'Kon�',
+  'Konï¿½',
   'Koumac',
-  'Poindimi�',
+  'Poindimiï¿½',
   'Lifou',
-  'Mar�',
-  'Ouv�a',
+  'Marï¿½',
+  'Ouvï¿½a',
   'Autre',
 ] as const
 
@@ -44,17 +44,17 @@ const steps = [
   {
     icon: Target,
     title: 'Choisissez votre annonce',
-    description: 'S�lectionnez lobjet que vous voulez troquer parmi vos propres annonces actives.',
+    description: 'Sï¿½lectionnez lobjet que vous voulez troquer parmi vos propres annonces actives.',
   },
   {
     icon: Scale,
-    title: 'On trouve les �quivalents',
-    description: 'Le Troc�m�tre recherche 3 annonces de valeur comparable dans une fourchette de �30%.',
+    title: 'On trouve les ï¿½quivalents',
+    description: 'Le Trocï¿½mï¿½tre recherche 3 annonces de valeur comparable dans une fourchette de ï¿½30%.',
   },
   {
     icon: Handshake,
     title: 'Contactez et troquez',
-    description: 'Ouvrez lannonce qui vous pla�t et d�marrez la discussion directement avec le vendeur.',
+    description: 'Ouvrez lannonce qui vous plaï¿½t et dï¿½marrez la discussion directement avec le vendeur.',
   },
 ]
 
@@ -259,7 +259,7 @@ export default function TrocPage() {
     const selectedCategory = trocTab === 'mine' ? getListingCategoryLabel(selectedOwnListing) : freeCategory
 
     if (!Number.isFinite(selectedPrice) || selectedPrice <= 0) {
-      setStatusMessage('S�lectionnez une annonce avec un prix valide ou saisissez un prix de r�f�rence.')
+      setStatusMessage('Sï¿½lectionnez une annonce avec un prix valide ou saisissez un prix de rï¿½fï¿½rence.')
       return
     }
 
@@ -289,13 +289,13 @@ export default function TrocPage() {
       setTrocResults(items)
 
       if (items.length === 0) {
-        setStatusMessage('Aucun troc disponible dans cette gamme - revenez bient�t !')
+        setStatusMessage('Aucun troc disponible dans cette gamme - revenez bientï¿½t !')
       } else if (items.length < 3) {
         setStatusMessage(`Seulement ${items.length} troc(s) disponible(s) dans cette gamme de prix.`)
       }
     } catch {
       setTrocResults([])
-      setStatusMessage('Aucun troc disponible dans cette gamme - revenez bient�t !')
+      setStatusMessage('Aucun troc disponible dans cette gamme - revenez bientï¿½t !')
     } finally {
       setTrocLoading(false)
     }
@@ -323,7 +323,7 @@ export default function TrocPage() {
 
         <div className="relative mx-auto flex max-w-4xl flex-col items-center text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/90 backdrop-blur-sm">
-            = Troc entre Cal�doniens
+            = Troc entre Calï¿½doniens
           </div>
 
           <h1 className="mt-4 max-w-3xl font-display text-4xl font-bold leading-tight text-white md:text-6xl">
@@ -331,7 +331,7 @@ export default function TrocPage() {
           </h1>
 
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/80 md:text-base">
-            �changez vos objets entre Cal�doniens. Parcourez les annonces troc disponibles ou publiez la v�tre.
+            ï¿½changez vos objets entre Calï¿½doniens. Parcourez les annonces troc disponibles ou publiez la vï¿½tre.
           </p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -353,20 +353,20 @@ export default function TrocPage() {
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Annonces disponibles au troc</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">Annonces disponibles au troc</h2>
           <p className="mt-1 text-sm text-night/55">
-            Ces Cal�doniens acceptent les �changes - trouvez votre bonheur.
+            Ces Calï¿½doniens acceptent les ï¿½changes - trouvez votre bonheur.
           </p>
         </div>
 
         <form onSubmit={handleMarketSearch} className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
           <div className="grid gap-3 lg:grid-cols-[1.1fr_0.9fr_0.8fr_auto]">
             <label className="grid gap-1">
-              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/50">Catégorie</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/50">CatÃ©gorie</span>
               <select
                 value={marketCategory}
                 onChange={(e) => setMarketCategory(e.target.value)}
                 className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm outline-none transition focus:border-[#0A7EA4] focus:ring-2 focus:ring-[#0A7EA4]/20"
               >
-                <option value="">Toutes les cat�gories</option>
+                <option value="">Toutes les catï¿½gories</option>
                 {categoryOptions.map((category) => (
                   <option key={category.value} value={category.value}>
                     {category.label}
@@ -452,10 +452,10 @@ export default function TrocPage() {
 
       <section className="mx-auto max-w-4xl px-4 pb-12">
         <div className="mb-5">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Troc�m�tre</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">� Troc�m�tre - Trouvez un �quivalent</h2>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Trocï¿½mï¿½tre</p>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">ï¿½ Trocï¿½mï¿½tre - Trouvez un ï¿½quivalent</h2>
           <p className="mt-1 text-sm text-night/55">
-            Vous avez post� une annonce troc ? Entrez son prix et d�couvrez 3 annonces de valeur �quivalente pr�tes � l&apos;�change.
+            Vous avez postï¿½ une annonce troc ? Entrez son prix et dï¿½couvrez 3 annonces de valeur ï¿½quivalente prï¿½tes ï¿½ l&apos;ï¿½change.
           </p>
         </div>
 
@@ -507,13 +507,13 @@ export default function TrocPage() {
                 >
                   Passez en saisie libre
                 </button>{' '}
-                pour tester le Troc�m�tre.
+                pour tester le Trocï¿½mï¿½tre.
               </div>
             )
           ) : (
             <div className="mt-4 grid gap-4 md:grid-cols-[1fr_1fr]">
               <label className="grid gap-1">
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/50">Prix de r�f�rence</span>
+                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/50">Prix de rï¿½fï¿½rence</span>
                 <input
                   type="number"
                   min="0"
@@ -524,13 +524,13 @@ export default function TrocPage() {
                 />
               </label>
               <label className="grid gap-1">
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/50">Catégorie souhait�e</span>
+                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/50">CatÃ©gorie souhaitï¿½e</span>
                 <select
                   value={freeCategory}
                   onChange={(e) => setFreeCategory(e.target.value)}
                   className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm outline-none transition focus:border-[#0A7EA4] focus:ring-2 focus:ring-[#0A7EA4]/20"
                 >
-                  <option value="">Toutes les cat�gories</option>
+                  <option value="">Toutes les catï¿½gories</option>
                   {categoryOptions.map((category) => (
                     <option key={category.value} value={category.value}>
                       {category.label}
@@ -591,8 +591,8 @@ export default function TrocPage() {
 
       <section className="mx-auto max-w-6xl px-4 pb-16">
         <div className="mb-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Comment �a marche</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">Trois �tapes simples pour trouver un �change</h2>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Comment ï¿½a marche</p>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">Trois ï¿½tapes simples pour trouver un ï¿½change</h2>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
@@ -606,7 +606,7 @@ export default function TrocPage() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
                   <Icon className="h-6 w-6" />
                 </div>
-                <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-coral/80">�tape {index + 1}</p>
+                <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-coral/80">ï¿½tape {index + 1}</p>
                 <h3 className="mt-2 text-lg font-semibold text-night">{step.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-night/60">{step.description}</p>
               </article>
@@ -616,9 +616,9 @@ export default function TrocPage() {
 
         <div className="mt-8 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center shadow-sm">
           <p className="text-sm text-night/60">
-            Besoin dun point de d�part ?{' '}
+            Besoin dun point de dï¿½part ?{' '}
             <Link href="/annonces/nouvelle" className="font-semibold text-coral hover:underline">
-              Publiez votre premi�re annonce
+              Publiez votre premiï¿½re annonce
             </Link>
             .
           </p>
