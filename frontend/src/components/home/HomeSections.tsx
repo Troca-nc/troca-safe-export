@@ -208,7 +208,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
               Les premières annonces arrivent. La vôtre aussi ?
             </h1>
 
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#39505b] md:text-lg dark:text-white/80">Annonces, services et pros locaux partout en Nouvelle-Calédonie. De Nouméa aux Loyaut�, de Kon� � l&apos;�le des Pins.</p>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#39505b] md:text-lg dark:text-white/80">Annonces, services et pros locaux partout en Nouvelle-Calédonie. De Nouméa aux Loyauté, de Koné à l&apos;île des Pins.</p>
 
             <form onSubmit={onSubmit} className="mt-6 flex w-full max-w-2xl flex-col gap-3 sm:flex-row">
               <div className="relative min-w-0 flex-1">
@@ -981,7 +981,7 @@ export function BonPlanSection({
             <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/8 px-5 py-8 text-center text-white/80">
               <div className="mx-auto flex max-w-md flex-col items-center">
                 <span className="mb-3 text-2xl animate-pulse motion-reduce:animate-none" aria-hidden="true">
-                    =�
+                    🚗
                   </span>
                 <p className="font-display text-lg font-medium text-night dark:text-white">
                   Le premier trajet, c&apos;est souvent le plus utile.

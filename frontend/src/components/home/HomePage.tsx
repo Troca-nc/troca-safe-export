@@ -241,8 +241,8 @@ export default function HomePage() {
         <div className="mb-5 flex items-end justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Pros locaux</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Nos professionnels recommand�s</h2>
-            <p className="mt-1 text-sm text-night/55">Des pros cal�doniens v�rifi�s, � port�e de message.</p>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Nos professionnels recommandés</h2>
+            <p className="mt-1 text-sm text-night/55">Des pros calédoniens vérifiés, à portée de message.</p>
           </div>
           <div className="hidden items-center gap-3 md:flex">
             <Link href="/pros" className="inline-flex items-center gap-1 text-sm font-semibold text-nc-emeraude hover:underline">
@@ -293,7 +293,7 @@ export default function HomePage() {
                 Vous cherchez un professionnel ?
               </h2>
               <p className="mt-1 text-sm text-night/55">
-                Publiez votre besoin en 2 minutes - les pros de votre commune vous r�pondent.
+                Publiez votre besoin en 2 minutes - les pros de votre commune vous répondent.
               </p>
             </div>
           </div>
@@ -318,7 +318,7 @@ export default function HomePage() {
               Annonces disponibles au troc
             </h2>
             <p className="mt-1 text-sm text-night/55">
-              Ces cal�doniens acceptent les �changes - trouvez votre bonheur.
+              Ces calédoniens acceptent les échanges - trouvez votre bonheur.
             </p>
           </div>
           <Link href="/troc" className="hidden items-center gap-1 text-sm font-semibold text-coral hover:underline md:inline-flex">
