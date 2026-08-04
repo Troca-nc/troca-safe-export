@@ -64,7 +64,7 @@ export function MobileBottomNav() {
     { href: '/', icon: Home, label: 'Accueil' },
     { href: '/annonces', icon: Search, label: 'Annonces' },
     { href: '/covoiturage', icon: Car, label: 'Covoit' },
-    { href: '/annonces/nouvelle', icon: PlusCircle, label: 'Déposer', isCta: true },
+    { href: '/annonces/nouvelle', icon: PlusCircle, label: 'DÃ©poser', isCta: true },
     { href: '/messages', icon: MessageCircle, label: 'Messages' },
     { href: '#more', icon: Menu, label: 'Plus', isDrawer: true },
   ]
@@ -471,7 +471,7 @@ export default function Header() {
               className="md:hidden flex shrink-0 items-center gap-1.5 rounded-xl bg-coral px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-coral/30 transition-transform active:scale-95"
             >
               <Plus className="h-4 w-4" strokeWidth={2.5} />
-              Déposer
+              DÃ©poser
             </Link>
           ) : (
             <button
@@ -485,7 +485,7 @@ export default function Header() {
               className="md:hidden flex shrink-0 items-center gap-1.5 rounded-xl bg-coral px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-coral/30 transition-transform active:scale-95"
             >
               <Plus className="h-4 w-4" strokeWidth={2.5} />
-              Déposer
+              DÃ©poser
             </button>
           )}
 
@@ -509,7 +509,7 @@ export default function Header() {
                 </Link>
                 <Link href="/annonces/nouvelle" className="btn-primary px-5 py-2 text-sm shadow-sm">
                   <Plus className="h-4 w-4" />
-      Déposer
+      DÃ©poser
                 </Link>
                 <div className="relative">
                   <button
@@ -555,7 +555,7 @@ export default function Header() {
                         </Link>
                         <Link href="/covoiturage/reservations" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-sand" role="menuitem">
                           <Car className="h-4 w-4 text-night/50" />
-                          Mes réservations
+                          Mes rÃ©servations
                         </Link>
                         <Link href="/mes-rdv" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-sand" role="menuitem">
                           <CalendarDays className="h-4 w-4 text-night/50" />
@@ -567,7 +567,7 @@ export default function Header() {
                         </Link>
                         <Link href="/parametres" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-sand" role="menuitem">
                           <Settings2 className="h-4 w-4 text-night/50" />
-                          Paramètres
+                          ParamÃ¨tres
                         </Link>
                         <Link href="/favoris" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-sand" role="menuitem">
                           <Heart className="h-4 w-4 text-night/50" />
@@ -580,7 +580,7 @@ export default function Header() {
                           role="menuitem"
                         >
                           <LogOut className="h-4 w-4" />
-              Déconnexion
+              DÃ©connexion
                         </button>
                       </div>
                     </>
@@ -615,7 +615,7 @@ export default function Header() {
                   className="btn-primary px-5 py-2 text-sm shadow-sm"
                 >
                   <Plus className="h-4 w-4" />
-      Déposer
+      DÃ©poser
                 </button>
               </>
             )}
@@ -679,11 +679,11 @@ export default function Header() {
                     Messages
                   </Link>
                   <Link href="/parametres" onClick={() => setMenuOpen(false)} className="btn-ghost justify-start" role="menuitem">
-                    Paramètres
+                    ParamÃ¨tres
                   </Link>
                   <button onClick={handleLogout} className="btn-ghost justify-start text-red-500">
                     <LogOut className="h-4 w-4" />
-                    Déconnexion
+                    DÃ©connexion
                   </button>
                 </>
               ) : (
