@@ -374,8 +374,8 @@ export default function Header() {
 
   return (
     <>
-      <header data-kalico-header className="fixed top-0 left-0 right-0 z-50 h-20 border-b border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-        <div ref={desktopNavRef} className="mx-auto flex h-20 max-w-[120rem] items-center gap-3 px-6 lg:px-10">
+      <header data-kalico-header className="fixed top-0 left-0 right-0 z-50 h-24 border-b border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+        <div ref={desktopNavRef} className="mx-auto flex h-24 max-w-[120rem] items-center gap-3 px-6 lg:px-10">
           <Link href="/" className="flex shrink-0 items-center gap-2">
             <Image
               src="/brand/kalico1.svg"
@@ -383,8 +383,8 @@ export default function Header() {
               width={160}
               height={40}
               priority
-              className="block h-10 w-auto shrink-0"
-              style={{ width: 'auto', height: '40px' }}
+              className="block h-12 w-auto shrink-0"
+              style={{ width: 'auto', height: '48px' }}
             />
             <span className="block font-display text-lg font-bold leading-none text-night md:text-xl">Kalico</span>
           </Link>
@@ -402,7 +402,7 @@ export default function Header() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher sur Kalico&"
                 aria-label="Rechercher sur Kalico"
-                className="input py-1.5 pl-9 pr-4 text-sm"
+                className="input h-12 py-2 pl-9 pr-4 text-sm"
               />
             </div>
           </form>

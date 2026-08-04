@@ -57,7 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className="bg-[var(--color-bg-page)] text-[var(--color-text-primary)] font-body antialiased overflow-x-clip pt-20 md:overflow-x-visible">
+      <body className="bg-[var(--color-bg-page)] text-[var(--color-text-primary)] font-body antialiased overflow-x-clip pt-24 md:overflow-x-visible">
         <ThemeProvider>
           <ReactQueryProvider>
             <JsonLd data={buildOrganizationSchema()} />

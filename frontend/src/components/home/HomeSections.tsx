@@ -49,7 +49,7 @@ type HomeListing = {
 }
 
 const HERO_CATEGORY_PILLS = [
-  { slug: 'vehicules', label: 'Véhicules' },
+  { slug: 'vehicules', label: 'VÃ©hicules' },
   { slug: 'immobilier', label: 'Immobilier' },
   { slug: 'services', label: 'Services' },
   { slug: 'electronique-multimedia', label: 'High-tech' },
@@ -66,11 +66,11 @@ const HERO_FEATURES = [
   {
     icon: MapPin,
     title: 'Toute la NC couverte',
-    subtitle: 'Communes, tribus, îles',
+    subtitle: 'Communes, tribus, Ã®les',
   },
   {
     icon: ShieldCheck,
-    title: 'Pros vérifiés',
+    title: 'Pros vÃ©rifiÃ©s',
     subtitle: 'Artisans et services de confiance',
   },
 ] as const
@@ -85,7 +85,7 @@ function normalizeHeroPrice(listing: HomeListing) {
 }
 
 function getHeroListingCommune(listing: HomeListing) {
-  return String(listing.commune_name ?? listing.commune ?? '').trim() || 'Nouvelle-Calédonie'
+  return String(listing.commune_name ?? listing.commune ?? '').trim() || 'Nouvelle-CalÃ©donie'
 }
 
 function getHeroListingImage(listing: HomeListing) {
@@ -174,13 +174,13 @@ function HeroListingCard({ listing }: { listing: HomeListing }) {
 
 function HeroFeature({ icon: Icon, title, subtitle }: (typeof HERO_FEATURES)[number]) {
   return (
-    <div className="flex min-w-0 items-start gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#e8832a]/15 text-[#8ce3d2]">
+    <div className="flex min-w-0 items-start gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">
+      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-background-secondary)] text-nc-emeraude">
         <Icon className="h-4.5 w-4.5" />
       </span>
       <span className="min-w-0">
-        <span className="block text-sm font-semibold text-white">{title}</span>
-        <span className="block text-xs text-white/65">{subtitle}</span>
+        <span className="block text-sm font-semibold text-[var(--color-text-primary)]">{title}</span>
+        <span className="block text-xs text-[var(--color-text-secondary)]">{subtitle}</span>
       </span>
     </div>
   )
@@ -201,14 +201,14 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
         <div className="grid gap-6 rounded-[2rem] border border-[#e7dbcd] bg-white/75 p-5 shadow-[0_30px_90px_rgba(3,31,45,0.08)] backdrop-blur-md md:grid-cols-[1.05fr_0.95fr] md:p-8 dark:border-white/10 dark:bg-[rgba(7,28,41,0.16)]">
           <div className="flex min-w-0 flex-col justify-center">
             <span className="inline-flex w-fit items-center rounded-full border border-[#d8c8b5] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#1d6d89] dark:border-white/15 dark:bg-white/10 dark:text-white/75">
-              100 % Nouvelle-Calédonie
+              100 % Nouvelle-CalÃ©donie
             </span>
 
             <h1 className="mt-4 max-w-2xl font-display text-4xl font-bold leading-tight text-[#17313d] md:text-6xl dark:text-white">
-              Les premières annonces arrivent. La vôtre aussi ?
+              Les premiÃ¨res annonces arrivent. La vÃ´tre aussi ?
             </h1>
 
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#39505b] md:text-lg dark:text-white/80">Annonces, services et pros locaux partout en Nouvelle-Calédonie. De Nouméa aux Loyauté, de Koné à l&apos;île des Pins.</p>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#39505b] md:text-lg dark:text-white/80">Annonces, services et pros locaux partout en Nouvelle-CalÃ©donie. De NoumÃ©a aux LoyautÃ©, de KonÃ© Ã  l&apos;Ã®le des Pins.</p>
 
             <form onSubmit={onSubmit} className="mt-6 flex w-full max-w-2xl flex-col gap-3 sm:flex-row">
               <div className="relative min-w-0 flex-1">
@@ -216,7 +216,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
                 <input
                   value={q}
                   onChange={(event) => onQueryChange(event.target.value)}
-                  placeholder="Toyota, studio Nouméa, plombier, iPhone..."
+                  placeholder="Toyota, studio NoumÃ©a, plombier, iPhone..."
                   aria-label="Rechercher une annonce"
                   className="w-full rounded-2xl border border-[#d8c8b5] bg-white px-4 py-3 pl-11 text-sm text-[#17313d] placeholder:text-[#6d5d4b]/55 outline-none ring-0 backdrop-blur-sm transition focus:border-[#1d9e75]/40 focus:bg-white focus:ring-4 focus:ring-[#1d9e75]/10 dark:border-white/12 dark:bg-white/10 dark:text-white dark:placeholder:text-white/55 dark:focus:border-white/30 dark:focus:bg-white/12 dark:focus:ring-white/10"
                   autoComplete="off"
@@ -248,7 +248,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
               cards.map((listing) => <HeroListingCard key={String(listing.id)} listing={listing} />)
             ) : (
               <div className="flex min-h-[360px] items-center justify-center rounded-[1.75rem] border border-dashed border-[#d8c8b5] bg-white/55 px-6 py-10 text-center text-sm text-[#39505b] dark:border-white/10 dark:bg-white/5 dark:text-white/65">
-                <p>Les premières annonces arrivent bientôt.</p>
+                <p>Les premiÃ¨res annonces arrivent bientÃ´t.</p>
               </div>
             )}
           </div>
@@ -339,11 +339,12 @@ export function FeaturedListingsSection({
   if (!loading && listings.length === 0) return null
 
   return (
-    <section id="featured-listings" className="mx-auto max-w-7xl px-4 pb-10" data-reveal="true">
+    <section id="featured-listings" className="bg-[var(--color-surface)]">
+      <div className="mx-auto max-w-7xl px-4 pb-10 pt-10" data-reveal="true">
       <div className="mb-5 flex items-end justify-between gap-4">
         <div className="section-lagon">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Annonces en vedette</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les cat�gories que les gens cherchent vraiment</h2>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les catï¿½gories que les gens cherchent vraiment</h2>
         </div>
         <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
           Tout voir <ArrowRight className="h-4 w-4" />
@@ -361,15 +362,16 @@ export function FeaturedListingsSection({
           </div>
         ) : (
           <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] py-14 text-center text-night/45">
-            <p className="text-sm font-semibold text-night">Les meilleures annonces apparaîtront ici</p>
+            <p className="text-sm font-semibold text-night">Les meilleures annonces apparaÃ®tront ici</p>
             <p className="mt-2 text-sm text-night/65">
-              Boostez votre annonce pour apparaître en tête de page.
+              Boostez votre annonce pour apparaÃ®tre en tÃªte de page.
             </p>
             <Link href="/annonces/nouvelle" className="btn-primary mt-4 inline-block">
-              Déposer une annonce
+              DÃ©poser une annonce
             </Link>
           </div>
         )}
+      </div>
       </div>
     </section>
   )
@@ -377,24 +379,24 @@ export function FeaturedListingsSection({
 
 export function SearchAlertsSection() {
   return (
-    <section className="mx-auto max-w-7xl px-4 pb-10" data-reveal="true">
-      <div className="grid gap-5 overflow-hidden rounded-[2rem] border border-[var(--color-border)] border-b-4 border-b-nc-corail bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.18))] px-6 py-8 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)] lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+    <section className="bg-[var(--color-surface)]">
+      <div className="mx-auto grid max-w-7xl gap-5 overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-8 text-[var(--color-text-primary)] shadow-[0_24px_80px_rgba(8,32,50,0.08)] lg:grid-cols-[1.1fr_0.9fr] lg:items-center" data-reveal="true">
         <div className="min-w-0">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-lagon">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-lagon">
             <Sparkles className="h-3.5 w-3.5" />
             Coups de cSur
           </div>
           <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
-            Gardez vos recherches en mémoire et recevez une alerte quand une offre correspond.
+            Gardez vos recherches en mÃ©moire et recevez une alerte quand une offre correspond.
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
-            Les utilisateurs peuvent enregistrer des mots-clés pour suivre ce qui compte vraiment: un modèle précis, une commune, une gamme de prix ou une catégorie.
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--color-text-secondary)] md:text-base">
+            Les utilisateurs peuvent enregistrer des mots-clÃ©s pour suivre ce qui compte vraiment: un modÃ¨le prÃ©cis, une commune, une gamme de prix ou une catÃ©gorie.
           </p>
           <div className="mt-5 flex flex-wrap gap-2 pb-1 sm:flex-nowrap sm:overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {SEARCH_ALERTS.map((term) => (
               <span
                 key={term}
-                className="shrink-0 rounded-full border border-white/10 bg-white/8 px-3 py-1.5 text-sm font-medium text-white/85"
+                className="shrink-0 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-primary)]"
               >
                 {term}
               </span>
@@ -402,20 +404,20 @@ export function SearchAlertsSection() {
           </div>
         </div>
 
-        <div className="min-w-0 rounded-[1.75rem] border border-white/10 bg-white/8 p-5">
+        <div className="min-w-0 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Exemple d&apos;alerte</p>
           <div className="mt-4 space-y-3">
-            <div className="rounded-2xl bg-white/10 p-4">
+            <div className="rounded-2xl bg-[var(--color-surface)] p-4">
               <p className="text-sm font-semibold">"Toyota Hilux"</p>
-              <p className="mt-1 text-sm text-white/65">Nouméa, prix max 3 500 000 XPF</p>
+              <p className="mt-1 text-sm text-white/65">NoumÃ©a, prix max 3 500 000 XPF</p>
             </div>
-            <div className="rounded-2xl bg-white/10 p-4">
+            <div className="rounded-2xl bg-[var(--color-surface)] p-4">
               <p className="text-sm font-semibold">"Studio"</p>
-              <p className="mt-1 text-sm text-white/65">Dumbéa / Nouméa, location ou vente</p>
+              <p className="mt-1 text-sm text-white/65">DumbÃ©a / NoumÃ©a, location ou vente</p>
             </div>
-            <div className="rounded-2xl bg-white/10 p-4">
+            <div className="rounded-2xl bg-[var(--color-surface)] p-4">
               <p className="text-sm font-semibold">"iPhone"</p>
-              <p className="mt-1 text-sm text-white/65">État bon ou comme neuf, en Nouvelle-Calédonie</p>
+              <p className="mt-1 text-sm text-white/65">Ã‰tat bon ou comme neuf, en Nouvelle-CalÃ©donie</p>
             </div>
           </div>
           <Link href="/alertes" className="btn-primary mt-5 inline-flex w-full items-center justify-center gap-2">
@@ -457,7 +459,7 @@ function CategoryTreeRow({
         <span className="min-w-0 flex-1">
           <span className="block font-semibold text-[var(--color-text-primary)]">{category.name}</span>
           <span className="block text-xs text-[var(--color-text-secondary)]">
-            {depth === 0 ? 'Famille ouverte' : 'Sous-catégorie ouverte'}
+            {depth === 0 ? 'Famille ouverte' : 'Sous-catÃ©gorie ouverte'}
           </span>
         </span>
         <ChevronRight className="h-4 w-4 shrink-0 text-nc-lagon" />
@@ -485,7 +487,7 @@ function CategoryTreeRow({
                   <span className="min-w-0 flex-1">
                     <span className="block font-semibold text-[var(--color-text-primary)]">{child.name}</span>
                     <span className="block text-xs text-[var(--color-text-secondary)]">
-                      {grandChildren.length > 0 ? `${grandChildren.length} sous-cat�gorie${grandChildren.length > 1 ? 's' : ''}` : 'Dernier niveau'}
+                      {grandChildren.length > 0 ? `${grandChildren.length} sous-catï¿½gorie${grandChildren.length > 1 ? 's' : ''}` : 'Dernier niveau'}
                     </span>
                   </span>
                   <ChevronRight className="h-4 w-4 shrink-0 text-nc-lagon" />
@@ -534,7 +536,7 @@ function CategoryCard({
           <Visual className="h-7 w-7" />
         </span>
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Catégorie</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">CatÃ©gorie</p>
           <h3 className="mt-1 text-lg font-semibold text-night">{category.name}</h3>
         </div>
       </div>
@@ -579,7 +581,7 @@ export function PopularCategoriesSection({
       <div className="mb-5 flex items-end justify-between gap-4">
         <div className="section-lagon">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Rayons populaires</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les cat�gories que les gens cherchent vraiment</h2>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les catï¿½gories que les gens cherchent vraiment</h2>
         </div>
         <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
           Voir toutes les annonces <ArrowRight className="h-4 w-4" />
@@ -729,12 +731,12 @@ function BonPlanCard({ item }: { item: BonPlanItem }) {
         {item.discount_pct ? (
           <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">-{item.discount_pct}%</span>
         ) : null}
-      <span className="rounded-full bg-sand px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-Calédonie'}</span>
+      <span className="rounded-full bg-sand px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-CalÃ©donie'}</span>
       </div>
 
       <div className="mt-4 space-y-1 text-sm text-night/55">
         <p>{formatDateLabel(item.event_date)}</p>
-        <p>{item.author_prenom ? `Publié par ${item.author_prenom}` : 'Publication locale'}</p>
+        <p>{item.author_prenom ? `PubliÃ© par ${item.author_prenom}` : 'Publication locale'}</p>
         {item.contact_name ? <p>Contact: {item.contact_name}</p> : null}
       </div>
     </article>
@@ -772,7 +774,7 @@ function CovoiturageCard({
         </span>
         {seatsRemaining <= 1 ? (
           <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-700">
-            Dernière place
+            DerniÃ¨re place
           </span>
         ) : null}
       </div>
@@ -781,7 +783,7 @@ function CovoiturageCard({
         {item.departure} - {item.destination}
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-night/60">
-        {dateLabel} � {timeLabel} � {item.vehicle || 'Véhicule détaillé'} � {item.price_xpf.toLocaleString('fr-FR')} XPF / place
+        {dateLabel} ï¿½ {timeLabel} ï¿½ {item.vehicle || 'VÃ©hicule dÃ©taillÃ©'} ï¿½ {item.price_xpf.toLocaleString('fr-FR')} XPF / place
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-night/65">
@@ -792,7 +794,7 @@ function CovoiturageCard({
 
       <div className="mt-4 space-y-1 text-sm text-night/55">
         <p>{item.driver_prenom ? `Conducteur: ${item.driver_prenom}` : 'Conducteur local'}</p>
-        <p>{item.trust_score != null ? `Fiabilité: ${item.trust_score}/100` : 'Trajet vérifié'}</p>
+        <p>{item.trust_score != null ? `FiabilitÃ©: ${item.trust_score}/100` : 'Trajet vÃ©rifiÃ©'}</p>
       </div>
     </article>
   )
@@ -823,13 +825,13 @@ function SponsoredCampaignCard({ item }: { item: CampaignItem }) {
       <div className="space-y-3 p-4">
         <h3 className="line-clamp-2 text-lg font-semibold text-night">{item.title}</h3>
         <p className="line-clamp-3 text-sm leading-relaxed text-night/65">
-          {item.description || 'Une visibilité locale payante, affichée au bon moment sur Kalico.'}
+          {item.description || 'Une visibilitÃ© locale payante, affichÃ©e au bon moment sur Kalico.'}
         </p>
         <a
           href={href}
           className="inline-flex w-full items-center justify-center rounded-2xl bg-nc-sable px-4 py-3 text-sm font-semibold text-white transition hover:bg-nc-sable/90"
         >
-          {item.cta_text || 'Découvrir'}
+          {item.cta_text || 'DÃ©couvrir'}
         </a>
       </div>
     </article>
@@ -838,14 +840,58 @@ function SponsoredCampaignCard({ item }: { item: CampaignItem }) {
 
 export function BonPlanSection({
   sponsoredItems,
-  promoItems,
-  eventItems,
-  covoiturageItems,
   loading,
 }: {
   sponsoredItems?: CampaignItem[]
-  promoItems?: BonPlanItem[]
-  eventItems?: BonPlanItem[]
+  loading?: boolean
+}) {
+  const sponsoredHasItems = (sponsoredItems || []).length > 0
+
+  return (
+    <section className="mx-auto max-w-7xl px-4 pb-10" data-reveal="true">
+      <div className="grid gap-5 overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-[var(--color-text-primary)] shadow-[0_24px_80px_rgba(8,32,50,0.08)]">
+        {sponsoredHasItems ? (
+          <div>
+            <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-sable">Sponsorisé</p>
+                <h3 className="mt-1 text-2xl font-bold text-[var(--color-text-primary)]">Les bons plans mis en avant</h3>
+              </div>
+              <Link href="/pro/dashboard/publicite" className="text-sm font-semibold text-nc-sable hover:underline">
+                Gérer les campagnes
+              </Link>
+            </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              {sponsoredItems!.map((item) => (
+                <SponsoredCampaignCard key={item.id} item={item} />
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="section-lagon">
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Bons plans & Événements</p>
+            <h3 className="mt-1 font-display text-2xl font-bold text-[var(--color-text-primary)] md:text-3xl">
+              Promotions, culture et mobilité locale
+            </h3>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--color-text-secondary)] md:text-base">
+              Une seule vue claire pour les offres du moment, l'agenda culturel et les trajets à partager.
+            </p>
+          </div>
+          <Link href="/bons-plans" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
+            Voir tout <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+export function CovoiturageSection({
+  covoiturageItems,
+  loading,
+}: {
   covoiturageItems?: Array<{
     id: number | string
     departure: string
@@ -863,97 +909,22 @@ export function BonPlanSection({
   }>
   loading?: boolean
 }) {
-  const sponsoredHasItems = (sponsoredItems || []).length > 0
-  const promoHasItems = (promoItems || []).length > 0
-  const eventHasItems = (eventItems || []).length > 0
   const rideHasItems = (covoiturageItems || []).length > 0
 
   return (
-    <section className="mx-auto max-w-7xl px-4 pb-10" data-reveal="true">
-      <div className="grid gap-5 overflow-hidden rounded-[2rem] border border-night/8 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.12))] p-5 text-white shadow-[0_24px_80px_rgba(8,32,50,0.12)]">
-        {sponsoredHasItems ? (
-          <div>
-            <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-sable">Sponsorisé</p>
-                <h3 className="mt-1 text-2xl font-bold text-white">Les bons plans mis en avant</h3>
-              </div>
-              <Link href="/pro/dashboard/publicite" className="text-sm font-semibold text-nc-sable hover:underline">
-                Gérer les campagnes
-              </Link>
-            </div>
-            <div className="grid gap-3 md:grid-cols-3">
-              {sponsoredItems!.map((item) => (
-                <SponsoredCampaignCard key={item.id} item={item} />
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="section-lagon">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/80">Bons plans & Événements</p>
-            <h3 className="mt-1 font-display text-2xl font-bold text-white md:text-3xl">
-              Promotions, culture et mobilité locale
-            </h3>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
-              Une seule vue claire pour les offres du moment, l'agenda culturel et les trajets à partager.
-            </p>
-          </div>
-          <Link href="/bons-plans" className="hidden items-center gap-1 text-sm font-semibold text-white hover:underline md:inline-flex">
-            Voir tout <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div>
-            <div className="mb-3 flex items-end justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Promotions</p>
-                <h4 className="mt-1 text-2xl font-bold text-white">Les offres qui marchent maintenant</h4>
-              </div>
-              <Link href="/annonces/nouvelle" className="text-sm font-semibold text-nc-emeraude hover:underline">
-                Ajouter la vôtre
-              </Link>
-            </div>
-            {loading ? (
-              <div className="grid gap-3 md:grid-cols-3">
-                {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="h-44 animate-pulse rounded-[1.5rem] border border-white/10 bg-white/8" />
-                ))}
-              </div>
-            ) : promoHasItems ? (
-              <div className="grid gap-3 md:grid-cols-3">
-                {promoItems!.map((item) => (
-                  <BonPlanCard key={item.id} item={item} />
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/8 px-5 py-8 text-center text-white/80">
-<div className="mx-auto flex max-w-md flex-col items-center">
-  <span className="mb-3 text-2xl animate-pulse motion-reduce:animate-none" aria-hidden="true">🎭</span>
-  <p className="font-display text-lg font-medium text-night dark:text-white">Le prochain événement NC mérite d'être ici.</p>
-  <p className="mt-2 text-sm text-[var(--color-text-secondary)]">Concerts, marchés, conférences - tout y est.</p>
-  <Link href="/evenements/nouveau" className="btn-primary mt-4 inline-flex items-center justify-center">
-    Créer un événement
-  </Link>
-</div>
-</div>
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-[1.5rem] border border-white/10 border-b-4 border-b-nc-corail bg-white/5 p-5">
+    <section className="bg-[var(--color-bg-page)]">
+      <div className="mx-auto max-w-7xl px-4 pb-10" data-reveal="true">
+        <div className="rounded-[1.5rem] border border-[var(--color-border)] border-b-4 border-b-nc-corail bg-[var(--color-surface)] p-5">
           <div className="mb-3 flex items-end justify-between gap-3">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-corail">Mobilité</p>
-              <h4 className="mt-1 text-2xl font-bold text-white">Covoiturage local et interurbain</h4>
+              <h4 className="mt-1 text-2xl font-bold text-[var(--color-text-primary)]">Covoiturage local et interurbain</h4>
             </div>
             <Link href="/covoiturage" className="text-sm font-semibold text-nc-corail hover:underline">
               Voir les trajets
             </Link>
           </div>
-          <p className="max-w-3xl text-sm leading-relaxed text-white/70 md:text-base">
+          <p className="max-w-3xl text-sm leading-relaxed text-[var(--color-text-secondary)] md:text-base">
             Trouvez un trajet, proposez une place ou consultez les profils de confiance. Les trajets sont
             pensés pour la recherche rapide, les réservations simples et la sécurité des échanges.
           </p>
@@ -968,7 +939,7 @@ export function BonPlanSection({
           {loading ? (
             <div className="mt-5 grid gap-3 md:grid-cols-3">
               {Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="h-44 animate-pulse rounded-[1.5rem] border border-white/10 bg-white/8" />
+                <div key={index} className="h-44 animate-pulse rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)]" />
               ))}
             </div>
           ) : rideHasItems ? (
@@ -978,10 +949,10 @@ export function BonPlanSection({
               ))}
             </div>
           ) : (
-            <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/8 px-5 py-8 text-center text-white/80">
+            <div className="mt-5 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-5 py-8 text-center text-[var(--color-text-primary)]">
               <div className="mx-auto flex max-w-md flex-col items-center">
                 <span className="mb-3 text-2xl animate-pulse motion-reduce:animate-none" aria-hidden="true">
-                    🚗
+                    ????
                   </span>
                 <p className="font-display text-lg font-medium text-night dark:text-white">
                   Le premier trajet, c&apos;est souvent le plus utile.
