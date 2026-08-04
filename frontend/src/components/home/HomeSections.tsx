@@ -49,7 +49,7 @@ type HomeListing = {
 }
 
 const HERO_CATEGORY_PILLS = [
-  { slug: 'vehicules', label: 'VÃÂ©hicules' },
+  { slug: 'vehicules', label: 'VÃ©hicules' },
   { slug: 'immobilier', label: 'Immobilier' },
   { slug: 'services', label: 'Services' },
   { slug: 'electronique-multimedia', label: 'High-tech' },
@@ -66,11 +66,11 @@ const HERO_FEATURES = [
   {
     icon: MapPin,
     title: 'Toute la NC couverte',
-    subtitle: 'Communes, tribus, ÃÂ®les',
+    subtitle: 'Communes, tribus, Ã®les',
   },
   {
     icon: ShieldCheck,
-    title: 'Pros vÃÂ©rifiÃÂ©s',
+    title: 'Pros vÃ©rifiÃ©s',
     subtitle: 'Artisans et services de confiance',
   },
 ] as const
@@ -85,7 +85,7 @@ function normalizeHeroPrice(listing: HomeListing) {
 }
 
 function getHeroListingCommune(listing: HomeListing) {
-  return String(listing.commune_name ?? listing.commune ?? '').trim() || 'Nouvelle-CalÃÂ©donie'
+  return String(listing.commune_name ?? listing.commune ?? '').trim() || 'Nouvelle-CalÃ©donie'
 }
 
 function getHeroListingImage(listing: HomeListing) {
@@ -201,14 +201,14 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
         <div className="grid gap-6 rounded-[2rem] border border-[#e7dbcd] bg-white/75 p-5 shadow-[0_30px_90px_rgba(3,31,45,0.08)] backdrop-blur-md md:grid-cols-[1.05fr_0.95fr] md:p-8 dark:border-white/10 dark:bg-[rgba(7,28,41,0.16)]">
           <div className="flex min-w-0 flex-col justify-center">
             <span className="inline-flex w-fit items-center rounded-full border border-[#d8c8b5] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#1d6d89] dark:border-white/15 dark:bg-white/10 dark:text-white/75">
-              100 % Nouvelle-CalÃÂ©donie
+              100 % Nouvelle-CalÃ©donie
             </span>
 
             <h1 className="mt-4 max-w-2xl font-display text-4xl font-bold leading-tight text-[#17313d] md:text-6xl dark:text-white">
-              Les premiÃ¨res annonces arrivent. La vÃ´tre aussi ?
+              Les premières annonces arrivent. La vôtre aussi ?
             </h1>
 
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#39505b] md:text-lg dark:text-white/80">Annonces, services et pros locaux partout en Nouvelle-CalÃÂ©donie. De NoumÃÂ©a aux LoyautÃÂ©, de KonÃÂ© ÃÂ  l&apos;ÃÂ®le des Pins.</p>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#39505b] md:text-lg dark:text-white/80">Annonces, services et pros locaux partout en Nouvelle-CalÃ©donie. De NoumÃ©a aux LoyautÃ©, de KonÃ© Ã  l&apos;Ã®le des Pins.</p>
 
             <form onSubmit={onSubmit} className="mt-6 flex w-full max-w-2xl flex-col gap-3 sm:flex-row">
               <div className="relative min-w-0 flex-1">
@@ -216,7 +216,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
                 <input
                   value={q}
                   onChange={(event) => onQueryChange(event.target.value)}
-                  placeholder="Toyota, studio NoumÃÂ©a, plombier, iPhone..."
+                  placeholder="Toyota, studio NoumÃ©a, plombier, iPhone..."
                   aria-label="Rechercher une annonce"
                   className="w-full rounded-2xl border border-[#d8c8b5] bg-white px-4 py-3 pl-11 text-sm text-[#17313d] placeholder:text-[#6d5d4b]/55 outline-none ring-0 backdrop-blur-sm transition focus:border-[#1d9e75]/40 focus:bg-white focus:ring-4 focus:ring-[#1d9e75]/10 dark:border-white/12 dark:bg-white/10 dark:text-white dark:placeholder:text-white/55 dark:focus:border-white/30 dark:focus:bg-white/12 dark:focus:ring-white/10"
                   autoComplete="off"
@@ -248,7 +248,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
               cards.map((listing) => <HeroListingCard key={String(listing.id)} listing={listing} />)
             ) : (
               <div className="flex min-h-[360px] items-center justify-center rounded-[1.75rem] border border-dashed border-[#d8c8b5] bg-white/55 px-6 py-10 text-center text-sm text-[#39505b] dark:border-white/10 dark:bg-white/5 dark:text-white/65">
-                <p>Les premiÃÂ¨res annonces arrivent bientÃÂ´t.</p>
+                <p>Les premiÃ¨res annonces arrivent bientÃ´t.</p>
               </div>
             )}
           </div>
@@ -342,7 +342,7 @@ export function FeaturedListingsSection({
       <div className="mb-5 flex items-end justify-between gap-4">
         <div className="section-lagon">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Annonces en vedette</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les catÃ¯Â¿Â½gories que les gens cherchent vraiment</h2>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les catï¿½gories que les gens cherchent vraiment</h2>
         </div>
         <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
           Tout voir <ArrowRight className="h-4 w-4" />
@@ -360,10 +360,10 @@ export function FeaturedListingsSection({
           </div>
         ) : (
           <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] py-14 text-center text-night/45">
-            <p className="text-sm font-semibold text-night">Les meilleures annonces apparaÃ®tront ici</p>
-            <p className="mt-2 text-sm text-night/65">Boostez votre annonce pour apparaÃ®tre en tÃªte de page.</p>
+            <p className="text-sm font-semibold text-night">Les meilleures annonces apparaîtront ici</p>
+            <p className="mt-2 text-sm text-night/65">Boostez votre annonce pour apparaître en tête de page.</p>
             <Link href="/annonces/nouvelle" className="btn-primary mt-4 inline-block">
-              DÃ©poser la premiÃ¨re annonce
+              Déposer la première annonce
             </Link>
           </div>
         )}
@@ -383,10 +383,10 @@ export function SearchAlertsSection() {
             Coups de cSur
           </div>
           <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
-            Gardez vos recherches en mÃÂ©moire et recevez une alerte quand une offre correspond.
+            Gardez vos recherches en mÃ©moire et recevez une alerte quand une offre correspond.
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--color-text-secondary)] md:text-base">
-            Les utilisateurs peuvent enregistrer des mots-clÃÂ©s pour suivre ce qui compte vraiment: un modÃÂ¨le prÃÂ©cis, une commune, une gamme de prix ou une catÃÂ©gorie.
+            Les utilisateurs peuvent enregistrer des mots-clÃ©s pour suivre ce qui compte vraiment: un modÃ¨le prÃ©cis, une commune, une gamme de prix ou une catÃ©gorie.
           </p>
           <div className="mt-5 flex flex-wrap gap-2 pb-1 sm:flex-nowrap sm:overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {SEARCH_ALERTS.map((term) => (
@@ -405,19 +405,19 @@ export function SearchAlertsSection() {
           <div className="mt-4 space-y-3">
             <div className="rounded-2xl bg-[var(--color-surface)] p-4">
               <p className="text-sm font-semibold">"Toyota Hilux"</p>
-              <p className="mt-1 text-sm text-white/65">NoumÃÂ©a, prix max 3 500 000 XPF</p>
+              <p className="mt-1 text-sm text-white/65">NoumÃ©a, prix max 3 500 000 XPF</p>
             </div>
             <div className="rounded-2xl bg-[var(--color-surface)] p-4">
               <p className="text-sm font-semibold">"Studio"</p>
-              <p className="mt-1 text-sm text-white/65">DumbÃÂ©a / NoumÃÂ©a, location ou vente</p>
+              <p className="mt-1 text-sm text-white/65">DumbÃ©a / NoumÃ©a, location ou vente</p>
             </div>
             <div className="rounded-2xl bg-[var(--color-surface)] p-4">
               <p className="text-sm font-semibold">"iPhone"</p>
-              <p className="mt-1 text-sm text-white/65">Ãâ°tat bon ou comme neuf, en Nouvelle-CalÃÂ©donie</p>
+              <p className="mt-1 text-sm text-white/65">Ã‰tat bon ou comme neuf, en Nouvelle-CalÃ©donie</p>
             </div>
           </div>
           <Link href="/alertes" className="btn-primary mt-5 inline-flex w-full items-center justify-center gap-2">
-            GÃ©rer mes alertes
+            Gérer mes alertes
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -455,7 +455,7 @@ function CategoryTreeRow({
         <span className="min-w-0 flex-1">
           <span className="block font-semibold text-[var(--color-text-primary)]">{category.name}</span>
           <span className="block text-xs text-[var(--color-text-secondary)]">
-            {depth === 0 ? 'Famille ouverte' : 'Sous-catÃÂ©gorie ouverte'}
+            {depth === 0 ? 'Famille ouverte' : 'Sous-catÃ©gorie ouverte'}
           </span>
         </span>
         <ChevronRight className="h-4 w-4 shrink-0 text-nc-lagon" />
@@ -483,7 +483,7 @@ function CategoryTreeRow({
                   <span className="min-w-0 flex-1">
                     <span className="block font-semibold text-[var(--color-text-primary)]">{child.name}</span>
                     <span className="block text-xs text-[var(--color-text-secondary)]">
-                      {grandChildren.length > 0 ? `${grandChildren.length} sous-catÃ¯Â¿Â½gorie${grandChildren.length > 1 ? 's' : ''}` : 'Dernier niveau'}
+                      {grandChildren.length > 0 ? `${grandChildren.length} sous-catï¿½gorie${grandChildren.length > 1 ? 's' : ''}` : 'Dernier niveau'}
                     </span>
                   </span>
                   <ChevronRight className="h-4 w-4 shrink-0 text-nc-lagon" />
@@ -532,7 +532,7 @@ function CategoryCard({
           <Visual className="h-7 w-7" />
         </span>
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">CatÃÂ©gorie</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">CatÃ©gorie</p>
           <h3 className="mt-1 text-lg font-semibold text-night">{category.name}</h3>
         </div>
       </div>
@@ -577,7 +577,7 @@ export function PopularCategoriesSection({
       <div className="mb-5 flex items-end justify-between gap-4">
         <div className="section-lagon">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Rayons populaires</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les catÃ¯Â¿Â½gories que les gens cherchent vraiment</h2>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les catï¿½gories que les gens cherchent vraiment</h2>
         </div>
         <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
           Voir toutes les annonces <ArrowRight className="h-4 w-4" />
@@ -727,12 +727,12 @@ function BonPlanCard({ item }: { item: BonPlanItem }) {
         {item.discount_pct ? (
           <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">-{item.discount_pct}%</span>
         ) : null}
-      <span className="rounded-full bg-sand px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-CalÃÂ©donie'}</span>
+      <span className="rounded-full bg-sand px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-CalÃ©donie'}</span>
       </div>
 
       <div className="mt-4 space-y-1 text-sm text-night/55">
         <p>{formatDateLabel(item.event_date)}</p>
-        <p>{item.author_prenom ? `PubliÃÂ© par ${item.author_prenom}` : 'Publication locale'}</p>
+        <p>{item.author_prenom ? `PubliÃ© par ${item.author_prenom}` : 'Publication locale'}</p>
         {item.contact_name ? <p>Contact: {item.contact_name}</p> : null}
       </div>
     </article>
@@ -770,7 +770,7 @@ function CovoiturageCard({
         </span>
         {seatsRemaining <= 1 ? (
           <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-700">
-            DerniÃÂ¨re place
+            DerniÃ¨re place
           </span>
         ) : null}
       </div>
@@ -779,7 +779,7 @@ function CovoiturageCard({
         {item.departure} - {item.destination}
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-night/60">
-        {dateLabel} Ã¯Â¿Â½ {timeLabel} Ã¯Â¿Â½ {item.vehicle || 'VÃÂ©hicule dÃÂ©taillÃÂ©'} Ã¯Â¿Â½ {item.price_xpf.toLocaleString('fr-FR')} XPF / place
+        {dateLabel} ï¿½ {timeLabel} ï¿½ {item.vehicle || 'VÃ©hicule dÃ©taillÃ©'} ï¿½ {item.price_xpf.toLocaleString('fr-FR')} XPF / place
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-night/65">
@@ -790,7 +790,7 @@ function CovoiturageCard({
 
       <div className="mt-4 space-y-1 text-sm text-night/55">
         <p>{item.driver_prenom ? `Conducteur: ${item.driver_prenom}` : 'Conducteur local'}</p>
-        <p>{item.trust_score != null ? `FiabilitÃÂ©: ${item.trust_score}/100` : 'Trajet vÃÂ©rifiÃÂ©'}</p>
+        <p>{item.trust_score != null ? `FiabilitÃ©: ${item.trust_score}/100` : 'Trajet vÃ©rifiÃ©'}</p>
       </div>
     </article>
   )
@@ -813,7 +813,7 @@ function SponsoredCampaignCard({ item }: { item: CampaignItem }) {
         ) : null}
         <div className="absolute left-3 top-3">
           <span className="badge badge-sable rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] shadow-sm">
-            SponsorisÃ©
+            Sponsorisé
           </span>
         </div>
       </div>
@@ -821,13 +821,13 @@ function SponsoredCampaignCard({ item }: { item: CampaignItem }) {
       <div className="space-y-3 p-4">
         <h3 className="line-clamp-2 text-lg font-semibold text-night">{item.title}</h3>
         <p className="line-clamp-3 text-sm leading-relaxed text-night/65">
-          {item.description || 'Une visibilitÃÂ© locale payante, affichÃÂ©e au bon moment sur Kalico.'}
+          {item.description || 'Une visibilitÃ© locale payante, affichÃ©e au bon moment sur Kalico.'}
         </p>
         <a
           href={href}
           className="inline-flex w-full items-center justify-center rounded-2xl bg-nc-sable px-4 py-3 text-sm font-semibold text-white transition hover:bg-nc-sable/90"
         >
-          {item.cta_text || 'DÃÂ©couvrir'}
+          {item.cta_text || 'DÃ©couvrir'}
         </a>
       </div>
     </article>
@@ -850,11 +850,11 @@ export function BonPlanSection({
           <div>
             <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-sable">SponsorisÃ©</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-sable">Sponsorisé</p>
                 <h3 className="mt-1 text-2xl font-bold text-[var(--color-text-primary)]">Les bons plans mis en avant</h3>
               </div>
               <Link href="/pro/dashboard/publicite" className="text-sm font-semibold text-nc-sable hover:underline">
-                GÃ©rer les campagnes
+                Gérer les campagnes
               </Link>
             </div>
             <div className="grid gap-3 md:grid-cols-3">
@@ -867,12 +867,12 @@ export function BonPlanSection({
 
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="section-lagon">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Bons plans & ÃvÃ©nements</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Bons plans & Événements</p>
             <h3 className="mt-1 font-display text-2xl font-bold text-[var(--color-text-primary)] md:text-3xl">
-              Promotions, culture et mobilitÃ© locale
+              Promotions, culture et mobilité locale
             </h3>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--color-text-secondary)] md:text-base">
-              Une seule vue claire pour les offres du moment, l'agenda culturel et les trajets Ã  partager.
+              Une seule vue claire pour les offres du moment, l'agenda culturel et les trajets à partager.
             </p>
           </div>
           <Link href="/bons-plans" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
@@ -913,7 +913,7 @@ export function CovoiturageSection({
         <div className="rounded-[1.5rem] border border-[var(--color-border)] border-b-4 border-b-nc-corail bg-[var(--color-surface)] p-5">
           <div className="mb-3 flex items-end justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-corail">MobilitÃ©</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-corail">Mobilité</p>
               <h4 className="mt-1 text-2xl font-bold text-[var(--color-text-primary)]">Covoiturage local et interurbain</h4>
             </div>
             <Link href="/covoiturage" className="text-sm font-semibold text-nc-corail hover:underline">
@@ -922,7 +922,7 @@ export function CovoiturageSection({
           </div>
           <p className="max-w-3xl text-sm leading-relaxed text-[var(--color-text-secondary)] md:text-base">
             Trouvez un trajet, proposez une place ou consultez les profils de confiance. Les trajets sont
-            pensÃ©s pour la recherche rapide, les rÃ©servations simples et la sÃ©curitÃ© des Ã©changes.
+            pensés pour la recherche rapide, les réservations simples et la sécurité des échanges.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link href="/covoiturage" className="btn-primary rounded-2xl px-4 py-2.5">
