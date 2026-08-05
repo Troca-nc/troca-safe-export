@@ -365,7 +365,7 @@ export const FEATURED_SEARCHES = [
   { label: 'Divers', slug: 'divers' },
 ]
 
-export const SEARCH_ALERTS = ['iPhone 15', 'Toyota Hilux', 'Studio NoumÃ©a', 'CanapÃ©', 'PS5', 'Chiot']
+export const SEARCH_ALERTS = ['iPhone 15', 'Toyota Hilux', 'Studio Nouméa', 'Canapé', 'PS5', 'Chiot']
 
 export const FEATURED_CATEGORY_ORDER = [
   'emploi',
