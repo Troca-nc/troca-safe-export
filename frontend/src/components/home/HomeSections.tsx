@@ -49,7 +49,7 @@ type HomeListing = {
 }
 
 const HERO_CATEGORY_PILLS = [
-  { slug: 'vehicules', label: 'VÃ©hicules' },
+  { slug: 'vehicules', label: 'Véhicules' },
   { slug: 'immobilier', label: 'Immobilier' },
   { slug: 'services', label: 'Services' },
   { slug: 'electronique-multimedia', label: 'High-tech' },
@@ -66,11 +66,11 @@ const HERO_FEATURES = [
   {
     icon: MapPin,
     title: 'Toute la NC couverte',
-    subtitle: 'Communes, tribus, Ã®les',
+    subtitle: 'Communes, tribus, îles',
   },
   {
     icon: ShieldCheck,
-    title: 'Pros vÃ©rifiÃ©s',
+    title: 'Pros vérifiés',
     subtitle: 'Artisans et services de confiance',
   },
 ] as const
@@ -85,7 +85,7 @@ function normalizeHeroPrice(listing: HomeListing) {
 }
 
 function getHeroListingCommune(listing: HomeListing) {
-  return String(listing.commune_name ?? listing.commune ?? '').trim() || 'Nouvelle-CalÃ©donie'
+  return String(listing.commune_name ?? listing.commune ?? '').trim() || 'Nouvelle-Calédonie'
 }
 
 function getHeroListingImage(listing: HomeListing) {
@@ -201,14 +201,13 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
         <div className="grid gap-6 rounded-[2rem] border border-[#e7dbcd] bg-white/75 p-5 shadow-[0_30px_90px_rgba(3,31,45,0.08)] backdrop-blur-md md:grid-cols-[1.05fr_0.95fr] md:p-8 dark:border-white/10 dark:bg-[rgba(7,28,41,0.16)]">
           <div className="flex min-w-0 flex-col justify-center">
             <span className="inline-flex w-fit items-center rounded-full border border-[#d8c8b5] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#1d6d89] dark:border-white/15 dark:bg-white/10 dark:text-white/75">
-              100 % Nouvelle-CalÃ©donie
+              100 % Nouvelle-Calédonie
             </span>
 
             <h1 className="mt-4 max-w-2xl font-display text-4xl font-bold leading-tight text-[#17313d] md:text-6xl dark:text-white">
               Les premières annonces arrivent. La vôtre aussi ?
             </h1>
-
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#39505b] md:text-lg dark:text-white/80">Annonces, services et pros locaux partout en Nouvelle-CalÃ©donie. De NoumÃ©a aux LoyautÃ©, de KonÃ© Ã  l&apos;Ã®le des Pins.</p>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#39505b] md:text-lg dark:text-white/80">Annonces, services et pros locaux partout en Nouvelle-Calédonie. De Nouméa aux Loyauté, de Koné à l&apos;île des Pins.</p>
 
             <form onSubmit={onSubmit} className="mt-6 flex w-full max-w-2xl flex-col gap-3 sm:flex-row">
               <div className="relative min-w-0 flex-1">
@@ -383,10 +382,10 @@ export function SearchAlertsSection() {
             Coups de cSur
           </div>
           <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
-            Gardez vos recherches en mÃ©moire et recevez une alerte quand une offre correspond.
+            Gardez vos recherches en mémoire et recevez une alerte quand une offre correspond.
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--color-text-secondary)] md:text-base">
-            Les utilisateurs peuvent enregistrer des mots-clÃ©s pour suivre ce qui compte vraiment: un modÃ¨le prÃ©cis, une commune, une gamme de prix ou une catÃ©gorie.
+            Les utilisateurs peuvent enregistrer des mots-clés pour suivre ce qui compte vraiment: un modèle précis, une commune, une gamme de prix ou une catégorie.
           </p>
           <div className="mt-5 flex flex-wrap gap-2 pb-1 sm:flex-nowrap sm:overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {SEARCH_ALERTS.map((term) => (
