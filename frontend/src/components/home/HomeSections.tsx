@@ -215,7 +215,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
                 <input
                   value={q}
                   onChange={(event) => onQueryChange(event.target.value)}
-                  placeholder="Toyota, studio NoumÃ©a, plombier, iPhone..."
+                  placeholder="Toyota, studio Nouméa, plombier, iPhone..."
                   aria-label="Rechercher une annonce"
                   className="w-full rounded-2xl border border-[#d8c8b5] bg-white px-4 py-3 pl-11 text-sm text-[#17313d] placeholder:text-[#6d5d4b]/55 outline-none ring-0 backdrop-blur-sm transition focus:border-[#1d9e75]/40 focus:bg-white focus:ring-4 focus:ring-[#1d9e75]/10 dark:border-white/12 dark:bg-white/10 dark:text-white dark:placeholder:text-white/55 dark:focus:border-white/30 dark:focus:bg-white/12 dark:focus:ring-white/10"
                   autoComplete="off"
@@ -341,7 +341,7 @@ export function FeaturedListingsSection({
       <div className="mb-5 flex items-end justify-between gap-4">
         <div className="section-lagon">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Annonces en vedette</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les catï¿½gories que les gens cherchent vraiment</h2>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les catégories que les gens cherchent vraiment</h2>
         </div>
         <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
           Tout voir <ArrowRight className="h-4 w-4" />
@@ -404,15 +404,15 @@ export function SearchAlertsSection() {
           <div className="mt-4 space-y-3">
             <div className="rounded-2xl bg-[var(--color-surface)] p-4">
               <p className="text-sm font-semibold">"Toyota Hilux"</p>
-              <p className="mt-1 text-sm text-white/65">NoumÃ©a, prix max 3 500 000 XPF</p>
+              <p className="mt-1 text-sm text-white/65">Nouméa, prix max 3 500 000 XPF</p>
             </div>
             <div className="rounded-2xl bg-[var(--color-surface)] p-4">
               <p className="text-sm font-semibold">"Studio"</p>
-              <p className="mt-1 text-sm text-white/65">DumbÃ©a / NoumÃ©a, location ou vente</p>
+              <p className="mt-1 text-sm text-white/65">Dumbéa / Nouméa, location ou vente</p>
             </div>
             <div className="rounded-2xl bg-[var(--color-surface)] p-4">
               <p className="text-sm font-semibold">"iPhone"</p>
-              <p className="mt-1 text-sm text-white/65">Ã‰tat bon ou comme neuf, en Nouvelle-CalÃ©donie</p>
+              <p className="mt-1 text-sm text-white/65">Ã‰tat bon ou comme neuf, en Nouvelle-Calédonie</p>
             </div>
           </div>
           <Link href="/alertes" className="btn-primary mt-5 inline-flex w-full items-center justify-center gap-2">
@@ -482,7 +482,7 @@ function CategoryTreeRow({
                   <span className="min-w-0 flex-1">
                     <span className="block font-semibold text-[var(--color-text-primary)]">{child.name}</span>
                     <span className="block text-xs text-[var(--color-text-secondary)]">
-                      {grandChildren.length > 0 ? `${grandChildren.length} sous-catï¿½gorie${grandChildren.length > 1 ? 's' : ''}` : 'Dernier niveau'}
+                      {grandChildren.length > 0 ? `${grandChildren.length} sous-catégorie${grandChildren.length > 1 ? 's' : ''}` : 'Dernier niveau'}
                     </span>
                   </span>
                   <ChevronRight className="h-4 w-4 shrink-0 text-nc-lagon" />
@@ -576,7 +576,7 @@ export function PopularCategoriesSection({
       <div className="mb-5 flex items-end justify-between gap-4">
         <div className="section-lagon">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Rayons populaires</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les catï¿½gories que les gens cherchent vraiment</h2>
+          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les catégories que les gens cherchent vraiment</h2>
         </div>
         <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
           Voir toutes les annonces <ArrowRight className="h-4 w-4" />
@@ -726,7 +726,7 @@ function BonPlanCard({ item }: { item: BonPlanItem }) {
         {item.discount_pct ? (
           <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">-{item.discount_pct}%</span>
         ) : null}
-      <span className="rounded-full bg-sand px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-CalÃ©donie'}</span>
+      <span className="rounded-full bg-sand px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-Calédonie'}</span>
       </div>
 
       <div className="mt-4 space-y-1 text-sm text-night/55">
