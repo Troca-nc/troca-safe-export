@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, notFound } from 'next/navigation'
 import {
   ArrowRight,
   Database,
@@ -23,12 +23,14 @@ const QUICK_LINKS = [
   { href: '/annonces', label: 'Annonces' },
   { href: '/annonces/nouvelle', label: 'Bon plan' },
   { href: '/messages', label: 'Messages' },
-  { href: '/parametres', label: 'ParamÃ¨tres' },
+  { href: '/parametres', label: 'Paramètres' },
   { href: '/profil', label: 'Profil' },
   { href: '/admin/dashboard', label: 'Admin' },
 ]
 
 export default function DemoQaPage() {
+  if (process.env.NODE_ENV === 'production') notFound()
+
   const router = useRouter()
   const { login, logout, isAuthenticated, user } = useAuthStore()
   const [status, setStatus] = useState<any>(null)
@@ -36,7 +38,7 @@ export default function DemoQaPage() {
   const [message, setMessage] = useState('')
 
   const demoEmail = user?.email ?? ''
-  const demoBadge = useMemo(() => demoEmail.endsWith('@demo.kalico') ? 'Compte dï¿½mo actif' : 'Mode rï¿½el', [demoEmail])
+  const demoBadge = useMemo(() => demoEmail.endsWith('@demo.kalico') ? 'Compte démo actif' : 'Mode réel', [demoEmail])
 
   const loadStatus = async () => {
     try {
@@ -56,7 +58,7 @@ export default function DemoQaPage() {
     setMessage('')
     try {
       const result = await seedDemoDataset()
-      setMessage(`Jeu de donnï¿½es gï¿½nï¿½rï¿½: ${result?.counts?.users ?? 0} comptes, ${result?.counts?.listings ?? 0} annonces.`)
+      setMessage(`Jeu de données généré: ${result?.counts?.users ?? 0} comptes, ${result?.counts?.listings ?? 0} annonces.`)
       await loadStatus()
     } finally {
       setBusy(null)
@@ -68,7 +70,7 @@ export default function DemoQaPage() {
     setMessage('')
     try {
       const result = await resetDemoDataset()
-      setMessage(result?.cleared ? 'Jeu de donnï¿½es dï¿½mo supprimï¿½.' : 'Jeu de donnï¿½es remis ï¿½ zï¿½ro.')
+      setMessage(result?.cleared ? 'Jeu de données démo supprimé.' : 'Jeu de données remis à zéro.')
       await loadStatus()
     } finally {
       setBusy(null)
@@ -82,7 +84,7 @@ export default function DemoQaPage() {
       await login(DEMO_ACCOUNTS[key].email, DEMO_ACCOUNTS[key].password)
       router.push(key === 'admin' ? '/admin/dashboard' : '/profil')
     } catch (err: any) {
-      setMessage(err?.response?.data?.error ?? 'Connexion dï¿½mo impossible.')
+      setMessage(err?.response?.data?.error ?? 'Connexion démo impossible.')
     } finally {
       setBusy(null)
     }
@@ -105,25 +107,25 @@ export default function DemoQaPage() {
                   Environnement visuel complet pour tester Kalico sans friction.
                 </h1>
                 <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/72 md:text-base">
-                  Gï¿½nï¿½rez les donnï¿½es locales, ouvrez les rï¿½les instantanï¿½s, puis naviguez dans toutes les pages critiques
-                  comme un utilisateur rï¿½el, sur web et mobile.
+                  Générez les données locales, ouvrez les rôles instantanés, puis naviguez dans toutes les pages critiques
+                  comme un utilisateur réel, sur web et mobile.
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[24rem]">
                 <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-lagoon">Statut</p>
-                  <p className="mt-2 text-sm font-semibold">{status?.enabled ? 'Local activï¿½' : 'Mode hors ligne'}</p>
+                  <p className="mt-2 text-sm font-semibold">{status?.enabled ? 'Local activé' : 'Mode hors ligne'}</p>
                   <p className="text-xs text-white/60">{demoBadge}</p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-lagoon">Comptes</p>
                   <p className="mt-2 text-2xl font-bold">{status?.counts?.users ?? 0}</p>
-                  <p className="text-xs text-white/60">comptes dï¿½mo</p>
+                  <p className="text-xs text-white/60">comptes démo</p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-lagoon">Annonces</p>
                   <p className="mt-2 text-2xl font-bold">{status?.counts?.listings ?? 0}</p>
-                  <p className="text-xs text-white/60">annonces seedï¿½es</p>
+                  <p className="text-xs text-white/60">annonces seedées</p>
                 </div>
               </div>
             </div>
@@ -144,7 +146,7 @@ export default function DemoQaPage() {
                   </div>
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-coral/80">Bootstrap local</p>
-                    <h2 className="text-xl font-bold text-night">Crï¿½er ou vider les donnï¿½es de dï¿½monstration</h2>
+                    <h2 className="text-xl font-bold text-night">Créer ou vider les données de démonstration</h2>
                   </div>
                 </div>
 
@@ -156,7 +158,7 @@ export default function DemoQaPage() {
                     className="btn-primary inline-flex items-center gap-2 rounded-2xl px-4 py-2.5"
                   >
                     {busy === 'seed' ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
-                    Gï¿½nï¿½rer le seed local
+                    Générer le seed local
                   </button>
                   <button
                     type="button"
@@ -174,8 +176,8 @@ export default function DemoQaPage() {
                 </div>
 
                 <div className="mt-4 rounded-2xl bg-sand px-4 py-3 text-sm text-night/65">
-                  Les comptes dï¿½mo utilisent le mot de passe commun <span className="font-semibold">Demo1234!</span>.
-                  Le seed crï¿½e des annonces, messages, notifications, avis, paiements simulï¿½s et ï¿½vï¿½nements analytics.
+                  Les comptes démo utilisent le mot de passe commun <span className="font-semibold">Demo1234!</span>.
+                  Le seed crée des annonces, messages, notifications, avis, paiements simulés et événements analytics.
                 </div>
               </div>
 
@@ -185,8 +187,8 @@ export default function DemoQaPage() {
                     <Crown className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ocean/80">Connexion instantanï¿½e</p>
-                    <h2 className="text-xl font-bold text-night">Accï¿½der aux rï¿½les rï¿½els seedï¿½s</h2>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ocean/80">Connexion instantanée</p>
+                    <h2 className="text-xl font-bold text-night">Accéder aux rôles réels seedés</h2>
                   </div>
                 </div>
 
@@ -260,12 +262,12 @@ export default function DemoQaPage() {
                   </div>
                   <div className="rounded-2xl bg-sand p-4">
                     <p className="text-sm font-semibold text-night">Mobile</p>
-                    <p className="mt-1 text-sm text-night/60">Navigation tactile, retour arriï¿½re et Ãtat dï¿½mo.</p>
+                    <p className="mt-1 text-sm text-night/60">Navigation tactile, retour arrière et état démo.</p>
                   </div>
                 </div>
 
                 <div className="mt-4 rounded-2xl border border-dashed border-night/10 bg-night/[0.03] p-4 text-sm text-night/60">
-                  Sur mobile, installez le seed puis utilisez les boutons de connexion instantanï¿½e dans lï¿½cran de login
+                  Sur mobile, installez le seed puis utilisez les boutons de connexion instantanée dans l'écran de login
                   pour basculer entre particulier, pro, bon plan et admin.
                 </div>
 
@@ -275,7 +277,7 @@ export default function DemoQaPage() {
                     onClick={() => logout()}
                     className="mt-4 btn-ghost inline-flex items-center gap-2 rounded-2xl px-4 py-2.5"
                   >
-                    DÃ©connexion rapide
+                    Déconnexion rapide
                   </button>
                 ) : null}
               </div>

@@ -12,10 +12,6 @@ const apiOrigin = new URL(apiUrl, siteUrl).origin
 const apiWsOrigin = apiOrigin.replace(/^http/, 'ws')
 
 const nextConfig = {
-  experimental: {
-    instrumentationHook: true,
-  },
-
   generateBuildId: async () => {
     return `build-${Date.now()}`
   },
