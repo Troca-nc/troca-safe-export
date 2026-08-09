@@ -247,7 +247,19 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
               cards.map((listing) => <HeroListingCard key={String(listing.id)} listing={listing} />)
             ) : (
               <div className="flex min-h-[360px] items-center justify-center rounded-[1.75rem] border border-dashed border-[#d8c8b5] bg-white/55 px-6 py-10 text-center text-sm text-[#39505b] dark:border-white/10 dark:bg-white/5 dark:text-white/65">
-                <p>Les premiÃ¨res annonces arrivent bientÃ´t.</p>
+                <div className="flex flex-col items-center justify-center gap-6 text-center p-8 h-full">
+                  <div className="text-5xl">🌺</div>
+                  <p className="font-display text-xl font-bold text-[var(--color-text-primary)] mb-2">
+                    Soyez parmi les premiers.
+                  </p>
+                  <p className="text-sm text-[var(--color-text-secondary)]">
+                    Kalico ouvre ses portes en Nouvelle-Calédonie.
+                    Déposez votre première annonce gratuitement.
+                  </p>
+                  <a href="/annonces/nouvelle" className="btn-primary px-6 py-3 rounded-xl text-sm font-semibold">
+                    Déposer une annonce
+                  </a>
+                </div>
               </div>
             )}
           </div>
