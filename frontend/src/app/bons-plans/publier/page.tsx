@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight, Check, CircleDollarSign, ExternalLink, Upload } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
@@ -343,9 +344,9 @@ export default function PublishBonPlanPage() {
                 <div className="rounded-[1.5rem] border border-coral/15 bg-coral/5 p-5">
                   <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Apereu en temps reel</p>
                   <div className="mt-4 overflow-hidden rounded-[1.25rem] border border-night/8 bg-white shadow-sm">
-                    <div className="aspect-[16/9] bg-sand">
+                    <div className="relative aspect-[16/9] bg-sand">
                       {preview.image_url ? (
-                        <img src={preview.image_url} alt={preview.title} className="h-full w-full object-cover" />
+                        <Image src={preview.image_url} alt={preview.title} fill className="object-cover" />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-4xl opacity-30">🎭</div>
                       )}

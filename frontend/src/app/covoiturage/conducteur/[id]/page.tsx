@@ -245,7 +245,7 @@ export default function DriverPublicProfilePage() {
                   <div className="mt-2 flex flex-wrap gap-2 text-sm text-night/60">
                     <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
                       <MapPin className="h-3.5 w-3.5" />
-                      {profile.commune_name || profile.province_name || 'Nouvelle-CalÃ©donie'}
+                      {profile.commune_name || profile.province_name || 'Nouvelle-Calédonie'}
                     </span>
                     <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 ${getTrustTone(score)}`}>
                       <BadgeCheck className="h-3.5 w-3.5" />

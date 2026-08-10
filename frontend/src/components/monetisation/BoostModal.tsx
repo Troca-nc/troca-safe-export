@@ -49,7 +49,7 @@ function ProviderSelector({
 }
 
 function formatCardLabel(card: SavedCard) {
-  return `${String(card.brand || 'card').toUpperCase()} """" ${card.last4}`
+  return `${String(card.brand || 'card').toUpperCase()} •••• ${card.last4}`
 }
 
 interface BoostModalProps {
@@ -182,7 +182,7 @@ export default function BoostModal({ annonce, onClose }: BoostModalProps) {
                   <div key={type} className="overflow-hidden rounded-2xl border border-night/8">
                     <div className="flex items-center gap-2 bg-sand/50 px-3 py-2.5">
                       {BOOST_ICONS[type]}
-                      <span className="text-sm font-medium text-night">{first.emoji} {first.label.split(' ')[0]}</span>
+                      <span className="text-sm font-medium text-night">{first.emoji} {first.label.split(' -')[0]}</span>
                     </div>
                     <div className="divide-y divide-night/6">
                       {options.map((option) => (

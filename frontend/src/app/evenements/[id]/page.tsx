@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight, CalendarDays, Clock3, Loader2, MapPin, Ticket } from 'lucide-react'
@@ -44,9 +45,9 @@ type EventDetail = {
 }
 
 function formatDateLabel(value?: string | null) {
-  if (!value) return 'Date ï¿½ confirmer'
+  if (!value) return 'Date à confirmer'
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'Date ï¿½ confirmer'
+  if (Number.isNaN(date.getTime())) return 'Date à confirmer'
   return new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }).format(date)
 }
 
@@ -152,7 +153,7 @@ export default function EventDetailPage() {
     }
 
     if (!selectedItems.length) {
-      setError('Sï¿½lectionnez au moins un billet.')
+      setError('Sélectionnez au moins un billet.')
       return
     }
 
@@ -175,9 +176,9 @@ export default function EventDetailPage() {
         return
       }
 
-      setSuccess(`Commande confirmï¿½e. Total payï¿½: ${formatMoney(totalXpf)}.`)
+      setSuccess(`Commande confirmée. Total payé: ${formatMoney(totalXpf)}.`)
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible de rï¿½server les billets.')
+      setError(err?.response?.data?.error || 'Impossible de réserver les billets.')
     } finally {
       setSubmitting(false)
     }
@@ -195,11 +196,11 @@ export default function EventDetailPage() {
             <article className="overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
               <div className="relative h-64 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.28))]">
                 {event.cover_image_url ? (
-                  <img src={event.cover_image_url} alt={event.title} className="h-full w-full object-cover opacity-80" />
+                  <Image src={event.cover_image_url} alt={event.title} fill className="object-cover opacity-80" />
                 ) : null}
               </div>
               <div className="p-6 md:p-8">
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">{event.category || 'ï¿½vï¿½nement'}</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">{event.category || 'Événement'}</p>
                 <h1 className="mt-2 font-display text-4xl font-bold text-night">{event.title}</h1>
                 <div className="mt-4 flex flex-wrap gap-3 text-sm text-night/65">
                   <span className="inline-flex items-center gap-2 rounded-full bg-sand px-3 py-1.5">
@@ -208,11 +209,11 @@ export default function EventDetailPage() {
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full bg-sand px-3 py-1.5">
                     <Clock3 className="h-4 w-4 text-coral" />
-                    {event.event_time || 'Heure ï¿½ confirmer'}
+                    {event.event_time || 'Heure à confirmer'}
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full bg-sand px-3 py-1.5">
                     <MapPin className="h-4 w-4 text-coral" />
-                    {event.venue_name || event.commune_name || 'Nouvelle-CalÃ©donie'}
+                    {event.venue_name || event.commune_name || 'Nouvelle-Calédonie'}
                   </span>
                 </div>
 
@@ -243,7 +244,7 @@ export default function EventDetailPage() {
 
             <aside className="space-y-4">
               <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Rï¿½server</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Réserver</p>
                 <h2 className="mt-1 font-display text-2xl font-bold text-night">Choisissez vos billets</h2>
 
                 <div className="mt-4 space-y-3">
@@ -269,7 +270,7 @@ export default function EventDetailPage() {
                     ))
                   ) : (
                     <p className="rounded-2xl border border-dashed border-[var(--color-border)] px-4 py-8 text-sm text-night/55">
-                      La billetterie nest pas encore configurï¿½e pour cet ï¿½vï¿½nement.
+                      La billetterie n'est pas encore configurée pour cet événement.
                     </p>
                   )}
                 </div>
@@ -284,7 +285,7 @@ export default function EventDetailPage() {
                     <input value={buyerEmail} onChange={(e) => setBuyerEmail(e.target.value)} type="email" className="input w-full rounded-2xl" />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-sm font-semibold">Tï¿½lï¿½phone</span>
+                    <span className="text-sm font-semibold">Téléphone</span>
                     <input value={buyerPhone} onChange={(e) => setBuyerPhone(e.target.value)} className="input w-full rounded-2xl" />
                   </label>
                 </div>
@@ -292,7 +293,7 @@ export default function EventDetailPage() {
                 <div className="mt-4 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Total</p>
                   <p className="mt-1 text-2xl font-bold text-night">{formatMoney(totalXpf)}</p>
-                  <p className="mt-1 text-sm text-night/55">Rï¿½servation temporaire 10 minutes avant expiration.</p>
+                  <p className="mt-1 text-sm text-night/55">Réservation temporaire 10 minutes avant expiration.</p>
                 </div>
 
                 {error ? <p className="mt-4 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
@@ -305,7 +306,7 @@ export default function EventDetailPage() {
                   className="btn-primary mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 disabled:opacity-60"
                 >
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  Rï¿½server mes billets
+                  Réserver mes billets
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
@@ -313,8 +314,8 @@ export default function EventDetailPage() {
           </div>
         ) : (
           <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-14 text-center text-night/55">
-            <p className="text-lg font-semibold text-night">ï¿½vï¿½nement introuvable</p>
-            <p className="mt-2 text-sm">Retournez au calendrier pour dï¿½couvrir les prochains ï¿½vï¿½nements.</p>
+            <p className="text-lg font-semibold text-night">Événement introuvable</p>
+            <p className="mt-2 text-sm">Retournez au calendrier pour découvrir les prochains événements.</p>
             <Link href="/evenements" className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white">
               Voir le calendrier
             </Link>

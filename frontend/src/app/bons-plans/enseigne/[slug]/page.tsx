@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { AlertTriangle, ArrowLeft, BadgeCheck, MessageSquare, Check } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
@@ -111,7 +112,7 @@ export default function BusinessProfilePage() {
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-white/20 bg-white">
                 {business?.logo_url ? (
-                  <img src={business.logo_url} alt={business?.name || 'Enseigne'} className="h-full w-full object-cover" />
+                  <Image src={business.logo_url} alt={business?.name || 'Enseigne'} width={64} height={64} className="h-full w-full object-cover" />
                 ) : (
                   <span className="text-2xl opacity-40">🎭</span>
                 )}

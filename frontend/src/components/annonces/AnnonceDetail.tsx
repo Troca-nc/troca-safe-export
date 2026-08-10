@@ -109,9 +109,9 @@ interface Props {
 const CONDITION_LABELS: Record<string, string> = {
   new: 'Neuf',
   like_new: 'Comme neuf',
-  good: 'Bon Ãtat',
+  good: 'Bon état',
   fair: 'Correct',
-  for_parts: 'Pour piï¿½ces',
+  for_parts: 'Pour pièces',
 }
 
 const TRUST_LABELS: Record<string, { label: string; className: string }> = {
@@ -119,7 +119,7 @@ const TRUST_LABELS: Record<string, { label: string; className: string }> = {
   bon: { label: 'Vendeur fiable', className: 'bg-teal-50 text-teal-700 border-teal-100' },
   moyen: { label: 'Profil en cours', className: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border-[var(--color-warning)]/30' },
   faible: { label: 'Profil sensible', className: 'bg-[var(--color-danger)]/10 text-[var(--color-danger)] border-[var(--color-danger)]/30' },
-  inconnu: { label: 'Non ï¿½valuï¿½', className: 'bg-sand text-night/60 border-night/10' },
+  inconnu: { label: 'Non évalué', className: 'bg-sand text-night/60 border-night/10' },
 }
 
 const STOP_WORDS = new Set([
@@ -497,7 +497,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
       }
 
       await messagesApi.makeOffer(convId, amount)
-      setOfferFeedback('Votre offre a bien ï¿½tï¿½ envoyï¿½e. Vous ï¿½tes redirigï¿½ vers la conversation.')
+      setOfferFeedback('Votre offre a bien été envoyée. Vous êtes redirigé vers la conversation.')
       setOfferModalOpen(false)
       router.push(`/messages/${convId}`)
     } catch {
@@ -517,7 +517,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
         reason: reportReason,
         comment: reportComment.trim(),
       })
-      setReportFeedback('Merci, votre signalement a bien ï¿½tï¿½ envoyï¿½.')
+      setReportFeedback('Merci, votre signalement a bien été envoyé.')
       setReportModalOpen(false)
       setReportComment('')
       setReportReason('spam')
@@ -541,7 +541,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
         refreshListing().catch(() => undefined),
         refreshSellerContext().catch(() => undefined),
       ])
-      setReviewFeedback('Merci, votre avis a bien ï¿½tï¿½ publiï¿½.')
+      setReviewFeedback('Merci, votre avis a bien été publié.')
       setReviewComment('')
       setReviewNote(5)
     } catch {
@@ -593,10 +593,10 @@ export default function AnnonceDetail({ id, initialData }: Props) {
         <div className="mb-5 rounded-[2rem] border border-[var(--color-success)]/30 bg-[var(--color-success)]/10 p-5 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-success)]">Publication rï¿½ussie</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-success)]">Publication réussie</p>
               <h2 className="mt-2 text-2xl font-bold text-[var(--color-success)]">Votre annonce est en ligne</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-success)]/70">
-                Partagez-la maintenant, retrouvez-la dans vos annonces et dï¿½couvrez les options de visibilitï¿½ pour lui donner un coup de pouce.
+                Partagez-la maintenant, retrouvez-la dans vos annonces et découvrez les options de visibilité pour lui donner un coup de pouce.
               </p>
             </div>
             <button
@@ -701,14 +701,14 @@ export default function AnnonceDetail({ id, initialData }: Props) {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Offre rapide</p>
                 <h2 className="mt-1 text-2xl font-bold text-night">Faire une offre pour {listing.title}</h2>
                 <p className="mt-2 text-sm leading-6 text-night/60">
-                  Proposez un montant et ajoutez un message bref. La discussion souvrira directement avec le vendeur.
+                  Proposez un montant et ajoutez un message bref. La discussion s'ouvrira directement avec le vendeur.
                 </p>
               </div>
             </div>
 
             <div className="mt-5 grid gap-4 sm:grid-cols-[1fr_1.1fr]">
               <label className="block space-y-2">
-                <span className="text-sm font-medium text-night">Montant proposï¿½ (XPF)</span>
+                <span className="text-sm font-medium text-night">Montant proposé (XPF)</span>
                 <input
                   type="number"
                   min={0}
@@ -721,8 +721,8 @@ export default function AnnonceDetail({ id, initialData }: Props) {
                 />
                 {listing.price != null && (
                   <p className="text-xs text-night/45">
-                    Prix affichï¿½: {listing.price.toLocaleString('fr-FR')} XPF
-                    {listing.price_negotiable ? ' ï¿½ nï¿½gociable' : ''}
+                    Prix affiché: {listing.price.toLocaleString('fr-FR')} XPF
+                    {listing.price_negotiable ? ' · négociable' : ''}
                   </p>
                 )}
               </label>
@@ -792,7 +792,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--color-danger)]/80">Signalement</p>
                 <h2 className="mt-1 text-2xl font-bold text-night">Signaler cette annonce</h2>
                 <p className="mt-2 text-sm leading-6 text-night/60">
-                  Aidez-nous ï¿½ garder une plateforme de confiance. Votre signalement sera transmis ï¿½ notre ï¿½quipe.
+                  Aidez-nous à garder une plateforme de confiance. Votre signalement sera transmis à notre équipe.
                 </p>
               </div>
             </div>
@@ -805,7 +805,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
                   onChange={(event) => setReportReason(event.target.value as typeof reportReason)}
                   className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-[var(--color-danger)]/30 focus:ring-4 focus:ring-[var(--color-danger)]/10"
                 >
-                  <option value="spam">Spam ou publicitï¿½ abusive</option>
+                  <option value="spam">Spam ou publicité abusive</option>
                   <option value="fake">Annonce douteuse ou trompeuse</option>
                   <option value="prohibited">Produit ou contenu interdit</option>
                   <option value="offensive">Contenu offensant</option>
@@ -820,7 +820,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
                   onChange={(event) => setReportComment(event.target.value)}
                   rows={4}
                   className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-[var(--color-danger)]/30 focus:ring-4 focus:ring-[var(--color-danger)]/10"
-                  placeholder="Expliquez briï¿½vement ce qui vous paraï¿½t problï¿½matique..."
+                  placeholder="Expliquez brièvement ce qui vous paraît problématique..."
                   maxLength={500}
                 />
               </label>
