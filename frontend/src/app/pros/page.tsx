@@ -5,16 +5,16 @@ import ProsDirectoryClient from './ProsDirectoryClient'
 import { SITE_URL } from '@/types/seo.types'
 
 export const metadata: Metadata = {
-  title: 'Annuaire des pros - Kalico NC',
+  title: 'Professionnels en Nouvelle-Calédonie | Kalico',
   description:
-    'Dï¿½couvrez les professionnels vï¿½rifiï¿½s de Nouvelle-CalÃ©donie. Filtrez par catï¿½gorie, commune et note pour trouver le bon partenaire local.',
+    'Trouvez des artisans et professionnels vérifiés en Nouvelle-Calédonie.',
   alternates: {
     canonical: `${SITE_URL}/pros`,
   },
   openGraph: {
-    title: 'Annuaire des pros - Kalico NC',
+    title: 'Professionnels en Nouvelle-Calédonie | Kalico',
     description:
-      'Dï¿½couvrez les professionnels vï¿½rifiï¿½s de Nouvelle-CalÃ©donie. Filtrez par catï¿½gorie, commune et note pour trouver le bon partenaire local.',
+      'Trouvez des artisans et professionnels vérifiés en Nouvelle-Calédonie.',
     url: `${SITE_URL}/pros`,
     siteName: 'Kalico',
     locale: 'fr_NC',
@@ -22,9 +22,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Annuaire des pros - Kalico NC',
+    title: 'Professionnels en Nouvelle-Calédonie | Kalico',
     description:
-      'Dï¿½couvrez les professionnels vï¿½rifiï¿½s de Nouvelle-CalÃ©donie. Filtrez par catï¿½gorie, commune et note pour trouver le bon partenaire local.',
+      'Trouvez des artisans et professionnels vérifiés en Nouvelle-Calédonie.',
   },
 }
 
