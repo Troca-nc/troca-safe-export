@@ -1533,6 +1533,9 @@ function ListingsPageContent() {
 
   return (
     <div className="min-h-screen">
+      <h1 className="sr-only">
+        Toutes les annonces en Nouvelle-Calédonie
+      </h1>
       <Header />
 
       <div className="max-w-7xl mx-auto px-4 py-6">
