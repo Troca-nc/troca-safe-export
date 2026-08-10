@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import {
@@ -89,9 +90,9 @@ type DriverProfilePayload = {
 }
 
 function formatDate(value?: string | null) {
-  if (!value) return 'Date non renseignï¿½e'
+  if (!value) return 'Date non renseignée'
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'Date non renseignï¿½e'
+  if (Number.isNaN(date.getTime())) return 'Date non renseignée'
   return new Intl.DateTimeFormat('fr-FR', {
     day: 'numeric',
     month: 'short',
@@ -105,9 +106,9 @@ function formatTime(value?: string | null) {
 }
 
 function formatRoute(ride: DriverRide) {
-  const departure = ride.departure_commune_name || ride.departure || 'Dï¿½part'
-  const destination = ride.destination_commune_name || ride.destination || 'Arrivï¿½e'
-  return `${departure} ï¿½ ${destination}`
+  const departure = ride.departure_commune_name || ride.departure || 'Départ'
+  const destination = ride.destination_commune_name || ride.destination || 'Arrivée'
+  return `${departure} → ${destination}`
 }
 
 function getInitials(value?: string | null) {
@@ -172,7 +173,7 @@ export default function DriverPublicProfilePage() {
   const profile = payload?.profile ?? null
   const vehicle = payload?.vehicle ?? null
   const trustScore = Number(profile?.trust_score ?? 0)
-  const memberSince = profile?.member_since ? formatDate(profile.member_since) : 'Membre rï¿½cent'
+  const memberSince = profile?.member_since ? formatDate(profile.member_since) : 'Membre récent'
 
   const reviewCount = useMemo(() => {
     return Number(profile?.reviews_count ?? reviews.length ?? 0)
@@ -200,7 +201,7 @@ export default function DriverPublicProfilePage() {
           </Link>
           <div className="mt-6 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center shadow-sm">
             <p className="text-lg font-semibold text-night">{error || 'Conducteur introuvable'}</p>
-            <p className="mt-2 text-sm text-night/60">Ce profil public nest pas disponible.</p>
+            <p className="mt-2 text-sm text-night/60">Ce profil public n'est pas disponible.</p>
           </div>
         </main>
       </div>
@@ -222,7 +223,7 @@ export default function DriverPublicProfilePage() {
         <section className="mt-4 overflow-hidden rounded-[2rem] border border-night/8 bg-[var(--color-surface)] shadow-sm">
           <div className="relative h-40 bg-[linear-gradient(135deg,_rgba(8,32,50,0.95),_rgba(10,126,164,0.55))]">
             {profile.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="h-full w-full object-cover opacity-25" />
+              <Image src={profile.avatar_url} alt="" fill className="object-cover opacity-25" />
             ) : null}
           </div>
           <div className="-mt-10 px-6 pb-6">
@@ -230,7 +231,7 @@ export default function DriverPublicProfilePage() {
                 <div className="flex items-end gap-4">
                 <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-white shadow-lg">
                   {profile.avatar_url ? (
-                    <img src={profile.avatar_url} alt={displayName} className="h-full w-full object-cover" />
+                    <Image src={profile.avatar_url} alt={displayName} width={80} height={80} className="h-full w-full object-cover" />
                   ) : (
                     <span className="text-xl font-bold text-[#0A7EA4]">{getInitials(displayName)}</span>
                   )}
@@ -277,19 +278,19 @@ export default function DriverPublicProfilePage() {
               <p className="mt-5 max-w-3xl text-sm leading-relaxed text-night/65">{profile.bio}</p>
             ) : (
               <p className="mt-5 max-w-3xl text-sm leading-relaxed text-night/55">
-                Ce conducteur partage ses trajets en Nouvelle-CalÃ©donie. Consultez son vï¿½hicule, son historique et les avis avant de rï¿½server.
+                Ce conducteur partage ses trajets en Nouvelle-Calédonie. Consultez son véhicule, son historique et les avis avant de réserver.
               </p>
             )}
 
             <div className="mt-4 flex flex-wrap gap-2">
               {profile.email_verified ? (
                 <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-3 py-1.5 text-xs font-medium text-night/70">
-                  Email vï¿½rifiï¿½
+                  Email vérifié
                 </span>
               ) : null}
               {profile.phone_verified ? (
                 <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-3 py-1.5 text-xs font-medium text-night/70">
-                  Tï¿½lï¿½phone vï¿½rifiï¿½
+                  Téléphone vérifié
                 </span>
               ) : null}
               {profile.is_pro ? (
@@ -312,24 +313,24 @@ export default function DriverPublicProfilePage() {
             <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-lagon">Vï¿½hicule</p>
-                  <h2 className="mt-1 font-display text-2xl font-bold text-night">Ce quil propose</h2>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-lagon">Véhicule</p>
+                  <h2 className="mt-1 font-display text-2xl font-bold text-night">Ce qu'il propose</h2>
                 </div>
                 <Car className="h-6 w-6 text-[#0A7EA4]" />
               </div>
 
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Vï¿½hicule</p>
-                  <p className="mt-2 text-lg font-semibold text-night">{vehicle?.vehicle || 'Vï¿½hicule non renseignï¿½'}</p>
-                  <p className="mt-2 text-sm leading-relaxed text-night/60">{vehicle?.vehicle_description || 'Informations vï¿½hicule ï¿½ venir.'}</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Véhicule</p>
+                  <p className="mt-2 text-lg font-semibold text-night">{vehicle?.vehicle || 'Véhicule non renseigné'}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-night/60">{vehicle?.vehicle_description || 'Informations véhicule à venir.'}</p>
                 </div>
 
                 <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Capacitï¿½ & confort</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Capacité & confort</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-night/70 shadow-sm">
-                      {vehicle?.vehicle_capacity ? `${vehicle.vehicle_capacity} places` : 'Capacitï¿½ non prï¿½cisï¿½e'}
+                      {vehicle?.vehicle_capacity ? `${vehicle.vehicle_capacity} places` : 'Capacité non précisée'}
                     </span>
                     {vehicle?.luggage_allowed ? (
                       <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-night/70 shadow-sm">
@@ -338,7 +339,7 @@ export default function DriverPublicProfilePage() {
                     ) : null}
                     {vehicle?.music_allowed ? (
                       <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-night/70 shadow-sm">
-                        Musique autorisï¿½e
+                        Musique autorisée
                       </span>
                     ) : null}
                     {vehicle?.no_smoking ? (
@@ -348,7 +349,7 @@ export default function DriverPublicProfilePage() {
                     ) : null}
                     {vehicle?.animals_allowed ? (
                       <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-night/70 shadow-sm">
-                        Animaux acceptï¿½s
+                        Animaux acceptés
                       </span>
                     ) : null}
                   </div>
@@ -373,7 +374,7 @@ export default function DriverPublicProfilePage() {
                         <div>
                           <p className="text-sm font-semibold text-night">{formatRoute(ride)}</p>
                           <p className="mt-1 text-xs text-night/55">
-                            {formatDate(ride.ride_date)} ï¿½ {formatTime(ride.ride_time)}
+                            {formatDate(ride.ride_date)} · {formatTime(ride.ride_time)}
                           </p>
                         </div>
                         <div className="rounded-2xl bg-nc-corailLight px-3 py-2 text-right">
@@ -389,10 +390,10 @@ export default function DriverPublicProfilePage() {
                           {ride.seats_remaining != null ? `${ride.seats_remaining} place${ride.seats_remaining > 1 ? 's' : ''} restante${ride.seats_remaining > 1 ? 's' : ''}` : 'Places disponibles'}
                         </span>
                         <span className="rounded-full bg-white px-2.5 py-1 shadow-sm">
-                          {ride.booking_mode === 'manual' ? 'Sur acceptation' : 'Rï¿½servation immï¿½diate'}
+                          {ride.booking_mode === 'manual' ? 'Sur acceptation' : 'Réservation immédiate'}
                         </span>
                         <span className="rounded-full bg-white px-2.5 py-1 shadow-sm">
-                          {ride.status || 'Publiï¿½'}
+                          {ride.status || 'Publié'}
                         </span>
                       </div>
                     </article>
@@ -400,7 +401,7 @@ export default function DriverPublicProfilePage() {
                 </div>
               ) : (
                 <div className="mt-5 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-background-secondary)] p-6 text-sm text-night/60">
-                  Aucun trajet rï¿½cent nest encore affichï¿½.
+                  Aucun trajet récent n'est encore affiché.
                 </div>
               )}
             </section>
@@ -439,7 +440,7 @@ export default function DriverPublicProfilePage() {
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="text-sm font-semibold text-night">{review.reviewer_prenom || 'Passager'}</p>
-                          <p className="text-xs text-night/50">{review.created_at ? formatDate(review.created_at) : 'Avis rï¿½cent'}</p>
+                          <p className="text-xs text-night/50">{review.created_at ? formatDate(review.created_at) : 'Avis récent'}</p>
                         </div>
                         <div className="inline-flex items-center gap-1 text-amber-500">
                           {Array.from({ length: 5 }).map((_, index) => (
@@ -453,7 +454,7 @@ export default function DriverPublicProfilePage() {
                       {review.comment ? <p className="mt-3 text-sm leading-relaxed text-night/65">{review.comment}</p> : null}
                       {review.departure || review.destination ? (
                         <p className="mt-3 text-xs text-night/45">
-                          {review.departure || 'Dï¿½part'} ï¿½ {review.destination || 'Arrivï¿½e'}
+                          {review.departure || 'Départ'} → {review.destination || 'Arrivée'}
                         </p>
                       ) : null}
                     </article>
@@ -470,16 +471,16 @@ export default function DriverPublicProfilePage() {
               <div className="flex items-center gap-3">
                 <MessageCircle className="h-6 w-6 text-[#0A7EA4]" />
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-lagon">Rï¿½sumï¿½</p>
-                  <h2 className="mt-1 font-display text-2xl font-bold text-night">ï¿½ retenir avant de rï¿½server</h2>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-lagon">Résumé</p>
+                  <h2 className="mt-1 font-display text-2xl font-bold text-night">À retenir avant de réserver</h2>
                 </div>
               </div>
 
               <div className="mt-4 space-y-3 text-sm text-night/65">
-                <p>" {Number(profile.rides_as_driver ?? 0)} trajets rï¿½alisï¿½s comme conducteur.</p>
-                <p>" {Number(profile.rides_as_passenger ?? 0)} trajets rï¿½alisï¿½s comme passager.</p>
-                <p>" {Number(profile.rides_total ?? rides.length ?? 0)} trajets publics visibles.</p>
-                <p>" Le vï¿½hicule et les habitudes de trajet sont dï¿½taillï¿½s au-dessus.</p>
+                <p>• {Number(profile.rides_as_driver ?? 0)} trajets réalisés comme conducteur.</p>
+                <p>• {Number(profile.rides_as_passenger ?? 0)} trajets réalisés comme passager.</p>
+                <p>• {Number(profile.rides_total ?? rides.length ?? 0)} trajets publics visibles.</p>
+                <p>• Le véhicule et les habitudes de trajet sont détaillés au-dessus.</p>
               </div>
 
               <Link href="/covoiturage" className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#065f7a]">

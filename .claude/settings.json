@@ -2,7 +2,15 @@
   "permissions": {
     "allow": [
       "Bash(xxd)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(node \"C:\\\\Users\\\\LO1A5A~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--kalico\\\\c071e37b-426d-4dd9-9e2f-6f611c56de1f\\\\scratchpad\\\\fix_generic.js\" \"C:\\\\Users\\\\LO1A5A~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--kalico\\\\c071e37b-426d-4dd9-9e2f-6f611c56de1f\\\\scratchpad\\\\nouvelle_clean.txt\" \"D:/kalico/frontend/src/app/annonces/nouvelle/page.tsx\")",
+      "Bash(node \"C:\\\\Users\\\\LO1A5A~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--kalico\\\\c071e37b-426d-4dd9-9e2f-6f611c56de1f\\\\scratchpad\\\\fix_generic.js\" \"C:\\\\Users\\\\LO1A5A~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--kalico\\\\c071e37b-426d-4dd9-9e2f-6f611c56de1f\\\\scratchpad\\\\imageuploader_clean.txt\" \"D:/kalico/frontend/src/components/annonces/ImageUploader.tsx\")",
+      "Bash(node \"C:\\\\Users\\\\LO1A5A~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--kalico\\\\c071e37b-426d-4dd9-9e2f-6f611c56de1f\\\\scratchpad\\\\fix_generic.js\" \"C:\\\\Users\\\\LO1A5A~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--kalico\\\\c071e37b-426d-4dd9-9e2f-6f611c56de1f\\\\scratchpad\\\\conducteur_clean.txt\" \"D:/kalico/frontend/src/app/covoiturage/conducteur/[id]/page.tsx\")",
+      "Read(//d/kalico/frontend/src/app/covoiturage/conducteur/**)",
+      "Bash(node \"C:\\\\Users\\\\LO1A5A~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--kalico\\\\c071e37b-426d-4dd9-9e2f-6f611c56de1f\\\\scratchpad\\\\fix_generic.js\" \"C:\\\\Users\\\\LO1A5A~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--kalico\\\\c071e37b-426d-4dd9-9e2f-6f611c56de1f\\\\scratchpad\\\\transport_clean.txt\" \"D:/kalico/frontend/src/app/covoiturage/transport/[id]/page.tsx\")",
+      "Read(//d/kalico/frontend/src/app/covoiturage/transport/**)",
+      "Bash(node \"C:\\\\Users\\\\LO1A5A~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--kalico\\\\c071e37b-426d-4dd9-9e2f-6f611c56de1f\\\\scratchpad\\\\fix_generic.js\" \"C:\\\\Users\\\\LO1A5A~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--kalico\\\\c071e37b-426d-4dd9-9e2f-6f611c56de1f\\\\scratchpad\\\\coupons_clean.txt\" \"D:/kalico/frontend/src/app/pro/dashboard/coupons/page.tsx\")",
+      "Bash(echo \"exit=$?\")"
     ]
   }
 }

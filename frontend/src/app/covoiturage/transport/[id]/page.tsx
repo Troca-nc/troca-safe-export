@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useParams } from 'next/navigation'
 import {
@@ -174,13 +175,13 @@ export default function TransporterDetailPage() {
       <main className="mx-auto max-w-7xl px-4 py-8 md:py-12">
         <Link href="/covoiturage?tab=transport" className="inline-flex items-center gap-2 text-sm font-semibold text-[#0A7EA4] hover:underline">
           <ArrowLeft className="h-4 w-4" />
-          Retour ï¿½ la recherche
+          Retour à la recherche
         </Link>
 
         <section className="mt-4 overflow-hidden rounded-[2rem] border border-night/8 bg-[var(--color-surface)] shadow-sm">
           <div className="relative h-40 bg-[linear-gradient(135deg,_rgba(8,32,50,0.95),_rgba(10,126,164,0.5))]">
             {transporter.pro_banner_url ? (
-              <img src={transporter.pro_banner_url} alt="" className="h-full w-full object-cover opacity-80" />
+              <Image src={transporter.pro_banner_url} alt="" fill className="object-cover opacity-80" />
             ) : null}
           </div>
           <div className="-mt-10 px-6 pb-6">
@@ -188,7 +189,7 @@ export default function TransporterDetailPage() {
               <div className="flex items-end gap-4">
                 <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-white shadow-lg">
                   {transporter.pro_logo_url ? (
-                    <img src={transporter.pro_logo_url} alt="" className="h-full w-full object-cover" />
+                    <Image src={transporter.pro_logo_url} alt="" width={80} height={80} className="h-full w-full object-cover" />
                   ) : (
                     <span className="text-xl font-bold text-[#0A7EA4]">{(transporter.company_name || 'T')[0]}</span>
                   )}
@@ -196,7 +197,7 @@ export default function TransporterDetailPage() {
                 <div>
                   <div className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
                     <BadgeCheck className="h-3.5 w-3.5" />
-                    Pro 
+                    Pro ✓
                   </div>
                   <h1 className="mt-2 font-display text-3xl font-bold text-night">{transporter.display_name || transporter.company_name}</h1>
                   <div className="mt-2 flex flex-wrap gap-2 text-sm text-night/60">
@@ -232,7 +233,7 @@ export default function TransporterDetailPage() {
               ))}
               {transporter.pro_phone ? (
                 <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-3 py-1.5 text-xs font-medium text-night/70">
-                  Tï¿½lï¿½phone: {transporter.pro_phone}
+                  Téléphone: {transporter.pro_phone}
                 </span>
               ) : null}
               {transporter.pro_hours ? (
@@ -256,8 +257,8 @@ export default function TransporterDetailPage() {
               year={todayCalendar.year}
               availableDates={transporter.available_dates ?? []}
               unavailableDates={transporter.unavailable_dates ?? []}
-              title="Disponibilitï¿½s"
-              description="Consultez la disponibilitï¿½ du transporteur sur le mois en cours."
+              title="Disponibilités"
+              description="Consultez la disponibilité du transporteur sur le mois en cours."
             />
 
             <article id="devis" className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
@@ -267,7 +268,7 @@ export default function TransporterDetailPage() {
               </div>
               <form onSubmit={handleQuote} className="grid gap-4 md:grid-cols-2">
                 <label className="block">
-                  <span className="mb-1 block text-sm font-semibold text-night">Dï¿½part</span>
+                  <span className="mb-1 block text-sm font-semibold text-night">Départ</span>
                   <input value={quoteForm.departure} onChange={(e) => setQuoteForm((current) => ({ ...current, departure: e.target.value }))} className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none" />
                 </label>
                 <label className="block">
@@ -296,9 +297,9 @@ export default function TransporterDetailPage() {
               {error ? <p className="mt-4 text-sm font-medium text-red-600">{error}</p> : null}
               {quoteResult ? (
                 <div className="mt-4 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-                  <p className="font-semibold">Devis estimï¿½ : {Number(quoteResult.total_price_xpf ?? 0).toLocaleString('fr-FR')} XPF</p>
-                  <p className="mt-1">Durï¿½e estimï¿½e : {quoteResult.estimated_duration_minutes} minutes</p>
-                  <p className="mt-1">Distance estimï¿½e : {Number(quoteResult.distance_km ?? 0).toFixed(1)} km</p>
+                  <p className="font-semibold">Devis estimé : {Number(quoteResult.total_price_xpf ?? 0).toLocaleString('fr-FR')} XPF</p>
+                  <p className="mt-1">Durée estimée : {quoteResult.estimated_duration_minutes} minutes</p>
+                  <p className="mt-1">Distance estimée : {Number(quoteResult.distance_km ?? 0).toFixed(1)} km</p>
                 </div>
               ) : null}
             </article>
@@ -310,23 +311,23 @@ export default function TransporterDetailPage() {
               <div className="mt-4 space-y-3 text-sm text-night/65">
                 <div className="flex items-center gap-2">
                   <Clock3 className="h-4 w-4 text-[#0A7EA4]" />
-                  Rï¿½ponse rapide et rï¿½servation simple
+                  Réponse rapide et réservation simple
                 </div>
                 <div className="flex items-center gap-2">
                   <CalendarDays className="h-4 w-4 text-[#0A7EA4]" />
-                  Rï¿½servez un trajet directement depuis Kalico
+                  Réservez un trajet directement depuis Kalico
                 </div>
               </div>
             </article>
 
             <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Avis rï¿½cents</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Avis récents</p>
               <div className="mt-4 space-y-4">
                 {reviews.length > 0 ? reviews.slice(0, 3).map((review) => (
                   <div key={review.id} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)]/70 p-4">
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-sm font-semibold text-night">{review.reviewer_prenom || 'Client'}</p>
-                      <span className="text-xs font-semibold text-amber-600"> {review.rating}/5</span>
+                      <span className="text-xs font-semibold text-amber-600">★ {review.rating}/5</span>
                     </div>
                     <p className="mt-2 text-sm text-night/65">{review.comment || 'Avis sans commentaire.'}</p>
                   </div>
