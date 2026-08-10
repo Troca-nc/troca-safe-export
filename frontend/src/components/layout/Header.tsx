@@ -520,7 +520,7 @@ export default function Header() {
                     className="btn-ghost flex items-center gap-2 px-3 py-2"
                   >
                     {user?.avatar_url ? (
-                      <img src={user.avatar_url} alt="" className="h-7 w-7 rounded-full object-cover" />
+                      <Image src={user.avatar_url} alt="" width={28} height={28} className="h-7 w-7 rounded-full object-cover" />
                     ) : (
                       <div className="flex h-7 w-7 items-center justify-center rounded-full bg-coral/15">
                         <span className="text-xs font-bold text-coral">

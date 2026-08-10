@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import ListingImageComponent from '@/components/ListingImage'
 import {
   ArrowLeftRight,
@@ -143,11 +144,11 @@ export function ListingHeroCard({
           {activeCover ? (
             <ListingImageComponent src={activeCover} alt={listing.title} sizes="(max-width: 768px) 100vw, 60vw" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-5xl text-night/20">=ï¿½</div>
+            <div className="w-full h-full flex items-center justify-center text-5xl text-night/20">📦</div>
           )}
           <div className="absolute top-4 left-4 flex flex-wrap gap-2">
             {listing.is_featured && (
-              <span className="px-3 py-1 rounded-full bg-coral text-white text-xs font-semibold">ï¿½ la une</span>
+              <span className="px-3 py-1 rounded-full bg-coral text-white text-xs font-semibold">À la une</span>
             )}
             {listing.is_urgent && (
               <span className="px-3 py-1 rounded-full bg-[var(--color-warning)]/10 text-[var(--color-warning)] text-xs font-semibold">Urgent</span>
@@ -188,7 +189,7 @@ export function ListingHeroCard({
           </Link>
           <span className="inline-flex items-center gap-1 rounded-full bg-night/5 px-3 py-1">
             <MapPin size={12} />
-            {listing.commune_name ?? 'Nouvelle-CalÃ©donie'}
+            {listing.commune_name ?? 'Nouvelle-Calédonie'}
           </span>
           {trustScore != null && (
             <span className="inline-flex items-center gap-1 rounded-full bg-jungle/10 px-3 py-1 text-jungle">
@@ -278,7 +279,7 @@ export function SellerSidebar({
         <div className="flex items-start gap-3">
           <div className="w-14 h-14 rounded-2xl bg-coral/10 text-coral font-bold flex items-center justify-center overflow-hidden shrink-0">
             {listing.user.avatar_url ? (
-              <img src={listing.user.avatar_url} alt="" className="w-full h-full object-cover" />
+              <Image src={listing.user.avatar_url} alt="" width={56} height={56} className="w-full h-full object-cover" />
             ) : (
               initials(listing.user)
             )}
@@ -294,9 +295,9 @@ export function SellerSidebar({
             {(listing.user.seller_commune_name || listing.user.seller_province_name) && (
               <p className="mt-1 flex items-center gap-1 text-xs text-night/50">
                 <MapPin size={12} />
-                {listing.user.seller_commune_name ?? 'Nouvelle-CalÃ©donie'}
+                {listing.user.seller_commune_name ?? 'Nouvelle-Calédonie'}
                 {listing.user.seller_province_name && (
-                  <span className="text-night/35">ï¿½ {listing.user.seller_province_name}</span>
+                  <span className="text-night/35">· {listing.user.seller_province_name}</span>
                 )}
               </p>
             )}
@@ -305,13 +306,13 @@ export function SellerSidebar({
               {listing.user.email_verified && (
                 <span className="inline-flex items-center gap-1 rounded-full border border-ocean/20 bg-ocean/8 px-2.5 py-0.5 text-[11px] font-medium text-ocean">
                   <MailCheck size={12} />
-                  Email vï¿½rifiï¿½
+                  Email verifie
                 </span>
               )}
               {listing.user.telephone_verifie && (
                 <span className="inline-flex items-center gap-1 rounded-full border border-jungle/20 bg-jungle/8 px-2.5 py-0.5 text-[11px] font-medium text-jungle">
                   <Phone size={12} />
-                  Tï¿½lï¿½phone vï¿½rifiï¿½
+                  Telephone verifie
                 </span>
               )}
               {listing.user.is_pro && (
@@ -339,7 +340,7 @@ export function SellerSidebar({
             {listing.user.avg_response_time_label && (
               <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-nc-lagonLight px-2.5 py-1 text-[11px] font-medium text-nc-lagonText">
                 <Clock size={12} />
-                Rï¿½pond en moyenne en {listing.user.avg_response_time_label}
+                Répond en moyenne en {listing.user.avg_response_time_label}
               </div>
             )}
 
@@ -402,7 +403,7 @@ export function SellerSidebar({
             className="inline-flex items-center justify-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-medium text-night/35 cursor-not-allowed"
           >
             <Send size={16} />
-            {listing.user.telephone_verifie ? 'Appel non activï¿½' : 'Tï¿½lï¿½phone non vï¿½rifiï¿½'}
+            {listing.user.telephone_verifie ? 'Appel non activé' : 'Téléphone non vérifié'}
           </button>
           {isOwner && (
             <button
@@ -421,7 +422,7 @@ export function SellerSidebar({
               className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-4 py-3 text-sm font-medium text-[var(--color-danger)] hover:bg-[var(--color-danger)]/20"
             >
               <AlertTriangle size={16} />
-              Signaler lannonce
+              Signaler l'annonce
             </button>
           )}
           <button
@@ -459,7 +460,7 @@ export function SellerReviewsSection({
           <div className="h-16 rounded-2xl bg-sand animate-pulse" />
         </div>
       ) : reviews.length === 0 ? (
-        <p className="text-sm text-night/45">Soyez le premier ï¿½ laisser un avis.</p>
+        <p className="text-sm text-night/45">Soyez le premier à laisser un avis.</p>
       ) : (
         <div className="space-y-3">
           {reviews.map((review) => (
@@ -467,7 +468,7 @@ export function SellerReviewsSection({
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full bg-coral/10 text-coral font-semibold flex items-center justify-center overflow-hidden shrink-0">
                   {review.auteur_avatar ? (
-                    <img src={review.auteur_avatar} alt="" className="w-full h-full object-cover" />
+                    <Image src={review.auteur_avatar} alt="" width={32} height={32} className="w-full h-full object-cover" />
                   ) : (
                     review.auteur_prenom?.[0]?.toUpperCase() ?? '?'
                   )}
@@ -520,7 +521,7 @@ export function ReviewFormSection({
           <h2 className="font-semibold">Laisser un avis</h2>
         </div>
         <p className="text-sm text-night/60 leading-6">
-          Connectez-vous pour noter ce vendeur, ajouter des ï¿½toiles et partager votre retour avec la communautï¿½.
+          Connectez-vous pour noter ce vendeur, ajouter des etoiles et partager votre retour avec la communaute.
         </p>
         {onRequireAuth ? (
           <button
@@ -551,7 +552,7 @@ export function ReviewFormSection({
       </div>
 
       <p className="text-sm text-night/60 mb-3">
-        Votre retour aide les autres acheteurs ï¿½ faire confiance au vendeur.
+        Votre retour aide les autres acheteurs a faire confiance au vendeur.
       </p>
 
       <div className="flex items-center gap-1 mb-4">
@@ -564,7 +565,7 @@ export function ReviewFormSection({
               type="button"
               onClick={() => onNoteChange(value)}
               className={`w-9 h-9 rounded-xl border transition-colors flex items-center justify-center ${active ? 'border-[var(--color-warning)]/30 bg-[var(--color-warning)]/10 text-[var(--color-warning)]' : 'border-night/10 bg-white text-night/25 hover:text-[var(--color-warning)]'}`}
-              aria-label={`${value} ï¿½toile${value > 1 ? 's' : ''}`}
+              aria-label={`${value} etoile${value > 1 ? 's' : ''}`}
             >
               <BadgeCheck className={`w-4 h-4 ${active ? 'text-[var(--color-warning)]' : ''}`} />
             </button>
@@ -601,12 +602,12 @@ export function SecurityTipsCard() {
     <div className="bg-[var(--color-warning)]/10 rounded-3xl border border-[var(--color-warning)]/30 p-5">
       <div className="flex items-center gap-2 mb-2 text-[var(--color-warning)]">
         <AlertTriangle size={16} />
-        <h2 className="font-semibold">Conseils de sÃ©curitÃ©</h2>
+        <h2 className="font-semibold">Conseils de sécurité</h2>
       </div>
       <ul className="space-y-2 text-sm text-[var(--color-warning)] leading-6">
-        <li>- N'envoyez jamais d'argent avant d'avoir vï¿½rifiï¿½ l'annonce et le vendeur.</li>
-        <li>- Prï¿½fï¿½rez l'ï¿½change en personne dans un lieu public.</li>
-        <li>- Gardez toutes les discussions dans Kalico pour faciliter la modï¿½ration.</li>
+        <li>- N'envoyez jamais d'argent avant d'avoir verifie l'annonce et le vendeur.</li>
+        <li>- Preferez l'echange en personne dans un lieu public.</li>
+        <li>- Gardez toutes les discussions dans Kalico pour faciliter la modération.</li>
       </ul>
     </div>
   )
@@ -649,7 +650,7 @@ export function SellerListingsSection({
                   imgClassName="group-hover:scale-105 transition-transform duration-300"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-3xl opacity-30">=ï¿½</div>
+                <div className="w-full h-full flex items-center justify-center text-3xl opacity-30">📦</div>
               )}
               {item.category_icon && (
                 <span className="absolute top-2 left-2 bg-white/90 rounded-full px-2 py-1 text-xs shadow-sm">

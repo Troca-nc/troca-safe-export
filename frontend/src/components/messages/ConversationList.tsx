@@ -2,6 +2,7 @@
 
 import { formatDistanceToNow, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
+import Image from 'next/image'
 import { ArrowLeftRight, BadgeCheck, FileText, MessageCircle, ShieldCheck } from 'lucide-react'
 import type { Conversation } from '@/types/messaging.types'
 
@@ -139,7 +140,7 @@ export default function ConversationList({ conversations, activeId, onSelect, lo
             <div className="relative shrink-0">
               <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-coral/10 text-sm font-bold text-coral">
                 {u.avatar_url
-                  ? <img src={u.avatar_url} alt="" className="h-full w-full object-cover" />
+                  ? <Image src={u.avatar_url} alt="" width={44} height={44} className="h-full w-full object-cover" />
                   : `${u.prenom[0]}${u.nom[0]}`
                 }
               </div>
