@@ -12,6 +12,7 @@ const { paymentLimiter } = require('../middleware/rateLimit');
 const { query, withTransaction } = require('../config/database');
 const { isConfiguredValue } = require('../config/env');
 const { validate, Joi } = require('../middleware/validate');
+const { logger } = require('../utils/logger');
 const { sendMail, sendBoostActivatedEmail } = require('../services/emailService');
 const payplug = require('../services/payplugService');
 const { verifyPayPlugWebhook } = payplug;
@@ -1524,7 +1525,7 @@ router.post('/webhooks/payplug', async (req, res) => {
           [annonceId, boostType, expiresAt]
         ).catch(() => {});
 
-        console.log(`[webhook/payplug] Boost activé - annonce ${annonceId} (${boostType} ${duration}j)`);
+        logger.info(`[webhook/payplug] Boost activé - annonce ${annonceId} (${boostType} ${duration}j)`);
       }
     }
 
@@ -1590,7 +1591,7 @@ router.post('/webhooks/payplug', async (req, res) => {
           }).catch(() => {});
         }
 
-        console.log(`[webhook/payplug] Abonnement activé - user ${userId} plan ${planId}`);
+        logger.info(`[webhook/payplug] Abonnement activé - user ${userId} plan ${planId}`);
       }
 
       const isCancelled = resource.is_cancelled ?? resource.state === 'cancelled';
@@ -1605,7 +1606,7 @@ router.post('/webhooks/payplug', async (req, res) => {
            WHERE id = $1 AND id = (SELECT user_id FROM subscriptions WHERE provider_sub_id = $2 LIMIT 1)`,
           [userId, resourceId]
         );
-        console.log(`[webhook/payplug] Abonnement annulé - user ${userId}`);
+        logger.info(`[webhook/payplug] Abonnement annulé - user ${userId}`);
       }
     }
 

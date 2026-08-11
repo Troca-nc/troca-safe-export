@@ -9,6 +9,7 @@ const { isConfiguredValue } = require('../config/env');
 const { query } = require('../config/database');
 const { ensureNotificationPreferences } = require('./notificationPreferencesService');
 const { generateQrCode } = require('./qrCodeService');
+const { logger } = require('../utils/logger');
 
 // â”€â”€ Transporter SMTP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -42,7 +43,7 @@ function getTransporter() {
 async function sendMail({ to, subject, html, text, replyTo, cc, bcc }) {
   const transporter = getTransporter();
   if (!transporter) {
-    console.log(`[email] (simulÃ©) â†’ ${to} | ${subject}`);
+    logger.info(`[email] (simulé) → ${to} | ${subject}`);
     return { simulated: true };
   }
 

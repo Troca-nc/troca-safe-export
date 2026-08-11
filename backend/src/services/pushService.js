@@ -8,6 +8,7 @@
 const https = require('https');
 const { query } = require('../config/database');
 const { ensureNotificationPreferences } = require('./notificationPreferencesService');
+const { logger } = require('../utils/logger');
 
 const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
 
@@ -100,7 +101,7 @@ async function _sendBatch(messages) {
                   const token = chunk[i]?.to;
                   if (token) {
                     query('DELETE FROM push_tokens WHERE token = $1', [token]).catch(() => {});
-                    console.log(`[push] Token supprimé (DeviceNotRegistered): ${token.slice(0, 30)}…`);
+                    logger.info(`[push] Token supprimé (DeviceNotRegistered): ${token.slice(0, 30)}…`);
                   }
                 }
               });
