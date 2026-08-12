@@ -326,7 +326,7 @@ header nav button {
   }
 
   .btn-ghost {
-    color: var(--coral);
+    color: #c96a1a;
     background: transparent;
   }
 
@@ -391,7 +391,7 @@ header nav button {
 
   .badge-primary {
     background: rgba(10, 126, 164, 0.12);
-    color: var(--coral);
+    color: #c96a1a;
   }
 
   .badge-success {
@@ -757,7 +757,7 @@ header nav button {
 }
 
 .legal-content a {
-  color: var(--coral);
+  color: #c96a1a;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
