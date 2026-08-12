@@ -391,7 +391,7 @@ export function SearchAlertsSection() {
         <div className="min-w-0">
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-lagon">
             <Sparkles className="h-3.5 w-3.5" />
-            Coups de cSur
+            Coups de cœur
           </div>
           <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
             Gardez vos recherches en mémoire et recevez une alerte quand une offre correspond.
@@ -424,7 +424,7 @@ export function SearchAlertsSection() {
             </div>
             <div className="rounded-2xl bg-[var(--color-surface)] p-4">
               <p className="text-sm font-semibold">"iPhone"</p>
-              <p className="mt-1 text-sm text-white/65">Ã‰tat bon ou comme neuf, en Nouvelle-Calédonie</p>
+              <p className="mt-1 text-sm text-white/65">État bon ou comme neuf, en Nouvelle-Calédonie</p>
             </div>
           </div>
           <Link href="/alertes" className="btn-primary mt-5 inline-flex w-full items-center justify-center gap-2">
@@ -466,7 +466,7 @@ function CategoryTreeRow({
         <span className="min-w-0 flex-1">
           <span className="block font-semibold text-[var(--color-text-primary)]">{category.name}</span>
           <span className="block text-xs text-[var(--color-text-secondary)]">
-            {depth === 0 ? 'Famille ouverte' : 'Sous-catÃ©gorie ouverte'}
+            {depth === 0 ? 'Famille ouverte' : 'Sous-catégorie ouverte'}
           </span>
         </span>
         <ChevronRight className="h-4 w-4 shrink-0 text-nc-lagon" />
@@ -543,7 +543,7 @@ function CategoryCard({
           <Visual className="h-7 w-7" />
         </span>
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">CatÃ©gorie</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Catégorie</p>
           <h3 className="mt-1 text-lg font-semibold text-night">{category.name}</h3>
         </div>
       </div>
@@ -567,7 +567,7 @@ function CategoryCard({
       <button
         type="button"
         onClick={() => onBrowse(category.slug)}
-        className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-nc-lagon transition-transform group-hover:translate-x-0.5"
+        className="btn-primary mt-5"
       >
         Voir tous les rayons
         <ArrowRight className="h-4 w-4" />
@@ -706,7 +706,7 @@ function BonPlanCard({ item }: { item: BonPlanItem }) {
   const audienceLabel = item.target_audience === 'pro' ? 'Professionnel' : 'Particulier'
   const kindLabel = {
     promo: 'Promo',
-    event: 'Evenement',
+    event: 'Événement',
     concert: 'Concert',
     other: 'Bon plan',
   }[item.kind || 'other']
@@ -743,7 +743,7 @@ function BonPlanCard({ item }: { item: BonPlanItem }) {
 
       <div className="mt-4 space-y-1 text-sm text-night/55">
         <p>{formatDateLabel(item.event_date)}</p>
-        <p>{item.author_prenom ? `PubliÃ© par ${item.author_prenom}` : 'Publication locale'}</p>
+        <p>{item.author_prenom ? `Publié par ${item.author_prenom}` : 'Publication locale'}</p>
         {item.contact_name ? <p>Contact: {item.contact_name}</p> : null}
       </div>
     </article>
@@ -781,7 +781,7 @@ function CovoiturageCard({
         </span>
         {seatsRemaining <= 1 ? (
           <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-700">
-            DerniÃ¨re place
+            Dernière place
           </span>
         ) : null}
       </div>
@@ -790,18 +790,18 @@ function CovoiturageCard({
         {item.departure} - {item.destination}
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-night/60">
-        {dateLabel} ï¿½ {timeLabel} ï¿½ {item.vehicle || 'VÃ©hicule dÃ©taillÃ©'} ï¿½ {item.price_xpf.toLocaleString('fr-FR')} XPF / place
+        {dateLabel} · {timeLabel} · {item.vehicle || 'Véhicule détaillé'} · {item.price_xpf.toLocaleString('fr-FR')} XPF / place
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-night/65">
         <span className="rounded-full bg-sand px-2.5 py-1">{seatsRemaining} place(s) restante(s)</span>
         <span className="rounded-full bg-sand px-2.5 py-1">{item.music_allowed ? 'Musique ok' : 'Musique calme'}</span>
-        <span className="rounded-full bg-sand px-2.5 py-1">{item.no_smoking ? 'Non fumeur' : 'Fumeur accepte'}</span>
+        <span className="rounded-full bg-sand px-2.5 py-1">{item.no_smoking ? 'Non fumeur' : 'Fumeur accepté'}</span>
       </div>
 
       <div className="mt-4 space-y-1 text-sm text-night/55">
         <p>{item.driver_prenom ? `Conducteur: ${item.driver_prenom}` : 'Conducteur local'}</p>
-        <p>{item.trust_score != null ? `FiabilitÃ©: ${item.trust_score}/100` : 'Trajet vÃ©rifiÃ©'}</p>
+        <p>{item.trust_score != null ? `Fiabilité: ${item.trust_score}/100` : 'Trajet vérifié'}</p>
       </div>
     </article>
   )
@@ -832,13 +832,13 @@ function SponsoredCampaignCard({ item }: { item: CampaignItem }) {
       <div className="space-y-3 p-4">
         <h3 className="line-clamp-2 text-lg font-semibold text-night">{item.title}</h3>
         <p className="line-clamp-3 text-sm leading-relaxed text-night/65">
-          {item.description || 'Une visibilitÃ© locale payante, affichÃ©e au bon moment sur Kalico.'}
+          {item.description || 'Une visibilité locale payante, affichée au bon moment sur Kalico.'}
         </p>
         <a
           href={href}
-          className="inline-flex w-full items-center justify-center rounded-2xl bg-nc-sable px-4 py-3 text-sm font-semibold text-white transition hover:bg-nc-sable/90"
+          className="btn-primary w-full"
         >
-          {item.cta_text || 'DÃ©couvrir'}
+          {item.cta_text || 'Découvrir'}
         </a>
       </div>
     </article>
@@ -959,7 +959,7 @@ export function CovoiturageSection({
             <div className="mt-5 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-5 py-8 text-center text-[var(--color-text-primary)]">
               <div className="mx-auto flex max-w-md flex-col items-center">
                 <span className="mb-3 text-2xl animate-pulse motion-reduce:animate-none" aria-hidden="true">
-                    ????
+                    🚗
                   </span>
                 <p className="font-display text-lg font-medium text-night dark:text-white">
                   Le premier trajet, c&apos;est souvent le plus utile.
