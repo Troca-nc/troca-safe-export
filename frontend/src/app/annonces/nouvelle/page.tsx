@@ -413,6 +413,9 @@ function SimpleBonPlanPage() {
                 <label className="space-y-2">
                   <span className="text-sm font-semibold text-night">Remise (%)</span>
                   <input
+                    type="number"
+                    min={0}
+                    max={100}
                     value={form.discount_pct}
                     onChange={(e) => handleChange('discount_pct', e.target.value)}
                     inputMode="numeric"
@@ -441,6 +444,8 @@ function SimpleBonPlanPage() {
                 <label className="space-y-2">
                   <span className="text-sm font-semibold text-night">Téléphone</span>
                   <input
+                    type="tel"
+                    pattern="[0-9+\s]{6,15}"
                     value={form.contact_phone}
                     onChange={(e) => handleChange('contact_phone', e.target.value)}
                     placeholder="Numéro de contact"
@@ -450,6 +455,7 @@ function SimpleBonPlanPage() {
                 <label className="space-y-2">
                   <span className="text-sm font-semibold text-night">Email</span>
                   <input
+                    type="email"
                     value={form.contact_email}
                     onChange={(e) => handleChange('contact_email', e.target.value)}
                     placeholder="contact@..."
@@ -459,6 +465,7 @@ function SimpleBonPlanPage() {
                 <label className="space-y-2">
                   <span className="text-sm font-semibold text-night">Site web</span>
                   <input
+                    type="url"
                     value={form.website_url}
                     onChange={(e) => handleChange('website_url', e.target.value)}
                     placeholder="https://..."
@@ -567,6 +574,7 @@ function SimpleBonPlanPage() {
                   Lien utile
                 </span>
                 <input
+                  type="url"
                   value={form.link_url}
                   onChange={(e) => handleChange('link_url', e.target.value)}
                   placeholder="https://..."

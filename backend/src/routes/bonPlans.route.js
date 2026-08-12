@@ -26,6 +26,7 @@ const {
 const router = express.Router();
 
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+// DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
 const demoModeEnabled = process.env.DEMO_MODE === 'true';
 const stripe = isConfiguredValue(process.env.STRIPE_SECRET_KEY)
   ? new Stripe(process.env.STRIPE_SECRET_KEY.trim(), { apiVersion: '2023-10-16' })
@@ -372,6 +373,7 @@ async function createPaymentForBonPlan({ user, bonPlan, provider, amountXpf, amo
     amount_eur: String(amountEur),
   };
 
+  // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
   if (demoModeEnabled) {
     await query(
       `UPDATE bon_plans
@@ -809,6 +811,7 @@ router.post('/', authenticate, paymentLimiter, validate({ body: createSchema }),
         durationDays,
       });
 
+      // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
       if (!demoModeEnabled) {
         await client.query(
           `UPDATE bon_plans
@@ -849,6 +852,7 @@ router.post('/', authenticate, paymentLimiter, validate({ body: createSchema }),
           ...created.bonPlan,
           amount_xpf: created.pricing.final_price_xpf,
           amount_eur: Math.round(created.pricing.final_price_xpf / 119.3317),
+          // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
           status: demoModeEnabled ? 'active' : 'draft',
         }),
       },

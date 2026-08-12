@@ -45,6 +45,7 @@ const payplugWebhookSecret = isConfiguredValue(process.env.PAYPLUG_WEBHOOK_SECRE
   ? process.env.PAYPLUG_WEBHOOK_SECRET.trim()
   : '';
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+// DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
 const demoModeEnabled = process.env.DEMO_MODE === 'true';
 const stripe = isConfiguredValue(process.env.STRIPE_SECRET_KEY)
   ? new Stripe(process.env.STRIPE_SECRET_KEY.trim(), { apiVersion: '2023-10-16' })
@@ -248,6 +249,7 @@ router.post('/boost/mobile', authenticate, paymentLimiter, validate(boostSchema)
   const boost = findBoost(boost_type, boost_duration);
   if (!boost) return res.status(400).json({ error: 'Boost introuvable dans le catalogue' });
 
+  // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
   if (demoModeEnabled) {
     return res.json({
       data: {
@@ -332,6 +334,7 @@ router.post('/boost', authenticate, paymentLimiter, validate(boostSchema), async
   const { annonce_id, boost_type, boost_duration, provider } = req.body;
 
   if (provider === 'payplug') {
+    // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
     if (demoModeEnabled) {
       return res.json({
         success: true,
@@ -400,6 +403,7 @@ router.post('/boost', authenticate, paymentLimiter, validate(boostSchema), async
     }
   }
 
+  // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
   if (demoModeEnabled) {
     return res.json({
       success: true,
@@ -479,6 +483,7 @@ router.post('/boost', authenticate, paymentLimiter, validate(boostSchema), async
 });
 
 router.get('/saved-cards', authenticate, async (req, res) => {
+  // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
   if (demoModeEnabled) {
     return res.json({
       data: [
@@ -610,6 +615,7 @@ router.post('/subscription', authenticate, paymentLimiter, validate(subscription
   const { plan_id, billing_period, provider } = req.body;
 
   if (provider === 'payplug') {
+    // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
     if (demoModeEnabled) {
       return res.json({
         success: true,
@@ -670,6 +676,7 @@ router.post('/subscription', authenticate, paymentLimiter, validate(subscription
     }
   }
 
+  // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
   if (demoModeEnabled) {
     return res.json({
       success: true,
@@ -742,6 +749,7 @@ router.post('/subscribe/mobile', authenticate, paymentLimiter, validate(mobilePl
     return res.status(500).json({ error: "Price ID Stripe non configuré — vérifiez les variables d'environnement" });
   }
 
+  // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
   if (demoModeEnabled) {
     return res.json({
       data: {
@@ -1015,6 +1023,7 @@ router.get('/subscriptions/verify', authenticate, paymentLimiter, async (req, re
   const { session_id: sessionId, payment_id: paymentId } = req.query;
 
   try {
+    // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
     if (demoModeEnabled) {
       return res.json({
         status: 'ok_subscription',
@@ -1369,6 +1378,7 @@ router.get('/verify-payplug', authenticate, paymentLimiter, async (req, res) => 
   if (!id) return res.status(400).json({ status: 'invalid', error: 'id manquant' });
 
   try {
+    // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
     if (demoModeEnabled) {
       if (resource_type === 'payment') {
         return res.json({

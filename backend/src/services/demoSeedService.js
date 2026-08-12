@@ -11,6 +11,7 @@ function normalizeDemoEmail(email) {
   return String(email).replace('@demo.kalico', '@demo.kalico.nc');
 }
 
+// DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
 function isDemoRuntimeEnabled() {
   return process.env.DEMO_MODE === 'true' || process.env.NODE_ENV !== 'production';
 }
@@ -657,6 +658,7 @@ async function clearExistingDemoData(client) {
 }
 
 async function seedDemoDataset() {
+  // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
   if (!isDemoRuntimeEnabled()) {
     throw new Error('Le seed démo est désactivé hors environnement local.');
   }
@@ -1307,6 +1309,7 @@ async function seedDemoDataset() {
 }
 
 async function clearDemoDataset() {
+  // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
   if (!isDemoRuntimeEnabled()) {
     throw new Error('Le seed démo est désactivé hors environnement local.');
   }
@@ -1319,6 +1322,7 @@ async function clearDemoDataset() {
 }
 
 async function getDemoStatus() {
+  // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
   if (!isDemoRuntimeEnabled()) {
     return {
       enabled: false,
