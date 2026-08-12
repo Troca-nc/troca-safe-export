@@ -191,14 +191,14 @@ export default function HomePage() {
         <div className="mb-5 flex items-end justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Pros locaux</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Nos professionnels recommandés</h2>
-            <p className="mt-1 text-sm text-night/55">Des pros calédoniens vérifiés, à portée de message.</p>
+            <h2 className="mt-1 font-display text-2xl font-bold text-[var(--color-text-primary)]">Nos professionnels recommandés</h2>
+            <p className="mt-1 text-sm text-[var(--color-text-secondary)]">Des pros calédoniens vérifiés, à portée de message.</p>
           </div>
           <div className="hidden items-center gap-3 md:flex">
             <Link href="/pros" className="inline-flex items-center gap-1 text-sm font-semibold text-nc-emeraude hover:underline">
               Voir l'annuaire <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link href="/pro" className="inline-flex items-center gap-1 text-sm font-semibold text-night/60 hover:text-night">
+            <Link href="/pro" className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-text-secondary)] hover:text-night">
               Devenir Pro <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

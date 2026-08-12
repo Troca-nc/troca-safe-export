@@ -537,14 +537,14 @@ function CategoryCard({
   const Visual = getHomepageCategoryIcon(category)
 
   return (
-    <div className="group overflow-hidden rounded-[1.75rem] border border-night/8 border-l-4 border-l-nc-lagon bg-white/95 p-5 shadow-card transition-all hover:-translate-y-1 hover:shadow-hover">
+    <div className="group overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] border-l-4 border-l-nc-lagon bg-[var(--color-surface)] p-5 shadow-card transition-all hover:-translate-y-1 hover:shadow-hover">
       <div className="mb-4 flex flex-col items-start gap-3">
         <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
           <Visual className="h-7 w-7" />
         </span>
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Catégorie</p>
-          <h3 className="mt-1 text-lg font-semibold text-night">{category.name}</h3>
+          <h3 className="mt-1 text-lg font-semibold text-[var(--color-text-primary)]">{category.name}</h3>
         </div>
       </div>
 
@@ -555,7 +555,7 @@ function CategoryCard({
             <Link
               key={sub.id}
               href={`/annonces?category=${encodeURIComponent(sub.slug)}`}
-              className="rounded-full border border-night/10 bg-sand px-3 py-1.5 text-xs font-medium text-night/70 transition-colors hover:border-nc-lagon/30 hover:bg-nc-lagonLight hover:text-nc-lagonText"
+              className="rounded-full border border-night/10 bg-[var(--color-bg-page)] px-3 py-1.5 text-xs font-medium text-night/70 transition-colors hover:border-nc-lagon/30 hover:bg-nc-lagonLight hover:text-nc-lagonText"
             >
               <SubVisual className="mr-1 inline-block h-3.5 w-3.5 align-[-2px]" />
               {sub.name}
@@ -595,7 +595,7 @@ export function PopularCategoriesSection({
         </Link>
       </div>
 
-      <div className="grid gap-4 rounded-[2rem] border border-night/8 border-l-4 border-l-nc-lagon bg-white/90 p-4 shadow-sm md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 rounded-[2rem] border border-[var(--color-border)] border-l-4 border-l-nc-lagon bg-[var(--color-surface)] p-4 shadow-sm md:grid-cols-2 xl:grid-cols-4">
         {categories.slice(0, 8).map((cat) => (
           <CategoryCard key={cat.id} category={cat} onBrowse={onBrowse} />
         ))}
@@ -712,7 +712,7 @@ function BonPlanCard({ item }: { item: BonPlanItem }) {
   }[item.kind || 'other']
 
   return (
-    <article className="rounded-[1.5rem] border border-white/10 border-l-4 border-l-nc-corail bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <article className="rounded-[1.5rem] border border-white/10 border-l-4 border-l-nc-corail bg-[var(--color-surface)] p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex flex-wrap items-center gap-2">
         <span className="badge-emeraude rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">
           {kindLabel}
@@ -724,21 +724,21 @@ function BonPlanCard({ item }: { item: BonPlanItem }) {
         ) : null}
       </div>
 
-      <h3 className="mt-3 text-lg font-semibold text-night">{item.title}</h3>
+      <h3 className="mt-3 text-lg font-semibold text-[var(--color-text-primary)]">{item.title}</h3>
       <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-night/60">{item.description}</p>
 
       <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-night/65">
-        <span className="rounded-full bg-sand px-2.5 py-1">{audienceLabel}</span>
-        <span className="rounded-full bg-sand px-2.5 py-1">{item.price_display || `${item.price_xpf ?? 0} XPF`}</span>
+        <span className="rounded-full bg-[var(--color-bg-page)] px-2.5 py-1">{audienceLabel}</span>
+        <span className="rounded-full bg-[var(--color-bg-page)] px-2.5 py-1">{item.price_display || `${item.price_xpf ?? 0} XPF`}</span>
         {item.normal_price_xpf && item.promo_price_xpf ? (
-          <span className="rounded-full bg-sand px-2.5 py-1">
+          <span className="rounded-full bg-[var(--color-bg-page)] px-2.5 py-1">
             {item.normal_price_xpf.toLocaleString('fr-FR')} {'->'} {item.promo_price_xpf.toLocaleString('fr-FR')} XPF
           </span>
         ) : null}
         {item.discount_pct ? (
           <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">-{item.discount_pct}%</span>
         ) : null}
-      <span className="rounded-full bg-sand px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-Calédonie'}</span>
+      <span className="rounded-full bg-[var(--color-bg-page)] px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-Calédonie'}</span>
       </div>
 
       <div className="mt-4 space-y-1 text-sm text-night/55">
@@ -774,7 +774,7 @@ function CovoiturageCard({
   const timeLabel = item.ride_time?.slice(0, 5) || 'Heure libre'
 
   return (
-    <article className="rounded-[1.5rem] border border-white/10 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <article className="rounded-[1.5rem] border border-white/10 bg-[var(--color-surface)] p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex flex-wrap items-center gap-2">
         <span className="badge-corail rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">
           Covoiturage
@@ -786,7 +786,7 @@ function CovoiturageCard({
         ) : null}
       </div>
 
-      <h3 className="mt-3 text-lg font-semibold text-night">
+      <h3 className="mt-3 text-lg font-semibold text-[var(--color-text-primary)]">
         {item.departure} - {item.destination}
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-night/60">
@@ -794,9 +794,9 @@ function CovoiturageCard({
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-night/65">
-        <span className="rounded-full bg-sand px-2.5 py-1">{seatsRemaining} place(s) restante(s)</span>
-        <span className="rounded-full bg-sand px-2.5 py-1">{item.music_allowed ? 'Musique ok' : 'Musique calme'}</span>
-        <span className="rounded-full bg-sand px-2.5 py-1">{item.no_smoking ? 'Non fumeur' : 'Fumeur accepté'}</span>
+        <span className="rounded-full bg-[var(--color-bg-page)] px-2.5 py-1">{seatsRemaining} place(s) restante(s)</span>
+        <span className="rounded-full bg-[var(--color-bg-page)] px-2.5 py-1">{item.music_allowed ? 'Musique ok' : 'Musique calme'}</span>
+        <span className="rounded-full bg-[var(--color-bg-page)] px-2.5 py-1">{item.no_smoking ? 'Non fumeur' : 'Fumeur accepté'}</span>
       </div>
 
       <div className="mt-4 space-y-1 text-sm text-night/55">
@@ -811,7 +811,7 @@ function SponsoredCampaignCard({ item }: { item: CampaignItem }) {
   const href = item.link_url || '/annonces'
 
   return (
-    <article className="overflow-hidden rounded-[1.5rem] border border-white/10 border-l-4 border-l-nc-sable bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <article className="overflow-hidden rounded-[1.5rem] border border-white/10 border-l-4 border-l-nc-sable bg-[var(--color-surface)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-nc-lagon/20 to-nc-emeraude/20">
         {item.image_url ? (
           <Image
@@ -830,7 +830,7 @@ function SponsoredCampaignCard({ item }: { item: CampaignItem }) {
       </div>
 
       <div className="space-y-3 p-4">
-        <h3 className="line-clamp-2 text-lg font-semibold text-night">{item.title}</h3>
+        <h3 className="line-clamp-2 text-lg font-semibold text-[var(--color-text-primary)]">{item.title}</h3>
         <p className="line-clamp-3 text-sm leading-relaxed text-night/65">
           {item.description || 'Une visibilité locale payante, affichée au bon moment sur Kalico.'}
         </p>
