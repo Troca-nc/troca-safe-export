@@ -169,7 +169,7 @@ export default function ProDashboardTransportPage() {
         </article>
 
         <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">ï¿½ venir</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">ï¿½ venir</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">Prochaines courses</h2>
           <div className="mt-4 space-y-3">
             {upcomingRides.length > 0 ? upcomingRides.map((ride) => (

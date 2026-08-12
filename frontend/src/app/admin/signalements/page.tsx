@@ -215,7 +215,7 @@ export default function AdminSignalementsPage() {
                 onClick={() => setFilters(f => ({ ...f, type: t === 'tous' ? undefined : t as TypeSignalement }))}
                 className={`px-3 py-1 rounded-full text-xs border transition-all ${
                   (filters.type ?? 'tous') === t
-                    ? 'bg-coral/10 text-coral border-coral/30 font-medium'
+                    ? 'bg-kalico-blue/10 text-kalico-blue border-kalico-blue/30 font-medium'
                     : 'border-night/10 text-night/50 hover:bg-sand'
                 }`}
               >
@@ -230,7 +230,7 @@ export default function AdminSignalementsPage() {
                 onClick={() => setFilters(f => ({ ...f, urgence: u === 'toutes' ? undefined : u as UrgenceSignalement }))}
                 className={`px-3 py-1 rounded-full text-xs border transition-all ${
                   (filters.urgence ?? 'toutes') === u
-                    ? 'bg-coral/10 text-coral border-coral/30 font-medium'
+                    ? 'bg-kalico-blue/10 text-kalico-blue border-kalico-blue/30 font-medium'
                     : 'border-night/10 text-night/50 hover:bg-sand'
                 }`}
               >

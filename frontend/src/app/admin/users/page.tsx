@@ -112,7 +112,7 @@ function UserRow({
     <tr className="border-b border-night/6 hover:bg-sand/40 transition-colors group">
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-coral/10 flex items-center justify-center text-xs font-bold text-coral shrink-0">
+          <div className="w-8 h-8 rounded-full bg-kalico-blue/10 flex items-center justify-center text-xs font-bold text-kalico-blue shrink-0">
             {user.avatar_url
               ? <img src={user.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
               : initiales
@@ -261,7 +261,7 @@ export default function AdminUsersPage() {
                 onClick={() => setFilters(fi => ({ ...fi, statut: f.value === 'tous' ? undefined : f.value, page: 1 }))}
                 className={`px-3 py-1.5 rounded-full text-xs border transition-all ${
                   (filters.statut ?? 'tous') === f.value
-                    ? 'bg-coral/10 text-coral border-coral/30 font-medium'
+                    ? 'bg-kalico-blue/10 text-kalico-blue border-kalico-blue/30 font-medium'
                     : 'border-night/10 text-night/50 hover:bg-sand'
                 }`}
               >

@@ -38,7 +38,7 @@ export default function Footer() {
               </span>
               <div>
                 <span className="block font-display text-lg font-bold text-night">Kalico</span>
-                <span className="block text-[10px] font-semibold uppercase tracking-[0.22em] text-coral/80">
+                <span className="block text-[10px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">
                   Nouvelle-Calédonie
                 </span>
               </div>
@@ -55,7 +55,7 @@ export default function Footer() {
                 <Link
                   key={href}
                   href={href}
-                  className="inline-flex items-center gap-2 text-sm text-night/60 transition-colors hover:text-coral"
+                  className="inline-flex items-center gap-2 text-sm text-night/60 transition-colors hover:text-kalico-blue"
                 >
                   <Icon className="h-4 w-4" />
                   {label}
@@ -64,14 +64,14 @@ export default function Footer() {
               <button
                 type="button"
                 onClick={openCookieBanner}
-                className="inline-flex items-center gap-2 text-left text-sm text-night/60 transition-colors hover:text-coral"
+                className="inline-flex items-center gap-2 text-left text-sm text-night/60 transition-colors hover:text-kalico-blue"
               >
                 <Lock className="h-4 w-4" />
                 Gérer mes cookies
               </button>
               <a
                 href="mailto:contact@kalico.nc"
-                className="inline-flex items-center gap-2 text-sm text-night/60 transition-colors hover:text-coral"
+                className="inline-flex items-center gap-2 text-sm text-night/60 transition-colors hover:text-kalico-blue"
               >
                 <Mail className="h-4 w-4" />
                 contact@kalico.nc

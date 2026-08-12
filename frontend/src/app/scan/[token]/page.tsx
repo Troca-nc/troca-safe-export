@@ -147,7 +147,7 @@ export default function TicketValidationPage() {
 
             <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-night/60">
               <span className="inline-flex items-center gap-2 rounded-full bg-sand px-3 py-1.5">
-                <UserCheck className="h-4 w-4 text-coral" />
+                <UserCheck className="h-4 w-4 text-kalico-blue" />
                 {isAuthenticated ? `Connectï¿½${user?.first_name ? ` ï¿½ ${user.first_name}` : ''}` : 'Connexion requise pour scanner'}
               </span>
               <Link href="/scan" className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 font-semibold text-night">

@@ -35,7 +35,7 @@ function ProviderSelector({
             type="button"
             onClick={() => onChange(option.value as PaymentProvider)}
             className={`flex flex-col items-start gap-1 rounded-xl border-2 p-3 text-left transition-all ${
-              value === option.value ? 'border-coral bg-coral/8' : 'border-night/10 hover:border-night/25'
+              value === option.value ? 'border-kalico-blue bg-kalico-blue/8' : 'border-night/10 hover:border-night/25'
             }`}
           >
             <option.icon className="h-5 w-5 text-night/60" />
@@ -151,7 +151,7 @@ export default function BoostModal({ annonce, onClose }: BoostModalProps) {
                     onClick={() => setSelectedCardId(card.id)}
                     className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-left transition ${
                       selectedCardId === card.id
-                        ? 'border-coral bg-coral/8'
+                        ? 'border-kalico-blue bg-kalico-blue/8'
                         : 'border-night/8 bg-white hover:border-night/20'
                     }`}
                   >
@@ -190,7 +190,7 @@ export default function BoostModal({ annonce, onClose }: BoostModalProps) {
                           key={`${option.type}-${option.duration}`}
                           className={`flex cursor-pointer items-center gap-3 px-4 py-3 transition-all ${
                             selectedBoost.type === option.type && selectedBoost.duration === option.duration
-                              ? 'bg-coral/8'
+                              ? 'bg-kalico-blue/8'
                               : 'hover:bg-sand'
                           }`}
                         >
@@ -199,13 +199,13 @@ export default function BoostModal({ annonce, onClose }: BoostModalProps) {
                             name="boost"
                             checked={selectedBoost.type === option.type && selectedBoost.duration === option.duration}
                             onChange={() => setSelectedBoost(option)}
-                            className="accent-coral"
+                            className="accent-kalico-blue"
                           />
                           <div className="flex-1">
                             <p className="text-sm text-night">{option.description}</p>
                             <p className="text-[10px] text-night/40">{option.duration} jours</p>
                           </div>
-                          <p className="text-sm font-bold text-coral">{formatXPF(option.price_xpf)}</p>
+                          <p className="text-sm font-bold text-kalico-blue">{formatXPF(option.price_xpf)}</p>
                         </label>
                       ))}
                     </div>

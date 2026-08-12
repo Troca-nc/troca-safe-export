@@ -123,15 +123,15 @@ function ServiceCard({
       <div className="mt-4 grid gap-2 text-xs font-semibold text-night/65 sm:grid-cols-2">
         <span className="rounded-full bg-sand px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-CalÃ©donie'}</span>
         <span className="rounded-full bg-sand px-2.5 py-1">
-          <CalendarDays className="mr-1 inline h-3.5 w-3.5 text-coral" />
+          <CalendarDays className="mr-1 inline h-3.5 w-3.5 text-kalico-blue" />
           {formatDateLabel(item.event_date, isPromo ? 'Expiration libre' : 'Date libre')}
         </span>
         <span className="rounded-full bg-sand px-2.5 py-1">
-          <Users className="mr-1 inline h-3.5 w-3.5 text-coral" />
+          <Users className="mr-1 inline h-3.5 w-3.5 text-kalico-blue" />
           {isPromo ? `${item.view_count ?? 0} vues` : `${item.share_count ?? 0} partages`}
         </span>
         <span className="rounded-full bg-sand px-2.5 py-1">
-          <Clock3 className="mr-1 inline h-3.5 w-3.5 text-coral" />
+          <Clock3 className="mr-1 inline h-3.5 w-3.5 text-kalico-blue" />
           {item.contact_name || 'Contact local'}
         </span>
       </div>
@@ -167,7 +167,7 @@ function ServiceCard({
           target={primaryHref.startsWith('http') ? '_blank' : undefined}
           rel={primaryHref.startsWith('http') ? 'noreferrer' : undefined}
           onClick={() => void trackEvent('service_directory_open', { mode, item_id: item.id, kind: item.kind || null })}
-          className="inline-flex items-center gap-2 rounded-2xl bg-coral px-4 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5"
+          className="inline-flex items-center gap-2 rounded-2xl bg-kalico-blue px-4 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5"
         >
           {primaryLabel}
           <ArrowRight className="h-4 w-4" />

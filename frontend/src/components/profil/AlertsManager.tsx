@@ -60,7 +60,7 @@ function AlertCard({
         <div className="flex items-start gap-3 min-w-0">
           {/* Icï¿½ne statut */}
           <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-            isActive ? 'bg-coral/10 text-coral' : 'bg-sand text-night/30'
+            isActive ? 'bg-kalico-blue/10 text-kalico-blue' : 'bg-sand text-night/30'
           }`}>
             {isActive ? <Bell size={16} /> : <BellOff size={16} />}
           </div>
@@ -101,7 +101,7 @@ function AlertCard({
               )}
               <Link
                 href={`/annonces?${searchParams}`}
-                className="text-coral hover:underline"
+                className="text-kalico-blue hover:underline"
               >
                 Voir les annonces ï¿½
               </Link>

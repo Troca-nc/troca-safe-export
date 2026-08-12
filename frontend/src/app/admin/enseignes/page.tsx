@@ -86,7 +86,7 @@ export default function AdminBusinessesPage() {
     <AdminLayout>
       <div className="border-b border-night/8 bg-white px-6 py-4">
         <div className="flex items-center gap-3">
-          <Store className="h-5 w-5 text-coral" />
+          <Store className="h-5 w-5 text-kalico-blue" />
           <div>
             <h1 className="text-xl font-bold text-night">Enseignes</h1>
             <p className="text-sm text-night/60">Vérification manuelle, badges et modération des avis signalés.</p>
@@ -106,8 +106,8 @@ export default function AdminBusinessesPage() {
               onClick={() => setFilter(item.id as typeof filter)}
               className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
                 filter === item.id
-                  ? 'border-coral bg-coral text-white'
-                  : 'border-night/10 bg-white text-night/60 hover:border-coral/30 hover:text-coral'
+                  ? 'border-kalico-blue bg-kalico-blue text-white'
+                  : 'border-night/10 bg-white text-night/60 hover:border-kalico-blue/30 hover:text-kalico-blue'
               }`}
             >
               {item.label}
@@ -131,7 +131,7 @@ export default function AdminBusinessesPage() {
                     {business.logo_url ? (
                       <Image src={business.logo_url} alt={business.name} width={48} height={48} className="h-12 w-12 rounded-2xl object-cover" />
                     ) : (
-                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sand text-coral">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sand text-kalico-blue">
                         <Store className="h-5 w-5" />
                       </div>
                     )}

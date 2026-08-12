@@ -71,7 +71,7 @@ export default async function CategoryPage({
           <span key={crumb.url} className="flex items-center gap-1">
             {i > 0 && <span aria-hidden>:</span>}
             {i < breadcrumbs.length - 1
-              ? <a href={crumb.url} className="hover:text-coral transition-colors">{crumb.name}</a>
+              ? <a href={crumb.url} className="hover:text-kalico-blue transition-colors">{crumb.name}</a>
               : <span className="text-night/70 font-medium">{crumb.name}</span>
             }
           </span>
@@ -82,7 +82,7 @@ export default async function CategoryPage({
         <h1 className="text-2xl font-display font-bold text-night flex items-center gap-2">
           <span aria-hidden>{cat.emoji}</span>
           {cat.label}
-          {commune && <span className="text-night/50"> ï¿½ {commune}</span>}
+          {commune && <span className="text-night/50"> à {commune}</span>}
         </h1>
         <p className="text-sm text-night/50 mt-1">
           {stats.nb_annonces.toLocaleString('fr-FR')} annonce{stats.nb_annonces > 1 ? 's' : ''} disponible{stats.nb_annonces > 1 ? 's' : ''}
@@ -91,6 +91,21 @@ export default async function CategoryPage({
           {cat.description}
         </p>
       </div>
+
+      {stats.nb_annonces === 0 && (
+        <div className="flex flex-col items-center justify-center gap-6 text-center py-16">
+          <div className="text-5xl">🌺</div>
+          <p className="font-display text-xl font-bold text-[var(--color-text-primary)]">
+            Soyez le premier à publier ici.
+          </p>
+          <p className="text-sm text-[var(--color-text-secondary)]">
+            Cette catégorie n'a pas encore d'annonces en Nouvelle-Calédonie. Déposez la vôtre gratuitement.
+          </p>
+          <a href="/annonces/nouvelle" className="btn-primary px-6 py-3 rounded-xl text-sm font-semibold">
+            Déposer une annonce
+          </a>
+        </div>
+      )}
     </>
   )
 }

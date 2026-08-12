@@ -89,7 +89,7 @@ function TrocDetailPageContent() {
         <Header />
         <main className="mx-auto max-w-4xl px-4 py-12">
           <div className="rounded-[2rem] border border-night/8 bg-white p-8 text-center shadow-card">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Troc</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Troc</p>
             <h1 className="mt-3 text-3xl font-bold text-night">Annonce troc introuvable</h1>
             <p className="mt-3 text-sm leading-6 text-night/60">
               Cette annonce nexiste plus ou nest plus disponible.
@@ -112,7 +112,7 @@ function TrocDetailPageContent() {
     <div className="min-h-screen bg-cream">
       <Header />
       <main className="mx-auto max-w-6xl px-4 py-8">
-        <Link href="/troc" className="inline-flex items-center gap-2 text-sm font-semibold text-night/60 transition hover:text-coral">
+        <Link href="/troc" className="inline-flex items-center gap-2 text-sm font-semibold text-night/60 transition hover:text-kalico-blue">
           <ArrowLeft className="h-4 w-4" />
           Retour au feed Troc
         </Link>
@@ -141,7 +141,7 @@ function TrocDetailPageContent() {
             <div className="space-y-5 p-5 sm:p-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-coral/80">{sellerName}</p>
+                  <p className="text-sm font-semibold text-kalico-blue/80">{sellerName}</p>
                   <h1 className="mt-2 text-3xl font-bold leading-tight text-night">{listing.title}</h1>
                   <div className="mt-3 flex flex-wrap gap-2 text-xs text-night/60">
                     {listing.commune_name ? (
@@ -187,7 +187,7 @@ function TrocDetailPageContent() {
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-night/40">Ce que le vendeur cherche</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {wants.map((want) => (
-                    <span key={want} className="rounded-full bg-coral/10 px-3 py-1.5 text-sm font-medium text-coral">
+                    <span key={want} className="rounded-full bg-kalico-blue/10 px-3 py-1.5 text-sm font-medium text-kalico-blue">
                       {want}
                     </span>
                   ))}
@@ -206,13 +206,13 @@ function TrocDetailPageContent() {
             <TrocProposalForm listingId={listing.id} listingTitle={listing.title} />
 
             <section className="rounded-[1.75rem] border border-night/8 bg-white p-5 shadow-card">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Conseil</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Conseil</p>
               <h2 className="mt-2 text-lg font-bold text-night">Proposition structurï¿½e puis chat</h2>
               <p className="mt-2 text-sm leading-6 text-night/60">
                 Commencez par dï¿½crire clairement ce que vous proposez. Une fois la proposition acceptï¿½e, la conversation de nï¿½gociation souvre automatiquement.
               </p>
               <div className="mt-4 rounded-2xl bg-night/5 p-4 text-sm text-night/65">
-                <MessageSquareText className="mb-2 h-5 w-5 text-coral" />
+                <MessageSquareText className="mb-2 h-5 w-5 text-kalico-blue" />
                 Le chat arrive aprï¿½s la proposition, pas avant.
               </div>
             </section>

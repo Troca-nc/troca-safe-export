@@ -292,15 +292,15 @@ export default function EvenementsPage() {
 
                       <div className="mt-3 grid gap-2 text-xs font-semibold text-night/65 sm:grid-cols-2">
                         <span className="rounded-full bg-white px-2.5 py-1">
-                          <CalendarDays className="mr-1 inline h-3.5 w-3.5 text-coral" />
+                          <CalendarDays className="mr-1 inline h-3.5 w-3.5 text-kalico-blue" />
                           {formatDateLabel(event.event_date)}
                         </span>
                         <span className="rounded-full bg-white px-2.5 py-1">
-                          <MapPin className="mr-1 inline h-3.5 w-3.5 text-coral" />
+                          <MapPin className="mr-1 inline h-3.5 w-3.5 text-kalico-blue" />
                           {event.commune_name || event.location_name || 'Local'}
                         </span>
                         <span className="rounded-full bg-white px-2.5 py-1">
-                          <Clock3 className="mr-1 inline h-3.5 w-3.5 text-coral" />
+                          <Clock3 className="mr-1 inline h-3.5 w-3.5 text-kalico-blue" />
                           {Number(event.price_xpf ?? 0) > 0 ? `${Number(event.price_xpf).toLocaleString('fr-FR')} XPF` : 'Gratuit'}
                         </span>
                       </div>

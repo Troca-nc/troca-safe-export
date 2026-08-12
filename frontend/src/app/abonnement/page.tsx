@@ -269,7 +269,7 @@ function MetierCard({
         aria-expanded={open}
         className="flex w-full items-start gap-4 text-left"
       >
-        <span className="mt-0.5 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-coral/10 text-coral">
+        <span className="mt-0.5 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-kalico-blue/10 text-kalico-blue">
           <Icon className="h-5 w-5" />
         </span>
         <span className="min-w-0 flex-1">
@@ -330,7 +330,7 @@ export default function AbonnementPage() {
     <div className="min-h-screen bg-[var(--color-bg-page)] text-night">
       <section className="bg-night px-4 py-16 text-center text-white">
         <div className="mx-auto max-w-5xl">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-coral/20 px-3 py-1.5 text-xs font-medium text-coral">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-kalico-blue/20 px-3 py-1.5 text-xs font-medium text-kalico-blue">
             <TrendingUp size={12} />
             Dï¿½veloppez votre activitï¿½ sur Kalico
           </div>
@@ -367,7 +367,7 @@ export default function AbonnementPage() {
 
         <section>
           <div className="mb-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral/80">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">
               Fait pour votre mï¿½tier
             </p>
             <h2 className="mt-1 font-display text-2xl font-bold text-night md:text-3xl">
@@ -393,7 +393,7 @@ export default function AbonnementPage() {
         <section className="mt-10">
           <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral/80">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">
                 Choisissez votre formule
               </p>
               <h2 className="mt-1 font-display text-2xl font-bold text-night md:text-3xl">
@@ -434,8 +434,8 @@ export default function AbonnementPage() {
               </div>
             </article>
 
-            <article className="relative flex h-full flex-col rounded-[2rem] border-2 border-coral bg-[var(--color-surface)] p-6 shadow-xl ring-2 ring-coral/10 lg:scale-[1.02]">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-coral px-4 py-1 text-xs font-bold text-white shadow">
+            <article className="relative flex h-full flex-col rounded-[2rem] border-2 border-kalico-blue bg-[var(--color-surface)] p-6 shadow-xl ring-2 ring-kalico-blue/10 lg:scale-[1.02]">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-kalico-blue px-4 py-1 text-xs font-bold text-white shadow">
                 Recommandï¿½
               </div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">Pro</p>
@@ -552,7 +552,7 @@ export default function AbonnementPage() {
         <section className="mt-10 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
           <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral/80">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">
                 Pourquoi Pro ?
               </p>
               <h2 className="mt-1 text-2xl font-bold text-night md:text-3xl">
@@ -566,7 +566,7 @@ export default function AbonnementPage() {
               const Icon = item.icon
               return (
                 <div key={item.title} className="rounded-2xl bg-[var(--color-surface-raised)] p-4">
-                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-coral/10 text-coral">
+                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-kalico-blue/10 text-kalico-blue">
                     <Icon className="h-5 w-5" />
                   </div>
                   <h3 className="mt-3 text-lg font-semibold text-night">{item.title}</h3>
@@ -585,7 +585,7 @@ export default function AbonnementPage() {
 
         <div className="mt-8 text-center text-sm text-night/55">
           Besoin d&apos;un dï¿½tail avant de vous lancer ?{' '}
-          <Link href="/contact" className="font-semibold text-coral hover:underline">
+          <Link href="/contact" className="font-semibold text-kalico-blue hover:underline">
             Contactez-nous
           </Link>
         </div>

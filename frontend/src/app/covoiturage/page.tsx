@@ -627,7 +627,7 @@ export default function CovoituragePage() {
                       type="checkbox"
                       checked={womenOnlyFilter}
                       onChange={(e) => setWomenOnlyFilter(e.target.checked)}
-                      className="h-4 w-4 rounded border-night/20 text-coral"
+                      className="h-4 w-4 rounded border-night/20 text-kalico-blue"
                     />
                     <span>Afficher seulement les trajets rï¿½servï¿½s aux femmes</span>
                   </label>
@@ -715,7 +715,7 @@ export default function CovoituragePage() {
                       </div>
                     ) : (
                       <div className="rounded-[1.75rem] border border-dashed border-night/10 bg-sand/30 p-8 text-center text-night/55">
-                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-coral/10 text-coral">
+                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-kalico-blue/10 text-kalico-blue">
                           <Car className="h-6 w-6" />
                         </div>
                         <p className="mt-4 text-lg font-semibold text-night">Aucun trajet disponible pour le moment</p>
@@ -740,7 +740,7 @@ export default function CovoituragePage() {
                   className={user ? 'grid gap-4 md:grid-cols-2' : 'grid gap-4 md:grid-cols-2 opacity-40 pointer-events-none select-none'}
                 >
                   <div className="md:col-span-2 flex items-center gap-2">
-                    <span className="rounded-full bg-coral/10 p-2 text-coral">
+                    <span className="rounded-full bg-kalico-blue/10 p-2 text-kalico-blue">
                       <Car className="h-4 w-4" />
                     </span>
                     <div>
@@ -863,7 +863,7 @@ export default function CovoituragePage() {
                       type="checkbox"
                       checked={form.women_only}
                       onChange={(e) => setForm((prev) => ({ ...prev, women_only: e.target.checked }))}
-                      className="h-4 w-4 rounded border-night/20 text-coral"
+                      className="h-4 w-4 rounded border-night/20 text-kalico-blue"
                     />
                     <span>Rï¿½server ce trajet aux femmes</span>
                   </label>

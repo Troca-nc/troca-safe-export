@@ -9,7 +9,7 @@ type PlanBadgeProps = {
 export default function PlanBadge({ className = '' }: PlanBadgeProps) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border border-coral/20 bg-coral/10 px-2 py-0.5 text-[11px] font-semibold text-coral ${
+      className={`inline-flex items-center gap-1 rounded-full border border-kalico-blue/20 bg-kalico-blue/10 px-2 py-0.5 text-[11px] font-semibold text-kalico-blue ${
         className
       }`}
     >

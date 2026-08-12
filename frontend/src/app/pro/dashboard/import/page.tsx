@@ -364,7 +364,7 @@ export default function ProDashboardImportPage() {
         <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Etape 1</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Etape 1</p>
               <h2 className="mt-1 font-display text-2xl font-bold text-night">Charger un fichier</h2>
             </div>
             <div className="inline-flex items-center gap-2 rounded-full bg-nc-lagonLight px-3 py-1.5 text-xs font-semibold text-nc-lagon">
@@ -469,7 +469,7 @@ export default function ProDashboardImportPage() {
             </p>
             <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
               {requiredFields.map((field) => (
-                <span key={field.key} className="rounded-full bg-coral/10 px-3 py-1 text-coral">
+                <span key={field.key} className="rounded-full bg-kalico-blue/10 px-3 py-1 text-kalico-blue">
                   {field.label}
                 </span>
               ))}
@@ -482,7 +482,7 @@ export default function ProDashboardImportPage() {
                 <History className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Historique</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Historique</p>
                 <h2 className="mt-1 font-display text-2xl font-bold text-night">10 derniers imports</h2>
               </div>
             </div>
@@ -524,7 +524,7 @@ export default function ProDashboardImportPage() {
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Etape 2</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Etape 2</p>
                 <h2 className="mt-1 font-display text-2xl font-bold text-night">Mapper les colonnes</h2>
               </div>
               <div className="rounded-full bg-nc-lagonLight px-3 py-1.5 text-xs font-semibold text-nc-lagon">
@@ -538,7 +538,7 @@ export default function ProDashboardImportPage() {
                   <div>
                     <p className="text-sm font-semibold text-night">
                       {field.label}
-                      {field.required ? <span className="ml-2 rounded-full bg-coral/10 px-2 py-0.5 text-[11px] text-coral">Requis</span> : null}
+                      {field.required ? <span className="ml-2 rounded-full bg-kalico-blue/10 px-2 py-0.5 text-[11px] text-kalico-blue">Requis</span> : null}
                     </p>
                     <p className="mt-1 text-xs text-night/55">
                       {field.key === 'title'
@@ -594,7 +594,7 @@ export default function ProDashboardImportPage() {
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Apercu</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Apercu</p>
                 <h2 className="mt-1 font-display text-2xl font-bold text-night">Premieres lignes du fichier</h2>
               </div>
               <span className="inline-flex items-center gap-2 rounded-full bg-nc-lagonLight px-3 py-1.5 text-xs font-semibold text-nc-lagon">

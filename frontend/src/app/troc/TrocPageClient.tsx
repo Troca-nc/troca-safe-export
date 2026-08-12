@@ -350,7 +350,7 @@ export default function TrocPage() {
 
       <section className="mx-auto max-w-7xl px-4 pb-12">
         <div className="mb-5">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Annonces disponibles au troc</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Annonces disponibles au troc</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">Annonces disponibles au troc</h2>
           <p className="mt-1 text-sm text-night/55">
             Ces Calï¿½doniens acceptent les ï¿½changes - trouvez votre bonheur.
@@ -452,7 +452,7 @@ export default function TrocPage() {
 
       <section className="mx-auto max-w-4xl px-4 pb-12">
         <div className="mb-5">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Trocï¿½mï¿½tre</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Trocï¿½mï¿½tre</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">ï¿½ Trocï¿½mï¿½tre - Trouvez un ï¿½quivalent</h2>
           <p className="mt-1 text-sm text-night/55">
             Vous avez postï¿½ une annonce troc ? Entrez son prix et dï¿½couvrez 3 annonces de valeur ï¿½quivalente prï¿½tes ï¿½ l&apos;ï¿½change.
@@ -545,7 +545,7 @@ export default function TrocPage() {
             <button
               type="button"
               onClick={handleFindTrocs}
-              className="inline-flex items-center gap-2 rounded-2xl bg-coral px-4 py-3 text-sm font-semibold text-white transition hover:bg-coral/90"
+              className="inline-flex items-center gap-2 rounded-2xl bg-kalico-blue px-4 py-3 text-sm font-semibold text-white transition hover:bg-kalico-blue/90"
             >
               {trocLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Scale className="h-4 w-4" />}
               Trouver des trocs
@@ -591,7 +591,7 @@ export default function TrocPage() {
 
       <section className="mx-auto max-w-6xl px-4 pb-16">
         <div className="mb-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Comment ï¿½a marche</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Comment ï¿½a marche</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">Trois ï¿½tapes simples pour trouver un ï¿½change</h2>
         </div>
 
@@ -606,7 +606,7 @@ export default function TrocPage() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-nc-lagonLight text-[#0A7EA4]">
                   <Icon className="h-6 w-6" />
                 </div>
-                <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-coral/80">ï¿½tape {index + 1}</p>
+                <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">ï¿½tape {index + 1}</p>
                 <h3 className="mt-2 text-lg font-semibold text-night">{step.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-night/60">{step.description}</p>
               </article>
@@ -617,7 +617,7 @@ export default function TrocPage() {
         <div className="mt-8 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center shadow-sm">
           <p className="text-sm text-night/60">
             Besoin dun point de dï¿½part ?{' '}
-            <Link href="/annonces/nouvelle" className="font-semibold text-coral hover:underline">
+            <Link href="/annonces/nouvelle" className="font-semibold text-kalico-blue hover:underline">
               Publiez votre premiï¿½re annonce
             </Link>
             .

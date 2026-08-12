@@ -334,7 +334,7 @@ export default function Trocometer() {
             <button
               type="button"
               onClick={() => setDropdownOpen((value) => !value)}
-              className="flex w-full items-center justify-between gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-left shadow-sm transition hover:border-coral/30 hover:shadow-md"
+              className="flex w-full items-center justify-between gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-left shadow-sm transition hover:border-kalico-blue/30 hover:shadow-md"
             >
               <span className="min-w-0 flex-1">
                 {selectedListing ? (
@@ -461,7 +461,7 @@ export default function Trocometer() {
               type="button"
               onClick={handleNextGroup}
               disabled={transitioning || searching}
-              className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm font-semibold text-night transition hover:border-coral/30 hover:text-coral disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm font-semibold text-night transition hover:border-kalico-blue/30 hover:text-kalico-blue disabled:cursor-not-allowed disabled:opacity-60"
               style={{ transform: `rotate(${spin}deg)`, transition: 'transform 400ms ease' }}
             >
               <RefreshCw className="h-4 w-4" />

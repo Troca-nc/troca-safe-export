@@ -70,8 +70,8 @@ const QUICK_LINKS = [
 
 const toneStyles = {
   coral: {
-    panel: 'border-coral/15 bg-coral/5',
-    icon: 'bg-coral/10 text-coral',
+    panel: 'border-kalico-blue/15 bg-kalico-blue/5',
+    icon: 'bg-kalico-blue/10 text-kalico-blue',
   },
   lagoon: {
     panel: 'border-lagoon/15 bg-lagoon/5',
@@ -192,7 +192,7 @@ function ToggleRow({
         </span>
       </span>
       <span
-        className="relative mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full bg-night/10 transition data-[checked=true]:bg-coral"
+        className="relative mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full bg-night/10 transition data-[checked=true]:bg-kalico-blue"
         data-checked={checked ? 'true' : 'false'}
       >
         <input
@@ -381,10 +381,10 @@ export default function NotificationPreferencesPage() {
       <Header />
 
       <main className="mx-auto max-w-6xl px-4 py-8">
-        <div className="overflow-hidden rounded-[2rem] border border-coral/15 bg-[linear-gradient(135deg,rgba(10,126,164,0.08),rgba(244,248,247,1)_45%,rgba(72,202,228,0.08))] p-6 shadow-sm">
+        <div className="overflow-hidden rounded-[2rem] border border-kalico-blue/15 bg-[linear-gradient(135deg,rgba(10,126,164,0.08),rgba(244,248,247,1)_45%,rgba(72,202,228,0.08))] p-6 shadow-sm">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full bg-coral/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-coral">
+              <div className="inline-flex items-center gap-2 rounded-full bg-kalico-blue/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue">
                 <Bell className="h-3.5 w-3.5" />
                 Centre unique de notifications
               </div>
@@ -417,7 +417,7 @@ export default function NotificationPreferencesPage() {
                 <a
                   key={item.href}
                   href={item.href}
-                  className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-3 py-1.5 text-xs font-medium text-night/65 shadow-xs transition hover:-translate-y-0.5 hover:border-coral/20 hover:text-night"
+                  className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-3 py-1.5 text-xs font-medium text-night/65 shadow-xs transition hover:-translate-y-0.5 hover:border-kalico-blue/20 hover:text-night"
                 >
                   <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${palette.icon}`}>
                     <ArrowRight className="h-3 w-3" />
@@ -568,7 +568,7 @@ export default function NotificationPreferencesPage() {
                 <select
                   value={notificationPrefs.performance_report_frequency}
                   onChange={(event) => updateNotificationPrefs('performance_report_frequency', event.target.value as NotificationPrefs['performance_report_frequency'])}
-                  className="mt-3 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-night outline-none transition focus:border-coral focus:ring-4 focus:ring-coral/10"
+                  className="mt-3 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-night outline-none transition focus:border-kalico-blue focus:ring-4 focus:ring-kalico-blue/10"
                 >
                   <option value="daily">Quotidien</option>
                   <option value="weekly">Hebdomadaire</option>
@@ -638,8 +638,8 @@ export default function NotificationPreferencesPage() {
                           onClick={() => toggleCategory(category.value)}
                           className={`rounded-full border px-3 py-2 text-xs font-medium transition duration-150 ${
                             active
-                              ? 'border-coral bg-coral text-white'
-                              : 'border-[var(--color-border)] bg-white text-night/65 hover:border-coral/30 hover:bg-coral/5 hover:text-coral'
+                              ? 'border-kalico-blue bg-kalico-blue text-white'
+                              : 'border-[var(--color-border)] bg-white text-night/65 hover:border-kalico-blue/30 hover:bg-kalico-blue/5 hover:text-kalico-blue'
                           }`}
                         >
                           {category.label}
@@ -660,12 +660,12 @@ export default function NotificationPreferencesPage() {
                       value={bonPlanBusinessInput}
                       onChange={(event) => setBonPlanBusinessInput(event.target.value)}
                       placeholder="Ajouter une enseigne"
-                      className="flex-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-night outline-none transition focus:border-coral focus:ring-4 focus:ring-coral/10"
+                      className="flex-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-night outline-none transition focus:border-kalico-blue focus:ring-4 focus:ring-kalico-blue/10"
                     />
                     <button
                       type="button"
                       onClick={addBusiness}
-                      className="inline-flex items-center gap-2 rounded-2xl bg-coral px-4 py-3 text-sm font-semibold text-white transition hover:bg-coral/90"
+                      className="inline-flex items-center gap-2 rounded-2xl bg-kalico-blue px-4 py-3 text-sm font-semibold text-white transition hover:bg-kalico-blue/90"
                     >
                       Ajouter
                     </button>
@@ -691,7 +691,7 @@ export default function NotificationPreferencesPage() {
                           <button
                             type="button"
                             onClick={() => removeBusiness(business)}
-                            className="text-night/30 transition hover:text-coral"
+                            className="text-night/30 transition hover:text-kalico-blue"
                             aria-label={`Retirer ${business}`}
                           >
                             ï¿½
@@ -710,7 +710,7 @@ export default function NotificationPreferencesPage() {
 
             <section className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
               <div className="flex items-start gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-coral/10 text-coral">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-kalico-blue/10 text-kalico-blue">
                   <Bell className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
@@ -734,7 +734,7 @@ export default function NotificationPreferencesPage() {
 
         <div className="mt-6 flex flex-col gap-3 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm md:flex-row md:items-center md:justify-between">
           <div className="max-w-2xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Enregistrement</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Enregistrement</p>
             <p className="mt-2 text-sm leading-relaxed text-night/65">
               Vous pouvez modifier vos canaux ï¿½ tout moment. Les changements sappliquent immï¿½diatement sur le web et sur mobile.
             </p>

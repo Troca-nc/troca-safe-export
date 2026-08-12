@@ -294,7 +294,7 @@ export default function ChatInput({
         <div className="px-4 py-3 border-b border-night/8 bg-sand/50">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-medium text-night flex items-center gap-1">
-              <TrendingUp size={13} className="text-coral" />
+              <TrendingUp size={13} className="text-kalico-blue" />
               Faire une offre
             </p>
             <button type="button" onClick={() => setOfferOpen(false)}>
@@ -339,7 +339,7 @@ export default function ChatInput({
                     key={ratio}
                     type="button"
                     onClick={() => setOfferAmt(String(amount))}
-                    className="text-[10px] border border-night/10 rounded-full px-2 py-0.5 text-night/50 hover:border-coral hover:text-coral transition-colors"
+                    className="text-[10px] border border-night/10 rounded-full px-2 py-0.5 text-night/50 hover:border-kalico-blue hover:text-kalico-blue transition-colors"
                   >
                     -{Math.round((1 - ratio) * 100)}% ï¿½ {amount.toLocaleString('fr-FR')}
                   </button>
@@ -368,7 +368,7 @@ export default function ChatInput({
             <button
               type="button"
               onClick={handleCancelDocument}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-night/10 bg-white text-night/45 transition-colors hover:text-coral"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-night/10 bg-white text-night/45 transition-colors hover:text-kalico-blue"
               aria-label="Annuler le document"
             >
               <Trash2 size={16} />
@@ -408,7 +408,7 @@ export default function ChatInput({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={disabled || uploading || recording || Boolean(pendingDocument)}
-          className="p-2 text-night/40 hover:text-coral hover:bg-coral/8 rounded-xl transition-all shrink-0 disabled:opacity-40"
+          className="p-2 text-night/40 hover:text-kalico-blue hover:bg-kalico-blue/8 rounded-xl transition-all shrink-0 disabled:opacity-40"
           aria-label="Envoyer une photo"
         >
           {uploading
@@ -421,7 +421,7 @@ export default function ChatInput({
           type="button"
           onClick={() => documentInputRef.current?.click()}
           disabled={disabled || uploading || recording || Boolean(pendingDocument)}
-          className="p-2 text-night/40 hover:text-coral hover:bg-coral/8 rounded-xl transition-all shrink-0 disabled:opacity-40"
+          className="p-2 text-night/40 hover:text-kalico-blue hover:bg-kalico-blue/8 rounded-xl transition-all shrink-0 disabled:opacity-40"
           aria-label="Envoyer un document"
         >
           <Paperclip size={18} />
@@ -434,8 +434,8 @@ export default function ChatInput({
             disabled={disabled || recording || Boolean(pendingDocument)}
             className={`p-2 rounded-xl transition-all shrink-0 disabled:opacity-40 ${
               offerOpen
-                ? 'text-coral bg-coral/10'
-                : 'text-night/40 hover:text-coral hover:bg-coral/8'
+                ? 'text-kalico-blue bg-kalico-blue/10'
+                : 'text-night/40 hover:text-kalico-blue hover:bg-kalico-blue/8'
             }`}
             aria-label="Faire une offre de prix"
           >
@@ -474,7 +474,7 @@ export default function ChatInput({
           type="button"
           onClick={handleSend}
           disabled={(pendingDocument ? false : !text.trim()) || sending || disabled || recording || uploading}
-          className="p-2.5 bg-coral text-white rounded-xl hover:bg-coral-dark transition-all shrink-0 disabled:opacity-30"
+          className="p-2.5 bg-kalico-blue text-white rounded-xl hover:bg-kalico-blue-dark transition-all shrink-0 disabled:opacity-30"
           aria-label={pendingDocument ? 'Envoyer le document' : 'Envoyer le message'}
         >
           {sending

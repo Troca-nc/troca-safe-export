@@ -66,7 +66,7 @@ export default function TrocProposalForm({ listingId, listingTitle }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-[1.75rem] border border-night/8 bg-white p-5 shadow-card">
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Proposition structurï¿½e</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Proposition structurï¿½e</p>
         <h3 className="mt-2 text-xl font-bold text-night">Proposer un ï¿½change pour {listingTitle}</h3>
         <p className="mt-2 text-sm leading-6 text-night/60">
           Dï¿½crivez ce que vous offrez avant de dï¿½marrer la discussion. Cest plus clair pour tout le monde.
@@ -74,7 +74,7 @@ export default function TrocProposalForm({ listingId, listingTitle }: Props) {
       </div>
 
       {!isAuthenticated ? (
-        <div className="rounded-2xl border border-coral/20 bg-coral/8 p-4 text-sm text-night/70">
+        <div className="rounded-2xl border border-kalico-blue/20 bg-kalico-blue/8 p-4 text-sm text-night/70">
           Connectez-vous pour envoyer une proposition. Votre brouillon reste visible ici aprï¿½s connexion.
         </div>
       ) : null}
@@ -85,7 +85,7 @@ export default function TrocProposalForm({ listingId, listingTitle }: Props) {
           value={offeredDescription}
           onChange={(event) => setOfferedDescription(event.target.value)}
           rows={4}
-          className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10"
+          className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-kalico-blue/40 focus:ring-4 focus:ring-kalico-blue/10"
           placeholder="Dï¿½crivez lobjet, lÃtat, la marque, les accessoires inclus..."
           maxLength={2000}
           required
@@ -98,7 +98,7 @@ export default function TrocProposalForm({ listingId, listingTitle }: Props) {
           <select
             value={complementDirection}
             onChange={(event) => setComplementDirection(event.target.value as 'none' | 'i_pay' | 'they_pay')}
-            className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10"
+            className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-kalico-blue/40 focus:ring-4 focus:ring-kalico-blue/10"
           >
             <option value="none">Aucun complï¿½ment</option>
             <option value="i_pay">Je propose un complï¿½ment</option>
@@ -120,7 +120,7 @@ export default function TrocProposalForm({ listingId, listingTitle }: Props) {
             onChange={(event) => setComplementXpf(Number(event.target.value || 0))}
             onBlur={(event) => setComplementXpf(snapTo10(Number(event.target.value || 0)))}
             disabled={complementDirection === 'none'}
-            className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10 disabled:bg-night/5"
+            className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-kalico-blue/40 focus:ring-4 focus:ring-kalico-blue/10 disabled:bg-night/5"
             placeholder="0"
           />
         </label>
@@ -132,7 +132,7 @@ export default function TrocProposalForm({ listingId, listingTitle }: Props) {
           value={message}
           onChange={(event) => setMessage(event.target.value)}
           rows={3}
-          className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10"
+          className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-kalico-blue/40 focus:ring-4 focus:ring-kalico-blue/10"
           placeholder="Ajoutez une courte note ou une question..."
           maxLength={2000}
         />
@@ -154,7 +154,7 @@ export default function TrocProposalForm({ listingId, listingTitle }: Props) {
       <button
         type="submit"
         disabled={sending}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-coral px-4 py-3 text-sm font-semibold text-white transition hover:bg-coral/90 disabled:cursor-wait disabled:opacity-60"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-kalico-blue px-4 py-3 text-sm font-semibold text-white transition hover:bg-kalico-blue/90 disabled:cursor-wait disabled:opacity-60"
       >
         <Send className="h-4 w-4" />
         {sending ? 'Envoi en cours&' : 'Envoyer ma proposition'}

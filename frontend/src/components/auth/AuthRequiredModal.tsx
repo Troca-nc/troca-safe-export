@@ -29,7 +29,7 @@ export default function AuthRequiredModal() {
         </button>
 
         <div className="p-6 sm:p-7">
-          <div className="inline-flex rounded-full bg-coral/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-coral">
+          <div className="inline-flex rounded-full bg-kalico-blue/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-kalico-blue">
             {isFavoriteAction ? 'Favoris synchronisï¿½s' : 'Connexion rapide'}
           </div>
           <h2 className="mt-4 text-2xl font-bold text-night">
@@ -46,7 +46,7 @@ export default function AuthRequiredModal() {
               <>
                 <Link
                   href="/inscription"
-                  className="inline-flex w-full items-center justify-center rounded-2xl bg-coral px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#b83e28]"
+                  className="inline-flex w-full items-center justify-center rounded-2xl bg-kalico-blue px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#b83e28]"
                   onClick={() => closeAuthModal()}
                 >
                   Crï¿½er un compte

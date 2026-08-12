@@ -165,7 +165,7 @@ function buildAssociatedSearches(listing: ListingDetail) {
     searches.push({
       label: token,
       href: `/annonces?q=${encodeURIComponent(token)}`,
-      tone: index % 2 === 0 ? 'bg-coral/10 text-coral' : 'bg-sand text-night',
+      tone: index % 2 === 0 ? 'bg-kalico-blue/10 text-kalico-blue' : 'bg-sand text-night',
     })
   })
 
@@ -573,10 +573,10 @@ export default function AnnonceDetail({ id, initialData }: Props) {
             type="button"
             onClick={handleFavorite}
             className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-sm transition-colors ${
-              saved ? 'border-coral/30 bg-coral/8 text-coral' : 'border-night/10 bg-white text-night/65 hover:text-night'
+              saved ? 'border-kalico-blue/30 bg-kalico-blue/8 text-kalico-blue' : 'border-night/10 bg-white text-night/65 hover:text-night'
             }`}
           >
-            <Heart size={16} className={saved ? 'fill-coral' : ''} />
+            <Heart size={16} className={saved ? 'fill-kalico-blue' : ''} />
             Favori
           </button>
           {shareAnnonce && <ShareButton annonce={shareAnnonce} variant="icon" />}
@@ -694,11 +694,11 @@ export default function AnnonceDetail({ id, initialData }: Props) {
             </button>
 
             <div className="flex items-start gap-3 pr-10">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-coral/10 text-coral">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-kalico-blue/10 text-kalico-blue">
                 <BadgeDollarSign className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Offre rapide</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Offre rapide</p>
                 <h2 className="mt-1 text-2xl font-bold text-night">Faire une offre pour {listing.title}</h2>
                 <p className="mt-2 text-sm leading-6 text-night/60">
                   Proposez un montant et ajoutez un message bref. La discussion s'ouvrira directement avec le vendeur.
@@ -716,7 +716,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
                   value={offerAmount}
                   onChange={(event) => setOfferAmount(event.target.value)}
                   onBlur={(event) => setOfferAmount(String(snapTo10(Number(event.target.value || 0))))}
-                  className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10"
+                  className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-kalico-blue/40 focus:ring-4 focus:ring-kalico-blue/10"
                   placeholder="Ex. 12 000"
                 />
                 {listing.price != null && (
@@ -733,7 +733,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
                   value={offerNote}
                   onChange={(event) => setOfferNote(event.target.value)}
                   rows={4}
-                  className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10"
+                  className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-kalico-blue/40 focus:ring-4 focus:ring-kalico-blue/10"
                   placeholder="Ajoutez une courte note sur votre offre..."
                   maxLength={500}
                 />
@@ -763,7 +763,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
                 type="button"
                 onClick={handleSubmitOffer}
                 disabled={offerSubmitting}
-                className="inline-flex items-center justify-center rounded-2xl bg-coral px-4 py-3 text-sm font-semibold text-white transition hover:bg-coral/90 disabled:cursor-wait disabled:opacity-60"
+                className="inline-flex items-center justify-center rounded-2xl bg-kalico-blue px-4 py-3 text-sm font-semibold text-white transition hover:bg-kalico-blue/90 disabled:cursor-wait disabled:opacity-60"
               >
                 {offerSubmitting ? 'Envoi...' : 'Envoyer mon offre'}
               </button>

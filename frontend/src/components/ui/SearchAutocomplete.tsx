@@ -214,10 +214,10 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher&', classN
   }
 
   const ICONS: Record<string, React.ReactNode> = {
-    annonce:    <TrendingUp size={14} className="text-coral shrink-0" />,
+    annonce:    <TrendingUp size={14} className="text-kalico-blue shrink-0" />,
     categorie:  <Grid       size={14} className="text-blue-500 shrink-0" />,
     commune:    <MapPin     size={14} className="text-green-500 shrink-0" />,
-    recherche:  <Search     size={14} className="text-coral shrink-0" />,
+    recherche:  <Search     size={14} className="text-kalico-blue shrink-0" />,
     historique: <Clock      size={14} className="text-night/30 shrink-0" />,
   }
 
@@ -244,7 +244,7 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher&', classN
             onChange={e => setQ(e.target.value)}
             onFocus={() => { if (!q) showHistory(); else setOpen(true) }}
             onKeyDown={handleKeyDown}
-            className="w-full bg-white border border-night/12 rounded-2xl pl-10 pr-10 py-3 text-sm text-night placeholder:text-night/35 outline-none focus:border-coral/50 focus:ring-2 focus:ring-coral/10 transition-all shadow-sm"
+            className="w-full bg-white border border-night/12 rounded-2xl pl-10 pr-10 py-3 text-sm text-night placeholder:text-night/35 outline-none focus:border-kalico-blue/50 focus:ring-2 focus:ring-kalico-blue/10 transition-all shadow-sm"
             autoComplete="off"
           />
           {q && (
@@ -277,7 +277,7 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher&', classN
               <button
                 type="button"
                 onClick={() => { clearHistory(); setSuggestions([]); setOpen(false) }}
-                className="text-[11px] text-night/60 hover:text-coral transition-colors"
+                className="text-[11px] text-night/60 hover:text-kalico-blue transition-colors"
               >
                 Effacer
               </button>
@@ -287,7 +287,7 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher&', classN
           {/* Loading */}
           {loading && (
             <div className="px-4 py-3 text-sm text-night/60 flex items-center gap-2" aria-live="polite">
-              <div className="w-3.5 h-3.5 border-2 border-coral/30 border-t-coral rounded-full animate-spin" />
+              <div className="w-3.5 h-3.5 border-2 border-kalico-blue/30 border-t-kalico-blue rounded-full animate-spin" />
               Recherche&
             </div>
           )}
@@ -334,7 +334,7 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher&', classN
             <button
               type="button"
               onClick={handleSubmit as any}
-              className="w-full flex items-center gap-2 px-4 py-3 text-sm text-coral font-medium border-t border-night/6 hover:bg-coral/5 transition-colors"
+              className="w-full flex items-center gap-2 px-4 py-3 text-sm text-kalico-blue font-medium border-t border-night/6 hover:bg-kalico-blue/5 transition-colors"
             >
               <Search size={14} />
               Voir tous les rï¿½sultats pour ï¿½ {q} ï¿½
@@ -353,7 +353,7 @@ function highlightMatch(text: string, query: string): React.ReactNode {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="bg-coral/15 text-coral rounded px-0.5 not-italic">
+      <mark className="bg-kalico-blue/15 text-kalico-blue rounded px-0.5 not-italic">
         {text.slice(idx, idx + query.length)}
       </mark>
       {text.slice(idx + query.length)}

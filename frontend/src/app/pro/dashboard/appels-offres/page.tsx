@@ -312,7 +312,7 @@ export default function ProDashboardAppelsOffresPage() {
                     <div className="rounded-2xl bg-[var(--color-background-secondary)] px-4 py-3">
                       <p className="text-[11px] uppercase tracking-[0.16em] text-night/40">Commune</p>
                       <p className="mt-1 flex items-center gap-2 font-semibold text-night">
-                        <MapPin className="h-4 w-4 text-coral" />
+                        <MapPin className="h-4 w-4 text-kalico-blue" />
                         {request.commune}
                       </p>
                     </div>
@@ -354,7 +354,7 @@ export default function ProDashboardAppelsOffresPage() {
                     <div className="mt-5 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Rï¿½pondre</p>
+                          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">Rï¿½pondre</p>
                           <h4 className="mt-1 text-base font-bold text-night">Soumettre une offre</h4>
                         </div>
                       </div>
@@ -431,7 +431,7 @@ export default function ProDashboardAppelsOffresPage() {
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Mes offres soumises</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Mes offres soumises</p>
             <h2 className="mt-1 font-display text-2xl font-bold text-night">Historique et statuts</h2>
           </div>
           <span className="text-sm text-night/55">{offers.length} offre{offers.length > 1 ? 's' : ''}</span>

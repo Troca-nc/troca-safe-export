@@ -40,7 +40,7 @@ export default function NewListingPage() {
         <Header />
         <main className="mx-auto max-w-3xl px-4 py-10 md:py-14">
           <div className="rounded-[2rem] border border-night/8 bg-white p-6 shadow-sm md:p-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-coral/15 bg-coral/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-coral">
+            <div className="inline-flex items-center gap-2 rounded-full border border-kalico-blue/15 bg-kalico-blue/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue">
               <Lock className="h-3.5 w-3.5" />
               Connexion requise
             </div>
@@ -283,7 +283,7 @@ function SimpleBonPlanPage() {
       <main className="mx-auto max-w-7xl px-4 py-8 md:py-12">
         <div className="mb-6 flex items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-coral/15 bg-coral/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-coral">
+            <div className="inline-flex items-center gap-2 rounded-full border border-kalico-blue/15 bg-kalico-blue/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue">
               <Sparkles className="h-3.5 w-3.5" />
               Bon plan
             </div>
@@ -549,7 +549,7 @@ function SimpleBonPlanPage() {
             <div className="grid gap-4 md:grid-cols-2">
               <label className="space-y-2">
                 <span className="flex items-center gap-2 text-sm font-semibold text-night">
-                  <CalendarDays className="h-4 w-4 text-coral" />
+                  <CalendarDays className="h-4 w-4 text-kalico-blue" />
                   Date de l&apos;événement
                 </span>
                 <input
@@ -563,7 +563,7 @@ function SimpleBonPlanPage() {
 
               <label className="space-y-2">
                 <span className="flex items-center gap-2 text-sm font-semibold text-night">
-                  <MapPin className="h-4 w-4 text-coral" />
+                  <MapPin className="h-4 w-4 text-kalico-blue" />
                   Lien utile
                 </span>
                 <input
@@ -617,7 +617,7 @@ function SimpleBonPlanPage() {
             </div>
 
             <div className="rounded-[2rem] border border-night/8 bg-white p-5 shadow-card">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Résumé</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">Résumé</p>
               <div className="mt-4 space-y-3 text-sm text-night/65">
                 <p><span className="font-semibold text-night">Profil:</span> {form.target_audience === 'pro' ? 'Professionnel' : 'Particulier'}</p>
                 <p><span className="font-semibold text-night">Durée:</span> {form.duration_days} jours</p>
@@ -626,7 +626,7 @@ function SimpleBonPlanPage() {
                 <p><span className="font-semibold text-night">Lieu:</span> {form.location_name.trim() || 'Non renseigné'}</p>
               </div>
               <div className="mt-4 rounded-2xl bg-sand p-4 text-sm text-night/65">
-                <Clock3 className="mb-2 h-4 w-4 text-coral" />
+                <Clock3 className="mb-2 h-4 w-4 text-kalico-blue" />
                 La publication reste visible pendant la durée choisie, puis expire automatiquement.
               </div>
             </div>

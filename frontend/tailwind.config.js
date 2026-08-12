@@ -10,7 +10,7 @@ module.exports = {
     extend: {
       colors: {
         // Palette de marque existante
-        coral: { DEFAULT: '#0A7EA4', light: '#1C9BC2', dark: '#075B77' },
+        'kalico-blue': { DEFAULT: '#0A7EA4', light: '#1C9BC2', dark: '#075B77' },
         ocean: { DEFAULT: '#08324F', light: '#0D4C75', dark: '#051E30' },
         lagoon: { DEFAULT: '#48CAE4', light: '#72DDF7', dark: '#2AB8D4' },
         sand: { DEFAULT: '#F4F8F7', light: '#FBFCFC', dark: '#DCE8E5' },

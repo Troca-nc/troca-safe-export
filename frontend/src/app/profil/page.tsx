@@ -209,7 +209,7 @@ function ProfilePageContent() {
         <Header />
         <div className="mx-auto flex max-w-5xl flex-col items-center px-4 py-12 text-center">
           <div className="w-full rounded-[2rem] border border-night/8 bg-white dark:bg-[var(--color-surface)] p-8 shadow-card">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Profil</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Profil</p>
             <h1 className="mt-3 font-display text-3xl font-bold text-night">
               {profileId ? 'Chargement de votre profil' : 'Connectez-vous pour accéder à votre espace.'}
             </h1>
@@ -275,10 +275,10 @@ function ProfilePageContent() {
         <Header />
 
         <div className="max-w-5xl mx-auto px-4 py-8 space-y-5">
-          <div className="card p-5 border-coral/15 bg-coral/5">
+          <div className="card p-5 border-kalico-blue/15 bg-kalico-blue/5">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Onboarding du compte</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Onboarding du compte</p>
                 <h2 className="mt-1 font-display text-2xl font-bold text-night">
                   {demoKey === 'pro'
                     ? 'Votre espace professionnel est prêt'
@@ -313,8 +313,8 @@ function ProfilePageContent() {
   }
 
   const securityPanel = activeTab === 'securite' ? (
-    <div className="card border-coral/15 bg-coral/5 p-5">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Sécurité et connexion</p>
+    <div className="card border-kalico-blue/15 bg-kalico-blue/5 p-5">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Sécurité et connexion</p>
       <h2 className="mt-2 text-xl font-bold text-night">Votre sécurité est active sur ce compte</h2>
       <p className="mt-2 text-sm text-night/60">
         Vous pouvez modifier votre mot de passe, vérifier vos appareils actifs et consulter les options de récupération dans Paramètres.
@@ -331,8 +331,8 @@ function ProfilePageContent() {
   ) : null
 
   const notificationsPanel = activeTab === 'notifications' ? (
-    <div className="card border-coral/15 bg-coral/5 p-5">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Notifications</p>
+    <div className="card border-kalico-blue/15 bg-kalico-blue/5 p-5">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Notifications</p>
       <h2 className="mt-2 text-xl font-bold text-night">Les notifications sont gérées depuis le compte</h2>
       <p className="mt-2 text-sm text-night/60">
         Les alertes de recherche, les messages et les réponses d'annonces restent visibles dans votre espace. Les réglages détaillés sont accessibles depuis Paramètres de notification.
@@ -356,7 +356,7 @@ function ProfilePageContent() {
         <div className="mt-6 rounded-[1.5rem] border border-night/8 bg-white dark:bg-[var(--color-surface)] p-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Bons Plans</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Bons Plans</p>
               <h3 className="mt-1 text-lg font-bold text-night">Tout est regroupé dans le centre de préférences</h3>
               <p className="mt-1 text-sm text-night/60">
                 Les promos, catégories, enseignes et canaux sont maintenant gérés dans Paramètres de notification pour éviter les doublons.
@@ -372,10 +372,10 @@ function ProfilePageContent() {
   ) : null
 
   const favoritesPanel = isOwn ? (
-    <div className="card border-coral/15 bg-white dark:bg-[var(--color-surface)] p-5 shadow-sm">
+    <div className="card border-kalico-blue/15 bg-white dark:bg-[var(--color-surface)] p-5 shadow-sm">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Favoris</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Favoris</p>
           <h2 className="mt-2 text-xl font-bold text-night">Mes favoris</h2>
           <p className="mt-2 text-sm text-night/60">
             Retrouvez ici les annonces que vous avez mises en mémoire pour les consulter plus tard.
@@ -399,10 +399,10 @@ function ProfilePageContent() {
         {notificationsPanel}
         {favoritesPanel}
 
-        <div className="card p-5 border-coral/15 bg-coral/5">
+        <div className="card p-5 border-kalico-blue/15 bg-kalico-blue/5">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Onboarding du compte</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Onboarding du compte</p>
               <h2 className="mt-1 font-display text-2xl font-bold text-night">
                 {profile?.is_pro ? 'Votre espace professionnel est prêt' : 'Votre espace particulier est prêt'}
               </h2>
@@ -490,7 +490,7 @@ function ProfilePageContent() {
 
             {/* Avatar */}
             <div className="relative shrink-0">
-              <div className="w-20 h-20 rounded-2xl bg-coral/15 flex items-center justify-center text-coral font-bold text-2xl overflow-hidden">
+              <div className="w-20 h-20 rounded-2xl bg-kalico-blue/15 flex items-center justify-center text-kalico-blue font-bold text-2xl overflow-hidden">
                 {profile.avatar_url
                   ? <Image src={profile.avatar_url} alt="" width={80} height={80} className="w-full h-full object-cover" />
                   : `${profile.first_name?.[0]}${profile.last_name?.[0]}`
@@ -607,7 +607,7 @@ function ProfilePageContent() {
               key={t.id}
               onClick={() => setTab(t.id)}
               className={`flex flex-shrink-0 items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                tab === t.id ? 'bg-white text-coral shadow-sm ring-1 ring-black/5' : 'text-night/75 hover:bg-white hover:text-night'
+                tab === t.id ? 'bg-white text-kalico-blue shadow-sm ring-1 ring-black/5' : 'text-night/75 hover:bg-white hover:text-night'
               }`}
             >
               {t.icon} {t.label}
@@ -652,7 +652,7 @@ function ProfilePageContent() {
               reviews.map((rev) => (
                 <div key={rev.id} className="card p-5">
                   <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-full bg-coral/15 flex items-center justify-center text-coral font-bold text-sm shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-kalico-blue/15 flex items-center justify-center text-kalico-blue font-bold text-sm shrink-0">
                       {rev.first_name?.[0]}{rev.last_name?.[0]}
                     </div>
                     <div className="flex-1">

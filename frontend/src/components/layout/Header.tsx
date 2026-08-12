@@ -116,10 +116,10 @@ export function MobileBottomNav() {
           isCta ? (
             isAuthenticated ? (
               <Link key={href} href={href} className="mt-[-1rem] flex flex-col items-center gap-0.5">
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-coral shadow-lg shadow-coral/30 ring-4 ring-white">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-kalico-blue shadow-lg shadow-kalico-blue/30 ring-4 ring-white">
                   <Icon className="h-4 w-4 text-white" strokeWidth={2.5} />
                 </span>
-                <span className="text-[10px] font-semibold text-coral">{label}</span>
+                <span className="text-[10px] font-semibold text-kalico-blue">{label}</span>
               </Link>
             ) : (
               <button
@@ -133,10 +133,10 @@ export function MobileBottomNav() {
                 }
                 className="mt-[-1rem] flex flex-col items-center gap-0.5"
               >
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-coral shadow-lg shadow-coral/30 ring-4 ring-white">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-kalico-blue shadow-lg shadow-kalico-blue/30 ring-4 ring-white">
                   <Icon className="h-4 w-4 text-white" strokeWidth={2.5} />
                 </span>
-                <span className="text-[10px] font-semibold text-coral">{label}</span>
+                <span className="text-[10px] font-semibold text-kalico-blue">{label}</span>
               </button>
             )
           ) : isDrawer ? (
@@ -468,7 +468,7 @@ export default function Header() {
           {isAuthenticated ? (
             <Link
               href="/annonces/nouvelle"
-              className="md:hidden flex shrink-0 items-center gap-1.5 rounded-xl bg-coral px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-coral/30 transition-transform active:scale-95"
+              className="md:hidden flex shrink-0 items-center gap-1.5 rounded-xl bg-kalico-blue px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-kalico-blue/30 transition-transform active:scale-95"
             >
               <Plus className="h-4 w-4" strokeWidth={2.5} />
               Déposer
@@ -482,7 +482,7 @@ export default function Header() {
                   redirectTo: '/annonces/nouvelle',
                 })
               }
-              className="md:hidden flex shrink-0 items-center gap-1.5 rounded-xl bg-coral px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-coral/30 transition-transform active:scale-95"
+              className="md:hidden flex shrink-0 items-center gap-1.5 rounded-xl bg-kalico-blue px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-kalico-blue/30 transition-transform active:scale-95"
             >
               <Plus className="h-4 w-4" strokeWidth={2.5} />
               Déposer
@@ -522,8 +522,8 @@ export default function Header() {
                     {user?.avatar_url ? (
                       <Image src={user.avatar_url} alt="" width={28} height={28} className="h-7 w-7 rounded-full object-cover" />
                     ) : (
-                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-coral/15">
-                        <span className="text-xs font-bold text-coral">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-kalico-blue/15">
+                        <span className="text-xs font-bold text-kalico-blue">
                           {user?.first_name?.[0]}
                           {user?.last_name?.[0]}
                         </span>
@@ -718,7 +718,7 @@ export default function Header() {
                 <div className="flex flex-wrap items-center gap-2">
                   <Link
                     href="/qa"
-                    className="rounded-full border border-coral/15 bg-[var(--color-surface)] px-3 py-1 text-[11px] font-semibold text-coral transition hover:border-coral/30 hover:bg-coral/5"
+                    className="rounded-full border border-kalico-blue/15 bg-[var(--color-surface)] px-3 py-1 text-[11px] font-semibold text-kalico-blue transition hover:border-kalico-blue/30 hover:bg-kalico-blue/5"
                   >
                     Ouvrir le dashboard QA
                   </Link>

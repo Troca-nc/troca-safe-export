@@ -326,7 +326,7 @@ function AnimatedStat({ value, label, loading }: { value: number | null; label: 
 
   return (
     <div ref={ref} className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center shadow-sm">
-      <p className="text-4xl font-bold text-coral md:text-[2.5rem]">{formatted}</p>
+      <p className="text-4xl font-bold text-kalico-blue md:text-[2.5rem]">{formatted}</p>
       <p className="mt-2 text-sm font-medium text-night/65">{label}</p>
     </div>
   )

@@ -234,7 +234,7 @@ function StepPill({
       disabled={!clickable}
       className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition duration-150 ${
         active
-          ? 'border-coral/25 bg-coral/5 shadow-sm'
+          ? 'border-kalico-blue/25 bg-kalico-blue/5 shadow-sm'
           : completed
             ? 'border-jungle/20 bg-jungle/5 hover:border-jungle/30'
             : 'border-night/10 bg-white/75 text-night/40'
@@ -244,7 +244,7 @@ function StepPill({
       <span
         className={`flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold transition-colors duration-200 ${
           active
-            ? 'bg-coral text-white'
+            ? 'bg-kalico-blue text-white'
             : completed
               ? 'bg-jungle text-white'
               : 'bg-night/5 text-night/35'
@@ -281,11 +281,11 @@ function AccountTypeCard({
       onClick={onClick}
       className={`flex h-full flex-col rounded-[1.5rem] border p-5 text-left transition duration-150 ${
         active
-          ? 'border-coral/30 bg-coral/5 shadow-sm'
-          : 'border-night/10 bg-white hover:-translate-y-0.5 hover:border-coral/20 hover:bg-sand/40 hover:shadow-sm'
+          ? 'border-kalico-blue/30 bg-kalico-blue/5 shadow-sm'
+          : 'border-night/10 bg-white hover:-translate-y-0.5 hover:border-kalico-blue/20 hover:bg-sand/40 hover:shadow-sm'
       }`}
     >
-      <span className={`flex h-12 w-12 items-center justify-center rounded-2xl ${active ? 'bg-coral/10 text-coral' : 'bg-night/5 text-night/55'}`}>
+      <span className={`flex h-12 w-12 items-center justify-center rounded-2xl ${active ? 'bg-kalico-blue/10 text-kalico-blue' : 'bg-night/5 text-night/55'}`}>
         <Icon className="h-5 w-5" />
       </span>
       <span className="mt-4 text-base font-semibold text-night">{title}</span>
@@ -432,7 +432,7 @@ export default function RegisterPage() {
                   <section className="space-y-4 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">ï¿½tape 1</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">ï¿½tape 1</p>
                         <h2 className="mt-2 text-2xl font-semibold text-night">Crï¿½ez votre compte</h2>
                         <p className="mt-1 text-sm text-night/55">E-mail, mot de passe et accï¿½s rapide avec Google si vous le souhaitez.</p>
                       </div>
@@ -510,7 +510,7 @@ export default function RegisterPage() {
                 {step === 2 ? (
                   <section className="space-y-5 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">ï¿½tape 2</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">ï¿½tape 2</p>
                       <h2 className="mt-2 text-2xl font-semibold text-night">Parlez-nous de vous</h2>
                       <p className="mt-1 text-sm text-night/55">Juste l'essentiel pour commencer.</p>
                     </div>
@@ -520,7 +520,7 @@ export default function RegisterPage() {
                         <div className="flex items-center gap-4">
                           <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-night/10 bg-white">
                             <span className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(72,202,228,0.22),transparent_65%)]" />
-                            <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-coral/10 text-lg font-bold text-coral">
+                            <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-kalico-blue/10 text-lg font-bold text-kalico-blue">
                               {profileName.trim().charAt(0).toUpperCase() || 'T'}
                             </span>
                             <span className="absolute bottom-1 right-1 flex h-7 w-7 items-center justify-center rounded-full border border-white bg-night text-white shadow-sm">
@@ -591,7 +591,7 @@ export default function RegisterPage() {
                 {step === 3 && selectedProfile === 'pro' ? (
                   <section className="space-y-5 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">ï¿½tape 3</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">ï¿½tape 3</p>
                       <h2 className="mt-2 text-2xl font-semibold text-night">Choisissez votre plan</h2>
                       <p className="mt-1 text-sm text-night/55">
                         Vous pouvez commencer gratuitement ou profiter du Pro quand votre activitï¿½ le justifie.
@@ -611,7 +611,7 @@ export default function RegisterPage() {
                       <button
                         type="button"
                         onClick={() => setShowProOptions((value) => !value)}
-                        className="inline-flex items-center gap-1 text-sm font-semibold text-coral hover:underline"
+                        className="inline-flex items-center gap-1 text-sm font-semibold text-kalico-blue hover:underline"
                         aria-expanded={showProOptions}
                       >
                         Voir les options Pro ï¿½ 
@@ -642,23 +642,23 @@ export default function RegisterPage() {
                             </ul>
                           </article>
 
-                          <article className="pulse-once rounded-[1.75rem] border border-coral/20 bg-[linear-gradient(180deg,rgba(10,126,164,0.08),rgba(255,255,255,1))] p-5 shadow-lg shadow-coral/10">
+                          <article className="pulse-once rounded-[1.75rem] border border-kalico-blue/20 bg-[linear-gradient(180deg,rgba(10,126,164,0.08),rgba(255,255,255,1))] p-5 shadow-lg shadow-kalico-blue/10">
                             <div className="flex items-center justify-between gap-3">
-                              <span className="inline-flex items-center rounded-full bg-coral px-3 py-1 text-xs font-semibold text-white">
+                              <span className="inline-flex items-center rounded-full bg-kalico-blue px-3 py-1 text-xs font-semibold text-white">
                                 Recommandï¿½
                               </span>
                               <button
                                 type="button"
                                 onClick={() => setBillingCycle((value) => (value === 'monthly' ? 'annual' : 'monthly'))}
-                                className="inline-flex items-center gap-1 rounded-full border border-night/10 bg-white px-3 py-1.5 text-xs font-semibold text-night transition hover:border-coral/25 hover:text-coral"
+                                className="inline-flex items-center gap-1 rounded-full border border-night/10 bg-white px-3 py-1.5 text-xs font-semibold text-night transition hover:border-kalico-blue/25 hover:text-kalico-blue"
                               >
-                                <span className={billingCycle === 'monthly' ? 'text-coral' : 'text-night/50'}>Mensuel</span>
+                                <span className={billingCycle === 'monthly' ? 'text-kalico-blue' : 'text-night/50'}>Mensuel</span>
                                 <span className="text-night/25">/</span>
-                                <span className={billingCycle === 'annual' ? 'text-coral' : 'text-night/50'}>Annuel</span>
+                                <span className={billingCycle === 'annual' ? 'text-kalico-blue' : 'text-night/50'}>Annuel</span>
                               </button>
                             </div>
 
-                            <p className="mt-4 text-3xl font-bold text-coral">
+                            <p className="mt-4 text-3xl font-bold text-kalico-blue">
                               {billingCycle === 'monthly' ? '4 900 XPF / mois' : '44 900 XPF / an'}
                             </p>
                             {billingCycle === 'annual' ? (
@@ -672,11 +672,11 @@ export default function RegisterPage() {
                                 <div key={feature.label} className="rounded-2xl border border-night/8 bg-white/80 p-3">
                                   <div className="flex items-center justify-between gap-3 text-sm">
                                     <span className="font-medium text-night">{feature.label}</span>
-                                    <span className="font-semibold text-coral">Pro : {feature.pro}</span>
+                                    <span className="font-semibold text-kalico-blue">Pro : {feature.pro}</span>
                                   </div>
                                   <div className="mt-2 h-2 rounded-full bg-night/10">
                                     <div
-                                      className="h-2 rounded-full bg-coral"
+                                      className="h-2 rounded-full bg-kalico-blue"
                                       style={{
                                         width:
                                           feature.label === 'Annonces actives'
@@ -694,18 +694,18 @@ export default function RegisterPage() {
                               ))}
                             </div>
 
-                            <div className="mt-5 grid gap-3 rounded-2xl border border-coral/15 bg-coral/5 p-4 text-sm text-night/65">
+                            <div className="mt-5 grid gap-3 rounded-2xl border border-kalico-blue/15 bg-kalico-blue/5 p-4 text-sm text-night/65">
                               <div className="flex items-center justify-between gap-3">
                                 <span>Annonces</span>
-                                <strong className="text-coral">ï¿½ï¿½~ vs 5</strong>
+                                <strong className="text-kalico-blue">ï¿½ï¿½~ vs 5</strong>
                               </div>
                               <div className="flex items-center justify-between gap-3">
                                 <span>Photos</span>
-                                <strong className="text-coral">12 vs 6</strong>
+                                <strong className="text-kalico-blue">12 vs 6</strong>
                               </div>
                               <div className="flex items-center justify-between gap-3">
                                 <span>Badge et stats</span>
-                                <strong className="text-coral">Visibles</strong>
+                                <strong className="text-kalico-blue">Visibles</strong>
                               </div>
                               <div className="rounded-2xl bg-white/80 p-3">
                                 <div className="flex items-center justify-between gap-3">
@@ -713,15 +713,15 @@ export default function RegisterPage() {
                                     <BarChart3 className="h-3.5 w-3.5" />
                                     Statistiques
                                   </span>
-                                  <span className="rounded-full bg-coral px-2.5 py-1 text-[11px] font-semibold text-white">Badge Pro</span>
+                                  <span className="rounded-full bg-kalico-blue px-2.5 py-1 text-[11px] font-semibold text-white">Badge Pro</span>
                                 </div>
                                 <div className="mt-3 h-20 rounded-2xl bg-[linear-gradient(180deg,rgba(72,202,228,0.16),rgba(10,126,164,0.04))] p-3">
                                   <div className="flex h-full items-end gap-2">
                                     <span className="h-6 w-4 rounded-t-full bg-night/15" />
                                     <span className="h-10 w-4 rounded-t-full bg-night/15" />
-                                    <span className="h-14 w-4 rounded-t-full bg-coral" />
+                                    <span className="h-14 w-4 rounded-t-full bg-kalico-blue" />
                                     <span className="h-8 w-4 rounded-t-full bg-night/15" />
-                                    <span className="h-16 w-4 rounded-t-full bg-coral/70" />
+                                    <span className="h-16 w-4 rounded-t-full bg-kalico-blue/70" />
                                   </div>
                                 </div>
                               </div>
@@ -733,7 +733,7 @@ export default function RegisterPage() {
 
                     <p className="text-center text-sm text-night/55">
                       Pas encore dï¿½cidï¿½ ?{' '}
-                      <button type="button" onClick={() => setSelectedProfile('particulier')} className="font-semibold text-coral hover:underline">
+                      <button type="button" onClick={() => setSelectedProfile('particulier')} className="font-semibold text-kalico-blue hover:underline">
                         Commencez gratuitement ï¿½ 
                       </button>
                     </p>
@@ -748,7 +748,7 @@ export default function RegisterPage() {
                     if (step > 1) goToStep((step - 1) as Step)
                   }}
                   disabled={step === 1}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-semibold text-night transition hover:border-coral/30 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-semibold text-night transition hover:border-kalico-blue/30 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <span>Retour</span>
                 </button>
@@ -803,7 +803,7 @@ export default function RegisterPage() {
                   style={{ fontFamily: 'var(--font-display), Georgia, serif' }}
                 >
                   <span className="block">Ce que vous pouvez faire</span>
-                  <span className="block text-coral">dï¿½s maintenant.</span>
+                  <span className="block text-kalico-blue">dï¿½s maintenant.</span>
                 </h2>
               </div>
 

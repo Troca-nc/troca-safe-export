@@ -160,7 +160,7 @@ export default function CategoryTreeSection() {
     <section className="mx-auto max-w-7xl px-4 pb-12">
       <div className="mb-6 flex items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">
             Tous les rayons
           </p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">
@@ -169,7 +169,7 @@ export default function CategoryTreeSection() {
         </div>
         <Link
           href="/annonces"
-          className="hidden items-center gap-1 text-sm font-semibold text-coral hover:underline md:inline-flex"
+          className="hidden items-center gap-1 text-sm font-semibold text-kalico-blue hover:underline md:inline-flex"
         >
           Voir toutes les annonces <ArrowRight className="h-4 w-4" />
         </Link>
@@ -187,7 +187,7 @@ export default function CategoryTreeSection() {
             >
               <Link href={buildCategoryHref(cat.slug)} className="mb-3 flex items-center gap-2 group">
                 <Icon className="h-7 w-7 shrink-0 text-[#0A7EA4]" />
-                <span className="font-semibold text-night transition-colors group-hover:text-coral text-sm">
+                <span className="font-semibold text-night transition-colors group-hover:text-kalico-blue text-sm">
                   {cat.name}
                 </span>
               </Link>
@@ -201,7 +201,7 @@ export default function CategoryTreeSection() {
       </div>
 
       <div className="mt-4 text-center md:hidden">
-        <Link href="/annonces" className="text-sm font-semibold text-coral hover:underline">
+        <Link href="/annonces" className="text-sm font-semibold text-kalico-blue hover:underline">
           Voir toutes les annonces <ArrowRight className="h-4 w-4 inline-block align-[-2px]" />
         </Link>
       </div>

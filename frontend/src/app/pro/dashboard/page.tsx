@@ -81,7 +81,7 @@ function KpiCard({
   const tones = {
     lagon: 'text-[#0A7EA4] bg-nc-lagonLight',
     emeraude: 'text-nc-emeraude bg-nc-emeraudeLight',
-    corail: 'text-coral bg-coral/10',
+    corail: 'text-kalico-blue bg-kalico-blue/10',
     amber: 'text-amber-600 bg-amber-50',
   } as const
 
@@ -317,7 +317,7 @@ export default function ProDashboardPage() {
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-5">
             <div className="mb-3 flex items-end justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Boosts actifs</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Boosts actifs</p>
                 <h2 className="mt-1 font-display text-lg font-bold text-night sm:text-xl">En cours</h2>
               </div>
             </div>
@@ -400,7 +400,7 @@ export default function ProDashboardPage() {
 
         <div className="mt-5">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Prioritï¿½</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Prioritï¿½</p>
             <span className="text-xs font-medium text-night/45">5 conversations maximum affichï¿½es</span>
           </div>
           {unreadThreads.length ? (
@@ -428,7 +428,7 @@ export default function ProDashboardPage() {
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="font-semibold text-night">{buyerName}</h3>
-                          <span className="rounded-full bg-coral/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-coral">
+                          <span className="rounded-full bg-kalico-blue/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-kalico-blue">
                             {thread.unread_count} non lus
                           </span>
                         </div>
@@ -464,10 +464,10 @@ export default function ProDashboardPage() {
         <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-5">
           <div className="mb-4 flex items-end justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Top annonces</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Top annonces</p>
               <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Vos meilleures annonces</h2>
             </div>
-            <Link href="/pro/dashboard/annonces" className="hidden items-center gap-1 text-sm font-semibold text-coral hover:underline md:inline-flex">
+            <Link href="/pro/dashboard/annonces" className="hidden items-center gap-1 text-sm font-semibold text-kalico-blue hover:underline md:inline-flex">
               Gï¿½rer les annonces <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

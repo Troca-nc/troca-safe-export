@@ -141,11 +141,11 @@ export default function DemoQaPage() {
             <div className="space-y-6">
               <div className="rounded-[1.75rem] border border-night/8 bg-white p-6 shadow-card">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-coral/10 text-coral">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-kalico-blue/10 text-kalico-blue">
                     <Database className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-coral/80">Bootstrap local</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">Bootstrap local</p>
                     <h2 className="text-xl font-bold text-night">Créer ou vider les données de démonstration</h2>
                   </div>
                 </div>
@@ -206,7 +206,7 @@ export default function DemoQaPage() {
                           <p className="text-sm font-semibold text-night">{account.label}</p>
                           <p className="mt-1 text-sm text-night/55">{account.description}</p>
                         </div>
-                        <span className="rounded-full bg-coral/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-coral">
+                        <span className="rounded-full bg-kalico-blue/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-kalico-blue">
                           Login
                         </span>
                       </div>
@@ -222,14 +222,14 @@ export default function DemoQaPage() {
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-coral/80">Navigation rapide</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">Navigation rapide</p>
                     <h2 className="text-xl font-bold text-night">Ouvrir les pages critiques en un clic</h2>
                   </div>
                 </div>
 
                 <div className="mt-5 flex flex-wrap gap-2">
                   {QUICK_LINKS.map((link) => (
-                    <Link key={link.href} href={link.href} className="rounded-full border border-night/10 bg-sand px-4 py-2 text-sm font-semibold text-night/70 transition hover:border-coral/30 hover:bg-coral/5 hover:text-coral">
+                    <Link key={link.href} href={link.href} className="rounded-full border border-night/10 bg-sand px-4 py-2 text-sm font-semibold text-night/70 transition hover:border-kalico-blue/30 hover:bg-kalico-blue/5 hover:text-kalico-blue">
                       {link.label}
                     </Link>
                   ))}
@@ -246,7 +246,7 @@ export default function DemoQaPage() {
                     <Monitor className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-coral/80">Surfaces visuelles</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">Surfaces visuelles</p>
                     <h2 className="text-xl font-bold text-night">Rendu desktop, tablette et mobile</h2>
                   </div>
                 </div>

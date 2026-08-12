@@ -438,7 +438,7 @@ export default function ProBookingModal({
               <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral/80">Calendrier</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">Calendrier</p>
                     <p className="mt-1 text-sm text-night/60">{formatMonthLabel(calendarMonth)}</p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -511,7 +511,7 @@ export default function ProBookingModal({
                 </div>
               </div>
               <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral/80">Crï¿½neaux disponibles</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">Crï¿½neaux disponibles</p>
                 <p className="mt-1 text-sm text-night/60">
                   {loadingSlots ? 'Chargement des crï¿½neaux...' : 'Choisissez lhoraire qui vous convient le mieux.'}
                 </p>

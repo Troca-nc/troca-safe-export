@@ -321,7 +321,7 @@ export default function TransporterDetailPage() {
             </article>
 
             <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Avis récents</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">Avis récents</p>
               <div className="mt-4 space-y-4">
                 {reviews.length > 0 ? reviews.slice(0, 3).map((review) => (
                   <div key={review.id} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)]/70 p-4">

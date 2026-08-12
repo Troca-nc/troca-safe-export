@@ -33,7 +33,7 @@ const PROFILE_CONFIG: Record<
   particulier: {
     title: 'Particulier',
     subtitle: 'Dï¿½pose une annonce simple et rapide',
-    accent: 'from-coral/20 to-[var(--color-surface)]',
+    accent: 'from-kalico-blue/20 to-[var(--color-surface)]',
     badge: 'DÃ©poser une annonce',
     depositLabel: 'Annonce classique',
     accountLabel: 'Mon compte particulier',
@@ -141,7 +141,7 @@ export default function ProfileDemoPreview({
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-coral/80">{config.badge}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">{config.badge}</p>
           <h3 className="mt-1 text-xl font-bold text-night">{config.title}</h3>
           <p className="text-sm text-night/60">{config.subtitle}</p>
         </div>
@@ -154,7 +154,7 @@ export default function ProfileDemoPreview({
         <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-2xl border border-white/70 bg-white/90 dark:bg-[var(--color-surface)] p-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-night">
-              <Plus className="h-4 w-4 text-coral" />
+              <Plus className="h-4 w-4 text-kalico-blue" />
               {config.depositLabel}
             </div>
             <div className="mt-3 space-y-2">
@@ -168,8 +168,8 @@ export default function ProfileDemoPreview({
             <p className="text-sm font-semibold text-night">{config.accountLabel}</p>
             <p className="mt-1 text-sm text-night/60">{config.accountHint}</p>
             <div className="mt-4 space-y-2">
-              <div className="flex items-center gap-2 rounded-xl bg-coral/5 px-3 py-2 text-sm text-night">
-                <ShieldCheck className="h-4 w-4 text-coral" />
+              <div className="flex items-center gap-2 rounded-xl bg-kalico-blue/5 px-3 py-2 text-sm text-night">
+                <ShieldCheck className="h-4 w-4 text-kalico-blue" />
                 {activeProfile === 'bon_plan' ? 'Mention sponsorisï¿½e obligatoire' : 'Vï¿½rification du compte recommandï¿½e'}
               </div>
               <div className="flex items-center gap-2 rounded-xl bg-night/5 px-3 py-2 text-sm text-night">
@@ -192,9 +192,9 @@ export default function ProfileDemoPreview({
                     <Link
                       key={item.label}
                       href={item.href}
-                      className="flex items-center gap-3 rounded-xl border border-night/10 bg-sand px-3 py-2 text-sm text-night/80 transition hover:-translate-y-0.5 hover:border-coral/20 hover:bg-coral/5 focus:outline-none focus:ring-2 focus:ring-coral/30"
+                      className="flex items-center gap-3 rounded-xl border border-night/10 bg-sand px-3 py-2 text-sm text-night/80 transition hover:-translate-y-0.5 hover:border-kalico-blue/20 hover:bg-kalico-blue/5 focus:outline-none focus:ring-2 focus:ring-kalico-blue/30"
                     >
-                      <Icon className="h-4 w-4 text-coral" />
+                      <Icon className="h-4 w-4 text-kalico-blue" />
                       {item.label}
                     </Link>
                   )
@@ -203,12 +203,12 @@ export default function ProfileDemoPreview({
             </div>
             <div className="rounded-2xl border border-white/70 bg-white/90 dark:bg-[var(--color-surface)] p-4">
               <div className="flex items-center gap-2 text-sm font-semibold text-night">
-                <Store className="h-4 w-4 text-coral" />
+                <Store className="h-4 w-4 text-kalico-blue" />
                 Vue rapide du compte
               </div>
               <div className="mt-3 grid gap-3 sm:grid-cols-3">
                 {accountStats.map((stat) => (
-                  <div key={stat.label} className="rounded-xl bg-coral/5 p-3">
+                  <div key={stat.label} className="rounded-xl bg-kalico-blue/5 p-3">
                     <p className="text-lg font-bold text-night">{stat.value}</p>
                     <p className="text-xs text-night/55">{stat.label}</p>
                   </div>
@@ -219,7 +219,7 @@ export default function ProfileDemoPreview({
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="rounded-full bg-night/5 px-3 py-1 text-xs font-semibold text-night/70 transition hover:bg-coral/10 hover:text-coral focus:outline-none focus:ring-2 focus:ring-coral/30"
+                    className="rounded-full bg-night/5 px-3 py-1 text-xs font-semibold text-night/70 transition hover:bg-kalico-blue/10 hover:text-kalico-blue focus:outline-none focus:ring-2 focus:ring-kalico-blue/30"
                   >
                     {item.label}
                   </Link>

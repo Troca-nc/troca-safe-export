@@ -204,15 +204,15 @@ export default function EventDetailPage() {
                 <h1 className="mt-2 font-display text-4xl font-bold text-night">{event.title}</h1>
                 <div className="mt-4 flex flex-wrap gap-3 text-sm text-night/65">
                   <span className="inline-flex items-center gap-2 rounded-full bg-sand px-3 py-1.5">
-                    <CalendarDays className="h-4 w-4 text-coral" />
+                    <CalendarDays className="h-4 w-4 text-kalico-blue" />
                     {formatDateLabel(event.event_date)}
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full bg-sand px-3 py-1.5">
-                    <Clock3 className="h-4 w-4 text-coral" />
+                    <Clock3 className="h-4 w-4 text-kalico-blue" />
                     {event.event_time || 'Heure à confirmer'}
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full bg-sand px-3 py-1.5">
-                    <MapPin className="h-4 w-4 text-coral" />
+                    <MapPin className="h-4 w-4 text-kalico-blue" />
                     {event.venue_name || event.commune_name || 'Nouvelle-Calédonie'}
                   </span>
                 </div>

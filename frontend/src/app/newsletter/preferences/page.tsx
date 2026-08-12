@@ -245,7 +245,7 @@ export default function NewsletterPreferencesPage() {
         </div>
       </section>
 
-      <Link href="/newsletter/unsubscribe" className="text-sm text-night/45 hover:text-coral">
+      <Link href="/newsletter/unsubscribe" className="text-sm text-night/45 hover:text-kalico-blue">
         Gï¿½rer le dï¿½sabonnement via le lien email
       </Link>
     </div>

@@ -181,7 +181,7 @@ export default function ReviewInvitePage() {
         <Header />
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
           <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Avis vï¿½rifiï¿½</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Avis vï¿½rifiï¿½</p>
             <h1 className="mt-3 font-display text-3xl font-bold text-night">Lien introuvable</h1>
             <p className="mt-3 text-sm leading-relaxed text-night/60">
               Ce lien d&apos;avis est invalide, expirï¿½ ou a dï¿½jï¿½ ï¿½tï¿½ utilisï¿½.

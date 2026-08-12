@@ -57,12 +57,12 @@ export function PaymentProviderSelector({ value, onChange, className = '' }: Pay
               onClick={() => onChange(option.value)}
               className={`flex min-h-[92px] items-start gap-3 rounded-2xl border-2 p-4 text-left transition-all ${
                 active
-                  ? 'border-coral bg-coral/8 shadow-sm ring-2 ring-coral/15'
+                  ? 'border-kalico-blue bg-kalico-blue/8 shadow-sm ring-2 ring-kalico-blue/15'
                   : 'border-night/10 bg-white hover:border-night/25 hover:bg-sand/40'
               }`}
             >
               <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
-                active ? 'bg-coral text-white' : 'bg-sand text-night'
+                active ? 'bg-kalico-blue text-white' : 'bg-sand text-night'
               }`}>
                 <Icon size={18} />
               </span>
@@ -71,7 +71,7 @@ export function PaymentProviderSelector({ value, onChange, className = '' }: Pay
                 <span className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-night">{option.title}</span>
                   {active && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.15em] text-coral">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.15em] text-kalico-blue">
                       <Check size={10} />
                       Sï¿½lectionnï¿½
                     </span>

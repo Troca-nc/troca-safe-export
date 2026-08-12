@@ -902,7 +902,7 @@ export default function ProDashboardRdvPage() {
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
             <div className="flex items-end justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Nouveau crï¿½neau</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Nouveau crï¿½neau</p>
                 <h2 className="mt-1 font-display text-2xl font-bold text-night">Publier un crï¿½neau visible</h2>
               </div>
             </div>

@@ -39,7 +39,7 @@ interface Stats {
   is_pro: boolean
 }
 
-function StatCard({ icon: Icon, label, value, sub, color = 'text-coral' }: {
+function StatCard({ icon: Icon, label, value, sub, color = 'text-kalico-blue' }: {
   icon:   React.ElementType
   label:  string
   value:  string | number
@@ -89,7 +89,7 @@ export default function SellerStatsDashboard() {
     <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <BarChart2 className="w-5 h-5 text-coral shrink-0" />
+        <BarChart2 className="w-5 h-5 text-kalico-blue shrink-0" />
         <h2 className="font-semibold text-night text-sm sm:text-base">Statistiques Pro</h2>
         <PlanBadge className="ml-auto" />
       </div>
@@ -125,7 +125,7 @@ export default function SellerStatsDashboard() {
           icon={TrendingUp} label="Annonces actives"
           value={totaux.annonces_actives ?? '0'}
           sub={`${totaux.total_annonces ?? 0} au total`}
-          color="text-coral"
+          color="text-kalico-blue"
         />
         <StatCard
           icon={Award} label="Annonces boostï¿½es"
@@ -185,7 +185,7 @@ export default function SellerStatsDashboard() {
       {stats.vues_par_annonce.length > 0 && (
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-night/5">
           <h3 className="text-sm font-semibold text-night mb-3 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-coral" />
+            <TrendingUp className="w-4 h-4 text-kalico-blue" />
             Vues moyennes par jour (annonces actives)
           </h3>
           <div className="space-y-2">
@@ -200,7 +200,7 @@ export default function SellerStatsDashboard() {
                   </div>
                   <div className="w-full bg-night/5 rounded-full h-1.5">
                     <div
-                      className="bg-coral h-1.5 rounded-full transition-all duration-500"
+                      className="bg-kalico-blue h-1.5 rounded-full transition-all duration-500"
                       style={{ width: `${pct}%` }}
                     />
                   </div>

@@ -150,7 +150,7 @@ function ProQuoteCard({
           </div>
           <div className="text-right text-xs text-night/60">
             <p className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
-              <MapPin className="h-3.5 w-3.5 text-coral" />
+              <MapPin className="h-3.5 w-3.5 text-kalico-blue" />
               {pro.pro_commune || 'Nouvelle-CalÃ©donie'}
             </p>
           </div>
@@ -685,7 +685,7 @@ export default function AppelsOffresClient() {
               <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Ciblage</p>
+                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">Ciblage</p>
                     <h3 className="mt-1 text-lg font-bold text-night">Rechercher et sï¿½lectionner des pros</h3>
                     <p className="mt-1 text-sm text-night/60">Sï¿½lectionnez jusquï¿½ 5 professionnels.</p>
                   </div>
@@ -815,7 +815,7 @@ export default function AppelsOffresClient() {
       <section id="mes-demandes" className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Mes demandes en cours</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Mes demandes en cours</p>
             <h2 className="mt-1 font-display text-2xl font-bold text-night">Suivez vos publications et le nombre doffres reï¿½ues</h2>
           </div>
           <span className="text-sm text-night/55">

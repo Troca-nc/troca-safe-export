@@ -140,7 +140,7 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             {business?.slug ? (
-              <Link href={`/bons-plans/enseigne/${business.slug}`} className="block text-sm font-semibold text-night/75 hover:text-coral">
+              <Link href={`/bons-plans/enseigne/${business.slug}`} className="block text-sm font-semibold text-night/75 hover:text-kalico-blue">
               {business?.name || cleanText(bonPlan.business_name, 'Enseigne locale')}
             </Link>
           ) : (
@@ -152,7 +152,7 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
             <button
               type="button"
               onClick={() => onFollowBusiness(business.name || '')}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-night/10 bg-white text-night/65 transition hover:border-coral/30 hover:text-coral"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-night/10 bg-white text-night/65 transition hover:border-kalico-blue/30 hover:text-kalico-blue"
               aria-label="Suivre cette enseigne"
             >
               <Heart className="h-4 w-4" />
@@ -183,7 +183,7 @@ export default function BonPlanCard({ bonPlan, compact = false, onFollowBusiness
           href={targetHref}
           target={bonPlan.cta_url ? '_blank' : undefined}
           rel={bonPlan.cta_url ? 'noreferrer' : undefined}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-coral px-4 py-3 text-sm font-semibold text-white transition hover:bg-coral/90"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-kalico-blue px-4 py-3 text-sm font-semibold text-white transition hover:bg-kalico-blue/90"
         >
           {bonPlan.cta_label || 'En profiter'}
           <ExternalLink className="h-4 w-4" />

@@ -38,7 +38,7 @@ function statusMeta(status: string) {
     case 'seen':
       return { label: 'Vue', className: 'bg-night/6 text-night/55' }
     default:
-      return { label: 'En attente', className: 'bg-coral/10 text-coral' }
+      return { label: 'En attente', className: 'bg-kalico-blue/10 text-kalico-blue' }
   }
 }
 
@@ -144,7 +144,7 @@ export default function TrocProposalsPanel() {
   if (!isAuthenticated) {
     return (
       <section className="rounded-[2rem] border border-night/8 bg-white p-6 shadow-card">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Mes propositions</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Mes propositions</p>
         <h2 className="mt-2 text-xl font-bold text-night">Suivez vos ï¿½changes structurï¿½s</h2>
         <p className="mt-2 text-sm leading-6 text-night/60">
           Connectez-vous pour voir les propositions reï¿½ues, vos envois, les contre-propositions et les cycles dï¿½tectï¿½s.
@@ -164,7 +164,7 @@ export default function TrocProposalsPanel() {
     <section className="rounded-[2rem] border border-night/8 bg-white p-5 shadow-card sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Mes propositions</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Mes propositions</p>
           <h2 className="mt-2 text-2xl font-bold text-night">Recevez, rï¿½pondez, contre-proposez</h2>
           <p className="mt-2 text-sm leading-6 text-night/60">
             Gardez la main sur vos ï¿½changes structurï¿½s. Une contre-proposition ouvre un nouveau fil sans perdre le contexte.
@@ -250,7 +250,7 @@ export default function TrocProposalsPanel() {
                 <div className="flex shrink-0 flex-wrap gap-2">
                   <Link
                     href={`/troc/${proposal.listing_id}`}
-                    className="inline-flex items-center gap-2 rounded-full border border-night/10 bg-white px-3 py-2 text-sm font-semibold text-night/70 transition hover:border-coral/30 hover:text-coral"
+                    className="inline-flex items-center gap-2 rounded-full border border-night/10 bg-white px-3 py-2 text-sm font-semibold text-night/70 transition hover:border-kalico-blue/30 hover:text-kalico-blue"
                   >
                     Voir lannonce
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -284,7 +284,7 @@ export default function TrocProposalsPanel() {
                           setCounterComplementXpf(0)
                           setCounterMessage('')
                         }}
-                        className="inline-flex items-center gap-2 rounded-full border border-coral/20 bg-coral/8 px-3 py-2 text-sm font-semibold text-coral transition hover:bg-coral/12"
+                        className="inline-flex items-center gap-2 rounded-full border border-kalico-blue/20 bg-kalico-blue/8 px-3 py-2 text-sm font-semibold text-kalico-blue transition hover:bg-kalico-blue/12"
                       >
                         <RotateCcw className="h-3.5 w-3.5" />
                         Contre-proposer
@@ -295,7 +295,7 @@ export default function TrocProposalsPanel() {
               </div>
 
               {isCountering && isReceived ? (
-                <div className="mt-4 rounded-2xl border border-coral/15 bg-white p-4">
+                <div className="mt-4 rounded-2xl border border-kalico-blue/15 bg-white p-4">
                   <p className="text-sm font-semibold text-night">Nouvelle contre-proposition</p>
                   <div className="mt-3 grid gap-3 md:grid-cols-2">
                     <label className="block space-y-2 md:col-span-2">
@@ -304,7 +304,7 @@ export default function TrocProposalsPanel() {
                         value={counterDescription}
                         onChange={(event) => setCounterDescription(event.target.value)}
                         rows={4}
-                        className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10"
+                        className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-kalico-blue/40 focus:ring-4 focus:ring-kalico-blue/10"
                         placeholder="Dï¿½crivez votre contre-proposition..."
                       />
                     </label>
@@ -314,7 +314,7 @@ export default function TrocProposalsPanel() {
                       <select
                         value={counterComplementDirection}
                         onChange={(event) => setCounterComplementDirection(event.target.value as 'none' | 'i_pay' | 'they_pay')}
-                        className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10"
+                        className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-kalico-blue/40 focus:ring-4 focus:ring-kalico-blue/10"
                       >
                         <option value="none">Aucun complï¿½ment</option>
                         <option value="i_pay">Je propose un complï¿½ment</option>
@@ -332,7 +332,7 @@ export default function TrocProposalsPanel() {
                         onChange={(event) => setCounterComplementXpf(Number(event.target.value || 0))}
                         onBlur={(event) => setCounterComplementXpf(snapTo10(Number(event.target.value || 0)))}
                         disabled={counterComplementDirection === 'none'}
-                        className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10 disabled:bg-night/5"
+                        className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-kalico-blue/40 focus:ring-4 focus:ring-kalico-blue/10 disabled:bg-night/5"
                       />
                     </label>
 
@@ -342,7 +342,7 @@ export default function TrocProposalsPanel() {
                         value={counterMessage}
                         onChange={(event) => setCounterMessage(event.target.value)}
                         rows={3}
-                        className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10"
+                        className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm text-night outline-none transition focus:border-kalico-blue/40 focus:ring-4 focus:ring-kalico-blue/10"
                         placeholder="Ajoutez quelques prï¿½cisions..."
                       />
                     </label>
@@ -360,7 +360,7 @@ export default function TrocProposalsPanel() {
                       type="button"
                       onClick={() => submitCounter(proposal)}
                       disabled={busyId === proposal.id || !counterDescription.trim()}
-                      className="inline-flex items-center gap-2 rounded-full bg-coral px-4 py-2 text-sm font-semibold text-white transition hover:bg-coral/90 disabled:opacity-60"
+                      className="inline-flex items-center gap-2 rounded-full bg-kalico-blue px-4 py-2 text-sm font-semibold text-white transition hover:bg-kalico-blue/90 disabled:opacity-60"
                     >
                       <MessageSquareText className="h-3.5 w-3.5" />
                       Envoyer la contre-proposition

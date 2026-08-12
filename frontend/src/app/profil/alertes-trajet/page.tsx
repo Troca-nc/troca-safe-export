@@ -134,7 +134,7 @@ export default function AlertesTrajetPage() {
     <main className="min-h-screen bg-sand-light px-4 py-8 text-night">
       <div className="mx-auto max-w-4xl">
         <div className="mb-6 rounded-[2rem] border border-night/8 bg-white p-6 shadow-sm">
-          <div className="inline-flex items-center gap-2 rounded-full border border-coral/15 bg-coral/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-coral">
+          <div className="inline-flex items-center gap-2 rounded-full border border-kalico-blue/15 bg-kalico-blue/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-kalico-blue">
             <BellRing className="h-3.5 w-3.5" />
             Alertes trajet
           </div>

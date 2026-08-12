@@ -320,7 +320,7 @@ function formatDelayLabel(value?: string | null) {
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Filtres</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Filtres</p>
             <h2 className="mt-1 font-display text-2xl font-bold text-night">Trier vos demandes</h2>
             <p className="mt-1 text-sm text-night/55">
               Recherchez par client, besoin, commune ou notez les demandes les plus urgentes en un coup d'oeil.

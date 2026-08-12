@@ -425,9 +425,9 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
             <p className="text-lg font-bold text-nc-emeraude">128</p>
             <p className="text-[11px] text-nc-emeraude-text">courses</p>
           </div>
-          <div className="rounded-2xl bg-coral/10 p-3 text-center">
-            <p className="text-lg font-bold text-coral">4.9</p>
-            <p className="text-[11px] text-coral/80">note</p>
+          <div className="rounded-2xl bg-kalico-blue/10 p-3 text-center">
+            <p className="text-lg font-bold text-kalico-blue">4.9</p>
+            <p className="text-[11px] text-kalico-blue/80">note</p>
           </div>
         </div>
       </div>
@@ -445,7 +445,7 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
         <div className="mt-4 space-y-3">
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-night">
-              <MapPin className="h-4 w-4 text-coral" />
+              <MapPin className="h-4 w-4 text-kalico-blue" />
               Capacitï¿½ recommandï¿½e
             </div>
             <p className="mt-2 text-sm text-night/60">Fourgon, utilitaire ou camion lï¿½ger selon le volume.</p>
@@ -459,9 +459,9 @@ function FeatureMockup({ section }: { section: FeatureSection }) {
               <p className="text-lg font-bold text-nc-emeraude">24h</p>
               <p className="text-[11px] text-nc-emeraude-text">rï¿½ponse</p>
             </div>
-            <div className="rounded-2xl bg-coral/10 p-3">
-              <p className="text-lg font-bold text-coral">NC</p>
-              <p className="text-[11px] text-coral/80">territoire</p>
+            <div className="rounded-2xl bg-kalico-blue/10 p-3">
+              <p className="text-lg font-bold text-kalico-blue">NC</p>
+              <p className="text-[11px] text-kalico-blue/80">territoire</p>
             </div>
           </div>
         </div>
@@ -533,7 +533,7 @@ function FeatureTabs() {
 
         <div className="mt-6 grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
-            <p className={`text-sm font-semibold uppercase tracking-[0.22em] ${activeSection.accent === 'corail' ? 'text-coral/80' : activeSection.accent === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-lagon'}`}>
+            <p className={`text-sm font-semibold uppercase tracking-[0.22em] ${activeSection.accent === 'corail' ? 'text-kalico-blue/80' : activeSection.accent === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-lagon'}`}>
               {activeSection.eyebrow}
             </p>
             <h3 className="mt-2 font-display text-2xl font-bold text-night">{activeSection.title}</h3>
@@ -542,7 +542,7 @@ function FeatureTabs() {
             <ul className="mt-6 space-y-3">
               {activeSection.bullets.map((bullet) => (
                 <li key={bullet} className="flex items-start gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-                  <CheckCircle2 className={`mt-0.5 h-5 w-5 shrink-0 ${activeSection.accent === 'corail' ? 'text-coral' : activeSection.accent === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-lagon'}`} />
+                  <CheckCircle2 className={`mt-0.5 h-5 w-5 shrink-0 ${activeSection.accent === 'corail' ? 'text-kalico-blue' : activeSection.accent === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-lagon'}`} />
                   <span className="text-sm leading-relaxed text-night/75">{bullet}</span>
                 </li>
               ))}
@@ -567,7 +567,7 @@ function FeatureTabs() {
                 aria-expanded={active}
               >
                 <div>
-                  <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${section.accent === 'corail' ? 'text-coral/80' : section.accent === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-lagon'}`}>
+                  <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${section.accent === 'corail' ? 'text-kalico-blue/80' : section.accent === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-lagon'}`}>
                     {section.eyebrow}
                   </p>
                   <h3 className="mt-1 text-lg font-semibold text-night">{section.title}</h3>
@@ -581,7 +581,7 @@ function FeatureTabs() {
                   <ul className="mt-4 space-y-3">
                     {section.bullets.map((bullet) => (
                       <li key={bullet} className="flex items-start gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-                        <CheckCircle2 className={`mt-0.5 h-5 w-5 shrink-0 ${section.accent === 'corail' ? 'text-coral' : section.accent === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-lagon'}`} />
+                        <CheckCircle2 className={`mt-0.5 h-5 w-5 shrink-0 ${section.accent === 'corail' ? 'text-kalico-blue' : section.accent === 'emeraude' ? 'text-nc-emeraude' : 'text-nc-lagon'}`} />
                         <span className="text-sm leading-relaxed text-night/75">{bullet}</span>
                       </li>
                     ))}

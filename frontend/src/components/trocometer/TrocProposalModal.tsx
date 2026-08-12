@@ -168,7 +168,7 @@ export default function TrocProposalModal({
                 <ArrowLeftRight className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Troc</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Troc</p>
                 <h3 className="text-2xl font-bold text-night">Proposer un troc</h3>
               </div>
             </div>
@@ -190,7 +190,7 @@ export default function TrocProposalModal({
               </div>
 
               <div className="flex items-center justify-center py-4 sm:py-0">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-coral/10 text-coral">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-kalico-blue/10 text-kalico-blue">
                   <ArrowLeftRight className="h-5 w-5" />
                 </div>
               </div>
@@ -217,7 +217,7 @@ export default function TrocProposalModal({
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
                 rows={5}
-                className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-night outline-none transition focus:border-coral/40 focus:ring-4 focus:ring-coral/10"
+                className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-night outline-none transition focus:border-kalico-blue/40 focus:ring-4 focus:ring-kalico-blue/10"
               />
             </label>
 
@@ -231,7 +231,7 @@ export default function TrocProposalModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex flex-1 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm font-semibold text-night transition hover:border-coral/25 hover:text-coral"
+                className="inline-flex flex-1 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm font-semibold text-night transition hover:border-kalico-blue/25 hover:text-kalico-blue"
               >
                 Annuler
               </button>

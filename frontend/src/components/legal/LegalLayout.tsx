@@ -19,7 +19,7 @@ export default function LegalLayout({ title, lastUpdated, children }: LegalLayou
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
       <div className="mb-8">
-        <p className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] text-coral font-semibold">
+        <p className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] text-kalico-blue font-semibold">
           {title}
         </p>
         <h1 className="mt-2 text-3xl font-bold text-night">{title}</h1>
@@ -31,7 +31,7 @@ export default function LegalLayout({ title, lastUpdated, children }: LegalLayou
           <Link
             key={link.href}
             href={link.href}
-            className="rounded-full border border-night/10 bg-white px-3 py-1.5 text-night/65 transition hover:border-coral/30 hover:text-coral"
+            className="rounded-full border border-night/10 bg-white px-3 py-1.5 text-night/65 transition hover:border-kalico-blue/30 hover:text-kalico-blue"
           >
             {link.label}
           </Link>

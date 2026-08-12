@@ -102,19 +102,19 @@ function EventCard({ item }: { item: DirectoryItem }) {
 
         <div className="mt-4 grid gap-2 text-xs font-semibold text-night/65 sm:grid-cols-2">
           <span className="rounded-full bg-sand px-2.5 py-1">
-            <MapPin className="mr-1 inline h-3.5 w-3.5 text-coral" />
+            <MapPin className="mr-1 inline h-3.5 w-3.5 text-kalico-blue" />
             {item.commune_name || item.location_name || 'Nouvelle-CalÃ©donie'}
           </span>
           <span className="rounded-full bg-sand px-2.5 py-1">
-            <CalendarDays className="mr-1 inline h-3.5 w-3.5 text-coral" />
+            <CalendarDays className="mr-1 inline h-3.5 w-3.5 text-kalico-blue" />
             {formatDateLabel(item.event_date, 'Date ï¿½ confirmer')}
           </span>
           <span className="rounded-full bg-sand px-2.5 py-1">
-            <Users className="mr-1 inline h-3.5 w-3.5 text-coral" />
+            <Users className="mr-1 inline h-3.5 w-3.5 text-kalico-blue" />
             {item.share_count ?? 0} partages
           </span>
           <span className="rounded-full bg-sand px-2.5 py-1">
-            <Clock3 className="mr-1 inline h-3.5 w-3.5 text-coral" />
+            <Clock3 className="mr-1 inline h-3.5 w-3.5 text-kalico-blue" />
             {item.contact_name || 'Contact local'}
           </span>
         </div>
@@ -135,7 +135,7 @@ function EventCard({ item }: { item: DirectoryItem }) {
               href={href}
               target={href.startsWith('http') ? '_blank' : undefined}
               rel={href.startsWith('http') ? 'noreferrer' : undefined}
-              className="inline-flex items-center gap-2 rounded-2xl bg-coral px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-coral/90"
+              className="inline-flex items-center gap-2 rounded-2xl bg-kalico-blue px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-kalico-blue/90"
             >
               Ouvrir
               <ArrowRight className="h-4 w-4" />

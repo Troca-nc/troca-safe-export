@@ -148,7 +148,7 @@ export function ListingHeroCard({
           )}
           <div className="absolute top-4 left-4 flex flex-wrap gap-2">
             {listing.is_featured && (
-              <span className="px-3 py-1 rounded-full bg-coral text-white text-xs font-semibold">À la une</span>
+              <span className="px-3 py-1 rounded-full bg-kalico-blue text-white text-xs font-semibold">À la une</span>
             )}
             {listing.is_urgent && (
               <span className="px-3 py-1 rounded-full bg-[var(--color-warning)]/10 text-[var(--color-warning)] text-xs font-semibold">Urgent</span>
@@ -167,7 +167,7 @@ export function ListingHeroCard({
                 type="button"
                 onClick={() => onPickImage(index)}
                 className={`relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 border-2 transition-colors snap-center ${
-                  index === activeImage ? 'border-coral' : 'border-transparent'
+                  index === activeImage ? 'border-kalico-blue' : 'border-transparent'
                 }`}
               >
                 <ListingImageComponent
@@ -208,7 +208,7 @@ export function ListingHeroCard({
             </div>
           </div>
           <div className="text-right shrink-0">
-            <p className="text-2xl font-bold text-coral">{formatPrice(listing)}</p>
+            <p className="text-2xl font-bold text-kalico-blue">{formatPrice(listing)}</p>
             {listing.price_negotiable && !listing.is_free && (
               <p className="text-xs text-night/45">Prix negociable</p>
             )}
@@ -230,7 +230,7 @@ export function ListingHeroCard({
 
         <div className="mt-5 rounded-2xl border border-night/8 bg-night/[0.03] p-4">
           <div className="flex items-center gap-2 text-night mb-2">
-            <MessageCircle size={16} className="text-coral" />
+            <MessageCircle size={16} className="text-kalico-blue" />
             <h2 className="font-semibold">Description</h2>
           </div>
           <p className="text-sm leading-7 text-night/75 whitespace-pre-line">{listing.description}</p>
@@ -277,7 +277,7 @@ export function SellerSidebar({
     <aside className="space-y-4 lg:sticky lg:top-24">
       <div className="bg-white rounded-3xl border border-night/8 p-5 shadow-sm">
         <div className="flex items-start gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-coral/10 text-coral font-bold flex items-center justify-center overflow-hidden shrink-0">
+          <div className="w-14 h-14 rounded-2xl bg-kalico-blue/10 text-kalico-blue font-bold flex items-center justify-center overflow-hidden shrink-0">
             {listing.user.avatar_url ? (
               <Image src={listing.user.avatar_url} alt="" width={56} height={56} className="w-full h-full object-cover" />
             ) : (
@@ -370,7 +370,7 @@ export function SellerSidebar({
             type="button"
             onClick={onMessageSeller}
             disabled={sendingMessage || isOwner}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-coral text-white px-4 py-3 text-sm font-medium disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-kalico-blue text-white px-4 py-3 text-sm font-medium disabled:opacity-50"
           >
             <MessageCircle size={16} />
             {isOwner ? 'Votre annonce' : sendingMessage ? 'Ouverture...' : 'Envoyer un message'}
@@ -380,7 +380,7 @@ export function SellerSidebar({
               <button
                 type="button"
                 onClick={onMakeOffer}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-medium text-night transition hover:border-coral/20 hover:bg-coral/5 hover:text-coral"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-medium text-night transition hover:border-kalico-blue/20 hover:bg-kalico-blue/5 hover:text-kalico-blue"
               >
                 <BadgeDollarSign size={16} />
                 Faire une offre
@@ -409,7 +409,7 @@ export function SellerSidebar({
             <button
               type="button"
               onClick={onOpenPro}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-coral/20 bg-coral/5 px-4 py-3 text-sm font-semibold text-coral hover:bg-coral/10"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-kalico-blue/20 bg-kalico-blue/5 px-4 py-3 text-sm font-semibold text-kalico-blue hover:bg-kalico-blue/10"
             >
               <TrendingUp size={16} />
               Booster et mettre en avant
@@ -450,7 +450,7 @@ export function SellerReviewsSection({
   return (
     <div className="bg-white dark:bg-[var(--color-surface)] rounded-3xl border border-night/8 p-5 shadow-sm">
       <div className="flex items-center gap-2 mb-3 text-night">
-        <Sparkles size={16} className="text-coral" />
+        <Sparkles size={16} className="text-kalico-blue" />
         <h2 className="font-semibold">Avis acheteurs</h2>
       </div>
 
@@ -466,7 +466,7 @@ export function SellerReviewsSection({
           {reviews.map((review) => (
             <div key={review.id} className="rounded-2xl border border-night/8 bg-night/[0.02] p-3">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-coral/10 text-coral font-semibold flex items-center justify-center overflow-hidden shrink-0">
+                <div className="w-8 h-8 rounded-full bg-kalico-blue/10 text-kalico-blue font-semibold flex items-center justify-center overflow-hidden shrink-0">
                   {review.auteur_avatar ? (
                     <Image src={review.auteur_avatar} alt="" width={32} height={32} className="w-full h-full object-cover" />
                   ) : (
@@ -579,7 +579,7 @@ export function ReviewFormSection({
         rows={4}
         maxLength={500}
         placeholder="Votre avis sur le vendeur..."
-        className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-coral/25 focus:border-coral resize-none"
+        className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-kalico-blue/25 focus:border-kalico-blue resize-none"
       />
 
       <button
@@ -629,7 +629,7 @@ export function SellerListingsSection({
           <h2 className="text-xl font-semibold text-night">Autres articles du vendeur</h2>
           <p className="text-sm text-night/50">Ses autres annonces sur Kalico.</p>
         </div>
-        <Link href={`/profil/${sellerId}`} className="text-sm text-coral hover:underline">
+        <Link href={`/profil/${sellerId}`} className="text-sm text-kalico-blue hover:underline">
           Voir tous ses articles
         </Link>
       </div>
@@ -662,7 +662,7 @@ export function SellerListingsSection({
               <p className="text-sm font-medium text-night line-clamp-2 leading-tight mb-1">
                 {item.title ?? item.titre}
               </p>
-              <p className="text-base font-bold text-coral">
+              <p className="text-base font-bold text-kalico-blue">
                 {item.prix != null || item.price != null
                   ? `${(item.prix ?? item.price ?? 0).toLocaleString('fr-FR')} XPF`
                   : <span className="text-night/40 font-normal text-sm">Prix libre</span>}

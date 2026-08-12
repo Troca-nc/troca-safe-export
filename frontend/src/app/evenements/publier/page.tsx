@@ -197,7 +197,7 @@ export default function EventPublishPage() {
 
               <section className="rounded-[1.5rem] border border-night/8 bg-sand/40 p-5">
                 <div className="mb-4 flex items-center gap-2 text-night">
-                  <CalendarDays className="h-4 w-4 text-coral" />
+                  <CalendarDays className="h-4 w-4 text-kalico-blue" />
                   <h2 className="text-lg font-bold">Informations ï¿½vï¿½nement</h2>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
@@ -280,7 +280,7 @@ export default function EventPublishPage() {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <div className="mb-2 flex items-center gap-2 text-night">
-                      <Ticket className="h-4 w-4 text-coral" />
+                      <Ticket className="h-4 w-4 text-kalico-blue" />
                       <h2 className="text-lg font-bold">Billetterie</h2>
                     </div>
                     <p className="text-sm text-night/60">Ajoutez un ou plusieurs types de billets et activez la rï¿½servation native.</p>
@@ -347,19 +347,19 @@ export default function EventPublishPage() {
             </div>
 
             <aside className="space-y-4">
-              <div className="rounded-[1.5rem] border border-coral/15 bg-coral/5 p-5">
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Aperï¿½u</p>
+              <div className="rounded-[1.5rem] border border-kalico-blue/15 bg-kalico-blue/5 p-5">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">Aperï¿½u</p>
                 <div className="mt-3 rounded-[1.25rem] border border-night/8 bg-white p-4 shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-coral">{form.category}</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-kalico-blue">{form.category}</p>
                   <h3 className="mt-2 text-xl font-bold text-night">{form.title || 'Titre de lï¿½vï¿½nement'}</h3>
                   <p className="mt-2 text-sm text-night/65">{form.description || 'La description de lï¿½vï¿½nement apparaï¿½tra ici.'}</p>
                   <div className="mt-4 space-y-2 text-sm text-night/60">
                     <p className="inline-flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-coral" />
+                      <MapPin className="h-4 w-4 text-kalico-blue" />
                       {form.venue_name || 'Lieu ï¿½ dï¿½finir'}
                     </p>
                     <p className="inline-flex items-center gap-2">
-                      <CalendarDays className="h-4 w-4 text-coral" />
+                      <CalendarDays className="h-4 w-4 text-kalico-blue" />
                       {form.event_date || 'Date ï¿½ dï¿½finir'} ï¿½ {form.event_time}
                     </p>
                   </div>
@@ -369,10 +369,10 @@ export default function EventPublishPage() {
               <div className="rounded-[1.5rem] border border-night/8 bg-sand/40 p-5">
                 <h3 className="text-lg font-bold text-night">Checklist</h3>
                 <ul className="mt-3 space-y-2 text-sm text-night/65">
-                  <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-coral" /> Publication sur Kalico</li>
-                  <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-coral" /> Rï¿½servation native 10 minutes</li>
-                  <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-coral" /> QR code de contrï¿½le gï¿½nï¿½rï¿½ automatiquement</li>
-                  <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-coral" /> Scan depuis `/scan/[token]`</li>
+                  <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> Publication sur Kalico</li>
+                  <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> Rï¿½servation native 10 minutes</li>
+                  <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> QR code de contrï¿½le gï¿½nï¿½rï¿½ automatiquement</li>
+                  <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> Scan depuis `/scan/[token]`</li>
                 </ul>
               </div>
 
@@ -381,7 +381,7 @@ export default function EventPublishPage() {
                 <p className="mt-2">
                   Vous pouvez dabord publier un ï¿½vï¿½nement gratuit pour tester le flux, puis activer des billets payants une fois prï¿½t.
                 </p>
-                <Link href="/evenements" className="mt-4 inline-flex items-center gap-2 font-semibold text-coral">
+                <Link href="/evenements" className="mt-4 inline-flex items-center gap-2 font-semibold text-kalico-blue">
                   Retour au calendrier
                   <ArrowRight className="h-4 w-4" />
                 </Link>

@@ -971,15 +971,15 @@ export default function ProDashboardSettingsPage() {
                       </div>
                       <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-night/60">
                         <span className="inline-flex items-center gap-1">
-                          <MapPin className="h-4 w-4 text-coral" />
+                          <MapPin className="h-4 w-4 text-kalico-blue" />
                           {previewProfile.commune}
                         </span>
                         <span className="inline-flex items-center gap-1">
-                          <Store className="h-4 w-4 text-coral" />
+                          <Store className="h-4 w-4 text-kalico-blue" />
                           {previewProfile.category}
                         </span>
                         <span className="inline-flex items-center gap-1">
-                          <Clock3 className="h-4 w-4 text-coral" />
+                          <Clock3 className="h-4 w-4 text-kalico-blue" />
                           {previewProfile.hours}
                         </span>
                       </div>

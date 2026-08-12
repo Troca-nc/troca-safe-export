@@ -385,7 +385,7 @@ export default function CategoryFields({ categorySlug, register, errors }: Props
   return (
     <div className="border-t border-night/8 pt-6 mt-2">
       <p className="text-sm font-semibold text-night mb-4 flex items-center gap-2">
-        <span className="w-5 h-5 bg-coral/10 text-coral rounded-full flex items-center justify-center text-xs">&</span>
+        <span className="w-5 h-5 bg-kalico-blue/10 text-kalico-blue rounded-full flex items-center justify-center text-xs">&</span>
         Caractï¿½ristiques spï¿½cifiques
       </p>
 
@@ -407,7 +407,7 @@ export default function CategoryFields({ categorySlug, register, errors }: Props
             <div key={field.name}>
               <label className="block text-sm font-medium text-night/70 mb-1.5">
                 {field.label}
-                {field.required && <span className="text-coral ml-1">*</span>}
+                {field.required && <span className="text-kalico-blue ml-1">*</span>}
               </label>
 
               {field.type === 'select' && (

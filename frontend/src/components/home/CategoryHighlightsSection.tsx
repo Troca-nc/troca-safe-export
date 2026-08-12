@@ -108,11 +108,11 @@ export default function CategoryHighlightsSection({
     <section ref={ref} className="mx-auto max-w-7xl px-4 pb-10">
       <div className="mb-5 flex items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">{eyebrow}</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">{eyebrow}</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">{title}</h2>
           <p className="mt-1 max-w-3xl text-sm text-night/55">{description}</p>
         </div>
-        <Link href={href} className="hidden items-center gap-1 text-sm font-semibold text-coral hover:underline md:inline-flex">
+        <Link href={href} className="hidden items-center gap-1 text-sm font-semibold text-kalico-blue hover:underline md:inline-flex">
           Voir tout <ArrowRight className="h-4 w-4" />
         </Link>
       </div>

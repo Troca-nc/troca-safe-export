@@ -107,7 +107,7 @@ export default function ListingPreviewPage() {
         <Header />
         <main className="mx-auto max-w-3xl px-4 py-10 md:py-14">
           <div className="rounded-[2rem] border border-night/8 bg-white p-6 shadow-sm md:p-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-coral/15 bg-coral/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-coral">
+            <div className="inline-flex items-center gap-2 rounded-full border border-kalico-blue/15 bg-kalico-blue/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue">
               <Eye className="h-3.5 w-3.5" />
               Prï¿½visualisation introuvable
             </div>
@@ -133,10 +133,10 @@ export default function ListingPreviewPage() {
     <div className="min-h-screen bg-sand-light">
       <Header />
       <main className="mx-auto max-w-7xl px-4 py-6 md:py-10">
-        <div className="sticky top-4 z-20 mb-6 rounded-[1.5rem] border border-coral/15 bg-coral/8 px-4 py-3 shadow-sm backdrop-blur-sm">
+        <div className="sticky top-4 z-20 mb-6 rounded-[1.5rem] border border-kalico-blue/15 bg-kalico-blue/8 px-4 py-3 shadow-sm backdrop-blur-sm">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-coral text-white">
+              <div className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-kalico-blue text-white">
                 <Sparkles className="h-4 w-4" />
               </div>
               <div>
@@ -179,7 +179,7 @@ export default function ListingPreviewPage() {
                     <div
                       key={photo.id}
                       className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border ${
-                        photo.isPrimary ? 'border-coral' : 'border-night/10'
+                        photo.isPrimary ? 'border-kalico-blue' : 'border-night/10'
                       }`}
                     >
                       <img src={photo.preview} alt={photo.name} className="h-full w-full object-cover" />
@@ -206,7 +206,7 @@ export default function ListingPreviewPage() {
 
             <div className="space-y-3">
               <h1 className="text-3xl font-bold text-night">{preview.draft.title}</h1>
-              <p className="text-2xl font-bold text-coral">{priceLabel}</p>
+              <p className="text-2xl font-bold text-kalico-blue">{priceLabel}</p>
               <div className="rounded-2xl border border-night/8 bg-night/[0.03] p-4">
                 <p className="text-sm leading-7 whitespace-pre-line text-night/75">
                   {preview.draft.description}
@@ -217,7 +217,7 @@ export default function ListingPreviewPage() {
 
           <aside className="space-y-4">
             <div className="rounded-[2rem] border border-night/8 bg-white p-5 shadow-sm">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Rï¿½sumï¿½</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">Rï¿½sumï¿½</p>
               <div className="mt-4 space-y-3 text-sm text-night/65">
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-night/45">CatÃ©gorie</span>

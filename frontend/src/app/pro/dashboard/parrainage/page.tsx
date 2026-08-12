@@ -127,7 +127,7 @@ export default function ProDashboardReferralPage() {
               <Users2 className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Votre code</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Votre code</p>
               <h2 className="mt-1 font-display text-2xl font-bold text-night">{displayCode}</h2>
               <p className="mt-2 text-sm text-night/60">
                 Ce code est genere par le serveur et reste identique pour votre compte Pro.
@@ -188,7 +188,7 @@ export default function ProDashboardReferralPage() {
           </article>
 
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Etape suivante</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Etape suivante</p>
             <h2 className="mt-1 font-display text-xl font-bold text-night">Reliez ce lien a vos contacts</h2>
             <p className="mt-2 text-sm text-night/60">
               Vous pouvez deja copier le lien et le coller dans un message, un devis ou un email d&apos;invitation.

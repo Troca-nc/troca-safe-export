@@ -269,7 +269,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
             <SlidersHorizontal className="w-4 h-4" />
             Filtres
             {activeFilterCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-coral text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-kalico-blue text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                 {activeFilterCount}
               </span>
             )}
@@ -278,7 +278,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
           <button
             type="button"
             onClick={() => setSearchAlertOpen(true)}
-            className="inline-flex items-center gap-2 rounded-xl border border-coral/20 bg-coral/6 px-3 py-2 text-sm font-semibold text-coral transition hover:border-coral/30 hover:bg-coral/10"
+            className="inline-flex items-center gap-2 rounded-xl border border-kalico-blue/20 bg-kalico-blue/6 px-3 py-2 text-sm font-semibold text-kalico-blue transition hover:border-kalico-blue/30 hover:bg-kalico-blue/10"
           >
             <Bell className="h-4 w-4" />
             Crï¿½er une alerte
@@ -305,7 +305,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
                         updateFilter('commune_id', '')
                       }}
                       className={`rounded-full border px-4 py-2 text-sm transition-colors ${
-                        !filters.province_id ? 'bg-coral text-white border-coral' : 'bg-white text-night/65 border-night/12 hover:bg-sand'
+                        !filters.province_id ? 'bg-kalico-blue text-white border-kalico-blue' : 'bg-white text-night/65 border-night/12 hover:bg-sand'
                       }`}
                     >
                       Toute la NC
@@ -317,7 +317,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
                         onClick={() => updateFilter('province_id', String(province.id))}
                         className={`rounded-full border px-4 py-2 text-sm transition-colors ${
                           String(filters.province_id) === String(province.id)
-                            ? 'bg-coral text-white border-coral'
+                            ? 'bg-kalico-blue text-white border-kalico-blue'
                             : 'bg-white text-night/65 border-night/12 hover:bg-sand'
                         }`}
                       >
@@ -334,7 +334,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
                           onClick={() => updateFilter('commune_id', '')}
                           className={`rounded-full border px-3 py-2 text-sm transition-colors ${
                               !filters.commune_id
-                                ? 'bg-coral text-white border-coral'
+                                ? 'bg-kalico-blue text-white border-kalico-blue'
                                 : 'bg-white text-night/65 border-night/12 hover:bg-sand'
                           }`}
                         >
@@ -347,7 +347,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
                             onClick={() => updateFilter('commune_id', String(commune.id))}
                             className={`rounded-full border px-3 py-2 text-sm transition-colors ${
                               String(filters.commune_id) === String(commune.id)
-                                ? 'bg-coral text-white border-coral'
+                                ? 'bg-kalico-blue text-white border-kalico-blue'
                                 : 'bg-white text-night/65 border-night/12 hover:bg-sand'
                             }`}
                           >
@@ -388,7 +388,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
                         onClick={() => updateFilter('radius', value)}
                         className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
                           active
-                            ? 'border-coral bg-coral text-white shadow-sm'
+                            ? 'border-kalico-blue bg-kalico-blue text-white shadow-sm'
                             : 'border-night/10 bg-white text-night/60 hover:bg-sand'
                         }`}
                       >
@@ -458,7 +458,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
                         value={opt.value}
                         checked={filters.condition === opt.value}
                         onChange={() => updateFilter('condition', opt.value)}
-                        className="accent-coral"
+                        className="accent-kalico-blue"
                       />
                       <span className="text-sm text-night/70">{opt.label}</span>
                     </label>
@@ -490,7 +490,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
               <ListingSkeletonGrid count={6} className="grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4" />
             ) : listings.length === 0 ? (
                             <div className="text-center py-20">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-coral/10 text-coral" aria-hidden="true">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-kalico-blue/10 text-kalico-blue" aria-hidden="true">
                   <Search className="h-7 w-7" />
                 </div>
                 <h3 className="mt-4 font-display text-xl font-bold text-night mb-2">

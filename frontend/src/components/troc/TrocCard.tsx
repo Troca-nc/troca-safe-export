@@ -92,8 +92,8 @@ export default function TrocCard({ listing, compatibility = listing.compatibilit
         <div className="space-y-3 p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-coral/80">{ownerName}</p>
-              <h3 className="mt-1 line-clamp-2 text-lg font-bold leading-tight text-night group-hover:text-coral">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">{ownerName}</p>
+              <h3 className="mt-1 line-clamp-2 text-lg font-bold leading-tight text-night group-hover:text-kalico-blue">
                 {listing.title}
               </h3>
             </div>
@@ -136,7 +136,7 @@ export default function TrocCard({ listing, compatibility = listing.compatibilit
             ) : null}
           </div>
 
-          <div className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-coral px-4 py-3 text-sm font-semibold text-white transition group-hover:bg-coral/90">
+          <div className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-kalico-blue px-4 py-3 text-sm font-semibold text-white transition group-hover:bg-kalico-blue/90">
             Proposer un ï¿½change
             <HeartHandshake className="h-4 w-4" />
           </div>

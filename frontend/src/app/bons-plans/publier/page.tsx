@@ -167,7 +167,7 @@ export default function PublishBonPlanPage() {
 
           {!isAuthenticated ? (
             <div className="p-6 md:p-8">
-              <div className="rounded-[1.5rem] border border-coral/15 bg-coral/5 p-5">
+              <div className="rounded-[1.5rem] border border-kalico-blue/15 bg-kalico-blue/5 p-5">
                 <p className="font-semibold text-night">Connectez-vous pour continuer.</p>
                 <p className="mt-1 text-sm text-night/60">Nous avons besoin de votre compte pour declencher le paiement et la publication immediate.</p>
                 <button type="button" className="btn-primary mt-4 rounded-2xl px-4 py-3" onClick={() => openAuthModal({ type: 'publish_listing', redirectTo: '/bons-plans/publier' })}>
@@ -180,7 +180,7 @@ export default function PublishBonPlanPage() {
               <div className="space-y-6">
                 <section className="rounded-[1.5rem] border border-night/8 bg-sand/40 p-5">
                   <div className="mb-4 flex items-center gap-2 text-night">
-                    <Upload className="h-4 w-4 text-coral" />
+                    <Upload className="h-4 w-4 text-kalico-blue" />
                     <h2 className="text-lg font-bold">Votre enseigne</h2>
                   </div>
                   <div className="grid gap-4 md:grid-cols-2">
@@ -201,7 +201,7 @@ export default function PublishBonPlanPage() {
 
                 <section className="rounded-[1.5rem] border border-night/8 bg-sand/40 p-5">
                   <div className="mb-4 flex items-center gap-2 text-night">
-                    <CircleDollarSign className="h-4 w-4 text-coral" />
+                    <CircleDollarSign className="h-4 w-4 text-kalico-blue" />
                     <h2 className="text-lg font-bold">Votre promo</h2>
                   </div>
                   <div className="grid gap-4 md:grid-cols-2">
@@ -300,10 +300,10 @@ export default function PublishBonPlanPage() {
                           type="button"
                           onClick={() => setDurationDays(option.days)}
                           className={`rounded-[1.25rem] border p-4 text-left transition ${
-                            active ? 'border-coral bg-white shadow-sm' : 'border-night/10 bg-white/70 hover:border-coral/25'
+                            active ? 'border-kalico-blue bg-white shadow-sm' : 'border-night/10 bg-white/70 hover:border-kalico-blue/25'
                           }`}
                         >
-                          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-coral">{option.label}</p>
+                          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-kalico-blue">{option.label}</p>
                           <p className="mt-2 text-2xl font-bold text-night">{Number(option.price).toLocaleString('fr-FR')} XPF</p>
                           <p className="mt-1 text-xs text-night/60">Pro: {Number(option.pro).toLocaleString('fr-FR')} XPF</p>
                         </button>
@@ -318,7 +318,7 @@ export default function PublishBonPlanPage() {
                     <button
                       type="button"
                       onClick={() => setPaymentProvider('stripe')}
-                      className={`rounded-[1.25rem] border p-4 text-left transition ${paymentProvider === 'stripe' ? 'border-coral bg-white' : 'border-night/10 bg-white/70'}`}
+                      className={`rounded-[1.25rem] border p-4 text-left transition ${paymentProvider === 'stripe' ? 'border-kalico-blue bg-white' : 'border-night/10 bg-white/70'}`}
                     >
                       <p className="font-semibold">Carte bancaire internationale</p>
                       <p className="mt-1 text-sm text-night/60">Stripe PaymentSheet pour les cartes internationales.</p>
@@ -326,7 +326,7 @@ export default function PublishBonPlanPage() {
                     <button
                       type="button"
                       onClick={() => setPaymentProvider('payplug')}
-                      className={`rounded-[1.25rem] border p-4 text-left transition ${paymentProvider === 'payplug' ? 'border-coral bg-white' : 'border-night/10 bg-white/70'}`}
+                      className={`rounded-[1.25rem] border p-4 text-left transition ${paymentProvider === 'payplug' ? 'border-kalico-blue bg-white' : 'border-night/10 bg-white/70'}`}
                     >
                       <p className="font-semibold">Carte OPT-NC / reseau local</p>
                       <p className="mt-1 text-sm text-night/60">PayPlug pour les cartes locales et un tunnel plus simple.</p>
@@ -341,8 +341,8 @@ export default function PublishBonPlanPage() {
               </div>
 
               <aside className="space-y-5">
-                <div className="rounded-[1.5rem] border border-coral/15 bg-coral/5 p-5">
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Apereu en temps reel</p>
+                <div className="rounded-[1.5rem] border border-kalico-blue/15 bg-kalico-blue/5 p-5">
+                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">Apereu en temps reel</p>
                   <div className="mt-4 overflow-hidden rounded-[1.25rem] border border-night/8 bg-white shadow-sm">
                     <div className="relative aspect-[16/9] bg-sand">
                       {preview.image_url ? (
@@ -352,7 +352,7 @@ export default function PublishBonPlanPage() {
                       )}
                     </div>
                     <div className="p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-coral">Categorie: {preview.category}</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-kalico-blue">Categorie: {preview.category}</p>
                       <h3 className="mt-2 text-xl font-bold text-night">{preview.title}</h3>
                       <p className="mt-2 text-sm text-night/65">{preview.description}</p>
                       <div className="mt-4 flex items-center justify-between">
@@ -369,10 +369,10 @@ export default function PublishBonPlanPage() {
                 <div className="rounded-[1.5rem] border border-night/8 bg-sand/40 p-5">
                   <h3 className="text-lg font-bold text-night">Resume</h3>
                   <ul className="mt-3 space-y-2 text-sm text-night/65">
-                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-coral" /> Duree: {durationDays} jours</li>
-                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-coral" /> Paiement: {paymentProvider === 'stripe' ? 'Stripe' : 'PayPlug'}</li>
-                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-coral" /> Prix public: {baseAmount.toLocaleString('fr-FR')} XPF</li>
-                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-coral" /> Prix Pro: {discountText}</li>
+                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> Duree: {durationDays} jours</li>
+                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> Paiement: {paymentProvider === 'stripe' ? 'Stripe' : 'PayPlug'}</li>
+                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> Prix public: {baseAmount.toLocaleString('fr-FR')} XPF</li>
+                    <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> Prix Pro: {discountText}</li>
                   </ul>
                 </div>
 
@@ -381,7 +381,7 @@ export default function PublishBonPlanPage() {
                   <p className="mt-2">
                     La promo devient visible seulement apres paiement confirme. Le paiement reel est traite par le fournisseur choisi.
                   </p>
-                  <Link href="/bons-plans" className="mt-4 inline-flex items-center gap-2 font-semibold text-coral">
+                  <Link href="/bons-plans" className="mt-4 inline-flex items-center gap-2 font-semibold text-kalico-blue">
                     Retour aux bons plans
                     <ExternalLink className="h-4 w-4" />
                   </Link>

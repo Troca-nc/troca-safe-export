@@ -48,11 +48,11 @@ function BienvenueContent() {
         <div className="rounded-[2rem] border border-night/10 bg-white p-6 shadow-sm md:p-8">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div className="flex items-start gap-4">
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-coral/10 text-coral">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-kalico-blue/10 text-kalico-blue">
                 <Icon className="h-6 w-6" />
               </span>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">ï¿½tape suivante</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">ï¿½tape suivante</p>
                 <h1 className="mt-1 font-display text-3xl font-bold text-night">{config.title}</h1>
                 <p className="mt-2 text-sm text-night/60">{config.subtitle}</p>
               </div>
@@ -77,7 +77,7 @@ function BienvenueContent() {
             </div>
             <div className="rounded-2xl border border-night/10 bg-white p-4">
               <div className="flex items-center gap-3">
-                {role === 'pro' ? <Megaphone className="h-5 w-5 text-coral" /> : <ArrowRight className="h-5 w-5 text-coral" />}
+                {role === 'pro' ? <Megaphone className="h-5 w-5 text-kalico-blue" /> : <ArrowRight className="h-5 w-5 text-kalico-blue" />}
                 <p className="text-sm font-semibold text-night">
                   {role === 'pro' ? 'Le mode pro se dï¿½bloque ï¿½tape par ï¿½tape' : 'Le parcours particulier est simple et rapide'}
                 </p>
@@ -86,9 +86,9 @@ function BienvenueContent() {
                 Vous pouvez maintenant continuer vers votre espace personnel ou publier votre premiï¿½re annonce.
               </p>
               {role === 'pro' && (
-                <div className="mt-4 rounded-2xl bg-coral/5 p-4">
+                <div className="mt-4 rounded-2xl bg-kalico-blue/5 p-4">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-coral" />
+                    <Sparkles className="h-4 w-4 text-kalico-blue" />
                     <p className="text-sm font-semibold text-night">Compte pro en cours de configuration</p>
                   </div>
                   <ul className="mt-3 space-y-2 text-sm text-night/65">
@@ -108,10 +108,10 @@ function BienvenueContent() {
           </div>
 
           {role === 'pro' ? (
-            <div className="mt-6 rounded-[2rem] border border-coral/15 bg-gradient-to-br from-coral/10 via-white to-white p-5 shadow-sm md:p-6">
+            <div className="mt-6 rounded-[2rem] border border-kalico-blue/15 bg-gradient-to-br from-kalico-blue/10 via-white to-white p-5 shadow-sm md:p-6">
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Choisir la formule</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Choisir la formule</p>
                   <h2 className="mt-1 text-2xl font-bold text-night">Le prix devient lï¿½lï¿½ment principal</h2>
                   <p className="mt-2 text-sm text-night/60">
                     La crï¿½ation reste gratuite. Ensuite, vous choisissez votre rythme Pro selon le besoin rï¿½el de votre activitï¿½.
@@ -128,10 +128,10 @@ function BienvenueContent() {
                   <p className="mt-2 text-3xl font-bold text-night">{PRO_PLAN.price_monthly.toLocaleString('fr-FR')} XPF</p>
                   <p className="mt-1 text-sm text-night/55">Idï¿½al pour tester et garder de la souplesse.</p>
                 </div>
-                <div className="rounded-[1.75rem] border border-coral/25 bg-coral/5 p-5 shadow-[0_16px_40px_rgba(231,111,81,0.10)]">
+                <div className="rounded-[1.75rem] border border-kalico-blue/25 bg-kalico-blue/5 p-5 shadow-[0_16px_40px_rgba(231,111,81,0.10)]">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-coral/80">Annuel</p>
-                    <span className="rounded-full bg-coral px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">Recommandï¿½</span>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">Annuel</p>
+                    <span className="rounded-full bg-kalico-blue px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">Recommandï¿½</span>
                   </div>
                   <p className="mt-2 text-3xl font-bold text-night">{PRO_PLAN.price_yearly.toLocaleString('fr-FR')} XPF</p>
                   <p className="mt-1 text-sm text-night/55">Plus lisible pour un usage pro rï¿½gulier.</p>

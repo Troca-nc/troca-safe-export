@@ -11,7 +11,7 @@ type Props = {
 function toneForScore(score: number) {
   if (score >= 80) return 'from-jungle to-emerald-500'
   if (score >= 50) return 'from-amber-400 to-orange-500'
-  if (score > 0) return 'from-coral to-amber-500'
+  if (score > 0) return 'from-kalico-blue to-amber-500'
   return 'from-night/20 to-night/35'
 }
 

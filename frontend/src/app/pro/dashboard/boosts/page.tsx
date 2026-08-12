@@ -76,7 +76,7 @@ export default function ProDashboardBoostsPage() {
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Boosts</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Boosts</p>
             <h1 className="mt-2 font-display text-3xl font-bold text-night">Historique des boosts</h1>
             <p className="mt-2 text-sm text-night/60">Suivez vos boosts actifs et vos anciennes campagnes de visibilitï¿½.</p>
           </div>

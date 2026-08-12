@@ -488,11 +488,11 @@ export default function ProLaunchPack() {
 
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
             <div className="flex items-start gap-3">
-              <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-coral/10 text-coral">
+              <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-kalico-blue/10 text-kalico-blue">
                 <Bell className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Appel onboarding</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Appel onboarding</p>
                 <h2 className="mt-1 font-display text-xl font-bold text-night">Planifier un appel</h2>
               </div>
             </div>
@@ -568,7 +568,7 @@ export default function ProLaunchPack() {
         </article>
 
         <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Raccourcis</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Raccourcis</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">Aller plus vite</h2>
 
           <div className="mt-4 grid gap-2">

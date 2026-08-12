@@ -159,7 +159,7 @@ function ConfirmationContent() {
         <Header />
         <div className="min-h-screen bg-sand-light flex items-center justify-center">
           <div className="text-center">
-            <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-coral" />
+            <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-kalico-blue" />
             <p className="font-medium text-night/60">Validation en cours...</p>
           </div>
         </div>

@@ -41,7 +41,7 @@ export default function ContactPage() {
               paiements.
             </p>
             <p>
-              <a href="mailto:contact@kalico.nc" className="text-coral underline">
+              <a href="mailto:contact@kalico.nc" className="text-kalico-blue underline">
                 contact@kalico.nc
               </a>
             </p>
@@ -53,7 +53,7 @@ export default function ContactPage() {
               traitement.
             </p>
             <p>
-              <a href="mailto:privacy@kalico.nc" className="text-coral underline">
+              <a href="mailto:privacy@kalico.nc" className="text-kalico-blue underline">
                 privacy@kalico.nc
               </a>
             </p>
@@ -65,7 +65,7 @@ export default function ContactPage() {
               relatives aux CGU.
             </p>
             <p>
-              <a href="mailto:legal@kalico.nc" className="text-coral underline">
+              <a href="mailto:legal@kalico.nc" className="text-kalico-blue underline">
                 legal@kalico.nc
               </a>
             </p>
@@ -78,7 +78,7 @@ export default function ContactPage() {
             </p>
             <p>
               Consultez aussi la page{' '}
-              <Link href="/securite" className="text-coral underline">
+              <Link href="/securite" className="text-kalico-blue underline">
                 Sï¿½curitï¿½
               </Link>
               .
@@ -92,7 +92,7 @@ export default function ContactPage() {
 
         <div className="mt-8 text-sm text-night/65">
           Vous n&apos;avez pas trouvï¿½ votre rï¿½ponse ?{' '}
-          <a href="#formulaire-contact" className="font-semibold text-coral underline">
+          <a href="#formulaire-contact" className="font-semibold text-kalico-blue underline">
             Contactez-nous directement
           </a>
         </div>

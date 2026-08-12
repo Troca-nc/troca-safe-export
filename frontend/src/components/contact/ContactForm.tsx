@@ -120,7 +120,7 @@ export default function ContactForm() {
     <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Nous contacter</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Nous contacter</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">Envoyez votre demande au support</h2>
           <p className="mt-2 text-sm leading-relaxed text-night/60">
             Remplissez le formulaire ci-dessous pour une rï¿½ponse structurï¿½e. Les comptes connectï¿½s ont leurs informations prï¿½-remplies.
@@ -245,7 +245,7 @@ export default function ContactForm() {
           <p className="mt-1 text-xs text-night/55">Demandes RGPD et confidentialitï¿½.</p>
         </div>
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-          <PhoneCall className="h-5 w-5 text-coral" />
+          <PhoneCall className="h-5 w-5 text-kalico-blue" />
           <p className="mt-2 text-sm font-semibold text-night">24h ï¿½ 48h ouvrï¿½es</p>
           <p className="mt-1 text-xs text-night/55">Temps de rï¿½ponse moyen sur les demandes standard.</p>
         </div>

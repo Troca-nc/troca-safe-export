@@ -22,7 +22,7 @@ interface Notif {
 }
 
 const TYPE_ICON: Record<string, React.ReactNode> = {
-  new_message: <MessageCircle size={15} className="text-coral" />,
+  new_message: <MessageCircle size={15} className="text-kalico-blue" />,
   search_alert: <Search size={15} className="text-blue-500" />,
   listing_expiring: <Clock size={15} className="text-amber-500" />,
   review: <Check size={15} className="text-green-500" />,
@@ -112,7 +112,7 @@ export default function NotificationBell() {
       >
         <Bell size={20} />
         {unread > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[17px] h-[17px] bg-coral text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
+          <span className="absolute -top-0.5 -right-0.5 min-w-[17px] h-[17px] bg-kalico-blue text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
             {unread > 9 ? '9+' : unread}
           </span>
         )}
@@ -132,7 +132,7 @@ export default function NotificationBell() {
             <span className="text-sm font-semibold text-night">Notifications</span>
             <div className="flex items-center gap-2">
               {unread > 0 && (
-                <button type="button" onClick={markAllRead} className="text-[11px] text-coral hover:underline">
+                <button type="button" onClick={markAllRead} className="text-[11px] text-kalico-blue hover:underline">
                   Tout marquer comme lu
                 </button>
               )}
@@ -145,7 +145,7 @@ export default function NotificationBell() {
           <div className="max-h-[360px] overflow-y-auto">
             {loading && notifs.length === 0 && (
               <div className="px-4 py-8 text-center">
-                <div className="w-5 h-5 border-2 border-coral/30 border-t-coral rounded-full animate-spin mx-auto" />
+                <div className="w-5 h-5 border-2 border-kalico-blue/30 border-t-kalico-blue rounded-full animate-spin mx-auto" />
               </div>
             )}
 
@@ -180,12 +180,12 @@ export default function NotificationBell() {
                   setOpen(false)
                 }}
                 className={`flex items-start gap-3 border-b border-[var(--color-border)] px-4 py-3 transition-colors hover:bg-sand last:border-0 ${
-                  !n.read ? 'bg-coral/3' : ''
+                  !n.read ? 'bg-kalico-blue/3' : ''
                 }`}
               >
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                    !n.read ? 'bg-coral/10' : 'bg-night/5'
+                    !n.read ? 'bg-kalico-blue/10' : 'bg-night/5'
                   }`}
                 >
                   {TYPE_ICON[n.type] ?? <Bell size={15} className="text-night/40" />}
@@ -199,7 +199,7 @@ export default function NotificationBell() {
                     {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: fr })}
                   </p>
                 </div>
-                {!n.read && <div className="w-2 h-2 bg-coral rounded-full shrink-0 mt-1.5" />}
+                {!n.read && <div className="w-2 h-2 bg-kalico-blue rounded-full shrink-0 mt-1.5" />}
               </Link>
             ))}
           </div>
@@ -207,7 +207,7 @@ export default function NotificationBell() {
           <Link
           href="/parametres/notifications"
             onClick={() => setOpen(false)}
-            className="block border-t border-[var(--color-border)] py-3 text-center text-xs text-night/40 transition-colors hover:text-coral"
+            className="block border-t border-[var(--color-border)] py-3 text-center text-xs text-night/40 transition-colors hover:text-kalico-blue"
             role="menuitem"
           >
             Gï¿½rer les notifications

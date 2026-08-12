@@ -474,7 +474,7 @@ function FilterSidebar({
                     onClick={() => updateFilter('radius', value)}
                     className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
                       active
-                        ? 'border-coral bg-coral text-white shadow-sm'
+                        ? 'border-kalico-blue bg-kalico-blue text-white shadow-sm'
                         : 'border-night/10 bg-white text-night/60 hover:bg-sand'
                     }`}
                   >
@@ -643,13 +643,13 @@ function FilterSidebar({
                   value={opt.value}
                   checked={filters.condition === opt.value}
                   onChange={() => updateFilter('condition', opt.value)}
-                  className="accent-coral"
+                  className="accent-kalico-blue"
                 />
                 <span className="text-sm text-night/70">{opt.label}</span>
               </label>
             ))}
             {filters.condition && (
-              <button onClick={() => updateFilter('condition', '')} className="pl-3 text-xs text-coral hover:underline">
+              <button onClick={() => updateFilter('condition', '')} className="pl-3 text-xs text-kalico-blue hover:underline">
                 Effacer
               </button>
             )}
@@ -1337,7 +1337,7 @@ function ListingsPageContent() {
                     onClick={() => updateFilter('radius', value)}
                     className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
                       active
-                        ? 'border-coral bg-coral text-white shadow-sm'
+                        ? 'border-kalico-blue bg-kalico-blue text-white shadow-sm'
                         : 'border-night/10 bg-white text-night/60 hover:bg-sand'
                     }`}
                   >
@@ -1508,13 +1508,13 @@ function ListingsPageContent() {
                   value={opt.value}
                   checked={filters.condition === opt.value}
                   onChange={() => updateFilter('condition', opt.value)}
-                  className="accent-coral"
+                  className="accent-kalico-blue"
                 />
                 <span className="text-sm text-night/70">{opt.label}</span>
               </label>
             ))}
             {filters.condition && (
-              <button onClick={() => updateFilter('condition', '')} className="pl-3 text-xs text-coral hover:underline">
+              <button onClick={() => updateFilter('condition', '')} className="pl-3 text-xs text-kalico-blue hover:underline">
                 Effacer
               </button>
             )}
@@ -1653,7 +1653,7 @@ function ListingsPageContent() {
               <SlidersHorizontal className="h-4 w-4" />
               Filtres
               {activeFilterCount > 0 && (
-                <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-coral text-[10px] font-bold text-white">
+                <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-kalico-blue text-[10px] font-bold text-white">
                   {activeFilterCount}
                 </span>
               )}
@@ -1695,7 +1695,7 @@ function ListingsPageContent() {
               onClick={() => setMobileCategoriesOpen((current) => !current)}
             >
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-coral/80">CatÃ©gories</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-kalico-blue/80">CatÃ©gories</p>
                 <p className="mt-1 text-sm font-semibold text-night">
                   {selectedCategoryLabel ?? 'Toutes les catï¿½gories'}
                 </p>

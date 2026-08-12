@@ -46,8 +46,8 @@ function Section({ icon: Icon, title, children, id }: {
   return (
     <div className="card p-6" id={id}>
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-9 h-9 rounded-xl bg-coral/10 flex items-center justify-center">
-          <Icon className="w-5 h-5 text-coral" />
+        <div className="w-9 h-9 rounded-xl bg-kalico-blue/10 flex items-center justify-center">
+          <Icon className="w-5 h-5 text-kalico-blue" />
         </div>
         <h2 className="font-semibold text-night text-base">{title}</h2>
       </div>
@@ -242,7 +242,7 @@ function NewsletterSection() {
           </button>
         </div>
         <div className="flex items-center justify-between gap-3">
-          <Link href="/newsletter/preferences" className="text-sm font-semibold text-coral hover:underline">
+          <Link href="/newsletter/preferences" className="text-sm font-semibold text-kalico-blue hover:underline">
             Gï¿½rer mes prï¿½fï¿½rences
           </Link>
           <Link href="/newsletter/unsubscribe" className="text-xs text-night/45 hover:text-night/65">
@@ -302,7 +302,7 @@ function FacturesSection() {
                   href={inv.pdf_url || inv.hosted_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-xs text-coral hover:underline"
+                  className="flex items-center gap-1 text-xs text-kalico-blue hover:underline"
                 >
                   PDF <ExternalLink className="w-3 h-3" />
                 </a>
@@ -422,7 +422,7 @@ function ExportSection() {
         className="btn-secondary w-full justify-center gap-2"
       >
         {loading ? (
-          <><span className="w-4 h-4 border-2 border-coral/30 border-t-coral rounded-full animate-spin" />Prï¿½paration&</>
+          <><span className="w-4 h-4 border-2 border-kalico-blue/30 border-t-kalico-blue rounded-full animate-spin" />Prï¿½paration&</>
         ) : done ? (
           <><CheckCircle2 className="w-4 h-4 text-jungle" />Tï¿½lï¿½chargement lancï¿½</>
         ) : (
@@ -510,7 +510,7 @@ function SuppressionSection() {
                 <button
                   type="button"
                   onClick={() => { void downloadRgpdExport().catch(() => {}) }}
-                  className="text-coral underline"
+                  className="text-kalico-blue underline"
                 >
                   t?l?charger vos donn?es
                 </button>.

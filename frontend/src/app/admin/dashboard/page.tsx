@@ -61,7 +61,7 @@ function KpiCard({ label, value, delta, deltaLabel, icon, danger }: KpiCardProps
     <div className="rounded-2xl border border-night/8 bg-white p-4">
       <div className="mb-3 flex items-start justify-between">
         <span className="text-xs font-medium uppercase tracking-wide text-night/50">{label}</span>
-        <span className={`rounded-lg p-1.5 ${danger ? 'bg-red-50 text-red-500' : 'bg-coral/10 text-coral'}`}>
+        <span className={`rounded-lg p-1.5 ${danger ? 'bg-red-50 text-red-500' : 'bg-kalico-blue/10 text-kalico-blue'}`}>
           {icon}
         </span>
       </div>
@@ -99,7 +99,7 @@ function MetricCard({
           <p className="text-xs font-medium uppercase tracking-wide text-night/50">{label}</p>
           <p className="mt-1 text-xl font-bold text-night">{value}</p>
         </div>
-        <span className="rounded-lg bg-sand px-2 py-2 text-coral">{icon}</span>
+        <span className="rounded-lg bg-sand px-2 py-2 text-kalico-blue">{icon}</span>
       </div>
       <p className="text-xs text-night/50">{hint}</p>
     </div>
@@ -353,7 +353,7 @@ function ObservabilitySection({
               <h3 className="mt-1 text-sm font-semibold text-night">Rï¿½partition par canal</h3>
               <p className="mt-1 text-xs text-night/50">{(share.total ?? 0).toLocaleString('fr-FR')} clic(s) de partage enregistrï¿½s</p>
             </div>
-            <span className="rounded-lg bg-coral/10 p-2 text-coral">
+            <span className="rounded-lg bg-kalico-blue/10 p-2 text-kalico-blue">
               <Share2 size={16} />
             </span>
           </div>
@@ -369,7 +369,7 @@ function ObservabilitySection({
                     </div>
                     <div className="h-2 rounded-full bg-sand/60">
                       <div
-                        className="h-2 rounded-full bg-coral transition-all"
+                        className="h-2 rounded-full bg-kalico-blue transition-all"
                         style={{ width: `${pct}%` }}
                         aria-hidden="true"
                       />
@@ -649,7 +649,7 @@ function ObservabilitySection({
             {[
               { label: 'Traiter les signalements en attente', href: '/admin/signalements', color: 'text-red-500 bg-red-50 border-red-200' },
               { label: 'Voir les nouvelles inscriptions', href: '/admin/utilisateurs?statut=en_attente', color: 'text-amber-600 bg-amber-50 border-amber-200' },
-              { label: 'Annonces signalees multiple', href: '/admin/annonces?statut=signalee', color: 'text-coral bg-coral/10 border-coral/20' },
+              { label: 'Annonces signalees multiple', href: '/admin/annonces?statut=signalee', color: 'text-kalico-blue bg-kalico-blue/10 border-kalico-blue/20' },
               { label: 'Comptes suspendus a reactiver', href: '/admin/utilisateurs?statut=suspendu', color: 'text-night/50 bg-sand border-night/10' },
             ].map((action) => (
               <a

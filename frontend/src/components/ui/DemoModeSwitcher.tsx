@@ -22,7 +22,7 @@ const PROFILE_TONE: Record<Exclude<DemoProfileKey, 'visitor'> | 'visitor', {
   chip: string
 }> = {
   visitor: { pill: 'bg-night/5 text-night/60', chip: 'bg-night/5 text-night/70' },
-  particulier: { pill: 'bg-coral/10 text-coral', chip: 'bg-coral text-white' },
+  particulier: { pill: 'bg-kalico-blue/10 text-kalico-blue', chip: 'bg-kalico-blue text-white' },
   pro: { pill: 'bg-ocean/10 text-ocean', chip: 'bg-ocean text-white' },
   bon_plan: { pill: 'bg-lagoon/15 text-night', chip: 'bg-lagoon text-night' },
 }
@@ -52,7 +52,7 @@ export default function DemoModeSwitcher() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={`flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left shadow-sm transition hover:shadow-md ${
-          demoProfile ? 'border-coral/20 bg-white' : 'border-night/10 bg-white'
+          demoProfile ? 'border-kalico-blue/20 bg-white' : 'border-night/10 bg-white'
         }`}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -63,7 +63,7 @@ export default function DemoModeSwitcher() {
             <Sparkles className="h-4 w-4" />
           </span>
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-coral/80">Mode dï¿½mo</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">Mode dï¿½mo</p>
             <p className="text-sm font-semibold text-night">{currentLabel}</p>
             <p className="text-xs text-night/55">{currentDescription}</p>
           </div>
@@ -97,10 +97,10 @@ export default function DemoModeSwitcher() {
               }}
               role="menuitem"
               className={`flex w-full items-start gap-3 px-4 py-3 text-left transition ${
-                !demoProfile ? 'bg-coral/5' : 'hover:bg-sand'
+                !demoProfile ? 'bg-kalico-blue/5' : 'hover:bg-sand'
               }`}
             >
-              <span className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-2xl ${!demoProfile ? 'bg-coral text-white' : 'bg-night/5 text-night/65'}`}>
+              <span className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-2xl ${!demoProfile ? 'bg-kalico-blue text-white' : 'bg-night/5 text-night/65'}`}>
                 <Sparkles className="h-4 w-4" />
               </span>
               <div className="min-w-0 flex-1">
@@ -121,10 +121,10 @@ export default function DemoModeSwitcher() {
                   }}
                   role="menuitem"
                   className={`flex w-full items-start gap-3 px-4 py-3 text-left transition ${
-                    active ? 'bg-coral/5' : 'hover:bg-sand'
+                    active ? 'bg-kalico-blue/5' : 'hover:bg-sand'
                   }`}
                 >
-                  <span className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-2xl ${active ? 'bg-coral text-white' : 'bg-night/5 text-night/65'}`}>
+                  <span className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-2xl ${active ? 'bg-kalico-blue text-white' : 'bg-night/5 text-night/65'}`}>
                     <Icon className="h-4 w-4" />
                   </span>
                   <div className="min-w-0 flex-1">
@@ -132,7 +132,7 @@ export default function DemoModeSwitcher() {
                     <p className="text-xs text-night/55">{option.description}</p>
                   </div>
                   {active && (
-                    <span className="rounded-full bg-coral px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">
+                    <span className="rounded-full bg-kalico-blue px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">
                       Actif
                     </span>
                   )}

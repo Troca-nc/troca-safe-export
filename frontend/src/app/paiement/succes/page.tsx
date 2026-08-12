@@ -91,7 +91,7 @@ function PaiementSuccesContent() {
       <Header />
       <div className="min-h-screen bg-sand-light flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 text-coral animate-spin mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 text-kalico-blue animate-spin mx-auto mb-4" />
           <p className="text-night/60 font-medium">Confirmation du paiement&</p>
           {retries > 0 && <p className="text-sm text-night/40 mt-1">Synchronisation ({retries}/6)</p>}
         </div>

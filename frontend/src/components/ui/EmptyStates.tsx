@@ -54,13 +54,13 @@ export function MobileEmptyState({
 
   return (
     <div className="rounded-2xl border border-night/10 bg-white p-8 text-center shadow-card">
-      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-coral/10 text-coral">
+      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-kalico-blue/10 text-kalico-blue">
         {config.icon}
       </div>
       <h3 className="mb-2 text-lg font-semibold text-night">{config.title}</h3>
       <p className="mx-auto max-w-md text-sm text-night/60">{config.subtitle}</p>
       {config.cta && onCta ? (
-        <button onClick={onCta} className="mt-5 rounded-xl bg-coral px-4 py-2 text-sm font-semibold text-white">
+        <button onClick={onCta} className="mt-5 rounded-xl bg-kalico-blue px-4 py-2 text-sm font-semibold text-white">
           {config.cta}
         </button>
       ) : null}

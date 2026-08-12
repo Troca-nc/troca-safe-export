@@ -208,7 +208,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews, s
       <div className="min-h-screen bg-[var(--color-bg-page)]">
         <div className="mx-auto max-w-4xl px-4 py-16 text-center">
           <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Profil pro</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Profil pro</p>
             <h1 className="mt-3 font-display text-3xl font-bold text-night">Professionnel introuvable</h1>
             <p className="mt-3 text-sm leading-relaxed text-night/60">
               Cette vitrine nï¿½"est pas disponible ou nï¿½"a pas encore ï¿½tï¿½ validï¿½e.
@@ -331,15 +331,15 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews, s
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-night/60">
                       <span className="inline-flex items-center gap-1">
-                        <MapPin className="h-4 w-4 text-coral" />
+                        <MapPin className="h-4 w-4 text-kalico-blue" />
                         {profile.pro_commune || 'Nouvelle-CalÃ©donie'}
                       </span>
                       <span className="inline-flex items-center gap-1">
-                        <Store className="h-4 w-4 text-coral" />
+                        <Store className="h-4 w-4 text-kalico-blue" />
                         {profile.pro_category || 'Professionnel local'}
                       </span>
                       <span className="inline-flex items-center gap-1">
-                        <Clock3 className="h-4 w-4 text-coral" />
+                        <Clock3 className="h-4 w-4 text-kalico-blue" />
                         {profile.pro_hours || 'Horaires ï¿½ venir'}
                       </span>
                     </div>
@@ -473,7 +473,7 @@ export default function ProPublicPage({ proId, initialProfile, initialReviews, s
 
               <div className="mt-5 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
                 <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral/80">Crï¿½neaux rï¿½cents</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">Crï¿½neaux rï¿½cents</p>
                   {bookingPreviewSlots.length ? (
                     <div className="mt-3 space-y-2">
                       {bookingPreviewSlots.map((slot) => {

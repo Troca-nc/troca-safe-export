@@ -59,7 +59,7 @@ function SocialPhoneCompletionContent() {
                 </span>
               </Link>
 
-              <span className="inline-flex items-center gap-2 rounded-full bg-coral/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-coral">
+              <span className="inline-flex items-center gap-2 rounded-full bg-kalico-blue/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-kalico-blue">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 Sï¿½curisation
               </span>
@@ -78,7 +78,7 @@ function SocialPhoneCompletionContent() {
               </p>
             </div>
 
-            <div className="mt-6 rounded-[1.75rem] border border-coral/15 bg-coral/5 p-4 text-sm text-night/70">
+            <div className="mt-6 rounded-[1.75rem] border border-kalico-blue/15 bg-kalico-blue/5 p-4 text-sm text-night/70">
               Si votre numï¿½ro est dï¿½jï¿½ renseignï¿½ dans votre compte, il sera prï¿½-rempli. Sinon, ajoutez-le maintenant puis validez le code reï¿½u.
             </div>
 

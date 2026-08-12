@@ -195,7 +195,7 @@ export default function AutoReplyPage() {
         <div className="space-y-6">
           <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
             <div className="flex items-center gap-2">
-              <Clock3 className="h-5 w-5 text-coral" />
+              <Clock3 className="h-5 w-5 text-kalico-blue" />
               <div>
                 <h2 className="font-display text-2xl font-bold text-night">Plages horaires actives</h2>
                 <p className="text-sm text-night/55">La rï¿½ponse se dï¿½clenche uniquement en dehors de ces horaires.</p>

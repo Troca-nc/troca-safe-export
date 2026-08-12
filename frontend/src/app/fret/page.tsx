@@ -868,11 +868,11 @@ export default function FreightPage() {
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2 text-xs text-night/60">
                       <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1">
-                        <MapPin className="h-3.5 w-3.5 text-coral" />
+                        <MapPin className="h-3.5 w-3.5 text-kalico-blue" />
                         {activeRequest.departure_commune?.name || activeRequest.departure}
                       </span>
                       <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1">
-                        <MapPin className="h-3.5 w-3.5 text-coral" />
+                        <MapPin className="h-3.5 w-3.5 text-kalico-blue" />
                         {activeRequest.destination_commune?.name || activeRequest.destination}
                       </span>
                       <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1">

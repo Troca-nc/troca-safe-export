@@ -79,7 +79,7 @@ export default function TrocometerCard({ listing, delayMs = 0, fadeOut = false, 
 
       <div className="space-y-3 p-4">
         <div>
-          <h3 className="line-clamp-2 text-lg font-semibold leading-tight text-night group-hover:text-coral">
+          <h3 className="line-clamp-2 text-lg font-semibold leading-tight text-night group-hover:text-kalico-blue">
             {listing.title}
           </h3>
           <p className="mt-2 text-sm font-bold text-nc-lagon">
@@ -96,7 +96,7 @@ export default function TrocometerCard({ listing, delayMs = 0, fadeOut = false, 
           <button
             type="button"
             onClick={() => onPropose?.(listing)}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-coral px-4 py-3 text-sm font-semibold text-white transition hover:bg-coral/90"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-kalico-blue px-4 py-3 text-sm font-semibold text-white transition hover:bg-kalico-blue/90"
           >
             Proposer un troc
             <ArrowLeftRight className="h-4 w-4" />
@@ -104,7 +104,7 @@ export default function TrocometerCard({ listing, delayMs = 0, fadeOut = false, 
 
           <Link
             href={`/annonces/${listing.id}`}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm font-semibold text-night transition hover:border-coral/30 hover:text-coral"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm font-semibold text-night transition hover:border-kalico-blue/30 hover:text-kalico-blue"
           >
             Contacter
             <HeartHandshake className="h-4 w-4" />

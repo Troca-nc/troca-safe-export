@@ -339,7 +339,7 @@ export default function ProQuoteModal({ proId, proName, open, onClose, template,
 
           <aside className="space-y-4 px-6 py-6">
             <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral/80">Rï¿½capitulatif</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">Rï¿½capitulatif</p>
               <div className="mt-3 space-y-3 text-sm text-night/65">
                 <p className="flex items-start gap-2">
                   <MessageSquareQuote className="mt-0.5 h-4 w-4 text-[#0A7EA4]" />

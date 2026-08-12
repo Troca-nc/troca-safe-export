@@ -215,7 +215,7 @@ export default function ProsDirectoryClient() {
       <section className="mt-6 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Filtres</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Filtres</p>
             <h2 className="mt-1 font-display text-2xl font-bold text-night">Affinez votre recherche</h2>
             <p className="mt-1 text-sm text-night/55">
               Cherchez par nom, spï¿½cialitï¿½, commune et niveau de note.

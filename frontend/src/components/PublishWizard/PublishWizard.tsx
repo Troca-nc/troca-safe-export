@@ -191,7 +191,7 @@ function PhotoGrid({
     <div className="space-y-4">
       <div
         className={`rounded-[1.75rem] border-2 border-dashed p-5 transition-colors ${
-          dragOver ? 'border-coral bg-coral/5' : 'border-night/15 bg-sand/20'
+          dragOver ? 'border-kalico-blue bg-kalico-blue/5' : 'border-night/15 bg-sand/20'
         }`}
         onDragOver={(event) => {
           event.preventDefault()
@@ -210,7 +210,7 @@ function PhotoGrid({
         tabIndex={0}
       >
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-coral shadow-sm">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-kalico-blue shadow-sm">
             <ImagePlus className="h-5 w-5" />
           </div>
           <div>
@@ -268,7 +268,7 @@ function PhotoGrid({
                 </button>
               </div>
               {index === 0 && (
-                <div className="absolute left-3 top-3 rounded-full bg-coral px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white">
+                <div className="absolute left-3 top-3 rounded-full bg-kalico-blue px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white">
                   Principale
                 </div>
               )}
@@ -1092,7 +1092,7 @@ export default function PublishWizard() {
                 <div className="grid gap-4 md:grid-cols-3">
                   <label className="block space-y-2">
                     <span className="flex items-center gap-2 text-sm font-semibold text-night">
-                      <CalendarDays className="h-4 w-4 text-coral" />
+                      <CalendarDays className="h-4 w-4 text-kalico-blue" />
                       Durï¿½e de mise en ligne *
                     </span>
                     <select
@@ -1126,7 +1126,7 @@ export default function PublishWizard() {
                       type="checkbox"
                       checked={draft.price_negotiable}
                       onChange={(event) => setDraft((current) => ({ ...current, price_negotiable: event.target.checked }))}
-                      className="mt-1 h-4 w-4 rounded border-night/20 text-coral focus:ring-coral/25"
+                      className="mt-1 h-4 w-4 rounded border-night/20 text-kalico-blue focus:ring-kalico-blue/25"
                     />
                     <span className="text-sm text-night">Prix nï¿½gociable</span>
                   </label>
@@ -1161,7 +1161,7 @@ export default function PublishWizard() {
                   type="button"
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-coral px-5 py-3 text-sm font-semibold text-white transition hover:bg-coral-dark disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-kalico-blue px-5 py-3 text-sm font-semibold text-white transition hover:bg-kalico-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {submitting ? 'Publication...' : 'Publier lannonce'}
                 </button>
@@ -1210,7 +1210,7 @@ export default function PublishWizard() {
             <PublicationPreview draft={draft} selectedCategory={selectedCategory} selectedCommune={selectedCommune} />
 
             <div className="rounded-[2rem] border border-night/8 bg-white p-5 shadow-card">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Checklist</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">Checklist</p>
               <div className="mt-4 space-y-3 text-sm text-night/65">
                 <p className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-jungle" />

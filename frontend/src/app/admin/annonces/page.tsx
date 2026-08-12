@@ -104,7 +104,7 @@ function AnnonceRow({
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-coral/10 flex items-center justify-center text-[10px] font-bold text-coral shrink-0">
+          <div className="w-6 h-6 rounded-full bg-kalico-blue/10 flex items-center justify-center text-[10px] font-bold text-kalico-blue shrink-0">
             {annonce.user.nom.split(' ').map(w => w[0]).join('').slice(0, 2)}
           </div>
           <div>
@@ -216,7 +216,7 @@ export default function AdminAnnoncesPage() {
                 onClick={() => setFilters(fi => ({ ...fi, statut: f.value === 'toutes' ? undefined : f.value, page: 1 }))}
                 className={`px-3 py-1.5 rounded-full text-xs border transition-all ${
                   (filters.statut ?? 'toutes') === f.value
-                    ? 'bg-coral/10 text-coral border-coral/30 font-medium'
+                    ? 'bg-kalico-blue/10 text-kalico-blue border-kalico-blue/30 font-medium'
                     : 'border-night/10 text-night/50 hover:bg-sand'
                 }`}
               >

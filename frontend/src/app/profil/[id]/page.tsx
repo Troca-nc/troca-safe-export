@@ -15,7 +15,7 @@ import { usersApi } from '@/lib/api'
 import { SITE_URL } from '@/types/seo.types'
 import Link from 'next/link'
 
-function MetricCard({ label, value, sub, icon: Icon, tone = 'text-coral' }: {
+function MetricCard({ label, value, sub, icon: Icon, tone = 'text-kalico-blue' }: {
   label: string
   value: string | number
   sub?: string
@@ -97,7 +97,7 @@ export default function PublicProfilePage() {
 
         {/* Carte profil */}
         <div className="card p-6 mb-6 flex flex-col sm:flex-row gap-5 items-start">
-          <div className="w-16 h-16 rounded-2xl bg-coral/15 flex items-center justify-center text-2xl font-bold text-coral shrink-0">
+          <div className="w-16 h-16 rounded-2xl bg-kalico-blue/15 flex items-center justify-center text-2xl font-bold text-kalico-blue shrink-0">
             {profile.prenom?.[0]?.toUpperCase() ?? '?'}
           </div>
           <div className="flex-1 min-w-0">
@@ -193,7 +193,7 @@ export default function PublicProfilePage() {
               value={Number(profile.active_listings_count ?? profile.nb_annonces ?? 0).toLocaleString('fr-FR')}
               sub={profile.is_pro ? 'Aperï¿½u public du catalogue' : 'Catalogue vendeur'}
               icon={TrendingUp}
-              tone="text-coral"
+              tone="text-kalico-blue"
             />
             <MetricCard
               label="Boosts / mises en avant"
@@ -208,7 +208,7 @@ export default function PublicProfilePage() {
         {(profile.commune_name || profile.province_name || profile.commune_id || profile.province_id) && (
           <div className="mb-6 overflow-hidden rounded-3xl border border-ocean/12 bg-white shadow-sm">
             <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="relative min-h-[220px] bg-gradient-to-br from-ocean via-ocean/95 to-coral overflow-hidden">
+              <div className="relative min-h-[220px] bg-gradient-to-br from-ocean via-ocean/95 to-kalico-blue overflow-hidden">
                 <div className="absolute inset-0 opacity-30"
                   style={{
                     backgroundImage:
@@ -238,13 +238,13 @@ export default function PublicProfilePage() {
                 <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-2">
                   {profile.commune_name && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-night shadow-sm">
-                      <Navigation2 className="w-3.5 h-3.5 text-coral" />
+                      <Navigation2 className="w-3.5 h-3.5 text-kalico-blue" />
                       {profile.commune_name}
                     </span>
                   )}
                   {profile.province_name && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-night shadow-sm">
-                      <MapPin className="w-3.5 h-3.5 text-coral" />
+                      <MapPin className="w-3.5 h-3.5 text-kalico-blue" />
                       {profile.province_name}
                     </span>
                   )}
@@ -280,20 +280,20 @@ export default function PublicProfilePage() {
                         ? `/annonces?commune_id=${profile.commune_id_lookup ?? profile.commune_id}`
                         : '/annonces'
                     }
-                    className="rounded-2xl border border-night/10 bg-white px-3 py-3 text-sm font-semibold text-night hover:border-coral/30 hover:text-coral transition-colors"
+                    className="rounded-2xl border border-night/10 bg-white px-3 py-3 text-sm font-semibold text-night hover:border-kalico-blue/30 hover:text-kalico-blue transition-colors"
                   >
                     Commune
                   </Link>
                   <Link
                     href={profile.province_id ? `/annonces?province_id=${profile.province_id}` : '/annonces'}
-                    className="rounded-2xl border border-night/10 bg-white px-3 py-3 text-sm font-semibold text-night hover:border-coral/30 hover:text-coral transition-colors"
+                    className="rounded-2xl border border-night/10 bg-white px-3 py-3 text-sm font-semibold text-night hover:border-kalico-blue/30 hover:text-kalico-blue transition-colors"
                   >
                     Province
                   </Link>
                 </div>
 
                 {isOwn && profile.is_pro && (
-                  <div className="mt-4 rounded-2xl border border-coral/15 bg-coral/5 p-4">
+                  <div className="mt-4 rounded-2xl border border-kalico-blue/15 bg-kalico-blue/5 p-4">
                     <p className="text-sm font-semibold text-night">Dï¿½finir votre zone de couverture</p>
                     <p className="mt-1 text-sm text-night/55">Renforcez votre visibilitï¿½ sur la commune et la province oï¿½ vous vendez le plus.</p>
                     <div className="mt-3">
@@ -309,10 +309,10 @@ export default function PublicProfilePage() {
         )}
 
         {isOwn && profile.is_pro && (
-          <div className="mb-6 rounded-3xl border border-coral/15 bg-coral/5 p-5">
+          <div className="mb-6 rounded-3xl border border-kalico-blue/15 bg-kalico-blue/5 p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Visibilitï¿½ vendeur</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Visibilitï¿½ vendeur</p>
                 <h2 className="mt-1 font-display text-2xl font-bold text-night">Booster vos annonces et mettre en avant votre vitrine</h2>
                 <p className="mt-1 text-sm text-night/60 max-w-2xl">
                   Suivez vos vues, vos favoris et vos annonces boostï¿½es, puis activez les options de visibilitï¿½ pour remonter dans les rï¿½sultats.
@@ -343,7 +343,7 @@ export default function PublicProfilePage() {
               key={key}
               onClick={() => setTab(key)}
               className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                tab === key ? 'bg-coral text-white' : 'text-night/60 hover:text-night'
+                tab === key ? 'bg-kalico-blue text-white' : 'text-night/60 hover:text-night'
               }`}
             >
               {label}
@@ -371,7 +371,7 @@ export default function PublicProfilePage() {
               {reviews.map((r: any) => (
                 <div key={r.id} className="card p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-full bg-coral/10 flex items-center justify-center text-xs font-bold text-coral">
+                    <div className="w-7 h-7 rounded-full bg-kalico-blue/10 flex items-center justify-center text-xs font-bold text-kalico-blue">
                       {r.auteur_prenom?.[0] ?? '?'}
                     </div>
                     <span className="text-sm font-medium text-night">{r.auteur_prenom}</span>

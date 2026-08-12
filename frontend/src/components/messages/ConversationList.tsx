@@ -133,12 +133,12 @@ export default function ConversationList({ conversations, activeId, onSelect, lo
                 : ''
             } ${
               isActive
-                ? 'border-l-2 border-coral bg-coral/8'
+                ? 'border-l-2 border-kalico-blue bg-kalico-blue/8'
                 : ''
             }`}
           >
             <div className="relative shrink-0">
-              <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-coral/10 text-sm font-bold text-coral">
+              <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-kalico-blue/10 text-sm font-bold text-kalico-blue">
                 {u.avatar_url
                   ? <Image src={u.avatar_url} alt="" width={44} height={44} className="h-full w-full object-cover" />
                   : `${u.prenom[0]}${u.nom[0]}`
@@ -223,7 +223,7 @@ export default function ConversationList({ conversations, activeId, onSelect, lo
                 </span>
               )}
               {hasUnread && (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-coral text-[10px] font-bold text-white">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-kalico-blue text-[10px] font-bold text-white">
                   {conv.unread_count > 9 ? '9+' : conv.unread_count}
                 </span>
               )}

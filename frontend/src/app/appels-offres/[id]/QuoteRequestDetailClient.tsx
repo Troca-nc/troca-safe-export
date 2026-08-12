@@ -240,7 +240,7 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
             <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Commune</p>
               <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-night">
-                <MapPin className="h-4 w-4 text-coral" />
+                <MapPin className="h-4 w-4 text-kalico-blue" />
                 {data.commune}
               </p>
               <p className="mt-1 text-sm text-night/60">{getRequestStatusLabel(data.status)}</p>
@@ -288,7 +288,7 @@ export default function QuoteRequestDetailClient({ requestId }: { requestId: str
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Offres reï¿½ues</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Offres reï¿½ues</p>
             <h2 className="mt-1 font-display text-2xl font-bold text-night">Comparez les rï¿½ponses et choisissez</h2>
           </div>
           <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-3 py-1 text-xs font-semibold text-night/60">

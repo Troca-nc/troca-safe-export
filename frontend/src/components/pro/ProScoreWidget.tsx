@@ -44,7 +44,7 @@ function toneForScore(score: number) {
   if (score >= 85) return { label: 'Tres solide', className: 'text-emerald-700 bg-emerald-50 border-emerald-200' }
   if (score >= 70) return { label: 'En bonne voie', className: 'text-[#0A7EA4] bg-nc-lagonLight border-[#0A7EA4]/15' }
   if (score >= 50) return { label: 'A renforcer', className: 'text-amber-700 bg-amber-50 border-amber-200' }
-  return { label: 'A construire', className: 'text-coral bg-coral/10 border-coral/20' }
+  return { label: 'A construire', className: 'text-kalico-blue bg-kalico-blue/10 border-kalico-blue/20' }
 }
 
 function buildSuggestions({
@@ -205,7 +205,7 @@ export default function ProScoreWidget({
     <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Pilotage</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Pilotage</p>
           <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">Score de performance de votre vitrine</h2>
           <p className="mt-2 text-sm leading-relaxed text-night/60">
             Ce score synthï¿½tique vous indique si votre vitrine avance bien et quelles actions peuvent encore faire progresser vos resultats.
@@ -253,7 +253,7 @@ export default function ProScoreWidget({
             const toneClasses = {
               lagon: 'border-[#0A7EA4]/15 bg-nc-lagonLight text-[#0A7EA4]',
               emeraude: 'border-nc-emeraude/15 bg-nc-emeraudeLight text-nc-emeraude',
-              corail: 'border-coral/15 bg-coral/10 text-coral',
+              corail: 'border-kalico-blue/15 bg-kalico-blue/10 text-kalico-blue',
               amber: 'border-amber-200 bg-amber-50 text-amber-700',
             } as const
 

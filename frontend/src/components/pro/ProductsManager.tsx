@@ -658,7 +658,7 @@ export default function ProductsManager() {
         <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">
                 {editingId ? 'Modifier un produit' : 'Crï¿½er un produit'}
               </p>
               <h2 className="mt-1 font-display text-2xl font-bold text-night">
@@ -1061,7 +1061,7 @@ export default function ProductsManager() {
 
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral/80">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">
                       {draftPreview.categoryName} ï¿½ {draftPreview.communeName}
                     </p>
                     <h4 className="mt-1 text-2xl font-bold text-night">
@@ -1166,7 +1166,7 @@ export default function ProductsManager() {
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
             <div className="mb-3 flex items-end justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Statut</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Statut</p>
                 <h2 className="mt-1 font-display text-xl font-bold text-night">Aperï¿½u du catalogue</h2>
               </div>
               <span className="rounded-full bg-nc-lagonLight px-3 py-1 text-xs font-semibold text-nc-lagon">
@@ -1198,7 +1198,7 @@ export default function ProductsManager() {
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Mes produits</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Mes produits</p>
             <h2 className="mt-1 font-display text-2xl font-bold text-night">Votre catalogue</h2>
           </div>
           <p className="text-sm text-night/55">
@@ -1225,7 +1225,7 @@ export default function ProductsManager() {
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="line-clamp-1 text-base font-semibold text-night">{product.title}</h3>
                         {product.is_featured ? (
-                          <span className="rounded-full bg-coral/10 px-2.5 py-1 text-[11px] font-semibold text-coral">Mise en avant</span>
+                          <span className="rounded-full bg-kalico-blue/10 px-2.5 py-1 text-[11px] font-semibold text-kalico-blue">Mise en avant</span>
                         ) : null}
                         {product.is_active ? (
                           <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">Actif</span>

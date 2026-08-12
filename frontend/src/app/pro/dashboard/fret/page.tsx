@@ -381,7 +381,7 @@ export default function ProDashboardFretPage() {
           </article>
 
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">Confirmï¿½s</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">Confirmï¿½s</p>
             <h2 className="mt-1 font-display text-2xl font-bold text-night">Mes transports confirmï¿½s</h2>
             <div className="mt-4 space-y-3">
               {confirmedTransports.length ? confirmedTransports.map((request) => (

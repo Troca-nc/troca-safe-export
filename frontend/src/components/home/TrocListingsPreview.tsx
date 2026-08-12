@@ -62,7 +62,7 @@ export default function TrocListingsPreview() {
         ))}
       </div>
       <div className="mt-4 text-center md:hidden">
-        <Link href="/troc" className="text-sm font-semibold text-coral hover:underline">
+        <Link href="/troc" className="text-sm font-semibold text-kalico-blue hover:underline">
           Voir toutes les annonces troc →
         </Link>
       </div>

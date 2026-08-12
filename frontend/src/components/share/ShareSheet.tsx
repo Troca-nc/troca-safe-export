@@ -111,10 +111,10 @@ export default function ShareSheet({ content, variant = 'full', label = 'Partage
 
   const buttonClass =
     variant === 'icon'
-      ? 'rounded-xl p-2 text-night/55 hover:bg-coral/8 hover:text-coral transition-colors'
+      ? 'rounded-xl p-2 text-night/55 hover:bg-kalico-blue/8 hover:text-kalico-blue transition-colors'
       : variant === 'compact' || variant === 'minimal'
-        ? 'inline-flex items-center gap-2 rounded-2xl border border-night/10 bg-white px-3 py-2 text-sm font-medium text-night/70 hover:border-coral/30 hover:text-coral hover:bg-coral/5 transition-all'
-        : 'inline-flex items-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-2 text-sm font-medium text-night/70 hover:border-coral/30 hover:text-coral hover:bg-coral/5 transition-all'
+        ? 'inline-flex items-center gap-2 rounded-2xl border border-night/10 bg-white px-3 py-2 text-sm font-medium text-night/70 hover:border-kalico-blue/30 hover:text-kalico-blue hover:bg-kalico-blue/5 transition-all'
+        : 'inline-flex items-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-2 text-sm font-medium text-night/70 hover:border-kalico-blue/30 hover:text-kalico-blue hover:bg-kalico-blue/5 transition-all'
 
   return (
     <div ref={ref} className={`relative ${className}`}>
@@ -139,7 +139,7 @@ export default function ShareSheet({ content, variant = 'full', label = 'Partage
         >
           <div className="flex items-center justify-between border-b border-night/6 px-4 py-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-coral/80">Partager</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">Partager</p>
               <p className="text-sm font-medium text-night">{content.title}</p>
             </div>
             <button
@@ -156,9 +156,9 @@ export default function ShareSheet({ content, variant = 'full', label = 'Partage
             <button
               type="button"
               onClick={onShareAttempt}
-              className="flex items-center gap-3 rounded-2xl border border-night/8 bg-sand/40 px-3 py-3 text-left hover:border-coral/25 hover:bg-coral/5"
+              className="flex items-center gap-3 rounded-2xl border border-night/8 bg-sand/40 px-3 py-3 text-left hover:border-kalico-blue/25 hover:bg-kalico-blue/5"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-coral/10 text-coral">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-kalico-blue/10 text-kalico-blue">
                 <Smartphone size={16} />
               </div>
               <div className="min-w-0">
@@ -284,7 +284,7 @@ export default function ShareSheet({ content, variant = 'full', label = 'Partage
             <button
               type="button"
               onClick={onCopy}
-              className="flex w-full items-center gap-3 rounded-2xl border border-night/8 bg-white px-3 py-3 text-left hover:border-coral/25 hover:bg-coral/5"
+              className="flex w-full items-center gap-3 rounded-2xl border border-night/8 bg-white px-3 py-3 text-left hover:border-kalico-blue/25 hover:bg-kalico-blue/5"
             >
               <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${copied ? 'bg-jungle/10 text-jungle' : 'bg-night/10 text-night'}`}>
                 {copied ? <Check size={16} /> : <Link2 size={16} />}

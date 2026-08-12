@@ -173,10 +173,10 @@ export default function MesCoursesPage() {
           <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
             <div className="flex items-end justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral/80">En tant que conducteur</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">En tant que conducteur</p>
                 <h2 className="mt-1 font-display text-2xl font-bold text-night">Demandes reï¿½ues</h2>
               </div>
-              <span className="rounded-full bg-coral/10 px-3 py-1 text-xs font-semibold text-coral">{driverRides.length}</span>
+              <span className="rounded-full bg-kalico-blue/10 px-3 py-1 text-xs font-semibold text-kalico-blue">{driverRides.length}</span>
             </div>
             <div className="mt-5 space-y-3">
               {loading ? (

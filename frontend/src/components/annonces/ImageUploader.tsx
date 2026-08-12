@@ -78,7 +78,7 @@ function ImageCard({
       />
 
       {index === 0 && (
-        <div className="absolute top-1.5 left-1.5 bg-coral text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+        <div className="absolute top-1.5 left-1.5 bg-kalico-blue text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
           Principale
         </div>
       )}
@@ -148,7 +148,7 @@ function ProgressBar({ pct, label }: { pct: number; label: string }) {
         <span className="text-night/40">{pct}%</span>
       </div>
       <div className="h-1.5 bg-sand rounded-full overflow-hidden">
-        <div className="h-full rounded-full transition-all duration-200 bg-coral" style={{ width: `${pct}%` }} />
+        <div className="h-full rounded-full transition-all duration-200 bg-kalico-blue" style={{ width: `${pct}%` }} />
       </div>
     </div>
   )
@@ -242,7 +242,7 @@ export default function ImageUploader({ annonce_id, initial = [], onChange, clas
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="aspect-square rounded-xl border-2 border-dashed border-night/20 hover:border-coral/50 hover:bg-coral/5 flex flex-col items-center justify-center gap-1 text-night/30 hover:text-coral transition-all"
+              className="aspect-square rounded-xl border-2 border-dashed border-night/20 hover:border-kalico-blue/50 hover:bg-kalico-blue/5 flex flex-col items-center justify-center gap-1 text-night/30 hover:text-kalico-blue transition-all"
               aria-label="Ajouter des photos"
             >
               <Upload size={18} />
@@ -267,8 +267,8 @@ export default function ImageUploader({ annonce_id, initial = [], onChange, clas
           }}
           className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all ${
             dragOver
-              ? 'border-coral bg-coral/8 scale-[1.01]'
-              : 'border-night/20 hover:border-coral/40 hover:bg-coral/4'
+              ? 'border-kalico-blue bg-kalico-blue/8 scale-[1.01]'
+              : 'border-night/20 hover:border-kalico-blue/40 hover:bg-kalico-blue/4'
           }`}
           role="button"
           tabIndex={0}
@@ -276,7 +276,7 @@ export default function ImageUploader({ annonce_id, initial = [], onChange, clas
           aria-describedby="upload-help"
         >
           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${
-            dragOver ? 'bg-coral text-white' : 'bg-sand text-night/30'
+            dragOver ? 'bg-kalico-blue text-white' : 'bg-sand text-night/30'
           }`}>
             {uploading ? <Loader2 size={22} className="animate-spin" /> : <ImageIcon size={22} />}
           </div>

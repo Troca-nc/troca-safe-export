@@ -106,7 +106,7 @@ export default function TrocCyclePage() {
         <Header />
         <main className="mx-auto max-w-4xl px-4 py-12">
           <div className="rounded-[2rem] border border-night/8 bg-white p-8 text-center shadow-card">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Troc</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Troc</p>
             <h1 className="mt-3 text-3xl font-bold text-night">Connectez-vous pour voir ce cycle</h1>
             <p className="mt-3 text-sm leading-6 text-night/60">
               Les cycles de troc sont rï¿½servï¿½s aux participants concernï¿½s.
@@ -145,7 +145,7 @@ export default function TrocCyclePage() {
         <Header />
         <main className="mx-auto max-w-4xl px-4 py-12">
           <div className="rounded-[2rem] border border-night/8 bg-white p-8 text-center shadow-card">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Troc</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Troc</p>
             <h1 className="mt-3 text-3xl font-bold text-night">Cycle introuvable</h1>
             <p className="mt-3 text-sm leading-6 text-night/60">
               Ce cycle nest plus disponible ou ne vous concerne plus.
@@ -163,7 +163,7 @@ export default function TrocCyclePage() {
     <div className="min-h-screen bg-cream">
       <Header />
       <main className="mx-auto max-w-6xl px-4 py-8">
-        <Link href="/troc" className="inline-flex items-center gap-2 text-sm font-semibold text-night/60 transition hover:text-coral">
+        <Link href="/troc" className="inline-flex items-center gap-2 text-sm font-semibold text-night/60 transition hover:text-kalico-blue">
           <ArrowLeft className="h-4 w-4" />
           Retour au feed Troc
         </Link>
@@ -219,7 +219,7 @@ export default function TrocCyclePage() {
                       {participantName}
                     </span>
                     {listing.seller_is_pro ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-coral/10 px-2.5 py-1 text-[11px] font-semibold text-coral">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-kalico-blue/10 px-2.5 py-1 text-[11px] font-semibold text-kalico-blue">
                         <BadgeCheck className="h-3.5 w-3.5" />
                         Pro
                       </span>
@@ -229,7 +229,7 @@ export default function TrocCyclePage() {
               <p className="mt-2 text-sm text-night/60">{listing.commune_name ?? 'Nouvelle-CalÃ©donie'}</p>
                   {index < listings.length - 1 ? (
                     <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-night/60">
-                      <ArrowRight className="h-3.5 w-3.5 text-coral" />
+                      <ArrowRight className="h-3.5 w-3.5 text-kalico-blue" />
                       Vers {formatName(next.seller_prenom, next.seller_nom)}
                     </div>
                   ) : null}
@@ -281,7 +281,7 @@ export default function TrocCyclePage() {
 
           <aside className="space-y-4">
             <div className="rounded-[1.75rem] border border-night/8 bg-white p-5 shadow-card">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-coral/80">Action</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Action</p>
               <h2 className="mt-2 text-xl font-bold text-night">Confirmer votre participation</h2>
               <p className="mt-2 text-sm leading-6 text-night/60">
                 En confirmant, vous acceptez dorganiser lï¿½change avec les autres participants. Kalico nassure pas la remise des objets.

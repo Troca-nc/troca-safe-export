@@ -23,7 +23,7 @@ function getProposalMetadata(message: Message) {
 
 function TextBubble({ message, isMine }: { message: Message; isMine: boolean }) {
   const receivedClass = 'bg-nc-lagonLight border border-nc-lagonBorder text-nc-lagonText'
-  const sentClass = 'bg-coral text-white'
+  const sentClass = 'bg-kalico-blue text-white'
   const documentLabel = message.attachment_name || 'Document partagï¿½'
   const documentUrl = message.attachment_download_url || message.attachment_url || '#'
   const documentMime = (message.attachment_mime_type || '').toLowerCase()
@@ -33,7 +33,7 @@ function TextBubble({ message, isMine }: { message: Message; isMine: boolean }) 
   return (
     <div className={`max-w-[75%] ${isMine ? 'items-end' : 'items-start'} flex flex-col gap-0.5`}>
       {message.type === 'document' && (message.attachment_download_url || message.attachment_url) && (
-        <div className={`overflow-hidden rounded-2xl border ${isMine ? 'border-coral/30 bg-coral text-white' : 'border-nc-lagonBorder bg-white text-night'}`}>
+        <div className={`overflow-hidden rounded-2xl border ${isMine ? 'border-kalico-blue/30 bg-kalico-blue text-white' : 'border-nc-lagonBorder bg-white text-night'}`}>
           {(documentIsImage || documentIsPdf) && (
             <a
               href={documentUrl}
@@ -79,7 +79,7 @@ function TextBubble({ message, isMine }: { message: Message; isMine: boolean }) 
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`inline-flex h-9 w-9 items-center justify-center rounded-full border transition-colors ${
-                  isMine ? 'border-white/20 bg-white/10 text-white hover:bg-white/15' : 'border-night/10 bg-white text-night/50 hover:text-coral'
+                  isMine ? 'border-white/20 bg-white/10 text-white hover:bg-white/15' : 'border-night/10 bg-white text-night/50 hover:text-kalico-blue'
                 }`}
                 aria-label={`Ouvrir ${documentLabel}`}
                 title={`Ouvrir ${documentLabel}`}
@@ -92,7 +92,7 @@ function TextBubble({ message, isMine }: { message: Message; isMine: boolean }) 
               href={documentUrl}
               download
               className={`mt-3 inline-flex items-center gap-2 text-xs font-medium transition-colors ${
-                isMine ? 'text-white/90 hover:text-white' : 'text-coral hover:text-coral-dark'
+                isMine ? 'text-white/90 hover:text-white' : 'text-kalico-blue hover:text-kalico-blue-dark'
               }`}
             >
               <ExternalLink size={13} />
@@ -178,9 +178,9 @@ function OfferBubble({
   const s = statusConfig[offer.status]
 
   return (
-    <div className={`max-w-[280px] overflow-hidden rounded-2xl border-2 bg-white ${isPending ? 'border-coral/30' : 'border-night/10'}`}>
-      <div className="flex items-center gap-2 border-b border-coral/10 bg-coral/5 px-4 py-3">
-        <TrendingUp size={16} className="text-coral" />
+    <div className={`max-w-[280px] overflow-hidden rounded-2xl border-2 bg-white ${isPending ? 'border-kalico-blue/30' : 'border-night/10'}`}>
+      <div className="flex items-center gap-2 border-b border-kalico-blue/10 bg-kalico-blue/5 px-4 py-3">
+        <TrendingUp size={16} className="text-kalico-blue" />
         <span className="text-sm font-semibold text-night">Offre de prix</span>
         <span className={`ml-auto rounded-full border px-2 py-0.5 text-[10px] font-medium ${s.color}`}>
           {s.label}
@@ -188,7 +188,7 @@ function OfferBubble({
       </div>
 
       <div className="px-4 py-4 text-center">
-        <p className="text-3xl font-bold text-coral">
+        <p className="text-3xl font-bold text-kalico-blue">
           {offer.amount_xpf.toLocaleString('fr-FR')} XPF
         </p>
         {offer.expires_at && isPending && (
@@ -249,9 +249,9 @@ function TrocProposalBubble({
   const statusMeta = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending
 
   return (
-    <div className="w-full max-w-[420px] overflow-hidden rounded-3xl border border-coral/15 bg-white shadow-sm">
-      <div className="flex items-center gap-2 border-b border-coral/10 bg-coral/5 px-4 py-3">
-        <TrendingUp size={16} className="text-coral" />
+    <div className="w-full max-w-[420px] overflow-hidden rounded-3xl border border-kalico-blue/15 bg-white shadow-sm">
+      <div className="flex items-center gap-2 border-b border-kalico-blue/10 bg-kalico-blue/5 px-4 py-3">
+        <TrendingUp size={16} className="text-kalico-blue" />
         <span className="text-sm font-semibold text-night">Proposition de troc</span>
         <span className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-medium ${statusMeta.className}`}>
           {isMine && isPending ? 'En attente de rï¿½ponse&' : statusMeta.label}
@@ -275,7 +275,7 @@ function TrocProposalBubble({
         </div>
 
         <div className="flex justify-center">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-coral/10 text-coral">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-kalico-blue/10 text-kalico-blue">
             ï¿½
           </div>
         </div>
@@ -316,7 +316,7 @@ function TrocProposalBubble({
           <button
             type="button"
             onClick={onDecline}
-            className="flex-1 rounded-2xl border border-night/10 bg-white px-3 py-2.5 text-sm font-semibold text-night transition hover:border-coral/25 hover:text-coral"
+            className="flex-1 rounded-2xl border border-night/10 bg-white px-3 py-2.5 text-sm font-semibold text-night transition hover:border-kalico-blue/25 hover:text-kalico-blue"
           >
              Refuser
           </button>

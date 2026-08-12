@@ -62,7 +62,7 @@ export default function CookieBanner() {
     <div className="fixed inset-x-0 bottom-0 z-[100] border-t border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
       <div className="mx-auto flex max-w-7xl flex-col gap-3 px-3 py-3 sm:px-4 md:flex-row md:items-center md:justify-between">
         <div className="flex min-w-0 items-start gap-2.5">
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-coral/10 text-coral">
+            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-kalico-blue/10 text-kalico-blue">
               <Cookie className="h-4 w-4" />
             </span>
           <p className="text-[13px] leading-5 text-night/80 sm:text-sm sm:leading-6">

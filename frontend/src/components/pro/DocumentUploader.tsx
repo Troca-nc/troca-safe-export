@@ -215,7 +215,7 @@ export default function DocumentUploader({
             <div className="mt-4 h-32 animate-pulse rounded-2xl bg-sand/60" />
           ) : documents.length === 0 ? (
             <div className="mt-4 rounded-2xl border border-dashed border-night/12 bg-sand/20 p-5 text-sm text-night/55">
-              <FileText className="h-5 w-5 text-coral" />
+              <FileText className="h-5 w-5 text-kalico-blue" />
               <p className="mt-3 font-semibold text-night">Aucun document pour le moment.</p>
               <p className="mt-1 text-sm text-night/55">Dï¿½posez un premier justificatif pour lancer la vï¿½rification.</p>
             </div>

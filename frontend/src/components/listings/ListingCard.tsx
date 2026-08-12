@@ -132,7 +132,7 @@ function SellerAvatar({ listing }: { listing: Listing }) {
   }
 
   return (
-    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/80 bg-coral/10 text-xs font-bold text-coral">
+    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/80 bg-kalico-blue/10 text-xs font-bold text-kalico-blue">
       {initials}
     </span>
   )
@@ -197,7 +197,7 @@ function ListingImageFrame({
         <>
           <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.55))]" />
           <div className="absolute bottom-3 left-3 z-10 text-base font-medium text-white">{priceLabel}</div>
-          <div className="absolute right-3 top-3 z-10 rounded bg-coral px-2 py-0.5 text-xs font-medium text-white shadow-sm">
+          <div className="absolute right-3 top-3 z-10 rounded bg-kalico-blue px-2 py-0.5 text-xs font-medium text-white shadow-sm">
             ï¿½ la une
           </div>
         </>
@@ -212,7 +212,7 @@ function ListingImageFrame({
           isLoading ? 'cursor-wait opacity-50' : ''
         }`}
       >
-        <Heart className={`h-3.5 w-3.5 ${saved ? 'fill-coral text-coral' : ''}`} />
+        <Heart className={`h-3.5 w-3.5 ${saved ? 'fill-kalico-blue text-kalico-blue' : ''}`} />
       </button>
     </div>
   )
@@ -290,7 +290,7 @@ export default function ListingCard({ listing, className = '', boosted, featured
     : listing.price
       ? `${listing.price.toLocaleString('fr-FR')} XPF`
       : 'Prix ï¿½ dï¿½battre'
-  const priceClassName = listing.is_free ? 'text-jungle' : 'text-coral'
+  const priceClassName = listing.is_free ? 'text-jungle' : 'text-kalico-blue'
 
   const publishedAt = listing.published_at ?? listing.created_at ?? new Date().toISOString()
   const timeAgo = formatDistanceToNow(new Date(publishedAt), {
@@ -336,7 +336,7 @@ export default function ListingCard({ listing, className = '', boosted, featured
 
       <div className="space-y-3 p-4">
         <div className="space-y-1.5">
-          <h3 className="line-clamp-2 text-[15px] font-medium leading-6 text-night transition-colors duration-150 group-hover:text-coral">
+          <h3 className="line-clamp-2 text-[15px] font-medium leading-6 text-night transition-colors duration-150 group-hover:text-kalico-blue">
             {listing.title}
           </h3>
           {level2 ? null : (

@@ -321,7 +321,7 @@ export default function QuoteBuilder({
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Lignes</p>
+                    <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Lignes</p>
                     <h3 className="font-display text-xl font-bold text-night">Dï¿½taillez les prestations</h3>
                   </div>
                   <button

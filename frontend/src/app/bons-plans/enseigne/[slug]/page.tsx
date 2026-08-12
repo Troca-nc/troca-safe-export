@@ -100,7 +100,7 @@ export default function BusinessProfilePage() {
       <Header />
 
       <section className="mx-auto max-w-7xl px-4 py-6">
-        <Link href="/bons-plans" className="inline-flex items-center gap-2 text-sm font-semibold text-coral hover:underline">
+        <Link href="/bons-plans" className="inline-flex items-center gap-2 text-sm font-semibold text-kalico-blue hover:underline">
           <ArrowLeft className="h-4 w-4" />
           Retour aux bons plans
         </Link>
@@ -121,7 +121,7 @@ export default function BusinessProfilePage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <h1 className="font-display text-3xl font-bold">{business?.name || 'Enseigne'}</h1>
                   {business?.badge === 'verified' ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-coral">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-kalico-blue">
                       <Check className="h-3 w-3" />
                       Verifie Kalico
                     </span>
@@ -143,7 +143,7 @@ export default function BusinessProfilePage() {
             <section>
               <div className="mb-4 flex items-end justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-coral/80">Bons plans en cours</p>
+                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">Bons plans en cours</p>
                   <h2 className="mt-1 text-2xl font-bold text-night">Les promos actives de cette enseigne</h2>
                 </div>
               </div>
@@ -170,7 +170,7 @@ export default function BusinessProfilePage() {
             <section>
               <div className="mb-4 flex items-end justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-coral/80">Avis clients</p>
+                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">Avis clients</p>
                   <h2 className="mt-1 text-2xl font-bold text-night">La parole aux utilisateurs Kalico</h2>
                 </div>
               </div>
@@ -193,12 +193,12 @@ export default function BusinessProfilePage() {
                         </div>
                         {review.comment ? <p className="mt-3 text-sm leading-relaxed text-night/70">{review.comment}</p> : null}
                         {review.reply_text ? (
-                          <div className="mt-3 rounded-2xl border border-coral/10 bg-coral/5 p-3 text-sm text-night/70">
-                            <p className="font-semibold text-coral">Reponse de l&apos;enseigne</p>
+                          <div className="mt-3 rounded-2xl border border-kalico-blue/10 bg-kalico-blue/5 p-3 text-sm text-night/70">
+                            <p className="font-semibold text-kalico-blue">Reponse de l&apos;enseigne</p>
                             <p className="mt-1">{review.reply_text}</p>
                           </div>
                         ) : null}
-                        <button type="button" className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-night/50 hover:text-coral">
+                        <button type="button" className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-night/50 hover:text-kalico-blue">
                           <AlertTriangle className="h-3.5 w-3.5" />
                           Signaler
                         </button>
@@ -213,7 +213,7 @@ export default function BusinessProfilePage() {
 
                 <form onSubmit={handleSubmitReview} className="rounded-[1.5rem] border border-night/8 bg-sand/40 p-5 shadow-sm">
                   <div className="flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4 text-coral" />
+                    <MessageSquare className="h-4 w-4 text-kalico-blue" />
                     <h3 className="text-lg font-bold">Laisser un avis</h3>
                   </div>
                   <p className="mt-2 text-sm text-night/60">

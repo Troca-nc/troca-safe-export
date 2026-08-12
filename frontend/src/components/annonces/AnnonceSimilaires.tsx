@@ -86,7 +86,7 @@ export default function AnnonceSimilaires({ annonceId, categorieId, communeId, t
         <h2 className="font-semibold text-night text-lg">Annonces similaires</h2>
         <Link
           href={`/annonces?category_id=${categorieId}`}
-          className="text-sm text-coral hover:underline"
+          className="text-sm text-kalico-blue hover:underline"
         >
           Voir tout ï¿½
         </Link>
@@ -130,7 +130,7 @@ export default function AnnonceSimilaires({ annonceId, categorieId, communeId, t
               <p className="text-sm font-medium text-night line-clamp-2 leading-tight mb-1">
                 {l.titre ?? l.title}
               </p>
-              <p className="text-base font-bold text-coral">
+              <p className="text-base font-bold text-kalico-blue">
                 {l.prix != null
                   ? `${l.prix.toLocaleString('fr-FR')} XPF`
                   : <span className="text-night/40 font-normal text-sm">Prix libre</span>

@@ -55,14 +55,14 @@ export default function ForgotPasswordPage() {
       <Header />
       <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
-          <Link href="/connexion" className="inline-flex items-center gap-1.5 text-sm text-night/50 hover:text-coral mb-6 transition-colors">
+          <Link href="/connexion" className="inline-flex items-center gap-1.5 text-sm text-night/50 hover:text-kalico-blue mb-6 transition-colors">
             <ArrowLeft className="w-4 h-4" /> Retour ï¿½ la connexion
           </Link>
 
           {!sent ? (
             <div className="card p-8">
-              <div className="w-12 h-12 bg-coral/10 rounded-2xl flex items-center justify-center mb-5">
-                <LeadingIcon className="w-6 h-6 text-coral" />
+              <div className="w-12 h-12 bg-kalico-blue/10 rounded-2xl flex items-center justify-center mb-5">
+                <LeadingIcon className="w-6 h-6 text-kalico-blue" />
               </div>
               <h1 className="font-display font-bold text-2xl text-night mb-2">Mot de passe oubliï¿½ ?</h1>
               <p className="text-night/50 text-sm mb-6">

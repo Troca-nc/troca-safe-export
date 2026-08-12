@@ -143,7 +143,7 @@ function RightPanel() {
             </div>
 
             <div className="connexion-anim mt-5 w-full max-w-[360px] border-t border-[0.5px] border-[var(--color-border)] pt-5 text-center" style={{ animationDelay: '480ms' }}>
-              <Link href="/inscription" className="inline-flex items-center gap-1 text-sm font-semibold text-coral hover:underline">
+              <Link href="/inscription" className="inline-flex items-center gap-1 text-sm font-semibold text-kalico-blue hover:underline">
                 Pas encore de compte ? Rejoindre Kalico ï¿½
               </Link>
             </div>
@@ -304,7 +304,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
               <div className="space-y-2 animate-fade-in">
                 <div className="flex items-center justify-between gap-3">
                   <label className="field-label mb-0">Mot de passe</label>
-                  <Link href="/reset-password" className="text-sm font-medium text-coral hover:underline">
+                  <Link href="/reset-password" className="text-sm font-medium text-kalico-blue hover:underline">
                     Mot de passe oubliï¿½ ?
                   </Link>
                 </div>
@@ -346,7 +346,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
           </form>
 
           {demoProfile ? (
-            <div className="mt-4 rounded-2xl border border-coral/20 bg-coral/5 p-4">
+            <div className="mt-4 rounded-2xl border border-kalico-blue/20 bg-kalico-blue/5 p-4">
               <p className="text-sm font-semibold text-night">Compte dï¿½mo dï¿½tectï¿½</p>
               <p className="mt-1 text-sm text-night/60">
                 Vous pouvez entrer dans l'application sans vï¿½rification supplï¿½mentaire.
@@ -376,15 +376,15 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
 
           <p className="mt-6 text-[11px] leading-relaxed text-night/40">
             En continuant, vous acceptez nos{' '}
-            <Link href="/cgu" className="transition hover:text-coral hover:underline">
+            <Link href="/cgu" className="transition hover:text-kalico-blue hover:underline">
               CGU
             </Link>
             ,{' '}
-            <Link href="/mentions-legales" className="transition hover:text-coral hover:underline">
+            <Link href="/mentions-legales" className="transition hover:text-kalico-blue hover:underline">
               mentions lï¿½gales
             </Link>{' '}
             et notre{' '}
-            <Link href="/politique-de-confidentialite" className="transition hover:text-coral hover:underline">
+            <Link href="/politique-de-confidentialite" className="transition hover:text-kalico-blue hover:underline">
               politique de confidentialitï¿½
             </Link>
             .

@@ -150,11 +150,11 @@ export default function SearchAlertModal({
       <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-[2rem] border border-night/10 bg-white shadow-[0_24px_80px_rgba(8,32,50,0.22)]">
         <div className="flex items-start justify-between gap-4 border-b border-night/8 px-5 py-4 md:px-6">
           <div className="flex items-start gap-3">
-            <div className="mt-0.5 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-coral/10 text-coral">
+            <div className="mt-0.5 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-kalico-blue/10 text-kalico-blue">
               {isSuccess ? <Check className="h-5 w-5" /> : <Bell className="h-5 w-5" />}
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-coral/70">Alerte de recherche</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-kalico-blue/70">Alerte de recherche</p>
               <h2 className="mt-1 text-xl font-bold text-night">
                 {isSuccess ? 'Alerte crï¿½ï¿½e' : 'Crï¿½er une alerte'}
               </h2>
@@ -193,7 +193,7 @@ export default function SearchAlertModal({
                         key={option.value}
                         className={`flex cursor-pointer items-center gap-3 rounded-2xl border px-3 py-3 transition ${
                           frequency === option.value
-                            ? 'border-coral bg-coral/5'
+                            ? 'border-kalico-blue bg-kalico-blue/5'
                             : 'border-night/10 bg-white hover:bg-sand'
                         }`}
                       >
@@ -202,7 +202,7 @@ export default function SearchAlertModal({
                           name="search-alert-frequency"
                           checked={frequency === option.value}
                           onChange={() => setFrequency(option.value)}
-                          className="accent-coral"
+                          className="accent-kalico-blue"
                         />
                         <div>
                           <p className="text-sm font-semibold text-night">{option.label}</p>

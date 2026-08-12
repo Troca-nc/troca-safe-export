@@ -43,7 +43,7 @@ function FavoriListItem({
 
       <div className="min-w-0 flex-1">
         <Link href={`/annonces/${item.id}`}>
-          <h3 className="mb-1.5 line-clamp-2 text-sm font-medium leading-tight text-night transition-colors hover:text-coral">
+          <h3 className="mb-1.5 line-clamp-2 text-sm font-medium leading-tight text-night transition-colors hover:text-kalico-blue">
             {item.titre}
           </h3>
         </Link>
@@ -96,8 +96,8 @@ function EmptyFavoris({
 }) {
   return (
     <div className="py-20 text-center">
-      <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-coral/10">
-        <Heart className="h-9 w-9 text-coral/50" />
+      <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-kalico-blue/10">
+        <Heart className="h-9 w-9 text-kalico-blue/50" />
       </div>
       <h2 className="mb-2 text-xl font-bold text-night font-display">
         {filtered ? 'Aucun favori correspondant' : 'Aucun favori sauvegardï¿½'}
@@ -240,7 +240,7 @@ export default function FavorisPage() {
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
             <h1 className="flex items-center gap-2 text-2xl font-bold text-night font-display">
-              <Heart className="h-6 w-6 fill-coral text-coral" />
+              <Heart className="h-6 w-6 fill-kalico-blue text-kalico-blue" />
               Mes favoris
             </h1>
             <p className="mt-0.5 text-sm text-night/50">
@@ -300,14 +300,14 @@ export default function FavorisPage() {
               <div className="flex overflow-hidden rounded-xl border border-night/12">
                 <button
                   onClick={() => setView('grid')}
-                  className={`p-2 transition-colors ${view === 'grid' ? 'bg-coral text-white' : 'text-night/40 hover:bg-sand'}`}
+                  className={`p-2 transition-colors ${view === 'grid' ? 'bg-kalico-blue text-white' : 'text-night/40 hover:bg-sand'}`}
                   aria-label="Vue grille"
                 >
                   <Grid2X2 className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setView('list')}
-                  className={`p-2 transition-colors ${view === 'list' ? 'bg-coral text-white' : 'text-night/40 hover:bg-sand'}`}
+                  className={`p-2 transition-colors ${view === 'list' ? 'bg-kalico-blue text-white' : 'text-night/40 hover:bg-sand'}`}
                   aria-label="Vue liste"
                 >
                   <List className="h-4 w-4" />
@@ -349,11 +349,11 @@ export default function FavorisPage() {
                           className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm transition-transform hover:scale-110"
                           aria-label="Retirer des favoris"
                         >
-                          <Heart className="h-4 w-4 fill-coral text-coral" />
+                          <Heart className="h-4 w-4 fill-kalico-blue text-kalico-blue" />
                         </button>
                       </div>
                       <div className="p-3">
-                        <h3 className="mb-1.5 line-clamp-2 text-sm font-medium leading-tight text-night transition-colors group-hover:text-coral">
+                        <h3 className="mb-1.5 line-clamp-2 text-sm font-medium leading-tight text-night transition-colors group-hover:text-kalico-blue">
                           {item.titre}
                         </h3>
                         <p className="text-base font-bold text-night">

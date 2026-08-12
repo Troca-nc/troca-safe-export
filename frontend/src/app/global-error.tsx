@@ -18,7 +18,7 @@ export default function GlobalError({
     <html lang="fr">
       <body className="min-h-screen flex items-center justify-center px-6 py-16 bg-sand-light text-night">
         <div className="max-w-lg w-full rounded-3xl border border-night/10 bg-white shadow-xl p-8 text-center">
-          <p className="text-sm uppercase tracking-[0.2em] text-coral font-semibold mb-3">Erreur critique</p>
+          <p className="text-sm uppercase tracking-[0.2em] text-kalico-blue font-semibold mb-3">Erreur critique</p>
           <h1 className="text-3xl font-bold mb-3">Une erreur critique a interrompu lapplication</h1>
           <p className="text-night/70 mb-6">
             Nous avons prï¿½parï¿½ un ï¿½cran de secours pour ï¿½viter une page blanche. Tu peux rï¿½essayer ou revenir ï¿½ laccueil.
@@ -27,7 +27,7 @@ export default function GlobalError({
             <button
               type="button"
               onClick={reset}
-              className="inline-flex items-center justify-center rounded-full bg-coral px-5 py-3 text-white font-semibold hover:bg-coral-dark transition-colors"
+              className="inline-flex items-center justify-center rounded-full bg-kalico-blue px-5 py-3 text-white font-semibold hover:bg-kalico-blue-dark transition-colors"
             >
               Rï¿½essayer
             </button>

@@ -146,7 +146,7 @@ export default function QuotePublicClient({ quote, token }: QuotePublicClientPro
             </section>
 
             <section className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5">
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Lignes</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Lignes</p>
               <div className="mt-4 space-y-3">
                 {quote.items.map((item, index) => (
                   <div key={item.id || `${index}`} className="rounded-2xl border border-[var(--color-border)] bg-white px-4 py-3">
@@ -168,7 +168,7 @@ export default function QuotePublicClient({ quote, token }: QuotePublicClientPro
 
           <aside className="space-y-4">
             <section className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5">
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-coral/80">Totaux</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Totaux</p>
               <div className="mt-4 space-y-2 rounded-2xl border border-[var(--color-border)] bg-white p-4">
                 <div className="flex items-center justify-between text-sm text-night/65">
                   <span>Sous-total</span>
