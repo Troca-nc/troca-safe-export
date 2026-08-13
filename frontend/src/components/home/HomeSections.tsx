@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { type FormEvent, useEffect, useRef, useState } from 'react'
-import { ArrowRight, ChevronRight, CheckCircle2, MapPin, Search, Sparkles, ShieldCheck } from 'lucide-react'
+import { ArrowRight, ChevronRight, MapPin, Search, Sparkles } from 'lucide-react'
 
 import PlatformStats from '@/components/PlatformStats'
 import CategoryTreeSection from '@/components/home/CategoryTreeSection'
@@ -56,24 +56,6 @@ const HERO_CATEGORY_PILLS = [
   { slug: 'maison-jardin', label: 'Jardin' },
 ] as const
 
-
-const HERO_FEATURES = [
-  {
-    icon: CheckCircle2,
-    title: 'Publication gratuite',
-    subtitle: 'Pour les particuliers',
-  },
-  {
-    icon: MapPin,
-    title: 'Toute la NC couverte',
-    subtitle: 'Communes, tribus, îles',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Pros vérifiés',
-    subtitle: 'Artisans et services de confiance',
-  },
-] as const
 
 function normalizeHeroPrice(listing: HomeListing) {
   const value = listing.price_display ?? listing.price_xpf ?? listing.price
@@ -172,20 +154,6 @@ function HeroListingCard({ listing }: { listing: HomeListing }) {
   )
 }
 
-function HeroFeature({ icon: Icon, title, subtitle }: (typeof HERO_FEATURES)[number]) {
-  return (
-    <div className="flex min-w-0 items-start gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">
-      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-background-secondary)] text-nc-emeraude">
-        <Icon className="h-4.5 w-4.5" />
-      </span>
-      <span className="min-w-0">
-        <span className="block text-sm font-semibold text-[var(--color-text-primary)]">{title}</span>
-        <span className="block text-xs text-[var(--color-text-secondary)]">{subtitle}</span>
-      </span>
-    </div>
-  )
-}
-
 export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHeroSectionProps) {
   const cards = listings.slice(0, 2)
   useScrollReveal()
@@ -263,17 +231,6 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
               </div>
             )}
           </div>
-        </div>
-
-        <div className="mt-5 grid gap-3 border-t border-white/12 pt-5 md:grid-cols-3 md:gap-0">
-          {HERO_FEATURES.map((feature, index) => (
-            <div
-              key={feature.title}
-              className={`md:px-5 ${index > 0 ? 'md:border-l md:border-white/12' : ''}`}
-            >
-              <HeroFeature {...feature} />
-            </div>
-          ))}
         </div>
       </div>
     </section>

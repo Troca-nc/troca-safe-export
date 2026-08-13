@@ -181,9 +181,9 @@ export default function HomePage() {
 
       <HomeHeroSection q={q} onQueryChange={setQ} onSubmit={handleSearch} listings={featuredListings} />
 
-      <FeaturedListingsSection loading={loading} listings={featuredListings} />
-
       <CategoryGridSection />
+
+      <FeaturedListingsSection loading={loading} listings={featuredListings} />
 
       <SearchAlertsSection />
 

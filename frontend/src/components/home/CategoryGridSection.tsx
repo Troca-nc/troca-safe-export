@@ -28,11 +28,14 @@ function findCategoryBySlug(nodes: CategoryNode[], slug: string): CategoryNode |
 }
 
 export default function CategoryGridSection() {
+  // TODO: trier par vues réelles quand la métrique existe
+  const sortedCategoryItems = [...PRIMARY_CATEGORY_ITEMS].sort((a, b) => a.label.localeCompare(b.label, 'fr'))
+
   return (
     <section className="mx-auto max-w-7xl px-4 pb-12">
       <div className="mb-5 flex items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Catégories principales</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Catégories les plus vues</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-night">Accédez vite aux rayons les plus utiles</h2>
         </div>
         <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
@@ -40,8 +43,8 @@ export default function CategoryGridSection() {
         </Link>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {PRIMARY_CATEGORY_ITEMS.map(({ slug, label }) => {
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Catégories les plus vues">
+        {sortedCategoryItems.map(({ slug, label }) => {
           const category = findCategoryBySlug(FALLBACK_CATEGORIES, slug)
           const Icon = getCategoryIcon(slug, label, category?.icon)
 
@@ -49,17 +52,13 @@ export default function CategoryGridSection() {
             <Link
               key={slug}
               href={`/annonces?categorie=${slug}`}
-              className="group flex items-center gap-3 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-4 py-4 text-[var(--color-text-primary)] shadow-card transition hover:-translate-y-0.5 hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface)]"
+              role="tab"
+              className="group inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-4 py-2.5 text-sm font-semibold text-[var(--color-text-primary)] shadow-card transition hover:-translate-y-0.5 hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface)]"
             >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] text-nc-lagon">
-                <Icon className="h-5 w-5" />
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-nc-lagon">
+                <Icon className="h-3.5 w-3.5" />
               </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold">{label}</span>
-                <span className="block text-[11px] uppercase tracking-[0.18em] text-[var(--color-text-tertiary)] group-hover:text-[var(--color-text-secondary)]">
-                  Explorer
-                </span>
-              </span>
+              {label}
             </Link>
           )
         })}
