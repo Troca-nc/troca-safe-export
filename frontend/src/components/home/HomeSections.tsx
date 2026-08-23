@@ -156,7 +156,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
       style={{ background: '#fdf8f1' }}
     >
       <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        className="absolute inset-0 opacity-[0.06] pointer-events-none"
         style={{
           backgroundImage:
             'repeating-linear-gradient(45deg, #123A44 0 1px, transparent 1px 9px), repeating-linear-gradient(-45deg, #123A44 0 1px, transparent 1px 9px)',
@@ -210,7 +210,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
 
             <div className="mt-5 flex flex-wrap items-center gap-2">
               <span className="text-[14px] text-[var(--color-text-muted)] mr-1">Recherché en ce moment</span>
-              {['Toyota Hilux', 'Studio Nouméa', 'iPhone 15', 'Canapé', 'Chiot'].map((tag) => (
+              {['Véhicules', 'Immobilier', 'Emploi', 'Services', 'High-tech'].map((tag) => (
                 <Link
                   key={tag}
                   href={`/annonces?q=${encodeURIComponent(tag)}`}
@@ -226,21 +226,55 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
             {cards.length > 0 ? (
               cards.map((listing) => <HeroListingCard key={String(listing.id)} listing={listing} />)
             ) : (
-              <div className="flex min-h-[360px] items-center justify-center rounded-[1.75rem] border border-dashed border-[#d8c8b5] bg-white/55 px-6 py-10 text-center text-sm text-[#39505b] dark:border-white/10 dark:bg-white/5 dark:text-white/65">
-                <div className="flex flex-col items-center justify-center gap-6 text-center p-8 h-full">
-                  <div className="text-5xl">🌺</div>
-                  <p className="font-display text-xl font-bold text-[var(--color-text-primary)] mb-2">
-                    Soyez parmi les premiers.
+              <aside className="rounded-[24px] bg-[#0E2A31] relative overflow-hidden p-[34px_32px] text-[#FBF6EC]">
+                <div
+                  className="absolute inset-0 opacity-10 pointer-events-none"
+                  style={{
+                    backgroundImage:
+                      'repeating-linear-gradient(45deg, #FBF6EC 0 1px, transparent 1px 9px), repeating-linear-gradient(-45deg, #FBF6EC 0 1px, transparent 1px 9px)',
+                  }}
+                />
+                <div className="relative">
+                  <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-emeraude)]">
+                    Rejoignez les premiers
                   </p>
-                  <p className="text-sm text-[var(--color-text-secondary)]">
+                  <p className="mt-[18px] mb-0 font-display text-[38px] leading-[1.08]">
                     Kalico ouvre ses portes en Nouvelle-Calédonie.
-                    Déposez votre première annonce gratuitement.
                   </p>
-                  <a href="/annonces/nouvelle" className="btn-primary px-6 py-3 rounded-xl text-sm font-semibold">
-                    Déposer une annonce
-                  </a>
+                  <p className="mt-4 mb-0 text-[15px] leading-[1.6] text-[rgba(251,246,236,0.72)]">
+                    Déposez votre première annonce gratuitement. Sans commission, sans engagement.
+                  </p>
+                  <Link
+                    href="/annonces/nouvelle"
+                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-[10px] bg-[var(--coral)] text-[#0E2A31] px-5 py-[14px] text-[16px] font-semibold"
+                  >
+                    + Déposer une annonce
+                  </Link>
+                  <p className="mt-[14px] mb-0 text-[13px] text-[rgba(251,246,236,0.5)] text-center">
+                    Gratuit, sans commission
+                  </p>
+                  <div className="mt-7 pt-[22px] border-t border-[rgba(251,246,236,0.16)] flex flex-col gap-[14px]">
+                    <div className="flex items-baseline gap-3">
+                      <span className="font-display text-[30px] leading-none text-[#FBF6EC] min-w-[76px]">100%</span>
+                      <span className="text-[14px] leading-[1.4] text-[rgba(251,246,236,0.66)]">
+                        calédonien, de Nouméa aux Loyauté
+                      </span>
+                    </div>
+                    <div className="flex items-baseline gap-3">
+                      <span className="font-display text-[30px] leading-none text-[#FBF6EC] min-w-[76px]">0 XPF</span>
+                      <span className="text-[14px] leading-[1.4] text-[rgba(251,246,236,0.66)]">
+                        pour déposer une annonce particulier
+                      </span>
+                    </div>
+                    <div className="flex items-baseline gap-3">
+                      <span className="font-display text-[30px] leading-none text-[#FBF6EC] min-w-[76px]">∞</span>
+                      <span className="text-[14px] leading-[1.4] text-[rgba(251,246,236,0.66)]">
+                        annonces possibles sur tout le territoire
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </aside>
             )}
           </div>
         </div>
