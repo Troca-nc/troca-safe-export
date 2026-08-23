@@ -1,5 +1,6 @@
 // src/app/layout.tsx
 import type { Metadata } from 'next'
+import { Instrument_Serif, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google'
 import './globals.css'
 import Footer from '@/components/layout/Footer'
 import CookieBanner from '@/components/legal/CookieBanner'
@@ -17,12 +18,12 @@ import { DEFAULT_OG_IMAGE, SITE_LOCALE, SITE_NAME, SITE_TWITTER, SITE_URL } from
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'Kalico - Petites annonces Nouvelle-CalÃ©donie',
-  description: 'La premiï¿½re plateforme de petites annonces dï¿½diï¿½e ï¿½ la Nouvelle-CalÃ©donie. Achetez, vendez, louez en toute confiance.',
-  keywords: 'annonces, nouvelle-calï¿½donie, noumea, vente, achat, immobilier, vï¿½hicules',
+  title: 'Kalico - Petites annonces Nouvelle-Calédonie',
+  description: 'La première plateforme de petites annonces dédiée à la Nouvelle-Calédonie. Achetez, vendez, louez en toute confiance.',
+  keywords: 'annonces, nouvelle-calédonie, noumea, vente, achat, immobilier, véhicules',
   openGraph: {
     title: SITE_NAME,
-    description: 'Petites annonces Nouvelle-CalÃ©donie',
+    description: 'Petites annonces Nouvelle-Calédonie',
     url: SITE_URL,
     locale: SITE_LOCALE,
     type: 'website',
@@ -34,11 +35,33 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: SITE_NAME,
-    description: 'Petites annonces Nouvelle-CalÃ©donie',
+    description: 'Petites annonces Nouvelle-Calédonie',
     images: [DEFAULT_OG_IMAGE],
     site: SITE_TWITTER,
   },
 }
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  style: ['normal', 'italic'],
+  variable: '--font-display',
+  display: 'swap',
+})
+
+const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-body',
+  display: 'swap',
+})
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-mono',
+  display: 'swap',
+})
 
 export const viewport = {
   themeColor: [
@@ -49,7 +72,7 @@ export const viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang="fr" className={`${instrumentSerif.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable}`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -57,7 +80,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className="bg-[var(--color-bg-page)] text-[var(--color-text-primary)] font-body antialiased overflow-x-clip pt-24 md:overflow-x-visible">
+      <body className={`${ibmPlexSans.className} bg-[var(--color-bg-page)] text-[var(--color-text-primary)] font-body antialiased overflow-x-clip pt-24 md:overflow-x-visible`}>
         <ThemeProvider>
           <ReactQueryProvider>
             <JsonLd data={buildOrganizationSchema()} />
