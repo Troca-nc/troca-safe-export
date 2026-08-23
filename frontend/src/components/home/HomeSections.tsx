@@ -48,14 +48,6 @@ type HomeListing = {
   category?: string | null
 }
 
-const HERO_CATEGORY_PILLS = [
-  { slug: 'vehicules', label: 'Véhicules' },
-  { slug: 'immobilier', label: 'Immobilier' },
-  { slug: 'services', label: 'Services' },
-  { slug: 'electronique-multimedia', label: 'High-tech' },
-  { slug: 'maison-jardin', label: 'Jardin' },
-] as const
-
 
 function normalizeHeroPrice(listing: HomeListing) {
   const value = listing.price_display ?? listing.price_xpf ?? listing.price
@@ -163,48 +155,68 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
       className="relative overflow-hidden px-4 pb-10 pt-6 text-[#17313d] dark:text-white dark:!bg-[#0c2a35]"
       style={{ background: '#fdf8f1' }}
     >
-      <div className="absolute inset-0 opacity-[0.04] [background-image:radial-gradient(circle_at_1px_1px,_rgba(23,49,61,0.22)_1px,_transparent_0)] [background-size:28px_28px] dark:[background-image:radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.75)_1px,_transparent_0)]" />
+      <div
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage:
+            'repeating-linear-gradient(45deg, #123A44 0 1px, transparent 1px 9px), repeating-linear-gradient(-45deg, #123A44 0 1px, transparent 1px 9px)',
+        }}
+      />
 
       <div className="relative mx-auto max-w-7xl">
         <div className="grid gap-6 rounded-[2rem] border border-[#e7dbcd] bg-white/75 p-5 shadow-[0_30px_90px_rgba(3,31,45,0.08)] backdrop-blur-md md:grid-cols-[1.05fr_0.95fr] md:p-8 dark:border-white/10 dark:bg-[rgba(7,28,41,0.16)]">
           <div className="flex min-w-0 flex-col justify-center">
-            <span className="inline-flex w-fit items-center rounded-full border border-[#d8c8b5] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#1d6d89] dark:border-white/15 dark:bg-white/10 dark:text-white/75">
-              100 % Nouvelle-Calédonie
-            </span>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-lagon)] m-0">
+              Marketplace calédonienne · Bientôt ouvert
+            </p>
 
-            <h1 className="mt-4 max-w-2xl font-display text-4xl font-bold leading-tight text-[#17313d] md:text-6xl dark:text-white">
-              Les premières annonces arrivent. La vôtre aussi ?
+            <h1 className="font-display font-normal text-[42px] sm:text-[56px] md:text-[68px] lg:text-[82px] leading-[0.97] tracking-[-0.015em] max-w-[860px] mt-[22px] mb-0">
+              Ce que vous cherchez est déjà sur le territoire.
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#39505b] md:text-lg dark:text-white/80">Annonces, services et pros locaux partout en Nouvelle-Calédonie. De Nouméa aux Loyauté, de Koné à l&apos;île des Pins.</p>
+            <p className="mt-6 text-[19px] leading-[1.6] text-[var(--color-text-secondary)] max-w-[560px]">
+              Annonces, services et pros locaux, de Nouméa aux Loyauté. On vend entre voisins, on se rencontre pour de vrai.
+            </p>
 
-            <form onSubmit={onSubmit} className="mt-6 flex w-full max-w-2xl flex-col gap-3 sm:flex-row">
+            <form
+              onSubmit={onSubmit}
+              className="mt-6 flex w-full max-w-2xl items-center rounded-[14px] border border-[#123A44] bg-[var(--color-surface)] p-1.5 shadow-[0_6px_24px_rgba(18,58,68,0.09)]"
+            >
               <div className="relative min-w-0 flex-1">
-                <Search className="absolute left-4 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-[#71838d] dark:text-white/45" />
+                <Search className="absolute left-4 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-[#71838d]" />
                 <input
                   value={q}
                   onChange={(event) => onQueryChange(event.target.value)}
                   placeholder="Toyota, studio Nouméa, plombier, iPhone..."
                   aria-label="Rechercher une annonce"
-                  className="w-full rounded-2xl border border-[#d8c8b5] bg-white px-4 py-3 pl-11 text-sm text-[#17313d] placeholder:text-[#6d5d4b]/55 outline-none ring-0 backdrop-blur-sm transition focus:border-[#1d9e75]/40 focus:bg-white focus:ring-4 focus:ring-[#1d9e75]/10 dark:border-white/12 dark:bg-white/10 dark:text-white dark:placeholder:text-white/55 dark:focus:border-white/30 dark:focus:bg-white/12 dark:focus:ring-white/10"
+                  className="w-full bg-transparent px-4 py-3 pl-11 text-sm text-[#17313d] placeholder:text-[#6d5d4b]/55 outline-none"
                   autoComplete="off"
                 />
               </div>
               <button
+                type="button"
+                className="hidden shrink-0 items-center gap-1.5 whitespace-nowrap px-3 py-3 text-sm font-medium text-[#17313d] sm:inline-flex"
+              >
+                <MapPin className="h-4 w-4 text-[#71838d]" />
+                Toute la NC
+              </button>
+              <span className="hidden h-6 w-px shrink-0 bg-[var(--color-border)] sm:block" aria-hidden="true" />
+              <button
                 type="submit"
-                className="btn-primary inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold"
+                className="btn-primary inline-flex shrink-0 items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold"
               >
                 Rechercher
               </button>
             </form>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              {HERO_CATEGORY_PILLS.map((pill) => (
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <span className="text-[14px] text-[var(--color-text-muted)] mr-1">Recherché en ce moment</span>
+              {['Toyota Hilux', 'Studio Nouméa', 'iPhone 15', 'Canapé', 'Chiot'].map((tag) => (
                 <Link
-                  key={pill.slug}
-                  href={`/annonces?categorie=${encodeURIComponent(pill.slug)}`}
-                  className="inline-flex items-center rounded-full border border-[#d8c8b5] bg-white px-3.5 py-2 text-sm font-medium text-[#17313d] transition hover:-translate-y-0.5 hover:border-[#1d9e75]/30 hover:bg-[#f8f2ea] dark:border-white/12 dark:bg-white/8 dark:text-white/90 dark:hover:border-white/20 dark:hover:bg-white/12"
+                  key={tag}
+                  href={`/annonces?q=${encodeURIComponent(tag)}`}
+                  className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-[14px] font-medium text-[var(--color-text-primary)] hover:border-[var(--color-lagon-dark)]"
                 >
-                  {pill.label}
+                  {tag}
                 </Link>
               ))}
             </div>
