@@ -10,6 +10,7 @@ import WelcomeToast from '@/components/onboarding/WelcomeToast'
 import OnboardingToast from '@/components/onboarding/OnboardingToast'
 import {
   BonPlanSection,
+  CommunesBarSection,
   FeaturedListingsSection,
   CovoiturageSection,
   HomeHeroSection,
@@ -180,6 +181,8 @@ export default function HomePage() {
       <OnboardingToast />
 
       <HomeHeroSection q={q} onQueryChange={setQ} onSubmit={handleSearch} listings={featuredListings} />
+
+      <CommunesBarSection />
 
       <CategoryGridSection />
 

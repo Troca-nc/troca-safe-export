@@ -283,6 +283,41 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
   )
 }
 
+const NEARBY_COMMUNES = [
+  { name: 'Nouméa', count: '1 240' },
+  { name: 'Dumbéa', count: '380' },
+  { name: 'Mont-Dore', count: '295' },
+  { name: 'Païta', count: '210' },
+  { name: 'Bourail', count: '86' },
+  { name: 'Koné', count: '74' },
+  { name: 'Lifou', count: '52' },
+  { name: 'Poindimié', count: '41' },
+] as const
+
+export function CommunesBarSection() {
+  return (
+    <section className="bg-[var(--color-surface-2)] border-b border-[var(--color-border)] py-[22px] px-12">
+      <div className="flex items-center gap-5">
+        <p className="m-0 flex-shrink-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+          Près de chez vous
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {NEARBY_COMMUNES.map((c) => (
+            <Link
+              key={c.name}
+              href={`/annonces?commune=${encodeURIComponent(c.name)}`}
+              className="inline-flex items-baseline gap-[7px] rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] px-[15px] py-[7px] text-[14px] font-medium text-[var(--color-text-primary)] hover:border-[var(--color-lagon-dark)]"
+            >
+              {c.name}
+              <span className="text-[12px] text-[var(--color-text-muted)]">{c.count}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function AnimatedStat({ value, label, loading }: { value: number | null; label: string; loading: boolean }) {
   const ref = useRef<HTMLDivElement | null>(null)
   const [displayValue, setDisplayValue] = useState(0)
