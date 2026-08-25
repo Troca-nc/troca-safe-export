@@ -280,16 +280,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
   )
 }
 
-const NEARBY_COMMUNES = [
-  { name: 'Nouméa', count: '1 240' },
-  { name: 'Dumbéa', count: '380' },
-  { name: 'Mont-Dore', count: '295' },
-  { name: 'Païta', count: '210' },
-  { name: 'Bourail', count: '86' },
-  { name: 'Koné', count: '74' },
-  { name: 'Lifou', count: '52' },
-  { name: 'Poindimié', count: '41' },
-] as const
+const NEARBY_COMMUNES = ['Nouméa', 'Dumbéa', 'Mont-Dore', 'Païta', 'Bourail', 'Koné', 'Lifou', 'Poindimié'] as const
 
 export function CommunesBarSection() {
   return (
@@ -299,14 +290,13 @@ export function CommunesBarSection() {
           Près de chez vous
         </p>
         <div className="flex flex-wrap gap-2">
-          {NEARBY_COMMUNES.map((c) => (
+          {NEARBY_COMMUNES.map((name) => (
             <Link
-              key={c.name}
-              href={`/annonces?commune=${encodeURIComponent(c.name)}`}
+              key={name}
+              href={`/annonces?commune=${encodeURIComponent(name)}`}
               className="inline-flex items-baseline gap-[7px] rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] px-[15px] py-[7px] text-[14px] font-medium text-[var(--color-text-primary)] hover:border-[var(--color-lagon-dark)]"
             >
-              {c.name}
-              <span className="text-[12px] text-[var(--color-text-muted)]">{c.count}</span>
+              {name}
             </Link>
           ))}
         </div>
@@ -770,41 +760,41 @@ const HOME_ALERTS = [
 
 export function AlertsCtaSection() {
   return (
-    <section className="px-12 pt-[72px] pb-[72px]">
-      <div className="rounded-[24px] bg-[#0E2A31] p-12 flex flex-col md:flex-row gap-12 items-start">
-        <div className="flex-1">
-          <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-emeraude)]">
+    <section className="bg-[var(--color-bg-page)] px-12 pt-[72px] pb-[72px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+        <div>
+          <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-lagon)]">
             Alertes
           </p>
-          <h2 className="mt-4 mb-0 font-display font-normal text-[42px] leading-[1.08] text-[#FBF6EC]">
+          <h2 className="mt-4 mb-0 font-display font-normal text-[42px] leading-[1.08] text-[var(--color-text-primary)]">
             Dites-nous ce que vous cherchez, on vous prévient.
           </h2>
-          <p className="mt-4 mb-0 text-[16px] leading-[1.6] text-[rgba(251,246,236,0.72)] max-w-[480px]">
+          <p className="mt-4 mb-0 text-[16px] leading-[1.6] text-[var(--color-text-secondary)] max-w-[480px]">
             Un modèle précis, une commune, un budget maximum. L'alerte part dès qu'une annonce correspond.
           </p>
           <Link
             href="/alertes"
-            className="mt-6 inline-flex items-center gap-2 rounded-[10px] bg-[var(--coral)] text-white px-6 py-3 text-[15px] font-semibold"
+            className="mt-6 inline-flex items-center gap-2 rounded-[10px] border border-[var(--color-lagon-dark)] bg-transparent text-[var(--color-text-primary)] px-6 py-3 text-[15px] font-semibold"
           >
             Créer une alerte
           </Link>
         </div>
-        <div className="flex-1 flex flex-col gap-3">
+        <div className="flex flex-col gap-3">
           {HOME_ALERTS.map((alert) => (
-            <div key={alert.term} className="rounded-[14px] bg-[rgba(251,246,236,0.07)] border border-[rgba(251,246,236,0.12)] p-5">
+            <div key={alert.term} className="rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-border)] p-5">
               <div className="flex items-center justify-between mb-1">
-                <p className="m-0 text-[16px] font-semibold text-[#FBF6EC]">{alert.term}</p>
+                <p className="m-0 text-[16px] font-semibold text-[var(--color-text-primary)]">{alert.term}</p>
                 <span
                   className={`text-[12px] font-semibold px-2 py-1 rounded-full ${
                     alert.status === '2 nouvelles'
                       ? 'bg-[var(--coral)] text-white'
-                      : 'bg-[rgba(251,246,236,0.12)] text-[rgba(251,246,236,0.6)]'
+                      : 'bg-[var(--color-surface-2)] text-[var(--color-text-muted)]'
                   }`}
                 >
                   {alert.status}
                 </span>
               </div>
-              <p className="m-0 text-[13px] text-[rgba(251,246,236,0.55)]">{alert.filters}</p>
+              <p className="m-0 text-[13px] text-[var(--color-text-muted)]">{alert.filters}</p>
             </div>
           ))}
         </div>
