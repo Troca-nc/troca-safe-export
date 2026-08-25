@@ -592,16 +592,16 @@ export function ExpandedCategoriesGridSection({
   return <CategoryTreeSection />
 }
 
-export function RecentListingsSection() {
+export function BoostedListingsSection() {
   return (
     <section className="px-12 pt-[72px]">
       <div className="flex items-end justify-between gap-8 mb-7">
         <div>
           <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-lagon)]">
-            Les premières annonces
+            Annonces mises en avant
           </p>
           <h2 className="mt-3 mb-0 font-display font-normal text-[46px] leading-[1.05]">
-            Déjà en ligne cette semaine
+            Visibilité maximale
           </h2>
         </div>
         <Link
@@ -617,16 +617,16 @@ export function RecentListingsSection() {
       </div>
       <div className="rounded-[16px] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-16 text-center">
         <p className="font-display text-[22px] font-normal text-[var(--color-text-primary)] mb-3">
-          Soyez la première annonce de votre commune.
+          Cet espace vous attend.
         </p>
         <p className="text-[15px] text-[var(--color-text-secondary)] mb-6 max-w-[480px] mx-auto">
-          Kalico ouvre ses portes. Les premiers vendeurs seront mis en avant sur la page d'accueil.
+          Boostez votre annonce pour apparaitre ici, en tête de la page d'accueil, visible par tous les visiteurs.
         </p>
         <Link
-          href="/annonces/nouvelle"
+          href="/pro/dashboard/boosts"
           className="inline-flex items-center gap-2 rounded-[10px] bg-[var(--coral)] text-white px-6 py-3 text-[15px] font-semibold"
         >
-          + Déposer une annonce
+          Découvrir les boosts
         </Link>
       </div>
     </section>

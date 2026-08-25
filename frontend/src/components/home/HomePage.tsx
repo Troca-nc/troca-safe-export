@@ -11,7 +11,7 @@ import {
   CommunesBarSection,
   HomeHeroSection,
   LocalProsSection,
-  RecentListingsSection,
+  BoostedListingsSection,
   TrustSection,
 } from '@/components/home/HomeSections'
 import CategoryGridSection from '@/components/home/CategoryGridSection'
@@ -98,7 +98,7 @@ export default function HomePage() {
 
       <CategoryGridSection />
 
-      <RecentListingsSection />
+      <BoostedListingsSection />
 
       <TrustSection />
 
