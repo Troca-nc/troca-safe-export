@@ -3,15 +3,13 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { type FormEvent, useEffect, useRef, useState } from 'react'
-import { ArrowRight, ChevronRight, MapPin, Search, Sparkles } from 'lucide-react'
+import { ArrowRight, ChevronRight, MapPin, Search } from 'lucide-react'
 
 import PlatformStats from '@/components/PlatformStats'
 import CategoryTreeSection from '@/components/home/CategoryTreeSection'
-import ListingCard from '@/components/listings/ListingCard'
-import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
 import { useScrollReveal } from '@/hooks/useScrollReveal'
 import type { CategoryNode } from '@/lib/categoryCatalog'
-import { SEARCH_ALERTS, getCategoryIcon } from '@/lib/categoryPresentation'
+import { getCategoryIcon } from '@/lib/categoryPresentation'
 
 function formatNumber(value: number | null) {
   if (value === null || Number.isNaN(value)) return '...'
@@ -152,8 +150,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
 
   return (
     <section
-      className="relative overflow-hidden px-4 pb-10 pt-6 text-[#17313d] dark:text-white dark:!bg-[#0c2a35]"
-      style={{ background: '#fdf8f1' }}
+      className="relative overflow-hidden px-4 pb-10 pt-6 text-[#17313d] dark:text-white dark:!bg-[#0c2a35] bg-[var(--color-bg-page)]"
     >
       <div
         className="absolute inset-0 opacity-[0.06] pointer-events-none"
@@ -164,7 +161,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
       />
 
       <div className="relative mx-auto max-w-7xl">
-        <div className="grid gap-6 rounded-[2rem] border border-[#e7dbcd] bg-white/75 p-5 shadow-[0_30px_90px_rgba(3,31,45,0.08)] backdrop-blur-md md:grid-cols-[1.05fr_0.95fr] md:p-8 dark:border-white/10 dark:bg-[rgba(7,28,41,0.16)]">
+        <div className="grid gap-6 md:grid-cols-[1.05fr_0.95fr] md:p-8">
           <div className="flex min-w-0 flex-col justify-center">
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-lagon)] m-0">
               Marketplace calédonienne · Bientôt ouvert
@@ -374,103 +371,6 @@ export function HomeStatsSection() {
   return (
     <section className="mx-auto max-w-7xl px-4 pb-10" data-reveal="true">
       <PlatformStats variant="light" />
-    </section>
-  )
-}
-
-export function FeaturedListingsSection({
-  listings,
-  loading,
-}: {
-  listings: any[]
-  loading: boolean
-}) {
-    return (
-    <section id="featured-listings" className="bg-[var(--color-surface)]">
-      <div className="mx-auto max-w-7xl px-4 pb-10 pt-10" data-reveal="true">
-      <div className="mb-5 flex items-end justify-between gap-4">
-        <div className="section-lagon">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Annonces en vedette</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-night">Les catégories que les gens cherchent vraiment</h2>
-        </div>
-        <Link href="/annonces" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
-          Tout voir <ArrowRight className="h-4 w-4" />
-        </Link>
-      </div>
-
-      <div className="rounded-[2rem] border border-[var(--color-border)] border-l-4 border-l-nc-lagon bg-[var(--color-surface)] p-4 shadow-sm md:p-5">
-        {loading ? (
-          <ListingSkeletonGrid count={8} className="grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4" />
-        ) : listings.length > 0 ? (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {listings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] py-14 text-center text-night/45">
-            <p className="text-sm font-semibold text-night">Les meilleures annonces apparaîtront ici</p>
-            <p className="mt-2 text-sm text-night/65">Boostez votre annonce pour apparaître en tête de page.</p>
-            <Link href="/annonces/nouvelle" className="btn-primary mt-4 inline-block">
-              Déposer la première annonce
-            </Link>
-          </div>
-        )}
-      </div>
-      </div>
-    </section>
-  )
-}
-
-export function SearchAlertsSection() {
-  return (
-    <section className="bg-[var(--color-surface)]">
-      <div className="mx-auto grid max-w-7xl gap-5 overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-8 text-[var(--color-text-primary)] shadow-[0_24px_80px_rgba(8,32,50,0.08)] lg:grid-cols-[1.1fr_0.9fr] lg:items-center" data-reveal="true">
-        <div className="min-w-0">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-nc-lagon">
-            <Sparkles className="h-3.5 w-3.5" />
-            Coups de cœur
-          </div>
-          <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
-            Gardez vos recherches en mémoire et recevez une alerte quand une offre correspond.
-          </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--color-text-secondary)] md:text-base">
-            Les utilisateurs peuvent enregistrer des mots-clés pour suivre ce qui compte vraiment: un modèle précis, une commune, une gamme de prix ou une catégorie.
-          </p>
-          <div className="mt-5 flex flex-wrap gap-2 pb-1 sm:flex-nowrap sm:overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {SEARCH_ALERTS.map((term) => (
-              <span
-                key={term}
-                className="shrink-0 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-primary)]"
-              >
-                {term}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="min-w-0 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Exemple d&apos;alerte</p>
-          <div className="mt-4 space-y-3">
-            <div className="rounded-2xl bg-[var(--color-surface)] p-4">
-              <p className="text-sm font-semibold">"Toyota Hilux"</p>
-              <p className="mt-1 text-sm text-white/65">Nouméa, prix max 3 500 000 XPF</p>
-            </div>
-            <div className="rounded-2xl bg-[var(--color-surface)] p-4">
-              <p className="text-sm font-semibold">"Studio"</p>
-              <p className="mt-1 text-sm text-white/65">Dumbéa / Nouméa, location ou vente</p>
-            </div>
-            <div className="rounded-2xl bg-[var(--color-surface)] p-4">
-              <p className="text-sm font-semibold">"iPhone"</p>
-              <p className="mt-1 text-sm text-white/65">État bon ou comme neuf, en Nouvelle-Calédonie</p>
-            </div>
-          </div>
-          <Link href="/alertes" className="btn-primary mt-5 inline-flex w-full items-center justify-center gap-2">
-            Gérer mes alertes
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
     </section>
   )
 }
@@ -702,315 +602,211 @@ export function ExpandedCategoriesGridSection({
   return <CategoryTreeSection />
 }
 
-type BonPlanItem = {
-  id: number | string
-  title: string
-  description: string
-  kind?: string
-  target_audience?: string
-  price_xpf?: number
-  price_display?: string
-  is_free_included?: boolean
-  normal_price_xpf?: number | null
-  promo_price_xpf?: number | null
-  discount_pct?: number | null
-  contact_name?: string | null
-  location_name?: string | null
-  commune_name?: string | null
-  event_date?: string | null
-  expires_at?: string | null
-  author_prenom?: string | null
-  author_nom?: string | null
-  author_is_pro?: boolean | null
-}
-
-type CampaignItem = {
-  id: number | string
-  title: string
-  description?: string | null
-  image_url?: string | null
-  link_url?: string | null
-  cta_text?: string | null
-}
-
-function formatDateLabel(value?: string | null) {
-  if (!value) return 'Date libre'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'Date libre'
-  return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short' }).format(date)
-}
-
-function BonPlanCard({ item }: { item: BonPlanItem }) {
-  const audienceLabel = item.target_audience === 'pro' ? 'Professionnel' : 'Particulier'
-  const kindLabel = {
-    promo: 'Promo',
-    event: 'Événement',
-    concert: 'Concert',
-    other: 'Bon plan',
-  }[item.kind || 'other']
-
+export function RecentListingsSection() {
   return (
-    <article className="rounded-[1.5rem] border border-white/10 border-l-4 border-l-nc-corail bg-[var(--color-surface)] p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="badge-emeraude rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">
-          {kindLabel}
-        </span>
-        {item.is_free_included ? (
-          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
-            Offre Pro
-          </span>
-        ) : null}
-      </div>
-
-      <h3 className="mt-3 text-lg font-semibold text-[var(--color-text-primary)]">{item.title}</h3>
-      <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-night/60">{item.description}</p>
-
-      <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-night/65">
-        <span className="rounded-full bg-[var(--color-bg-page)] px-2.5 py-1">{audienceLabel}</span>
-        <span className="rounded-full bg-[var(--color-bg-page)] px-2.5 py-1">{item.price_display || `${item.price_xpf ?? 0} XPF`}</span>
-        {item.normal_price_xpf && item.promo_price_xpf ? (
-          <span className="rounded-full bg-[var(--color-bg-page)] px-2.5 py-1">
-            {item.normal_price_xpf.toLocaleString('fr-FR')} {'->'} {item.promo_price_xpf.toLocaleString('fr-FR')} XPF
-          </span>
-        ) : null}
-        {item.discount_pct ? (
-          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">-{item.discount_pct}%</span>
-        ) : null}
-      <span className="rounded-full bg-[var(--color-bg-page)] px-2.5 py-1">{item.commune_name || item.location_name || 'Nouvelle-Calédonie'}</span>
-      </div>
-
-      <div className="mt-4 space-y-1 text-sm text-night/55">
-        <p>{formatDateLabel(item.event_date)}</p>
-        <p>{item.author_prenom ? `Publié par ${item.author_prenom}` : 'Publication locale'}</p>
-        {item.contact_name ? <p>Contact: {item.contact_name}</p> : null}
-      </div>
-    </article>
-  )
-}
-
-function CovoiturageCard({
-  item,
-}: {
-  item: {
-    id: number | string
-    departure: string
-    destination: string
-    ride_date: string
-    ride_time: string
-    price_xpf: number
-    vehicle?: string | null
-    seats_remaining?: number
-    music_allowed?: boolean
-    no_smoking?: boolean
-    driver_prenom?: string | null
-    driver_nom?: string | null
-    trust_score?: number | null
-  }
-}) {
-  const seatsRemaining = item.seats_remaining ?? 0
-  const dateLabel = formatDateLabel(item.ride_date)
-  const timeLabel = item.ride_time?.slice(0, 5) || 'Heure libre'
-
-  return (
-    <article className="rounded-[1.5rem] border border-white/10 bg-[var(--color-surface)] p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="badge-corail rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">
-          Covoiturage
-        </span>
-        {seatsRemaining <= 1 ? (
-          <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-700">
-            Dernière place
-          </span>
-        ) : null}
-      </div>
-
-      <h3 className="mt-3 text-lg font-semibold text-[var(--color-text-primary)]">
-        {item.departure} - {item.destination}
-      </h3>
-      <p className="mt-2 text-sm leading-relaxed text-night/60">
-        {dateLabel} · {timeLabel} · {item.vehicle || 'Véhicule détaillé'} · {item.price_xpf.toLocaleString('fr-FR')} XPF / place
-      </p>
-
-      <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-night/65">
-        <span className="rounded-full bg-[var(--color-bg-page)] px-2.5 py-1">{seatsRemaining} place(s) restante(s)</span>
-        <span className="rounded-full bg-[var(--color-bg-page)] px-2.5 py-1">{item.music_allowed ? 'Musique ok' : 'Musique calme'}</span>
-        <span className="rounded-full bg-[var(--color-bg-page)] px-2.5 py-1">{item.no_smoking ? 'Non fumeur' : 'Fumeur accepté'}</span>
-      </div>
-
-      <div className="mt-4 space-y-1 text-sm text-night/55">
-        <p>{item.driver_prenom ? `Conducteur: ${item.driver_prenom}` : 'Conducteur local'}</p>
-        <p>{item.trust_score != null ? `Fiabilité: ${item.trust_score}/100` : 'Trajet vérifié'}</p>
-      </div>
-    </article>
-  )
-}
-
-function SponsoredCampaignCard({ item }: { item: CampaignItem }) {
-  const href = item.link_url || '/annonces'
-
-  return (
-    <article className="overflow-hidden rounded-[1.5rem] border border-white/10 border-l-4 border-l-nc-sable bg-[var(--color-surface)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-nc-lagon/20 to-nc-emeraude/20">
-        {item.image_url ? (
-          <Image
-            src={item.image_url}
-            alt={item.title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 640px) 90vw, 33vw"
-          />
-        ) : null}
-        <div className="absolute left-3 top-3">
-          <span className="badge badge-sable rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] shadow-sm">
-            Sponsorisé
-          </span>
+    <section className="px-12 pt-[72px]">
+      <div className="flex items-end justify-between gap-8 mb-7">
+        <div>
+          <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-lagon)]">
+            Les premières annonces
+          </p>
+          <h2 className="mt-3 mb-0 font-display font-normal text-[46px] leading-[1.05]">
+            Déjà en ligne cette semaine
+          </h2>
         </div>
-      </div>
-
-      <div className="space-y-3 p-4">
-        <h3 className="line-clamp-2 text-lg font-semibold text-[var(--color-text-primary)]">{item.title}</h3>
-        <p className="line-clamp-3 text-sm leading-relaxed text-night/65">
-          {item.description || 'Une visibilité locale payante, affichée au bon moment sur Kalico.'}
-        </p>
-        <a
-          href={href}
-          className="btn-primary w-full"
+        <Link
+          href="/annonces"
+          className="inline-flex items-center gap-[6px] text-[15px] font-semibold text-[var(--color-text-primary)] pb-[6px]"
         >
-          {item.cta_text || 'Découvrir'}
-        </a>
+          Tout voir
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="w-4 h-4">
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+          </svg>
+        </Link>
       </div>
-    </article>
-  )
-}
-
-export function BonPlanSection({
-  sponsoredItems,
-  loading,
-}: {
-  sponsoredItems?: CampaignItem[]
-  loading?: boolean
-}) {
-  const sponsoredHasItems = (sponsoredItems || []).length > 0
-
-  return (
-    <section className="mx-auto max-w-7xl px-4 pb-10" data-reveal="true">
-      <div className="grid gap-5 overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-[var(--color-text-primary)] shadow-[0_24px_80px_rgba(8,32,50,0.08)]">
-        {sponsoredHasItems ? (
-          <div>
-            <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-sable">Sponsorisé</p>
-                <h3 className="mt-1 text-2xl font-bold text-[var(--color-text-primary)]">Les bons plans mis en avant</h3>
-              </div>
-              <Link href="/pro/dashboard/publicite" className="text-sm font-semibold text-nc-sable hover:underline">
-                Gérer les campagnes
-              </Link>
-            </div>
-            <div className="grid gap-3 md:grid-cols-3">
-              {sponsoredItems!.map((item) => (
-                <SponsoredCampaignCard key={item.id} item={item} />
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="section-lagon">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Bons plans & Événements</p>
-            <h3 className="mt-1 font-display text-2xl font-bold text-[var(--color-text-primary)] md:text-3xl">
-              Promotions, culture et mobilité locale
-            </h3>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--color-text-secondary)] md:text-base">
-              Une seule vue claire pour les offres du moment, l'agenda culturel et les trajets à partager.
-            </p>
-          </div>
-          <Link href="/bons-plans" className="hidden items-center gap-1 text-sm font-semibold text-nc-lagon hover:underline md:inline-flex">
-            Voir tout <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
+      <div className="rounded-[16px] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-16 text-center">
+        <p className="font-display text-[22px] font-normal text-[var(--color-text-primary)] mb-3">
+          Soyez la première annonce de votre commune.
+        </p>
+        <p className="text-[15px] text-[var(--color-text-secondary)] mb-6 max-w-[480px] mx-auto">
+          Kalico ouvre ses portes. Les premiers vendeurs seront mis en avant sur la page d'accueil.
+        </p>
+        <Link
+          href="/annonces/nouvelle"
+          className="inline-flex items-center gap-2 rounded-[10px] bg-[var(--coral)] text-white px-6 py-3 text-[15px] font-semibold"
+        >
+          + Déposer une annonce
+        </Link>
       </div>
     </section>
   )
 }
 
-export function CovoiturageSection({
-  covoiturageItems,
-  loading,
-}: {
-  covoiturageItems?: Array<{
-    id: number | string
-    departure: string
-    destination: string
-    ride_date: string
-    ride_time: string
-    price_xpf: number
-    vehicle?: string | null
-    seats_remaining?: number
-    music_allowed?: boolean
-    no_smoking?: boolean
-    driver_prenom?: string | null
-    driver_nom?: string | null
-    trust_score?: number | null
-  }>
-  loading?: boolean
-}) {
-  const rideHasItems = (covoiturageItems || []).length > 0
+const TRUST_ITEMS = [
+  {
+    title: 'Vérification en trois temps',
+    body: "Email, téléphone, puis pièce professionnelle pour les pros. Le badge vérifié n'apparaît qu'au bout des trois.",
+  },
+  {
+    title: 'Les avis restent lisibles',
+    body: "Note moyenne et nombre d'avis sur la carte, détail sur le profil. Un vendeur avec 6 avis et un avec 48 ne s'affichent pas pareil.",
+  },
+  {
+    title: 'La distance, pas juste la commune',
+    body: "À 12 km de chez vous dit plus que Dumbéa. Sur un territoire où l'on fait 150 km pour un meuble, c'est l'information qui décide.",
+  },
+] as const
 
+export function TrustSection() {
   return (
-    <section className="bg-[var(--color-bg-page)]">
-      <div className="mx-auto max-w-7xl px-4 pb-10" data-reveal="true">
-        <div className="rounded-[1.5rem] border border-[var(--color-border)] border-b-4 border-b-nc-corail bg-[var(--color-surface)] p-5">
-          <div className="mb-3 flex items-end justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-corail">Mobilité</p>
-              <h4 className="mt-1 text-2xl font-bold text-[var(--color-text-primary)]">Covoiturage local et interurbain</h4>
-            </div>
-            <Link href="/covoiturage" className="text-sm font-semibold text-nc-corail hover:underline">
-              Voir les trajets
-            </Link>
+    <section className="px-12 pt-[72px]">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {TRUST_ITEMS.map((item) => (
+          <div key={item.title} className="rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] p-8">
+            <h3 className="font-display font-normal text-[22px] leading-[1.2] text-[var(--color-text-primary)] mb-4">
+              {item.title}
+            </h3>
+            <p className="text-[15px] leading-[1.6] text-[var(--color-text-secondary)] m-0">{item.body}</p>
           </div>
-          <p className="max-w-3xl text-sm leading-relaxed text-[var(--color-text-secondary)] md:text-base">
-            Trouvez un trajet, proposez une place ou consultez les profils de confiance. Les trajets sont
-            pensés pour la recherche rapide, les réservations simples et la sécurité des échanges.
+        ))}
+      </div>
+    </section>
+  )
+}
+
+const LOCAL_PROS = [
+  {
+    initials: 'PB',
+    name: 'Plomberie Baie',
+    trade: 'Plombier · Nouméa',
+    blurb: 'Dépannage et installation sanitaire sur le Grand Nouméa, urgences le week-end.',
+    rating: '4,9',
+    reviews: '64',
+  },
+  {
+    initials: 'ED',
+    name: 'Élec Dumbéa',
+    trade: 'Électricien · Dumbéa',
+    blurb: 'Mise aux normes, tableaux, recherche de panne. Devis sous 48 h.',
+    rating: '4,7',
+    reviews: '38',
+  },
+  {
+    initials: 'MC',
+    name: 'Menuiserie Cocotier',
+    trade: 'Menuisier · Païta',
+    blurb: 'Terrasses, pergolas et mobilier sur mesure en bois local.',
+    rating: '5,0',
+    reviews: '21',
+  },
+  {
+    initials: 'GT',
+    name: 'Garage Tropic',
+    trade: 'Garagiste · Mont-Dore',
+    blurb: 'Entretien toutes marques, pneus, climatisation. Prêt de véhicule.',
+    rating: '4,6',
+    reviews: '91',
+  },
+] as const
+
+export function LocalProsSection() {
+  return (
+    <section className="px-12 pt-[72px]">
+      <div className="flex items-end justify-between gap-8 mb-7">
+        <div>
+          <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-lagon)]">
+            Pros locaux
           </p>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <Link href="/covoiturage" className="btn-primary rounded-2xl px-4 py-2.5">
-              Explorer le covoiturage
-            </Link>
-            <Link href="/covoiturage?mode=publish" className="btn-secondary rounded-2xl px-4 py-2.5">
-              Proposer un trajet
-            </Link>
-          </div>
-          {loading ? (
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="h-44 animate-pulse rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)]" />
-              ))}
-            </div>
-          ) : rideHasItems ? (
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
-              {covoiturageItems!.map((item) => (
-                <CovoiturageCard key={item.id} item={item} />
-              ))}
-            </div>
-          ) : (
-            <div className="mt-5 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] px-5 py-8 text-center text-[var(--color-text-primary)]">
-              <div className="mx-auto flex max-w-md flex-col items-center">
-                <span className="mb-3 text-2xl animate-pulse motion-reduce:animate-none" aria-hidden="true">
-                    🚗
-                  </span>
-                <p className="font-display text-lg font-medium text-night dark:text-white">
-                  Le premier trajet, c&apos;est souvent le plus utile.
-                </p>
-                <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-                  Proposez un trajet, trouvez des passagers.
-                </p>
-                <Link href="/covoiturage/nouveau" className="btn-primary mt-4 inline-flex items-center justify-center">
-                  Proposer un trajet
-                </Link>
+          <h2 className="mt-3 mb-0 font-display font-normal text-[46px] leading-[1.05]">
+            Des artisans du coin, vérifiés
+          </h2>
+        </div>
+        <div className="flex items-center gap-4 pb-[6px]">
+          <Link href="/pros" className="text-[15px] font-semibold text-[var(--color-text-primary)]">
+            L'annuaire
+          </Link>
+          <Link
+            href="/pro"
+            className="rounded-[10px] border border-[var(--color-border)] px-4 py-2 text-[15px] font-semibold text-[var(--color-text-primary)]"
+          >
+            Devenir Pro
+          </Link>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {LOCAL_PROS.map((pro) => (
+          <div key={pro.name} className="rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="flex h-[46px] w-[46px] flex-shrink-0 items-center justify-center rounded-full bg-[rgba(85,173,179,0.16)] text-[15px] font-semibold text-[var(--color-lagon)]">
+                {pro.initials}
+              </span>
+              <div className="min-w-0">
+                <p className="m-0 text-[15px] font-semibold text-[var(--color-text-primary)] truncate">{pro.name}</p>
+                <p className="m-0 text-[13px] text-[var(--color-text-muted)]">{pro.trade}</p>
               </div>
             </div>
-          )}
+            <p className="text-[14px] leading-[1.5] text-[var(--color-text-secondary)] mb-4">{pro.blurb}</p>
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] text-[var(--color-text-muted)]">
+                ★ {pro.rating} · {pro.reviews} avis
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(110,154,106,0.14)] border border-[rgba(110,154,106,0.3)] px-2 py-1 text-[11px] font-semibold text-[#3F6B3C]">
+                ✓ Vérifié
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+const HOME_ALERTS = [
+  { term: 'Toyota Hilux', filters: 'Grand Nouméa · moins de 3 500 000 XPF', status: '2 nouvelles' },
+  { term: 'Studio meublé', filters: 'Nouméa, Dumbéa · location', status: 'active' },
+  { term: 'Planche de surf', filters: 'Toute la NC · bon état ou mieux', status: 'active' },
+] as const
+
+export function AlertsCtaSection() {
+  return (
+    <section className="px-12 pt-[72px] pb-[72px]">
+      <div className="rounded-[24px] bg-[#0E2A31] p-12 flex flex-col md:flex-row gap-12 items-start">
+        <div className="flex-1">
+          <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-emeraude)]">
+            Alertes
+          </p>
+          <h2 className="mt-4 mb-0 font-display font-normal text-[42px] leading-[1.08] text-[#FBF6EC]">
+            Dites-nous ce que vous cherchez, on vous prévient.
+          </h2>
+          <p className="mt-4 mb-0 text-[16px] leading-[1.6] text-[rgba(251,246,236,0.72)] max-w-[480px]">
+            Un modèle précis, une commune, un budget maximum. L'alerte part dès qu'une annonce correspond.
+          </p>
+          <Link
+            href="/alertes"
+            className="mt-6 inline-flex items-center gap-2 rounded-[10px] bg-[var(--coral)] text-white px-6 py-3 text-[15px] font-semibold"
+          >
+            Créer une alerte
+          </Link>
+        </div>
+        <div className="flex-1 flex flex-col gap-3">
+          {HOME_ALERTS.map((alert) => (
+            <div key={alert.term} className="rounded-[14px] bg-[rgba(251,246,236,0.07)] border border-[rgba(251,246,236,0.12)] p-5">
+              <div className="flex items-center justify-between mb-1">
+                <p className="m-0 text-[16px] font-semibold text-[#FBF6EC]">{alert.term}</p>
+                <span
+                  className={`text-[12px] font-semibold px-2 py-1 rounded-full ${
+                    alert.status === '2 nouvelles'
+                      ? 'bg-[var(--coral)] text-white'
+                      : 'bg-[rgba(251,246,236,0.12)] text-[rgba(251,246,236,0.6)]'
+                  }`}
+                >
+                  {alert.status}
+                </span>
+              </div>
+              <p className="m-0 text-[13px] text-[rgba(251,246,236,0.55)]">{alert.filters}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
