@@ -7,7 +7,7 @@ on:
     branches: [main, master]
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -96,7 +96,10 @@ jobs:
 
       # Temporary quarantine: keep the complete report visible without
       # blocking security work on assertions made stale by the current UX.
+      # Pull requests run only the fast blocking gate above; the full suite
+      # runs once after changes reach the default branch.
       - name: Run full Playwright suite (temporary non-blocking quarantine)
+        if: github.event_name == 'push'
         continue-on-error: true
         run: npm run test:e2e
 
