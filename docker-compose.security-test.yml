@@ -1,0 +1,115 @@
+services:
+  security-postgres:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: kalico_security_test
+      POSTGRES_USER: security_test
+      POSTGRES_PASSWORD: security_test_password
+    tmpfs: [/var/lib/postgresql/data]
+    networks: [security_net]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U security_test -d kalico_security_test']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  security-redis:
+    image: redis:7.2-alpine
+    command: ['redis-server', '--save', '', '--appendonly', 'no', '--requirepass', 'security_test_password']
+    networks: [security_net]
+    healthcheck:
+      test: ['CMD', 'redis-cli', '-a', 'security_test_password', 'ping']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  security-migrate:
+    build: &backend_build
+      context: .
+      dockerfile: docker/security-test/backend.Dockerfile
+      secrets:
+        - security_test_ca
+    command: ['npm', 'run', 'migrate']
+    environment: &security_backend_env
+      NODE_ENV: test
+      PORT: 3001
+      BASE_URL: http://127.0.0.1:${SECURITY_NGINX_PORT:-18080}
+      DB_HOST: security-postgres
+      DB_PORT: 5432
+      DB_NAME: kalico_security_test
+      DB_USER: security_test
+      DB_PASSWORD: security_test_password
+      REDIS_URL: redis://:security_test_password@security-redis:6379
+      JWT_SECRET: kalico_security_test_jwt_secret_64_chars_minimum_xxxxxxxxxxxxxxxxx
+      INTERNAL_API_TOKEN: KALICO_CANARY_INTERNAL_HEADER_TEST_ONLY
+      STORAGE_LOCAL_PATH: /app/uploads
+      RUN_JOBS: 'false'
+      DEMO_MODE: 'false'
+      KALICO_SECURITY_TEST_ONLY: 'true'
+    volumes:
+      - ./database:/database:ro
+    depends_on:
+      security-postgres:
+        condition: service_healthy
+    networks: [security_net]
+    restart: 'no'
+
+  security-seed:
+    build: *backend_build
+    command: ['node', 'src/scripts/security/seedSecurityFixtures.js']
+    environment: *security_backend_env
+    volumes:
+      - security_uploads:/app/uploads
+    depends_on:
+      security-migrate:
+        condition: service_completed_successfully
+    networks: [security_net]
+    restart: 'no'
+
+  security-backend:
+    build: *backend_build
+    environment: *security_backend_env
+    volumes:
+      - security_uploads:/app/uploads
+    depends_on:
+      security-seed:
+        condition: service_completed_successfully
+      security-redis:
+        condition: service_healthy
+    networks: [security_net]
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 2s
+      timeout: 3s
+      retries: 90
+
+  security-nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - '127.0.0.1:${SECURITY_NGINX_PORT:-18080}:8080'
+    volumes:
+      - ./docker/security-test/nginx.conf:/etc/nginx/nginx.conf:ro
+      - security_uploads:/app/uploads:ro
+      - ./security-test-artifacts/nginx:/var/log/nginx
+    depends_on:
+      security-backend:
+        condition: service_healthy
+    networks: [security_net]
+    read_only: true
+    tmpfs: [/tmp, /var/cache/nginx]
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:8080/api/health']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+networks:
+  security_net:
+    internal: true
+
+volumes:
+  security_uploads:
+
+secrets:
+  security_test_ca:
+    file: ./security-test-artifacts/local-ca.crt
