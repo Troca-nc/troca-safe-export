@@ -284,8 +284,9 @@ export function useConversation(convId: number | null) {
           if (!m.pending) return true
           if (m.type !== msg.type) return true
           if (m.type === 'text') return m.content !== msg.content
-          if (m.type === 'photo' || m.type === 'audio') return m.photo_url !== msg.photo_url
-          if (m.type === 'document') return m.attachment_url !== msg.attachment_url
+          if (m.type === 'photo' || m.type === 'audio' || m.type === 'document') {
+            return Number(m.sender_id) !== Number(msg.sender_id)
+          }
           return true
         })
         return [...filtered, msg]
