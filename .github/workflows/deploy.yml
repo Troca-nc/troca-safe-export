@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 concurrency:
-  group: production-deploy
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -93,15 +93,6 @@ jobs:
 
       - name: Run blocking Playwright CI gate
         run: npm run test:e2e:gate
-        env:
-          PLAYWRIGHT_USE_LOCAL_SERVER: 'true'
-          NODE_EXE: node
-
-      # Temporary quarantine: the legacy suite still runs and publishes its
-      # report while stale UX assertions are brought back in line with the app.
-      - name: Run full Playwright suite (temporary non-blocking quarantine)
-        continue-on-error: true
-        run: npm run test:e2e
         env:
           PLAYWRIGHT_USE_LOCAL_SERVER: 'true'
           NODE_EXE: node
