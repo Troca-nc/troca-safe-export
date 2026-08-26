@@ -41,8 +41,8 @@ x-backend-env: &backend-env
   ADMIN_API_TOKEN: ${ADMIN_API_TOKEN}
   ADMIN_ALERT_EMAIL: ${ADMIN_ALERT_EMAIL}
   STORAGE_LOCAL_PATH: /app/uploads
-  MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB}
-  MAX_IMAGES_PER_LISTING: ${MAX_IMAGES_PER_LISTING}
+  MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-10}
+  MAX_IMAGES_PER_LISTING: ${MAX_IMAGES_PER_LISTING:-8}
   INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN}
 
 services:
@@ -81,8 +81,8 @@ services:
     volumes:
       - certbot_www:/var/www/certbot
       - certbot_conf:/etc/letsencrypt
-    	entrypoint: ["tail", "-f", "/dev/null"]
-    	command: []
+    entrypoint: ["tail", "-f", "/dev/null"]
+    command: []
 
   postgres:
     image: postgis/postgis:16-3.4
