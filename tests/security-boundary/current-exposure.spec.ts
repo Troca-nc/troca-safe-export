@@ -1,13 +1,13 @@
 import { expect, test } from '@playwright/test'
 
 const knownPrivatePaths = [
-  '/uploads/chat/security-a/security-document.pdf',
-  '/uploads/chat/security-a/security-photo.webp',
-  '/uploads/chat/security-a/security-audio.webm',
   '/uploads/qr-tickets/security-ticket-paid.png',
 ]
 
 const remediatedPrivatePaths = [
+  '/uploads/chat/security-a/security-document.pdf',
+  '/uploads/chat/security-a/security-photo.webp',
+  '/uploads/chat/security-a/security-audio.webm',
   '/uploads/pro-documents/security-pro-a/security-ridet.pdf',
   '/uploads/imports/security-import.csv',
 ]

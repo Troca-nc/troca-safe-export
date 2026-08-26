@@ -208,7 +208,7 @@ app.use('/api/messages',   messagesRouter);
 app.use('/api/categories', categoriesRouter);
 app.use('/api/communes',   communesRouter);
 app.use('/api/upload',     uploadRouter);
-app.use(['/uploads/pro-documents', '/uploads/imports'], (_req, res) => {
+app.use(['/uploads/chat', '/uploads/pro-documents', '/uploads/imports'], (_req, res) => {
   res.set('Cache-Control', 'no-store');
   return res.status(404).json({ error: 'Fichier introuvable' });
 });

@@ -72,6 +72,7 @@ function formatPreviewText(type, content) {
 
 function mapMessageRow(row, conversationId, currentUserId = null) {
   const decoded = decodeStructuredMessage(row.content);
+  const protectedMediaUrl = buildAttachmentDownloadUrl(row.id, currentUserId);
 
   return {
     id: row.id,
@@ -83,9 +84,9 @@ function mapMessageRow(row, conversationId, currentUserId = null) {
       ...decoded.metadata,
       ...(row.proposal_status ? { status: row.proposal_status } : {}),
     },
-    photo_url: row.photo_url ?? null,
-    attachment_url: row.attachment_url ?? null,
-    attachment_download_url: buildAttachmentDownloadUrl(row.id, currentUserId),
+    photo_url: ['photo', 'audio'].includes(row.type) ? protectedMediaUrl : null,
+    attachment_url: null,
+    attachment_download_url: row.type === 'document' ? protectedMediaUrl : null,
     attachment_name: row.attachment_name ?? null,
     attachment_mime_type: row.attachment_mime_type ?? null,
     attachment_size_bytes: row.attachment_size_bytes ?? null,

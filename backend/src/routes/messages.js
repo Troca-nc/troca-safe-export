@@ -10,7 +10,6 @@
 const express = require('express');
 const Joi = require('joi');
 const fs = require('fs').promises;
-const path = require('path');
 const { authenticate } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');
 const { messageLimiter } = require('../middleware/rateLimit');
@@ -110,7 +109,13 @@ router.get('/attachments/:messageId/download', async (req, res, next) => {
 
     const attachment = await loadConversationAttachmentForUser(userId, messageId);
     await fs.access(attachment.filePath);
-    res.download(attachment.filePath, attachment.attachment_name || path.basename(attachment.filePath));
+    res.sendFile(attachment.filePath, {
+      headers: {
+        'Cache-Control': 'private, no-store',
+        'Content-Disposition': 'inline',
+        'X-Content-Type-Options': 'nosniff',
+      },
+    });
   } catch (err) {
     if (err.code === 'ENOENT') {
       return res.status(404).json({ error: 'Pièce jointe introuvable' });

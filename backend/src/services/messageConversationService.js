@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const fs = require('fs').promises;
 const { query, withTransaction } = require('../config/database');
 const {
   filterMessage,
@@ -63,6 +64,14 @@ function resolveAttachmentFilePath(attachmentUrl) {
   } catch {
     return null;
   }
+}
+
+function resolveOwnedChatFilePath(fileUrl, userId) {
+  const filePath = resolveAttachmentFilePath(fileUrl);
+  if (!filePath || !userId) return null;
+  const ownedRoot = path.resolve(getUploadRoot(), 'chat', String(userId));
+  if (!filePath.startsWith(`${ownedRoot}${path.sep}`)) return null;
+  return filePath;
 }
 
 function buildConversationAccessClause(userParam = '$1') {
@@ -396,6 +405,19 @@ async function appendConversationMessage(userId, conversationId, payload) {
     ? Number(payload.attachment_size_bytes)
     : null;
 
+  const submittedFileUrl = type === 'document' ? attachmentUrl : photoUrl;
+  if (['photo', 'audio', 'document'].includes(type)) {
+    const ownedFilePath = resolveOwnedChatFilePath(submittedFileUrl, userId);
+    if (!ownedFilePath) {
+      throw createHttpError(400, 'Fichier de messagerie invalide');
+    }
+    try {
+      await fs.access(ownedFilePath);
+    } catch {
+      throw createHttpError(400, 'Fichier de messagerie introuvable');
+    }
+  }
+
   if (type === 'text') {
     const { blocked, reason } = filterMessage(content);
     if (blocked) {
@@ -468,6 +490,7 @@ async function loadConversationAttachmentForUser(userId, messageId) {
       m.conv_id,
       m.sender_id,
       m.type,
+      m.photo_url,
       m.attachment_url,
       m.attachment_name,
       m.attachment_mime_type,
@@ -487,11 +510,12 @@ async function loadConversationAttachmentForUser(userId, messageId) {
     throw createHttpError(404, 'Pièce jointe introuvable');
   }
 
-  if (!row.attachment_url || !row.attachment_name) {
+  const mediaUrl = row.type === 'document' ? row.attachment_url : row.photo_url;
+  if (!mediaUrl) {
     throw createHttpError(404, 'Pièce jointe introuvable');
   }
 
-  const filePath = resolveAttachmentFilePath(row.attachment_url);
+  const filePath = resolveAttachmentFilePath(mediaUrl);
   if (!filePath) {
     throw createHttpError(404, 'Pièce jointe introuvable');
   }
@@ -499,8 +523,8 @@ async function loadConversationAttachmentForUser(userId, messageId) {
   return {
     messageId: row.id,
     conv_id: row.conv_id,
-    attachment_url: row.attachment_url,
-    attachment_name: row.attachment_name,
+    attachment_url: mediaUrl,
+    attachment_name: row.attachment_name || path.basename(filePath),
     attachment_mime_type: row.attachment_mime_type,
     attachment_size_bytes: row.attachment_size_bytes,
     filePath,
