@@ -59,7 +59,10 @@ function getDocumentFilePath(fileUrl) {
     const index = pathname.indexOf(marker);
     if (index === -1) return null;
     const relative = pathname.slice(index + marker.length);
-    return path.join(getUploadBaseDir(), relative);
+    const root = getUploadBaseDir();
+    const resolved = path.resolve(root, relative);
+    if (resolved !== root && !resolved.startsWith(`${root}${path.sep}`)) return null;
+    return resolved;
   } catch {
     return null;
   }
@@ -113,7 +116,7 @@ router.get('/documents', async (req, res, next) => {
         document_type: row.document_type,
         document_type_label: formatDocumentTypeLabel(row.document_type),
         label: row.label ?? null,
-        file_url: row.file_url,
+        download_url: `/api/pro/documents/${Number(row.id)}/download`,
         file_name: row.file_name ?? null,
         file_size: row.file_size == null ? null : Number(row.file_size),
         status: row.status,
@@ -125,6 +128,30 @@ router.get('/documents', async (req, res, next) => {
     });
   } catch (err) {
     next(err);
+  }
+});
+
+router.get('/documents/:id/download', async (req, res, next) => {
+  try {
+    if (!req.user?.is_pro) {
+      return res.status(403).json({ error: 'Espace réservé aux comptes Pro.' });
+    }
+    const documentId = Number(req.params.id);
+    if (!Number.isFinite(documentId) || documentId <= 0) {
+      return res.status(400).json({ error: 'Document invalide.' });
+    }
+    const result = await query(
+      `SELECT file_url, file_name FROM pro_documents WHERE id = $1 AND pro_id = $2 LIMIT 1`,
+      [documentId, req.user.id]
+    );
+    const doc = result.rows[0];
+    const filePath = getDocumentFilePath(doc?.file_url);
+    if (!doc || !filePath) return res.status(404).json({ error: 'Document introuvable.' });
+    await fs.access(filePath);
+    return res.download(filePath, doc.file_name || path.basename(filePath));
+  } catch (err) {
+    if (err.code === 'ENOENT') return res.status(404).json({ error: 'Document introuvable.' });
+    return next(err);
   }
 });
 
@@ -196,7 +223,7 @@ router.post('/documents', uploadLimiter, upload.single('file'), async (req, res,
         document_type: documentType,
         document_type_label: formatDocumentTypeLabel(documentType),
         label,
-        file_url: fileUrl,
+        download_url: `/api/pro/documents/${Number(result.rows[0].id)}/download`,
         file_name: req.file.originalname || filename,
         file_size: req.file.size,
         status: 'pending',

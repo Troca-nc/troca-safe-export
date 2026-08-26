@@ -4,9 +4,12 @@ const knownPrivatePaths = [
   '/uploads/chat/security-a/security-document.pdf',
   '/uploads/chat/security-a/security-photo.webp',
   '/uploads/chat/security-a/security-audio.webm',
+  '/uploads/qr-tickets/security-ticket-paid.png',
+]
+
+const remediatedPrivatePaths = [
   '/uploads/pro-documents/security-pro-a/security-ridet.pdf',
   '/uploads/imports/security-import.csv',
-  '/uploads/qr-tickets/security-ticket-paid.png',
 ]
 
 test('security harness reaches the real backend through nginx', async ({ request }) => {
@@ -22,6 +25,16 @@ for (const pathname of knownPrivatePaths) {
     expect(response.status()).toBe(200)
     expect(response.headers()['cache-control'] || '').toContain('public')
     expect(await response.text()).toContain('KALICO_TEST_ONLY')
+  })
+}
+
+
+for (const pathname of remediatedPrivatePaths) {
+  test(`private storage is denied for ${pathname.split('/')[2]}`, async ({ request }) => {
+    const response = await request.get(pathname)
+    expect(response.status()).toBe(404)
+    expect(response.headers()['cache-control'] || '').not.toContain('public')
+    expect(await response.text()).not.toContain('KALICO_TEST_ONLY')
   })
 }
 

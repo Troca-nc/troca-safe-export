@@ -18,9 +18,6 @@ type ImportJob = {
   id: number
   pro_id: number
   original_filename: string
-  stored_filename: string
-  file_path: string
-  file_url: string
   mime_type: string
   file_size_bytes: number
   file_format: string

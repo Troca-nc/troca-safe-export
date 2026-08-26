@@ -941,6 +941,7 @@ export const proDocumentsApi = {
     invalidateApiCache('pro.')
     return res
   },
+  download: (id: string | number) => api.get(`/pro/documents/${id}/download`, { responseType: 'blob' }),
 }
 
 export const deliveryApi = {
@@ -991,6 +992,7 @@ export const adminApi = {
     () => api.get('/admin/pro-documents'),
     CACHE_TTL.short,
   ),
+  downloadProDocument: (id: string | number) => api.get(`/admin/pro-documents/${id}/download`, { responseType: 'blob' }),
   validateProDocument: async (id: string | number, data: { status: 'validated' | 'rejected'; rejection_reason?: string }) => {
     const res = await api.post(`/admin/pro-documents/${id}/validate`, data)
       invalidateApiCache('admin.proDocuments.')
