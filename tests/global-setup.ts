@@ -13,7 +13,7 @@ const BACKEND_HEALTH_URL = new URL('/api/health', BACKEND_BASE_URL).toString()
 const SERVER_STATE_FILE = path.join(ROOT, 'playwright', '.server.json')
 const USE_DEMO_SERVER = process.env.PLAYWRIGHT_USE_DEMO_SERVER !== 'false'
 const USE_LOCAL_SERVERS = process.env.PLAYWRIGHT_USE_LOCAL_SERVER !== 'false' && !isExternalUrl
-const NODE_EXE = process.env.NODE_EXE || 'C:\\Program Files\\nodejs\\node.exe'
+const NODE_EXE = process.env.NODE_EXE || process.execPath
 
 const AUTH_ACCOUNTS: Array<{ role: AuthRole; email: string; password: string }> = [
   { role: 'particulier', email: 'particulier@demo.kalico', password: 'Demo1234!' },

@@ -8,7 +8,7 @@ const { loadDemoEnv } = require('./scripts/loadDemoEnv');
 loadDemoEnv();
 
 const ROOT = __dirname;
-const NODE_EXE = process.env.NODE_EXE || 'C:\\Program Files\\nodejs\\node.exe';
+const NODE_EXE = process.env.NODE_EXE || process.execPath;
 const LOG_DIR = path.join(ROOT, 'playwright-logs');
 const SERVER_STATE_FILE = path.join(ROOT, 'playwright', '.server.json');
 fs.mkdirSync(LOG_DIR, { recursive: true });
