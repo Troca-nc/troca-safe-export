@@ -66,4 +66,14 @@ describe('P0-B log and internal-token boundaries', () => {
       assert.ok(!content.includes('$http_referer'));
     }
   });
+
+  it('les sites Nginx gardent des CSP monolignes et la syntaxe HTTP2 moderne', () => {
+    const root = path.resolve(__dirname, '../../../../');
+    for (const relative of ['nginx/sites/kalico.nc.conf', 'nginx/sites/admin.kalico.nc.conf']) {
+      const content = fs.readFileSync(path.join(root, relative), 'utf8');
+      assert.ok(!/add_header\s+Content-Security-Policy\s+"\s*\r?\n/.test(content));
+      assert.ok(!/listen\s+443\s+ssl\s+http2\s*;/.test(content));
+      assert.ok(/listen\s+443\s+ssl\s*;\s*\r?\n\s*http2\s+on\s*;/.test(content));
+    }
+  });
 });
