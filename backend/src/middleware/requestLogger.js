@@ -1,6 +1,7 @@
 'use strict';
 
 const { logger } = require('../utils/logger');
+const { sanitizeLogPath } = require('../utils/logSanitizer');
 const { recordHttp } = require('../services/observability');
 
 function requestLogger(req, res, next) {
@@ -8,10 +9,11 @@ function requestLogger(req, res, next) {
 
   res.on('finish', () => {
     const durationMs = Date.now() - startedAt;
+    const path = sanitizeLogPath(req.originalUrl || req.url);
     recordHttp({
       requestId: req.requestId,
       method: req.method,
-      path: req.originalUrl || req.url,
+      path,
       statusCode: res.statusCode,
       durationMs,
       userId: req.user?.id ?? null,
@@ -19,7 +21,7 @@ function requestLogger(req, res, next) {
     logger.info('http_request', {
       request_id: req.requestId,
       method: req.method,
-      path: req.originalUrl || req.url,
+      path,
       status_code: res.statusCode,
       duration_ms: durationMs,
       user_id: req.user?.id ?? null,

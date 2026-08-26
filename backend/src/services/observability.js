@@ -1,5 +1,7 @@
 'use strict';
 
+const { sanitizeLogPath } = require('../utils/logSanitizer');
+
 const os = require('os');
 const { query } = require('../config/database');
 const { getRedisClient } = require('../config/redis');
@@ -634,6 +636,8 @@ async function readDistributedSnapshot() {
 }
 
 function recordHttp(entry) {
+  const safeEntry = { ...entry, path: sanitizeLogPath(entry.path) };
+  entry = safeEntry;
   state.http.total += 1;
   state.http.byStatus[entry.statusCode] = (state.http.byStatus[entry.statusCode] || 0) + 1;
   if (entry.durationMs >= 1000) state.http.slow += 1;
@@ -681,6 +685,9 @@ function recordHttp(entry) {
 }
 
 function recordError(entry) {
+  const safeEntry = { ...entry };
+  if ('path' in safeEntry) safeEntry.path = sanitizeLogPath(safeEntry.path);
+  entry = safeEntry;
   pushLimited(state.errors, {
     ts: nowIso(),
     ...entry,
