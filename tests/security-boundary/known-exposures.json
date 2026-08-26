@@ -3,8 +3,6 @@
   "base_commit": "59f23c8",
   "entries": [
     { "id": "EXP-001", "finding": "KAL-SEC-006", "removal_lot": "D" },
-    { "id": "EXP-002", "finding": "KAL-SEC-006", "removal_lot": "E" },
-    { "id": "EXP-003", "finding": "KAL-SEC-006", "removal_lot": "E" },
     { "id": "EXP-004", "finding": "KAL-SEC-007", "removal_lot": "F" },
     { "id": "EXP-005", "finding": "KAL-OPS-011", "removal_lot": "C" },
     { "id": "EXP-008", "finding": "KAL-SEC-017", "removal_lot": "B" }

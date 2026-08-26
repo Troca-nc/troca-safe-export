@@ -11,7 +11,7 @@ type ProDocument = {
   document_type: string
   document_type_label: string
   label: string | null
-  file_url: string
+  download_url: string
   file_name: string | null
   file_size: number | null
   status: 'pending' | 'validated' | 'rejected' | string
@@ -61,6 +61,17 @@ export default function DocumentUploader({
       setDocuments([])
     } finally {
       setLoading(false)
+    }
+  }
+
+  const openDocument = async (doc: ProDocument) => {
+    try {
+      const response = await proDocumentsApi.download(doc.id)
+      const url = URL.createObjectURL(response.data)
+      window.open(url, '_blank', 'noopener,noreferrer')
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
+    } catch {
+      setError('Impossible d\u2019ouvrir ce document.')
     }
   }
 
@@ -250,14 +261,13 @@ export default function DocumentUploader({
                       </div>
 
                       <div className="flex shrink-0 items-center gap-2">
-                        <a
-                          href={doc.file_url}
-                          target="_blank"
-                          rel="noreferrer"
+                        <button
+                          type="button"
+                          onClick={() => void openDocument(doc)}
                           className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-white px-3 py-2 text-xs font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
                         >
                           Ouvrir
-                        </a>
+                        </button>
                         {doc.status === 'pending' ? (
                           <button
                             type="button"

@@ -208,6 +208,10 @@ app.use('/api/messages',   messagesRouter);
 app.use('/api/categories', categoriesRouter);
 app.use('/api/communes',   communesRouter);
 app.use('/api/upload',     uploadRouter);
+app.use(['/uploads/pro-documents', '/uploads/imports'], (_req, res) => {
+  res.set('Cache-Control', 'no-store');
+  return res.status(404).json({ error: 'Fichier introuvable' });
+});
 app.use('/uploads',        express.static(path.resolve(process.env.STORAGE_LOCAL_PATH || './uploads')));
 app.use('/uploads',        uploadsRouter);
 app.use('/api/admin',      adminRouter);

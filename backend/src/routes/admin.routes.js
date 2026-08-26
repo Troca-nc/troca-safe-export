@@ -5,6 +5,8 @@
 // ============================================================
 
 const express = require('express')
+const fs = require('fs').promises
+const path = require('path')
 const { query, withTransaction, checkConnection, pool } = require('../config/database')
 const { getRedisClient } = require('../config/redis')
 const { requireAdminToken, adminRateLimit } = require('../middleware/adminApiToken')
@@ -83,6 +85,21 @@ function getBaseUrl() {
   return (process.env.BASE_URL || 'http://localhost:3000').replace(/\/$/, '')
 }
 
+function resolvePrivateUpload(fileUrl) {
+  try {
+    const parsed = new URL(fileUrl, getBaseUrl())
+    const marker = '/uploads/'
+    const index = parsed.pathname.indexOf(marker)
+    if (index < 0) return null
+    const root = path.resolve(process.env.STORAGE_LOCAL_PATH || './uploads')
+    const resolved = path.resolve(root, decodeURIComponent(parsed.pathname.slice(index + marker.length)))
+    if (resolved !== root && !resolved.startsWith(`${root}${path.sep}`)) return null
+    return resolved
+  } catch {
+    return null
+  }
+}
+
 async function logAdminAction(req, action, targetType, targetId, metadata = {}) {
   const adminId = Number(req?.user?.id || 0)
   if (!adminId) return
@@ -130,7 +147,7 @@ router.get('/pro-documents', async (_req, res, next) => {
         document_type: row.document_type,
         document_type_label: formatDocumentTypeLabel(row.document_type),
         label: row.label ?? null,
-        file_url: row.file_url,
+        download_url: `/api/admin/pro-documents/${Number(row.id)}/download`,
         file_name: row.file_name ?? null,
         file_size: row.file_size == null ? null : Number(row.file_size),
         status: row.status,
@@ -142,6 +159,27 @@ router.get('/pro-documents', async (_req, res, next) => {
     })
   } catch (err) {
     next(err)
+  }
+})
+
+router.get('/pro-documents/:id/download', async (req, res, next) => {
+  try {
+    const documentId = Number(req.params.id)
+    if (!Number.isFinite(documentId) || documentId <= 0) {
+      return res.status(400).json({ error: 'Document invalide.' })
+    }
+    const result = await query(
+      `SELECT file_url, file_name FROM pro_documents WHERE id = $1 LIMIT 1`,
+      [documentId]
+    )
+    const doc = result.rows[0]
+    const filePath = resolvePrivateUpload(doc?.file_url)
+    if (!doc || !filePath) return res.status(404).json({ error: 'Document introuvable.' })
+    await fs.access(filePath)
+    return res.download(filePath, doc.file_name || path.basename(filePath))
+  } catch (err) {
+    if (err.code === 'ENOENT') return res.status(404).json({ error: 'Document introuvable.' })
+    return next(err)
   }
 })
 

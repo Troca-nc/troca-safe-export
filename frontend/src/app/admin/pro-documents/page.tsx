@@ -14,7 +14,7 @@ type AdminProDocument = {
   pro_commune?: string | null
   document_type_label: string
   label: string | null
-  file_url: string
+  download_url: string
   file_name: string | null
   file_size: number | null
   status: 'pending' | 'validated' | 'rejected' | string
@@ -64,6 +64,17 @@ function AdminProDocumentsContent() {
       setDocuments([])
     } finally {
       setLoading(false)
+    }
+  }
+
+  const openDocument = async (doc: AdminProDocument) => {
+    try {
+      const response = await adminApi.downloadProDocument(doc.id)
+      const url = URL.createObjectURL(response.data)
+      window.open(url, '_blank', 'noopener,noreferrer')
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
+    } catch {
+      setError('Impossible d\u2019ouvrir ce document.')
     }
   }
 
@@ -186,14 +197,13 @@ function AdminProDocumentsContent() {
                   </div>
 
                   <div className="flex shrink-0 flex-col gap-2 lg:w-56">
-                    <a
-                      href={doc.file_url}
-                      target="_blank"
-                      rel="noreferrer"
+                    <button
+                      type="button"
+                      onClick={() => void openDocument(doc)}
                       className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
                     >
                       Ouvrir le fichier
-                    </a>
+                    </button>
                     <button
                       type="button"
                       onClick={() => void handleValidate(doc.id, 'validated')}
