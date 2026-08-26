@@ -59,6 +59,13 @@ export default defineConfig({
     actionTimeout: 15_000,
   },
   projects: [
+    {
+      name: 'ci-gate',
+      testMatch: /ci\/critical-gate\.spec\.ts$/,
+      use: {
+        ...desktop,
+      },
+    },
     ...visualProjects,
     {
       name: 'mobile-chrome',
