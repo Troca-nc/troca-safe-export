@@ -55,6 +55,14 @@ async function seedDatabase() {
       users[key] = result.rows[0].id;
     }
 
+    const existingListing = await client.query(
+      `SELECT id FROM annonces WHERE titre = $1 ORDER BY id LIMIT 1`,
+      [`${TEST_MARKER} listing`]
+    );
+    if (existingListing.rowCount) {
+      return { users, listingId: existingListing.rows[0].id, reused: true };
+    }
+
     const category = await client.query(`SELECT id FROM categories ORDER BY id LIMIT 1`);
     const listing = await client.query(
       `INSERT INTO annonces (user_id, category_id, titre, description, status)
@@ -69,8 +77,8 @@ async function seedDatabase() {
     );
     const imageId = image.rows[0].id;
     await client.query(
-      `UPDATE annonce_images SET url=$1, thumbnail_url=$2,
-       variants=jsonb_build_object('original', jsonb_build_object('path', $3, 'url', $1)) WHERE id=$4`,
+      `UPDATE annonce_images SET url=$1::text, thumbnail_url=$2::text,
+       variants=jsonb_build_object('original', jsonb_build_object('path', $3::text, 'url', $1::text)) WHERE id=$4`,
       [`/uploads/${imageId}`, `/uploads/${imageId}?w=400`, `listings/${listingId}/security-public.webp`, imageId]
     );
 

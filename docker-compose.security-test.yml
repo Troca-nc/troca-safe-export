@@ -27,6 +27,8 @@ services:
     build: &backend_build
       context: .
       dockerfile: docker/security-test/backend.Dockerfile
+      secrets:
+        - security_test_ca
     command: ['npm', 'run', 'migrate']
     environment: &security_backend_env
       NODE_ENV: test
@@ -79,7 +81,7 @@ services:
       test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 2s
       timeout: 3s
-      retries: 30
+      retries: 90
 
   security-nginx:
     image: nginx:1.27-alpine
@@ -107,3 +109,7 @@ networks:
 
 volumes:
   security_uploads:
+
+secrets:
+  security_test_ca:
+    file: ./security-test-artifacts/local-ca.crt

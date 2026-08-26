@@ -24,3 +24,11 @@ docker compose -p kalico-security-local -f docker-compose.security-test.yml down
 ```
 
 The current exposure tests intentionally characterize known findings. They are temporary evidence, not target behavior. Each entry is tracked in `known-exposures.json` and must be retired by its corrective lot.
+
+## Local TLS interception
+
+The backend image accepts a local public CA through the BuildKit secret
+`security_test_ca`. Place it at
+`security-test-artifacts/local-ca.crt`; this path is ignored by Git and must
+never contain a private key. The CA is used only while installing locked npm
+dependencies and is removed before the image layer is finalized.
