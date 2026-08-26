@@ -102,7 +102,7 @@ async function recordErrorLog(entry) {
     user_email: null,
     ip: maskIp(entry.ip),
     user_agent: null,
-    body: sanitizeBody(entry.body),
+    body: null,
     request_id: entry.request_id ?? null,
     timestamp: entry.timestamp || new Date().toISOString(),
   };

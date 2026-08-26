@@ -3,15 +3,17 @@
 // ============================================================
 
 const { logger } = require('../utils/logger');
+const { sanitizeLogPath } = require('../utils/logSanitizer');
 const { recordError } = require('../services/observability');
 const { recordErrorLog } = require('../services/errorLogStore');
 
 const errorHandler = (err, req, res, next) => {
+  const path = sanitizeLogPath(req?.originalUrl ?? req?.url);
   recordError({
     source: 'api',
     request_id: req?.requestId ?? null,
     method: req?.method ?? null,
-    path: req?.originalUrl ?? req?.url ?? null,
+    path,
     user_id: req?.user?.id ?? null,
     error_code: err?.code ?? null,
     message: err?.message ?? null,
@@ -21,19 +23,19 @@ const errorHandler = (err, req, res, next) => {
     status: err?.status || 500,
     message: err?.message || 'Erreur interne du serveur',
     stack: process.env.NODE_ENV === 'production' ? null : err?.stack,
-    route: `${req?.method || 'GET'} ${req?.path || req?.originalUrl || req?.url || '/'}`,
+    route: `${req?.method || 'GET'} ${path}`,
     user_id: req?.user?.id ?? null,
     user_email: req?.user?.email ?? null,
     ip: req?.ip ?? null,
     user_agent: req?.headers?.['user-agent'] ?? null,
-    body: req?.body ?? null,
+    body: null,
     request_id: req?.requestId ?? null,
     timestamp: new Date().toISOString(),
   });
   logger.error('request_error', {
     request_id: req?.requestId ?? null,
     method: req?.method ?? null,
-    path: req?.originalUrl ?? req?.url ?? null,
+    path,
     user_id: req?.user?.id ?? null,
     error: err,
   });

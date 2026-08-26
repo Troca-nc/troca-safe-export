@@ -3,6 +3,7 @@
 async function run() {
   const { flushTests } = require('../helpers');
   require('./securityHarness.test');
+  require('./logSanitization.test');
   await flushTests();
   if (process.exitCode === 1) process.exit(1);
 }
