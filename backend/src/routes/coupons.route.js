@@ -52,7 +52,7 @@ async function insertCoupon({ userId, payload }) {
   const code = generateCode();
   const couponUrl = `${baseUrl}/coupon/${code}`;
   const qrCodeDataUrl = await generateQrCodeFromUrl(couponUrl);
-  const qrCodeUrl = await saveQrCodeToStorage(`coupon-${code}`, qrCodeDataUrl);
+  const qrCodeUrl = await saveQrCodeToStorage(`coupon-${code}`, qrCodeDataUrl, 'qr-coupons');
 
   const result = await query(
     `INSERT INTO coupons

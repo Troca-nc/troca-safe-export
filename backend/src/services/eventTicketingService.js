@@ -3,7 +3,7 @@
 const { query, withTransaction } = require('../config/database');
 const { isConfiguredValue } = require('../config/env');
 const payplug = require('./payplugService');
-const { generateTicketToken, generateQrCode, saveQrCodeToStorage } = require('./qrCodeService');
+const { generateTicketToken } = require('./qrCodeService');
 
 const EVENT_CATEGORIES = new Set([
   'concert',
@@ -269,8 +269,7 @@ async function createOrderTickets(eventId, orderId, buyer, selectedTickets, stat
     const ticketType = item.ticketType;
     for (let index = 0; index < item.quantity; index += 1) {
       const token = generateTicketToken();
-      const qrData = await generateQrCode(token);
-      const qrCodeUrl = await saveQrCodeToStorage(token, qrData);
+      const qrCodeUrl = null;
       const ticketStatus = status === 'paid' ? 'active' : 'active';
       const { rows } = await query(
         `INSERT INTO tickets
@@ -365,8 +364,7 @@ async function reserveEventTickets({ eventId, buyer, items, provider = 'stripe',
     for (const item of selectedTickets) {
       for (let index = 0; index < item.quantity; index += 1) {
         const token = generateTicketToken();
-        const qrData = await generateQrCode(token);
-        const qrCodeUrl = await saveQrCodeToStorage(token, qrData);
+        const qrCodeUrl = null;
         const ticketResult = await client.query(
           `INSERT INTO tickets
              (order_id, event_id, ticket_type_id, buyer_name, buyer_email, price_xpf, token, qr_code_url, is_scanned, status)
@@ -725,7 +723,7 @@ async function getTicketByToken(token) {
   return {
     id: Number(row.id),
     token: row.token,
-    qr_code_url: row.qr_code_url ?? null,
+    qr_code_url: null,
     status: row.status,
     is_scanned: Boolean(row.is_scanned),
     scanned_at: row.scanned_at ?? null,

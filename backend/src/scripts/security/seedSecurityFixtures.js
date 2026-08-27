@@ -136,7 +136,7 @@ async function seedDatabase() {
     }
     await client.query(
       `INSERT INTO coupons (pro_id,code,label,discount_type,is_active,qr_code_url)
-       VALUES ($1,'SECURITY-ACTIVE','Security coupon','percent',TRUE,'/uploads/qr-tickets/security-coupon-active.png')`,
+       VALUES ($1,'SECURITY-ACTIVE','Security coupon','percent',TRUE,'/uploads/qr-coupons/security-coupon-active.png')`,
       [users.proA]
     );
 
@@ -154,7 +154,7 @@ async function main() {
   await writeFixture(root, 'imports/security-import.csv', Buffer.from(`title,price_xpf\n${TEST_MARKER},1000\n`));
   await writeFixture(root, 'qr-tickets/security-ticket-paid.png', Buffer.from(TEST_MARKER));
   await writeFixture(root, 'qr-tickets/security-ticket-pending.png', Buffer.from(TEST_MARKER));
-  await writeFixture(root, 'qr-tickets/security-coupon-active.png', Buffer.from(TEST_MARKER));
+  await writeFixture(root, 'qr-coupons/security-coupon-active.png', Buffer.from(TEST_MARKER));
   await writeFixture(root, 'orphan/security-orphan.bin', Buffer.from(TEST_MARKER));
   const summary = await seedDatabase();
   console.log(JSON.stringify({ ok: true, marker: TEST_MARKER, counts: { users: Object.keys(summary.users).length, conversations: 1, tickets: 2, coupons: 1 } }));

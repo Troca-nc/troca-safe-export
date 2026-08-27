@@ -5,6 +5,7 @@ async function run() {
   require('./securityHarness.test');
   require('./logSanitization.test');
   require('./messageMediaPresentation.test');
+  require('./qrStorageBoundary.test');
   await flushTests();
   if (process.exitCode === 1) process.exit(1);
 }

@@ -1,8 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-const knownPrivatePaths = [
-  '/uploads/qr-tickets/security-ticket-paid.png',
-]
+const knownPrivatePaths: string[] = []
 
 const remediatedPrivatePaths = [
   '/uploads/chat/security-a/security-document.pdf',
@@ -10,6 +8,7 @@ const remediatedPrivatePaths = [
   '/uploads/chat/security-a/security-audio.webm',
   '/uploads/pro-documents/security-pro-a/security-ridet.pdf',
   '/uploads/imports/security-import.csv',
+  '/uploads/qr-tickets/security-ticket-paid.png',
 ]
 
 test('security harness reaches the real backend through nginx', async ({ request }) => {
@@ -27,6 +26,12 @@ for (const pathname of knownPrivatePaths) {
     expect(await response.text()).toContain('KALICO_TEST_ONLY')
   })
 }
+
+test('public coupon QR remains available from its dedicated storage class', async ({ request }) => {
+  const response = await request.get('/uploads/qr-coupons/security-coupon-active.png')
+  expect(response.status()).toBe(200)
+  expect(await response.text()).toContain('KALICO_TEST_ONLY')
+})
 
 
 for (const pathname of remediatedPrivatePaths) {
