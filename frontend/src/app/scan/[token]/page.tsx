@@ -12,7 +12,8 @@ import { useAuthStore } from '@/store/authStore'
 
 type TicketPayload = {
   id: number
-  token: string
+  token?: string
+  can_manage?: boolean
   qr_code_url?: string | null
   status: string
   is_scanned: boolean
@@ -84,7 +85,7 @@ export default function TicketValidationPage() {
 
     setScanning(true)
     try {
-      const response = await eventsApi.scanTicket(ticket.token, { location: location.trim() || null })
+      const response = await eventsApi.scanTicket(token, { location: location.trim() || null })
       setTicket(response.data?.data?.ticket || ticket)
       setSuccess('Billet validï¿½ avec succï¿½s.')
     } catch (err: any) {
@@ -108,7 +109,7 @@ export default function TicketValidationPage() {
               Validation de billet
             </p>
             <h1 className="mt-4 font-display text-4xl font-bold text-night">{ticket.event_title || 'Billet Kalico'}</h1>
-            <p className="mt-2 text-sm text-night/60">{ticket.ticket_type_name || 'Billet standard'} ï¿½ {ticket.token}</p>
+            <p className="mt-2 text-sm text-night/60">{ticket.ticket_type_name || 'Billet standard'}</p>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5">
@@ -116,14 +117,14 @@ export default function TicketValidationPage() {
                 <p className="mt-2 text-lg font-bold text-night">{ticket.status === 'used' ? 'Dï¿½jï¿½ utilisï¿½' : 'Valide'}</p>
                 <p className="mt-1 text-sm text-night/60">{ticket.is_scanned ? 'Ce billet a dï¿½jï¿½ ï¿½tï¿½ scannï¿½.' : 'Ce billet est prï¿½t ï¿½ ï¿½tre contrï¿½lï¿½.'}</p>
               </div>
-              <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5">
+              {ticket.can_manage ? <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Acheteur</p>
                 <p className="mt-2 text-lg font-bold text-night">{ticket.buyer_name || 'Non renseignï¿½'}</p>
                 <p className="mt-1 text-sm text-night/60">{ticket.buyer_email || 'Email non renseignï¿½'}</p>
-              </div>
+              </div> : null}
             </div>
 
-            <div className="mt-6 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5">
+            {ticket.can_manage ? <div className="mt-6 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5">
               <p className="text-sm font-semibold text-night">Contrï¿½le sur place</p>
               <input
                 value={location}
@@ -143,7 +144,11 @@ export default function TicketValidationPage() {
                 {scanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <BadgeCheck className="h-4 w-4" />}
                 Marquer comme utilisï¿½
               </button>
-            </div>
+            </div> : (
+              <div className="mt-6 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5 text-sm text-night/60">
+                Connectez-vous avec le compte organisateur pour contrôler ce billet.
+              </div>
+            )}
 
             <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-night/60">
               <span className="inline-flex items-center gap-2 rounded-full bg-sand px-3 py-1.5">

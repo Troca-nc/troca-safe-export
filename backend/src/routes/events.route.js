@@ -11,6 +11,7 @@ const {
   finalizeEventTicketPayment,
   getPublicEventById,
   getTicketByToken,
+  serializeTicketForViewer,
   listPublicEvents,
   reserveEventTickets,
   scanTicket,
@@ -150,13 +151,13 @@ router.post('/:id/reservations', optionalAuth, validate(reserveSchema), async (r
   }
 });
 
-router.get('/tickets/:token', async (req, res, next) => {
+router.get('/tickets/:token', optionalAuth, async (req, res, next) => {
   try {
     const ticket = await getTicketByToken(req.params.token);
     if (!ticket) {
       return res.status(404).json({ error: 'Billet introuvable.' });
     }
-    return res.json({ data: ticket });
+    return res.json({ data: serializeTicketForViewer(ticket, req.user) });
   } catch (err) {
     next(err);
   }
@@ -182,13 +183,13 @@ router.post('/tickets/:token/scan', authenticate, scanLimiter, validate(scanSche
 
     const result = await scanTicket({
       token: req.params.token,
-      scannerUserId: req.user.id,
+      scannerUser: req.user,
       location: req.body.location || null,
     });
 
     return res.json({
       data: {
-        ticket: result.ticket,
+        ticket: serializeTicketForViewer(result.ticket, req.user),
         already_scanned: Boolean(result.already_scanned),
       },
     });
