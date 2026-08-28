@@ -8,7 +8,6 @@ const { sendTicketEmail } = require('../services/emailService');
 const {
   createEventAndBonPlan,
   expireEventTicketReservations,
-  finalizeEventTicketPayment,
   getPublicEventById,
   getTicketByToken,
   serializeTicketForViewer,
@@ -68,7 +67,7 @@ const reserveSchema = Joi.object({
   buyer_email: Joi.string().email().max(255).required(),
   buyer_name: Joi.string().trim().min(2).max(200).required(),
   buyer_phone: Joi.string().trim().max(30).allow('', null),
-  provider: Joi.string().valid('stripe', 'payplug').default('stripe'),
+  provider: Joi.string().valid('stripe').default('stripe'),
   items: Joi.array().items(
     Joi.object({
       ticket_type_id: Joi.number().integer().positive().required(),
@@ -201,19 +200,6 @@ router.post('/tickets/:token/scan', authenticate, scanLimiter, validate(scanSche
 router.post('/jobs/expire', authenticate, async (_req, res, next) => {
   try {
     const result = await expireEventTicketReservations();
-    return res.json({ data: result });
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.post('/webhooks/stripe/finalize', async (req, res, next) => {
-  try {
-    const providerRef = String(req.body?.provider_ref || '').trim();
-    if (!providerRef) {
-      return res.status(400).json({ error: 'provider_ref requis.' });
-    }
-    const result = await finalizeEventTicketPayment({ providerRef, paymentStatus: 'succeeded' });
     return res.json({ data: result });
   } catch (err) {
     next(err);
