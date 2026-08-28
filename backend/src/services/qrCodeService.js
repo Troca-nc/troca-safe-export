@@ -37,7 +37,7 @@ async function generateQrCodeFromUrl(url) {
   });
 }
 
-async function saveQrCodeToStorage(token, base64Data) {
+async function saveQrCodeToStorage(token, base64Data, folder) {
   const data = String(base64Data || '');
   const match = data.match(/^data:image\/png;base64,(.+)$/i);
   const base64 = match ? match[1] : data.replace(/\s+/g, '');
@@ -45,14 +45,17 @@ async function saveQrCodeToStorage(token, base64Data) {
     throw new Error('QR code vide');
   }
 
-  const dir = path.join(getUploadRoot(), 'qr-tickets');
+  if (folder !== 'qr-coupons') {
+    throw new Error('Classe de stockage QR invalide');
+  }
+  const dir = path.join(getUploadRoot(), folder);
   await ensureDir(dir);
 
   const filename = `${token}.png`;
   const filePath = path.join(dir, filename);
   await fs.writeFile(filePath, Buffer.from(base64, 'base64'));
 
-  return `${getBaseUrl()}/uploads/qr-tickets/${encodeURIComponent(filename)}`;
+  return `${getBaseUrl()}/uploads/${folder}/${encodeURIComponent(filename)}`;
 }
 
 module.exports = {
