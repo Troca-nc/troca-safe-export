@@ -21,6 +21,7 @@ const SUITES = [
   './push.service.test',
   './payment.route.test',
   './trocService.test',
+  './eventTicketAccess.test',
 ];
 
 async function run() {

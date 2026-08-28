@@ -709,7 +709,7 @@ async function getTicketByToken(token) {
   const { rows } = await query(
     `SELECT t.*, e.title AS event_title, e.event_date, e.event_time, e.status AS event_status,
             tt.name AS ticket_type_name, tt.price_xpf AS ticket_price_xpf,
-            o.buyer_name, o.buyer_email, o.status AS order_status
+            e.organizer_id, o.buyer_id, o.buyer_name, o.buyer_email, o.status AS order_status
        FROM tickets t
        JOIN events e ON e.id = t.event_id
        LEFT JOIN ticket_types tt ON tt.id = t.ticket_type_id
@@ -737,30 +737,79 @@ async function getTicketByToken(token) {
     buyer_name: row.buyer_name ?? null,
     buyer_email: row.buyer_email ?? null,
     order_status: row.order_status ?? null,
+    organizer_id: row.organizer_id == null ? null : Number(row.organizer_id),
+    buyer_id: row.buyer_id == null ? null : Number(row.buyer_id),
   };
 }
 
-async function scanTicket({ token, scannerUserId, location = null }) {
+function canManageTicket(user, ticket) {
+  if (!user || !ticket) return false;
+  if (user.is_admin) return true;
+  const userId = Number(user.id || 0);
+  const organizerId = Number(ticket.organizer_id || 0);
+  return userId > 0 && organizerId > 0 && userId === organizerId;
+}
+
+function serializeTicketForViewer(ticket, user = null) {
+  if (!ticket) return null;
+  const publicTicket = {
+    id: ticket.id,
+    can_manage: false,
+    status: ticket.status,
+    is_scanned: ticket.is_scanned,
+    event_title: ticket.event_title,
+    event_date: ticket.event_date,
+    event_time: ticket.event_time,
+    event_status: ticket.event_status,
+    ticket_type_name: ticket.ticket_type_name,
+  };
+  if (!canManageTicket(user, ticket)) return publicTicket;
+  return {
+    ...publicTicket,
+    can_manage: true,
+    token: ticket.token,
+    scanned_at: ticket.scanned_at,
+    scan_location: ticket.scan_location,
+    ticket_price_xpf: ticket.ticket_price_xpf,
+    buyer_name: ticket.buyer_name,
+    buyer_email: ticket.buyer_email,
+    order_status: ticket.order_status,
+  };
+}
+
+async function scanTicket({ token, scannerUser, location = null }) {
   const ticket = await getTicketByToken(token);
   if (!ticket) {
     throw Object.assign(new Error('Billet introuvable.'), { status: 404 });
   }
+  if (!canManageTicket(scannerUser, ticket)) {
+    throw Object.assign(new Error('Accès réservé à l’organisateur de cet événement.'), { status: 403 });
+  }
   if (ticket.status === 'used') {
     return { ticket, already_scanned: true };
   }
+  if (ticket.status !== 'active' || ticket.order_status !== 'paid') {
+    throw Object.assign(new Error('Ce billet n’est pas valide.'), { status: 409 });
+  }
 
-  await query(
+  const updated = await query(
     `UPDATE tickets
         SET status = 'used',
             is_scanned = TRUE,
             scanned_at = NOW(),
             scanned_by = $2,
             scan_location = $3
-      WHERE token = $1`,
-    [token, scannerUserId || null, location]
+      WHERE token = $1
+        AND status = 'active'
+        AND is_scanned = FALSE
+      RETURNING id`,
+    [token, scannerUser.id, location]
   );
 
-  return { ticket: await getTicketByToken(token), already_scanned: false };
+  return {
+    ticket: await getTicketByToken(token),
+    already_scanned: updated.rows.length === 0,
+  };
 }
 
 module.exports = {
@@ -768,6 +817,8 @@ module.exports = {
   expireEventTicketReservations,
   finalizeEventTicketPayment,
   getTicketByToken,
+  canManageTicket,
+  serializeTicketForViewer,
   getPublicEventById,
   listPublicEvents,
   reserveEventTickets,
