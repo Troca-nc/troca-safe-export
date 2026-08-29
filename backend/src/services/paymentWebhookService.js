@@ -4,6 +4,7 @@ const { activateBonPlanFromPayment } = require('./bonPlansService');
 const { activateCampaignFromPayment } = require('./campaignsService');
 const { sendBoostActivatedEmail, sendTicketEmail } = require('./emailService');
 const { finalizeEventTicketPayment } = require('./eventTicketingService');
+const { xpfToEurCents } = require('./paymentCatalog');
 
 function isValidEventTicketCheckout(session, payment) {
   const sessionMeta = session?.metadata || {};
@@ -373,12 +374,31 @@ async function processStripeWebhookEvent({
       return;
     }
 
+    const meta = payment.metadata ?? session.metadata ?? {};
+
     if (paymentType === 'event_ticket') {
       if (!isValidEventTicketCheckout(session, payment)) return;
       const finalized = await finalizeEventTicketPayment({ providerRef: session.id, paymentStatus: 'succeeded' });
       if (finalized?.order && Array.isArray(finalized.tickets)) {
         await sendTicketEmail(finalized.order, finalized.tickets).catch(() => {});
       }
+      return;
+    }
+
+    // These products create Checkout Sessions, not standalone PaymentIntents.
+    if (paymentType === 'campaign' || paymentType === 'bon_plan') {
+      const amountXpf = Number(payment.amount_xpf);
+      if (session.payment_status !== 'paid'
+          || String(session.currency || '').toLowerCase() !== 'eur'
+          || !Number.isSafeInteger(amountXpf) || amountXpf <= 0
+          || session.amount_total !== xpfToEurCents(amountXpf)) return;
+
+      await withTransaction(async (client) => {
+        const activated = paymentType === 'campaign'
+          ? await activateCampaignFromPayment(client, payment, meta, session.id, 'stripe')
+          : await activateBonPlanFromPayment(client, payment, meta, session.id, 'stripe');
+        if (!activated) throw new Error('Webhook activation target unavailable');
+      });
       return;
     }
 
@@ -505,31 +525,6 @@ async function processStripeWebhookEvent({
         [subId, periodEnd]
         );
       }
-    }
-
-    if (meta.payment_type === 'campaign') {
-      await withTransaction(async (client) => {
-        await activateCampaignFromPayment(
-          client,
-          payment,
-          meta,
-          paymentRef,
-          'stripe'
-        );
-      });
-    }
-
-    if (meta.payment_type === 'bon_plan') {
-      await withTransaction(async (client) => {
-        await activateBonPlanFromPayment(
-          client,
-          payment,
-          meta,
-          paymentRef,
-          'stripe',
-          intent
-        );
-      });
     }
 
   if (event.type === 'customer.subscription.deleted') {
@@ -766,6 +761,8 @@ async function processPayplugWebhook({
     );
     const payment = paymentRows[0];
     if (!payment) return resource;
+
+    const shouldSendBoostEmail = payment.status !== 'succeeded';
 
     const expectedAmountXpf = Number(payment.amount_xpf ?? meta.amount_xpf ?? 0);
     const providerAmountXpf = payplugAmountToXpf(resource.amount, payplug.XPF_PER_EUR);

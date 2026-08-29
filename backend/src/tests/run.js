@@ -23,6 +23,7 @@ const SUITES = [
   './trocService.test',
   './eventTicketAccess.test',
   './eventTicketPaymentIntegrity.test',
+  './paymentWebhookRuntime.test',
 ];
 
 async function run() {
