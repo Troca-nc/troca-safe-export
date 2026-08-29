@@ -2,7 +2,6 @@
 
 const { query, withTransaction } = require('../config/database');
 const { isConfiguredValue } = require('../config/env');
-const payplug = require('./payplugService');
 const { generateTicketToken } = require('./qrCodeService');
 
 const EVENT_CATEGORIES = new Set([
@@ -270,7 +269,7 @@ async function createOrderTickets(eventId, orderId, buyer, selectedTickets, stat
     for (let index = 0; index < item.quantity; index += 1) {
       const token = generateTicketToken();
       const qrCodeUrl = null;
-      const ticketStatus = status === 'paid' ? 'active' : 'active';
+      const ticketStatus = status === 'paid' ? 'active' : 'reserved';
       const { rows } = await query(
         `INSERT INTO tickets
            (order_id, event_id, ticket_type_id, buyer_name, buyer_email, price_xpf, token, qr_code_url, is_scanned, status)
@@ -333,6 +332,10 @@ async function reserveEventTickets({ eventId, buyer, items, provider = 'stripe',
 
   const totalXpf = selectedTickets.reduce((sum, item) => sum + item.quantity * Number(item.ticketType.price_xpf || 0), 0);
 
+  if (totalXpf > 0 && provider !== 'stripe') {
+    throw Object.assign(new Error('Ce moyen de paiement n’est pas encore disponible pour la billetterie.'), { status: 503 });
+  }
+
   return withTransaction(async (client) => {
     const orderResult = await client.query(
       `INSERT INTO ticket_orders
@@ -368,7 +371,7 @@ async function reserveEventTickets({ eventId, buyer, items, provider = 'stripe',
         const ticketResult = await client.query(
           `INSERT INTO tickets
              (order_id, event_id, ticket_type_id, buyer_name, buyer_email, price_xpf, token, qr_code_url, is_scanned, status)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, 'active')
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, 'reserved')
            RETURNING *`,
           [
             order.id,
@@ -424,47 +427,9 @@ async function reserveEventTickets({ eventId, buyer, items, provider = 'stripe',
 
       return {
         order: { ...order, status: 'paid', total_xpf: totalXpf, event_title: event.title },
-        tickets,
+        tickets: tickets.map((ticket) => ({ ...ticket, status: 'active' })),
         checkout_url: null,
         demo: true,
-      };
-    }
-
-    if (provider === 'payplug') {
-      if (!payplug.isPayPlugConfigured()) {
-        throw Object.assign(new Error('PayPlug non configuré'), { status: 503 });
-      }
-      const payment = await payplug.createPayment({
-        amount_xpf: totalXpf,
-        description: `Billets ${event.title}`.slice(0, 80),
-        email: orderBuyer.email,
-        first_name: orderBuyer.name.split(' ')[0] || 'Client',
-        last_name: orderBuyer.name.split(' ').slice(1).join(' ') || 'Kalico',
-        return_url: `${process.env.BASE_URL || 'https://kalico.nc'}/evenements/${eventId}?paid=1&order=${order.id}`,
-        cancel_url: `${process.env.BASE_URL || 'https://kalico.nc'}/evenements/${eventId}?cancelled=1&order=${order.id}`,
-        metadata: {
-          payment_type: 'event_ticket',
-          event_id: String(eventId),
-          order_id: String(order.id),
-          user_id: String(buyer.userId || ''),
-        },
-      });
-
-      await query(
-        `UPDATE ticket_orders
-            SET stripe_payment_intent_id = $2,
-                stripe_client_secret = NULL,
-                updated_at = NOW()
-          WHERE id = $1`,
-        [order.id, payment.id]
-      );
-
-      return {
-        order: { ...order, event_title: event.title },
-        tickets,
-        checkout_url: payment.hosted_payment?.payment_url || null,
-        payment_id: payment.id,
-        provider: 'payplug',
       };
     }
 
@@ -474,6 +439,18 @@ async function reserveEventTickets({ eventId, buyer, items, provider = 'stripe',
 
     const Stripe = require('stripe');
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY.trim(), { apiVersion: '2023-10-16' });
+    const amountEurCents = selectedTickets.reduce(
+      (sum, item) => sum + item.quantity * Math.max(50, Math.round((item.ticketType.price_xpf / 119.3317) * 100)),
+      0
+    );
+    const paymentMetadata = {
+      payment_type: 'event_ticket',
+      event_id: String(eventId),
+      order_id: String(order.id),
+      user_id: String(buyer.userId || ''),
+      amount_xpf: String(totalXpf),
+      amount_eur_cents: String(amountEurCents),
+    };
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       customer_email: orderBuyer.email,
@@ -490,24 +467,13 @@ async function reserveEventTickets({ eventId, buyer, items, provider = 'stripe',
       })),
       success_url: `${process.env.BASE_URL || 'https://kalico.nc'}/evenements/${eventId}?paid=1&session_id={CHECKOUT_SESSION_ID}&order=${order.id}`,
       cancel_url: `${process.env.BASE_URL || 'https://kalico.nc'}/evenements/${eventId}?cancelled=1&order=${order.id}`,
-      metadata: {
-        payment_type: 'event_ticket',
-        event_id: String(eventId),
-        order_id: String(order.id),
-        user_id: String(buyer.userId || ''),
-      },
+      metadata: paymentMetadata,
       payment_intent_data: {
-        capture_method: 'manual',
-        metadata: {
-          payment_type: 'event_ticket',
-          event_id: String(eventId),
-          order_id: String(order.id),
-          user_id: String(buyer.userId || ''),
-        },
+        metadata: paymentMetadata,
       },
     });
 
-    await query(
+    await client.query(
       `INSERT INTO payments (user_id, type, provider, provider_ref, amount_xpf, status, metadata)
        VALUES ($1, 'event_ticket', 'stripe', $2, $3, 'pending', $4)`,
       [
@@ -519,11 +485,13 @@ async function reserveEventTickets({ eventId, buyer, items, provider = 'stripe',
           event_id: String(eventId),
           order_id: String(order.id),
           buyer_email: orderBuyer.email,
+          amount_xpf: String(totalXpf),
+          amount_eur_cents: String(amountEurCents),
         }),
       ]
     );
 
-    await query(
+    await client.query(
       `UPDATE ticket_orders
           SET stripe_payment_intent_id = $2,
               stripe_client_secret = $3,
@@ -534,7 +502,7 @@ async function reserveEventTickets({ eventId, buyer, items, provider = 'stripe',
 
     return {
       order: { ...order, event_title: event.title },
-      tickets,
+      tickets: [],
       checkout_url: session.url || null,
       client_secret: session.payment_intent ? session.client_secret || null : null,
       session_id: session.id,
@@ -544,121 +512,110 @@ async function reserveEventTickets({ eventId, buyer, items, provider = 'stripe',
 }
 
 async function finalizeEventTicketPayment({ providerRef, paymentStatus = 'succeeded' }) {
-  const { rows: paymentRows } = await query(
-    `SELECT id, user_id, metadata, status
-       FROM payments
-      WHERE provider_ref = $1
-      LIMIT 1`,
-    [providerRef]
-  );
-  const payment = paymentRows[0];
-  if (!payment) return null;
+  if (paymentStatus !== 'succeeded') return null;
+  return withTransaction(async (client) => {
+    const { rows: paymentRows } = await client.query(
+      `SELECT id, user_id, metadata, status
+         FROM payments
+        WHERE provider = 'stripe' AND provider_ref = $1
+        LIMIT 1
+        FOR UPDATE`,
+      [providerRef]
+    );
+    const payment = paymentRows[0];
+    if (!payment) return null;
 
-  const meta = payment.metadata || {};
-  if (meta.payment_type !== 'event_ticket') return null;
+    const meta = payment.metadata || {};
+    if (meta.payment_type !== 'event_ticket') return null;
+    const orderId = Number(meta.order_id || 0);
+    const eventId = Number(meta.event_id || 0);
+    if (!orderId || !eventId) return null;
 
-  const orderId = Number(meta.order_id || 0);
-  const eventId = Number(meta.event_id || 0);
-  if (!orderId || !eventId) return null;
+    const { rows: orderRows } = await client.query(
+      `SELECT id, status, expires_at
+         FROM ticket_orders
+        WHERE id = $1 AND event_id = $2
+        LIMIT 1
+        FOR UPDATE`,
+      [orderId, eventId]
+    );
+    const order = orderRows[0];
+    if (!order) return null;
 
-  const orderRows = await query(
-    `SELECT id, status, expires_at
-       FROM ticket_orders
-      WHERE id = $1 AND event_id = $2
-      LIMIT 1`,
-    [orderId, eventId]
-  );
-  const order = orderRows.rows[0];
-  if (!order) return null;
+    if (order.status === 'paid') {
+      const existing = await client.query(
+        `SELECT t.id, t.token, t.qr_code_url, t.status, t.price_xpf, e.title AS event_title,
+                o.buyer_email, o.buyer_name, o.total_xpf
+           FROM tickets t
+           JOIN ticket_orders o ON o.id = t.order_id
+           JOIN events e ON e.id = t.event_id
+          WHERE t.order_id = $1
+          ORDER BY t.id ASC`,
+        [orderId]
+      );
+      return { order_id: orderId, event_id: eventId, status: 'already_paid', order, tickets: existing.rows };
+    }
+    if (order.status !== 'reserved') {
+      return null;
+    }
 
-  await query(
-    `UPDATE payments
-        SET status = $2,
-            updated_at = NOW()
-      WHERE id = $1`,
-    [payment.id, paymentStatus]
-  );
+    const ticketsRows = await client.query(
+      `SELECT id, ticket_type_id, price_xpf
+         FROM tickets
+        WHERE order_id = $1 AND status = 'reserved'
+        FOR UPDATE`,
+      [orderId]
+    );
+    if (!ticketsRows.rows.length) return null;
 
-  if (order.status === 'paid') {
-    const existing = await query(
-      `SELECT t.id, t.token, t.qr_code_url, t.status, t.price_xpf, e.title AS event_title, o.buyer_email, o.buyer_name, o.total_xpf
+    const grouped = new Map();
+    for (const row of ticketsRows.rows) {
+      grouped.set(Number(row.ticket_type_id), (grouped.get(Number(row.ticket_type_id)) || 0) + 1);
+    }
+    for (const [ticketTypeId, count] of grouped.entries()) {
+      await client.query(
+        `UPDATE ticket_types
+            SET quantity_reserved = GREATEST(quantity_reserved - $2, 0),
+                quantity_sold = quantity_sold + $2,
+                updated_at = NOW()
+          WHERE id = $1`,
+        [ticketTypeId, count]
+      );
+    }
+
+    await client.query(`UPDATE tickets SET status = 'active' WHERE order_id = $1 AND status = 'reserved'`, [orderId]);
+    await client.query(
+      `UPDATE ticket_orders
+          SET status = 'paid', paid_at = NOW(), updated_at = NOW()
+        WHERE id = $1 AND status = 'reserved'`,
+      [orderId]
+    );
+    await client.query(
+      `UPDATE events SET tickets_sold = tickets_sold + $2, updated_at = NOW() WHERE id = $1`,
+      [eventId, ticketsRows.rows.length]
+    );
+    await client.query(
+      `UPDATE payments SET status = 'succeeded', updated_at = NOW() WHERE id = $1`,
+      [payment.id]
+    );
+
+    const finalOrder = await client.query(
+      `SELECT o.*, e.title AS event_title
+         FROM ticket_orders o JOIN events e ON e.id = o.event_id
+        WHERE o.id = $1 LIMIT 1`,
+      [orderId]
+    );
+    const finalTickets = await client.query(
+      `SELECT t.id, t.token, t.qr_code_url, t.status, t.price_xpf, e.title AS event_title,
+              o.buyer_email, o.buyer_name, o.total_xpf
          FROM tickets t
          JOIN ticket_orders o ON o.id = t.order_id
          JOIN events e ON e.id = t.event_id
-        WHERE t.order_id = $1
-        ORDER BY t.id ASC`,
+        WHERE t.order_id = $1 ORDER BY t.id ASC`,
       [orderId]
     );
-    return { order_id: orderId, event_id: eventId, status: 'already_paid', order: order, tickets: existing.rows };
-  }
-
-  const ticketsRows = await query(
-    `SELECT id, ticket_type_id, price_xpf
-       FROM tickets
-      WHERE order_id = $1`,
-    [orderId]
-  );
-  const grouped = new Map();
-  for (const row of ticketsRows.rows) {
-    const current = grouped.get(Number(row.ticket_type_id)) || { count: 0, price_xpf: Number(row.price_xpf || 0) };
-    current.count += 1;
-    grouped.set(Number(row.ticket_type_id), current);
-  }
-
-  for (const [ticketTypeId, item] of grouped.entries()) {
-    await query(
-      `UPDATE ticket_types
-          SET quantity_reserved = GREATEST(quantity_reserved - $2, 0),
-              quantity_sold = quantity_sold + $2,
-              updated_at = NOW()
-        WHERE id = $1`,
-      [ticketTypeId, item.count]
-    );
-  }
-
-  await query(
-    `UPDATE tickets
-        SET status = 'active'
-      WHERE order_id = $1`,
-    [orderId]
-  );
-
-  await query(
-    `UPDATE ticket_orders
-        SET status = 'paid',
-            paid_at = NOW(),
-            updated_at = NOW()
-      WHERE id = $1`,
-    [orderId]
-  );
-
-  await query(
-    `UPDATE events
-        SET tickets_sold = tickets_sold + $2,
-            updated_at = NOW()
-      WHERE id = $1`,
-    [eventId, ticketsRows.rows.length]
-  );
-
-  const finalOrder = await query(
-    `SELECT o.*, e.title AS event_title
-       FROM ticket_orders o
-       JOIN events e ON e.id = o.event_id
-      WHERE o.id = $1
-      LIMIT 1`,
-    [orderId]
-  );
-  const finalTickets = await query(
-    `SELECT t.id, t.token, t.qr_code_url, t.status, t.price_xpf, e.title AS event_title, o.buyer_email, o.buyer_name, o.total_xpf
-       FROM tickets t
-       JOIN ticket_orders o ON o.id = t.order_id
-       JOIN events e ON e.id = t.event_id
-      WHERE t.order_id = $1
-      ORDER BY t.id ASC`,
-    [orderId]
-  );
-
-  return { order_id: orderId, event_id: eventId, status: 'paid', order: finalOrder.rows[0], tickets: finalTickets.rows };
+    return { order_id: orderId, event_id: eventId, status: 'paid', order: finalOrder.rows[0], tickets: finalTickets.rows };
+  });
 }
 
 async function expireEventTicketReservations() {

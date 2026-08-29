@@ -5,6 +5,25 @@ const { activateCampaignFromPayment } = require('./campaignsService');
 const { sendBoostActivatedEmail, sendTicketEmail } = require('./emailService');
 const { finalizeEventTicketPayment } = require('./eventTicketingService');
 
+function isValidEventTicketCheckout(session, payment) {
+  const sessionMeta = session?.metadata || {};
+  const paymentMeta = payment?.metadata || {};
+  if (session?.payment_status !== 'paid') return false;
+  if (String(session?.currency || '').toLowerCase() !== 'eur') return false;
+  if (sessionMeta.payment_type !== 'event_ticket' || paymentMeta.payment_type !== 'event_ticket') return false;
+  if (String(sessionMeta.order_id || '') !== String(paymentMeta.order_id || '')) return false;
+  if (String(sessionMeta.event_id || '') !== String(paymentMeta.event_id || '')) return false;
+
+  const expectedEurCents = Number(paymentMeta.amount_eur_cents || 0);
+  const expectedXpf = Number(payment?.amount_xpf || paymentMeta.amount_xpf || 0);
+  if (!Number.isInteger(expectedEurCents) || expectedEurCents <= 0) return false;
+  if (!Number.isInteger(expectedXpf) || expectedXpf <= 0) return false;
+  if (Number(session.amount_total) !== expectedEurCents) return false;
+  if (Number(sessionMeta.amount_eur_cents || 0) !== expectedEurCents) return false;
+  if (Number(sessionMeta.amount_xpf || 0) !== expectedXpf) return false;
+  return true;
+}
+
 async function setSubscriptionPaymentStatus(query, providerSubId, paymentStatus) {
   if (!providerSubId) return;
   await query(
@@ -155,7 +174,7 @@ async function processStripeWebhookEvent({
     const intent = event.data.object;
     const paymentRef = intent.id;
     const { rows: paymentRows } = await query(
-      `SELECT id, user_id, type, metadata, status
+      `SELECT id, user_id, type, metadata, status, amount_xpf
        FROM payments
        WHERE provider_ref = $1
        LIMIT 1`,
@@ -340,17 +359,26 @@ async function processStripeWebhookEvent({
     const userId = Number(session.metadata?.user_id ?? 0);
 
     const { rows: paymentRows } = await query(
-      `SELECT id, user_id, type, metadata, status
+      `SELECT id, user_id, type, metadata, status, amount_xpf
        FROM payments
        WHERE provider_ref = $1
        LIMIT 1`,
       [session.id]
     );
     const payment = paymentRows[0];
-    if (!payment || payment.user_id !== userId) return;
+    if (!payment || Number(payment.user_id || 0) !== userId) return;
     const shouldSendBoostEmail = payment.status !== 'succeeded';
 
     if (payment.metadata?.payment_type && payment.metadata.payment_type !== paymentType) {
+      return;
+    }
+
+    if (paymentType === 'event_ticket') {
+      if (!isValidEventTicketCheckout(session, payment)) return;
+      const finalized = await finalizeEventTicketPayment({ providerRef: session.id, paymentStatus: 'succeeded' });
+      if (finalized?.order && Array.isArray(finalized.tickets)) {
+        await sendTicketEmail(finalized.order, finalized.tickets).catch(() => {});
+      }
       return;
     }
 
@@ -384,14 +412,6 @@ async function processStripeWebhookEvent({
         }).catch(() => {});
       }
     }
-    }
-
-    if (paymentType === 'event_ticket') {
-      const finalized = await finalizeEventTicketPayment({ providerRef: session.id, paymentStatus: 'succeeded' });
-      if (finalized?.order && Array.isArray(finalized.tickets)) {
-        await sendTicketEmail(finalized.order, finalized.tickets).catch(() => {});
-      }
-      return;
     }
 
     if (paymentType === 'subscription') {
@@ -1018,6 +1038,7 @@ async function processPayplugWebhook({
 }
 
 module.exports = {
+  isValidEventTicketCheckout,
   processPayplugWebhook,
   processStripeWebhookEvent,
 };

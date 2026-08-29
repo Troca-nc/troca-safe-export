@@ -22,6 +22,7 @@ const SUITES = [
   './payment.route.test',
   './trocService.test',
   './eventTicketAccess.test',
+  './eventTicketPaymentIntegrity.test',
 ];
 
 async function run() {
