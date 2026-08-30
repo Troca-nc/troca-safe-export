@@ -359,6 +359,29 @@ async function processStripeWebhookEvent({
     const paymentType = session.metadata?.payment_type;
     const userId = Number(session.metadata?.user_id ?? 0);
 
+    if (paymentType === 'event_ticket') {
+      const finalized = await withTransaction(async (client) => {
+        // Validate the same locked payment that the finalizer will mutate.
+        const { rows } = await client.query(
+          `SELECT id, user_id, type, metadata, status, amount_xpf
+             FROM payments
+            WHERE provider = 'stripe' AND provider_ref = $1
+            LIMIT 1 FOR UPDATE`,
+          [session.id]
+        );
+        const payment = rows[0];
+        if (!payment || Number(payment.user_id || 0) !== userId
+            || !isValidEventTicketCheckout(session, payment)) return null;
+        return finalizeEventTicketPayment({ providerRef: session.id, paymentStatus: 'succeeded', client });
+      });
+      // No notification before COMMIT or for an already-finalized order.
+      // Durable delivery after a crash still requires the planned outbox.
+      if (finalized?.status === 'paid' && finalized.order && Array.isArray(finalized.tickets)) {
+        await sendTicketEmail(finalized.order, finalized.tickets).catch(() => {});
+      }
+      return;
+    }
+
     const { rows: paymentRows } = await query(
       `SELECT id, user_id, type, metadata, status, amount_xpf
        FROM payments
@@ -375,15 +398,6 @@ async function processStripeWebhookEvent({
     }
 
     const meta = payment.metadata ?? session.metadata ?? {};
-
-    if (paymentType === 'event_ticket') {
-      if (!isValidEventTicketCheckout(session, payment)) return;
-      const finalized = await finalizeEventTicketPayment({ providerRef: session.id, paymentStatus: 'succeeded' });
-      if (finalized?.order && Array.isArray(finalized.tickets)) {
-        await sendTicketEmail(finalized.order, finalized.tickets).catch(() => {});
-      }
-      return;
-    }
 
     // These products create Checkout Sessions, not standalone PaymentIntents.
     if (paymentType === 'campaign' || paymentType === 'bon_plan') {

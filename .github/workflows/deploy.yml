@@ -64,6 +64,12 @@ jobs:
       - name: Lint
         run: cd backend && npm run lint --if-present
 
+      - name: Ticket transaction PostgreSQL checks
+        timeout-minutes: 2
+        run: node backend/src/tests/integration/eventTicketTransaction.postgres.test.js
+        env:
+          KALICO_TEST_PG_PORT: '5432'
+
   e2e:
     name: Playwright E2E
     runs-on: ubuntu-latest

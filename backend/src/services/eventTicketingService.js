@@ -511,9 +511,13 @@ async function reserveEventTickets({ eventId, buyer, items, provider = 'stripe',
   });
 }
 
-async function finalizeEventTicketPayment({ providerRef, paymentStatus = 'succeeded' }) {
+// When a client is supplied, the caller owns BEGIN/COMMIT/ROLLBACK and release.
+async function finalizeEventTicketPayment({ providerRef, paymentStatus = 'succeeded', client = null }) {
   if (paymentStatus !== 'succeeded') return null;
-  return withTransaction(async (client) => {
+  if (client !== null && typeof client?.query !== 'function') {
+    throw new TypeError('A transaction client with query is required');
+  }
+  const finalize = async (client) => {
     const { rows: paymentRows } = await client.query(
       `SELECT id, user_id, metadata, status
          FROM payments
@@ -615,7 +619,8 @@ async function finalizeEventTicketPayment({ providerRef, paymentStatus = 'succee
       [orderId]
     );
     return { order_id: orderId, event_id: eventId, status: 'paid', order: finalOrder.rows[0], tickets: finalTickets.rows };
-  });
+  };
+  return client === null ? withTransaction(finalize) : finalize(client);
 }
 
 async function expireEventTicketReservations() {

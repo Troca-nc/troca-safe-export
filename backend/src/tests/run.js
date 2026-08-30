@@ -25,6 +25,7 @@ const SUITES = [
   './eventTicketPaymentIntegrity.test',
   './paymentWebhookRuntime.test',
   './paymentWebhookReceipt.test',
+  './eventTicketTransaction.test',
 ];
 
 async function run() {
