@@ -1222,51 +1222,81 @@ async function listAdminCampaigns(db = query) {
   };
 }
 
+function withCampaignStateTransaction(db, operation) {
+  if (db == null || db === query) return withTransaction(operation);
+  if (typeof db.query === 'function') return operation(db);
+  throw new Error('Campaign state transaction client required');
+}
+
 async function pauseCampaign(db, { campaignId, userId, isAdmin = false }) {
-  const q = getQueryRunner(db);
-  const { rows } = await q(`SELECT * FROM campaigns WHERE id = $1 LIMIT 1`, [campaignId]);
-  const campaign = rows[0];
-  if (!campaign) throw Object.assign(new Error('Campagne introuvable'), { status: 404 });
-  if (!isAdmin && Number(campaign.user_id || 0) !== Number(userId)) throw Object.assign(new Error('Accès refusé'), { status: 403 });
-  if (isDefaultPopup(campaign)) throw Object.assign(new Error('Le popup par défaut ne peut pas être suspendu'), { status: 400 });
+  return withCampaignStateTransaction(db, async client => {
+    const q = getQueryRunner(client);
+    const { rows } = await q(`SELECT * FROM campaigns WHERE id = $1 LIMIT 1 FOR UPDATE`, [campaignId]);
+    const campaign = rows[0];
+    if (!campaign) throw Object.assign(new Error('Campagne introuvable'), { status: 404 });
+    if (!isAdmin && Number(campaign.user_id || 0) !== Number(userId)) throw Object.assign(new Error('Accès refusé'), { status: 403 });
+    if (isDefaultPopup(campaign)) throw Object.assign(new Error('Le popup par défaut ne peut pas être suspendu'), { status: 400 });
+    if (campaign.status === 'paused') return true;
+    if (!['active', 'queued'].includes(campaign.status)) {
+      throw Object.assign(new Error('Cette campagne ne peut pas être mise en pause.'), { status: 409 });
+    }
 
-  await q(
-    `UPDATE campaigns
-     SET status = 'paused',
-         paused_at = NOW(),
-         updated_at = NOW()
-     WHERE id = $1`,
-    [campaignId]
-  );
+    await q(
+      `UPDATE campaigns
+       SET status = 'paused',
+           paused_at = NOW(),
+           updated_at = NOW()
+       WHERE id = $1`,
+      [campaignId]
+    );
 
-  return true;
+    return true;
+  });
 }
 
 async function resumeCampaign(db, { campaignId, userId, isAdmin = false }) {
-  const q = getQueryRunner(db);
-  const { rows } = await q(`SELECT * FROM campaigns WHERE id = $1 LIMIT 1`, [campaignId]);
-  const campaign = rows[0];
-  if (!campaign) throw Object.assign(new Error('Campagne introuvable'), { status: 404 });
-  if (!isAdmin && Number(campaign.user_id || 0) !== Number(userId)) throw Object.assign(new Error('Accès refusé'), { status: 403 });
-  if (isDefaultPopup(campaign)) throw Object.assign(new Error('Le popup par défaut ne peut pas être modifié'), { status: 400 });
+  return withCampaignStateTransaction(db, async client => {
+    const q = getQueryRunner(client);
+    const { rows } = await q(`SELECT * FROM campaigns WHERE id = $1 LIMIT 1 FOR UPDATE`, [campaignId]);
+    const campaign = rows[0];
+    if (!campaign) throw Object.assign(new Error('Campagne introuvable'), { status: 404 });
+    if (!isAdmin && Number(campaign.user_id || 0) !== Number(userId)) throw Object.assign(new Error('Accès refusé'), { status: 403 });
+    if (isDefaultPopup(campaign)) throw Object.assign(new Error('Le popup par défaut ne peut pas être modifié'), { status: 400 });
+    // Repeated resume must not count itself as a competing campaign or shift dates.
+    if (campaign.status === 'active' || campaign.status === 'queued') return true;
+    if (campaign.status !== 'paused') {
+      throw Object.assign(new Error('Seule une campagne en pause peut être reprise.'), { status: 409 });
+    }
+    // Demo activation has no payment row. Production/admin calls must have a paid
+    // campaign belonging to the same owner, not just an untrusted metadata flag.
+    if (process.env.DEMO_MODE !== 'true') {
+      const { rows: paid } = await q(
+        `SELECT id FROM payments WHERE user_id = $1 AND provider = $2 AND provider_ref = $3
+         AND type = 'campaign' AND status = 'succeeded'
+         AND metadata->>'campaign_id' = $4 LIMIT 1`,
+        [campaign.user_id, campaign.metadata?.payment_provider, campaign.metadata?.payment_ref, String(campaign.id)]
+      );
+      if (!paid[0]) throw Object.assign(new Error('Paiement de campagne non confirmé.'), { status: 409 });
+    }
 
-  const pausedAt = campaign.paused_at ? new Date(campaign.paused_at) : null;
-  const shiftMs = pausedAt ? Math.max(0, Date.now() - pausedAt.getTime()) : 0;
-  const nextEndsAt = campaign.ends_at ? new Date(new Date(campaign.ends_at).getTime() + shiftMs).toISOString() : null;
-  const slotAvailable = await getActiveCount(q, campaign) < countLimitForType(campaign.type);
+    const pausedAt = campaign.paused_at ? new Date(campaign.paused_at) : null;
+    const shiftMs = pausedAt ? Math.max(0, Date.now() - pausedAt.getTime()) : 0;
+    const nextEndsAt = campaign.ends_at ? new Date(new Date(campaign.ends_at).getTime() + shiftMs).toISOString() : null;
+    const slotAvailable = await getActiveCount(q, campaign) < countLimitForType(campaign.type);
 
-  await q(
-    `UPDATE campaigns
-     SET status = $2,
-         starts_at = CASE WHEN $2 = 'active' THEN NOW() ELSE starts_at END,
-         ends_at = COALESCE($3, ends_at),
-         paused_at = NULL,
-         updated_at = NOW()
-     WHERE id = $1`,
-    [campaignId, slotAvailable ? 'active' : 'queued', nextEndsAt]
-  );
+    await q(
+      `UPDATE campaigns
+       SET status = $2,
+           starts_at = CASE WHEN $2 = 'active' THEN NOW() ELSE starts_at END,
+           ends_at = COALESCE($3, ends_at),
+           paused_at = NULL,
+           updated_at = NOW()
+       WHERE id = $1`,
+      [campaignId, slotAvailable ? 'active' : 'queued', nextEndsAt]
+    );
 
-  return true;
+    return true;
+  });
 }
 
 async function expireCampaignsAndActivateQueued(db = query) {

@@ -248,6 +248,74 @@ async function run() {
       assert.deepStrictEqual(await state(), before); assert.strictEqual((await queue()).length, 5);
       assert.strictEqual((await receipts()).length, 1);
     });
+    const stateService = loadCampaigns(async () => { throw new Error('Unexpected state notification'); }, () => Date.now(), database);
+    const stateArgs = { campaignId: 13, userId: 7 };
+    const completeState = async () => (await pool.query('SELECT * FROM campaigns WHERE id = 13')).rows[0];
+    for (const method of ['pauseCampaign', 'resumeCampaign']) {
+      await check(`${method} rejects unpaid pending campaign without mutation`, async () => {
+        const before = await completeState();
+        await assert.rejects(stateService[method](database.query, stateArgs), e => e.status === 409);
+        assert.deepStrictEqual(await completeState(), before);
+      });
+    }
+    for (const mutation of [
+      "UPDATE payments SET status = 'refunded'",
+      "UPDATE payments SET status = 'pending'",
+      'UPDATE payments SET user_id = 8',
+      "UPDATE payments SET provider = 'payplug'",
+      "UPDATE payments SET provider_ref = 'other'",
+      "UPDATE payments SET type = 'event_ticket'",
+      "UPDATE payments SET metadata = '{\"campaign_id\":\"99\"}'::jsonb",
+      'DELETE FROM payments',
+    ]) {
+      await check(`resume rejects payment mismatch: ${mutation}`, async () => {
+        await invoke(); await stateService.pauseCampaign(undefined, stateArgs);
+        // Outbox foreign keys deliberately retain payment rows in production.
+        if (mutation === 'DELETE FROM payments') await pool.query('DELETE FROM campaign_notification_outbox');
+        await pool.query(mutation);
+        const before = await completeState();
+        await assert.rejects(stateService.resumeCampaign(undefined, { ...stateArgs, isAdmin: true }), e => e.status === 409);
+        assert.deepStrictEqual(await completeState(), before);
+      });
+    }
+    await check('concurrent pauses set one timestamp and repeats are stable', async () => {
+      await invoke();
+      await Promise.all([stateService.pauseCampaign(undefined, stateArgs), stateService.pauseCampaign(undefined, stateArgs)]);
+      const before = await completeState(); assert.strictEqual(before.status, 'paused');
+      assert.ok(before.paused_at);
+      await stateService.pauseCampaign(undefined, stateArgs);
+      assert.deepStrictEqual(await completeState(), before);
+    });
+    await check('concurrent resumes extend once, without counting itself as competitor', async () => {
+      await invoke(); await stateService.pauseCampaign(undefined, stateArgs);
+      await pool.query("UPDATE campaigns SET paused_at = NOW() - interval '1 day' WHERE id = 13");
+      const before = await completeState();
+      await Promise.all([stateService.resumeCampaign(undefined, stateArgs), stateService.resumeCampaign(undefined, stateArgs)]);
+      const after = await completeState(); assert.strictEqual(after.status, 'active');
+      assert.strictEqual(after.paused_at, null);
+      assert.ok(after.ends_at - before.ends_at >= 86400000);
+      assert.ok(after.ends_at - before.ends_at < 86410000);
+      await stateService.resumeCampaign(undefined, stateArgs);
+      assert.deepStrictEqual(await completeState(), after);
+    });
+    await check('resume queues when another popup is active', async () => {
+      await invoke(); await stateService.pauseCampaign(undefined, stateArgs);
+      await pool.query("INSERT INTO campaigns (id, user_id, type, status, ends_at, is_default_popup) VALUES (14, 8, 'popup', 'active', NOW() + interval '30 days', false)");
+      await stateService.resumeCampaign(undefined, stateArgs);
+      const before = await completeState(); assert.strictEqual(before.status, 'queued');
+      await stateService.resumeCampaign(undefined, stateArgs);
+      assert.deepStrictEqual(await completeState(), before);
+    });
+    await check('state update SQL failure rolls back and releases lock', async () => {
+      await invoke(); await stateService.pauseCampaign(undefined, stateArgs);
+      const before = await completeState();
+      await assert.rejects(database.withTransaction(client => stateService.resumeCampaign({ query(sql, values) {
+        return sql.includes('UPDATE campaigns') ? client.query('SELECT 1 / 0') : client.query(sql, values);
+      } }, stateArgs)), e => e.code === '22012');
+      assert.deepStrictEqual(await completeState(), before);
+      await stateService.resumeCampaign(undefined, stateArgs);
+      assert.strictEqual((await state()).status, 'active');
+    });
     console.log(`PostgreSQL campaign activation: ${total} checks passed`);
   } finally {
     if (pool) await pool.end();

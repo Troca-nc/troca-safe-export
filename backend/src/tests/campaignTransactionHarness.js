@@ -1,14 +1,14 @@
 'use strict';
 const { load } = require('./paymentTransactionHarness');
 
-function loadCampaigns(notify = async () => {}, clock = () => Date.now()) {
+function loadCampaigns(notify = async () => {}, clock = () => Date.now(), database = null, env = {}) {
   const forbidden = () => { throw new Error('Unexpected pool/provider call'); };
   const outbox = load('services/campaignNotificationOutboxService.js', {
     '../config/database': { withTransaction: forbidden },
   });
   return load('services/campaignsService.js', {
     twilio: () => ({ messages: { create: () => notify('sms') } }), stripe: forbidden,
-    '../config/database': { query: forbidden, withTransaction: forbidden },
+    '../config/database': database || { query: forbidden, withTransaction: forbidden },
     './notificationService': { createNotification: () => notify('notification') },
     './emailService': { sendMail: () => notify('email') },
     './pushService': { sendPushToUsers: () => notify('push') },
@@ -19,7 +19,7 @@ function loadCampaigns(notify = async () => {}, clock = () => Date.now()) {
     './campaignNotificationOutboxService': outbox,
     './campaignPushDelivery': { sendCampaignPush: () => notify('push') },
   }, {
-    process: { env: { TWILIO_ACCOUNT_SID: 'synthetic', TWILIO_AUTH_TOKEN: 'synthetic', TWILIO_PHONE_NUMBER: '+000' } },
+    process: { env: { TWILIO_ACCOUNT_SID: 'synthetic', TWILIO_AUTH_TOKEN: 'synthetic', TWILIO_PHONE_NUMBER: '+000', ...env } },
     Date: class extends Date {
       constructor(...args) { super(...(args.length ? args : [clock()])); }
       static now() { return clock(); }

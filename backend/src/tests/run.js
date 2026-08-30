@@ -28,6 +28,7 @@ const SUITES = [
   './eventTicketTransaction.test',
   './ticketEmailOutbox.test',
   './campaignActivation.test',
+  './campaignStateTransitions.test',
   './campaignNotificationOutbox.test',
 ];
 
