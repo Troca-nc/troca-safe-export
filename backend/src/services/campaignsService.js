@@ -11,6 +11,8 @@ const { isConfiguredValue } = require('../config/env');
 const payplug = require('./payplugService');
 const { ensureStripe, getOrCreateStripeCustomer } = require('./paymentHelpers');
 const { xpfToEurCents, formatXpfEur } = require('./paymentCatalog');
+const { enqueueCampaignNotifications } = require('./campaignNotificationOutboxService');
+const { sendCampaignPush } = require('./campaignPushDelivery');
 
 const CAMPAIGN_TYPE_LABEL = {
   bon_plan: 'Bon plan sponsorisé',
@@ -76,7 +78,7 @@ function buildTwilioClient() {
   const token = process.env.TWILIO_AUTH_TOKEN || '';
   if (!sid || !token) return null;
   try {
-    return twilio(sid.trim(), token.trim());
+    return twilio(sid.trim(), token.trim(), { timeout: 15000 });
   } catch {
     return null;
   }
@@ -433,6 +435,45 @@ async function notifyCampaignOwner({ user, campaign, message, subject, href }) {
   }).catch(() => {});
 }
 
+// Strict adapter used only by the durable payment notification worker.
+// Legacy scheduler/admin notification behavior remains unchanged.
+async function deliverCampaignNotification(item, campaign, client) {
+  const active = campaign.status === 'active';
+  const title = active ? 'Campagne activée' : 'Campagne en file d’attente';
+  const body = active
+    ? `Votre campagne "${campaign.title}" est active du ${formatDate(campaign.starts_at)} au ${formatDate(campaign.ends_at)}.`
+    : `Votre campagne "${campaign.title}" est en file d'attente. Début estimé : ${formatDate(campaign.starts_at)}.`;
+  const href = '/pro/dashboard/publicite';
+  if (item.channel === 'in_app') {
+    await client.query(
+      `INSERT INTO notifications (user_id, type, title, body, href) VALUES ($1, 'campaign', $2, $3, $4)`,
+      [item.user_id, title, body, href]
+    );
+    return { status: 'sent' };
+  }
+  if (item.channel === 'email') {
+    if (!String(campaign.email || '').trim()) return { status: 'skipped' };
+    const result = await sendMail({ to: campaign.email, subject: title,
+      html: buildCampaignEmailHtml({ title, subtitle: CAMPAIGN_TYPE_LABEL[campaign.type], description: body,
+        ctaText: campaign.cta_text || 'Voir la campagne', linkUrl: `${BASE_URL}${href}`,
+        imageUrl: campaign.image_url || DEFAULT_POPUP.image_url }) });
+    return { status: !result?.simulated && Array.isArray(result?.accepted) && result.accepted.length > 0 ? 'sent' : 'retry' };
+  }
+  if (item.channel === 'sms') {
+    if (!String(campaign.telephone || '').trim()) return { status: 'skipped' };
+    const from = process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_FROM_PHONE || '';
+    if (!twilioClient || !from) return { status: 'retry' };
+    const result = await twilioClient.messages.create({ to: campaign.telephone, from, body: `${title} : ${body}` });
+    return { status: result?.sid && !['failed', 'undelivered', 'canceled'].includes(result.status) ? 'sent' : 'retry' };
+  }
+  if (item.channel === 'push') {
+    const { rows } = await client.query('SELECT token FROM push_tokens WHERE id = $1 AND user_id = $2', [item.target_id, item.user_id]);
+    if (!rows[0]?.token) return { status: 'skipped' };
+    return sendCampaignPush(rows[0].token, { title, body, data: { type: 'campaign', campaign_id: campaign.id } });
+  }
+  throw new Error('Unknown campaign notification channel');
+}
+
 function countLimitForType(type) {
   return CAMPAIGN_LIMITS[type] ?? 1;
 }
@@ -648,7 +689,7 @@ async function createCampaignWithPayment(db, { user, payload, provider = 'stripe
   };
 }
 
-async function activateCampaignIfSlotAvailable(db, campaign, { fromQueue = false } = {}) {
+async function activateCampaignIfSlotAvailable(db, campaign, { fromQueue = false, notifyOwner = true } = {}) {
   const q = getQueryRunner(db);
   const activeCount = await getActiveCount(q, campaign);
   const limit = countLimitForType(campaign.type);
@@ -684,7 +725,7 @@ async function activateCampaignIfSlotAvailable(db, campaign, { fromQueue = false
     [campaign.id]
   );
   const current = rows[0];
-  if (current?.user_id) {
+  if (notifyOwner && current?.user_id) {
     const user = {
       id: Number(current.user_id),
       email: current.email,
@@ -1019,7 +1060,7 @@ async function activateCampaignFromPayment(db, payment, paymentMeta, providerRef
   );
   if (updatedPayment.rowCount !== 1) throw new Error('Campaign payment update failed');
 
-  const activation = await activateCampaignIfSlotAvailable(q, campaign, { fromQueue: false });
+  const activation = await activateCampaignIfSlotAvailable(q, campaign, { fromQueue: false, notifyOwner: false });
 
   const updatedCampaign = await q(
     `UPDATE campaigns
@@ -1038,6 +1079,7 @@ async function activateCampaignFromPayment(db, payment, paymentMeta, providerRef
     ]
   );
   if (updatedCampaign.rowCount !== 1) throw new Error('Campaign metadata update failed');
+  await enqueueCampaignNotifications(db, storedPayment.id, campaign.id, storedPayment.user_id, activation.status);
 
   return { campaignId, activation };
 }
@@ -1333,6 +1375,7 @@ async function expireCampaignsAndActivateQueued(db = query) {
 }
 
 module.exports = {
+  deliverCampaignNotification,
   CAMPAIGN_PRICE_TABLE,
   CAMPAIGN_LIMITS,
   CAMPAIGN_TYPE_LABEL,

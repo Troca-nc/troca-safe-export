@@ -28,6 +28,7 @@ const SUITES = [
   './eventTicketTransaction.test',
   './ticketEmailOutbox.test',
   './campaignActivation.test',
+  './campaignNotificationOutbox.test',
 ];
 
 async function run() {
