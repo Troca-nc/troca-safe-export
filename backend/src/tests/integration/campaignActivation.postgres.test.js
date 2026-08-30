@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const { Pool } = require('pg');
 const { loadDatabase, load } = require('../paymentTransactionHarness');
-const { loadCampaigns, payment, campaignEvent, loadCampaignWebhook } = require('../campaignTransactionHarness');
+const { loadCampaigns, payment, campaignEvent, campaignRefundEvent, loadCampaignWebhook } = require('../campaignTransactionHarness');
 
 async function run() {
   const port = Number(process.env.KALICO_TEST_PG_PORT);
@@ -26,12 +26,14 @@ async function run() {
         type varchar(100) NOT NULL, processed_at timestamptz NOT NULL DEFAULT NOW());
       CREATE TABLE users (id int PRIMARY KEY, email text, telephone text, prenom text, nom text);
       CREATE TABLE campaigns (id int PRIMARY KEY, user_id int REFERENCES users, type text,
-        title text, status text, duration_days int, starts_at timestamptz, ends_at timestamptz,
+        title text, status text CHECK (status IN ('pending', 'active', 'paused', 'expired', 'queued')),
+        duration_days int, starts_at timestamptz, ends_at timestamptz,
         paused_at timestamptz, updated_at timestamptz, metadata jsonb, category_slug text, is_default_popup boolean,
         created_at timestamptz DEFAULT NOW());
       CREATE TABLE payments (id int PRIMARY KEY, user_id int REFERENCES users,
         type text NOT NULL CONSTRAINT payments_type_check CHECK (type IN ('boost', 'subscription', 'bon_plan')),
-        provider text, provider_ref text, amount_xpf int, status text, metadata jsonb, updated_at timestamptz);
+        provider text, provider_ref text, amount_xpf int,
+        status text CHECK (status IN ('pending', 'succeeded', 'failed', 'refunded')), metadata jsonb, updated_at timestamptz);
       CREATE TABLE push_tokens (id int PRIMARY KEY, user_id int REFERENCES users, token text);
       CREATE TABLE notifications (id serial PRIMARY KEY, user_id int REFERENCES users, type text, title text, body text, href text);
     `);
@@ -525,6 +527,100 @@ async function run() {
       const next = campaignEvent(); next.id = 'evt_same_link'; await dispatch(next);
       assert.deepStrictEqual(await state(), before); assert.deepStrictEqual(await paymentState(), current);
       assert.strictEqual((await queue()).length, 5); assert.strictEqual((await receipts()).length, 2);
+    });
+    function refund(event = campaignRefundEvent(), failOn = '') {
+      return webhook.processStripeWebhookEvent({ event, query: database.query,
+        withTransaction: fn => database.withTransaction(client => fn({ query(sql, values) {
+          return failOn && sql.includes(failOn) ? client.query('SELECT 1 / 0') : client.query(sql, values);
+        } })),
+      });
+    }
+    const financialState = async () => ({
+      payment: await paymentState(), campaigns: (await pool.query('SELECT * FROM campaigns ORDER BY id')).rows,
+      receipts: await receipts(), queue: await queue(),
+    });
+    await check('partial refund commits cumulative amount without any campaign change', async () => {
+      await dispatch(); const before = await completeState(); const outboxBefore = await queue();
+      await refund(campaignRefundEvent({ amount_refunded: 100, refunded: false }));
+      assert.deepStrictEqual(await completeState(), before); assert.deepStrictEqual(await queue(), outboxBefore);
+      assert.strictEqual((await paymentState()).status, 'succeeded');
+      assert.strictEqual((await paymentState()).metadata.stripe_refund_amount_eur_cents, 100);
+    });
+    for (const status of ['active', 'queued', 'paused', 'expired']) {
+      await check(`full refund definitively stops ${status} campaign`, async () => {
+        await dispatch(); await pool.query('UPDATE campaigns SET status=$1 WHERE id=13', [status]);
+        const before = await completeState(); await refund(); const after = await completeState();
+        assert.strictEqual(after.status, 'expired'); assert.deepStrictEqual(after.starts_at, before.starts_at);
+        assert.ok(after.ends_at <= new Date()); assert.strictEqual(after.paused_at, null);
+        assert.strictEqual(after.metadata.stop_reason, 'stripe_full_refund'); assert.strictEqual((await paymentState()).status, 'refunded');
+        assert.ok((await queue()).every(row => row.status === 'cancelled'));
+        await assert.rejects(stateService.resumeCampaign(undefined, stateArgs), e => e.status === 409);
+        await stateService.expireCampaignsAndActivateQueued(); assert.strictEqual((await state()).status, 'expired');
+      });
+    }
+    await check('same refund event applied once across two connections', async () => {
+      await dispatch(); const results = await Promise.all([refund(), refund()]);
+      assert.strictEqual(results.filter(r => r.duplicate).length, 1);
+      assert.strictEqual((await receipts()).filter(r => r.event_id === 'evt_refund').length, 1);
+    });
+    await check('reordered concurrent partial and total snapshots converge to total', async () => {
+      await dispatch();
+      await Promise.all([refund(), refund(campaignRefundEvent({ amount_refunded: 100, refunded: false }, 'evt_partial'))]);
+      assert.strictEqual((await paymentState()).status, 'refunded'); assert.strictEqual((await state()).status, 'expired');
+      const before = await completeState(); await refund(campaignRefundEvent({ amount_refunded: 100, refunded: false }, 'evt_older'));
+      assert.deepStrictEqual(await completeState(), before);
+    });
+    for (const failOn of ['INSERT INTO webhook_events', 'UPDATE payments', 'UPDATE campaigns', 'UPDATE campaign_notification_outbox']) {
+      await check(`refund SQL rollback at ${failOn}`, async () => {
+        await dispatch(); const before = await financialState();
+        await assert.rejects(refund(campaignRefundEvent(), failOn), e => e.code === '22012');
+        assert.deepStrictEqual(await financialState(), before);
+        await refund(); assert.strictEqual((await state()).status, 'expired');
+      });
+    }
+    await check('refund racing resume always leaves campaign stopped', async () => {
+      await dispatch(); await stateService.pauseCampaign(undefined, stateArgs);
+      const results = await Promise.allSettled([refund(), stateService.resumeCampaign(undefined, stateArgs)]);
+      assert.strictEqual(results[0].status, 'fulfilled');
+      if (results[1].status === 'rejected') assert.strictEqual(results[1].reason.status, 409);
+      assert.strictEqual((await state()).status, 'expired');
+    });
+    await check('refund racing scheduler stops refunded campaign and preserves capacity', async () => {
+      await dispatch(); const other = await competitor(14); await other();
+      await Promise.all([refund(), stateService.expireCampaignsAndActivateQueued()]);
+      await stateService.expireCampaignsAndActivateQueued();
+      assert.strictEqual((await state()).status, 'expired'); assert.strictEqual(await activeCount('popup'), 1);
+      assert.strictEqual((await pool.query('SELECT status FROM campaigns WHERE id=14')).rows[0].status, 'active');
+    });
+    await check('late Checkout cannot reactivate a fully refunded campaign', async () => {
+      await dispatch(); await refund(); const before = await financialState();
+      const late = campaignEvent(); late.id = 'evt_late_checkout';
+      await assert.rejects(dispatch(late), /validation failed/);
+      assert.deepStrictEqual(await financialState(), before);
+    });
+    await check('unlinked refund received before Checkout is retriable without receipt', async () => {
+      const before = await financialState(); await assert.rejects(refund(), /unresolved or ambiguous/);
+      assert.deepStrictEqual(await financialState(), before);
+      await dispatch(); await refund(); assert.strictEqual((await state()).status, 'expired');
+    });
+    await check('ambiguous PaymentIntent refuses refund without receipt', async () => {
+      await dispatch(); await competitor(14);
+      await pool.query(`UPDATE payments SET metadata=metadata || '{"stripe_payment_intent_id":"pi_synthetic"}'::jsonb WHERE id=14`);
+      const before = await financialState(); await assert.rejects(refund(), /unresolved or ambiguous/);
+      assert.deepStrictEqual(await financialState(), before);
+    });
+    for (const change of [{ currency: 'usd' }, { amount_refunded: 999999 }, { payment_intent: 'pi_other' }]) {
+      await check('invalid refund cannot mutate stored campaign or receipt', async () => {
+        await dispatch(); const before = await financialState();
+        await assert.rejects(refund(campaignRefundEvent(change)));
+        assert.deepStrictEqual(await financialState(), before);
+      });
+    }
+    await check('partial refund retains pause/resume entitlement and dates', async () => {
+      await dispatch(); await stateService.pauseCampaign(undefined, stateArgs);
+      const before = await completeState(); await refund(campaignRefundEvent({ amount_refunded: 100, refunded: false }));
+      assert.deepStrictEqual(await completeState(), before);
+      await stateService.resumeCampaign(undefined, stateArgs); assert.strictEqual((await state()).status, 'active');
     });
     console.log(`PostgreSQL campaign activation: ${total} checks passed`);
   } finally {

@@ -46,4 +46,10 @@ function loadCampaignWebhook(campaignService) {
     './paymentCatalog': { xpfToEurCents },
   });
 }
-module.exports = { loadCampaigns, payment, campaignEvent, loadCampaignWebhook };
+function campaignRefundEvent(changes = {}, id = 'evt_refund') {
+  const amount = xpfToEurCents(payment.amount_xpf);
+  return { id, type: 'charge.refunded', data: { object: { id: 'ch_synthetic', payment_intent: 'pi_synthetic',
+    amount, amount_captured: amount, amount_refunded: amount, refunded: true, currency: 'eur',
+    paid: true, captured: true, ...changes } } };
+}
+module.exports = { loadCampaigns, payment, campaignEvent, campaignRefundEvent, loadCampaignWebhook };

@@ -1141,10 +1141,11 @@ router.post('/webhooks/stripe', async (req, res) => {
     return res.status(400).json({ error: 'Signature invalide' });
   }
 
-  // Only verified ticket/campaign Checkouts own a complete atomic transaction.
-  const isAtomicCheckout = event.type === 'checkout.session.completed'
-    && ['event_ticket', 'campaign'].includes(event.data?.object?.metadata?.payment_type);
-  if (!isAtomicCheckout) {
+  // Refund routing resolves the stored product before choosing receipt semantics.
+  const hasBusinessReceipt = event.type === 'charge.refunded'
+    || (event.type === 'checkout.session.completed'
+      && ['event_ticket', 'campaign'].includes(event.data?.object?.metadata?.payment_type));
+  if (!hasBusinessReceipt) {
     try {
       const { rows } = await query(
         `INSERT INTO webhook_events (event_id, provider, type, processed_at)
