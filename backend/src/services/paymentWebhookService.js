@@ -38,6 +38,36 @@ async function setSubscriptionPaymentStatus(query, providerSubId, paymentStatus)
   );
 }
 
+async function bindCampaignStripePaymentIntent(client, payment, session) {
+  // Read the verified Checkout field, never an ID supplied through its metadata.
+  const intent = session.payment_intent;
+  const intentId = typeof intent === 'string' ? intent : intent?.id;
+  if (typeof intentId !== 'string' || intentId.length > 255 || !/^pi_[A-Za-z0-9_]+$/.test(intentId)) {
+    throw new Error('Campaign Stripe payment identity invalid');
+  }
+  const storedId = payment.metadata?.stripe_payment_intent_id;
+  if (storedId !== undefined && storedId !== intentId) {
+    throw new Error('Campaign Stripe payment identity conflict');
+  }
+  // Reserved identity lock: payment -> identity -> capacity -> campaign.
+  // All campaign link writers must use this transaction-scoped protocol.
+  await client.query('SELECT pg_advisory_xact_lock(1262570569, 2)');
+  const other = await client.query(
+    `SELECT id AS linked_payment_id FROM payments WHERE provider = 'stripe'
+     AND (metadata->>'stripe_payment_intent_id' = $1 OR provider_ref = $1)
+     AND id <> $2 LIMIT 1`, [intentId, payment.id]
+  );
+  if (other.rows.length) throw new Error('Campaign Stripe payment identity already linked');
+  if (storedId === intentId) return;
+  const updated = await client.query(
+    `UPDATE payments SET metadata = COALESCE(metadata, '{}'::jsonb)
+       || jsonb_build_object('stripe_payment_intent_id', $2::text), updated_at = NOW()
+     WHERE id = $1 AND provider = 'stripe' AND provider_ref = $3 AND type = 'campaign'`,
+    [payment.id, intentId, session.id]
+  );
+  if (updated.rowCount !== 1) throw new Error('Campaign Stripe payment identity update failed');
+}
+
 async function processStripeWebhookEvent({
   event,
   stripe,
@@ -399,6 +429,7 @@ async function processStripeWebhookEvent({
               || session.amount_total !== xpfToEurCents(amountXpf)) {
             throw new Error('Campaign checkout validation failed');
           }
+          await bindCampaignStripePaymentIntent(client, payment, session);
           const activated = await activateCampaignFromPayment(client, payment, payment.metadata, session.id, 'stripe');
           if (!activated) throw new Error('Webhook activation target unavailable');
           return { duplicate: false };

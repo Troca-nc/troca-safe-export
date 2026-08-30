@@ -31,7 +31,7 @@ const payment = { id: 9, user_id: 7, type: 'campaign', status: 'pending', amount
 const { xpfToEurCents } = require('../services/paymentCatalog');
 function campaignEvent(changes = {}) {
   return { id: 'evt_campaign', type: 'checkout.session.completed', data: { object: {
-    id: 'cs_synthetic', metadata: { ...payment.metadata }, currency: 'eur', payment_status: 'paid',
+    id: 'cs_synthetic', payment_intent: 'pi_synthetic', metadata: { ...payment.metadata }, currency: 'eur', payment_status: 'paid',
     amount_total: xpfToEurCents(payment.amount_xpf), ...changes,
   } } };
 }
