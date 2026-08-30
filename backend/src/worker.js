@@ -2,6 +2,7 @@
 
 const { checkConnection } = require('./config/database');
 const { startAllJobs } = require('./jobs/scheduler');
+const { startTicketEmailOutboxJob } = require('./jobs/ticketEmailOutbox');
 const { logger } = require('./utils/logger');
 const {
   recordError,
@@ -20,12 +21,14 @@ async function start() {
   }
 
   startAllJobs();
+  const ticketEmailJob = startTicketEmailOutboxJob();
   void registerObservabilityInstance('worker');
   logger.info('worker_started');
 
   const shutdown = (signal) => {
     logger.info('worker_shutdown_signal', { signal });
     stopObservabilityHeartbeat();
+    ticketEmailJob.stop();
     setTimeout(() => process.exit(0), 0);
   };
 

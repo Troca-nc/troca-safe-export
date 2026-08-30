@@ -33,6 +33,7 @@ function harness({ type = 'boost', status = 'pending', activationResult = {} } =
     './campaignsService': { activateCampaignFromPayment: activate('campaign') },
     './emailService': { sendBoostActivatedEmail: async () => {}, sendTicketEmail: async () => {} },
     './eventTicketingService': { finalizeEventTicketPayment: async () => null },
+    './ticketEmailOutboxService': { enqueueTicketEmail: async () => {} },
     './paymentCatalog': { xpfToEurCents },
   };
   const sandbox = {
