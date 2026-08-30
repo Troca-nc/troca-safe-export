@@ -1141,10 +1141,10 @@ router.post('/webhooks/stripe', async (req, res) => {
     return res.status(400).json({ error: 'Signature invalide' });
   }
 
-  // Only a verified ticket Checkout delegates its receipt to the transaction.
-  const isTicketCheckout = event.type === 'checkout.session.completed'
-    && event.data?.object?.metadata?.payment_type === 'event_ticket';
-  if (!isTicketCheckout) {
+  // Only verified ticket/campaign Checkouts own a complete atomic transaction.
+  const isAtomicCheckout = event.type === 'checkout.session.completed'
+    && ['event_ticket', 'campaign'].includes(event.data?.object?.metadata?.payment_type);
+  if (!isAtomicCheckout) {
     try {
       const { rows } = await query(
         `INSERT INTO webhook_events (event_id, provider, type, processed_at)

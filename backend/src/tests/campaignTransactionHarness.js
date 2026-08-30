@@ -27,5 +27,23 @@ function loadCampaigns(notify = async () => {}, clock = () => Date.now()) {
   });
 }
 const payment = { id: 9, user_id: 7, type: 'campaign', status: 'pending', amount_xpf: 1900,
-  metadata: { campaign_id: '13', pricing_mode: 'one_shot' } };
-module.exports = { loadCampaigns, payment };
+  metadata: { campaign_id: '13', pricing_mode: 'one_shot', payment_type: 'campaign', user_id: '7' } };
+const { xpfToEurCents } = require('../services/paymentCatalog');
+function campaignEvent(changes = {}) {
+  return { id: 'evt_campaign', type: 'checkout.session.completed', data: { object: {
+    id: 'cs_synthetic', metadata: { ...payment.metadata }, currency: 'eur', payment_status: 'paid',
+    amount_total: xpfToEurCents(payment.amount_xpf), ...changes,
+  } } };
+}
+function loadCampaignWebhook(campaignService) {
+  const forbidden = () => { throw new Error('Unexpected non-campaign effect'); };
+  return load('services/paymentWebhookService.js', {
+    './campaignsService': campaignService,
+    './bonPlansService': { activateBonPlanFromPayment: forbidden },
+    './emailService': { sendBoostActivatedEmail: forbidden },
+    './eventTicketingService': { finalizeEventTicketPayment: forbidden },
+    './ticketEmailOutboxService': { enqueueTicketEmail: forbidden },
+    './paymentCatalog': { xpfToEurCents },
+  });
+}
+module.exports = { loadCampaigns, payment, campaignEvent, loadCampaignWebhook };
