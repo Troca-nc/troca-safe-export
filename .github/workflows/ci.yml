@@ -26,6 +26,7 @@ jobs:
       PLAYWRIGHT_ENABLE_MSW: 'false'
       NODE_EXE: node
       K6_BASE_URL: http://127.0.0.1:3000
+      K6_API_BASE_URL: http://127.0.0.1:3001
       K6_USERNAME: pro@demo.kalico
       K6_PASSWORD: Demo1234!
       STRIPE_E2E_ENABLED: ${{ secrets.STRIPE_E2E_ENABLED }}
@@ -65,6 +66,9 @@ jobs:
 
       - name: Install k6
         uses: grafana/setup-k6-action@v1
+
+      - name: Check k6 request routing and login errors
+        run: node --test tests/performance/critical-routes.test.cjs
 
       - name: Start local demo services
         run: |
