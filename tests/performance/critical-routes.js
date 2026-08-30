@@ -19,6 +19,9 @@ export const options = {
   thresholds: {
     http_req_failed: ['rate<0.01'],
     http_req_duration: ['p(95)<1200'],
+    'http_req_duration{name:home}': ['p(95)<1200'],
+    'http_req_duration{name:pro-dashboard}': ['p(95)<1200'],
+    'http_req_duration{name:checkout}': ['p(95)<1200'],
   },
 }
 

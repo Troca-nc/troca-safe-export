@@ -76,4 +76,7 @@ test('load profile and failure thresholds remain unchanged', () => {
   assert.equal(h.options.scenarios.critical_routes.duration, '2m');
   assert.equal(h.options.thresholds.http_req_failed[0], 'rate<0.01');
   assert.equal(h.options.thresholds.http_req_duration[0], 'p(95)<1200');
+  for (const route of ['home', 'pro-dashboard', 'checkout']) {
+    assert.equal(h.options.thresholds[`http_req_duration{name:${route}}`][0], 'p(95)<1200');
+  }
 });
