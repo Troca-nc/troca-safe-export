@@ -6,8 +6,9 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const { ticketEvent } = require('./paymentTransactionHarness');
 
-function harness(provider, { secret = true, validSignature = true, outcomes = ['inserted'] } = {}) {
+function harness(provider, { secret = true, validSignature = true, outcomes = ['inserted'], event = { id: 'evt_synthetic', type: 'synthetic.event' }, processTicket = async () => {} } = {}) {
   const file = path.join(__dirname, '../routes/payment.route.js');
   const source = fs.readFileSync(file, 'utf8');
   const marker = `router.post('/webhooks/${provider}',`;
@@ -24,7 +25,7 @@ function harness(provider, { secret = true, validSignature = true, outcomes = ['
     payplugWebhookSecret: secret ? 'synthetic' : '',
     stripe: { webhooks: { constructEvent() {
       if (!validSignature) throw new Error('Invalid signature');
-      return { id: 'evt_synthetic', type: 'synthetic.event' };
+      return event;
     } } },
     getPayplugSignature: () => 'synthetic',
     verifyPayPlugWebhook: () => validSignature,
@@ -34,7 +35,7 @@ function harness(provider, { secret = true, validSignature = true, outcomes = ['
       if (outcome === 'error') throw new Error('synthetic DB failure: private detail');
       return { rows: outcome === 'duplicate' ? [] : [{ id: 1 }] };
     },
-    processStripeWebhookEvent: async () => { calls.business++; },
+    processStripeWebhookEvent: async () => { calls.business++; return processTicket(); },
     processPayplugWebhook: async () => { calls.business++; return { is_paid: true }; },
     payplug: {}, withTransaction() {}, sendMail() {}, sendBoostActivatedEmail() {},
     getWebPlan() {}, markPaymentSucceeded() {}, formatXpfEur() {}, XPF_PER_EUR: 119.33, baseUrl: '',
@@ -109,6 +110,39 @@ async function run() {
       assert.deepStrictEqual(h.calls, { registry: 3, business: 1 });
     });
   }
+  await check('Ticket receipt is delegated to business transaction, including duplicates', async () => {
+    const h = harness('stripe', { event: ticketEvent(), outcomes: ['error'], processTicket: async () => ({ duplicate: true }) });
+    const res = await h.invoke();
+    assert.strictEqual(res.code, 200);
+    assert.strictEqual(res.payload.duplicate, true);
+    assert.deepStrictEqual(h.calls, { registry: 0, business: 1 });
+  });
+  await check('Ticket transaction failure returns 500 without a premature receipt', async () => {
+    const h = harness('stripe', { event: ticketEvent(), processTicket: async () => { throw new Error('private database detail'); } });
+    const res = await h.invoke();
+    assert.strictEqual(res.code, 500);
+    assert.ok(!JSON.stringify(res.payload).includes('private database detail'));
+    assert.deepStrictEqual(h.calls, { registry: 0, business: 1 });
+  });
+  await check('Ticket response waits until the transaction resolves', async () => {
+    let finish;
+    const pending = new Promise(resolve => { finish = resolve; });
+    const h = harness('stripe', { event: ticketEvent(), processTicket: () => pending });
+    let responded = false;
+    const response = h.invoke().then(res => { responded = true; return res; });
+    await Promise.resolve(); await Promise.resolve();
+    assert.strictEqual(responded, false);
+    finish({ duplicate: false });
+    assert.strictEqual((await response).code, 200);
+  });
+  await check('Unverified body cannot select ticket receipt handling', async () => {
+    const h = harness('stripe');
+    await h.invoke({ body: ticketEvent() });
+    assert.deepStrictEqual(h.calls, { registry: 1, business: 1 });
+    const invalid = harness('stripe', { event: ticketEvent(), validSignature: false });
+    assert.strictEqual((await invalid.invoke()).code, 400);
+    assert.deepStrictEqual(invalid.calls, { registry: 0, business: 0 });
+  });
   console.log(`Webhook receipt: ${count} checks passed`);
 }
 

@@ -1141,22 +1141,27 @@ router.post('/webhooks/stripe', async (req, res) => {
     return res.status(400).json({ error: 'Signature invalide' });
   }
 
-  try {
-    const { rows } = await query(
-      `INSERT INTO webhook_events (event_id, provider, type, processed_at)
-       VALUES ($1, 'stripe', $2, NOW())
-       ON CONFLICT (event_id) DO NOTHING RETURNING id`,
-      [event.id, event.type]
-    );
-    if (!rows[0]) return res.json({ received: true, duplicate: true });
-  } catch (err) {
-    console.error('[webhook] Erreur idempotence:', err.message);
-    // Never apply business effects when duplicate protection is unavailable.
-    return res.status(503).json({ error: 'Enregistrement webhook indisponible' });
+  // Only a verified ticket Checkout delegates its receipt to the transaction.
+  const isTicketCheckout = event.type === 'checkout.session.completed'
+    && event.data?.object?.metadata?.payment_type === 'event_ticket';
+  if (!isTicketCheckout) {
+    try {
+      const { rows } = await query(
+        `INSERT INTO webhook_events (event_id, provider, type, processed_at)
+         VALUES ($1, 'stripe', $2, NOW())
+         ON CONFLICT (event_id) DO NOTHING RETURNING id`,
+        [event.id, event.type]
+      );
+      if (!rows[0]) return res.json({ received: true, duplicate: true });
+    } catch (err) {
+      console.error('[webhook] Erreur idempotence:', err.message);
+      // Never apply business effects when duplicate protection is unavailable.
+      return res.status(503).json({ error: 'Enregistrement webhook indisponible' });
+    }
   }
 
   try {
-    await processStripeWebhookEvent({
+    const result = await processStripeWebhookEvent({
       event,
       stripe,
       query,
@@ -1169,6 +1174,7 @@ router.post('/webhooks/stripe', async (req, res) => {
       XPF_PER_EUR,
       baseUrl,
     });
+    if (result?.duplicate) return res.json({ received: true, duplicate: true });
     return res.json({ received: true });
 
     if (event.type === 'checkout.session.completed') {
