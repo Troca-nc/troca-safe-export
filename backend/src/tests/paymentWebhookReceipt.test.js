@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const { ticketEvent } = require('./paymentTransactionHarness');
-const { campaignEvent } = require('./campaignTransactionHarness');
+const { campaignEvent, campaignRefundEvent } = require('./campaignTransactionHarness');
 
 function harness(provider, { secret = true, validSignature = true, outcomes = ['inserted'], event = { id: 'evt_synthetic', type: 'synthetic.event' }, processTicket = async () => {} } = {}) {
   const file = path.join(__dirname, '../routes/payment.route.js');
@@ -162,6 +162,29 @@ async function run() {
     let responded = false; const response = h.invoke().then(res => { responded = true; return res; });
     await Promise.resolve(); await Promise.resolve(); assert.strictEqual(responded, false);
     finish({ duplicate: false }); assert.strictEqual((await response).code, 200);
+  });
+  await check('Refund receipt is delegated after signature verification', async () => {
+    const h = harness('stripe', { event: campaignRefundEvent(), outcomes: ['error'], processTicket: async () => ({ duplicate: true }) });
+    const res = await h.invoke(); assert.strictEqual(res.code, 200); assert.strictEqual(res.payload.duplicate, true);
+    assert.deepStrictEqual(h.calls, { registry: 0, business: 1 });
+  });
+  await check('Unresolved refund returns generic failure without premature receipt', async () => {
+    const h = harness('stripe', { event: campaignRefundEvent(), processTicket: async () => { throw new Error('private refund detail'); } });
+    const res = await h.invoke(); assert.strictEqual(res.code, 500);
+    assert.ok(!JSON.stringify(res.payload).includes('private refund detail')); assert.strictEqual(h.calls.registry, 0);
+  });
+  await check('Refund response waits for transaction completion', async () => {
+    let finish; const pending = new Promise(resolve => { finish = resolve; });
+    const h = harness('stripe', { event: campaignRefundEvent(), processTicket: () => pending });
+    let responded = false; const response = h.invoke().then(res => { responded = true; return res; });
+    await Promise.resolve(); await Promise.resolve(); assert.strictEqual(responded, false);
+    finish({}); assert.strictEqual((await response).code, 200);
+  });
+  await check('Forged refund cannot bypass signature or select business receipt using request body', async () => {
+    const h = harness('stripe', { event: campaignRefundEvent(), validSignature: false });
+    assert.strictEqual((await h.invoke()).code, 400); assert.deepStrictEqual(h.calls, { registry: 0, business: 0 });
+    const other = harness('stripe'); await other.invoke({ body: campaignRefundEvent() });
+    assert.strictEqual(other.calls.registry, 1);
   });
   console.log(`Webhook receipt: ${count} checks passed`);
 }

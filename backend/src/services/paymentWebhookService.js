@@ -149,9 +149,12 @@ async function processStripeWebhookEvent({
 
   if (event.type === 'charge.refunded') {
     const charge = event.data.object;
-    const paymentRef = charge.payment_intent || charge.id;
+    const result = await routeStripeChargeRefund({ event, query, withTransaction });
+    if (result.handled) return result;
+    // Non-campaign refunds retain their legacy effects and receipt semantics.
+    const paymentRef = typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id || charge.id;
     const { rows: paymentRows } = await query(
-      `SELECT id, user_id, metadata, status FROM payments WHERE provider_ref = $1 LIMIT 1`,
+      `SELECT id, user_id, metadata, status FROM payments WHERE provider = 'stripe' AND provider_ref = $1 LIMIT 1`,
       [paymentRef]
     );
     const payment = paymentRows[0];
@@ -729,6 +732,101 @@ function payplugAmountToXpf(amountCents, xpfPerEur) {
   const rate = Number(xpfPerEur ?? 0);
   if (!cents || !rate) return 0;
   return Math.round((cents / 100) * rate);
+}
+
+async function insertStripeRefundReceipt(client, event) {
+  const result = await client.query(
+    `INSERT INTO webhook_events (event_id, provider, type, processed_at)
+     VALUES ($1, 'stripe', $2, NOW()) ON CONFLICT (event_id) DO NOTHING RETURNING id`, [event.id, event.type]
+  );
+  if (result.rows[0]) return true;
+  const existing = await client.query('SELECT provider FROM webhook_events WHERE event_id = $1', [event.id]);
+  if (existing.rows[0]?.provider !== 'stripe') throw new Error('Webhook receipt provider conflict');
+  return false;
+}
+
+async function routeStripeChargeRefund({ event, query, withTransaction }) {
+  if (typeof event.id !== 'string' || !event.id.trim() || event.id.length > 255) throw new Error('Invalid refund event ID');
+  // Historical receipts are not repaired or replayed automatically.
+  const existing = await query('SELECT provider FROM webhook_events WHERE event_id = $1', [event.id]);
+  if (existing.rows[0]) {
+    if (existing.rows[0].provider !== 'stripe') throw new Error('Webhook receipt provider conflict');
+    return { handled: true, duplicate: true };
+  }
+  const charge = event.data?.object;
+  const intentId = typeof charge?.payment_intent === 'string' ? charge.payment_intent : charge?.payment_intent?.id;
+  const reference = intentId || charge?.id;
+  if (typeof reference !== 'string' || reference.length > 255) throw new Error('Invalid refund reference');
+  const candidates = await query(
+    `SELECT id, type FROM payments WHERE provider = 'stripe'
+     AND (provider_ref = $1 OR metadata->>'stripe_payment_intent_id' = $1) LIMIT 2`, [reference]
+  );
+  if (candidates.rows.length !== 1) throw new Error('Stripe refund payment unresolved or ambiguous');
+  if (candidates.rows[0].type !== 'campaign') {
+    const inserted = await insertStripeRefundReceipt({ query }, event);
+    return inserted ? { handled: false } : { handled: true, duplicate: true };
+  }
+  return withTransaction(async client => {
+    if (!await insertStripeRefundReceipt(client, event)) return { handled: true, duplicate: true };
+    const { rows } = await client.query(
+      'SELECT * FROM payments WHERE id = $1 AND provider = \'stripe\' LIMIT 1 FOR UPDATE', [candidates.rows[0].id]
+    );
+    const payment = rows[0];
+    const campaignId = Number(payment?.metadata?.campaign_id);
+    const amountXpf = Number(payment?.amount_xpf);
+    const expected = xpfToEurCents(amountXpf);
+    if (!payment || payment.type !== 'campaign' || !['succeeded', 'refunded'].includes(payment.status)
+        || payment.metadata?.payment_type !== 'campaign' || !Number.isSafeInteger(amountXpf) || amountXpf <= 0
+        || !Number.isSafeInteger(campaignId) || campaignId <= 0
+        || typeof intentId !== 'string' || !/^pi_[A-Za-z0-9_]+$/.test(intentId)
+        || payment.metadata?.stripe_payment_intent_id !== intentId
+        || typeof charge.id !== 'string' || !/^ch_[A-Za-z0-9_]+$/.test(charge.id) || charge.id.length > 255
+        || charge.currency !== 'eur' || charge.paid !== true || charge.captured !== true
+        || !Number.isSafeInteger(expected) || expected <= 0 || charge.amount !== expected || charge.amount_captured !== expected
+        || !Number.isSafeInteger(charge.amount_refunded) || charge.amount_refunded <= 0 || charge.amount_refunded > expected
+        || charge.refunded !== (charge.amount_refunded === expected)) throw new Error('Campaign refund validation failed');
+    const previous = payment.metadata.stripe_refund_amount_eur_cents ?? 0;
+    if (!Number.isSafeInteger(previous) || previous < 0 || previous > expected
+        || (payment.status === 'refunded' && previous !== expected)
+        || (previous === expected && payment.status !== 'refunded')
+        || (previous > 0 && (payment.metadata.stripe_refund_currency !== 'eur'
+          || payment.metadata.stripe_refund_charge_id !== charge.id))
+        || (payment.metadata.stripe_refund_charge_id !== undefined && payment.metadata.stripe_refund_charge_id !== charge.id)) {
+      throw new Error('Campaign refund history conflict');
+    }
+    // Same order as activation/resume/scheduler: payment, capacity, campaign.
+    await client.query('SELECT pg_advisory_xact_lock(1262570569, 1)');
+    const target = await client.query('SELECT * FROM campaigns WHERE id = $1 LIMIT 1 FOR UPDATE', [campaignId]);
+    const campaign = target.rows[0];
+    if (!campaign || campaign.is_default_popup || Number(campaign.user_id) !== Number(payment.user_id)
+        || campaign.metadata?.payment_provider !== 'stripe' || campaign.metadata?.payment_ref !== payment.provider_ref) {
+      throw new Error('Campaign refund target mismatch');
+    }
+    // Charge.amount_refunded is cumulative; reordered snapshots never subtract.
+    if (charge.amount_refunded <= previous) return { handled: true, duplicate: false, applied: false };
+    const full = charge.amount_refunded === expected;
+    const refundMeta = { stripe_refund_amount_eur_cents: charge.amount_refunded, stripe_refund_currency: 'eur',
+      stripe_refund_charge_id: charge.id, stripe_refund_event_id: event.id, stripe_refund_status: full ? 'full' : 'partial' };
+    const updated = await client.query(
+      `UPDATE payments SET status = $2, metadata = COALESCE(metadata, '{}'::jsonb) || $3::jsonb, updated_at = NOW()
+       WHERE id = $1 AND provider = 'stripe' AND type = 'campaign'`,
+      [payment.id, full ? 'refunded' : 'succeeded', JSON.stringify(refundMeta)]
+    );
+    if (updated.rowCount !== 1) throw new Error('Campaign refund payment update failed');
+    if (full) {
+      const stopped = await client.query(
+        `UPDATE campaigns SET status = 'expired', ends_at = LEAST(COALESCE(ends_at, NOW()), NOW()),
+         paused_at = NULL, metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb, updated_at = NOW() WHERE id = $1`,
+        [campaignId, JSON.stringify({ payment_status: 'refunded', stop_reason: 'stripe_full_refund', ...refundMeta })]
+      );
+      if (stopped.rowCount !== 1) throw new Error('Campaign refund stop failed');
+      await client.query(
+        `UPDATE campaign_notification_outbox SET status = 'cancelled', last_error_code = 'CAMPAIGN_REFUNDED'
+         WHERE payment_id = $1 AND status = 'pending'`, [payment.id]
+      );
+    }
+    return { handled: true, duplicate: false, applied: true, refund: full ? 'full' : 'partial' };
+  });
 }
 
 async function upsertBillingDocument(query, {

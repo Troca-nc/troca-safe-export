@@ -30,6 +30,7 @@ const SUITES = [
   './campaignActivation.test',
   './campaignStateTransitions.test',
   './campaignQueuePayment.test',
+  './campaignRefund.test',
   './campaignNotificationOutbox.test',
 ];
 

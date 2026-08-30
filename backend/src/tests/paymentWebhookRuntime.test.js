@@ -19,6 +19,7 @@ function harness({ type = 'boost', status = 'pending', activationResult = {} } =
   const payment = { id: 9, user_id: 7, type, status, amount_xpf: 3600, metadata };
   const query = async (sql, params) => {
     if (/^\s*(UPDATE|INSERT|DELETE)/i.test(sql)) writes.push({ sql, params });
+    if (sql.startsWith('SELECT provider FROM webhook_events')) return { rows: [] };
     if (sql.includes('AS linked_payment_id')) return { rows: [] };
     if (sql.includes("jsonb_build_object('stripe_payment_intent_id'")) return { rows: [], rowCount: 1 };
     if (/FROM payments/.test(sql)) return { rows: [payment] };
@@ -62,7 +63,7 @@ function harness({ type = 'boost', status = 'pending', activationResult = {} } =
     } } },
   });
   const stripeEvent = (eventType, object) => sandbox.module.exports.processStripeWebhookEvent({
-    ...dependencies, event: { type: eventType, data: { object } },
+    ...dependencies, event: { id: 'evt_runtime', type: eventType, data: { object } },
   });
   const payplug = () => sandbox.module.exports.processPayplugWebhook({
     ...dependencies, resourceId: 'pay_synthetic', resourceType: 'payment',
@@ -145,6 +146,13 @@ async function run() {
       await assert.rejects(h.checkout(), /activation target unavailable/);
     });
   }
+  await check('Non-campaign Stripe refund keeps legacy effects and inserts its delegated receipt', async () => {
+    const h = harness({ type: 'boost', status: 'succeeded' });
+    await h.stripeEvent('charge.refunded', { id: 'ch_synthetic', payment_intent: 'pi_synthetic', amount_refunded: 100, currency: 'eur' });
+    assert.ok(h.writes.some(write => /INSERT INTO webhook_events/.test(write.sql)));
+    assert.ok(h.writes.some(write => /UPDATE payments SET status = 'refunded'/.test(write.sql)));
+    assert.ok(h.writes.some(write => /DELETE FROM annonce_boosts/.test(write.sql)));
+  });
   console.log(`Webhook runtime: ${count} checks passed`);
 }
 
