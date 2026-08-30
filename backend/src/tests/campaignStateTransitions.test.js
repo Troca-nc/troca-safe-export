@@ -13,8 +13,11 @@ async function run() {
     const client = { release() { calls.push('RELEASE'); }, async query(sql, values) {
       sql = sql.replace(/\s+/g, ' ').trim(); calls.push(sql);
       if (['BEGIN', 'COMMIT', 'ROLLBACK'].includes(sql)) return { rows: [] };
+      if (sql.includes('pg_advisory_xact_lock')) return { rows: [] };
       if (sql.startsWith('SELECT * FROM campaigns')) {
-        assert.ok(sql.endsWith('FOR UPDATE')); return { rows: options.missing ? [] : [row] };
+        assert.ok(sql.endsWith('FOR UPDATE'));
+        assert.ok(calls.some(x => x.includes('pg_advisory_xact_lock')), 'Capacity lock precedes campaign lock');
+        return { rows: options.missing ? [] : [row] };
       }
       if (sql.startsWith('SELECT id FROM payments')) {
         assert.ok(sql.includes("type = 'campaign' AND status = 'succeeded'"));
