@@ -65,6 +65,7 @@ jobs:
         run: cd backend && npm run lint --if-present
 
       - name: Ticket transaction PostgreSQL checks
+        # The payment-type migration also runs inside the ticket/campaign suites.
         timeout-minutes: 2
         run: node backend/src/tests/integration/eventTicketTransaction.postgres.test.js
         env:
@@ -73,6 +74,12 @@ jobs:
       - name: Campaign activation PostgreSQL checks
         timeout-minutes: 2
         run: node backend/src/tests/integration/campaignActivation.postgres.test.js
+        env:
+          KALICO_TEST_PG_PORT: '5432'
+
+      - name: Payment type migration PostgreSQL checks
+        timeout-minutes: 2
+        run: node backend/src/tests/integration/paymentTypes.postgres.test.js
         env:
           KALICO_TEST_PG_PORT: '5432'
 

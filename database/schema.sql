@@ -335,7 +335,7 @@ CREATE TRIGGER trg_conv_updated_at
 CREATE TABLE IF NOT EXISTS payments (
   id           SERIAL PRIMARY KEY,
   user_id      INTEGER     NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  type         VARCHAR(20) NOT NULL CHECK (type IN ('boost','subscription')),
+  type         VARCHAR(20) NOT NULL CHECK (type IN ('boost','subscription','bon_plan','campaign','event_ticket')),
   provider     VARCHAR(20) NOT NULL CHECK (provider IN ('stripe','payplug')),
   provider_ref VARCHAR(255) NOT NULL UNIQUE,
   amount_xpf   INTEGER     NOT NULL,

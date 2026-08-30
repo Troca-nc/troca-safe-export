@@ -34,7 +34,8 @@ async function run() {
         type varchar(100) NOT NULL, processed_at timestamptz NOT NULL DEFAULT NOW());
       CREATE TABLE events (id int PRIMARY KEY, title text, tickets_sold int NOT NULL, updated_at timestamptz);
       CREATE TABLE payments (id int PRIMARY KEY, provider text, provider_ref text, user_id int,
-        type text, metadata jsonb, status text, amount_xpf int, updated_at timestamptz);
+        type text NOT NULL CONSTRAINT payments_type_check CHECK (type IN ('boost', 'subscription', 'bon_plan')),
+        metadata jsonb, status text, amount_xpf int, updated_at timestamptz);
       CREATE TABLE ticket_orders (id int PRIMARY KEY, event_id int REFERENCES events, status text,
         expires_at timestamptz, buyer_email text, buyer_name text, total_xpf int,
         paid_at timestamptz, updated_at timestamptz);
@@ -43,6 +44,7 @@ async function run() {
         event_id int REFERENCES events, ticket_type_id int REFERENCES ticket_types,
         token text, qr_code_url text, status text, price_xpf int);
     `);
+    await pool.query(fs.readFileSync(path.join(__dirname, '../../../../database/migrations/20260830_payment_types_campaign_ticket.sql'), 'utf8'));
     await pool.query(fs.readFileSync(path.join(__dirname, '../../../../database/migrations/20260830_ticket_email_outbox.sql'), 'utf8'));
     async function seed() {
       await pool.query('TRUNCATE webhook_events, ticket_email_outbox, tickets, ticket_types, ticket_orders, payments, events');

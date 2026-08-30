@@ -25,11 +25,13 @@ async function run() {
       CREATE TABLE campaigns (id int PRIMARY KEY, user_id int REFERENCES users, type text,
         title text, status text, duration_days int, starts_at timestamptz, ends_at timestamptz,
         paused_at timestamptz, updated_at timestamptz, metadata jsonb, category_slug text, is_default_popup boolean);
-      CREATE TABLE payments (id int PRIMARY KEY, user_id int REFERENCES users, type text,
+      CREATE TABLE payments (id int PRIMARY KEY, user_id int REFERENCES users,
+        type text NOT NULL CONSTRAINT payments_type_check CHECK (type IN ('boost', 'subscription', 'bon_plan')),
         provider text, provider_ref text, amount_xpf int, status text, metadata jsonb, updated_at timestamptz);
       CREATE TABLE push_tokens (id int PRIMARY KEY, user_id int REFERENCES users, token text);
       CREATE TABLE notifications (id serial PRIMARY KEY, user_id int REFERENCES users, type text, title text, body text, href text);
     `);
+    await pool.query(fs.readFileSync(path.join(__dirname, '../../../../database/migrations/20260830_payment_types_campaign_ticket.sql'), 'utf8'));
     await pool.query(fs.readFileSync(path.join(__dirname, '../../../../database/migrations/20260830_campaign_notification_outbox.sql'), 'utf8'));
     const database = loadDatabase(pool);
     const outbox = load('services/campaignNotificationOutboxService.js', { '../config/database': database });
