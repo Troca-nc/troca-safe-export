@@ -29,6 +29,9 @@ async function run() {
     pool = new Pool({ ...connection, max: 4, options: `-c search_path=${schema}` });
     // Minimal schema for the production queries, not a full migration test.
     await pool.query(`
+      CREATE TABLE webhook_events (id serial PRIMARY KEY, event_id varchar(255) UNIQUE NOT NULL,
+        provider varchar(20) NOT NULL CHECK (provider IN ('stripe', 'payplug')),
+        type varchar(100) NOT NULL, processed_at timestamptz NOT NULL DEFAULT NOW());
       CREATE TABLE events (id int PRIMARY KEY, title text, tickets_sold int NOT NULL, updated_at timestamptz);
       CREATE TABLE payments (id int PRIMARY KEY, provider text, provider_ref text, user_id int,
         type text, metadata jsonb, status text, amount_xpf int, updated_at timestamptz);
@@ -42,7 +45,7 @@ async function run() {
     `);
     await pool.query(fs.readFileSync(path.join(__dirname, '../../../../database/migrations/20260830_ticket_email_outbox.sql'), 'utf8'));
     async function seed() {
-      await pool.query('TRUNCATE ticket_email_outbox, tickets, ticket_types, ticket_orders, payments, events');
+      await pool.query('TRUNCATE webhook_events, ticket_email_outbox, tickets, ticket_types, ticket_orders, payments, events');
       await pool.query("INSERT INTO events VALUES (12, 'Synthetic event', 0, NOW())");
       await pool.query("INSERT INTO payments VALUES (9, 'stripe', 'cs_synthetic', 7, 'event_ticket', $1, 'pending', 3600, NOW())", [metadata]);
       await pool.query("INSERT INTO ticket_orders VALUES (34, 12, 'reserved', NOW() + interval '1 hour', 'synthetic@example.invalid', 'Test', 3600, NULL, NOW())");
@@ -63,17 +66,23 @@ async function run() {
     const paid = { payment: 'succeeded', order_status: 'paid', active: 2, sold: 2, reserved: 0, event_sold: 2 };
     const database = loadDatabase(pool);
     const queue = async () => (await pool.query('SELECT status, attempts, last_error_code FROM ticket_email_outbox ORDER BY id')).rows;
-    function handler(failOn = '', mailMode = 'accepted') {
+    const receipts = async () => (await pool.query('SELECT event_id, provider FROM webhook_events ORDER BY id')).rows;
+    function handler(failOn = '', mailMode = 'accepted', loseCommitAck = false) {
       let emails = 0;
       const transactionDb = {
         query() { throw new Error('Global pool query escaped transaction'); },
-        withTransaction: fn => database.withTransaction(client => fn({
-          query(sql, values) {
-            // Inject a real SQL error on this connection, after earlier writes.
-            if (failOn && sql.replace(/\s+/g, ' ').includes(failOn)) return client.query('SELECT 1 / 0');
-            return client.query(sql, values);
-          },
-        })),
+        withTransaction: async fn => {
+          const result = await database.withTransaction(client => fn({
+            query(sql, values) {
+              // Inject a real SQL error on this connection, after earlier writes.
+              if (failOn && sql.replace(/\s+/g, ' ').includes(failOn)) return client.query('SELECT 1 / 0');
+              return client.query(sql, values);
+            },
+          }));
+          // Simulate lost acknowledgement AFTER a real commit, not a DB crash.
+          if (loseCommitAck) throw new Error('Simulated lost commit acknowledgement');
+          return result;
+        },
       };
       const service = loadServices(transactionDb, async () => {
         // A different DB connection must see the committed state before email.
@@ -96,24 +105,28 @@ async function run() {
     await check('commit persists ticket effects and queue before notification', async () => {
       const h = handler(); await h.invoke();
       assert.deepStrictEqual(await state(), paid);
+      assert.strictEqual((await receipts()).length, 1);
       assert.strictEqual(h.emails(), 0);
       assert.strictEqual((await queue())[0].status, 'pending');
       await h.deliver();
       assert.strictEqual(h.emails(), 1);
       assert.strictEqual((await queue())[0].status, 'sent');
     });
-    for (const failOn of ['UPDATE ticket_types', 'UPDATE tickets ', 'UPDATE ticket_orders', 'UPDATE events', 'UPDATE payments', 'SELECT o.*', 'INSERT INTO ticket_email_outbox']) {
+    for (const failOn of ['INSERT INTO webhook_events', 'UPDATE ticket_types', 'UPDATE tickets ', 'UPDATE ticket_orders', 'UPDATE events', 'UPDATE payments', 'SELECT o.*', 'INSERT INTO ticket_email_outbox']) {
       await check(`rollback on ${failOn} restores all counters and statuses`, async () => {
         const h = handler(failOn);
         await assert.rejects(h.invoke(), error => error.code === '22012');
         assert.deepStrictEqual(await state(), initial);
         assert.strictEqual(h.emails(), 0);
         assert.deepStrictEqual(await queue(), []);
+        assert.deepStrictEqual(await receipts(), []);
       });
     }
     await check('concurrent dispatches and workers enqueue and deliver once', async () => {
       const h = handler();
-      await Promise.all([h.invoke(), h.invoke()]);
+      const results = await Promise.all([h.invoke(), h.invoke()]);
+      assert.strictEqual(results.filter(result => result.duplicate).length, 1);
+      assert.strictEqual((await receipts()).length, 1);
       assert.deepStrictEqual(await state(), paid);
       assert.strictEqual((await queue()).length, 1);
       assert.strictEqual(h.emails(), 0);
@@ -127,9 +140,48 @@ async function run() {
       assert.strictEqual(h.emails(), 1);
     });
     await check('invalid amount leaves all reserved state intact', async () => {
-      const h = handler(); await h.invoke(ticketEvent({ amount_total: 1 }));
+      const h = handler(); await assert.rejects(h.invoke(ticketEvent({ amount_total: 1 })), /validation failed/);
+      assert.deepStrictEqual(await receipts(), []);
       assert.deepStrictEqual(await state(), initial);
       assert.strictEqual(h.emails(), 0);
+    });
+    await check('Same event can succeed after an SQL failure without a poisoned receipt', async () => {
+      await assert.rejects(handler('INSERT INTO ticket_email_outbox').invoke());
+      assert.deepStrictEqual(await state(), initial);
+      assert.deepStrictEqual(await receipts(), []);
+      const h = handler(); await h.invoke();
+      assert.deepStrictEqual(await state(), paid);
+      assert.strictEqual((await receipts()).length, 1);
+      assert.strictEqual((await queue()).length, 1);
+    });
+    await check('Retry after simulated lost commit acknowledgement skips committed effects', async () => {
+      await assert.rejects(handler('', 'accepted', true).invoke(), /lost commit acknowledgement/);
+      assert.deepStrictEqual(await state(), paid);
+      assert.strictEqual((await handler().invoke()).duplicate, true);
+      assert.deepStrictEqual(await state(), paid);
+      assert.strictEqual((await receipts()).length, 1);
+      assert.strictEqual((await queue()).length, 1);
+    });
+    await check('Distinct concurrent events for one payment do not duplicate effects', async () => {
+      const h = handler();
+      await Promise.all([h.invoke(), h.invoke({ ...ticketEvent(), id: 'evt_second' })]);
+      assert.deepStrictEqual(await state(), paid);
+      assert.strictEqual((await receipts()).length, 2);
+      assert.strictEqual((await queue()).length, 1);
+    });
+    await check('Historical receipt is preserved without replaying uncertain effects', async () => {
+      await pool.query("INSERT INTO webhook_events (event_id, provider, type) VALUES ('evt_synthetic', 'stripe', 'checkout.session.completed')");
+      assert.strictEqual((await handler().invoke()).duplicate, true);
+      assert.deepStrictEqual(await state(), initial);
+      assert.deepStrictEqual(await queue(), []);
+      assert.strictEqual((await receipts()).length, 1);
+    });
+    await check('Cross-provider collision does not acknowledge ticket success', async () => {
+      await pool.query("INSERT INTO webhook_events (event_id, provider, type) VALUES ('evt_synthetic', 'payplug', 'payment')");
+      await assert.rejects(handler().invoke(), /provider conflict/);
+      assert.deepStrictEqual(await state(), initial);
+      assert.deepStrictEqual(await queue(), []);
+      assert.strictEqual((await receipts())[0].provider, 'payplug');
     });
     await check('SMTP failure commits a delayed retry then another worker can deliver', async () => {
       const h = handler('', 'throw'); await h.invoke();

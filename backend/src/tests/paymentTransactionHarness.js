@@ -53,7 +53,7 @@ const metadata = {
   amount_xpf: '3600', amount_eur_cents: '3017',
 };
 function ticketEvent(overrides = {}) {
-  return { type: 'checkout.session.completed', data: { object: {
+  return { id: 'evt_synthetic', type: 'checkout.session.completed', data: { object: {
     id: 'cs_synthetic', payment_status: 'paid', currency: 'eur', amount_total: 3017,
     metadata: { ...metadata }, ...overrides,
   } } };

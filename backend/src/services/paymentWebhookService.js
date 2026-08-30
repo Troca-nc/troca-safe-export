@@ -361,7 +361,23 @@ async function processStripeWebhookEvent({
     const userId = Number(session.metadata?.user_id ?? 0);
 
     if (paymentType === 'event_ticket') {
-      await withTransaction(async (client) => {
+      if (typeof event.id !== 'string' || !event.id.trim() || event.id.length > 255) {
+        throw new Error('Invalid ticket webhook event ID');
+      }
+      return withTransaction(async (client) => {
+        // The receipt must commit with the ticket effects, never before them.
+        const receipt = await client.query(
+          `INSERT INTO webhook_events (event_id, provider, type, processed_at)
+           VALUES ($1, 'stripe', $2, NOW())
+           ON CONFLICT (event_id) DO NOTHING RETURNING id`,
+          [event.id, event.type]
+        );
+        if (!receipt.rows[0]) {
+          const existing = await client.query('SELECT provider FROM webhook_events WHERE event_id = $1', [event.id]);
+          if (existing.rows[0]?.provider !== 'stripe') throw new Error('Webhook receipt provider conflict');
+          // Preserve historical receipts: their effects must not be replayed.
+          return { duplicate: true };
+        }
         // Validate the same locked payment that the finalizer will mutate.
         const { rows } = await client.query(
           `SELECT id, user_id, type, metadata, status, amount_xpf
@@ -372,12 +388,12 @@ async function processStripeWebhookEvent({
         );
         const payment = rows[0];
         if (!payment || Number(payment.user_id || 0) !== userId
-            || !isValidEventTicketCheckout(session, payment)) return null;
+            || !isValidEventTicketCheckout(session, payment)) throw new Error('Ticket checkout validation failed');
         const finalized = await finalizeEventTicketPayment({ providerRef: session.id, paymentStatus: 'succeeded', client });
+        if (!['paid', 'already_paid'].includes(finalized?.status)) throw new Error('Ticket payment is not finalizable');
         if (finalized?.status === 'paid') await enqueueTicketEmail(client, finalized.order_id);
-        return finalized;
+        return { duplicate: false };
       });
-      return;
     }
 
     const { rows: paymentRows } = await query(

@@ -3,7 +3,7 @@
 const assert = require('assert');
 const { loadDatabase, loadServices, metadata, ticketEvent } = require('./paymentTransactionHarness');
 
-function harness({ orderStatus = 'reserved', failOn = '', emailFails = false, missingPayment = false } = {}) {
+function harness({ orderStatus = 'reserved', failOn = '', emailFails = false, missingPayment = false, duplicate = false, receiptProvider = 'stripe' } = {}) {
   const trace = [];
   let updates = 0;
   let releases = 0;
@@ -13,6 +13,8 @@ function harness({ orderStatus = 'reserved', failOn = '', emailFails = false, mi
       trace.push(normalized);
       if (failOn && normalized.includes(failOn)) throw new Error('injected SQL error');
       if (/^(BEGIN|COMMIT|ROLLBACK)$/.test(normalized)) return { rows: [] };
+      if (normalized.startsWith('INSERT INTO webhook_events')) return { rows: duplicate ? [] : [{ id: 1 }] };
+      if (normalized.includes('FROM webhook_events')) return { rows: [{ provider: receiptProvider }] };
       if (/^UPDATE/.test(normalized)) { updates++; return { rows: [], rowCount: 1 }; }
       if (normalized.includes('FROM payments')) return { rows: missingPayment ? [] : [{
         id: 9, user_id: 7, metadata, amount_xpf: 3600, status: 'pending',
@@ -60,9 +62,10 @@ async function run() {
     assert.ok(!h.trace.includes('EMAIL'));
     const enqueued = h.trace.findIndex(sql => sql.startsWith('INSERT INTO ticket_email_outbox'));
     assert.ok(enqueued > 0 && enqueued < h.trace.indexOf('COMMIT'));
-    assert.match(h.trace[2], /provider = 'stripe'.*FOR UPDATE/);
+    assert.match(h.trace[2], /^INSERT INTO webhook_events/);
+    assert.match(h.trace[3], /provider = 'stripe'.*FOR UPDATE/);
   });
-  for (const failOn of ['UPDATE ticket_types', 'UPDATE tickets ', 'UPDATE ticket_orders', 'UPDATE events', 'UPDATE payments', 'INSERT INTO ticket_email_outbox', 'COMMIT']) {
+  for (const failOn of ['INSERT INTO webhook_events', 'UPDATE ticket_types', 'UPDATE tickets ', 'UPDATE ticket_orders', 'UPDATE events', 'UPDATE payments', 'INSERT INTO ticket_email_outbox', 'COMMIT']) {
     await check(`Ticket failure at ${failOn.trim()} propagates without email`, async () => {
       const h = harness({ failOn });
       await assert.rejects(h.invoke(), /injected SQL error/);
@@ -81,16 +84,41 @@ async function run() {
   for (const change of [{ payment_status: 'unpaid' }, { currency: 'usd' }, { amount_total: 1 }, { metadata: { ...metadata, user_id: '8' } }]) {
     await check(`Invalid ticket checkout ${JSON.stringify(change)} causes no writes`, async () => {
       const h = harness();
-      await h.invoke(ticketEvent(change));
+      await assert.rejects(h.invoke(ticketEvent(change)), /validation failed/);
+      assert.ok(h.trace.includes('ROLLBACK') && !h.trace.includes('COMMIT'));
       assert.strictEqual(h.updates(), 0);
       assert.ok(!h.trace.includes('EMAIL'));
     });
   }
   await check('Missing ticket payment causes no writes or email', async () => {
     const h = harness({ missingPayment: true });
-    await h.invoke();
+    await assert.rejects(h.invoke(), /validation failed/);
+    assert.ok(h.trace.includes('ROLLBACK'));
     assert.strictEqual(h.updates(), 0);
     assert.ok(!h.trace.includes('EMAIL'));
+  });
+  await check('Historical receipt skips ticket effects without replay', async () => {
+    const h = harness({ duplicate: true });
+    assert.strictEqual((await h.invoke()).duplicate, true);
+    assert.ok(h.trace.includes('COMMIT'));
+    assert.ok(!h.trace.some(sql => sql.includes('FROM payments')));
+    assert.strictEqual(h.updates(), 0);
+  });
+  await check('Cross-provider receipt conflict fails closed', async () => {
+    const h = harness({ duplicate: true, receiptProvider: 'payplug' });
+    await assert.rejects(h.invoke(), /provider conflict/);
+    assert.ok(h.trace.includes('ROLLBACK'));
+    assert.strictEqual(h.updates(), 0);
+  });
+  await check('Non-finalizable order rolls back its receipt', async () => {
+    const h = harness({ orderStatus: 'cancelled' });
+    await assert.rejects(h.invoke(), /not finalizable/);
+    assert.ok(h.trace.includes('ROLLBACK'));
+  });
+  await check('Missing event ID fails before opening a transaction', async () => {
+    const h = harness();
+    await assert.rejects(h.invoke({ ...ticketEvent(), id: undefined }), /event ID/);
+    assert.deepStrictEqual(h.trace, []);
   });
   await check('Standalone finalizer still owns its transaction', async () => {
     const h = harness();
