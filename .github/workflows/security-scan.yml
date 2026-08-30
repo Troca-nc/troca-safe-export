@@ -11,10 +11,15 @@ permissions:
 jobs:
   trivy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Build backend image
         run: docker build -t kalico/backend ./backend
