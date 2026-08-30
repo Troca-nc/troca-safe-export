@@ -654,10 +654,10 @@ async function activateCampaignIfSlotAvailable(db, campaign, { fromQueue = false
   const limit = countLimitForType(campaign.type);
   const slotAvailable = activeCount < limit;
   const now = new Date().toISOString();
-  const endsAt = campaign.duration_days > 0
-    ? new Date(Date.now() + campaign.duration_days * 24 * 60 * 60 * 1000).toISOString()
-    : null;
   const nextStart = slotAvailable ? now : await estimateStartAt(q, campaign);
+  const endsAt = campaign.duration_days > 0
+    ? new Date(Date.parse(nextStart) + campaign.duration_days * 24 * 60 * 60 * 1000).toISOString()
+    : null;
 
   if (slotAvailable) {
     await setCampaignStatus(q, campaign.id, {
@@ -976,23 +976,52 @@ async function autoSelectWeeklyBonPlans(db) {
 }
 
 async function activateCampaignFromPayment(db, payment, paymentMeta, providerRef, provider) {
+  // Both webhook callers supply a transaction client. Never silently use the pool.
+  if (!db || typeof db.query !== 'function') throw new Error('Campaign transaction client required');
   const q = getQueryRunner(db);
   const campaignId = Number(paymentMeta.campaign_id || 0);
   if (!campaignId) return null;
 
-  const { rows } = await q(`SELECT * FROM campaigns WHERE id = $1 LIMIT 1`, [campaignId]);
+  const { rows: paymentRows } = await q(
+    `SELECT id, user_id, type, status, metadata, amount_xpf FROM payments
+     WHERE id = $1 AND provider = $2 AND provider_ref = $3 LIMIT 1 FOR UPDATE`,
+    [payment?.id, provider, providerRef]
+  );
+  const storedPayment = paymentRows[0];
+  if (!storedPayment || storedPayment.type !== 'campaign'
+      || !['pending', 'succeeded'].includes(storedPayment.status)
+      || Number(storedPayment.metadata?.campaign_id) !== campaignId
+      || Number(storedPayment.user_id) !== Number(payment?.user_id)
+      || Number(storedPayment.amount_xpf) !== Number(payment?.amount_xpf)) {
+    throw new Error('Campaign payment validation failed');
+  }
+  const { rows } = await q(`SELECT * FROM campaigns WHERE id = $1 LIMIT 1 FOR UPDATE`, [campaignId]);
   const campaign = rows[0];
   if (!campaign) return null;
+  if (Number(campaign.user_id) !== Number(storedPayment.user_id)) throw new Error('Campaign owner mismatch');
 
-  await q(
+  // Preserve already applied effects, including legacy metadata with stale status.
+  // Never resume a paused/expired campaign or extend dates for the same payment.
+  if (campaign.metadata?.payment_ref === providerRef && campaign.metadata?.payment_provider === provider
+      && storedPayment.status === 'succeeded') {
+    return { campaignId, duplicate: true, activation: {
+      status: campaign.status, starts_at: campaign.starts_at, ends_at: campaign.ends_at, fromQueue: false,
+    } };
+  }
+  if (campaign.status !== 'pending' || campaign.metadata?.payment_ref) {
+    throw new Error('Campaign payment transition not allowed');
+  }
+
+  const updatedPayment = await q(
     `UPDATE payments SET status = 'succeeded', updated_at = NOW()
-     WHERE provider_ref = $1 AND type = 'campaign'`,
-    [providerRef]
-  ).catch(() => {});
+     WHERE id = $1 AND provider = $2 AND provider_ref = $3 AND type = 'campaign'`,
+    [storedPayment.id, provider, providerRef]
+  );
+  if (updatedPayment.rowCount !== 1) throw new Error('Campaign payment update failed');
 
   const activation = await activateCampaignIfSlotAvailable(q, campaign, { fromQueue: false });
 
-  await q(
+  const updatedCampaign = await q(
     `UPDATE campaigns
      SET metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb,
          updated_at = NOW()
@@ -1002,12 +1031,13 @@ async function activateCampaignFromPayment(db, payment, paymentMeta, providerRef
       JSON.stringify({
         payment_provider: provider,
         payment_ref: providerRef,
-        payment_status: payment?.status || 'succeeded',
-        pricing_mode: paymentMeta.pricing_mode || 'one_shot',
-        pricing_plan: paymentMeta.pricing_plan || null,
+        payment_status: 'succeeded',
+        pricing_mode: storedPayment.metadata.pricing_mode || 'one_shot',
+        pricing_plan: storedPayment.metadata.pricing_plan || null,
       }),
     ]
-  ).catch(() => {});
+  );
+  if (updatedCampaign.rowCount !== 1) throw new Error('Campaign metadata update failed');
 
   return { campaignId, activation };
 }
