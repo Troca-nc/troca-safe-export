@@ -695,6 +695,18 @@ async function lockCampaignCapacity(client) {
   await client.query('SELECT pg_advisory_xact_lock(1262570569, 1)');
 }
 
+async function hasConfirmedCampaignPayment(q, campaign) {
+  // Only the server demo mode can activate without a persisted payment.
+  if (process.env.DEMO_MODE === 'true') return true;
+  const { rows } = await q(
+    `SELECT id FROM payments WHERE user_id = $1 AND provider = $2 AND provider_ref = $3
+     AND type = 'campaign' AND status = 'succeeded'
+     AND metadata->>'campaign_id' = $4 LIMIT 1`,
+    [campaign.user_id, campaign.metadata?.payment_provider, campaign.metadata?.payment_ref, String(campaign.id)]
+  );
+  return Boolean(rows[0]);
+}
+
 async function activateCampaignIfSlotAvailable(db, campaign, { fromQueue = false, notifyOwner = true } = {}) {
   if (notifyOwner && db != null && db !== query) {
     throw new Error('Campaign notifications require an owned transaction');
@@ -708,6 +720,9 @@ async function activateCampaignIfSlotAvailable(db, campaign, { fromQueue = false
     if (!current || isDefaultPopup(current)) throw new Error('Campaign activation target unavailable');
     if (current.status !== (fromQueue ? 'queued' : 'pending')) {
       return { status: current.status, starts_at: current.starts_at, ends_at: current.ends_at, fromQueue, duplicate: true };
+    }
+    if (!await hasConfirmedCampaignPayment(q, current)) {
+      throw Object.assign(new Error('Paiement de campagne non confirmé.'), { status: 409 });
     }
     return activateCampaignWithCapacityHeld(q, current, { fromQueue, notifications: notifyOwner ? notifications : null });
   });
@@ -1297,16 +1312,8 @@ async function resumeCampaign(db, { campaignId, userId, isAdmin = false }) {
     if (campaign.status !== 'paused') {
       throw Object.assign(new Error('Seule une campagne en pause peut être reprise.'), { status: 409 });
     }
-    // Demo activation has no payment row. Production/admin calls must have a paid
-    // campaign belonging to the same owner, not just an untrusted metadata flag.
-    if (process.env.DEMO_MODE !== 'true') {
-      const { rows: paid } = await q(
-        `SELECT id FROM payments WHERE user_id = $1 AND provider = $2 AND provider_ref = $3
-         AND type = 'campaign' AND status = 'succeeded'
-         AND metadata->>'campaign_id' = $4 LIMIT 1`,
-        [campaign.user_id, campaign.metadata?.payment_provider, campaign.metadata?.payment_ref, String(campaign.id)]
-      );
-      if (!paid[0]) throw Object.assign(new Error('Paiement de campagne non confirmé.'), { status: 409 });
+    if (!await hasConfirmedCampaignPayment(q, campaign)) {
+      throw Object.assign(new Error('Paiement de campagne non confirmé.'), { status: 409 });
     }
 
     const pausedAt = campaign.paused_at ? new Date(campaign.paused_at) : null;
@@ -1348,6 +1355,9 @@ async function expireCampaignsAndActivateQueued(db = query) {
     let activatedCount = 0;
     for (const campaign of rows) {
       if (await getActiveCount(q, campaign) >= countLimitForType(campaign.type)) continue;
+      // A rejected campaign stays queued for explicit review; it must neither
+      // consume a slot nor prevent a later paid campaign from being considered.
+      if (!await hasConfirmedCampaignPayment(q, campaign)) continue;
       await activateCampaignWithCapacityHeld(q, campaign, { fromQueue: true, notifications });
       activatedCount++;
     }

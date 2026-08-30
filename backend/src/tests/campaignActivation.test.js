@@ -15,6 +15,9 @@ function harness({ failOn = '', count = 0, paymentChange = {}, campaignChange = 
     if (zeroOn && sql.includes(zeroOn)) return { rows: [], rowCount: 0 };
     if (sql.startsWith('INSERT INTO webhook_events')) return { rows: duplicate ? [] : [{ id: 1 }] };
     if (sql.includes('FROM webhook_events')) return { rows: [{ provider: receiptProvider }] };
+    if (sql.startsWith('SELECT id FROM payments')) return { rows: stored.status === 'succeeded'
+      && values[0] === stored.user_id && values[1] === 'stripe' && values[2] === 'cs_synthetic'
+      && values[3] === stored.metadata.campaign_id ? [{ id: stored.id }] : [] };
     if (sql.includes('FROM payments')) return { rows: [stored] };
     if (sql.startsWith('UPDATE payments')) stored.status = 'succeeded';
     if (sql.includes('SELECT COUNT')) return { rows: [{ count }] };
@@ -73,7 +76,9 @@ async function run() {
     assert.ok(!h.trace.some(sql => sql.startsWith('UPDATE')));
   });
   await check('Queued end is computed from estimated start, including scheduler path', async () => {
-    const h = harness({ count: 1, campaignChange: { status: 'queued' } });
+    const h = harness({ count: 1, paymentChange: { status: 'succeeded' }, campaignChange: {
+      status: 'queued', metadata: { payment_provider: 'stripe', payment_ref: 'cs_synthetic' },
+    } });
     const activation = await h.service.activateCampaignIfSlotAvailable(h.db, h.campaign, { fromQueue: true, notifyOwner: false });
     assert.strictEqual(activation.starts_at, '2026-09-10T00:00:00.000Z');
     assert.strictEqual(activation.ends_at, '2026-09-13T00:00:00.000Z');

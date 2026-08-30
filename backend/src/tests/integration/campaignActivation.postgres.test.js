@@ -415,6 +415,64 @@ async function run() {
       const result = await stateService.activateCampaignIfSlotAvailable(undefined, { id: 13 });
       assert.strictEqual(result.duplicate, true); assert.deepStrictEqual(await completeState(), before);
     });
+    for (const mutation of [
+      "UPDATE payments SET status='refunded' WHERE id=14",
+      "UPDATE payments SET status='pending' WHERE id=14",
+      'UPDATE payments SET user_id=8 WHERE id=14',
+      "UPDATE payments SET provider='payplug' WHERE id=14",
+      "UPDATE payments SET provider_ref='other' WHERE id=14",
+      "UPDATE payments SET type='event_ticket' WHERE id=14",
+      "UPDATE payments SET metadata='{\"campaign_id\":\"99\"}'::jsonb WHERE id=14",
+      'DELETE FROM payments WHERE id=14',
+    ]) {
+      await check(`queue skips invalid payment: ${mutation}`, async () => {
+        await invoke(); const other = await competitor(14); await other();
+        await pool.query("UPDATE campaigns SET ends_at=NOW()-interval '1 second' WHERE id=13");
+        if (mutation.startsWith('DELETE')) await pool.query('DELETE FROM campaign_notification_outbox WHERE payment_id=14');
+        await pool.query(mutation);
+        const before = (await pool.query('SELECT * FROM campaigns WHERE id=14')).rows[0];
+        let sent = 0;
+        const guarded = loadCampaigns(async () => { sent++; }, () => Date.now(), database);
+        assert.strictEqual((await guarded.expireCampaignsAndActivateQueued()).activatedCount, 0);
+        assert.deepStrictEqual((await pool.query('SELECT * FROM campaigns WHERE id=14')).rows[0], before);
+        assert.strictEqual(sent, 0);
+        await assert.rejects(guarded.activateCampaignIfSlotAvailable(undefined, { id: 14 }, { fromQueue: true }), e => e.status === 409);
+        assert.strictEqual(sent, 0);
+      });
+    }
+    await check('invalid queue head does not block a later paid campaign', async () => {
+      await invoke(); const second = await competitor(14); await second();
+      const third = await competitor(15); await third();
+      await pool.query("UPDATE payments SET status='refunded' WHERE id=14");
+      await pool.query("UPDATE campaigns SET created_at=NOW()-interval '1 day' WHERE id=14");
+      await pool.query("UPDATE campaigns SET ends_at=NOW()-interval '1 second' WHERE id=13");
+      const result = await stateService.expireCampaignsAndActivateQueued();
+      assert.strictEqual(result.activatedCount, 1);
+      assert.deepStrictEqual((await pool.query('SELECT id, status FROM campaigns WHERE id IN (14,15) ORDER BY id')).rows,
+        [{ id: 14, status: 'queued' }, { id: 15, status: 'active' }]);
+    });
+    await check('server demo still promotes unpaid queue entries', async () => {
+      await pool.query("UPDATE campaigns SET status='queued'");
+      const demo = loadCampaigns(async () => {}, () => Date.now(), database, { DEMO_MODE: 'true' });
+      assert.strictEqual((await demo.expireCampaignsAndActivateQueued()).activatedCount, 1);
+      assert.strictEqual((await state()).status, 'active');
+      assert.strictEqual((await state()).payment_status, 'pending');
+    });
+    await check('payment query failure rolls back expiry and queue changes together', async () => {
+      await invoke(); const other = await competitor(14); await other();
+      await pool.query("UPDATE campaigns SET ends_at=NOW()-interval '1 second' WHERE id=13");
+      const before = (await pool.query('SELECT * FROM campaigns ORDER BY id')).rows;
+      const failingDatabase = { ...database, withTransaction(fn) {
+        return database.withTransaction(client => fn({ query(sql, values) {
+          return sql.includes('SELECT id FROM payments') ? client.query('SELECT 1 / 0') : client.query(sql, values);
+        } }));
+      } };
+      let sent = 0;
+      const guarded = loadCampaigns(async () => { sent++; }, () => Date.now(), failingDatabase);
+      await assert.rejects(guarded.expireCampaignsAndActivateQueued(), e => e.code === '22012');
+      assert.deepStrictEqual((await pool.query('SELECT * FROM campaigns ORDER BY id')).rows, before);
+      assert.strictEqual(sent, 0);
+    });
     console.log(`PostgreSQL campaign activation: ${total} checks passed`);
   } finally {
     if (pool) await pool.end();
