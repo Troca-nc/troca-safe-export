@@ -24,8 +24,13 @@ jobs:
       PLAYWRIGHT_USE_LOCAL_SERVER: 'true'
       PLAYWRIGHT_USE_DEMO_SERVER: 'true'
       PLAYWRIGHT_ENABLE_MSW: 'false'
+      PLAYWRIGHT_FRONTEND_MODE: production
+      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3000
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:3001/api
+      NEXT_PUBLIC_ENABLE_MSW: 'false'
       NODE_EXE: node
       K6_BASE_URL: http://127.0.0.1:3000
+      K6_API_BASE_URL: http://127.0.0.1:3001
       K6_USERNAME: pro@demo.kalico
       K6_PASSWORD: Demo1234!
       STRIPE_E2E_ENABLED: ${{ secrets.STRIPE_E2E_ENABLED }}
@@ -50,7 +55,7 @@ jobs:
         run: cd frontend && npm ci
 
       - name: Security scan - dependencies
-        if: ${{ secrets.SNYK_TOKEN != '' }}
+        if: ${{ env.SNYK_TOKEN != '' }}
         uses: snyk/actions/node@v1.0.0
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -58,13 +63,21 @@ jobs:
           args: --all-projects --severity-threshold=high
 
       - name: Security scan - code
-        if: ${{ secrets.SNYK_TOKEN != '' }}
+        if: ${{ env.SNYK_TOKEN != '' }}
         run: npx --yes snyk@1 code test --severity-threshold=high .
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Install k6
         uses: grafana/setup-k6-action@v1
+
+      - name: Check k6 request routing and login errors
+        run: node --test tests/performance/critical-routes.test.cjs tests/performance/local-services.test.cjs
+
+      - name: Build optimized frontend for local tests
+        run: npm run build --prefix frontend
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
 
       - name: Start local demo services
         run: |
@@ -82,6 +95,9 @@ jobs:
           echo "Services did not become healthy in time"
           cat playwright-launch.log || true
           exit 1
+
+      - name: Warm local pages before load measurement
+        run: node scripts/warmup-performance.cjs
 
       - name: Run k6 load test
         uses: grafana/run-k6-action@v1
@@ -112,6 +128,7 @@ jobs:
             playwright-report/
             test-results/
             playwright-launch.log
+            playwright-logs/
           retention-days: 30
 
       - name: Stop local services

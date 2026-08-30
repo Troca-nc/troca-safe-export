@@ -9,6 +9,13 @@ loadDemoEnv();
 
 const ROOT = __dirname;
 const NODE_EXE = process.env.NODE_EXE || process.execPath;
+const FRONTEND_MODE = process.env.PLAYWRIGHT_FRONTEND_MODE || 'development';
+if (!['development', 'production'].includes(FRONTEND_MODE)) {
+  throw new Error('PLAYWRIGHT_FRONTEND_MODE must be development or production');
+}
+if (FRONTEND_MODE === 'production' && !fs.existsSync(path.join(ROOT, 'frontend', '.next', 'BUILD_ID'))) {
+  throw new Error('Build the frontend before starting production-mode test services');
+}
 const LOG_DIR = path.join(ROOT, 'playwright-logs');
 const SERVER_STATE_FILE = path.join(ROOT, 'playwright', '.server.json');
 fs.mkdirSync(LOG_DIR, { recursive: true });
@@ -45,10 +52,10 @@ const backend = startDetached(
 const frontend = startDetached(
   'frontend',
   NODE_EXE,
-  ['node_modules/next/dist/bin/next', 'dev', '-p', process.env.FRONTEND_PORT || '3000'],
+  ['node_modules/next/dist/bin/next', FRONTEND_MODE === 'production' ? 'start' : 'dev', '-p', process.env.FRONTEND_PORT || '3000'],
   path.join(ROOT, 'frontend'),
   {
-    NODE_ENV: 'development',
+    NODE_ENV: FRONTEND_MODE,
     NEXT_PUBLIC_ENABLE_MSW: process.env.PLAYWRIGHT_ENABLE_MSW === 'false' ? 'false' : 'true',
   }
 );
