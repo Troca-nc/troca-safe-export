@@ -39,7 +39,8 @@ async function run() {
     const h = harness(); await h.invoke(); const end = h.campaign.ends_at;
     h.advance(); assert.strictEqual((await h.invoke()).duplicate, true);
     assert.strictEqual(h.campaign.ends_at, end);
-    assert.strictEqual(h.trace.filter(x => x === 'email').length, 1);
+    assert.strictEqual(h.trace.filter(x => x === 'email').length, 0);
+    assert.strictEqual(h.trace.filter(x => x.startsWith('INSERT INTO campaign_notification_outbox')).length, 2);
   });
   await check('Queued end is computed from estimated start, including scheduler path', async () => {
     const h = harness({ count: 1 });
@@ -47,6 +48,7 @@ async function run() {
     assert.strictEqual(activation.starts_at, '2026-09-10T00:00:00.000Z');
     assert.strictEqual(activation.ends_at, '2026-09-13T00:00:00.000Z');
     assert.strictEqual(activation.fromQueue, true);
+    assert.strictEqual(h.trace.filter(x => x === 'email').length, 1, 'Legacy scheduler notifications remain enabled');
   });
   for (const status of ['refunded', 'failed']) await check(`Reject payment ${status}`, async () => {
     await assert.rejects(harness({ paymentChange: { status } }).invoke(), /validation failed/);
@@ -60,7 +62,7 @@ async function run() {
   await check('Changed payment amount rejected under lock', async () => {
     await assert.rejects(harness({ paymentChange: { amount_xpf: 1 } }).invoke(), /validation failed/);
   });
-  for (const failOn of ['UPDATE payments', 'UPDATE campaigns SET status', 'SET metadata']) await check(`SQL failure propagates: ${failOn}`, async () => {
+  for (const failOn of ['UPDATE payments', 'UPDATE campaigns SET status', 'SET metadata', 'INSERT INTO campaign_notification_outbox']) await check(`SQL failure propagates: ${failOn}`, async () => {
     await assert.rejects(harness({ failOn }).invoke(), /injected SQL error/);
   });
   for (const zeroOn of ['UPDATE payments', 'SET metadata']) await check(`Missing update rejected: ${zeroOn}`, async () => {

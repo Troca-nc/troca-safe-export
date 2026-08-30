@@ -3,6 +3,7 @@
 const { checkConnection } = require('./config/database');
 const { startAllJobs } = require('./jobs/scheduler');
 const { startTicketEmailOutboxJob } = require('./jobs/ticketEmailOutbox');
+const { startCampaignNotificationOutboxJob } = require('./jobs/campaignNotificationOutbox');
 const { logger } = require('./utils/logger');
 const {
   recordError,
@@ -22,6 +23,7 @@ async function start() {
 
   startAllJobs();
   const ticketEmailJob = startTicketEmailOutboxJob();
+  const campaignNotificationJob = startCampaignNotificationOutboxJob();
   void registerObservabilityInstance('worker');
   logger.info('worker_started');
 
@@ -29,6 +31,7 @@ async function start() {
     logger.info('worker_shutdown_signal', { signal });
     stopObservabilityHeartbeat();
     ticketEmailJob.stop();
+    campaignNotificationJob.stop();
     setTimeout(() => process.exit(0), 0);
   };
 
