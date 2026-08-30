@@ -5,7 +5,7 @@ const { loadDatabase } = require('./paymentTransactionHarness');
 
 function harness({ failOn = '', count = 0, paymentChange = {}, campaignChange = {}, zeroOn = '', duplicate = false, receiptProvider = 'stripe' } = {}) {
   let now = Date.parse('2026-08-30T00:00:00Z');
-  const stored = { ...payment, ...paymentChange };
+  const stored = { ...payment, metadata: { ...payment.metadata }, ...paymentChange };
   const campaign = { id: 13, user_id: 7, type: 'popup', title: 'Synthetic', status: 'pending', duration_days: 3,
     email: 'synthetic@example.invalid', telephone: '+000', metadata: {}, ...campaignChange };
   const trace = [];
@@ -15,6 +15,11 @@ function harness({ failOn = '', count = 0, paymentChange = {}, campaignChange = 
     if (zeroOn && sql.includes(zeroOn)) return { rows: [], rowCount: 0 };
     if (sql.startsWith('INSERT INTO webhook_events')) return { rows: duplicate ? [] : [{ id: 1 }] };
     if (sql.includes('FROM webhook_events')) return { rows: [{ provider: receiptProvider }] };
+    if (sql.includes('AS linked_payment_id')) return { rows: [] };
+    if (sql.includes("jsonb_build_object('stripe_payment_intent_id'")) {
+      stored.metadata = { ...stored.metadata, stripe_payment_intent_id: values[1] };
+      return { rows: [], rowCount: 1 };
+    }
     if (sql.startsWith('SELECT id FROM payments')) return { rows: stored.status === 'succeeded'
       && values[0] === stored.user_id && values[1] === 'stripe' && values[2] === 'cs_synthetic'
       && values[3] === stored.metadata.campaign_id ? [{ id: stored.id }] : [] };
@@ -32,7 +37,7 @@ function harness({ failOn = '', count = 0, paymentChange = {}, campaignChange = 
   const database = loadDatabase({ on() {}, query() { throw new Error('Global query outside transaction'); },
     async connect() { trace.push('CONNECT'); return { ...db, release() { trace.push('RELEASE'); } }; } });
   const webhook = loadCampaignWebhook(service);
-  return { trace, campaign, service, db, advance: () => { now += 86400000; },
+  return { trace, campaign, stored, service, db, advance: () => { now += 86400000; },
     dispatch: (event = campaignEvent()) => webhook.processStripeWebhookEvent({ event, ...database }),
     invoke: () => service.activateCampaignFromPayment(db, payment, payment.metadata, 'cs_synthetic', 'stripe') };
 }
@@ -134,6 +139,43 @@ async function run() {
       assert.ok(h.trace.includes('ROLLBACK') && !h.trace.includes('COMMIT'));
     });
   }
+  for (const intent of ['pi_synthetic', { id: 'pi_synthetic', object: 'payment_intent' }]) {
+    await check('Verified Checkout stores only its PaymentIntent ID and preserves metadata', async () => {
+      const h = harness();
+      await h.dispatch(campaignEvent({ payment_intent: intent, metadata: { ...payment.metadata, stripe_payment_intent_id: 'pi_untrusted' } }));
+      assert.strictEqual(h.stored.metadata.stripe_payment_intent_id, 'pi_synthetic');
+      assert.strictEqual(h.stored.metadata.campaign_id, '13');
+      assert.ok(h.trace.indexOf('COMMIT') > h.trace.findIndex(sql => sql.includes("jsonb_build_object('stripe_payment_intent_id'")));
+    });
+  }
+  for (const intent of [null, undefined, '', 'cs_wrong', {}, 123, 'pi_' + 'a'.repeat(256)]) {
+    await check('Invalid or missing PaymentIntent rolls back Checkout receipt', async () => {
+      const h = harness();
+      await assert.rejects(h.dispatch(campaignEvent({ payment_intent: intent })), /identity invalid/);
+      assert.ok(h.trace.includes('ROLLBACK')); assert.ok(!h.trace.includes('COMMIT'));
+      assert.ok(!h.trace.some(sql => sql.startsWith('UPDATE')));
+    });
+  }
+  await check('Existing different PaymentIntent is never overwritten', async () => {
+    const h = harness({ paymentChange: { metadata: { ...payment.metadata, stripe_payment_intent_id: 'pi_other' } } });
+    await assert.rejects(h.dispatch(), /identity conflict/);
+    assert.strictEqual(h.stored.metadata.stripe_payment_intent_id, 'pi_other');
+    assert.ok(h.trace.includes('ROLLBACK'));
+  });
+  await check('Missing identity update row rolls back instead of acknowledging', async () => {
+    const h = harness({ zeroOn: "jsonb_build_object('stripe_payment_intent_id'" });
+    await assert.rejects(h.dispatch(), /identity update failed/); assert.ok(h.trace.includes('ROLLBACK'));
+  });
+  await check('Identity write error rolls back instead of activating', async () => {
+    const h = harness({ failOn: "jsonb_build_object('stripe_payment_intent_id'" });
+    await assert.rejects(h.dispatch(), /injected SQL error/); assert.ok(h.trace.includes('ROLLBACK'));
+    assert.ok(!h.trace.some(sql => sql.startsWith('UPDATE campaigns')));
+  });
+  await check('Matching association does not rewrite identity on a new event', async () => {
+    const h = harness(); await h.dispatch();
+    const next = campaignEvent(); next.id = 'evt_second'; await h.dispatch(next);
+    assert.strictEqual(h.trace.filter(sql => sql.includes("jsonb_build_object('stripe_payment_intent_id'")).length, 1);
+  });
   console.log(`Campaign activation: ${total} checks passed`);
 }
 module.exports = run().catch(error => { console.error(error); process.exitCode = 1; });

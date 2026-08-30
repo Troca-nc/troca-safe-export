@@ -19,6 +19,8 @@ function harness({ type = 'boost', status = 'pending', activationResult = {} } =
   const payment = { id: 9, user_id: 7, type, status, amount_xpf: 3600, metadata };
   const query = async (sql, params) => {
     if (/^\s*(UPDATE|INSERT|DELETE)/i.test(sql)) writes.push({ sql, params });
+    if (sql.includes('AS linked_payment_id')) return { rows: [] };
+    if (sql.includes("jsonb_build_object('stripe_payment_intent_id'")) return { rows: [], rowCount: 1 };
     if (/FROM payments/.test(sql)) return { rows: [payment] };
     if (/SELECT u\./.test(sql)) return { rows: [{ id: 7, email: 'synthetic@example.invalid' }] };
     if (/RETURNING user_id/.test(sql)) return { rows: [{ user_id: 7 }] };
@@ -55,7 +57,7 @@ function harness({ type = 'boost', status = 'pending', activationResult = {} } =
   const checkout = (overrides = {}) => sandbox.module.exports.processStripeWebhookEvent({
     ...dependencies,
     event: { id: 'evt_synthetic', type: 'checkout.session.completed', data: { object: {
-      id: 'cs_synthetic', metadata, payment_status: 'paid', currency: 'eur',
+      id: 'cs_synthetic', payment_intent: 'pi_synthetic', metadata, payment_status: 'paid', currency: 'eur',
       amount_total: xpfToEurCents(3600), ...overrides,
     } } },
   });

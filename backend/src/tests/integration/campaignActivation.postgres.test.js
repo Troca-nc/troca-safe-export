@@ -473,6 +473,59 @@ async function run() {
       assert.deepStrictEqual((await pool.query('SELECT * FROM campaigns ORDER BY id')).rows, before);
       assert.strictEqual(sent, 0);
     });
+    const paymentState = async () => (await pool.query('SELECT * FROM payments WHERE id=9')).rows[0];
+    for (const intent of ['pi_synthetic', { id: 'pi_synthetic', object: 'payment_intent' }]) {
+      await check('Checkout commits PaymentIntent link with receipt, activation and outbox', async () => {
+        await dispatch(campaignEvent({ payment_intent: intent }));
+        const current = await paymentState();
+        assert.strictEqual(current.provider_ref, 'cs_synthetic');
+        assert.deepStrictEqual(current.metadata, { ...payment.metadata, stripe_payment_intent_id: 'pi_synthetic' });
+        assert.strictEqual((await state()).status, 'active'); assert.strictEqual((await queue()).length, 5);
+        assert.strictEqual((await receipts()).length, 1);
+      });
+    }
+    await check('Identity is rolled back if activation outbox fails later', async () => {
+      const before = await paymentState();
+      await assert.rejects(dispatch(campaignEvent(), 'INSERT INTO campaign_notification_outbox'), e => e.code === '22012');
+      assert.deepStrictEqual(await paymentState(), before);
+      assert.deepStrictEqual(await receipts(), []); assert.deepStrictEqual(await queue(), []);
+    });
+    await check('Identity write SQL failure rolls back receipt and effects', async () => {
+      const before = await paymentState();
+      await assert.rejects(dispatch(campaignEvent(), "jsonb_build_object('stripe_payment_intent_id'"), e => e.code === '22012');
+      assert.deepStrictEqual(await paymentState(), before); assert.deepStrictEqual(await receipts(), []);
+      assert.strictEqual((await state()).status, 'pending');
+    });
+    await check('Missing PaymentIntent does not persist receipt', async () => {
+      await assert.rejects(dispatch(campaignEvent({ payment_intent: null })), /identity invalid/);
+      assert.deepStrictEqual(await receipts(), []); assert.strictEqual((await state()).status, 'pending');
+    });
+    await check('Different stored identity cannot be overwritten', async () => {
+      await pool.query(`UPDATE payments SET metadata=metadata || '{"stripe_payment_intent_id":"pi_other"}'::jsonb WHERE id=9`);
+      const before = await paymentState(); await assert.rejects(dispatch(), /identity conflict/);
+      assert.deepStrictEqual(await paymentState(), before); assert.deepStrictEqual(await receipts(), []);
+    });
+    await check('Another Stripe payment using the same provider reference blocks binding', async () => {
+      await pool.query("INSERT INTO payments VALUES (10, 8, 'boost', 'stripe', 'pi_synthetic', 1900, 'succeeded', '{}', NOW())");
+      await assert.rejects(dispatch(), /identity already linked/);
+      assert.deepStrictEqual(await receipts(), []);
+    });
+    await check('Concurrent different Checkouts cannot bind the same PaymentIntent', async () => {
+      await competitor(14);
+      const second = campaignEvent({ id: 'cs_14', metadata: { ...payment.metadata, campaign_id: '14' } });
+      second.id = 'evt_second_payment';
+      const results = await Promise.allSettled([dispatch(), dispatch(second)]);
+      assert.strictEqual(results.filter(r => r.status === 'fulfilled').length, 1);
+      assert.match(results.find(r => r.status === 'rejected').reason.message, /identity already linked/);
+      assert.strictEqual((await pool.query("SELECT count(*)::int AS n FROM payments WHERE metadata->>'stripe_payment_intent_id'='pi_synthetic'")).rows[0].n, 1);
+      assert.strictEqual((await receipts()).length, 1);
+    });
+    await check('New event with same identity preserves dates and outbox', async () => {
+      await dispatch(); const before = await state(); const current = await paymentState();
+      const next = campaignEvent(); next.id = 'evt_same_link'; await dispatch(next);
+      assert.deepStrictEqual(await state(), before); assert.deepStrictEqual(await paymentState(), current);
+      assert.strictEqual((await queue()).length, 5); assert.strictEqual((await receipts()).length, 2);
+    });
     console.log(`PostgreSQL campaign activation: ${total} checks passed`);
   } finally {
     if (pool) await pool.end();
