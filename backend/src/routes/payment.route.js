@@ -1151,6 +1151,8 @@ router.post('/webhooks/stripe', async (req, res) => {
     if (!rows[0]) return res.json({ received: true, duplicate: true });
   } catch (err) {
     console.error('[webhook] Erreur idempotence:', err.message);
+    // Never apply business effects when duplicate protection is unavailable.
+    return res.status(503).json({ error: 'Enregistrement webhook indisponible' });
   }
 
   try {
@@ -1484,6 +1486,8 @@ router.post('/webhooks/payplug', async (req, res) => {
     if (!rows[0]) return res.json({ received: true, duplicate: true });
   } catch (err) {
     console.error('[webhook/payplug] idempotence error:', err.message);
+    // Never apply business effects when duplicate protection is unavailable.
+    return res.status(503).json({ error: 'Enregistrement webhook indisponible' });
   }
 
   try {
