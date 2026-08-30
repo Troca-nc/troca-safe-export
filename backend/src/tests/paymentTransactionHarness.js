@@ -27,6 +27,10 @@ function loadDatabase(pool) {
 }
 
 function loadServices(database, sendTicketEmail = async () => {}) {
+  const outbox = load('services/ticketEmailOutboxService.js', {
+    '../config/database': database,
+    './emailService': { sendTicketEmail },
+  });
   const ticketing = load('services/eventTicketingService.js', {
     '../config/database': database,
     '../config/env': { isConfiguredValue: () => false },
@@ -35,12 +39,13 @@ function loadServices(database, sendTicketEmail = async () => {}) {
   const forbidden = () => { throw new Error('Unexpected non-ticket effect'); };
   const webhook = load('services/paymentWebhookService.js', {
     './eventTicketingService': ticketing,
+    './ticketEmailOutboxService': outbox,
     './bonPlansService': { activateBonPlanFromPayment: forbidden },
     './campaignsService': { activateCampaignFromPayment: forbidden },
     './emailService': { sendTicketEmail, sendBoostActivatedEmail: forbidden },
     './paymentCatalog': { xpfToEurCents: forbidden },
   });
-  return { ...ticketing, ...webhook };
+  return { ...ticketing, ...webhook, ...outbox };
 }
 
 const metadata = {
@@ -54,4 +59,4 @@ function ticketEvent(overrides = {}) {
   } } };
 }
 
-module.exports = { loadDatabase, loadServices, metadata, ticketEvent };
+module.exports = { load, loadDatabase, loadServices, metadata, ticketEvent };

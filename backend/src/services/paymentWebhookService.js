@@ -2,7 +2,8 @@
 
 const { activateBonPlanFromPayment } = require('./bonPlansService');
 const { activateCampaignFromPayment } = require('./campaignsService');
-const { sendBoostActivatedEmail, sendTicketEmail } = require('./emailService');
+const { sendBoostActivatedEmail } = require('./emailService');
+const { enqueueTicketEmail } = require('./ticketEmailOutboxService');
 const { finalizeEventTicketPayment } = require('./eventTicketingService');
 const { xpfToEurCents } = require('./paymentCatalog');
 
@@ -360,7 +361,7 @@ async function processStripeWebhookEvent({
     const userId = Number(session.metadata?.user_id ?? 0);
 
     if (paymentType === 'event_ticket') {
-      const finalized = await withTransaction(async (client) => {
+      await withTransaction(async (client) => {
         // Validate the same locked payment that the finalizer will mutate.
         const { rows } = await client.query(
           `SELECT id, user_id, type, metadata, status, amount_xpf
@@ -372,13 +373,10 @@ async function processStripeWebhookEvent({
         const payment = rows[0];
         if (!payment || Number(payment.user_id || 0) !== userId
             || !isValidEventTicketCheckout(session, payment)) return null;
-        return finalizeEventTicketPayment({ providerRef: session.id, paymentStatus: 'succeeded', client });
+        const finalized = await finalizeEventTicketPayment({ providerRef: session.id, paymentStatus: 'succeeded', client });
+        if (finalized?.status === 'paid') await enqueueTicketEmail(client, finalized.order_id);
+        return finalized;
       });
-      // No notification before COMMIT or for an already-finalized order.
-      // Durable delivery after a crash still requires the planned outbox.
-      if (finalized?.status === 'paid' && finalized.order && Array.isArray(finalized.tickets)) {
-        await sendTicketEmail(finalized.order, finalized.tickets).catch(() => {});
-      }
       return;
     }
 
