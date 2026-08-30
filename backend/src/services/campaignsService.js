@@ -689,8 +689,33 @@ async function createCampaignWithPayment(db, { user, payload, provider = 'stripe
   };
 }
 
+// Shared by every capacity-changing path, before any campaign row lock.
+// Payment callbacks already hold their payment lock; these paths never lock payments.
+async function lockCampaignCapacity(client) {
+  await client.query('SELECT pg_advisory_xact_lock(1262570569, 1)');
+}
+
 async function activateCampaignIfSlotAvailable(db, campaign, { fromQueue = false, notifyOwner = true } = {}) {
-  const q = getQueryRunner(db);
+  if (notifyOwner && db != null && db !== query) {
+    throw new Error('Campaign notifications require an owned transaction');
+  }
+  const notifications = [];
+  const result = await withCampaignStateTransaction(db, async client => {
+    await lockCampaignCapacity(client);
+    const q = getQueryRunner(client);
+    const { rows } = await q('SELECT * FROM campaigns WHERE id = $1 LIMIT 1 FOR UPDATE', [campaign.id]);
+    const current = rows[0];
+    if (!current || isDefaultPopup(current)) throw new Error('Campaign activation target unavailable');
+    if (current.status !== (fromQueue ? 'queued' : 'pending')) {
+      return { status: current.status, starts_at: current.starts_at, ends_at: current.ends_at, fromQueue, duplicate: true };
+    }
+    return activateCampaignWithCapacityHeld(q, current, { fromQueue, notifications: notifyOwner ? notifications : null });
+  });
+  for (const notify of notifications) await notify();
+  return result;
+}
+
+async function activateCampaignWithCapacityHeld(q, campaign, { fromQueue = false, notifications = null } = {}) {
   const activeCount = await getActiveCount(q, campaign);
   const limit = countLimitForType(campaign.type);
   const slotAvailable = activeCount < limit;
@@ -725,26 +750,28 @@ async function activateCampaignIfSlotAvailable(db, campaign, { fromQueue = false
     [campaign.id]
   );
   const current = rows[0];
-  if (notifyOwner && current?.user_id) {
-    const user = {
-      id: Number(current.user_id),
-      email: current.email,
-      telephone: current.telephone,
-      prenom: current.prenom,
-      nom: current.nom,
-    };
+  if (notifications && current?.user_id) {
+    notifications.push(async () => {
+      const user = {
+        id: Number(current.user_id),
+        email: current.email,
+        telephone: current.telephone,
+        prenom: current.prenom,
+        nom: current.nom,
+      };
 
-    const message = slotAvailable
-      ? `Votre campagne "${current.title}" est active du ${formatDate(current.starts_at)} au ${formatDate(current.ends_at)}.`
-      : `Votre campagne "${current.title}" est en file d'attente. Début estimé : ${formatDate(nextStart)}.`;
+      const message = slotAvailable
+        ? `Votre campagne "${current.title}" est active du ${formatDate(current.starts_at)} au ${formatDate(current.ends_at)}.`
+        : `Votre campagne "${current.title}" est en file d'attente. Début estimé : ${formatDate(nextStart)}.`;
 
-    await notifyCampaignOwner({
-      user,
-      campaign: current,
-      message,
-      subject: slotAvailable ? 'Campagne activée' : 'Campagne en file d’attente',
-      href: '/pro/dashboard/publicite',
-    }).catch(() => {});
+      await notifyCampaignOwner({
+        user,
+        campaign: current,
+        message,
+        subject: slotAvailable ? 'Campagne activée' : 'Campagne en file d’attente',
+        href: '/pro/dashboard/publicite',
+      }).catch(() => {});
+    });
   }
 
   return {
@@ -1036,6 +1063,7 @@ async function activateCampaignFromPayment(db, payment, paymentMeta, providerRef
       || Number(storedPayment.amount_xpf) !== Number(payment?.amount_xpf)) {
     throw new Error('Campaign payment validation failed');
   }
+  await lockCampaignCapacity(db);
   const { rows } = await q(`SELECT * FROM campaigns WHERE id = $1 LIMIT 1 FOR UPDATE`, [campaignId]);
   const campaign = rows[0];
   if (!campaign) return null;
@@ -1060,7 +1088,7 @@ async function activateCampaignFromPayment(db, payment, paymentMeta, providerRef
   );
   if (updatedPayment.rowCount !== 1) throw new Error('Campaign payment update failed');
 
-  const activation = await activateCampaignIfSlotAvailable(q, campaign, { fromQueue: false, notifyOwner: false });
+  const activation = await activateCampaignWithCapacityHeld(q, campaign);
 
   const updatedCampaign = await q(
     `UPDATE campaigns
@@ -1230,6 +1258,7 @@ function withCampaignStateTransaction(db, operation) {
 
 async function pauseCampaign(db, { campaignId, userId, isAdmin = false }) {
   return withCampaignStateTransaction(db, async client => {
+    await lockCampaignCapacity(client);
     const q = getQueryRunner(client);
     const { rows } = await q(`SELECT * FROM campaigns WHERE id = $1 LIMIT 1 FOR UPDATE`, [campaignId]);
     const campaign = rows[0];
@@ -1256,6 +1285,7 @@ async function pauseCampaign(db, { campaignId, userId, isAdmin = false }) {
 
 async function resumeCampaign(db, { campaignId, userId, isAdmin = false }) {
   return withCampaignStateTransaction(db, async client => {
+    await lockCampaignCapacity(client);
     const q = getQueryRunner(client);
     const { rows } = await q(`SELECT * FROM campaigns WHERE id = $1 LIMIT 1 FOR UPDATE`, [campaignId]);
     const campaign = rows[0];
@@ -1300,108 +1330,31 @@ async function resumeCampaign(db, { campaignId, userId, isAdmin = false }) {
 }
 
 async function expireCampaignsAndActivateQueued(db = query) {
-  const q = getQueryRunner(db);
-  const expired = await q(
-    `UPDATE campaigns
-     SET status = 'expired',
-         updated_at = NOW()
-     WHERE status = 'active'
-       AND is_default_popup = FALSE
-       AND ends_at IS NOT NULL
-       AND ends_at <= NOW()
-     RETURNING id, type, category_slug`
-  );
-
-  const activated = [];
-
-  const bonPlanActive = await q(
-    `SELECT COUNT(*)::int AS count
-     FROM campaigns
-     WHERE type = 'bon_plan'
-       AND status = 'active'
-       AND is_default_popup = FALSE
-       AND (ends_at IS NULL OR ends_at > NOW())`
-  );
-  const bonPlanSlots = Math.max(0, countLimitForType('bon_plan') - Number(bonPlanActive.rows[0]?.count || 0));
-  if (bonPlanSlots > 0) {
-    const queued = await q(
-      `SELECT * FROM campaigns
-       WHERE type = 'bon_plan'
-         AND status = 'queued'
-       ORDER BY created_at ASC
-       LIMIT $1`,
-      [bonPlanSlots]
+  // The scheduler owns commit so legacy notifications cannot hold the capacity lock.
+  if (db != null && db !== query) throw new Error('Campaign scheduler requires an owned transaction');
+  const notifications = [];
+  const result = await withCampaignStateTransaction(db, async client => {
+    await lockCampaignCapacity(client);
+    const q = getQueryRunner(client);
+    const expired = await q(
+      `UPDATE campaigns SET status = 'expired', updated_at = NOW()
+       WHERE status = 'active' AND is_default_popup = FALSE
+         AND ends_at IS NOT NULL AND ends_at <= NOW() RETURNING id`
     );
-    for (const row of queued.rows) {
-      await activateCampaignIfSlotAvailable(q, row, { fromQueue: true });
-      activated.push(row.id);
+    const { rows } = await q(
+      `SELECT * FROM campaigns WHERE status = 'queued' AND is_default_popup = FALSE
+       AND type IN ('bon_plan', 'banner', 'popup') ORDER BY created_at ASC, id ASC FOR UPDATE`
+    );
+    let activatedCount = 0;
+    for (const campaign of rows) {
+      if (await getActiveCount(q, campaign) >= countLimitForType(campaign.type)) continue;
+      await activateCampaignWithCapacityHeld(q, campaign, { fromQueue: true, notifications });
+      activatedCount++;
     }
-  }
-
-  const bannerCategories = await q(
-    `SELECT DISTINCT category_slug
-     FROM campaigns
-     WHERE type = 'banner'
-       AND status IN ('active', 'queued')
-       AND category_slug IS NOT NULL`
-  );
-
-  for (const entry of bannerCategories.rows) {
-    const slug = entry.category_slug;
-    const activeBannerCount = await q(
-      `SELECT COUNT(*)::int AS count
-       FROM campaigns
-       WHERE type = 'banner'
-         AND category_slug = $1
-         AND status = 'active'
-         AND is_default_popup = FALSE
-         AND (ends_at IS NULL OR ends_at > NOW())`,
-      [slug]
-    );
-    const slots = Math.max(0, countLimitForType('banner') - Number(activeBannerCount.rows[0]?.count || 0));
-    if (!slots) continue;
-    const queued = await q(
-      `SELECT * FROM campaigns
-       WHERE type = 'banner'
-         AND category_slug = $1
-         AND status = 'queued'
-       ORDER BY created_at ASC
-       LIMIT $2`,
-      [slug, slots]
-    );
-    for (const row of queued.rows) {
-      await activateCampaignIfSlotAvailable(q, row, { fromQueue: true });
-      activated.push(row.id);
-    }
-  }
-
-  const activePopup = await q(
-    `SELECT COUNT(*)::int AS count
-     FROM campaigns
-     WHERE type = 'popup'
-       AND status = 'active'
-       AND is_default_popup = FALSE
-       AND (ends_at IS NULL OR ends_at > NOW())`
-  );
-  if (Number(activePopup.rows[0]?.count || 0) < countLimitForType('popup')) {
-    const queued = await q(
-      `SELECT * FROM campaigns
-       WHERE type = 'popup'
-         AND status = 'queued'
-         AND is_default_popup = FALSE
-       ORDER BY created_at ASC
-       LIMIT 1`
-    );
-    if (queued.rows[0]) {
-      await activateCampaignIfSlotAvailable(q, queued.rows[0], { fromQueue: true });
-      activated.push(queued.rows[0].id);
-    }
-  }
-
-  return {
-    expiredCount: expired.rowCount || expired.rows.length || 0,
-    activatedCount: activated.length,
-  };
+    return { expiredCount: expired.rowCount || 0, activatedCount };
+  });
+  for (const notify of notifications) await notify();
+  return result;
 }
 
 module.exports = {

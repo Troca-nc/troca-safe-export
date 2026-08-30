@@ -27,7 +27,8 @@ async function run() {
       CREATE TABLE users (id int PRIMARY KEY, email text, telephone text, prenom text, nom text);
       CREATE TABLE campaigns (id int PRIMARY KEY, user_id int REFERENCES users, type text,
         title text, status text, duration_days int, starts_at timestamptz, ends_at timestamptz,
-        paused_at timestamptz, updated_at timestamptz, metadata jsonb, category_slug text, is_default_popup boolean);
+        paused_at timestamptz, updated_at timestamptz, metadata jsonb, category_slug text, is_default_popup boolean,
+        created_at timestamptz DEFAULT NOW());
       CREATE TABLE payments (id int PRIMARY KEY, user_id int REFERENCES users,
         type text NOT NULL CONSTRAINT payments_type_check CHECK (type IN ('boost', 'subscription', 'bon_plan')),
         provider text, provider_ref text, amount_xpf int, status text, metadata jsonb, updated_at timestamptz);
@@ -315,6 +316,104 @@ async function run() {
       assert.deepStrictEqual(await completeState(), before);
       await stateService.resumeCampaign(undefined, stateArgs);
       assert.strictEqual((await state()).status, 'active');
+    });
+    async function competitor(id, type = 'popup', category = null, status = 'pending') {
+      await pool.query(`INSERT INTO campaigns (id, user_id, type, title, status, duration_days, metadata, is_default_popup, category_slug)
+        VALUES ($1, 7, $2, 'Synthetic competitor', $3, 3, '{}', false, $4)`, [id, type, status, category]);
+      const meta = { ...payment.metadata, campaign_id: String(id) };
+      await pool.query("INSERT INTO payments VALUES ($1, 7, 'campaign', 'stripe', $2, 1900, 'pending', $3, NOW())", [id, `cs_${id}`, meta]);
+      return () => invoke('', 'stripe', { ...payment, id, metadata: meta }, `cs_${id}`);
+    }
+    async function activeCount(type) {
+      return (await pool.query("SELECT count(*)::int AS n FROM campaigns WHERE type=$1 AND status='active' AND is_default_popup=false", [type])).rows[0].n;
+    }
+    await check('two different paid popups reserve one slot', async () => {
+      const other = await competitor(14);
+      await Promise.all([invoke(), other()]);
+      assert.strictEqual(await activeCount('popup'), 1);
+      assert.strictEqual((await pool.query("SELECT count(*)::int AS n FROM campaigns WHERE status='queued'")).rows[0].n, 1);
+    });
+    await check('capacity lock remains held until caller commit and is then released', async () => {
+      await database.withTransaction(async client => {
+        await service.activateCampaignFromPayment(client, payment, payment.metadata, 'cs_synthetic', 'stripe');
+        const probe = await pool.query('SELECT pg_try_advisory_xact_lock(1262570569, 1) AS acquired');
+        assert.strictEqual(probe.rows[0].acquired, false);
+      });
+      const probe = await pool.query('SELECT pg_try_advisory_xact_lock(1262570569, 1) AS acquired');
+      assert.strictEqual(probe.rows[0].acquired, true);
+    });
+    await check('seven concurrent bon plans reserve at most six slots', async () => {
+      await pool.query("UPDATE campaigns SET type='bon_plan'");
+      const operations = [invoke];
+      for (let id = 14; id < 20; id++) operations.push(await competitor(id, 'bon_plan'));
+      await Promise.all(operations.map(fn => fn()));
+      assert.strictEqual(await activeCount('bon_plan'), 6);
+    });
+    await check('banner capacity is two per category, not two globally', async () => {
+      await pool.query("UPDATE campaigns SET type='banner', category_slug='auto'");
+      const operations = [invoke, await competitor(14, 'banner', 'auto'), await competitor(15, 'banner', 'auto'), await competitor(16, 'banner', 'maison')];
+      await Promise.all(operations.map(fn => fn()));
+      const counts = (await pool.query("SELECT category_slug, count(*)::int AS n FROM campaigns WHERE status='active' GROUP BY category_slug ORDER BY category_slug")).rows;
+      assert.deepStrictEqual(counts, [{ category_slug: 'auto', n: 2 }, { category_slug: 'maison', n: 1 }]);
+    });
+    await check('payment racing paid resume cannot overbook popup', async () => {
+      await invoke(); await stateService.pauseCampaign(undefined, stateArgs);
+      const other = await competitor(14);
+      await Promise.all([stateService.resumeCampaign(undefined, stateArgs), other()]);
+      assert.strictEqual(await activeCount('popup'), 1);
+    });
+    await check('two paid resumes cannot overbook popup', async () => {
+      await invoke(); const other = await competitor(14); await other();
+      await stateService.pauseCampaign(undefined, stateArgs);
+      await stateService.pauseCampaign(undefined, { campaignId: 14, userId: 7 });
+      await Promise.all([stateService.resumeCampaign(undefined, stateArgs), stateService.resumeCampaign(undefined, { campaignId: 14, userId: 7 })]);
+      assert.strictEqual(await activeCount('popup'), 1);
+    });
+    // Record outside legacy delivery's swallowed errors; assert after the operation.
+    const notificationLockResults = [];
+    const schedulerService = loadCampaigns(async () => {
+      const result = await database.withTransaction(client => client.query('SELECT pg_try_advisory_xact_lock(1262570569, 1) AS acquired'));
+      notificationLockResults.push(result.rows[0].acquired);
+    }, () => Date.now(), database);
+    await check('two schedulers activate queued popup once after expiry', async () => {
+      await invoke(); const other = await competitor(14); await other();
+      await pool.query("UPDATE campaigns SET ends_at=NOW()-interval '1 second' WHERE id=13");
+      const results = await Promise.all([schedulerService.expireCampaignsAndActivateQueued(), schedulerService.expireCampaignsAndActivateQueued()]);
+      assert.strictEqual(results.reduce((n, r) => n + r.activatedCount, 0), 1);
+      assert.strictEqual(await activeCount('popup'), 1);
+    });
+    await check('scheduler notifications run after releasing capacity lock', async () => {
+      await invoke(); const other = await competitor(14); await other();
+      await pool.query("UPDATE campaigns SET ends_at=NOW()-interval '1 second' WHERE id=13");
+      notificationLockResults.length = 0;
+      await schedulerService.expireCampaignsAndActivateQueued();
+      assert.ok(notificationLockResults.length > 0);
+      assert.ok(notificationLockResults.every(Boolean));
+    });
+    await check('scheduler racing payment respects popup capacity', async () => {
+      await invoke(); const other = await competitor(14); await other();
+      await pool.query("UPDATE campaigns SET ends_at=NOW()-interval '1 second' WHERE id=13");
+      const third = await competitor(15);
+      await Promise.all([stateService.expireCampaignsAndActivateQueued(), third()]);
+      assert.strictEqual(await activeCount('popup'), 1);
+    });
+    await check('demo activation racing payment respects capacity', async () => {
+      const other = await competitor(14);
+      const demo = loadCampaigns(async () => {}, () => Date.now(), database, { DEMO_MODE: 'true' });
+      await Promise.all([demo.activateCampaignIfSlotAvailable(database.query, { id: 13 }), other()]);
+      assert.strictEqual(await activeCount('popup'), 1);
+    });
+    await check('rollback releases capacity for another campaign', async () => {
+      const other = await competitor(14);
+      await assert.rejects(invoke('UPDATE campaigns SET status'), e => e.code === '22012');
+      await other(); assert.strictEqual(await activeCount('popup'), 1);
+      assert.strictEqual((await state()).status, 'pending');
+    });
+    await check('stale standalone activation cannot resume a paused campaign', async () => {
+      await invoke(); await stateService.pauseCampaign(undefined, stateArgs);
+      const before = await completeState();
+      const result = await stateService.activateCampaignIfSlotAvailable(undefined, { id: 13 });
+      assert.strictEqual(result.duplicate, true); assert.deepStrictEqual(await completeState(), before);
     });
     console.log(`PostgreSQL campaign activation: ${total} checks passed`);
   } finally {

@@ -39,7 +39,8 @@ async function run() {
   await check('Payment and campaign are locked; metadata records succeeded', async () => {
     const h = harness(); await h.invoke();
     assert.match(h.trace[0], /provider = \$2.*FOR UPDATE/);
-    assert.match(h.trace[1], /campaigns.*FOR UPDATE/);
+    assert.match(h.trace[1], /pg_advisory_xact_lock/);
+    assert.match(h.trace[2], /campaigns.*FOR UPDATE/);
     assert.strictEqual(h.campaign.metadata.payment_status, 'succeeded');
   });
   await check('Same payment preserves dates and does not resend notifications', async () => {
@@ -49,13 +50,35 @@ async function run() {
     assert.strictEqual(h.trace.filter(x => x === 'email').length, 0);
     assert.strictEqual(h.trace.filter(x => x.startsWith('INSERT INTO campaign_notification_outbox')).length, 2);
   });
+  await check('Capacity lock failure prevents activation writes', async () => {
+    const h = harness({ failOn: 'pg_advisory_xact_lock' });
+    await assert.rejects(h.invoke(), /injected SQL error/);
+    assert.ok(!h.trace.some(sql => sql.startsWith('UPDATE')));
+  });
+  await check('Borrowed transaction cannot send legacy notifications before commit', async () => {
+    const h = harness();
+    await assert.rejects(h.service.activateCampaignIfSlotAvailable(h.db, h.campaign), /owned transaction/);
+    assert.strictEqual(h.trace.length, 0);
+  });
+  await check('Scheduler rejects borrowed transaction before doing work', async () => {
+    const h = harness();
+    await assert.rejects(h.service.expireCampaignsAndActivateQueued(h.db), /owned transaction/);
+    assert.strictEqual(h.trace.length, 0);
+  });
+  await check('Stale activation rereads paused campaign and preserves dates', async () => {
+    const h = harness({ campaignChange: { status: 'paused' } });
+    const result = await h.service.activateCampaignIfSlotAvailable(h.db, { id: 13, status: 'pending' }, { notifyOwner: false });
+    assert.strictEqual(result.duplicate, true);
+    assert.strictEqual(h.campaign.status, 'paused');
+    assert.ok(!h.trace.some(sql => sql.startsWith('UPDATE')));
+  });
   await check('Queued end is computed from estimated start, including scheduler path', async () => {
-    const h = harness({ count: 1 });
-    const activation = await h.service.activateCampaignIfSlotAvailable(h.db, h.campaign, { fromQueue: true });
+    const h = harness({ count: 1, campaignChange: { status: 'queued' } });
+    const activation = await h.service.activateCampaignIfSlotAvailable(h.db, h.campaign, { fromQueue: true, notifyOwner: false });
     assert.strictEqual(activation.starts_at, '2026-09-10T00:00:00.000Z');
     assert.strictEqual(activation.ends_at, '2026-09-13T00:00:00.000Z');
     assert.strictEqual(activation.fromQueue, true);
-    assert.strictEqual(h.trace.filter(x => x === 'email').length, 1, 'Legacy scheduler notifications remain enabled');
+    assert.strictEqual(h.trace.filter(x => x === 'email').length, 0, 'No notification before caller commit');
   });
   for (const status of ['refunded', 'failed']) await check(`Reject payment ${status}`, async () => {
     await assert.rejects(harness({ paymentChange: { status } }).invoke(), /validation failed/);
