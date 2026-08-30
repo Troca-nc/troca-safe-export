@@ -360,12 +360,12 @@ async function processStripeWebhookEvent({
     const paymentType = session.metadata?.payment_type;
     const userId = Number(session.metadata?.user_id ?? 0);
 
-    if (paymentType === 'event_ticket') {
+    if (paymentType === 'event_ticket' || paymentType === 'campaign') {
       if (typeof event.id !== 'string' || !event.id.trim() || event.id.length > 255) {
-        throw new Error('Invalid ticket webhook event ID');
+        throw new Error('Invalid checkout webhook event ID');
       }
       return withTransaction(async (client) => {
-        // The receipt must commit with the ticket effects, never before them.
+        // The receipt must commit with business effects and outbox, never before.
         const receipt = await client.query(
           `INSERT INTO webhook_events (event_id, provider, type, processed_at)
            VALUES ($1, 'stripe', $2, NOW())
@@ -387,6 +387,22 @@ async function processStripeWebhookEvent({
           [session.id]
         );
         const payment = rows[0];
+        if (paymentType === 'campaign') {
+          const amountXpf = Number(payment?.amount_xpf);
+          const campaignId = Number(payment?.metadata?.campaign_id);
+          if (!payment || payment.type !== 'campaign' || Number(payment.user_id) !== userId
+              || payment.metadata?.payment_type !== 'campaign'
+              || !Number.isSafeInteger(campaignId) || campaignId <= 0
+              || Number(session.metadata?.campaign_id) !== campaignId
+              || session.payment_status !== 'paid' || String(session.currency || '').toLowerCase() !== 'eur'
+              || !Number.isSafeInteger(amountXpf) || amountXpf <= 0
+              || session.amount_total !== xpfToEurCents(amountXpf)) {
+            throw new Error('Campaign checkout validation failed');
+          }
+          const activated = await activateCampaignFromPayment(client, payment, payment.metadata, session.id, 'stripe');
+          if (!activated) throw new Error('Webhook activation target unavailable');
+          return { duplicate: false };
+        }
         if (!payment || Number(payment.user_id || 0) !== userId
             || !isValidEventTicketCheckout(session, payment)) throw new Error('Ticket checkout validation failed');
         const finalized = await finalizeEventTicketPayment({ providerRef: session.id, paymentStatus: 'succeeded', client });
@@ -414,7 +430,7 @@ async function processStripeWebhookEvent({
     const meta = payment.metadata ?? session.metadata ?? {};
 
     // These products create Checkout Sessions, not standalone PaymentIntents.
-    if (paymentType === 'campaign' || paymentType === 'bon_plan') {
+    if (paymentType === 'bon_plan') {
       const amountXpf = Number(payment.amount_xpf);
       if (session.payment_status !== 'paid'
           || String(session.currency || '').toLowerCase() !== 'eur'
@@ -422,9 +438,7 @@ async function processStripeWebhookEvent({
           || session.amount_total !== xpfToEurCents(amountXpf)) return;
 
       await withTransaction(async (client) => {
-        const activated = paymentType === 'campaign'
-          ? await activateCampaignFromPayment(client, payment, meta, session.id, 'stripe')
-          : await activateBonPlanFromPayment(client, payment, meta, session.id, 'stripe');
+        const activated = await activateBonPlanFromPayment(client, payment, meta, session.id, 'stripe');
         if (!activated) throw new Error('Webhook activation target unavailable');
       });
       return;

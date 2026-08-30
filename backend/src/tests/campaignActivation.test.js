@@ -1,8 +1,9 @@
 'use strict';
 const assert = require('assert');
-const { loadCampaigns, payment } = require('./campaignTransactionHarness');
+const { loadCampaigns, payment, campaignEvent, loadCampaignWebhook } = require('./campaignTransactionHarness');
+const { loadDatabase } = require('./paymentTransactionHarness');
 
-function harness({ failOn = '', count = 0, paymentChange = {}, campaignChange = {}, zeroOn = '' } = {}) {
+function harness({ failOn = '', count = 0, paymentChange = {}, campaignChange = {}, zeroOn = '', duplicate = false, receiptProvider = 'stripe' } = {}) {
   let now = Date.parse('2026-08-30T00:00:00Z');
   const stored = { ...payment, ...paymentChange };
   const campaign = { id: 13, user_id: 7, type: 'popup', title: 'Synthetic', status: 'pending', duration_days: 3,
@@ -12,6 +13,8 @@ function harness({ failOn = '', count = 0, paymentChange = {}, campaignChange = 
     sql = sql.replace(/\s+/g, ' ').trim(); trace.push(sql);
     if (failOn && sql.includes(failOn)) throw new Error('injected SQL error');
     if (zeroOn && sql.includes(zeroOn)) return { rows: [], rowCount: 0 };
+    if (sql.startsWith('INSERT INTO webhook_events')) return { rows: duplicate ? [] : [{ id: 1 }] };
+    if (sql.includes('FROM webhook_events')) return { rows: [{ provider: receiptProvider }] };
     if (sql.includes('FROM payments')) return { rows: [stored] };
     if (sql.startsWith('UPDATE payments')) stored.status = 'succeeded';
     if (sql.includes('SELECT COUNT')) return { rows: [{ count }] };
@@ -23,7 +26,11 @@ function harness({ failOn = '', count = 0, paymentChange = {}, campaignChange = 
     return { rows: [campaign], rowCount: 1 };
   } };
   const service = loadCampaigns(async channel => { trace.push(channel); }, () => now);
+  const database = loadDatabase({ on() {}, query() { throw new Error('Global query outside transaction'); },
+    async connect() { trace.push('CONNECT'); return { ...db, release() { trace.push('RELEASE'); } }; } });
+  const webhook = loadCampaignWebhook(service);
   return { trace, campaign, service, db, advance: () => { now += 86400000; },
+    dispatch: (event = campaignEvent()) => webhook.processStripeWebhookEvent({ event, ...database }),
     invoke: () => service.activateCampaignFromPayment(db, payment, payment.metadata, 'cs_synthetic', 'stripe') };
 }
 async function run() {
@@ -71,6 +78,34 @@ async function run() {
   await check('Pool fallback rejected', async () => {
     await assert.rejects(harness().service.activateCampaignFromPayment(() => {}, payment, payment.metadata, 'cs_synthetic', 'stripe'), /transaction client required/);
   });
+  await check('Receipt, campaign and queue share one transaction with no external send', async () => {
+    const h = harness(); await h.dispatch();
+    for (const marker of ['CONNECT', 'BEGIN', 'COMMIT', 'RELEASE']) assert.strictEqual(h.trace.filter(x => x === marker).length, 1);
+    assert.ok(h.trace.findIndex(x => x.startsWith('INSERT INTO webhook_events')) < h.trace.findIndex(x => x.includes('FROM payments')));
+    assert.ok(h.trace.findIndex(x => x.startsWith('INSERT INTO campaign_notification_outbox')) < h.trace.indexOf('COMMIT'));
+    assert.ok(!h.trace.some(x => ['email', 'sms', 'push', 'notification'].includes(x)));
+  });
+  for (const failOn of ['INSERT INTO webhook_events', 'UPDATE payments', 'SET metadata', 'INSERT INTO campaign_notification_outbox', 'COMMIT']) {
+    await check(`Atomic campaign failure rolls back: ${failOn}`, async () => {
+      const h = harness({ failOn }); await assert.rejects(h.dispatch(), /injected SQL error/);
+      assert.ok(h.trace.includes('ROLLBACK'));
+    });
+  }
+  await check('Historical receipt skips all business queries', async () => {
+    const h = harness({ duplicate: true }); assert.strictEqual((await h.dispatch()).duplicate, true);
+    assert.ok(!h.trace.some(x => x.includes('FROM payments')));
+  });
+  await check('Other provider receipt fails closed', async () => {
+    const h = harness({ duplicate: true, receiptProvider: 'payplug' });
+    await assert.rejects(h.dispatch(), /provider conflict/); assert.ok(h.trace.includes('ROLLBACK'));
+  });
+  for (const change of [{ amount_total: 1 }, { payment_status: 'unpaid' }, { currency: 'usd' },
+    { metadata: { ...payment.metadata, campaign_id: '99' } }, { metadata: { ...payment.metadata, user_id: '8' } }]) {
+    await check('Invalid Checkout rolls back receipt', async () => {
+      const h = harness(); await assert.rejects(h.dispatch(campaignEvent(change)), /validation failed/);
+      assert.ok(h.trace.includes('ROLLBACK') && !h.trace.includes('COMMIT'));
+    });
+  }
   console.log(`Campaign activation: ${total} checks passed`);
 }
 module.exports = run().catch(error => { console.error(error); process.exitCode = 1; });

@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const { ticketEvent } = require('./paymentTransactionHarness');
+const { campaignEvent } = require('./campaignTransactionHarness');
 
 function harness(provider, { secret = true, validSignature = true, outcomes = ['inserted'], event = { id: 'evt_synthetic', type: 'synthetic.event' }, processTicket = async () => {} } = {}) {
   const file = path.join(__dirname, '../routes/payment.route.js');
@@ -142,6 +143,25 @@ async function run() {
     const invalid = harness('stripe', { event: ticketEvent(), validSignature: false });
     assert.strictEqual((await invalid.invoke()).code, 400);
     assert.deepStrictEqual(invalid.calls, { registry: 0, business: 0 });
+  });
+  await check('Campaign receipt delegated to transaction, not global registry', async () => {
+    const h = harness('stripe', { event: campaignEvent(), outcomes: ['error'], processTicket: async () => ({ duplicate: true }) });
+    const res = await h.invoke(); assert.strictEqual(res.code, 200); assert.strictEqual(res.payload.duplicate, true);
+    assert.deepStrictEqual(h.calls, { registry: 0, business: 1 });
+  });
+  await check('Campaign transaction error returns 500 without receipt acknowledgement', async () => {
+    const h = harness('stripe', { event: campaignEvent(), processTicket: async () => { throw new Error('private detail'); } });
+    const res = await h.invoke(); assert.strictEqual(res.code, 500);
+    assert.ok(!JSON.stringify(res.payload).includes('private detail'));
+    assert.deepStrictEqual(h.calls, { registry: 0, business: 1 });
+  });
+  await check('Campaign response waits for transaction completion', async () => {
+    let finish;
+    const pending = new Promise(resolve => { finish = resolve; });
+    const h = harness('stripe', { event: campaignEvent(), processTicket: () => pending });
+    let responded = false; const response = h.invoke().then(res => { responded = true; return res; });
+    await Promise.resolve(); await Promise.resolve(); assert.strictEqual(responded, false);
+    finish({ duplicate: false }); assert.strictEqual((await response).code, 200);
   });
   console.log(`Webhook receipt: ${count} checks passed`);
 }

@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const { Pool } = require('pg');
 const { loadDatabase, load } = require('../paymentTransactionHarness');
-const { loadCampaigns, payment } = require('../campaignTransactionHarness');
+const { loadCampaigns, payment, campaignEvent, loadCampaignWebhook } = require('../campaignTransactionHarness');
 
 async function run() {
   const port = Number(process.env.KALICO_TEST_PG_PORT);
@@ -21,6 +21,9 @@ async function run() {
     await admin.query(`CREATE SCHEMA ${schema}`);
     pool = new Pool({ ...connection, max: 4, options: `-c search_path=${schema}` });
     await pool.query(`
+      CREATE TABLE webhook_events (id serial PRIMARY KEY, event_id varchar(255) NOT NULL UNIQUE,
+        provider varchar(20) NOT NULL CHECK (provider IN ('stripe', 'payplug')),
+        type varchar(100) NOT NULL, processed_at timestamptz NOT NULL DEFAULT NOW());
       CREATE TABLE users (id int PRIMARY KEY, email text, telephone text, prenom text, nom text);
       CREATE TABLE campaigns (id int PRIMARY KEY, user_id int REFERENCES users, type text,
         title text, status text, duration_days int, starts_at timestamptz, ends_at timestamptz,
@@ -43,7 +46,7 @@ async function run() {
     });
     async function seed() {
       notifications = 0;
-      await pool.query('TRUNCATE campaign_notification_outbox, notifications, push_tokens, campaigns, payments, users');
+      await pool.query('TRUNCATE webhook_events, campaign_notification_outbox, notifications, push_tokens, campaigns, payments, users');
       await pool.query("INSERT INTO users VALUES (7, 'synthetic@example.invalid', '+000', 'Test', 'User'), (8, NULL, NULL, 'Other', 'User')");
       await pool.query("INSERT INTO campaigns (id, user_id, type, title, status, duration_days, metadata, is_default_popup) VALUES (13, 7, 'popup', 'Synthetic', 'pending', 3, '{}', false)");
       await pool.query("INSERT INTO payments VALUES (9, 7, 'campaign', 'stripe', 'cs_synthetic', 1900, 'pending', $1, NOW())", [payment.metadata]);
@@ -53,6 +56,22 @@ async function run() {
       (SELECT status FROM payments WHERE id = 9) AS payment_status FROM campaigns c WHERE id = 13`)).rows[0];
     const queue = async () => (await pool.query('SELECT channel, target_id, status, attempts FROM campaign_notification_outbox ORDER BY id')).rows;
     const deliver = () => outbox.deliverNextCampaignNotification(service.deliverCampaignNotification);
+    const webhook = loadCampaignWebhook(service);
+    const receipts = async () => (await pool.query('SELECT event_id, provider FROM webhook_events ORDER BY id')).rows;
+    function dispatch(event = campaignEvent(), failOn = '', loseAck = false) {
+      return webhook.processStripeWebhookEvent({ event,
+        query() { throw new Error('Global query escaped campaign transaction'); },
+        async withTransaction(fn) {
+          const result = await database.withTransaction(client => fn({ query(sql, values) {
+            if (failOn && sql.replace(/\s+/g, ' ').includes(failOn)) return client.query('SELECT 1 / 0');
+            return client.query(sql, values);
+          } }));
+          // Lost acknowledgement is simulated after a real commit, not a DB crash.
+          if (loseAck) throw new Error('Simulated lost commit acknowledgement');
+          return result;
+        },
+      });
+    }
     function invoke(failOn = '', provider = 'stripe', paymentInput = payment, ref = 'cs_synthetic') {
       return database.withTransaction(client => service.activateCampaignFromPayment({
         query(sql, values) {
@@ -176,6 +195,58 @@ async function run() {
         assert.strictEqual(notifications, 0);
       });
       assert.strictEqual((await queue()).length, 5);
+    });
+    await check('webhook commits receipt, activation and outbox without sending', async () => {
+      await dispatch(); assert.strictEqual((await receipts()).length, 1);
+      assert.strictEqual((await state()).status, 'active');
+      assert.strictEqual((await queue()).length, 5); assert.strictEqual(notifications, 0);
+    });
+    for (const failOn of ['INSERT INTO webhook_events', 'UPDATE payments', 'SET metadata', 'INSERT INTO campaign_notification_outbox']) {
+      await check(`webhook rollback removes receipt and effects at ${failOn}`, async () => {
+        const before = await state();
+        await assert.rejects(dispatch(campaignEvent(), failOn), error => error.code === '22012');
+        assert.deepStrictEqual(await state(), before); assert.deepStrictEqual(await queue(), []);
+        assert.deepStrictEqual(await receipts(), []); assert.strictEqual(notifications, 0);
+      });
+    }
+    await check('same event succeeds after failed enqueue', async () => {
+      await assert.rejects(dispatch(campaignEvent(), 'INSERT INTO campaign_notification_outbox'));
+      await dispatch(); assert.strictEqual((await receipts()).length, 1); assert.strictEqual((await queue()).length, 5);
+    });
+    await check('concurrent same event yields one receipt and one activation', async () => {
+      const results = await Promise.all([dispatch(), dispatch()]);
+      assert.strictEqual(results.filter(result => result.duplicate).length, 1);
+      assert.strictEqual((await receipts()).length, 1); assert.strictEqual((await queue()).length, 5);
+    });
+    await check('distinct events for same payment preserve one set of effects', async () => {
+      await Promise.all([dispatch(), dispatch({ ...campaignEvent(), id: 'evt_second' })]);
+      const before = await state(); await dispatch({ ...campaignEvent(), id: 'evt_third' });
+      assert.deepStrictEqual(await state(), before);
+      assert.strictEqual((await receipts()).length, 3); assert.strictEqual((await queue()).length, 5);
+    });
+    await check('historical receipt is preserved without attempting repair', async () => {
+      await pool.query("INSERT INTO webhook_events (event_id, provider, type) VALUES ('evt_campaign', 'stripe', 'checkout.session.completed')");
+      const before = await state(); assert.strictEqual((await dispatch()).duplicate, true);
+      assert.deepStrictEqual(await state(), before); assert.deepStrictEqual(await queue(), []);
+    });
+    await check('provider collision fails without campaign activation', async () => {
+      await pool.query("INSERT INTO webhook_events (event_id, provider, type) VALUES ('evt_campaign', 'payplug', 'payment')");
+      const before = await state(); await assert.rejects(dispatch(), /provider conflict/);
+      assert.deepStrictEqual(await state(), before); assert.deepStrictEqual(await queue(), []);
+      assert.strictEqual((await receipts())[0].provider, 'payplug');
+    });
+    for (const change of [{ amount_total: 1 }, { metadata: { ...payment.metadata, user_id: '8' } }, { metadata: { ...payment.metadata, campaign_id: '99' } }]) {
+      await check('invalid signed Checkout leaves no processed receipt', async () => {
+        const before = await state(); await assert.rejects(dispatch(campaignEvent(change)), /validation failed/);
+        assert.deepStrictEqual(await state(), before); assert.deepStrictEqual(await queue(), []);
+        assert.deepStrictEqual(await receipts(), []);
+      });
+    }
+    await check('lost commit acknowledgement retry skips committed effects', async () => {
+      await assert.rejects(dispatch(campaignEvent(), '', true), /lost commit acknowledgement/);
+      const before = await state(); assert.strictEqual((await dispatch()).duplicate, true);
+      assert.deepStrictEqual(await state(), before); assert.strictEqual((await queue()).length, 5);
+      assert.strictEqual((await receipts()).length, 1);
     });
     console.log(`PostgreSQL campaign activation: ${total} checks passed`);
   } finally {

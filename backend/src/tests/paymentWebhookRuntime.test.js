@@ -54,7 +54,7 @@ function harness({ type = 'boost', status = 'pending', activationResult = {} } =
   };
   const checkout = (overrides = {}) => sandbox.module.exports.processStripeWebhookEvent({
     ...dependencies,
-    event: { type: 'checkout.session.completed', data: { object: {
+    event: { id: 'evt_synthetic', type: 'checkout.session.completed', data: { object: {
       id: 'cs_synthetic', metadata, payment_status: 'paid', currency: 'eur',
       amount_total: xpfToEurCents(3600), ...overrides,
     } } },
@@ -132,9 +132,10 @@ async function run() {
     for (const invalid of [{ payment_status: 'unpaid' }, { currency: 'usd' }, { amount_total: 1 }]) {
       await check(`Stripe ${product} rejects ${JSON.stringify(invalid)} before mutation`, async () => {
         const h = harness({ type: product });
-        await h.checkout(invalid);
+        if (product === 'campaign') await assert.rejects(h.checkout(invalid), /validation failed/);
+        else await h.checkout(invalid);
         assert.strictEqual(h.activations.length, 0);
-        assert.strictEqual(h.writes.length, 0);
+        assert.ok(h.writes.every(write => /INSERT INTO webhook_events/.test(write.sql)));
       });
     }
     await check(`Stripe ${product} surfaces missing activation target`, async () => {
