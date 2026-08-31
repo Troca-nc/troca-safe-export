@@ -22,6 +22,7 @@ const SUITES = [
   './payment.route.test',
   './trocService.test',
   './eventTicketAccess.test',
+  './eventPublicationAccess.test',
   './eventTicketPaymentIntegrity.test',
   './paymentWebhookRuntime.test',
   './paymentWebhookReceipt.test',

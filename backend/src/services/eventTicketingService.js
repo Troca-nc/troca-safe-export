@@ -134,11 +134,13 @@ async function listPublicEvents({ limit = 24, category = '', commune = '' } = {}
 }
 
 async function getPublicEventById(id) {
+  // Historical cancelled/completed rows have no verified publication history.
+  // Fail closed until a server-owned publication record permits public archives.
   const { rows } = await query(
     `SELECT e.*, c.name AS commune_name
        FROM events e
        LEFT JOIN communes c ON c.id = e.commune_id
-      WHERE e.id = $1
+      WHERE e.id = $1 AND e.status = 'published'
       LIMIT 1`,
     [id]
   );
