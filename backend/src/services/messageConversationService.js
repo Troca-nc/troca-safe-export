@@ -92,6 +92,25 @@ function buildConversationAccessClause(userParam = '$1') {
   )`;
 }
 
+async function listConversationOffersForUser(userId, conversationId) {
+  const validId = (value) => (typeof value === 'number' || (typeof value === 'string' && /^\d+$/.test(value)))
+    && Number.isSafeInteger(Number(value)) && Number(value) > 0;
+  if (!validId(userId)) throw createHttpError(401, 'Connexion requise');
+  if (!validId(conversationId)) throw createHttpError(400, 'Conversation invalide');
+  // Filter membership in the same query as the offers: no authorization/read gap.
+  // Missing and inaccessible conversations intentionally share an empty result.
+  const { rows } = await query(
+    `SELECT o.id, o.amount_xpf, o.status, o.expires_at, o.responded_at,
+            o.buyer_id, o.message_id
+     FROM message_offers o
+     JOIN conversations c ON c.id = o.conv_id
+     WHERE o.conv_id = $1 AND ${buildConversationAccessClause('$2')}
+     ORDER BY o.id DESC`,
+    [Number(conversationId), Number(userId)]
+  );
+  return rows;
+}
+
 async function listConversationsForUser(userId) {
   const result = await query(`
     SELECT
@@ -562,6 +581,7 @@ async function archiveConversation(userId, conversationId) {
 }
 
 module.exports = {
+  listConversationOffersForUser,
   archiveConversation,
   appendConversationMessage,
   decodeCursor,
