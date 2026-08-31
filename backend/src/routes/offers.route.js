@@ -11,11 +11,12 @@ const { Router }          = require('express');
 const Joi                 = require('joi');
 const { authenticate }    = require('../middleware/auth');
 const { validate }        = require('../middleware/validate');
-const { query, withTransaction } = require('../config/database');
+const { withTransaction } = require('../config/database');
 const { emitNewMessage }  = require('../services/websocketServer');
 const { sendPushToUser }  = require('../services/pushService');
 const { notifyOfferReceived } = require('../services/notificationService');
 const { sendOfferReceivedEmail } = require('../services/emailService');
+const { listConversationOffersForUser } = require('../services/messageConversationService');
 
 const router = Router();
 router.use(authenticate);
@@ -226,14 +227,7 @@ router.post('/:id/respond', validate(respondSchema), async (req, res, next) => {
 
 router.get('/conversations/:id/offers', async (req, res, next) => {
   try {
-    const { rows } = await query(
-      `SELECT o.id, o.amount_xpf, o.status, o.expires_at, o.responded_at,
-              o.buyer_id, o.message_id
-       FROM message_offers o
-       WHERE o.conv_id = $1
-       ORDER BY o.id DESC`,
-      [req.params.id]
-    );
+    const rows = await listConversationOffersForUser(req.user?.id, req.params.id);
     return res.json({ data: rows });
   } catch (err) { next(err); }
 });
