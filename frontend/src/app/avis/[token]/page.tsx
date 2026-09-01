@@ -68,8 +68,6 @@ export default function ReviewInvitePage() {
   const [rating, setRating] = useState(5)
   const [title, setTitle] = useState('')
   const [comment, setComment] = useState('')
-  const [reviewerPrenom, setReviewerPrenom] = useState('')
-  const [reviewerEmail, setReviewerEmail] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
@@ -128,12 +126,6 @@ export default function ReviewInvitePage() {
     }
   }, [invite?.pro?.id])
 
-  useEffect(() => {
-    if (!hasHydrated) return
-    setReviewerPrenom(user?.prenom || user?.first_name || '')
-    setReviewerEmail(user?.email || '')
-  }, [hasHydrated, user?.email, user?.first_name, user?.prenom])
-
   const displayName = useMemo(() => {
     if (!invite) return 'Professionnel Kalico'
     return invite.pro.pro_company_name
@@ -144,6 +136,10 @@ export default function ReviewInvitePage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!invite) return
+    if (!user) {
+      setError('Connectez-vous pour publier un avis vérifié.')
+      return
+    }
     setSubmitting(true)
     setError('')
     try {
@@ -153,8 +149,6 @@ export default function ReviewInvitePage() {
         rating,
         title,
         comment,
-        reviewer_prenom: reviewerPrenom,
-        reviewer_email: reviewerEmail,
       })
       setSuccess(true)
     } catch (err: any) {
@@ -301,34 +295,15 @@ export default function ReviewInvitePage() {
                   />
                 </div>
 
-                {!user ? (
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-night" htmlFor="reviewer-prenom">
-                        Prï¿½nom
-                      </label>
-                      <input
-                        id="reviewer-prenom"
-                        value={reviewerPrenom}
-                        onChange={(e) => setReviewerPrenom(e.target.value)}
-                        maxLength={120}
-                        className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-night outline-none transition focus:border-[#0A7EA4] focus:ring-4 focus:ring-[#0A7EA4]/10"
-                        placeholder="Votre prï¿½nom"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-night" htmlFor="reviewer-email">
-                        Email
-                      </label>
-                      <input
-                        id="reviewer-email"
-                        value={reviewerEmail}
-                        onChange={(e) => setReviewerEmail(e.target.value)}
-                        type="email"
-                        className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-night outline-none transition focus:border-[#0A7EA4] focus:ring-4 focus:ring-[#0A7EA4]/10"
-                        placeholder="vous@exemple.nc"
-                      />
-                    </div>
+                {hasHydrated && !user ? (
+                  <div className="rounded-2xl border border-[#0A7EA4]/20 bg-[#0A7EA4]/5 p-4 text-sm text-night/70">
+                    <p>Un compte Kalico est nécessaire pour garantir l’identité associée à cet avis.</p>
+                    <Link
+                      href={`/connexion?next=${encodeURIComponent(`/avis/${token}`)}`}
+                      className="mt-3 inline-flex font-semibold text-[#0A7EA4] hover:underline"
+                    >
+                      Se connecter pour continuer
+                    </Link>
                   </div>
                 ) : null}
 
@@ -336,7 +311,7 @@ export default function ReviewInvitePage() {
 
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || !hasHydrated || !user}
                   className="btn-primary inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm"
                 >
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageCircle className="h-4 w-4" />}

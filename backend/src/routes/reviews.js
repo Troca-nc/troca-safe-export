@@ -9,6 +9,7 @@ const { query, withTransaction } = require('../config/database');
 const { sendReviewInviteEmail } = require('../services/emailService');
 const { createNotification } = require('../services/notificationService');
 const { sendPushToUser } = require('../services/pushService');
+const { evaluateReviewCreation } = require('../services/reviewCreationPolicy');
 
 const router = express.Router();
 
@@ -324,7 +325,7 @@ router.post('/invite', authenticate, async (req, res, next) => {
   }
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', authenticate, async (req, res, next) => {
   try {
     const { error, value } = reviewSchema.validate(req.body, {
       stripUnknown: true,
@@ -348,6 +349,9 @@ router.post('/', async (req, res, next) => {
     const pro = proRes.rows[0];
     if (!pro) {
       return res.status(404).json({ error: 'Professionnel introuvable.' });
+    }
+    if (Number(req.user.id) === proId) {
+      return res.status(403).json({ error: 'Vous ne pouvez pas évaluer votre propre profil.' });
     }
 
     let tokenRow = null;
@@ -374,28 +378,35 @@ router.post('/', async (req, res, next) => {
       }
     }
 
-    const reviewerId = req.user?.id ?? tokenRow?.reviewer_id ?? null;
-    const reviewerPrenom = normalizeText(req.user?.prenom || value.reviewer_prenom || tokenRow?.reviewer_email || 'Client');
-    const reviewerAvatar = req.user?.avatar_url || null;
+    const reviewerId = req.user.id;
+    const reviewerPrenom = normalizeText(req.user.prenom || 'Client');
+    const reviewerAvatar = req.user.avatar_url || null;
 
-    const conversationCheck = reviewerId
-      ? await query(
-          `SELECT 1
-           FROM conversations c
-           WHERE (c.buyer_id = $1 AND c.seller_id = $2)
-              OR (c.buyer_id = $2 AND c.seller_id = $1)
-           LIMIT 1`,
-          [reviewerId, proId]
-        )
-      : { rows: [] };
+    const conversationCheck = await query(
+      `SELECT 1
+       FROM conversations c
+       WHERE (c.buyer_id = $1 AND c.seller_id = $2)
+          OR (c.buyer_id = $2 AND c.seller_id = $1)
+       LIMIT 1`,
+      [reviewerId, proId]
+    );
+    const policy = evaluateReviewCreation({
+      reviewerId,
+      proId,
+      hasInvite: Boolean(tokenRow),
+      hasConversation: conversationCheck.rows.length > 0,
+    });
+    if (!policy.allowed) {
+      return res.status(policy.status).json({ error: policy.error });
+    }
 
     const created = await withTransaction(async (client) => {
       const reviewRes = await client.query(
         `INSERT INTO verified_reviews (
            pro_id, reviewer_id, reviewer_prenom, reviewer_avatar_url,
-           rating, title, comment, verified_purchase, source
+           rating, title, comment, verified_purchase, source, status
          )
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE, $8, 'published')
          RETURNING *`,
         [
           proId,
@@ -405,7 +416,6 @@ router.post('/', async (req, res, next) => {
           value.rating,
           normalizeText(value.title),
           normalizeText(value.comment),
-          Boolean(tokenRow) || conversationCheck.rows.length > 0,
           tokenRow ? 'invite' : 'profile',
         ]
       );
@@ -565,4 +575,3 @@ router.post('/:id/report', authenticate, async (req, res, next) => {
 });
 
 module.exports = router;
-
