@@ -34,27 +34,24 @@ require.cache[require.resolve('../config/database')] = {
   exports: {
     query: async (sql) => {
       queryCalls.push(sql);
-      if (/deleted_at, banned_until FROM users WHERE id = \$1/i.test(sql)) {
-        return {
-          rows: [{
-            id: 1,
-            email: 'test@kalico.nc',
-            is_admin: false,
-            is_pro: false,
-            pro_plan: null,
-            pro_expires_at: null,
-            last_bon_plan_offer_at: null,
-            deleted_at: null,
-            banned_until: null,
-          }],
-        };
-      }
       return { rows: [] };
     },
   },
 };
 
+// Ce test cible la route OTP. L'authentification elle-même est couverte par
+// auth.middleware.test.js et authenticationFailClosed.test.js.
+const authPath = require.resolve('../middleware/auth');
+const cachedAuth = require.cache[authPath];
+require.cache[authPath] = {
+  id: authPath,
+  filename: authPath,
+  loaded: true,
+  exports: { ...(cachedAuth?.exports || {}), authenticate: (req, res, next) => next() },
+};
 const router = require('../routes/auth');
+if (cachedAuth) require.cache[authPath] = cachedAuth;
+else delete require.cache[authPath];
 
 function callRoute(method, path, req, res) {
   return new Promise((resolve, reject) => {
