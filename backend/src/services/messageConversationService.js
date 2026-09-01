@@ -92,6 +92,19 @@ function buildConversationAccessClause(userParam = '$1') {
   )`;
 }
 
+async function canAccessConversation(userId, conversationId) {
+  const validId = (value) => (typeof value === 'number' || (typeof value === 'string' && /^\d+$/.test(value)))
+    && Number.isSafeInteger(Number(value)) && Number(value) > 0;
+  if (!validId(userId) || !validId(conversationId)) return false;
+  const { rows } = await query(
+    `SELECT c.id FROM conversations c
+     WHERE c.id = $1 AND ${buildConversationAccessClause('$2')}
+     LIMIT 1`,
+    [Number(conversationId), Number(userId)]
+  );
+  return Boolean(rows[0]);
+}
+
 async function listConversationOffersForUser(userId, conversationId) {
   const validId = (value) => (typeof value === 'number' || (typeof value === 'string' && /^\d+$/.test(value)))
     && Number.isSafeInteger(Number(value)) && Number(value) > 0;
@@ -585,6 +598,7 @@ async function archiveConversation(userId, conversationId) {
 }
 
 module.exports = {
+  canAccessConversation,
   listConversationOffersForUser,
   archiveConversation,
   appendConversationMessage,

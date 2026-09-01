@@ -9,7 +9,7 @@ const { verifyAccessToken } = require('../config/jwt');
 const { query }             = require('../config/database');
 const { logger }            = require('../utils/logger');
 const { recordWebsocket }    = require('./observability');
-const { markConversationMessagesRead } = require('./messageConversationService');
+const { canAccessConversation, markConversationMessagesRead } = require('./messageConversationService');
 const { markUserOffline, markUserOnline } = require('./presenceService');
 const {
   initWebsocketBridge,
@@ -93,13 +93,12 @@ function initSocket(httpServer) {
     // Rejoindre une conversation
     socket.on('join_conversation', async (convId) => {
       try {
-        const conv = await query(
-          'SELECT id FROM conversations WHERE id = $1 AND (buyer_id = $2 OR seller_id = $2)',
-          [convId, userId]
-        );
-        if (!conv.rows[0]) return socket.emit('error', { message: 'Conversation introuvable' });
-        socket.join(`conv:${convId}`);
-        socket.emit('joined_conversation', { convId });
+        if (!await canAccessConversation(userId, convId)) {
+          return socket.emit('error', { message: 'Conversation introuvable' });
+        }
+        const normalizedId = Number(convId);
+        socket.join(`conv:${normalizedId}`);
+        socket.emit('joined_conversation', { convId: normalizedId });
       } catch (err) {
         logger.error('ws_join_conversation_error', { error: err, user_id: userId, conv_id: convId });
       }
@@ -110,7 +109,12 @@ function initSocket(httpServer) {
     });
 
     // Indicateur de frappe
-    socket.on('typing', ({ convId, isTyping }) => {
+    socket.on('typing', (payload = {}) => {
+      const convId = Number(payload?.convId);
+      if (!Number.isSafeInteger(convId) || convId <= 0 || !socket.rooms.has(`conv:${convId}`)) {
+        return;
+      }
+      const isTyping = payload?.isTyping;
       const nextState = Boolean(isTyping);
       const now = Date.now();
       if (socket.data.lastTypingState === nextState && now - socket.data.lastTypingAt < 3000) {

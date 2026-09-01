@@ -6,6 +6,7 @@
 // ============================================================
 
 const SUITES = [
+  './conversationTypingAccess.test',
   './conversationReadAccess.test',
   './conversationOffersAccess.test',
   './eventPublicationRules.test',
