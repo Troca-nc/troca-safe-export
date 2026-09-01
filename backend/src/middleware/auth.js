@@ -22,45 +22,13 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json({ error: 'Session expirée. Veuillez vous reconnecter.', code: 'TOKEN_REVOKED' });
     }
 
-    // Vérifier que l'utilisateur existe encore
-    let user = null;
-    try {
-      const result = await query(
-        'SELECT id, email, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at, deleted_at, banned_until FROM users WHERE id = $1',
-        [payload.sub]
-      );
-      user = result.rows[0];
-    } catch (dbErr) {
-      if (process.env.NODE_ENV !== 'production') {
-        user = {
-          id: payload.sub,
-          email: null,
-          is_admin: false,
-          is_pro: false,
-          pro_plan: null,
-          pro_expires_at: null,
-          last_bon_plan_offer_at: null,
-          deleted_at: null,
-          banned_until: null,
-        };
-      } else {
-        throw dbErr;
-      }
-    }
-
-    if (!user && process.env.NODE_ENV !== 'production') {
-      user = {
-        id: payload.sub,
-        email: null,
-        is_admin: false,
-        is_pro: false,
-        pro_plan: null,
-        pro_expires_at: null,
-        last_bon_plan_offer_at: null,
-        deleted_at: null,
-        banned_until: null,
-      };
-    }
+    // L'identité applicative vient toujours du compte persistant.
+    // Une erreur DB ou un compte absent ne doit jamais être remplacé par le JWT.
+    const result = await query(
+      'SELECT id, email, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at, deleted_at, banned_until FROM users WHERE id = $1',
+      [payload.sub]
+    );
+    const user = result.rows[0];
 
     if (!user || user.deleted_at) {
       return res.status(401).json({ error: 'Compte introuvable ou désactivé' });
