@@ -102,10 +102,13 @@ const optionalAuth = async (req, res, next) => {
       return next();
     }
     const result = await query(
-      'SELECT id, email, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at FROM users WHERE id = $1 AND deleted_at IS NULL',
+      'SELECT id, email, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at, banned_until FROM users WHERE id = $1 AND deleted_at IS NULL',
       [payload.sub]
     );
-    req.user = result.rows[0] || null;
+    const user = result.rows[0] || null;
+    req.user = user?.banned_until && new Date(user.banned_until) > new Date()
+      ? null
+      : user;
   } catch {
     req.user = null;
   }

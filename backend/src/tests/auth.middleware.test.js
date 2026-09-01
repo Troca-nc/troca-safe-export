@@ -120,4 +120,5 @@ describe('optionalAuth', () => {
     }
     assert.ok(called);
   });
+
 });
