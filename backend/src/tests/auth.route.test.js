@@ -34,6 +34,21 @@ require.cache[require.resolve('../config/database')] = {
   exports: {
     query: async (sql) => {
       queryCalls.push(sql);
+      if (/deleted_at, banned_until FROM users WHERE id = \$1/i.test(sql)) {
+        return {
+          rows: [{
+            id: 1,
+            email: 'test@kalico.nc',
+            is_admin: false,
+            is_pro: false,
+            pro_plan: null,
+            pro_expires_at: null,
+            last_bon_plan_offer_at: null,
+            deleted_at: null,
+            banned_until: null,
+          }],
+        };
+      }
       return { rows: [] };
     },
   },
