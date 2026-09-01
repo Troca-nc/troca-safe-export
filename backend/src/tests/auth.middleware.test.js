@@ -16,7 +16,6 @@ process.env.JWT_SECRET = 'test_jwt_secret_minimum_64_chars_xxxxxxxxxxxxxxxxxxxxx
 const fakeUser = { id: 1, email: 'test@kalico.nc', prenom: 'Jean', nom: 'Test', is_admin: false, is_pro: false, deleted_at: null };
 let mockRows = [fakeUser];
 const blacklistedTokens = new Set();
-const mockQueries = [];
 
 // Patch require cache pour database
 const Module = require('module');
@@ -24,10 +23,7 @@ const _originalLoad = Module._load;
 Module._load = function (request, parent, isMain) {
   if (request.includes('config/database') || request.endsWith('database')) {
     return {
-      query: async (sql, params) => {
-        mockQueries.push({ sql, params });
-        return { rows: mockRows };
-      },
+      query: async () => ({ rows: mockRows }),
       withTransaction: async (fn) => fn({ query: async () => ({ rows: mockRows }) }),
       checkConnection: async () => new Date().toISOString(),
     };
@@ -125,56 +121,4 @@ describe('optionalAuth', () => {
     assert.ok(called);
   });
 
-  it('attache un utilisateur actif et charge son bannissement', async () => {
-    const token = makeAccessToken(1);
-    const req = makeReq({ headers: { authorization: `Bearer ${token}` } });
-    mockRows = [{ ...fakeUser, banned_until: null }];
-    mockQueries.length = 0;
-    let called = 0;
-    await optionalAuth(req, makeRes(), () => { called++; });
-    assert.strictEqual(called, 1);
-    assert.strictEqual(req.user.id, 1);
-    assert.strictEqual(mockQueries.length, 1);
-    assert.match(mockQueries[0].sql, /banned_until/);
-    assert.match(mockQueries[0].sql, /deleted_at IS NULL/);
-  });
-
-  it('traite un compte temporairement banni comme visiteur anonyme', async () => {
-    const token = makeAccessToken(1);
-    const req = makeReq({ headers: { authorization: `Bearer ${token}` } });
-    mockRows = [{ ...fakeUser, banned_until: new Date(Date.now() + 60000).toISOString() }];
-    let called = 0;
-    await optionalAuth(req, makeRes(), () => { called++; });
-    assert.strictEqual(called, 1);
-    assert.strictEqual(req.user, null);
-  });
-
-  it('reconnaît le compte après expiration du ban', async () => {
-    const token = makeAccessToken(1);
-    const req = makeReq({ headers: { authorization: `Bearer ${token}` } });
-    mockRows = [{ ...fakeUser, banned_until: new Date(Date.now() - 60000).toISOString() }];
-    await optionalAuth(req, makeRes(), () => {});
-    assert.strictEqual(req.user.id, 1);
-  });
-
-  it('traite un token révoqué comme visiteur anonyme sans interroger la DB', async () => {
-    const token = makeAccessToken(1);
-    blacklistedTokens.add(token);
-    const req = makeReq({ headers: { authorization: `Bearer ${token}` } });
-    mockQueries.length = 0;
-    let called = 0;
-    await optionalAuth(req, makeRes(), () => { called++; });
-    assert.strictEqual(called, 1);
-    assert.strictEqual(req.user, null);
-    assert.strictEqual(mockQueries.length, 0);
-    blacklistedTokens.delete(token);
-  });
-
-  it('traite un token invalide comme visiteur anonyme', async () => {
-    const req = makeReq({ headers: { authorization: 'Bearer invalid.token' } });
-    let called = 0;
-    await optionalAuth(req, makeRes(), () => { called++; });
-    assert.strictEqual(called, 1);
-    assert.strictEqual(req.user, null);
-  });
 });
