@@ -321,12 +321,16 @@ async function loadConversationThread(userId, conversationId, page = 1, limit = 
 
 async function markConversationMessagesRead(conversationId, userId) {
   const result = await query(`
-    UPDATE messages
+    UPDATE messages m
     SET read_at = NOW()
-    WHERE conv_id = $1
-      AND sender_id != $2
-      AND read_at IS NULL
-    RETURNING id
+    WHERE m.conv_id = $1
+      AND m.sender_id != $2
+      AND m.read_at IS NULL
+      AND EXISTS (
+        SELECT 1 FROM conversations c
+        WHERE c.id = m.conv_id AND ${buildConversationAccessClause('$2')}
+      )
+    RETURNING m.id
   `, [conversationId, userId]);
 
   return result.rowCount ?? result.rows.length ?? 0;
