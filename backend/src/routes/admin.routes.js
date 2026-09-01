@@ -18,6 +18,7 @@ const { createNotification } = require('../services/notificationService')
 const { sendPushToUser } = require('../services/pushService')
 const { sendMail } = require('../services/emailService')
 const { runCinemaScraper } = require('../services/cinemaScraperService')
+const { disconnectUserSockets } = require('../services/websocketServer')
 
 const router = express.Router()
 router.use(adminRateLimit, requireAdminToken)
@@ -1386,6 +1387,7 @@ router.post('/users/:id/:action', async (req, res, next) => {
         } else {
           await query(`UPDATE users SET deleted_at = NOW() WHERE id = $1`, [id])
         }
+        disconnectUserSockets(id)
         break
       case 'unban':
         await query(`UPDATE users SET deleted_at = NULL, banned_until = NULL, updated_at = NOW() WHERE id = $1`, [id])

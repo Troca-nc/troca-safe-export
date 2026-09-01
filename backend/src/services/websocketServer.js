@@ -65,11 +65,14 @@ function initSocket(httpServer) {
 
       const payload = verifyAccessToken(token);
       const result  = await query(
-        'SELECT id, prenom, nom FROM users WHERE id = $1 AND deleted_at IS NULL',
+        'SELECT id, prenom, nom, banned_until FROM users WHERE id = $1 AND deleted_at IS NULL',
         [payload.sub]
       );
 
       if (!result.rows[0]) return next(new Error('USER_NOT_FOUND'));
+      if (result.rows[0].banned_until && new Date(result.rows[0].banned_until) > new Date()) {
+        return next(new Error('USER_BANNED'));
+      }
 
     socket.userId   = result.rows[0].id;
     socket.userName = `${result.rows[0].prenom} ${result.rows[0].nom}`;
@@ -177,4 +180,11 @@ function notifyUser(userId, type, data) {
   publishUserEvent(userId, 'notification', { type, ...data }).catch(() => {});
 }
 
-module.exports = { initSocket, getIO, emitNewMessage, notifyUser, emitConversationRead, shutdownWebsocketBridge };
+function disconnectUserSockets(userId) {
+  const normalizedId = Number(userId);
+  if (!_io || !Number.isSafeInteger(normalizedId) || normalizedId <= 0) return false;
+  _io.in(`user:${normalizedId}`).disconnectSockets(true);
+  return true;
+}
+
+module.exports = { initSocket, getIO, emitNewMessage, notifyUser, disconnectUserSockets, emitConversationRead, shutdownWebsocketBridge };
