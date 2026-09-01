@@ -39,7 +39,19 @@ require.cache[require.resolve('../config/database')] = {
   },
 };
 
+// Ce test cible la route OTP. L'authentification elle-même est couverte par
+// auth.middleware.test.js et authenticationFailClosed.test.js.
+const authPath = require.resolve('../middleware/auth');
+const cachedAuth = require.cache[authPath];
+require.cache[authPath] = {
+  id: authPath,
+  filename: authPath,
+  loaded: true,
+  exports: { ...(cachedAuth?.exports || {}), authenticate: (req, res, next) => next() },
+};
 const router = require('../routes/auth');
+if (cachedAuth) require.cache[authPath] = cachedAuth;
+else delete require.cache[authPath];
 
 function callRoute(method, path, req, res) {
   return new Promise((resolve, reject) => {

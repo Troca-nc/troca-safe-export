@@ -6,6 +6,7 @@
 // ============================================================
 
 const SUITES = [
+  './authenticationFailClosed.test',
   './optionalAuthBanPolicy.test',
   './websocketBanEnforcement.test',
   './conversationTypingAccess.test',
