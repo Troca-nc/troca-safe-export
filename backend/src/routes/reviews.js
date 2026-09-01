@@ -10,6 +10,7 @@ const { sendReviewInviteEmail } = require('../services/emailService');
 const { createNotification } = require('../services/notificationService');
 const { sendPushToUser } = require('../services/pushService');
 const { evaluateReviewCreation } = require('../services/reviewCreationPolicy');
+const { reportVerifiedReview } = require('../services/reviewReportService');
 
 const router = express.Router();
 
@@ -557,18 +558,20 @@ router.post('/:id/report', authenticate, async (req, res, next) => {
     });
     if (error) return res.status(400).json({ error: error.details[0].message });
 
-    const updated = await query(
-      `UPDATE verified_reviews
-       SET report_count = report_count + 1,
-           report_reason = COALESCE($2, report_reason),
-           status = CASE WHEN report_count + 1 >= 1 THEN 'reported' ELSE status END,
-           updated_at = NOW()
-       WHERE id = $1
-       RETURNING *`,
-      [reviewId, normalizeText(value.reason)]
-    );
+    const result = await withTransaction((client) => reportVerifiedReview({
+      client,
+      reviewId,
+      reporterId: req.user.id,
+      reason: normalizeText(value.reason),
+    }));
+    if (result.outcome === 'invalid') return res.status(400).json({ error: 'Avis invalide.' });
+    if (result.outcome === 'not_found') return res.status(404).json({ error: 'Avis introuvable.' });
+    if (result.outcome === 'self_report') return res.status(403).json({ error: 'Vous ne pouvez pas signaler votre propre avis.' });
 
-    return res.json({ data: mapReview(updated.rows[0]) });
+    return res.json({
+      data: mapReview(result.review),
+      report: { recorded: result.outcome === 'recorded', count: result.count, threshold: result.threshold },
+    });
   } catch (err) {
     next(err);
   }
