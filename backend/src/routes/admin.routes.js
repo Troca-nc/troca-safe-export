@@ -987,12 +987,47 @@ router.patch('/moderation/reports/:id/resolve', async (req, res, next) => {
 router.get('/users/:id/full', async (req, res, next) => {
   try {
     const userId = Number(req.params.id)
-    const [userRes, listingsRes, paymentsRes, reportsMadeRes, reportsReceivedRes, subscriptionsRes] = await Promise.all([
+    const [userRes, listingsRes, paymentsRes, reportsMadeRes, reportsReceivedRes, subscriptionsRes, trocRes] = await Promise.all([
       query(
         `SELECT
-           u.*,
+           u.id,
+           u.email,
+           u.prenom,
+           u.nom,
+           u.telephone,
+           u.phone_verified,
+           u.email_verified,
+           u.avatar_url,
+           u.commune_id,
+           u.bio,
+           u.member_since,
+           u.trust_score,
+           u.is_admin,
+           u.is_pro,
+           u.account_type,
+           u.pro_plan,
+           u.pro_expires_at,
+           u.pro_verified,
+           u.pro_verified_at,
+           u.pro_company_name,
+           u.pro_category,
+           u.nb_annonces,
+           u.note_moyenne,
+           u.nb_avis,
+           u.banned_until,
+           u.deleted_at,
+           u.created_at,
+           u.updated_at,
            COALESCE(com.name, '') AS commune_name,
-           COALESCE(prov.name, '') AS province_name
+           COALESCE(prov.name, '') AS province_name,
+           (SELECT COALESCE(SUM(a.nb_vues), 0)::int FROM annonces a WHERE a.user_id = u.id) AS total_vues,
+           (SELECT COUNT(*)::int
+              FROM favoris f
+              JOIN annonces a ON a.id = f.annonce_id
+             WHERE a.user_id = u.id) AS total_favoris,
+           (SELECT COUNT(*)::int
+              FROM annonces a
+             WHERE a.user_id = u.id AND a.status = 'active') AS active_listings_count
          FROM users u
          LEFT JOIN communes com ON com.id = u.commune_id
          LEFT JOIN provinces prov ON prov.id = com.province_id
@@ -1009,15 +1044,15 @@ router.get('/users/:id/full', async (req, res, next) => {
          ORDER BY a.created_at DESC
          LIMIT 100`,
         [userId]
-      ).catch(() => ({ rows: [] })),
+      ),
       query(
-        `SELECT id, type, provider, amount_xpf, status, provider_ref, created_at, metadata
+        `SELECT id, type, provider, amount_xpf, status, created_at
          FROM payments
          WHERE user_id = $1
          ORDER BY created_at DESC
          LIMIT 100`,
         [userId]
-      ).catch(() => ({ rows: [] })),
+      ),
       query(
         `SELECT id, annonce_id, reason, comment, status, created_at, resolved_at
          FROM signalements
@@ -1025,7 +1060,7 @@ router.get('/users/:id/full', async (req, res, next) => {
          ORDER BY created_at DESC
          LIMIT 100`,
         [userId]
-      ).catch(() => ({ rows: [] })),
+      ),
       query(
         `SELECT id, annonce_id, reason, comment, status, created_at, resolved_at
          FROM signalements
@@ -1033,8 +1068,32 @@ router.get('/users/:id/full', async (req, res, next) => {
          ORDER BY created_at DESC
          LIMIT 100`,
         [userId]
-      ).catch(() => ({ rows: [] })),
+      ),
       getLatestSubscriptionSnapshot(userId),
+      query(
+        `SELECT
+           p.id,
+           p.listing_id,
+           p.proposer_id,
+           p.offered_listing_ids,
+           p.offered_description,
+           p.complement_xpf,
+           p.complement_direction,
+           p.status,
+           p.counter_proposal_id,
+           p.conversation_id,
+           p.created_at,
+           p.updated_at,
+           p.expires_at,
+           a.titre AS listing_title,
+           a.user_id AS listing_owner_id
+         FROM troc_proposals p
+         JOIN annonces a ON a.id = p.listing_id
+         WHERE p.proposer_id = $1 OR a.user_id = $1
+         ORDER BY p.created_at DESC
+         LIMIT 100`,
+        [userId]
+      ),
     ])
 
     if (!userRes.rows[0]) {
@@ -1049,8 +1108,7 @@ router.get('/users/:id/full', async (req, res, next) => {
         payments: paymentsRes.rows,
         reports_made: reportsMadeRes.rows,
         reports_received: reportsReceivedRes.rows,
-        troc_proposals: [],
-        login_history: [],
+        troc_proposals: trocRes.rows,
       },
     })
   } catch (err) {
