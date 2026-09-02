@@ -1,17 +1,13 @@
 import { test, expect } from '@playwright/test'
 
-const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || 'https://admin.kalico.nc'
-
-test.describe('smoke admin redirect', () => {
-  test('public frontend delegates admin paths to the isolated application', async ({ page }) => {
-    await page.route(`${adminUrl}/**`, (route) => route.fulfill({
-      status: 200,
-      contentType: 'text/html',
-      body: '<h1>Dedicated Kalico admin</h1>',
-    }))
-
-    await page.goto('/admin/users')
-
-    await expect(page).toHaveURL(`${adminUrl}/`)
-  })
+test.describe('legacy admin unavailable', () => {
+  for (const path of ['/admin/dashboard', '/admin/users', '/admin/annonces', '/admin/signalements']) {
+    test(`shows an explicit notice at ${path} without external redirect`, async ({ page }) => {
+      await page.goto(path)
+      expect(new URL(page.url()).pathname).toBe(path)
+      await expect(page.getByRole('heading', { name: 'Administration indisponible' })).toBeVisible()
+      await expect(page.getByText('Aucune action administrative ne peut être effectuée depuis cet écran.')).toBeVisible()
+      await expect(page.getByRole('button')).toHaveCount(0)
+    })
+  }
 })
