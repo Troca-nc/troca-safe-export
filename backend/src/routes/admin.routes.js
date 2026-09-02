@@ -1341,36 +1341,9 @@ router.get('/listings', async (req, res, next) => {
 
 // ── POST /admin/annonces/bulk — Actions groupées ─────────
 
-router.post('/annonces/bulk', async (req, res, next) => {
-  try {
-    const { ids, action } = req.body
-    if (!ids?.length) return res.status(400).json({ error: 'Aucun ID fourni' })
-
-    const placeholders = ids.map((_,i) => `$${i + 1}`).join(',')
-
-    switch (action) {
-      case 'ban':
-        await query(`UPDATE annonces SET status = 'banned', updated_at = NOW() WHERE id IN (${placeholders})`, ids)
-        break
-      case 'approve':
-        await query(`UPDATE annonces SET status = 'active', updated_at = NOW() WHERE id IN (${placeholders})`, ids)
-        break
-      case 'boost':
-        await query(`UPDATE annonces SET is_boosted = TRUE, boost_type = 'une', boost_expires_at = NOW() + INTERVAL '7 days', updated_at = NOW() WHERE id IN (${placeholders})`, ids)
-        break
-      case 'delete':
-        await query(`UPDATE annonces SET deleted_at = NOW(), delete_reason = 'admin' WHERE id IN (${placeholders})`, ids)
-        break
-      default:
-        return res.status(400).json({ error: 'Action inconnue' })
-    }
-
-    res.json({ message: 'Action effectuée', count: ids.length })
-  } catch (err) { next(err) }
-})
-
 // ── GET /admin/users ─────────────────────────────────────
 
+// La route bulk historique est retirée : toute future action groupée doit avoir un contrat strict dédié.
 router.get('/users', async (req, res, next) => {
   try {
     const { q, page = 1, limit = 25 } = req.query
@@ -1410,64 +1383,9 @@ router.get('/users', async (req, res, next) => {
 
 // ── POST /admin/users/:id/:action ────────────────────────
 
-router.post('/users/:id/:action', async (req, res, next) => {
-  try {
-    const { id, action } = req.params
-    const { duration_days } = req.body   // pour ban temporaire
-
-    switch (action) {
-      case 'verify':
-        await query(`UPDATE users SET phone_verified = TRUE, updated_at = NOW() WHERE id = $1`, [id])
-        break
-      case 'ban':
-        // Ban temporaire si duration_days fourni, sinon définitif
-        if (duration_days) {
-          await query(
-            `UPDATE users SET banned_until = NOW() + ($1 || ' days')::INTERVAL, updated_at = NOW() WHERE id = $2`,
-            [Number(duration_days), id]
-          )
-        } else {
-          await query(`UPDATE users SET deleted_at = NOW() WHERE id = $1`, [id])
-        }
-        disconnectUserSockets(id)
-        break
-      case 'unban':
-        await query(`UPDATE users SET deleted_at = NULL, banned_until = NULL, updated_at = NOW() WHERE id = $1`, [id])
-        break
-      case 'admin':
-        await query(`UPDATE users SET is_admin = TRUE, updated_at = NOW() WHERE id = $1`, [id])
-        break
-      case 'unadmin':
-        await query(`UPDATE users SET is_admin = FALSE, updated_at = NOW() WHERE id = $1`, [id])
-        break
-      case 'pro':
-        await withTransaction(async (client) => {
-          await client.query(`UPDATE users SET is_pro = TRUE, pro_since = NOW(), updated_at = NOW() WHERE id = $1`, [id])
-          await ensureProReferralCode(client, id)
-          await ensureLaunchPack(client, id)
-        })
-        await refreshTrustScore(id).catch(() => {})
-        break
-      case 'unpro':
-        await query(`UPDATE users SET is_pro = FALSE, updated_at = NOW() WHERE id = $1`, [id])
-        break
-      default:
-        return res.status(400).json({ error: 'Action inconnue' })
-    }
-
-    // Logger l'action admin
-    await query(
-      `INSERT INTO admin_logs (admin_id, action, target_type, target_id, metadata)
-       VALUES ($1, $2, 'user', $3, $4)`,
-      [req.user.id, action, id, JSON.stringify(req.body)]
-    ).catch(() => {}) // table optionnelle
-
-    res.json({ message: 'Action effectuée' })
-  } catch (err) { next(err) }
-})
-
 // ── GET /admin/signalements ───────────────────────────────
 
+// La route utilisateur générique historique est retirée au profit des mutations explicites ci-dessus.
 router.get('/signalements', async (req, res, next) => {
   try {
     const { resolved = 'false', page = 1, limit = 20 } = req.query
