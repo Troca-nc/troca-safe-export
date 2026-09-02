@@ -53,6 +53,16 @@ const router = require('../routes/auth');
 if (cachedAuth) require.cache[authPath] = cachedAuth;
 else delete require.cache[authPath];
 
+describe('auth route registration', () => {
+  it('monte une seule route POST /forgot-password', () => {
+    const forgotPasswordRoutes = router.stack.filter((layer) => (
+      layer.route?.path === '/forgot-password' && layer.route.methods?.post
+    ));
+
+    assert.strictEqual(forgotPasswordRoutes.length, 1);
+  });
+});
+
 function callRoute(method, path, req, res) {
   return new Promise((resolve, reject) => {
     req.method = method.toUpperCase();

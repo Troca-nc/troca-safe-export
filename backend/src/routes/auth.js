@@ -227,27 +227,6 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res, next) =>
   }
 });
 
-router.post('/forgot-password', forgotPasswordLimiter, async (req, res, next) => {
-  try {
-    const { error, value } = forgotSchema.validate(req.body);
-    if (error) return res.status(400).json({ error: error.details[0].message });
-
-    await verifyTurnstileToken({ req, token: value.turnstile_token, ip: req.ip, action: 'forgot_password' });
-    const reset = await requestPasswordReset(value.email);
-    if (!reset) {
-      return res.json({ message: 'Si cet email existe, vous recevrez un lien de réinitialisation.' });
-    }
-
-    await sendResetEmail(value.email, reset.token).catch((err) => {
-      console.error('[AUTH] Erreur envoi email reset:', err.message);
-    });
-
-    return res.json({ message: 'Si cet email existe, vous recevrez un lien de réinitialisation.' });
-  } catch (err) {
-    next(err);
-  }
-});
-
 router.post('/verify-email', verificationLimiter, async (req, res, next) => {
   try {
     const { token } = req.body || {};
