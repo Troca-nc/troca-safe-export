@@ -1,33 +1,18 @@
 import { test, expect } from '@playwright/test'
-import { assertNoForbiddenBodyText, createConsoleCollector, restoreAuthenticatedStore, restoreSessionStorage, storageStatePath } from './support/auth'
-import { expectMainHeadingVisible, expectNotOnConnexion, expectPageHealthy, gotoPage } from './support/audit'
 
-test.describe('admin', () => {
-  test.beforeEach(async ({ page }) => {
-    await restoreAuthenticatedStore(page, 'admin')
-    await restoreSessionStorage(page, 'admin')
-  })
+const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || 'https://admin.kalico.nc'
 
-  test('dashboard is accessible for admin', async ({ page }) => {
-    const console = createConsoleCollector(page)
+test.describe('legacy admin surface', () => {
+  test('redirects every public-frontend admin path to the dedicated back-office', async ({ page }) => {
+    await page.route(`${adminUrl}/**`, (route) => route.fulfill({
+      status: 200,
+      contentType: 'text/html',
+      body: '<h1>Dedicated Kalico admin</h1>',
+    }))
 
-    await gotoPage(page, '/admin/dashboard')
-    await expectNotOnConnexion(page)
-    await expectMainHeadingVisible(page)
+    await page.goto('/admin/dashboard')
 
-    await expectPageHealthy(page)
-    await assertNoForbiddenBodyText(page)
-  })
-
-  test('particulier storage cannot access admin pages', async ({ browser }) => {
-    const context = await browser.newContext({ storageState: storageStatePath('particulier') })
-    const page = await context.newPage()
-    await restoreAuthenticatedStore(page, 'particulier')
-    await restoreSessionStorage(page, 'particulier')
-    await gotoPage(page, '/admin/dashboard')
-    await expect(page).toHaveURL(/\/admin/i)
-    const body = await page.locator('body').innerText()
-    expect(body).toMatch(/accès|access|non autorisé|non autorise|forbidden|erreur/i)
-    await context.close()
+    await expect(page).toHaveURL(`${adminUrl}/`)
+    await expect(page.getByRole('heading', { name: 'Dedicated Kalico admin' })).toBeVisible()
   })
 })

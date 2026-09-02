@@ -6,6 +6,7 @@
 const isProd = process.env.NODE_ENV === 'production'
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kalico.nc'
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || `${siteUrl}/api`
+const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || 'https://admin.kalico.nc'
 const siteUrlObject = new URL(siteUrl)
 const siteOrigin = siteUrlObject.origin
 const apiOrigin = new URL(apiUrl, siteUrl).origin
@@ -32,6 +33,11 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: '/admin/:path*',
+        destination: `${adminUrl}/`,
+        permanent: false,
+      },
+      {
         source: '/fret',
         destination: '/envoi-livraison',
         permanent: true,
@@ -43,6 +49,7 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || 'https://kalico.nc',
     NEXT_PUBLIC_API_URL:    process.env.NEXT_PUBLIC_API_URL    || 'http://localhost:3001',
+    NEXT_PUBLIC_ADMIN_URL: process.env.NEXT_PUBLIC_ADMIN_URL || 'https://admin.kalico.nc',
     NEXT_PUBLIC_STRIPE_PK: process.env.NEXT_PUBLIC_STRIPE_PK || '',
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
     NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY || '',
