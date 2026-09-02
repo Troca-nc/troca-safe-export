@@ -76,4 +76,19 @@ describe('P0-B log and internal-token boundaries', () => {
       assert.ok(/listen\s+443\s+ssl\s*;\s*\r?\n\s*http2\s+on\s*;/.test(content));
     }
   });
+
+  it('interdit tout Referer sur chaque couche HTTP', () => {
+    const root = path.resolve(__dirname, '../../../../');
+    for (const relative of [
+      'nginx/nginx.conf',
+      'nginx/sites/kalico.nc.conf',
+      'nginx/sites/admin.kalico.nc.conf',
+      'frontend/next.config.js',
+      'backend/src/index.js',
+    ]) {
+      const content = fs.readFileSync(path.join(root, relative), 'utf8');
+      assert.ok(content.includes('no-referrer'), `${relative} doit imposer no-referrer`);
+      assert.ok(!content.includes('strict-origin-when-cross-origin'), `${relative} conserve une politique trop permissive`);
+    }
+  });
 });
