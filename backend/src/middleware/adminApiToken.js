@@ -1,5 +1,6 @@
 'use strict';
 
+const crypto = require('crypto');
 const { query } = require('../config/database');
 const { getRedisClient } = require('../config/redis');
 const { getTrustedClientIp } = require('../utils/clientIp');
@@ -13,39 +14,35 @@ function normalizeToken(value) {
   return String(value || '').trim();
 }
 
+function secureTokenEquals(provided, expected) {
+  if (!provided || !expected) return false;
+  const providedDigest = crypto.createHash('sha256').update(provided).digest();
+  const expectedDigest = crypto.createHash('sha256').update(expected).digest();
+  return crypto.timingSafeEqual(providedDigest, expectedDigest);
+}
+
 async function resolveAdminUser() {
   const adminEmail = normalizeToken(process.env.ADMIN_EMAIL);
+  if (!adminEmail) return null;
 
-  if (adminEmail) {
-    const result = await query(
-      `SELECT id, email, prenom, nom, is_admin
-       FROM users
-       WHERE LOWER(email) = LOWER($1)
-       LIMIT 1`,
-      [adminEmail],
-    ).catch(() => ({ rows: [] }));
-
-    if (result.rows[0]) {
-      return result.rows[0];
-    }
-  }
-
-  const fallback = await query(
+  const result = await query(
     `SELECT id, email, prenom, nom, is_admin
      FROM users
-     WHERE is_admin = TRUE
-     ORDER BY created_at ASC
+     WHERE LOWER(email) = LOWER($1)
+       AND is_admin = TRUE
+       AND deleted_at IS NULL
      LIMIT 1`,
+    [adminEmail],
   ).catch(() => ({ rows: [] }));
 
-  return fallback.rows[0] || null;
+  return result.rows[0] || null;
 }
 
 async function requireAdminToken(req, res, next) {
   const token = normalizeToken(req.headers['x-admin-token']);
   const expected = normalizeToken(process.env.ADMIN_API_TOKEN);
 
-  if (!token || !expected || token !== expected) {
+  if (!secureTokenEquals(token, expected)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -56,7 +53,7 @@ async function requireAdminToken(req, res, next) {
     }
 
     req.admin = {
-      email: normalizeToken(req.headers['x-admin-email']) || normalizeToken(process.env.ADMIN_EMAIL),
+      email: normalizeToken(adminUser.email),
     };
     req.user = adminUser;
   } catch {
@@ -106,4 +103,5 @@ module.exports = {
   adminRateLimit,
   requireAdminToken,
   resolveAdminUser,
+  secureTokenEquals,
 };

@@ -15,9 +15,6 @@ export async function adminBackendFetch(pathname: string, init: RequestInit = {}
   const hdrs = new Headers(init.headers)
   if (token) hdrs.set('x-admin-token', token)
 
-  const email = process.env.ADMIN_EMAIL?.trim() || ''
-  if (email) hdrs.set('x-admin-email', email)
-
   hdrs.set('accept', hdrs.get('accept') || 'application/json')
 
   const response = await fetch(url, {
