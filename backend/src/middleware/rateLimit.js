@@ -4,19 +4,14 @@
 
 const rateLimit = require('express-rate-limit')
 const { createRedisRateLimitStore } = require('../services/redisRateLimitStore')
+const { getTrustedClientIp } = require('../utils/clientIp')
 
 const normalizeKeyPart = (value) => {
   const normalized = String(value ?? '').trim().toLowerCase()
   return normalized || 'unknown'
 }
 
-const getIpKey = (req) => {
-  const forwarded = req.headers['x-forwarded-for']
-  if (typeof forwarded === 'string' && forwarded.trim()) {
-    return forwarded.split(',')[0].trim()
-  }
-  return req.ip ?? 'unknown'
-}
+const getIpKey = (req) => getTrustedClientIp(req)
 
 const keyByFields = (fields = []) => (req) => {
   const values = fields.map((field) => normalizeKeyPart(req.body?.[field] ?? req.query?.[field]))
@@ -34,7 +29,7 @@ const createRateLimit = ({ windowMs = 15 * 60 * 1000, max = 100, message, prefix
     max,
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator: keyGenerator || ((req) => req.ip ?? 'unknown'),
+    keyGenerator: keyGenerator || getIpKey,
     store: createRedisRateLimitStore(prefix),
     message: {
       error: message || `Trop de requêtes, veuillez réessayer dans ${Math.round(windowMs / 60000)} minutes.`,

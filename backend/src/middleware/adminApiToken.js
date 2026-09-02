@@ -2,6 +2,7 @@
 
 const { query } = require('../config/database');
 const { getRedisClient } = require('../config/redis');
+const { getTrustedClientIp } = require('../utils/clientIp');
 
 const WINDOW_MS = 60 * 1000;
 const MAX_REQUESTS = 60;
@@ -66,7 +67,7 @@ async function requireAdminToken(req, res, next) {
 }
 
 async function adminRateLimit(req, res, next) {
-  const ip = String(req.ip || req.headers['x-forwarded-for'] || '127.0.0.1').split(',')[0].trim();
+  const ip = getTrustedClientIp(req);
   const key = `admin:rate:${ip}`;
 
   try {
