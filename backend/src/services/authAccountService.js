@@ -27,9 +27,12 @@ function createHttpError(status, message, code) {
   return err;
 }
 
+function hashRefreshToken(refreshToken) {
+  return crypto.createHash('sha256').update(String(refreshToken || '')).digest('hex');
+}
+
 function buildRefreshBlacklistKey(refreshToken) {
-  const hash = crypto.createHash('sha256').update(String(refreshToken || '')).digest('hex');
-  return `refresh:blacklist:${hash}`;
+  return `refresh:blacklist:${hashRefreshToken(refreshToken)}`;
 }
 
 function buildAccessBlacklistKey(accessToken) {
@@ -190,7 +193,7 @@ async function persistRefreshToken(userId, refreshToken, refreshExpiresAt) {
     `INSERT INTO refresh_tokens (user_id, token, expires_at)
      VALUES ($1, $2, $3)
      ON CONFLICT DO NOTHING`,
-    [userId, refreshToken, refreshExpiresAt]
+    [userId, hashRefreshToken(refreshToken), refreshExpiresAt]
   ).catch(() => {});
 }
 
@@ -251,7 +254,7 @@ async function isAccessTokenBlacklisted(accessToken) {
 }
 
 async function revokeRefreshToken(refreshToken) {
-  await query(`DELETE FROM refresh_tokens WHERE token = $1`, [refreshToken]).catch(() => {});
+  await query(`DELETE FROM refresh_tokens WHERE token = $1`, [hashRefreshToken(refreshToken)]).catch(() => {});
   await blacklistRefreshToken(refreshToken).catch(() => {});
 }
 
@@ -259,11 +262,11 @@ async function rotateRefreshToken(userId, oldRefreshToken) {
   const { accessToken, refreshToken: newRefresh, refreshExpiresAt } = generateTokens(userId);
 
   await withTransaction(async (client) => {
-    await client.query(`DELETE FROM refresh_tokens WHERE token = $1`, [oldRefreshToken]);
+    await client.query(`DELETE FROM refresh_tokens WHERE token = $1`, [hashRefreshToken(oldRefreshToken)]);
     await client.query(
       `INSERT INTO refresh_tokens (user_id, token, expires_at)
        VALUES ($1, $2, $3)`,
-      [userId, newRefresh, refreshExpiresAt]
+      [userId, hashRefreshToken(newRefresh), refreshExpiresAt]
     );
   });
 
@@ -422,7 +425,7 @@ async function refreshSessionWithRotation(refreshToken) {
 
   const tokenRow = await query(
     `SELECT id FROM refresh_tokens WHERE token = $1 AND user_id = $2 AND expires_at > NOW()`,
-    [refreshToken, payload.sub]
+    [hashRefreshToken(refreshToken), payload.sub]
   ).catch(() => ({ rows: [] }));
   if (!tokenRow.rows[0]) {
     throw createHttpError(401, 'Token de rafra?chissement invalide ou expir?.');
@@ -544,6 +547,7 @@ module.exports = {
   findUserByEmail,
   findUserByIdentifier,
   findUserById,
+  hashRefreshToken,
   loginAccount,
   normalizeEmail,
   persistRefreshToken,

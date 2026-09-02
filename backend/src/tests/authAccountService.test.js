@@ -93,6 +93,7 @@ delete require.cache[servicePath];
 const {
   buildRefreshBlacklistKey,
   deleteRefreshToken,
+  hashRefreshToken,
   refreshSessionWithRotation,
 } = require('../services/authAccountService');
 
@@ -130,6 +131,15 @@ function withRefreshExpiry(expiry, fn) {
 }
 
 describe('authAccountService — refresh rotation', () => {
+  it('produit une empreinte SHA-256 déterministe sans conserver le token brut', () => {
+    const token = 'refresh-token-secret';
+    const expected = crypto.createHash('sha256').update(token).digest('hex');
+
+    assert.strictEqual(hashRefreshToken(token), expected);
+    assert.strictEqual(hashRefreshToken(token).length, 64);
+    assert.notStrictEqual(hashRefreshToken(token), token);
+  });
+
   it('rejette un refresh token déjà blacklisté', async () => {
     resetState();
 
@@ -160,8 +170,14 @@ describe('authAccountService — refresh rotation', () => {
       assert.ok(blacklistEntry, 'Blacklist Redis non écrite');
       assert.strictEqual(blacklistEntry.options.PX, 2 * 60 * 60 * 1000);
 
-      assert.ok(txCalls.some((call) => call.sql.toUpperCase().includes('DELETE FROM REFRESH_TOKENS')));
-      assert.ok(txCalls.some((call) => call.sql.toUpperCase().includes('INSERT INTO REFRESH_TOKENS') && call.params[1] === result.refreshToken));
+      const lookup = queryCalls.find((call) => call.sql.toUpperCase().includes('SELECT ID FROM REFRESH_TOKENS'));
+      const deletion = txCalls.find((call) => call.sql.toUpperCase().includes('DELETE FROM REFRESH_TOKENS'));
+      const insertion = txCalls.find((call) => call.sql.toUpperCase().includes('INSERT INTO REFRESH_TOKENS'));
+      assert.strictEqual(lookup.params[0], hashRefreshToken(refreshToken));
+      assert.strictEqual(deletion.params[0], hashRefreshToken(refreshToken));
+      assert.strictEqual(insertion.params[1], hashRefreshToken(result.refreshToken));
+      assert.ok(!queryCalls.concat(txCalls).some((call) => call.params?.includes(refreshToken)));
+      assert.ok(!queryCalls.concat(txCalls).some((call) => call.params?.includes(result.refreshToken)));
     });
   });
 
@@ -173,7 +189,8 @@ describe('authAccountService — refresh rotation', () => {
       await deleteRefreshToken(refreshToken);
 
       const expectedKey = buildRefreshBlacklistKey(refreshToken);
-      assert.ok(queryCalls.some((call) => call.sql.toUpperCase().includes('DELETE FROM REFRESH_TOKENS') && call.params[0] === refreshToken));
+      assert.ok(queryCalls.some((call) => call.sql.toUpperCase().includes('DELETE FROM REFRESH_TOKENS') && call.params[0] === hashRefreshToken(refreshToken)));
+      assert.ok(!queryCalls.some((call) => call.params?.includes(refreshToken)));
       assert.ok(redisSets.some((entry) => entry.key === expectedKey));
     });
   });
