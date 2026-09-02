@@ -31,6 +31,10 @@ function hashRefreshToken(refreshToken) {
   return crypto.createHash('sha256').update(String(refreshToken || '')).digest('hex');
 }
 
+function hashAccountActionToken(token) {
+  return crypto.createHash('sha256').update(String(token || '')).digest('hex');
+}
+
 function buildRefreshBlacklistKey(refreshToken) {
   return `refresh:blacklist:${hashRefreshToken(refreshToken)}`;
 }
@@ -175,7 +179,7 @@ async function upsertEmailVerificationToken(userId, token, expiresAt) {
     `INSERT INTO email_verification_tokens (user_id, token, expires_at)
      VALUES ($1, $2, $3)
      ON CONFLICT (user_id) DO UPDATE SET token = $2, expires_at = $3`,
-    [userId, token, expiresAt]
+    [userId, hashAccountActionToken(token), expiresAt]
   ).catch(() => {});
 }
 
@@ -184,7 +188,7 @@ async function upsertPasswordResetToken(userId, token, expiresAt) {
     `INSERT INTO password_reset_tokens (user_id, token, expires_at)
      VALUES ($1, $2, $3)
      ON CONFLICT (user_id) DO UPDATE SET token = $2, expires_at = $3`,
-    [userId, token, expiresAt]
+    [userId, hashAccountActionToken(token), expiresAt]
   ).catch(() => {});
 }
 
@@ -474,7 +478,7 @@ async function confirmEmail(token) {
   const tokenRow = await query(
     `SELECT user_id FROM email_verification_tokens
      WHERE token = $1 AND expires_at > NOW()`,
-    [token]
+    [hashAccountActionToken(token)]
   ).catch(() => ({ rows: [] }));
 
   if (!tokenRow.rows[0]) {
@@ -519,7 +523,7 @@ async function resetPasswordWithToken(token, password) {
   const tokenRow = await query(
     `SELECT user_id FROM password_reset_tokens
      WHERE token = $1 AND expires_at > NOW()`,
-    [token]
+    [hashAccountActionToken(token)]
   ).catch(() => ({ rows: [] }));
 
   if (!tokenRow.rows[0]) {
@@ -547,6 +551,7 @@ module.exports = {
   findUserByEmail,
   findUserByIdentifier,
   findUserById,
+  hashAccountActionToken,
   hashRefreshToken,
   loginAccount,
   normalizeEmail,

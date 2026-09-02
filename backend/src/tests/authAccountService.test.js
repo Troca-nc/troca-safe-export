@@ -33,6 +33,21 @@ const dbStub = {
       return { rows: [{ id: 1 }], rowCount: 1 };
     }
 
+    if (normalized.startsWith('SELECT USER_ID FROM EMAIL_VERIFICATION_TOKENS')) {
+      return { rows: [{ user_id: 21 }], rowCount: 1 };
+    }
+
+    if (normalized.startsWith('SELECT USER_ID FROM PASSWORD_RESET_TOKENS')) {
+      return { rows: [{ user_id: 22 }], rowCount: 1 };
+    }
+
+    if (normalized.startsWith('UPDATE USERS SET EMAIL_VERIFIED = TRUE')) {
+      return {
+        rows: [{ id: 21, email: 'verified@test.nc', prenom: 'Verified', email_verified: true }],
+        rowCount: 1,
+      };
+    }
+
     if (normalized.startsWith('SELECT ID, EMAIL, PRENOM, NOM, IS_ADMIN, ACCOUNT_TYPE, CASE WHEN IS_PRO = TRUE AND (PRO_EXPIRES_AT IS NULL OR PRO_EXPIRES_AT > NOW()) THEN TRUE ELSE FALSE END AS IS_PRO')) {
       return {
         rows: [{
@@ -92,9 +107,14 @@ delete require.cache[servicePath];
 
 const {
   buildRefreshBlacklistKey,
+  confirmEmail,
   deleteRefreshToken,
+  hashAccountActionToken,
   hashRefreshToken,
   refreshSessionWithRotation,
+  resetPasswordWithToken,
+  upsertEmailVerificationToken,
+  upsertPasswordResetToken,
 } = require('../services/authAccountService');
 
 require.cache[databasePath] = originalDatabaseCache;
@@ -193,5 +213,57 @@ describe('authAccountService — refresh rotation', () => {
       assert.ok(!queryCalls.some((call) => call.params?.includes(refreshToken)));
       assert.ok(redisSets.some((entry) => entry.key === expectedKey));
     });
+  });
+});
+
+describe('authAccountService — account action tokens', () => {
+  it('hachage SHA-256 déterministe des jetons à usage unique', () => {
+    const token = 'account-action-token-secret';
+    const expected = crypto.createHash('sha256').update(token).digest('hex');
+
+    assert.strictEqual(hashAccountActionToken(token), expected);
+    assert.strictEqual(hashAccountActionToken(token).length, 64);
+    assert.notStrictEqual(hashAccountActionToken(token), token);
+  });
+
+  it('ne persiste pas en clair les jetons de vérification et de reset', async () => {
+    resetState();
+    const expiresAt = new Date(Date.now() + 60_000);
+    const verificationToken = 'raw-verification-token';
+    const resetToken = 'raw-reset-token';
+
+    await upsertEmailVerificationToken(21, verificationToken, expiresAt);
+    await upsertPasswordResetToken(22, resetToken, expiresAt);
+
+    const verificationInsert = queryCalls.find((call) => call.sql.toUpperCase().includes('INSERT INTO EMAIL_VERIFICATION_TOKENS'));
+    const resetInsert = queryCalls.find((call) => call.sql.toUpperCase().includes('INSERT INTO PASSWORD_RESET_TOKENS'));
+    assert.strictEqual(verificationInsert.params[1], hashAccountActionToken(verificationToken));
+    assert.strictEqual(resetInsert.params[1], hashAccountActionToken(resetToken));
+    assert.ok(!queryCalls.some((call) => call.params?.includes(verificationToken)));
+    assert.ok(!queryCalls.some((call) => call.params?.includes(resetToken)));
+  });
+
+  it('recherche la vérification email uniquement par empreinte', async () => {
+    resetState();
+    const token = 'raw-email-verification-token';
+
+    const user = await confirmEmail(token);
+
+    const lookup = queryCalls.find((call) => call.sql.toUpperCase().includes('SELECT USER_ID FROM EMAIL_VERIFICATION_TOKENS'));
+    assert.strictEqual(lookup.params[0], hashAccountActionToken(token));
+    assert.strictEqual(user.id, 21);
+    assert.ok(!queryCalls.some((call) => call.params?.includes(token)));
+  });
+
+  it('recherche le reset de mot de passe uniquement par empreinte', async () => {
+    resetState();
+    const token = 'raw-password-reset-token';
+
+    const result = await resetPasswordWithToken(token, 'A-strong-test-password-2026!');
+
+    const lookup = queryCalls.find((call) => call.sql.toUpperCase().includes('SELECT USER_ID FROM PASSWORD_RESET_TOKENS'));
+    assert.strictEqual(lookup.params[0], hashAccountActionToken(token));
+    assert.strictEqual(result, true);
+    assert.ok(!queryCalls.some((call) => call.params?.includes(token)));
   });
 });
