@@ -152,13 +152,15 @@ function mapBookingSlot(row) {
   };
 }
 
-function mapBookingRow(row) {
+function mapBookingRow(row, options) {
   return {
     id: Number(row.id),
     pro_id: Number(row.pro_id),
     requester_user_id: row.requester_user_id == null ? null : Number(row.requester_user_id),
     slot_id: row.slot_id == null ? null : Number(row.slot_id),
-    booking_access_token: row.booking_access_token ?? null,
+    ...(options?.includeCapabilityToken === true
+      ? { booking_access_token: row.booking_access_token ?? null }
+      : {}),
     requester_name: row.requester_name,
     requester_email: row.requester_email,
     requester_phone: row.requester_phone ?? null,
@@ -1200,7 +1202,7 @@ router.post('/:id/bookings', optionalAuth, async (req, res, next) => {
         ...mapBookingRow({
           ...enrichedBooking,
           role: req.user?.id ? 'client' : 'client',
-        }),
+        }, { includeCapabilityToken: true }),
         settings: profile.booking_settings,
       },
     });
