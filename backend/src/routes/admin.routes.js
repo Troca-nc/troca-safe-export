@@ -19,6 +19,12 @@ const { sendPushToUser } = require('../services/pushService')
 const { sendMail } = require('../services/emailService')
 const { runCinemaScraper } = require('../services/cinemaScraperService')
 const { disconnectUserSockets } = require('../services/websocketServer')
+const {
+  forceDeleteUser,
+  setUserPlan,
+  suspendUser,
+  unsuspendUser,
+} = require('../services/adminUserActionService')
 
 const router = express.Router()
 router.use(adminRateLimit, requireAdminToken)
@@ -1067,15 +1073,14 @@ router.patch('/users/:id/suspend', async (req, res, next) => {
   try {
     const userId = Number(req.params.id)
     const { reason = 'admin', duration_days = 30 } = req.body || {}
-    await query(
-      `UPDATE users
-       SET deleted_at = NOW(),
-           updated_at = NOW()
-       WHERE id = $1`,
-      [userId]
-    )
+    if (userId === Number(req.user.id)) {
+      return res.status(400).json({ error: 'Vous ne pouvez pas suspendre votre propre compte administrateur.' })
+    }
+    const updated = await suspendUser(userId, duration_days)
+    if (!updated) return res.status(404).json({ error: 'Utilisateur introuvable.' })
+    disconnectUserSockets(userId)
     await logAdminAction(req, 'suspend_user', 'user', userId, { reason, duration_days })
-    return res.json({ data: { ok: true } })
+    return res.json({ data: { ok: true, id: Number(updated.id), banned_until: updated.banned_until } })
   } catch (err) {
     next(err)
   }
@@ -1084,15 +1089,10 @@ router.patch('/users/:id/suspend', async (req, res, next) => {
 router.patch('/users/:id/unsuspend', async (req, res, next) => {
   try {
     const userId = Number(req.params.id)
-    await query(
-      `UPDATE users
-       SET deleted_at = NULL,
-           updated_at = NOW()
-       WHERE id = $1`,
-      [userId]
-    )
+    const updated = await unsuspendUser(userId)
+    if (!updated) return res.status(404).json({ error: 'Utilisateur introuvable.' })
     await logAdminAction(req, 'unsuspend_user', 'user', userId, {})
-    return res.json({ data: { ok: true } })
+    return res.json({ data: { ok: true, id: Number(updated.id) } })
   } catch (err) {
     next(err)
   }
@@ -1101,16 +1101,9 @@ router.patch('/users/:id/unsuspend', async (req, res, next) => {
 router.patch('/users/:id/set-plan', async (req, res, next) => {
   try {
     const userId = Number(req.params.id)
-    const plan = String(req.body?.plan || 'free').toLowerCase() === 'pro' ? 'pro' : 'free'
-    await query(
-      `UPDATE users
-       SET is_pro = $2,
-           pro_plan = CASE WHEN $2 THEN 'pro' ELSE NULL END,
-           pro_expires_at = CASE WHEN $2 THEN COALESCE(pro_expires_at, NOW() + INTERVAL '30 days') ELSE NULL END,
-           updated_at = NOW()
-       WHERE id = $1`,
-      [userId, plan === 'pro']
-    )
+    const result = await setUserPlan(userId, req.body?.plan)
+    if (!result.user) return res.status(404).json({ error: 'Utilisateur introuvable.' })
+    const { plan } = result
     await logAdminAction(req, 'set_plan', 'user', userId, { plan })
     return res.json({ data: { ok: true, plan } })
   } catch (err) {
@@ -1121,12 +1114,14 @@ router.patch('/users/:id/set-plan', async (req, res, next) => {
 router.delete('/users/:id/force-delete', async (req, res, next) => {
   try {
     const userId = Number(req.params.id)
-    await query(
-      `UPDATE users SET deleted_at = NOW(), updated_at = NOW() WHERE id = $1`,
-      [userId]
-    )
+    if (userId === Number(req.user.id)) {
+      return res.status(400).json({ error: 'Vous ne pouvez pas supprimer votre propre compte administrateur.' })
+    }
+    const updated = await forceDeleteUser(userId)
+    if (!updated) return res.status(404).json({ error: 'Utilisateur introuvable.' })
+    disconnectUserSockets(userId)
     await logAdminAction(req, 'force_delete_user', 'user', userId, {})
-    return res.json({ data: { ok: true } })
+    return res.json({ data: { ok: true, id: Number(updated.id) } })
   } catch (err) {
     next(err)
   }
