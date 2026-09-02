@@ -25,6 +25,7 @@ const {
   suspendUser,
   unsuspendUser,
 } = require('../services/adminUserActionService')
+const { resolveReport } = require('../services/adminModerationActionService')
 
 const router = express.Router()
 router.use(adminRateLimit, requireAdminToken)
@@ -973,23 +974,11 @@ router.get('/moderation/queue', async (_req, res, next) => {
 
 router.patch('/moderation/reports/:id/resolve', async (req, res, next) => {
   try {
-    const { action } = req.body || {}
-    const resolveAction = action || 'dismiss'
-    const result = await query(
-      `UPDATE signalements
-       SET resolved_at = NOW(),
-           action_taken = $2,
-           resolved_by = $3
-       WHERE id = $1
-       RETURNING id`,
-      [req.params.id, resolveAction, req.user?.id ?? null]
-    )
-    if (!result.rows[0]) {
-      return res.status(404).json({ error: 'Signalement introuvable.' })
+    const result = await resolveReport(req.params.id, req.body?.action, getAdminActorId(req))
+    if (result.action_taken === 'suspend_user') {
+      disconnectUserSockets(result.content_owner_id)
     }
-
-    await logAdminAction(req, `moderation_${resolveAction}`, 'signalement', req.params.id, { action: resolveAction })
-    return res.json({ data: { action: resolveAction } })
+    return res.json({ data: result })
   } catch (err) {
     next(err)
   }
@@ -1464,17 +1453,13 @@ router.get('/reports', (req, res) => res.redirect(307, req.originalUrl.replace('
 
 router.put('/signalements/:id/resolve', async (req, res, next) => {
   try {
-    const { action_taken } = req.body   // ex: 'warning', 'banned', 'dismissed'
-    await query(
-      `UPDATE signalements SET resolved_at = NOW(), action_taken = $1, resolved_by = $2 WHERE id = $3`,
-      [action_taken || 'dismissed', req.user.id, req.params.id]
-    )
-    await query(
-      `INSERT INTO admin_logs (admin_id, action, target_type, target_id, metadata)
-       VALUES ($1, 'resolve_signalement', 'signalement', $2, $3)`,
-      [req.user.id, req.params.id, JSON.stringify({ action_taken })]
-    ).catch(() => {})
-    res.json({ message: 'Signalement résolu' })
+    const legacyActions = { dismissed: 'dismiss', warning: 'dismiss', banned: 'suspend_user' }
+    const requestedAction = legacyActions[req.body?.action_taken] || req.body?.action_taken
+    const result = await resolveReport(req.params.id, requestedAction, getAdminActorId(req))
+    if (result.action_taken === 'suspend_user') {
+      disconnectUserSockets(result.content_owner_id)
+    }
+    res.json({ data: result, message: 'Signalement résolu' })
   } catch (err) { next(err) }
 })
 
