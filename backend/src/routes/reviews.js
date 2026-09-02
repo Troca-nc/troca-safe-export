@@ -11,6 +11,7 @@ const { createNotification } = require('../services/notificationService');
 const { sendPushToUser } = require('../services/pushService');
 const { evaluateReviewCreation } = require('../services/reviewCreationPolicy');
 const { reportVerifiedReview } = require('../services/reviewReportService');
+const { hashReviewToken } = require('../services/reviewTokenService');
 
 const router = express.Router();
 
@@ -228,7 +229,7 @@ router.get('/invite/:token', async (req, res, next) => {
        JOIN users u ON u.id = rt.pro_id
        WHERE rt.token = $1
        LIMIT 1`,
-      [token]
+      [hashReviewToken(token)]
     );
 
     const row = tokenRes.rows[0];
@@ -238,7 +239,7 @@ router.get('/invite/:token', async (req, res, next) => {
 
     return res.json({
       data: {
-        token: row.token,
+        token,
         expires_at: row.expires_at,
         used_at: row.used_at,
         pro: {
@@ -298,7 +299,7 @@ router.post('/invite', authenticate, async (req, res, next) => {
        VALUES ($1, $2, $3, $4, $5, 'invite', NOW() + INTERVAL '14 days', NOW())
        RETURNING *`,
       [
-        token,
+        hashReviewToken(token),
         proId,
         value.reviewer_id ? Number(value.reviewer_id) : null,
         normalizeText(value.reviewer_email),
@@ -359,7 +360,7 @@ router.post('/', authenticate, async (req, res, next) => {
     if (value.token) {
       const tokenRes = await query(
         `SELECT * FROM review_tokens WHERE token = $1 LIMIT 1`,
-        [value.token]
+        [hashReviewToken(value.token)]
       );
       tokenRow = tokenRes.rows[0] || null;
       if (!tokenRow) {

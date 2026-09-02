@@ -9,6 +9,7 @@ const SUITES = [
   './security/logSanitization.test',
   './reviewReportService.test',
   './reviewCreationPolicy.test',
+  './reviewTokenService.test',
   './authenticationFailClosed.test',
   './optionalAuthBanPolicy.test',
   './websocketBanEnforcement.test',
