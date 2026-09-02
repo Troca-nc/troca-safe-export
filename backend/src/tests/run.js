@@ -30,6 +30,7 @@ const SUITES = [
   './adminUserActionService.test',
   './adminModerationActionService.test',
   './adminUserDetailContract.test',
+  './adminLegacyMutationSurface.test',
   './csrf.test',
   './legal.route.test',
   './phone.route.test',

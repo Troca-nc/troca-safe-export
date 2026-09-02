@@ -106,10 +106,12 @@ async function run() {
   }
   await check('admin ban path disconnects sockets after persisting the ban', async () => {
     const source = fs.readFileSync(path.join(__dirname, '..', 'routes', 'admin.routes.js'), 'utf8');
-    const banCase = source.slice(source.indexOf("case 'ban':"), source.indexOf("case 'unban':"));
-    assert.ok(banCase.includes('UPDATE users SET banned_until'));
-    assert.ok(banCase.includes('UPDATE users SET deleted_at'));
-    assert.ok(banCase.indexOf('disconnectUserSockets(id)') > banCase.lastIndexOf('UPDATE users SET'));
+    const start = source.indexOf("router.patch('/users/:id/suspend'");
+    const end = source.indexOf("router.patch('/users/:id/unsuspend'", start);
+    const suspendRoute = source.slice(start, end);
+    assert.ok(start >= 0 && end > start);
+    assert.ok(suspendRoute.includes('await suspendUser(userId, duration_days)'));
+    assert.ok(suspendRoute.indexOf('disconnectUserSockets(userId)') > suspendRoute.indexOf('await suspendUser'));
   });
   console.log(`WebSocket ban enforcement: ${count} checks passed (isolated handshake).`);
 }
