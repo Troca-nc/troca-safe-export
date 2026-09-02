@@ -229,7 +229,6 @@ function parseQuoteRow(row) {
     created_at: row.created_at,
     updated_at: row.updated_at,
     converted_listing_id: row.converted_listing_id == null ? null : Number(row.converted_listing_id),
-    share_token: row.share_token ?? null,
     pro: {
       id: Number(row.pro_id),
       prenom: row.pro_prenom ?? null,
@@ -581,6 +580,7 @@ router.post('/:id/send', authenticate, async (req, res, next) => {
       pro_phone: quote.pro_phone,
       pro_website: quote.pro_website,
     });
+    fullQuote.share_token = quote.share_token;
 
     await sendQuoteSentEmails(fullQuote);
     await Promise.all([

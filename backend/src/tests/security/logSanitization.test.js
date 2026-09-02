@@ -91,4 +91,25 @@ describe('P0-B log and internal-token boundaries', () => {
       assert.ok(!content.includes('strict-origin-when-cross-origin'), `${relative} conserve une politique trop permissive`);
     }
   });
+
+  it('exclut les jetons de capacité des sérialiseurs API ordinaires', () => {
+    const root = path.resolve(__dirname, '../../../../');
+    const quoteRoute = fs.readFileSync(path.join(root, 'backend/src/routes/pro.quotes.js'), 'utf8');
+    const bookingRoute = fs.readFileSync(path.join(root, 'backend/src/routes/pro.bookings.js'), 'utf8');
+    const quoteMapper = quoteRoute.match(/function parseQuoteRow\(row\) \{([\s\S]*?)\n\}\n\nasync function loadQuoteById/);
+    const bookingMapper = bookingRoute.match(/function mapBookingRow\(row, options\) \{([\s\S]*?)\n\}\n\nfunction buildBookingShareUrl/);
+
+    assert.ok(quoteMapper, 'Sérialiseur de devis introuvable');
+    assert.ok(bookingMapper, 'Sérialiseur de réservation introuvable');
+    assert.ok(!quoteMapper[1].includes('share_token'), 'share_token exposé dans une réponse de devis');
+    assert.ok(
+      bookingMapper[1].includes('options?.includeCapabilityToken === true'),
+      'booking_access_token doit être limité à sa réponse d\'\u00e9mission'
+    );
+    assert.strictEqual(
+      (bookingRoute.match(/includeCapabilityToken:\s*true/g) || []).length,
+      1,
+      'une seule réponse peut émettre booking_access_token'
+    );
+  });
 });
