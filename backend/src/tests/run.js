@@ -6,6 +6,7 @@
 // ============================================================
 
 const SUITES = [
+  './security/logSanitization.test',
   './reviewReportService.test',
   './reviewCreationPolicy.test',
   './authenticationFailClosed.test',

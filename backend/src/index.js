@@ -136,7 +136,7 @@ app.use(helmet({
     preload: true,
   },
   noSniff: true,
-  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  referrerPolicy: { policy: 'no-referrer' },
 }));
 
 app.use(express.json({
@@ -155,7 +155,7 @@ app.use((req, res, next) => {
   res.setHeader('Content-Security-Policy', csp);
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Referrer-Policy', 'no-referrer');
   if (process.env.NODE_ENV === 'production' || req.secure) {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
