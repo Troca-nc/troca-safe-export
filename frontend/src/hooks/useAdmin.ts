@@ -5,6 +5,8 @@ import { api } from '@/lib/api'
 import { getStoredAccessToken } from '@/lib/tokenStorage'
 import type { ActionModeration } from '@/types/admin.types'
 
+const UNAVAILABLE = 'Fonctionnalité indisponible : aucune action administrative effectuée.'
+
 function useStaticResource<T>(initialData: T) {
   const [data] = useState(initialData)
   const [loading, setLoading] = useState(false)
@@ -15,7 +17,7 @@ function useStaticResource<T>(initialData: T) {
     return data
   }
 
-  return { data, loading, refetch }
+  return { data, loading, refetch, error: UNAVAILABLE }
 }
 
 export type AdminObservabilitySnapshot = {
@@ -189,8 +191,8 @@ export function useAdminAnnonces(_filters?: unknown) {
 export function useDeleteAnnonce() {
   return {
     loading: false,
-    error: null as string | null,
-    deleteAnnonce: async (_id?: number, _reason?: string) => true,
+    error: UNAVAILABLE,
+    deleteAnnonce: async (_id?: number, _reason?: string) => false,
   }
 }
 
@@ -208,10 +210,10 @@ export function useModerationAction() {
     action: ActionModeration
     raison?: string
     duree_jours?: number
-  }) => ({ success: true, message: 'ok' })
+  }) => ({ success: false, message: UNAVAILABLE })
   return {
     loading: false,
-    error: null as string | null,
+    error: UNAVAILABLE,
     moderate: executeAction,
     executeAction,
   }
@@ -227,9 +229,9 @@ export function useAdminUsers(_filters?: unknown) {
 export function useSuspendUser() {
   return {
     loading: false,
-    error: null as string | null,
-    suspendUser: async (_id?: number, _reason?: string, _duration?: number) => true,
-    reactiverUser: async (_id?: number) => true,
+    error: UNAVAILABLE,
+    suspendUser: async (_id?: number, _reason?: string, _duration?: number) => false,
+    reactiverUser: async (_id?: number) => false,
   }
 }
 
