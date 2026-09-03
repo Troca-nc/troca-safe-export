@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "pnpm exec next dev -p 3002",
     "build": "pnpm exec next build",
-    "test": "echo 'No test suite configured' && exit 0",
+    "test": "node --test tests/load.test.cjs",
     "start": "pnpm exec next start -p 3002",
     "lint": "pnpm exec next lint"
   },

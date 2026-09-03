@@ -1,9 +1,15 @@
 import { adminBackendJson } from './backend'
 
-export async function loadAdminJson<T>(path: string, fallback: T): Promise<T> {
+// Second argument retained for existing callers; never substitute it for a failed request.
+export async function loadAdminJson<T>(path: string, _fallback: T): Promise<T> {
   try {
-    return await adminBackendJson<T>(path)
+    const data = await adminBackendJson<T>(path)
+    if (data === null || data === undefined) {
+      throw new Error('Empty backend response')
+    }
+    return data
   } catch {
-    return fallback
+    // Do not expose backend messages, credentials or response bodies to the client.
+    throw new Error('Impossible de charger les données administratives.')
   }
 }
