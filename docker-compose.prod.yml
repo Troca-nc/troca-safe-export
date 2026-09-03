@@ -250,13 +250,19 @@ services:
       ADMIN_ALERT_EMAIL: ${ADMIN_ALERT_EMAIL}
       BACKEND_URL: http://backend:3001
       ADMIN_TOTP_SECRET: ${ADMIN_TOTP_SECRET}
+      TOTP_CONFIGURED: ${TOTP_CONFIGURED:-false}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-https://admin.51.255.161.64.nip.io}
       NODE_ENV: production
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - kalico_internal
+      - cache_net
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3002/api/health']
       interval: 30s
