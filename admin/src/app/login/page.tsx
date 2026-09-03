@@ -12,7 +12,6 @@ export default function LoginPage() {
   const [totp, setTotp] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const demoModeEnabled = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
@@ -51,16 +50,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {demoModeEnabled ? (
-          <div className="mt-5 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4 text-sm text-amber-50">
-            <p className="font-semibold text-amber-200">Mode démo admin</p>
-            <p className="mt-1 text-amber-50/80">
-              Account: <span className="font-semibold">admin@kalico.nc</span> | Password:{' '}
-              <span className="font-semibold">admin1234</span> | TOTP:{' '}
-              <span className="font-semibold">123456</span>
-            </p>
-          </div>
-        ) : null}
 
         <form className="mt-8 space-y-4" onSubmit={submit}>
           <label className="block">

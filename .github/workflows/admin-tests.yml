@@ -32,7 +32,9 @@ jobs:
       - run: npm install --global pnpm@11.1.1
       - run: pnpm install --frozen-lockfile --ignore-scripts --ignore-workspace
         working-directory: admin
-      - run: node --test tests/load.test.cjs
+      - run: node --test tests/*.test.cjs
         working-directory: admin
       - run: node node_modules/next/dist/bin/next build
+        working-directory: admin
+      - run: node tests/http-boundary.smoke.cjs
         working-directory: admin
