@@ -1,4 +1,5 @@
 import { getBackendUrl } from './auth'
+import { requireAdminSession } from './session'
 
 function normalizeBackendUrl(url: string) {
   const trimmed = url.trim().replace(/\/+$/, '')
@@ -10,6 +11,9 @@ export function getAdminApiBase() {
 }
 
 export async function adminBackendFetch(pathname: string, init: RequestInit = {}) {
+  if (!await requireAdminSession()) {
+    return Response.json({ error: 'Authentification administrateur requise.' }, { status: 401 })
+  }
   const url = `${getAdminApiBase()}${pathname.startsWith('/') ? pathname : `/${pathname}`}`
   const token = process.env.ADMIN_API_TOKEN?.trim() || ''
   const hdrs = new Headers(init.headers)

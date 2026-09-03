@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminSession, verifyAdminCredentials, ADMIN_SESSION_COOKIE } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
+  try {
   const body = await request.json().catch(() => null)
   const email = body?.email || ''
   const password = body?.password || ''
@@ -24,4 +25,7 @@ export async function POST(request: NextRequest) {
     maxAge: 60 * 60 * 24,
   })
   return response
+  } catch {
+    return NextResponse.json({ error: 'Connexion administrateur indisponible.' }, { status: 503 })
+  }
 }

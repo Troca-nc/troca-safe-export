@@ -2,128 +2,68 @@ import bcrypt from 'bcryptjs'
 import fs from 'node:fs'
 import path from 'node:path'
 import jwt from 'jsonwebtoken'
-import { createOtpAuthUrl, verifyTotpToken } from './totp'
-import { buildQrLikeDataUrl } from './qr'
+import { verifyTotpToken } from './totp'
 
 export const ADMIN_SESSION_COOKIE = 'kalico_admin_session'
 const SETUP_FLAG_PATH = path.join(process.cwd(), '.totp-configured')
-const DEMO_TOTP_CODE = '123456'
+const ISSUER = 'kalico-admin'
+const AUDIENCE = 'kalico-admin-session'
 
 function readEnv(value: string | undefined, fallback = '') {
   return String(value || fallback).trim()
 }
 
 export function isTotpConfigured() {
-  if (isDemoMode()) return true
   return fs.existsSync(SETUP_FLAG_PATH) || readEnv(process.env.TOTP_CONFIGURED).toLowerCase() === 'true'
 }
-
-export function markTotpConfigured() {
-  fs.writeFileSync(SETUP_FLAG_PATH, 'true', 'utf8')
-}
-
-export function getAdminEmail() {
-  return readEnv(process.env.ADMIN_EMAIL, 'admin@kalico.nc')
-}
-
-export function getAdminPasswordHash() {
-  return readEnv(process.env.ADMIN_PASSWORD_HASH)
-}
-
-export function getAdminTotpSecret() {
-  return readEnv(process.env.ADMIN_TOTP_SECRET)
-}
-
+export function getAdminEmail() { return readEnv(process.env.ADMIN_EMAIL) }
+export function getAdminPasswordHash() { return readEnv(process.env.ADMIN_PASSWORD_HASH) }
+export function getAdminTotpSecret() { return readEnv(process.env.ADMIN_TOTP_SECRET) }
 export function getSessionSecret() {
-  return readEnv(process.env.NEXTAUTH_SECRET, 'dev-admin-secret-change-me')
+  const secret = readEnv(process.env.NEXTAUTH_SECRET)
+  if (secret.length < 32 || /change.?me/i.test(secret)) {
+    throw new Error('Configuration de session administrateur invalide.')
+  }
+  return secret
 }
-
-export function getBackendUrl() {
-  return readEnv(process.env.BACKEND_URL, 'http://backend:3001')
-}
-
-export function getAdminBaseUrl() {
-  return readEnv(process.env.NEXTAUTH_URL, 'https://admin.kalico.nc')
-}
-
-export async function buildSetupQrDataUrl() {
-  const uri = createOtpAuthUrl({
-    secret: getAdminTotpSecret(),
-    label: `Kalico Admin (${getAdminEmail()})`,
-    issuer: 'Kalico',
-  })
-
-  return buildQrLikeDataUrl(uri)
-}
+export function getBackendUrl() { return readEnv(process.env.BACKEND_URL, 'http://backend:3001') }
+export function getAdminBaseUrl() { return readEnv(process.env.NEXTAUTH_URL, 'https://admin.kalico.nc') }
 
 export async function verifyAdminCredentials(email: string, password: string, totpCode: string) {
-  if (readEnv(email).toLowerCase() !== getAdminEmail().toLowerCase()) {
-    return null
+  getSessionSecret()
+  const expectedEmail = getAdminEmail()
+  const secret = getAdminTotpSecret()
+  if (!expectedEmail || !getAdminPasswordHash() || !/^[A-Z2-7]{32,}=*$/i.test(secret)) {
+    throw new Error('Configuration administrateur incomplète.')
   }
-
-  const passwordHash = getAdminPasswordHash()
-  if (!passwordHash) {
-    throw new Error('ADMIN_PASSWORD_HASH manquant')
-  }
-
-  const passwordOk = await bcrypt.compare(password, passwordHash)
-  if (!passwordOk) {
-    return null
-  }
-
-  if (isDemoMode()) {
-    if (readEnv(totpCode) !== DEMO_TOTP_CODE) {
-      return null
-    }
-  } else {
-    if (!isTotpConfigured()) {
-      return null
-    }
-
-    const totpOk = verifyTotpToken({
-      secret: getAdminTotpSecret(),
-      token: readEnv(totpCode),
-      window: 1,
-    })
-
-    if (!totpOk) {
-      return null
-    }
-  }
-
-  return {
-    email: getAdminEmail(),
-    role: 'single-admin',
-  }
+  if (typeof email !== 'string' || typeof password !== 'string' || typeof totpCode !== 'string') return null
+  if (readEnv(email).toLowerCase() !== expectedEmail.toLowerCase()) return null
+  if (!await bcrypt.compare(password, getAdminPasswordHash())) return null
+  if (!isTotpConfigured()) return null
+  if (!verifyTotpToken({ secret, token: readEnv(totpCode), window: 1 })) return null
+  return { email: expectedEmail, role: 'single-admin' }
 }
 
 export function createAdminSession(payload: { email: string; role?: string }) {
-  return jwt.sign(
-    {
-      email: payload.email,
-      role: payload.role || 'admin',
-    },
-    getSessionSecret(),
-    {
-      subject: payload.email,
-      expiresIn: '24h',
-    }
-  )
+  if (!getAdminEmail() || payload.email !== getAdminEmail() || payload.role !== 'single-admin') {
+    throw new Error('Identité administrateur invalide.')
+  }
+  return jwt.sign({ email: payload.email, role: 'single-admin' }, getSessionSecret(), {
+    algorithm: 'HS256', issuer: ISSUER, audience: AUDIENCE,
+    subject: payload.email, expiresIn: '24h',
+  })
 }
 
 export function verifyAdminSession(token: string) {
   try {
-    return jwt.verify(token, getSessionSecret()) as {
-      email?: string
-      role?: string
-      sub?: string
-      exp?: number
-    }
+    const session = jwt.verify(token, getSessionSecret(), {
+      algorithms: ['HS256'], issuer: ISSUER, audience: AUDIENCE,
+    })
+    if (typeof session === 'string' || !getAdminEmail()) return null
+    if (session.email !== getAdminEmail() || session.sub !== getAdminEmail() || session.role !== 'single-admin') return null
+    if (typeof session.exp !== 'number' || !Number.isFinite(session.exp)) return null
+    return session
   } catch {
     return null
   }
-}
-
-export function isDemoMode() {
-  return process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
 }
