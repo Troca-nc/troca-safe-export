@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminSession, verifyAdminCredentials, ADMIN_SESSION_COOKIE } from '@/lib/auth'
 import { claimAdminTotpCounter, consumeAdminLoginAttempt, resetAdminLoginAttempts } from '@/lib/login-rate-limit'
+import { registerAdminSession } from '@/lib/session-store'
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,6 +36,7 @@ export async function POST(request: NextRequest) {
     await resetAdminLoginAttempts(request.headers, email)
 
     const token = createAdminSession(admin)
+    await registerAdminSession(token)
     const response = NextResponse.json({ ok: true }, { headers: { 'Cache-Control': 'no-store' } })
     response.cookies.set({
       name: ADMIN_SESSION_COOKIE,

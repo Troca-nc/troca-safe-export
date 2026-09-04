@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs'
 import fs from 'node:fs'
 import path from 'node:path'
 import jwt from 'jsonwebtoken'
+import { randomUUID } from 'node:crypto'
 import { matchTotpCounter } from './totp'
 
 export const ADMIN_SESSION_COOKIE = 'kalico_admin_session'
@@ -51,7 +52,7 @@ export function createAdminSession(payload: { email: string; role?: string }) {
   }
   return jwt.sign({ email: payload.email, role: 'single-admin' }, getSessionSecret(), {
     algorithm: 'HS256', issuer: ISSUER, audience: AUDIENCE,
-    subject: payload.email, expiresIn: '24h',
+    subject: payload.email, jwtid: randomUUID(), expiresIn: '24h',
   })
 }
 
@@ -63,6 +64,7 @@ export function verifyAdminSession(token: string) {
     if (typeof session === 'string' || !getAdminEmail()) return null
     if (session.email !== getAdminEmail() || session.sub !== getAdminEmail() || session.role !== 'single-admin') return null
     if (typeof session.exp !== 'number' || !Number.isFinite(session.exp)) return null
+    if (typeof session.jti !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(session.jti)) return null
     return session
   } catch {
     return null
