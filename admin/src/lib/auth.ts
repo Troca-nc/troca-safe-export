@@ -28,7 +28,6 @@ export function getSessionSecret() {
   return secret
 }
 export function getBackendUrl() { return readEnv(process.env.BACKEND_URL, 'http://backend:3001') }
-export function getAdminBaseUrl() { return readEnv(process.env.NEXTAUTH_URL, 'https://admin.kalico.nc') }
 
 export async function verifyAdminCredentials(email: string, password: string, totpCode: string) {
   getSessionSecret()

@@ -45,7 +45,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.25em] text-emerald-300/80">Kalico admin</p>
-            <h1 className="mt-1 text-xl font-semibold">admin.kalico.nc</h1>
+            <h1 className="mt-1 text-xl font-semibold">Espace d’administration</h1>
           </div>
           <button className="lg:hidden rounded-xl border border-white/10 p-2 text-slate-200">
             <Menu className="h-5 w-5" />
@@ -72,12 +72,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        <div className="mt-8 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-100">
-          <p className="font-semibold">Système OK</p>
-          <p className="mt-1 text-emerald-100/80">Backend 99.9% - dernier job récent</p>
-        </div>
-
-        <button onClick={logout} className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/5">
+        <button onClick={logout} className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/5">
           <LogOut className="h-4 w-4" />
           Se déconnecter
         </button>
