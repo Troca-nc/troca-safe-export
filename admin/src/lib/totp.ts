@@ -63,15 +63,30 @@ export function verifyTotpToken({
   window?: number
   epoch?: number
 }) {
+  return matchTotpCounter({ secret, token, window, epoch }) !== null
+}
+
+export function matchTotpCounter({
+  secret,
+  token,
+  window = 1,
+  epoch = Date.now(),
+}: {
+  secret: string
+  token: string
+  window?: number
+  epoch?: number
+}) {
   const normalizedToken = String(token || '').trim()
-  if (!/^\d{6}$/.test(normalizedToken)) return false
+  if (!/^\d{6}$/.test(normalizedToken)) return null
 
   const counter = Math.floor(epoch / 1000 / 30)
   for (let offset = -window; offset <= window; offset += 1) {
     if (counter + offset < 0) continue
-    if (generateHotp(secret, counter + offset) === normalizedToken) {
-      return true
+    const expected = generateHotp(secret, counter + offset)
+    if (crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(normalizedToken))) {
+      return counter + offset
     }
   }
-  return false
+  return null
 }

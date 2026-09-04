@@ -83,3 +83,13 @@ export async function resetAdminLoginAttempts(headers: Headers, email: string) {
   const client = await redisClient()
   await client.del(loginLimitKeys(headers, email).map(({ key }) => key))
 }
+
+export async function claimAdminTotpCounter(email: string, counter: number) {
+  if (!Number.isSafeInteger(counter) || counter < 0) {
+    throw new Error('Pas de temps TOTP invalide.')
+  }
+  const client = await redisClient()
+  const key = `admin-login:totp:${digest('totp', `${email}:${counter}`)}`
+  const result = await client.set(key, 'used', { NX: true, EX: 120 })
+  return result === 'OK'
+}
