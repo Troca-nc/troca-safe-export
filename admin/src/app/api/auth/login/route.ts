@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminSession, verifyAdminCredentials, ADMIN_SESSION_COOKIE } from '@/lib/auth'
-import { consumeAdminLoginAttempt, resetAdminLoginAttempts } from '@/lib/login-rate-limit'
+import { claimAdminTotpCounter, consumeAdminLoginAttempt, resetAdminLoginAttempts } from '@/lib/login-rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,6 +25,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (!await claimAdminTotpCounter(admin.email, admin.totpCounter)) {
+      return NextResponse.json(
+        { error: 'Identifiants invalides' },
+        { status: 401, headers: { 'Cache-Control': 'no-store' } },
+      )
+    }
+
     await resetAdminLoginAttempts(request.headers, email)
 
     const token = createAdminSession(admin)
@@ -40,6 +47,9 @@ export async function POST(request: NextRequest) {
     })
     return response
   } catch {
-    return NextResponse.json({ error: 'Connexion administrateur indisponible.' }, { status: 503 })
+    return NextResponse.json(
+      { error: 'Connexion administrateur indisponible.' },
+      { status: 503, headers: { 'Cache-Control': 'no-store' } },
+    )
   }
 }

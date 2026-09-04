@@ -26,7 +26,7 @@ function moduleAt(file, dependencies = {}, globals = {}) {
 function auth(overrides = {}, totp = () => true) {
   return moduleAt('src/lib/auth.ts', {
     bcryptjs: bcrypt, jsonwebtoken: jwt, 'node:path': path,
-    'node:fs': { existsSync: () => false }, './totp': { verifyTotpToken: totp },
+    'node:fs': { existsSync: () => false }, './totp': { matchTotpCounter: (...args) => totp(...args) ? 123 : null },
   }, { process: { env: { ...env, ...overrides }, cwd: () => '/isolated-test' } });
 }
 
@@ -76,6 +76,7 @@ test('demo flag cannot bypass TOTP and missing enrollment blocks login', async (
 
 test('TOTP verifier agrees with the RFC SHA1 vector truncated to six digits', () => {
   const totp = moduleAt('src/lib/totp.ts', { 'node:crypto': require('node:crypto') });
+  assert.equal(totp.matchTotpCounter({ secret: env.ADMIN_TOTP_SECRET, token: '287082', epoch: 59000, window: 0 }), 1);
   assert.equal(totp.verifyTotpToken({ secret: env.ADMIN_TOTP_SECRET, token: '287082', epoch: 59000, window: 0 }), true);
   assert.equal(totp.verifyTotpToken({ secret: env.ADMIN_TOTP_SECRET, token: '287083', epoch: 59000, window: 0 }), false);
 });

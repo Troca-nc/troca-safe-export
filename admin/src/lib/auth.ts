@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs'
 import fs from 'node:fs'
 import path from 'node:path'
 import jwt from 'jsonwebtoken'
-import { verifyTotpToken } from './totp'
+import { matchTotpCounter } from './totp'
 
 export const ADMIN_SESSION_COOKIE = 'kalico_admin_session'
 const SETUP_FLAG_PATH = path.join(process.cwd(), '.totp-configured')
@@ -40,8 +40,9 @@ export async function verifyAdminCredentials(email: string, password: string, to
   if (readEnv(email).toLowerCase() !== expectedEmail.toLowerCase()) return null
   if (!await bcrypt.compare(password, getAdminPasswordHash())) return null
   if (!isTotpConfigured()) return null
-  if (!verifyTotpToken({ secret, token: readEnv(totpCode), window: 1 })) return null
-  return { email: expectedEmail, role: 'single-admin' }
+  const totpCounter = matchTotpCounter({ secret, token: readEnv(totpCode), window: 1 })
+  if (totpCounter === null) return null
+  return { email: expectedEmail, role: 'single-admin', totpCounter }
 }
 
 export function createAdminSession(payload: { email: string; role?: string }) {
