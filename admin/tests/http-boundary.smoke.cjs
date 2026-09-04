@@ -17,7 +17,7 @@ async function run() {
       NEXTAUTH_URL: `http://127.0.0.1:${port}`, ADMIN_EMAIL: 'local@example.test',
       NEXTAUTH_SECRET: 'local-http-test-only-key-01234567890123456789',
       ADMIN_PASSWORD_HASH: '', ADMIN_TOTP_SECRET: '', ADMIN_API_TOKEN: 'local-test-only',
-      NEXT_PUBLIC_DEMO_MODE: 'false', TOTP_CONFIGURED: 'false' },
+      NEXT_PUBLIC_DEMO_MODE: 'false', TOTP_CONFIGURED: 'false', REDIS_URL: '' },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   // Drain output without exposing configuration in test logs.
@@ -38,6 +38,9 @@ async function run() {
     assert.equal(mutation.status, 401);
     const me = await fetch(`${base}/api/auth/me`, { headers, redirect: 'manual' });
     assert.equal(me.status, 401);
+    const login = await fetch(`${base}/api/auth/login`, { method: 'POST', headers,
+      body: JSON.stringify({ email: 'local@example.test', password: 'invalid', totp: '000000' }), redirect: 'manual' });
+    assert.equal(login.status, 503);
     for (const method of ['GET', 'POST']) {
       const setup = await fetch(`${base}/api/setup`, { method, headers, redirect: 'manual' });
       assert.equal(setup.status, 503);
@@ -46,7 +49,7 @@ async function run() {
     const page = await fetch(`${base}/setup`, { redirect: 'manual' });
     assert.equal(page.status, 200);
     assert.ok(!(await page.text()).includes('otpauth://'));
-    console.log('HTTP Admin: forged mutation/session rejected; setup GET/POST disabled; no secret on setup page.');
+    console.log('HTTP Admin: forged session rejected; login fails closed without Redis; public setup disabled.');
   } finally {
     if (child.exitCode === null) {
       const stopped = once(child, 'exit');
