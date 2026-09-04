@@ -84,7 +84,7 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-5 text-sm text-slate-400">
-          Première connexion ? <a className="text-emerald-300 underline" href="/setup">Configurer le TOTP</a>
+          Le provisionnement initial est réalisé hors ligne par un opérateur autorisé.
         </p>
       </section>
     </main>
