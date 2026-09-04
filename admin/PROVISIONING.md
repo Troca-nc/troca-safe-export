@@ -13,3 +13,8 @@ Le bloc contient une nouvelle identité Admin, le hash bcrypt du mot de passe, l
 
 Pour une rotation, préparer et stocker les nouvelles valeurs avant de modifier l’environnement. Ne jamais désactiver le TOTP pour contourner une perte d’accès.
 
+## Révocation globale des sessions
+
+En cas de compromission ou avant une rotation sensible, définir explicitement `ADMIN_ENVIRONMENT`, vérifier la cible Redis, puis exécuter `pnpm revoke:admin-sessions` dans un terminal interactif autorisé. Dans le conteneur de production, la forme attendue est `docker compose exec admin pnpm revoke:admin-sessions`.
+
+La commande affiche uniquement l’hôte et le numéro de base Redis, jamais ses identifiants. Elle exige de recopier une phrase contenant le nom de l’environnement avant toute connexion. Elle parcourt seulement `admin-session:active:*` avec `SCAN` et supprime par lots bornés avec `UNLINK`. Elle ne doit pas être automatisée dans la CI ou au démarrage.

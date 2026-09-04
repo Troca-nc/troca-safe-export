@@ -7,6 +7,11 @@ const { spawnSync } = require('node:child_process');
 const ts = require('typescript');
 const provision = require('../scripts/provision-admin.cjs');
 
+test('example bcrypt hash is literal for Docker Compose interpolation', () => {
+  const example = fs.readFileSync(path.join(__dirname, '../../.env.example'), 'utf8');
+  assert.match(example, /^ADMIN_PASSWORD_HASH='\$2b\$12\$/m);
+});
+
 function runtimeTotp() {
   const source = fs.readFileSync(path.join(__dirname, '../src/lib/totp.ts'), 'utf8');
   const compiled = ts.transpileModule(source, { compilerOptions: {

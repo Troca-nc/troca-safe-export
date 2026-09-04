@@ -7,6 +7,7 @@
     "dev": "pnpm exec next dev -p 3002",
     "build": "pnpm exec next build",
     "provision:admin": "node scripts/provision-admin.cjs",
+    "revoke:admin-sessions": "node scripts/revoke-admin-sessions.cjs",
     "test": "node --test tests/*.test.cjs",
     "start": "pnpm exec next start -p 3002",
     "lint": "pnpm exec next lint"
