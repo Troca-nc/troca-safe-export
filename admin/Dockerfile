@@ -29,6 +29,7 @@ RUN corepack prepare pnpm@11.1.1 --activate
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/node_modules ./node_modules
 EXPOSE 3002
 CMD ["./node_modules/.bin/next", "start", "-p", "3002"]
