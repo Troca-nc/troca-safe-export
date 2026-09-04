@@ -18,3 +18,5 @@ Pour une rotation, préparer et stocker les nouvelles valeurs avant de modifier 
 En cas de compromission ou avant une rotation sensible, définir explicitement `ADMIN_ENVIRONMENT`, vérifier la cible Redis, puis exécuter `pnpm revoke:admin-sessions` dans un terminal interactif autorisé. Dans le conteneur de production, la forme attendue est `docker compose exec admin pnpm revoke:admin-sessions`.
 
 La commande affiche uniquement l’hôte et le numéro de base Redis, jamais ses identifiants. Elle exige de recopier une phrase contenant le nom de l’environnement avant toute connexion. Elle parcourt seulement `admin-session:active:*` avec `SCAN` et supprime par lots bornés avec `UNLINK`. Elle ne doit pas être automatisée dans la CI ou au démarrage.
+
+Le workflow Admin exécute séparément `tests/redis-session.smoke.cjs` contre un conteneur Redis jetable. Ce test utilise exclusivement des identifiants fictifs et contrôle la connexion, le refus du rejeu TOTP, la révocation au logout et le périmètre de la révocation globale. `ADMIN_TEST_REDIS_URL` doit toujours désigner une instance de test isolée : ce script ne doit jamais être lancé contre Redis de production.
