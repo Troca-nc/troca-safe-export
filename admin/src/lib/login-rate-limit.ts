@@ -14,7 +14,7 @@ function redisUrl() {
   return value
 }
 
-async function redisClient() {
+export async function getAdminRedisClient() {
   if (!clientPromise) {
     clientPromise = (async () => {
       const client = createClient({
@@ -58,7 +58,7 @@ export function loginLimitKeys(headers: Headers, email: string) {
 }
 
 export async function consumeAdminLoginAttempt(headers: Headers, email: string) {
-  const client = await redisClient()
+  const client = await getAdminRedisClient()
   const keys = loginLimitKeys(headers, email)
   const result = await client.eval(
     `
@@ -80,7 +80,7 @@ export async function consumeAdminLoginAttempt(headers: Headers, email: string) 
 }
 
 export async function resetAdminLoginAttempts(headers: Headers, email: string) {
-  const client = await redisClient()
+  const client = await getAdminRedisClient()
   await client.del(loginLimitKeys(headers, email).map(({ key }) => key))
 }
 
@@ -88,7 +88,7 @@ export async function claimAdminTotpCounter(email: string, counter: number) {
   if (!Number.isSafeInteger(counter) || counter < 0) {
     throw new Error('Pas de temps TOTP invalide.')
   }
-  const client = await redisClient()
+  const client = await getAdminRedisClient()
   const key = `admin-login:totp:${digest('totp', `${email}:${counter}`)}`
   const result = await client.set(key, 'used', { NX: true, EX: 120 })
   return result === 'OK'

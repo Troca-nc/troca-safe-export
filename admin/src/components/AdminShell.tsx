@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { BarChart3, Bell, FileText, HeartHandshake, Home, LogOut, Menu, MessageSquareMore, ShieldAlert, Users } from 'lucide-react'
 import clsx from 'clsx'
 
@@ -21,10 +21,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const showChrome = pathname !== '/login' && pathname !== '/setup'
+  const [logoutError, setLogoutError] = useState<string | null>(null)
 
   const logout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
-    router.replace('/login')
+    setLogoutError(null)
+    try {
+      const response = await fetch('/api/auth/logout', { method: 'POST' })
+      if (!response.ok) throw new Error('La session n’a pas pu être révoquée. Réessayez.')
+      router.replace('/login')
+      router.refresh()
+    } catch (error) {
+      setLogoutError(error instanceof Error ? error.message : 'Déconnexion impossible.')
+    }
   }
 
   if (!showChrome) {
@@ -73,6 +81,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <LogOut className="h-4 w-4" />
           Se déconnecter
         </button>
+        {logoutError ? <p className="mt-2 text-sm text-rose-300">{logoutError}</p> : null}
       </aside>
 
       <main className="flex-1 px-4 py-6 md:px-6 xl:px-8">{children}</main>

@@ -1,17 +1,13 @@
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
-import { ADMIN_SESSION_COOKIE, verifyAdminSession } from '@/lib/auth'
+import { getAdminSession } from '@/lib/session'
 
 export async function GET() {
-  const cookieStore = await cookies()
-  const sessionToken = cookieStore.get(ADMIN_SESSION_COOKIE)?.value
-  if (!sessionToken) {
-    return NextResponse.json({ authenticated: false }, { status: 401 })
-  }
-
-  const session = verifyAdminSession(sessionToken)
+  const session = await getAdminSession()
   if (!session) {
-    return NextResponse.json({ authenticated: false }, { status: 401 })
+    return NextResponse.json(
+      { authenticated: false },
+      { status: 401, headers: { 'Cache-Control': 'no-store' } },
+    )
   }
 
   return NextResponse.json({
@@ -20,5 +16,5 @@ export async function GET() {
       email: session.email,
       role: session.role || 'admin',
     },
-  })
+  }, { headers: { 'Cache-Control': 'no-store' } })
 }

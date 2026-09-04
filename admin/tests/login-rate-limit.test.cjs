@@ -93,6 +93,7 @@ test('login route checks the limiter before credentials and returns Retry-After'
       claimAdminTotpCounter: async () => assert.fail('blocked login cannot claim a TOTP step'),
       resetAdminLoginAttempts: async () => assert.fail('blocked login cannot reset limits'),
     },
+    '@/lib/session-store': { registerAdminSession: async () => assert.fail('blocked login cannot register a session') },
   });
   const response = await route.POST({ headers: new Headers(), json: async () => ({ email: 'a@example.test' }) });
   assert.equal(response.status, 429);
@@ -113,6 +114,7 @@ test('login route rejects a replay before creating a session or clearing limits'
       claimAdminTotpCounter: async (_email, counter) => { assert.equal(counter, 123); return false; },
       resetAdminLoginAttempts: async () => assert.fail('replay cannot reset limits'),
     },
+    '@/lib/session-store': { registerAdminSession: async () => assert.fail('replay cannot register a session') },
   });
   const response = await route.POST({ headers: new Headers(), json: async () => ({ email: 'a@example.test' }) });
   assert.equal(response.status, 401);

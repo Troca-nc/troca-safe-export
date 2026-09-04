@@ -30,12 +30,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  if (session && (pathname === '/login' || pathname === '/setup')) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
-  }
-
   return NextResponse.next()
 }
 

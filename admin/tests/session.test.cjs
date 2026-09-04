@@ -6,6 +6,7 @@ const vm = require('node:vm');
 const ts = require('typescript');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('node:crypto');
 
 const key = 'local-test-only-secret-01234567890123456789';
 const email = 'operator@example.test';
@@ -25,7 +26,7 @@ function moduleAt(file, dependencies = {}, globals = {}) {
 
 function auth(overrides = {}, totp = () => true) {
   return moduleAt('src/lib/auth.ts', {
-    bcryptjs: bcrypt, jsonwebtoken: jwt, 'node:path': path,
+    bcryptjs: bcrypt, jsonwebtoken: jwt, 'node:path': path, 'node:crypto': crypto,
     'node:fs': { existsSync: () => false }, './totp': { matchTotpCounter: (...args) => totp(...args) ? 123 : null },
   }, { process: { env: { ...env, ...overrides }, cwd: () => '/isolated-test' } });
 }
@@ -49,7 +50,8 @@ test('valid session is accepted; arbitrary cookie and legacy-key token are rejec
 test('wrong identity, role, issuer, audience, algorithm and expiry are rejected', () => {
   const service = auth();
   const payload = { email, role: 'single-admin' };
-  const options = { algorithm: 'HS256', issuer: 'kalico-admin', audience: 'kalico-admin-session', subject: email, expiresIn: '1h' };
+  const options = { algorithm: 'HS256', issuer: 'kalico-admin', audience: 'kalico-admin-session', subject: email,
+    jwtid: '12345678-1234-4123-8123-123456789abc', expiresIn: '1h' };
   for (const [claims, settings] of [
     [{ email: 'other@example.test' }, {}], [{ role: 'user' }, {}], [{}, { subject: 'other' }],
     [{}, { issuer: 'other' }], [{}, { audience: 'other' }], [{}, { algorithm: 'HS384' }], [{}, { expiresIn: '-1s' }],
@@ -86,7 +88,9 @@ test('backend relay verifies the actual cookie before sending any request', asyn
   for (const token of [undefined, 'forged', service.createAdminSession({ email, role: 'single-admin' })]) {
     let requests = 0;
     const session = moduleAt('src/lib/session.ts', {
-      './auth': service, 'next/headers': { cookies: async () => ({ get: () => token ? { value: token } : undefined }) },
+      './auth': service,
+      './session-store': { verifyActiveAdminSession: async (candidate) => service.verifyAdminSession(candidate) },
+      'next/headers': { cookies: async () => ({ get: () => token ? { value: token } : undefined }) },
     });
     const backend = moduleAt('src/lib/backend.ts', { './auth': service, './session': session }, {
       process: { env: { ADMIN_API_TOKEN: 'local-internal-test-token' } },
