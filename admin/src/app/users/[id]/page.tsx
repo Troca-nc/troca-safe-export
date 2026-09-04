@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { DataTable } from '@/components/DataTable'
+import { CollectionNotice } from '@/components/CollectionNotice'
 import { UserActionButtons } from '@/components/UserActionButtons'
 import { StatCard } from '@/components/StatCard'
 import { formatDateNc, formatXpf } from '@/lib/formatters'
 import { loadAdminJson } from '@/lib/load'
+import { displayArrayCount, displayCount, rowsOrEmpty } from '@/lib/presentation'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,9 +39,9 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <StatCard label="Annonces" value={String(data.listings?.length || 0)} />
-        <StatCard label="Paiements" value={String(data.payments?.length || 0)} />
-        <StatCard label="Signalements" value={String(data.reports_made?.length || 0)} />
+        <StatCard label="Annonces" value={displayArrayCount(data.listings)} />
+        <StatCard label="Paiements" value={displayArrayCount(data.payments)} />
+        <StatCard label="Signalements" value={displayArrayCount(data.reports_made)} />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-2">
@@ -56,9 +58,9 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
           <p className="admin-label">Métadonnées</p>
           <div className="mt-4 space-y-2">
             <p>Inscrit le: {formatDateNc(data.user.created_at)}</p>
-            <p>Total vues: {data.user.total_vues ?? 0}</p>
-            <p>Total favoris: {data.user.total_favoris ?? 0}</p>
-            <p>Announces actives: {data.user.active_listings_count ?? 0}</p>
+            <p>Total vues: {displayCount(data.user.total_vues)}</p>
+            <p>Total favoris: {displayCount(data.user.total_favoris)}</p>
+            <p>Annonces actives: {displayCount(data.user.active_listings_count)}</p>
           </div>
         </div>
       </section>
@@ -73,8 +75,9 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
             { key: 'view_count', label: 'Vues' },
             { key: 'created_at', label: 'Créée le' },
           ]}
-          rows={(data.listings || []).map((row: any) => ({ ...row, created_at: formatDateNc(row.created_at) }))}
+          rows={rowsOrEmpty(data.listings).map((row: any) => ({ ...row, created_at: formatDateNc(row.created_at) }))}
         />
+        <CollectionNotice value={data.listings} emptyLabel="Aucune annonce pour cet utilisateur." />
       </section>
 
       <section className="space-y-4">
@@ -87,12 +90,13 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
             { key: 'amount_xpf', label: 'Montant' },
             { key: 'status', label: 'Statut' },
           ]}
-          rows={(data.payments || []).map((row: any) => ({
+          rows={rowsOrEmpty(data.payments).map((row: any) => ({
             ...row,
             created_at: formatDateNc(row.created_at),
             amount_xpf: formatXpf(row.amount_xpf),
           }))}
         />
+        <CollectionNotice value={data.payments} emptyLabel="Aucun paiement pour cet utilisateur." />
       </section>
     </div>
   )

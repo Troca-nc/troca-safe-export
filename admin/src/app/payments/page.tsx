@@ -1,7 +1,9 @@
 import { DataTable } from '@/components/DataTable'
+import { CollectionNotice } from '@/components/CollectionNotice'
 import { StatCard } from '@/components/StatCard'
 import { formatXpf } from '@/lib/formatters'
 import { loadAdminJson } from '@/lib/load'
+import { displayXpf, rowsOrEmpty } from '@/lib/presentation'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,9 +18,9 @@ export default async function PaymentsPage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <StatCard label="Total reçu" value={formatXpf(payload.totals?.total_xpf || 0)} tone="good" />
-        <StatCard label="Boosts" value={formatXpf(payload.totals?.boost_xpf || 0)} />
-        <StatCard label="Abonnements" value={formatXpf(payload.totals?.sub_xpf || 0)} tone="warning" />
+        <StatCard label="Total reçu" value={displayXpf(payload.totals?.total_xpf)} tone="good" />
+        <StatCard label="Boosts" value={displayXpf(payload.totals?.boost_xpf)} />
+        <StatCard label="Abonnements" value={displayXpf(payload.totals?.sub_xpf)} tone="warning" />
       </section>
 
       <DataTable
@@ -30,11 +32,12 @@ export default async function PaymentsPage() {
           { key: 'status', label: 'Statut' },
           { key: 'email', label: 'Utilisateur' },
         ]}
-        rows={(payload.data || []).map((row: any) => ({
+        rows={rowsOrEmpty(payload.data).map((row: any) => ({
           ...row,
           amount_xpf: formatXpf(row.amount_xpf),
         }))}
       />
+      <CollectionNotice value={payload.data} emptyLabel="Aucun paiement dans ce résultat." />
     </div>
   )
 }

@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { DataTable } from '@/components/DataTable'
+import { CollectionNotice } from '@/components/CollectionNotice'
 import { UserSearch } from '@/components/UserSearch'
 import { loadAdminJson } from '@/lib/load'
+import { displayCount, rowsOrEmpty } from '@/lib/presentation'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,7 +18,7 @@ export default async function UsersPage({ searchParams }: { searchParams?: Promi
       <section className="admin-card">
         <p className="admin-label">Utilisateurs</p>
         <h1 className="mt-2 text-3xl font-semibold">Recherche et gestion</h1>
-        <p className="mt-2 text-slate-400">Total: {users?.pagination?.total ?? 0}</p>
+        <p className="mt-2 text-slate-400">Total: {displayCount(users?.pagination?.total)}</p>
       </section>
 
       <UserSearch initialValue={search} />
@@ -31,11 +33,12 @@ export default async function UsersPage({ searchParams }: { searchParams?: Promi
           { key: 'created_at', label: 'Inscrit le' },
           { key: 'action', label: 'Fiche' },
         ]}
-        rows={(users?.data || []).map((user: any) => ({
+        rows={rowsOrEmpty(users?.data).map((user: any) => ({
           ...user,
           action: <Link className="text-emerald-300 underline" href={`/users/${user.id}`}>Voir</Link>,
         }))}
       />
+      <CollectionNotice value={users?.data} emptyLabel="Aucun utilisateur dans ce résultat." />
     </div>
   )
 }

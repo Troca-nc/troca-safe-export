@@ -1,5 +1,7 @@
 import { DataTable } from '@/components/DataTable'
+import { CollectionNotice } from '@/components/CollectionNotice'
 import { loadAdminJson } from '@/lib/load'
+import { rowsOrEmpty } from '@/lib/presentation'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,8 +22,9 @@ export default async function ErrorsPage() {
           { key: 'route', label: 'Route' },
           { key: 'message', label: 'Message' },
         ]}
-        rows={payload.data || []}
+        rows={rowsOrEmpty(payload.data)}
       />
+      <CollectionNotice value={payload.data} emptyLabel="Aucune erreur dans ce résultat." />
     </div>
   )
 }
