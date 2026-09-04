@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { StatCard } from '@/components/StatCard'
-import { formatXpf } from '@/lib/formatters'
 import { loadAdminJson } from '@/lib/load'
+import { displayCount, displayXpf } from '@/lib/presentation'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,9 +19,9 @@ export default async function ReportsPage({ searchParams }: { searchParams?: Pro
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <StatCard label="Nouveaux inscrits" value={String(data?.new_users ?? 0)} tone="good" />
-        <StatCard label="MRR" value={formatXpf(data?.mrr_xpf ?? 0)} tone="warning" />
-        <StatCard label="Annonces publiées" value={String(data?.listings_published ?? 0)} />
+        <StatCard label="Nouveaux inscrits" value={displayCount(data?.new_users)} tone="good" />
+        <StatCard label="MRR" value={displayXpf(data?.mrr_xpf)} tone="warning" />
+        <StatCard label="Annonces publiées" value={displayCount(data?.listings_published)} />
       </section>
 
       <div className="flex flex-wrap gap-3">

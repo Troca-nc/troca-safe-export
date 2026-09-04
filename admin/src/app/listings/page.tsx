@@ -1,5 +1,7 @@
 import { DataTable } from '@/components/DataTable'
+import { CollectionNotice } from '@/components/CollectionNotice'
 import { loadAdminJson } from '@/lib/load'
+import { rowsOrEmpty } from '@/lib/presentation'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,8 +23,9 @@ export default async function ListingsPage() {
           { key: 'prix', label: 'Prix' },
           { key: 'user_id', label: 'Auteur' },
         ]}
-        rows={payload.data || []}
+        rows={rowsOrEmpty(payload.data)}
       />
+      <CollectionNotice value={payload.data} emptyLabel="Aucune annonce dans ce résultat." />
     </div>
   )
 }

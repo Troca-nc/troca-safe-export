@@ -1,18 +1,16 @@
 import { AutoRefresh } from '@/components/AutoRefresh'
 import { AlertBanner } from '@/components/AlertBanner'
+import { CollectionNotice } from '@/components/CollectionNotice'
 import { MetricChart } from '@/components/MetricChart'
 import { StatCard } from '@/components/StatCard'
-import { formatDateTimeNc, formatXpf } from '@/lib/formatters'
+import { formatDateTimeNc } from '@/lib/formatters'
 import { loadAdminJson } from '@/lib/load'
+import { displayCount, displayXpf, rowsOrEmpty } from '@/lib/presentation'
 
 export const dynamic = 'force-dynamic'
 
 function valueOrUnavailable(value: unknown) {
   return value === null || value === undefined || value === '' ? 'Non renseigné' : String(value)
-}
-
-function xpfOrUnavailable(value: unknown) {
-  return typeof value === 'number' && Number.isFinite(value) ? formatXpf(value) : 'Non renseigné'
 }
 
 function measurementOrUnavailable(value: unknown, unit: string) {
@@ -32,8 +30,8 @@ export default async function DashboardPage() {
   const todayActions = [
     { label: 'Conducteurs à vérifier', value: 'Non renseigné', href: '/moderation' },
     { label: 'Alertes actives', value: Array.isArray(alerts) ? String(alerts.length) : 'Non renseigné', href: '/moderation' },
-    { label: 'Erreurs 1h', value: valueOrUnavailable(health?.errors_1h), href: '/errors' },
-    { label: 'Abonnements résiliés', value: valueOrUnavailable(revenue?.pro_subscribers_churned), href: '/payments' },
+    { label: 'Erreurs 1h', value: displayCount(health?.errors_1h), href: '/errors' },
+    { label: 'Abonnements résiliés', value: displayCount(revenue?.pro_subscribers_churned), href: '/payments' },
   ]
 
   return (
@@ -68,10 +66,10 @@ export default async function DashboardPage() {
       ) : null}
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Nouveaux inscrits" value={valueOrUnavailable(users?.new_today)} delta={`30j: ${valueOrUnavailable(users?.new_this_month)}`} tone="good" />
-        <StatCard label="Annonces publiées" value={valueOrUnavailable(listings?.published_today)} delta={`Actives: ${valueOrUnavailable(listings?.total_active)}`} tone="good" />
-        <StatCard label="Messages envoyés" value={valueOrUnavailable(engagement?.messages_today)} delta={`Semaine: ${valueOrUnavailable(engagement?.messages_this_week)}`} />
-        <StatCard label="Revenus du mois" value={xpfOrUnavailable(revenue?.revenue_this_month?.total_xpf ?? revenue?.mrr_xpf)} delta={`MRR: ${xpfOrUnavailable(revenue?.mrr_xpf)}`} tone="warning" />
+        <StatCard label="Nouveaux inscrits" value={displayCount(users?.new_today)} delta={`30j: ${displayCount(users?.new_this_month)}`} tone="good" />
+        <StatCard label="Annonces publiées" value={displayCount(listings?.published_today)} delta={`Actives: ${displayCount(listings?.total_active)}`} tone="good" />
+        <StatCard label="Messages envoyés" value={displayCount(engagement?.messages_today)} delta={`Semaine: ${displayCount(engagement?.messages_this_week)}`} />
+        <StatCard label="Revenus du mois" value={displayXpf(revenue?.revenue_this_month?.total_xpf ?? revenue?.mrr_xpf)} delta={`MRR: ${displayXpf(revenue?.mrr_xpf)}`} tone="warning" />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
@@ -113,7 +111,8 @@ export default async function DashboardPage() {
             </div>
           </div>
           <div className="mt-6">
-            <MetricChart type="area" data={users?.chart_new_users || []} xKey="date" yKey="count" />
+            <MetricChart type="area" data={rowsOrEmpty(users?.chart_new_users)} xKey="date" yKey="count" />
+            <CollectionNotice value={users?.chart_new_users} />
           </div>
         </div>
         <div className="admin-card">
@@ -124,7 +123,8 @@ export default async function DashboardPage() {
             </div>
           </div>
           <div className="mt-6">
-            <MetricChart type="line" data={engagement?.chart_messages || []} xKey="date" yKey="count" />
+            <MetricChart type="line" data={rowsOrEmpty(engagement?.chart_messages)} xKey="date" yKey="count" />
+            <CollectionNotice value={engagement?.chart_messages} />
           </div>
         </div>
       </section>
