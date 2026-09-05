@@ -52,3 +52,19 @@ test('subscription revenue metrics do not confuse MRR, receipts and churn', () =
   assert.match(routes, /ltv_estimate_xpf: churnRate > 0 \? Math\.round\(mrr \/ churnRate\) : null/);
   assert.ok(!routes.includes('Math.max(0.01'));
 });
+
+test('health contract reports checked dependencies and time-bounded worker errors', () => {
+  const routes = backendAdminRoutes();
+
+  assert.match(routes, /await query\('SELECT 1'\)/);
+  assert.match(routes, /redis\.ping\(\)/);
+  assert.match(routes, /pong === 'PONG'/);
+  assert.match(routes, /slow_queries_count: null/);
+  assert.match(routes, /entry\.source === 'job'/);
+  assert.match(routes, /entry\.event === 'error'/);
+  assert.match(routes, /\['connect', 'disconnect'\]\.includes\(entry\.event\)/);
+  assert.match(routes, /entry\.source === 'job' && entry\.event === 'skipped'/);
+  assert.match(routes, /failed_jobs_24h: failedJobs24h/);
+  assert.ok(!routes.includes("slow_queries_count: 0"));
+  assert.ok(!routes.includes("snapshot.cluster?.nodes?.[0]?.updated_at || null"));
+});

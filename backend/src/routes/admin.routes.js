@@ -410,7 +410,25 @@ router.get('/health/full', async (_req, res, next) => {
   try {
     const startedAt = Date.now()
     const snapshot = await getSnapshot()
-    const redis = await getRedisClient()
+
+    const dbStartedAt = Date.now()
+    let dbStatus = {
+      status: 'degraded',
+      response_time_ms: null,
+      active_connections: pool.totalCount - pool.idleCount,
+      pool_size: pool.options?.max ?? null,
+      slow_queries_count: null,
+    }
+    try {
+      await query('SELECT 1')
+      dbStatus = {
+        ...dbStatus,
+        status: 'ok',
+        response_time_ms: Date.now() - dbStartedAt,
+      }
+    } catch {
+      // A health response remains available while reporting the database degradation.
+    }
 
     let redisStatus = {
       status: 'degraded',
@@ -419,31 +437,54 @@ router.get('/health/full', async (_req, res, next) => {
       queue_length: null,
     }
 
-    if (redis) {
-      const [dbSize, memoryInfo] = await Promise.all([
-        redis.dbSize().catch(() => 0),
-        redis.info('memory').catch(() => ''),
-      ])
-      const usedMemory = Number(memoryInfo.match(/used_memory:(\d+)/)?.[1] || 0)
-      redisStatus = {
-        status: 'ok',
-        memory_mb: Math.round(usedMemory / 1024 / 1024),
-        keys_count: Number(dbSize || 0),
-        queue_length: Number(await redis.llen('error_logs').catch(() => 0)),
+    try {
+      const redis = await getRedisClient()
+      if (redis) {
+        const [pong, dbSize, memoryInfo, queueLength] = await Promise.all([
+          redis.ping(),
+          redis.dbSize(),
+          redis.info('memory'),
+          redis.llen('error_logs'),
+        ])
+        if (pong === 'PONG') {
+          const usedMemoryMatch = memoryInfo.match(/used_memory:(\d+)/)
+          redisStatus = {
+            status: 'ok',
+            memory_mb: usedMemoryMatch ? Math.round(Number(usedMemoryMatch[1]) / 1024 / 1024) : null,
+            keys_count: Number(dbSize),
+            queue_length: Number(queueLength),
+          }
+        }
       }
+    } catch {
+      // Do not convert failed Redis commands into successful zero measurements.
     }
 
-    const errors1h = snapshot.errors.filter((entry) => {
-      const ts = new Date(entry.ts || entry.timestamp || Date.now()).getTime()
-      return Date.now() - ts <= 60 * 60 * 1000
-    }).length
+    const now = Date.now()
+    const recentErrors = (snapshot.errors || []).map((entry) => ({
+      entry,
+      timestamp: new Date(entry.ts || entry.timestamp || '').getTime(),
+    })).filter(({ entry, timestamp }) => (
+      Number.isFinite(timestamp)
+      && timestamp <= now
+      && !(entry.source === 'ws' && ['connect', 'disconnect'].includes(entry.event))
+      && !(entry.source === 'job' && entry.event === 'skipped')
+    ))
 
-    const errors24h = snapshot.errors.filter((entry) => {
-      const ts = new Date(entry.ts || entry.timestamp || Date.now()).getTime()
-      return Date.now() - ts <= 24 * 60 * 60 * 1000
-    }).length
+    const errors1h = recentErrors.filter(({ timestamp }) => now - timestamp <= 60 * 60 * 1000).length
+    const errors24h = recentErrors.filter(({ timestamp }) => now - timestamp <= 24 * 60 * 60 * 1000).length
+    const failedJobs24h = recentErrors.filter(({ entry, timestamp }) => (
+      entry.source === 'job'
+      && entry.event === 'error'
+      && now - timestamp <= 24 * 60 * 60 * 1000
+    )).length
 
-    const workerLastRun = snapshot.cluster?.nodes?.[0]?.last_job_at || snapshot.cluster?.nodes?.[0]?.updated_at || null
+    const workerLastRun = (snapshot.cluster?.nodes || [])
+      .map((node) => node.last_job_at || null)
+      .filter(Boolean)
+      .sort()
+      .at(-1) || null
+    const jobsStarted = Number(snapshot.jobs?.started || 0)
 
     return res.json({
       data: {
@@ -453,17 +494,12 @@ router.get('/health/full', async (_req, res, next) => {
           memory_mb: Math.round(process.memoryUsage().rss / 1024 / 1024),
           response_time_ms: Date.now() - startedAt,
         },
-        db: {
-          status: 'ok',
-          active_connections: pool.totalCount - pool.idleCount,
-          pool_size: pool.options?.max ?? null,
-          slow_queries_count: 0,
-        },
+        db: dbStatus,
         redis: redisStatus,
         worker: {
-          status: snapshot.jobs.errors > 0 ? 'degraded' : 'ok',
+          status: failedJobs24h > 0 ? 'degraded' : (jobsStarted > 0 || workerLastRun ? 'ok' : 'unknown'),
           last_run_at: workerLastRun,
-          failed_jobs_24h: snapshot.jobs.errors || 0,
+          failed_jobs_24h: failedJobs24h,
         },
         errors_1h: errors1h,
         errors_24h: errors24h,
