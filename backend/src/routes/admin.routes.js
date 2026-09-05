@@ -767,23 +767,60 @@ router.get('/stats/revenue', async (req, res, next) => {
     const days = normalizePeriod(req.query.period)
     const startDate = startDateFromDays(days)
     const endDate = new Date()
-    const [currentSubs, previousSubs, chartRevenue, topProUsers] = await Promise.all([
+    const [subscriptionMetrics, revenuePeriods, chartRevenue, topProUsers] = await Promise.all([
       query(
         `SELECT
-           COALESCE(SUM(CASE WHEN billing_period = 'monthly' THEN 4900 ELSE 44900 / 12 END), 0)::int AS mrr_xpf,
-           COUNT(*) FILTER (WHERE status = 'active' AND payment_status = 'succeeded')::int AS pro_subscribers_active,
-           COUNT(*) FILTER (WHERE DATE(created_at) >= CURRENT_DATE - INTERVAL '30 days')::int AS pro_subscribers_new,
-           COUNT(*) FILTER (WHERE payment_status = 'failed' AND updated_at >= NOW() - INTERVAL '30 days')::int AS pro_subscribers_churned
-         FROM subscriptions
-         WHERE payment_status = 'succeeded'
-           AND (current_period_end IS NULL OR current_period_end > NOW())`
+           COALESCE(SUM(CASE WHEN billing_period = 'monthly' THEN 4900 ELSE 44900.0 / 12 END)
+             FILTER (WHERE status = 'active' AND payment_status = 'succeeded' AND current_period_end > NOW()), 0)::int AS mrr_xpf,
+           COUNT(*) FILTER (WHERE status = 'active' AND payment_status = 'succeeded' AND current_period_end > NOW())::int AS pro_subscribers_active,
+           COUNT(*) FILTER (WHERE payment_status = 'succeeded' AND created_at >= NOW() - INTERVAL '30 days')::int AS pro_subscribers_new,
+           COUNT(*) FILTER (WHERE status = 'cancelled' AND updated_at >= NOW() - INTERVAL '30 days')::int AS pro_subscribers_churned
+         FROM subscriptions`
       ),
       query(
         `SELECT
-           COALESCE(SUM(CASE WHEN billing_period = 'monthly' THEN 4900 ELSE 44900 / 12 END), 0)::int AS mrr_xpf
-         FROM subscriptions
-         WHERE payment_status = 'succeeded'
-           AND (current_period_end IS NULL OR current_period_end > NOW() - INTERVAL '30 days')`
+           COALESCE(SUM(amount_xpf) FILTER (
+             WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE)
+               AND created_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month'
+           ), 0)::int AS current_total_xpf,
+           COALESCE(SUM(amount_xpf) FILTER (
+             WHERE type = 'subscription' AND created_at >= DATE_TRUNC('month', CURRENT_DATE)
+               AND created_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month'
+           ), 0)::int AS current_subscriptions_xpf,
+           COALESCE(SUM(amount_xpf) FILTER (
+             WHERE type = 'boost' AND created_at >= DATE_TRUNC('month', CURRENT_DATE)
+               AND created_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month'
+           ), 0)::int AS current_boosts_xpf,
+           COALESCE(SUM(amount_xpf) FILTER (
+             WHERE type = 'bon_plan' AND created_at >= DATE_TRUNC('month', CURRENT_DATE)
+               AND created_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month'
+           ), 0)::int AS current_bon_plans_xpf,
+           COALESCE(SUM(amount_xpf) FILTER (
+             WHERE type = 'driver_badge' AND created_at >= DATE_TRUNC('month', CURRENT_DATE)
+               AND created_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month'
+           ), 0)::int AS current_driver_badges_xpf,
+           COALESCE(SUM(amount_xpf) FILTER (
+             WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
+               AND created_at < DATE_TRUNC('month', CURRENT_DATE)
+           ), 0)::int AS previous_total_xpf,
+           COALESCE(SUM(amount_xpf) FILTER (
+             WHERE type = 'subscription' AND created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
+               AND created_at < DATE_TRUNC('month', CURRENT_DATE)
+           ), 0)::int AS previous_subscriptions_xpf,
+           COALESCE(SUM(amount_xpf) FILTER (
+             WHERE type = 'boost' AND created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
+               AND created_at < DATE_TRUNC('month', CURRENT_DATE)
+           ), 0)::int AS previous_boosts_xpf,
+           COALESCE(SUM(amount_xpf) FILTER (
+             WHERE type = 'bon_plan' AND created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
+               AND created_at < DATE_TRUNC('month', CURRENT_DATE)
+           ), 0)::int AS previous_bon_plans_xpf,
+           COALESCE(SUM(amount_xpf) FILTER (
+             WHERE type = 'driver_badge' AND created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
+               AND created_at < DATE_TRUNC('month', CURRENT_DATE)
+           ), 0)::int AS previous_driver_badges_xpf
+         FROM payments
+         WHERE status = 'succeeded'`
       ),
       query(
         `WITH days AS (
@@ -804,39 +841,38 @@ router.get('/stats/revenue', async (req, res, next) => {
       getCurrentProSubscribers(),
     ])
 
-    const current = currentSubs.rows[0] || {}
-    const previous = previousSubs.rows[0] || {}
+    const current = subscriptionMetrics.rows[0] || {}
+    const revenue = revenuePeriods.rows[0] || {}
     const mrr = Number(current.mrr_xpf || 0)
-    const previousMrr = Number(previous.mrr_xpf || 0)
+    const activeSubscribers = Number(current.pro_subscribers_active || 0)
+    const churnedSubscribers = Number(current.pro_subscribers_churned || 0)
+    const churnBase = activeSubscribers + churnedSubscribers
+    const churnRate = churnBase ? churnedSubscribers / churnBase : 0
 
     return res.json({
       data: {
         mrr_xpf: mrr,
-        mrr_trend: previousMrr ? ((mrr - previousMrr) / previousMrr) * 100 : 0,
+        mrr_trend: null,
         arr_xpf: mrr * 12,
         revenue_this_month: {
-          subscriptions_xpf: Number(current.mrr_xpf || 0),
-          boosts_xpf: 0,
-          bon_plans_xpf: 0,
-          driver_badges_xpf: 0,
-          total_xpf: Number(current.mrr_xpf || 0),
+          subscriptions_xpf: Number(revenue.current_subscriptions_xpf || 0),
+          boosts_xpf: Number(revenue.current_boosts_xpf || 0),
+          bon_plans_xpf: Number(revenue.current_bon_plans_xpf || 0),
+          driver_badges_xpf: Number(revenue.current_driver_badges_xpf || 0),
+          total_xpf: Number(revenue.current_total_xpf || 0),
         },
         revenue_last_month: {
-          subscriptions_xpf: Number(previous.mrr_xpf || 0),
-          boosts_xpf: 0,
-          bon_plans_xpf: 0,
-          driver_badges_xpf: 0,
-          total_xpf: Number(previous.mrr_xpf || 0),
+          subscriptions_xpf: Number(revenue.previous_subscriptions_xpf || 0),
+          boosts_xpf: Number(revenue.previous_boosts_xpf || 0),
+          bon_plans_xpf: Number(revenue.previous_bon_plans_xpf || 0),
+          driver_badges_xpf: Number(revenue.previous_driver_badges_xpf || 0),
+          total_xpf: Number(revenue.previous_total_xpf || 0),
         },
-        pro_subscribers_active: Number(current.pro_subscribers_active || 0),
+        pro_subscribers_active: activeSubscribers,
         pro_subscribers_new: Number(current.pro_subscribers_new || 0),
-        pro_subscribers_churned: Number(current.pro_subscribers_churned || 0),
-        churn_rate: Number(current.pro_subscribers_active || 0)
-          ? Number(current.pro_subscribers_churned || 0) / Number(current.pro_subscribers_active || 0)
-          : 0,
-        ltv_estimate_xpf: Number(current.pro_subscribers_active || 0)
-          ? Math.round(Number(current.mrr_xpf || 0) / Math.max(0.01, Number(current.pro_subscribers_churned || 0) / Number(current.pro_subscribers_active || 0)))
-          : 0,
+        pro_subscribers_churned: churnedSubscribers,
+        churn_rate: churnRate,
+        ltv_estimate_xpf: churnRate > 0 ? Math.round(mrr / churnRate) : null,
         chart_revenue: chartRevenue.rows,
         top_pro_users: topProUsers,
       },
