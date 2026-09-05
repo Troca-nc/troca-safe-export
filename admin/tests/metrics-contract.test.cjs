@@ -39,3 +39,16 @@ test('payment totals are numeric zeros when there are no successful payments', (
     assert.match(routes, new RegExp(`${field}: Number\\(totals\\.rows\\[0\\]\\?\\.${field} \\?\\? 0\\)`));
   }
 });
+
+test('subscription revenue metrics do not confuse MRR, receipts and churn', () => {
+  const routes = backendAdminRoutes();
+
+  assert.match(routes, /status = 'cancelled' AND updated_at >= NOW\(\) - INTERVAL '30 days'/);
+  assert.ok(!routes.includes("payment_status = 'failed' AND updated_at >= NOW() - INTERVAL '30 days'"));
+  assert.match(routes, /FROM payments\s+WHERE status = 'succeeded'/);
+  assert.match(routes, /current_total_xpf/);
+  assert.match(routes, /previous_total_xpf/);
+  assert.match(routes, /mrr_trend: null/);
+  assert.match(routes, /ltv_estimate_xpf: churnRate > 0 \? Math\.round\(mrr \/ churnRate\) : null/);
+  assert.ok(!routes.includes('Math.max(0.01'));
+});
