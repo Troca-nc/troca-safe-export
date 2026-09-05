@@ -600,7 +600,7 @@ router.get('/stats/users', async (req, res, next) => {
     const days = normalizePeriod(req.query.period)
     const startDate = startDateFromDays(days)
     const endDate = new Date()
-    const [summary, chartNew, chartActive] = await Promise.all([
+    const [summary, activeSummary, chartNew, chartActive] = await Promise.all([
       query(
         `SELECT
            COUNT(*)::int AS total,
@@ -612,6 +612,14 @@ router.get('/stats/users', async (req, res, next) => {
            COUNT(*) FILTER (WHERE is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()))::int AS pro_subscribers
          FROM users
          WHERE deleted_at IS NULL`
+      ),
+      query(
+        `SELECT
+           COUNT(DISTINCT user_id) FILTER (WHERE created_at >= CURRENT_DATE)::int AS active_dau,
+           COUNT(DISTINCT user_id) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days')::int AS active_wau,
+           COUNT(DISTINCT user_id) FILTER (WHERE created_at >= NOW() - INTERVAL '30 days')::int AS active_mau
+         FROM analytics_events
+         WHERE user_id IS NOT NULL`
       ),
       query(
         `WITH days AS (
@@ -655,9 +663,9 @@ router.get('/stats/users', async (req, res, next) => {
         new_today: Number(summary.rows[0]?.new_today ?? 0),
         new_this_week: Number(summary.rows[0]?.new_this_week ?? 0),
         new_this_month: Number(summary.rows[0]?.new_this_month ?? 0),
-        active_dau: Number(chartActive.rows[chartActive.rows.length - 1]?.count ?? 0),
-        active_wau: Number(summary.rows[0]?.new_this_week ?? 0),
-        active_mau: Number(summary.rows[0]?.new_this_month ?? 0),
+        active_dau: Number(activeSummary.rows[0]?.active_dau ?? 0),
+        active_wau: Number(activeSummary.rows[0]?.active_wau ?? 0),
+        active_mau: Number(activeSummary.rows[0]?.active_mau ?? 0),
         phone_verified_rate: phoneVerifiedRate,
         activation_rate: activationRate,
         pro_subscribers: proSubscribers,
@@ -1223,7 +1231,7 @@ router.get('/reports/monthly', async (req, res, next) => {
         total_users: Number(users.rows[0]?.total ?? 0),
         pro_users: Number(users.rows[0]?.pro_users ?? 0),
         listings_published: Number(listings.rows[0]?.listings_published ?? 0),
-        mrr_xpf: Number(revenue.rows[0]?.revenue_xpf ?? 0),
+        revenue_xpf: Number(revenue.rows[0]?.revenue_xpf ?? 0),
         troc_proposals: Number(troc.rows[0]?.proposals ?? 0),
         troc_accepted: Number(troc.rows[0]?.accepted ?? 0),
         bon_plans: Number(bonPlans.rows[0]?.total ?? 0),
@@ -1457,15 +1465,19 @@ router.get('/payments', async (req, res, next) => {
       `, [Number(limit), offset]).catch(() => ({ rows: [] })),
       query(`SELECT COUNT(*) FROM payments`).catch(() => ({ rows: [{ count: 0 }] })),
       query(`SELECT
-               SUM(amount_xpf) FILTER (WHERE status='succeeded')               AS total_xpf,
-               SUM(amount_xpf) FILTER (WHERE status='succeeded' AND type='boost') AS boost_xpf,
-               SUM(amount_xpf) FILTER (WHERE status='succeeded' AND type='subscription') AS sub_xpf
+               COALESCE(SUM(amount_xpf) FILTER (WHERE status='succeeded'), 0)::int AS total_xpf,
+               COALESCE(SUM(amount_xpf) FILTER (WHERE status='succeeded' AND type='boost'), 0)::int AS boost_xpf,
+               COALESCE(SUM(amount_xpf) FILTER (WHERE status='succeeded' AND type='subscription'), 0)::int AS sub_xpf
              FROM payments`).catch(() => ({ rows: [{}] })),
     ])
 
     res.json({
       data: rows.rows,
-      totals: totals.rows[0],
+      totals: {
+        total_xpf: Number(totals.rows[0]?.total_xpf ?? 0),
+        boost_xpf: Number(totals.rows[0]?.boost_xpf ?? 0),
+        sub_xpf: Number(totals.rows[0]?.sub_xpf ?? 0),
+      },
       pagination: { total: parseInt(count.rows[0].count), page: Number(page), limit: Number(limit) },
     })
   } catch (err) { next(err) }

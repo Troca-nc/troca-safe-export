@@ -20,7 +20,7 @@ export default async function ReportsPage({ searchParams }: { searchParams?: Pro
 
       <section className="grid gap-4 md:grid-cols-3">
         <StatCard label="Nouveaux inscrits" value={displayCount(data?.new_users)} tone="good" />
-        <StatCard label="MRR" value={displayXpf(data?.mrr_xpf)} tone="warning" />
+        <StatCard label="Revenus encaissés" value={displayXpf(data?.revenue_xpf)} tone="warning" />
         <StatCard label="Annonces publiées" value={displayCount(data?.listings_published)} />
       </section>
 

@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const csv = [
       ['month', month],
       ['new_users', String(data?.new_users ?? 0)],
-      ['mrr_xpf', String(data?.mrr_xpf ?? 0)],
+      ['revenue_xpf', String(data?.revenue_xpf ?? 0)],
       ['listings_published', String(data?.listings_published ?? 0)],
     ]
       .map((row) => row.join(','))
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     '',
     'Faits marquants',
     `- Nouveaux inscrits: ${data?.new_users ?? 0}`,
-    `- MRR: ${Number(data?.mrr_xpf ?? 0).toLocaleString('fr-FR')} XPF`,
+    `- Revenus encaisses: ${Number(data?.revenue_xpf ?? 0).toLocaleString('fr-FR')} XPF`,
     `- Annonces publiees: ${data?.listings_published ?? 0}`,
     `- Propositions Troc: ${data?.troc_proposals ?? 0}`,
     `- Troc acceptes: ${data?.troc_accepted ?? 0}`,
