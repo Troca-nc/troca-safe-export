@@ -1636,7 +1636,7 @@ router.post('/webhooks/payplug', async (req, res) => {
     return res.json({ received: true });
   } catch (err) {
     console.error('[webhook/payplug] Erreur traitement:', err.message);
-    return res.status(200).json({ received: true, error: err.message });
+    return res.status(500).json({ error: 'Erreur traitement webhook' });
   }
 });
 
