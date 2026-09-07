@@ -354,7 +354,7 @@ async function getLatestSubscriptionSnapshot(userId) {
      ORDER BY created_at DESC
      LIMIT 20`,
     [userId]
-  ).catch(() => ({ rows: [] }))
+  )
   return result.rows
 }
 
@@ -369,7 +369,7 @@ async function getCurrentProSubscribers() {
      GROUP BY u.id, u.prenom, u.nom, u.email, u.created_at
      ORDER BY revenue_generated DESC, u.created_at DESC
      LIMIT 10`
-  ).catch(() => ({ rows: [] }))
+  )
 
   return result.rows.map((row) => ({
     id: row.id,
@@ -947,13 +947,13 @@ router.get('/stats/engagement', async (req, res, next) => {
            COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '30 days')::int AS troc_proposals_created,
            COUNT(*) FILTER (WHERE status = 'accepted' AND updated_at >= NOW() - INTERVAL '30 days')::int AS troc_proposals_accepted
          FROM troc_proposals`
-      ).catch(() => ({ rows: [{ troc_proposals_created: 0, troc_proposals_accepted: 0 }] })),
+      ),
       query(
         `SELECT
            COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '30 days')::int AS covoit_alerts_created,
            COUNT(*) FILTER (WHERE last_notified_at >= NOW() - INTERVAL '30 days')::int AS covoit_alerts_triggered
          FROM covoit_alerts`
-      ).catch(() => ({ rows: [{ covoit_alerts_created: 0, covoit_alerts_triggered: 0 }] })),
+      ),
       query(
         `SELECT
            COALESCE(SUM(COALESCE(click_count, 0)), 0)::int AS bon_plans_clicks_total,
@@ -962,7 +962,7 @@ router.get('/stats/engagement', async (req, res, next) => {
              ELSE ROUND(100.0 * SUM(COALESCE(click_count, 0)) / SUM(COALESCE(view_count, 0)), 2)
            END AS bon_plans_avg_ctr
          FROM bon_plans`
-      ).catch(() => ({ rows: [{ bon_plans_clicks_total: 0, bon_plans_avg_ctr: 0 }] })),
+      ),
       query(
         `WITH days AS (
            SELECT generate_series($1::date, $2::date, interval '1 day')::date AS day
@@ -988,7 +988,7 @@ router.get('/stats/engagement', async (req, res, next) => {
          ORDER BY days.day ASC`
         ,
         [dateIso(startDate), dateIso(endDate)]
-      ).catch(() => ({ rows: [] })),
+      ),
     ])
 
     return res.json({
