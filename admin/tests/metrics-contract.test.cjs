@@ -111,3 +111,24 @@ test('operational read failures cannot masquerade as empty logs or payments', ()
   assert.match(paymentsRoute, /const page = Math\.max\(1, toInt\(req\.query\.page, 1\)\)/);
   assert.match(paymentsRoute, /const limit = Math\.min\(100, Math\.max\(1, toInt\(req\.query\.limit, 25\)\)\)/);
 });
+
+test('secondary admin read failures cannot masquerade as empty subscription or engagement data', () => {
+  const routes = backendAdminRoutes();
+  const subscriptionSnapshot = routes.slice(
+    routes.indexOf('async function getLatestSubscriptionSnapshot'),
+    routes.indexOf('async function getCurrentProSubscribers'),
+  );
+  const proSubscribers = routes.slice(
+    routes.indexOf('async function getCurrentProSubscribers'),
+    routes.indexOf('async function getErrorLogsFromRedis'),
+  );
+  const engagementRoute = routes.slice(
+    routes.indexOf("router.get('/stats/engagement'"),
+    routes.indexOf("router.get('/moderation/queue'"),
+  );
+
+  assert.ok(!subscriptionSnapshot.includes('.catch(() =>'));
+  assert.ok(!proSubscribers.includes('.catch(() =>'));
+  assert.ok(!engagementRoute.includes('.catch(() =>'));
+  assert.match(engagementRoute, /const \[messages, troc, covoit, bonPlans, chartMessages, chartTroc\] = await Promise\.all/);
+});
