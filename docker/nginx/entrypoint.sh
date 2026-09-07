@@ -3,7 +3,15 @@ set -eu
 
 SERVER_NAME="${SERVER_NAME:-51.255.161.64.nip.io}"
 ADMIN_SERVER_NAME="${ADMIN_SERVER_NAME:-admin.51.255.161.64.nip.io}"
-NGINX_SSL_ENABLED="${NGINX_SSL_ENABLED:-false}"
+: "${NGINX_SSL_ENABLED:?NGINX_SSL_ENABLED must be explicitly set to true or false}"
+
+case "$NGINX_SSL_ENABLED" in
+  true|false) ;;
+  *)
+    echo "ERROR: NGINX_SSL_ENABLED must be exactly true or false." >&2
+    exit 1
+    ;;
+esac
 
 SRC_DIR="/etc/nginx/conf.d"
 RENDER_DIR="/tmp/nginx-rendered"

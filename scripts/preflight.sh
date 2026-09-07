@@ -53,6 +53,7 @@ required_vars=(
 )
 
 production_required_vars=(
+  NGINX_SSL_ENABLED
   BACKEND_IMAGE
   FRONTEND_IMAGE
   NEXTAUTH_SECRET
@@ -139,6 +140,11 @@ if [[ "$ENV_FILE" == *production* ]]; then
 
   if [[ -n "${DB_USER:-}" && -n "${DB_PASSWORD:-}" && "${DB_USER}" == "${DB_PASSWORD}" ]]; then
     echo "DB_PASSWORD must not match DB_USER in production" >&2
+    missing=1
+  fi
+
+  if [[ "${NGINX_SSL_ENABLED:-}" != "true" ]]; then
+    echo "NGINX_SSL_ENABLED must be true in production" >&2
     missing=1
   fi
 fi

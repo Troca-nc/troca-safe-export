@@ -29,8 +29,12 @@ docker compose -f docker-compose.prod.yml --env-file .env.production.local up -d
 Optional:
 
 ```bash
-docker compose -f docker-compose.prod.yml --env-file .env.production.local up -d nginx
+NGINX_SSL_ENABLED=false docker compose -f docker-compose.prod.yml --env-file .env.production.local up -d nginx
 ```
+
+Le choix du mode Nginx est obligatoire : utilisez explicitement `false` uniquement
+pour ce lancement local HTTP. Le fichier d'environnement de production doit fixer
+`NGINX_SSL_ENABLED=true` après l'initialisation du certificat.
 
 Health checks:
 
