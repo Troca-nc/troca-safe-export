@@ -9,7 +9,7 @@ const vm = require('vm');
 const { ticketEvent } = require('./paymentTransactionHarness');
 const { campaignEvent, campaignRefundEvent } = require('./campaignTransactionHarness');
 
-function harness(provider, { secret = true, validSignature = true, outcomes = ['inserted'], event = { id: 'evt_synthetic', type: 'synthetic.event' }, processTicket = async () => {} } = {}) {
+function harness(provider, { secret = true, validSignature = true, outcomes = ['inserted'], event = { id: 'evt_synthetic', type: 'synthetic.event' }, processTicket = async () => {}, processPayplug = async () => ({ is_paid: true }) } = {}) {
   const file = path.join(__dirname, '../routes/payment.route.js');
   const source = fs.readFileSync(file, 'utf8');
   const marker = `router.post('/webhooks/${provider}',`;
@@ -37,7 +37,7 @@ function harness(provider, { secret = true, validSignature = true, outcomes = ['
       return { rows: outcome === 'duplicate' ? [] : [{ id: 1 }] };
     },
     processStripeWebhookEvent: async () => { calls.business++; return processTicket(); },
-    processPayplugWebhook: async () => { calls.business++; return { is_paid: true }; },
+    processPayplugWebhook: async () => { calls.business++; return processPayplug(); },
     payplug: {}, withTransaction() {}, sendMail() {}, sendBoostActivatedEmail() {},
     getWebPlan() {}, markPaymentSucceeded() {}, formatXpfEur() {}, XPF_PER_EUR: 119.33, baseUrl: '',
   };
@@ -111,6 +111,33 @@ async function run() {
       assert.deepStrictEqual(h.calls, { registry: 3, business: 1 });
     });
   }
+  for (const resourceType of ['payment', 'subscription', 'refund']) {
+    await check(`PayPlug ${resourceType}: processing failure returns generic 500 without acknowledgement`, async () => {
+      const h = harness('payplug', { processPayplug: async () => {
+        throw new Error('private provider/database detail');
+      } });
+      const res = await h.invoke({ body: { id: 'pay_synthetic', object: resourceType } });
+      assert.strictEqual(res.code, 500);
+      assert.strictEqual(res.payload.error, 'Erreur traitement webhook');
+      assert.strictEqual(res.payload.received, undefined);
+      assert.ok(!JSON.stringify(res.payload).includes('private provider/database detail'));
+      // Receipt atomicity is a separate unresolved contract: registration still precedes processing.
+      assert.deepStrictEqual(h.calls, { registry: 1, business: 1 });
+    });
+  }
+  await check('PayPlug waits for processing before acknowledging success', async () => {
+    let finish;
+    const pending = new Promise(resolve => { finish = resolve; });
+    const h = harness('payplug', { processPayplug: () => pending });
+    let responded = false;
+    const response = h.invoke().then(res => { responded = true; return res; });
+    await Promise.resolve(); await Promise.resolve();
+    assert.strictEqual(responded, false);
+    finish({ is_paid: true });
+    const res = await response;
+    assert.strictEqual(res.code, 200);
+    assert.strictEqual(res.payload.received, true);
+  });
   await check('Ticket receipt is delegated to business transaction, including duplicates', async () => {
     const h = harness('stripe', { event: ticketEvent(), outcomes: ['error'], processTicket: async () => ({ duplicate: true }) });
     const res = await h.invoke();
