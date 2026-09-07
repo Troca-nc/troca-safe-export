@@ -87,3 +87,27 @@ test('alerts and moderation failures cannot masquerade as empty queues', () => {
   assert.ok(!alertsRoute.includes('res.json({ data: [] })'));
   assert.ok(!moderationRoute.includes('.catch(() => ({ rows: [] }))'));
 });
+
+test('operational read failures cannot masquerade as empty logs or payments', () => {
+  const routes = backendAdminRoutes();
+  const errorLogReader = routes.slice(
+    routes.indexOf('async function readRedisListJson'),
+    routes.indexOf('function getAdminActorId'),
+  );
+  const slowQueriesRoute = routes.slice(
+    routes.indexOf("router.get('/health/slow-queries'"),
+    routes.indexOf("router.get('/alerts/active'"),
+  );
+  const paymentsRoute = routes.slice(
+    routes.indexOf("router.get('/payments'"),
+    routes.indexOf('module.exports = router'),
+  );
+
+  assert.match(errorLogReader, /error\.status = 503/);
+  assert.match(errorLogReader, /await redis\.lRange\(key, 0, Math\.max\(0, limit - 1\)\)/);
+  assert.ok(!errorLogReader.includes('.catch(() => [])'));
+  assert.ok(!slowQueriesRoute.includes('.catch(() => ({ rows: [] }))'));
+  assert.ok(!paymentsRoute.includes('.catch(() =>'));
+  assert.match(paymentsRoute, /const page = Math\.max\(1, toInt\(req\.query\.page, 1\)\)/);
+  assert.match(paymentsRoute, /const limit = Math\.min\(100, Math\.max\(1, toInt\(req\.query\.limit, 25\)\)\)/);
+});
