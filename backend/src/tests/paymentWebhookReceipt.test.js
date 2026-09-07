@@ -12,16 +12,23 @@ const { campaignEvent, campaignRefundEvent } = require('./campaignTransactionHar
 function harness(provider, { secret = true, validSignature = true, outcomes = ['inserted'], event = { id: 'evt_synthetic', type: 'synthetic.event' }, processTicket = async () => {}, processPayplug = async () => ({ is_paid: true }) } = {}) {
   const file = path.join(__dirname, '../routes/payment.route.js');
   const source = fs.readFileSync(file, 'utf8');
-  const marker = `router.post('/webhooks/${provider}',`;
+  const routeMarker = `router.post('/webhooks/${provider}',`;
+  const marker = 'async function processWebhookWithReceipt';
   const start = source.indexOf(marker);
   assert.ok(start >= 0, `Missing ${provider} route`);
-  const end = source.indexOf('\nrouter.', start + marker.length);
+  const routeStart = source.indexOf(routeMarker, start);
+  const end = source.indexOf('\nrouter.', routeStart + routeMarker.length);
   assert.ok(end > start, 'Missing route boundary');
   let handler;
   const calls = { registry: 0, business: 0 };
+  const transactions = [];
   const sandbox = {
-    router: { post(route, callback) { assert.strictEqual(route, `/webhooks/${provider}`); handler = callback; } },
-    console: { error() {} },
+    router: {
+      post(route, callback) { if (route === `/webhooks/${provider}`) handler = callback; },
+      get() {},
+    },
+    authenticate() {}, paymentLimiter() {},
+    console: { error(...args) { if (process.env.DEBUG_WEBHOOK_TEST) console.error(...args); } },
     stripeWebhookSecret: secret ? 'synthetic' : '',
     payplugWebhookSecret: secret ? 'synthetic' : '',
     stripe: { webhooks: { constructEvent() {
@@ -31,6 +38,9 @@ function harness(provider, { secret = true, validSignature = true, outcomes = ['
     getPayplugSignature: () => 'synthetic',
     verifyPayPlugWebhook: () => validSignature,
     query: async (sql) => {
+      if (/SELECT provider FROM webhook_events/.test(sql)) {
+        return { rows: [{ provider }] };
+      }
       assert.match(sql, /INSERT INTO webhook_events/);
       const outcome = outcomes[Math.min(calls.registry++, outcomes.length - 1)];
       if (outcome === 'error') throw new Error('synthetic DB failure: private detail');
@@ -38,12 +48,24 @@ function harness(provider, { secret = true, validSignature = true, outcomes = ['
     },
     processStripeWebhookEvent: async () => { calls.business++; return processTicket(); },
     processPayplugWebhook: async () => { calls.business++; return processPayplug(); },
-    payplug: {}, withTransaction() {}, sendMail() {}, sendBoostActivatedEmail() {},
+    payplug: { verifyIPN: async () => ({ is_paid: true }) },
+    withTransaction: async (operation) => {
+      transactions.push('BEGIN');
+      try {
+        const result = await operation({ query: sandbox.query });
+        transactions.push('COMMIT');
+        return result;
+      } catch (error) {
+        transactions.push('ROLLBACK');
+        throw error;
+      }
+    },
+    sendMail() {}, sendBoostActivatedEmail() {},
     getWebPlan() {}, markPaymentSucceeded() {}, formatXpfEur() {}, XPF_PER_EUR: 119.33, baseUrl: '',
   };
   vm.runInNewContext(source.slice(start, end), sandbox, { filename: file, timeout: 1000 });
   return {
-    calls,
+    calls, transactions,
     async invoke(overrides = {}) {
       const req = {
         body: { id: 'pay_synthetic', object: 'payment' },
@@ -101,6 +123,7 @@ async function run() {
       assert.strictEqual(res.code, 200);
       assert.strictEqual(res.payload.received, true);
       assert.deepStrictEqual(h.calls, { registry: 1, business: 1 });
+      assert.deepStrictEqual(h.transactions, ['BEGIN', 'COMMIT']);
     });
     await check(`${provider}: retry after simulated uncommitted insert failure`, async () => {
       const h = harness(provider, { outcomes: ['error', 'inserted', 'duplicate'] });
@@ -111,6 +134,16 @@ async function run() {
       assert.deepStrictEqual(h.calls, { registry: 3, business: 1 });
     });
   }
+  await check('Stripe generic processing failure rolls back its receipt', async () => {
+    const h = harness('stripe', { processTicket: async () => {
+      throw new Error('private database detail');
+    } });
+    const res = await h.invoke();
+    assert.strictEqual(res.code, 500);
+    assert.strictEqual(res.payload.error, 'Erreur traitement webhook');
+    assert.deepStrictEqual(h.calls, { registry: 1, business: 1 });
+    assert.deepStrictEqual(h.transactions, ['BEGIN', 'ROLLBACK']);
+  });
   for (const resourceType of ['payment', 'subscription', 'refund']) {
     await check(`PayPlug ${resourceType}: processing failure returns generic 500 without acknowledgement`, async () => {
       const h = harness('payplug', { processPayplug: async () => {
@@ -121,8 +154,8 @@ async function run() {
       assert.strictEqual(res.payload.error, 'Erreur traitement webhook');
       assert.strictEqual(res.payload.received, undefined);
       assert.ok(!JSON.stringify(res.payload).includes('private provider/database detail'));
-      // Receipt atomicity is a separate unresolved contract: registration still precedes processing.
       assert.deepStrictEqual(h.calls, { registry: 1, business: 1 });
+      assert.deepStrictEqual(h.transactions, ['BEGIN', 'ROLLBACK']);
     });
   }
   await check('PayPlug waits for processing before acknowledging success', async () => {

@@ -912,6 +912,7 @@ async function upsertInvoiceRecord(query, {
 async function processPayplugWebhook({
   resourceId,
   resourceType,
+  resource: verifiedResource,
   payplug,
   query,
   withTransaction,
@@ -919,7 +920,7 @@ async function processPayplugWebhook({
   sendBoostActivatedEmail,
   baseUrl,
 }) {
-  const resource = await payplug.verifyIPN(resourceId, resourceType);
+  const resource = verifiedResource ?? await payplug.verifyIPN(resourceId, resourceType);
 
   if (resourceType === 'payment' && resource.is_paid) {
     const meta = resource.metadata ?? {};

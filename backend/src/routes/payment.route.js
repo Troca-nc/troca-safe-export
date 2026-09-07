@@ -1127,6 +1127,40 @@ router.get('/verify-session', authenticate, paymentLimiter, async (req, res) => 
   }
 });
 
+async function processWebhookWithReceipt({ eventId, provider, type, process }) {
+  return withTransaction(async (client) => {
+    let rows;
+    try {
+      ({ rows } = await client.query(
+        `INSERT INTO webhook_events (event_id, provider, type, processed_at)
+         VALUES ($1, $2, $3, NOW())
+         ON CONFLICT (event_id) DO NOTHING RETURNING id`,
+        [eventId, provider, type]
+      ));
+      if (!rows[0]) {
+        const existing = await client.query(
+          'SELECT provider FROM webhook_events WHERE event_id = $1',
+          [eventId]
+        );
+        if (existing.rows[0]?.provider !== provider) {
+          throw new Error('Webhook receipt provider conflict');
+        }
+        return { duplicate: true };
+      }
+    } catch (error) {
+      error.webhookReceiptUnavailable = true;
+      throw error;
+    }
+
+    const transactionQuery = client.query.bind(client);
+    const result = await process({
+      query: transactionQuery,
+      withTransaction: async (operation) => operation(client),
+    });
+    return { duplicate: false, result };
+  });
+}
+
 router.post('/webhooks/stripe', async (req, res) => {
   const sig = req.headers['stripe-signature'];
 
@@ -1145,36 +1179,33 @@ router.post('/webhooks/stripe', async (req, res) => {
   const hasBusinessReceipt = event.type === 'charge.refunded'
     || (event.type === 'checkout.session.completed'
       && ['event_ticket', 'campaign'].includes(event.data?.object?.metadata?.payment_type));
-  if (!hasBusinessReceipt) {
-    try {
-      const { rows } = await query(
-        `INSERT INTO webhook_events (event_id, provider, type, processed_at)
-         VALUES ($1, 'stripe', $2, NOW())
-         ON CONFLICT (event_id) DO NOTHING RETURNING id`,
-        [event.id, event.type]
-      );
-      if (!rows[0]) return res.json({ received: true, duplicate: true });
-    } catch (err) {
-      console.error('[webhook] Erreur idempotence:', err.message);
-      // Never apply business effects when duplicate protection is unavailable.
-      return res.status(503).json({ error: 'Enregistrement webhook indisponible' });
-    }
-  }
-
   try {
-    const result = await processStripeWebhookEvent({
-      event,
-      stripe,
-      query,
-      withTransaction,
-      sendMail,
-      sendBoostActivatedEmail,
-      getWebPlan,
-      markPaymentSucceeded,
-      formatXpfEur,
-      XPF_PER_EUR,
-      baseUrl,
-    });
+    const invoke = ({ query: webhookQuery, withTransaction: webhookTransaction }) =>
+      processStripeWebhookEvent({
+        event,
+        stripe,
+        query: webhookQuery,
+        withTransaction: webhookTransaction,
+        sendMail,
+        sendBoostActivatedEmail,
+        getWebPlan,
+        markPaymentSucceeded: (providerRef) => webhookQuery(
+          `UPDATE payments SET status = 'succeeded', updated_at = NOW()
+           WHERE provider_ref = $1 AND status = 'pending' RETURNING id`,
+          [providerRef]
+        ),
+        formatXpfEur,
+        XPF_PER_EUR,
+        baseUrl,
+      });
+    const result = hasBusinessReceipt
+      ? await invoke({ query, withTransaction })
+      : await processWebhookWithReceipt({
+          eventId: event.id,
+          provider: 'stripe',
+          type: event.type,
+          process: invoke,
+        });
     if (result?.duplicate) return res.json({ received: true, duplicate: true });
     return res.json({ received: true });
 
@@ -1378,6 +1409,9 @@ router.post('/webhooks/stripe', async (req, res) => {
     return res.json({ received: true });
   } catch (err) {
     console.error('[webhook] Erreur traitement:', err.message);
+    if (err.webhookReceiptUnavailable) {
+      return res.status(503).json({ error: 'Enregistrement webhook indisponible' });
+    }
     return res.status(500).json({ error: 'Erreur traitement webhook' });
   }
 });
@@ -1484,30 +1518,26 @@ router.post('/webhooks/payplug', async (req, res) => {
   }
 
   try {
-    const { rows } = await query(
-      `INSERT INTO webhook_events (event_id, provider, type, processed_at)
-       VALUES ($1, 'payplug', $2, NOW())
-       ON CONFLICT (event_id) DO NOTHING RETURNING id`,
-      [String(resourceId), resourceType]
-    );
-    if (!rows[0]) return res.json({ received: true, duplicate: true });
-  } catch (err) {
-    console.error('[webhook/payplug] idempotence error:', err.message);
-    // Never apply business effects when duplicate protection is unavailable.
-    return res.status(503).json({ error: 'Enregistrement webhook indisponible' });
-  }
-
-  try {
-    const resource = await processPayplugWebhook({
-      resourceId,
-      resourceType,
-      payplug,
-      query,
-      withTransaction,
-      sendMail,
-      sendBoostActivatedEmail,
-      baseUrl,
+    // Verify the provider resource before opening a database transaction.
+    const verifiedResource = await payplug.verifyIPN(resourceId, resourceType);
+    const processed = await processWebhookWithReceipt({
+      eventId: String(resourceId),
+      provider: 'payplug',
+      type: resourceType,
+      process: ({ query: webhookQuery, withTransaction: webhookTransaction }) => processPayplugWebhook({
+        resourceId,
+        resourceType,
+        resource: verifiedResource,
+        payplug,
+        query: webhookQuery,
+        withTransaction: webhookTransaction,
+        sendMail,
+        sendBoostActivatedEmail,
+        baseUrl,
+      }),
     });
+    if (processed.duplicate) return res.json({ received: true, duplicate: true });
+    const resource = processed.result;
     if (resourceType === 'payment' && resource.is_paid) {
       return res.json({ received: true });
     }
@@ -1636,6 +1666,9 @@ router.post('/webhooks/payplug', async (req, res) => {
     return res.json({ received: true });
   } catch (err) {
     console.error('[webhook/payplug] Erreur traitement:', err.message);
+    if (err.webhookReceiptUnavailable) {
+      return res.status(503).json({ error: 'Enregistrement webhook indisponible' });
+    }
     return res.status(500).json({ error: 'Erreur traitement webhook' });
   }
 });
