@@ -60,8 +60,12 @@ function dateIso(date) {
 
 async function readRedisListJson(key, limit = 50) {
   const redis = await getRedisClient()
-  if (!redis) return []
-  const rows = await redis.lRange(key, 0, Math.max(0, limit - 1)).catch(() => [])
+  if (!redis) {
+    const error = new Error('Stockage des journaux indisponible')
+    error.status = 503
+    throw error
+  }
+  const rows = await redis.lRange(key, 0, Math.max(0, limit - 1))
   return rows.map((row) => {
     try {
       return JSON.parse(row)
@@ -538,7 +542,7 @@ router.get('/health/slow-queries', async (req, res, next) => {
        ORDER BY mean_exec_time DESC
        LIMIT $1`,
       [limit]
-    ).catch(() => ({ rows: [] }))
+    )
 
     return res.json({ data: result.rows })
   } catch (err) {
@@ -1530,8 +1534,9 @@ router.put('/signalements/:id/resolve', async (req, res, next) => {
 
 router.get('/payments', async (req, res, next) => {
   try {
-    const { page = 1, limit = 25 } = req.query
-    const offset = (Number(page) - 1) * Number(limit)
+    const page = Math.max(1, toInt(req.query.page, 1))
+    const limit = Math.min(100, Math.max(1, toInt(req.query.limit, 25)))
+    const offset = (page - 1) * limit
 
     const [rows, count, totals] = await Promise.all([
       query(`
@@ -1541,13 +1546,13 @@ router.get('/payments', async (req, res, next) => {
         JOIN users u ON u.id = p.user_id
         ORDER BY p.created_at DESC
         LIMIT $1 OFFSET $2
-      `, [Number(limit), offset]).catch(() => ({ rows: [] })),
-      query(`SELECT COUNT(*) FROM payments`).catch(() => ({ rows: [{ count: 0 }] })),
+      `, [limit, offset]),
+      query(`SELECT COUNT(*) FROM payments`),
       query(`SELECT
                COALESCE(SUM(amount_xpf) FILTER (WHERE status='succeeded'), 0)::int AS total_xpf,
                COALESCE(SUM(amount_xpf) FILTER (WHERE status='succeeded' AND type='boost'), 0)::int AS boost_xpf,
                COALESCE(SUM(amount_xpf) FILTER (WHERE status='succeeded' AND type='subscription'), 0)::int AS sub_xpf
-             FROM payments`).catch(() => ({ rows: [{}] })),
+             FROM payments`),
     ])
 
     res.json({
@@ -1557,7 +1562,7 @@ router.get('/payments', async (req, res, next) => {
         boost_xpf: Number(totals.rows[0]?.boost_xpf ?? 0),
         sub_xpf: Number(totals.rows[0]?.sub_xpf ?? 0),
       },
-      pagination: { total: parseInt(count.rows[0].count), page: Number(page), limit: Number(limit) },
+      pagination: { total: parseInt(count.rows[0].count), page, limit },
     })
   } catch (err) { next(err) }
 })
