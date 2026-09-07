@@ -68,3 +68,22 @@ test('health contract reports checked dependencies and time-bounded worker error
   assert.ok(!routes.includes("slow_queries_count: 0"));
   assert.ok(!routes.includes("snapshot.cluster?.nodes?.[0]?.updated_at || null"));
 });
+
+test('alerts and moderation failures cannot masquerade as empty queues', () => {
+  const routes = backendAdminRoutes();
+  const alertsRoute = routes.slice(
+    routes.indexOf("router.get('/alerts/active'"),
+    routes.indexOf('// ── GET /admin/stats', routes.indexOf("router.get('/alerts/active'")),
+  );
+  const moderationRoute = routes.slice(
+    routes.indexOf("router.get('/moderation/queue'"),
+    routes.indexOf("router.patch('/moderation/reports", routes.indexOf("router.get('/moderation/queue'")),
+  );
+
+  assert.match(alertsRoute, /error\.status = 503/);
+  assert.match(alertsRoute, /await redis\.get\('admin:alerts'\)/);
+  assert.match(alertsRoute, /Array\.isArray\(data\)/);
+  assert.ok(!alertsRoute.includes(".catch(() => '[]')"));
+  assert.ok(!alertsRoute.includes('res.json({ data: [] })'));
+  assert.ok(!moderationRoute.includes('.catch(() => ({ rows: [] }))'));
+});

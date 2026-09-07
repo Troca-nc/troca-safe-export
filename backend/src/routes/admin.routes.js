@@ -550,11 +550,18 @@ router.get('/alerts/active', async (_req, res, next) => {
   try {
     const redis = await getRedisClient()
     if (!redis) {
-      return res.json({ data: [] })
+      const error = new Error('Stockage des alertes indisponible')
+      error.status = 503
+      throw error
     }
 
-    const payload = await redis.get('admin:alerts').catch(() => '[]')
+    const payload = await redis.get('admin:alerts')
     const data = JSON.parse(payload || '[]')
+    if (!Array.isArray(data)) {
+      const error = new Error('Format du stockage des alertes invalide')
+      error.status = 503
+      throw error
+    }
     return res.json({ data })
   } catch (err) {
     next(err)
@@ -1029,14 +1036,14 @@ router.get('/moderation/queue', async (_req, res, next) => {
          WHERE s.resolved_at IS NULL
          ORDER BY s.created_at DESC
          LIMIT 200`
-      ).catch(() => ({ rows: [] })),
+      ),
       query(
         `SELECT id, name AS business_name, badge, bon_plan_count
          FROM businesses
          WHERE badge = 'active'
          ORDER BY bon_plan_count DESC, created_at DESC
          LIMIT 100`
-      ).catch(() => ({ rows: [] })),
+      ),
     ])
 
     return res.json({
