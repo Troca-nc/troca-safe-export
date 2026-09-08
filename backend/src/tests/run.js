@@ -33,6 +33,7 @@ const SUITES = [
   './proEntitlementService.test',
   './proRenewalGraceService.test',
   './companyIdentityService.test',
+  './companyTrialService.test',
   './auth.route.test',
   './adminUserActionService.test',
   './adminModerationActionService.test',

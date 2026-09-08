@@ -4,6 +4,7 @@ const { Router } = require('express');
 const { authenticate } = require('../middleware/auth');
 const { query } = require('../config/database');
 const { PRO_PLANS, BOOST_CATALOG, XPF_PER_EUR } = require('../services/paymentCatalog');
+const { startCompanyTrial } = require('../services/companyTrialService');
 
 const router = Router();
 
@@ -68,6 +69,29 @@ router.get('/plans', async (_req, res) => {
 
 router.get('/status', authenticate, async (req, res) => {
   try {
+    const trialResult = await query(
+      `SELECT c.trial_started_at, c.trial_ends_at
+         FROM company_members cm
+         JOIN companies c ON c.id = cm.company_id
+        WHERE cm.user_id = $1`,
+      [req.user.id]
+    );
+    const trial = trialResult.rows[0] ?? null;
+    const trialEnd = trial?.trial_ends_at ? new Date(trial.trial_ends_at) : null;
+    if (trialEnd && trialEnd.getTime() > Date.now()) {
+      return res.json({
+        data: {
+          plan: 'pro',
+          status: 'trialing',
+          trial_started_at: new Date(trial.trial_started_at).toISOString(),
+          current_period_end: trialEnd.toISOString(),
+          days_remaining: Math.max(0, Math.ceil((trialEnd.getTime() - Date.now()) / 86_400_000)),
+          payment_provider: null,
+          payment_status: null,
+        },
+      });
+    }
+
     const { rows } = await query(
       `SELECT
          id,
@@ -129,6 +153,23 @@ router.get('/status', authenticate, async (req, res) => {
     });
   } catch (err) {
     return res.status(500).json({ error: 'Erreur r?cup?ration statut abonnement' });
+  }
+});
+
+router.post('/trial/start', authenticate, async (req, res) => {
+  try {
+    const trial = await startCompanyTrial(req.user.id);
+    return res.status(201).json({
+      data: {
+        status: 'trialing',
+        plan: 'pro',
+        trial_started_at: trial.trial_started_at,
+        trial_ends_at: trial.trial_ends_at,
+      },
+    });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    return res.status(500).json({ error: "Impossible d'activer l'essai Pro." });
   }
 });
 
