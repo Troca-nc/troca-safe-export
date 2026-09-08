@@ -1462,6 +1462,11 @@ export const notificationsApi = {
 }
 
 export const subscriptionsApi = {
+  startTrial: async () => {
+    const res = await api.post('/subscriptions/trial/start')
+    invalidateApiCache('subscriptions.')
+    return res
+  },
   getStatus: () => cachedGet(
     buildCacheKey('subscriptions.getStatus', '/subscriptions/status'),
     () => api.get('/subscriptions/status'),

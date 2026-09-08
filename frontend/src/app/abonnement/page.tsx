@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
   ArrowLeft,
@@ -18,8 +19,9 @@ import {
   Wrench,
 } from 'lucide-react'
 
-import { useSubscription } from '@/hooks/usePayment'
 import { trackEvent } from '@/lib/analytics'
+import { subscriptionsApi } from '@/lib/api'
+import { useAuthStore } from '@/store/authStore'
 import { PRO_PLANS, type BillingPeriod, type PaymentProvider } from '@/types/monetisation.types'
 
 const PRO_PLAN = PRO_PLANS[0]
@@ -290,27 +292,34 @@ function MetierCard({
 }
 
 export default function AbonnementPage() {
+  const router = useRouter()
+  const refreshMe = useAuthStore((state) => state.refreshMe)
   const billing: BillingPeriod = 'monthly'
   const [openMetierId, setOpenMetierId] = useState<string | null>(null)
   const [provider] = useState<PaymentProvider>('stripe')
-  const { initiateSubscription, loading, error } = useSubscription()
-  const stripePk = process.env.NEXT_PUBLIC_STRIPE_PK?.trim()
-  const hasStripeConfigured = Boolean(stripePk)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const proPriceLabel = `${PRO_PLAN.price_monthly.toLocaleString('fr-FR')} XPF / mois`
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
+    setLoading(true)
+    setError(null)
     void trackEvent('subscription_cta_click', {
       plan_id: 'pro',
       billing_period: billing,
       provider,
     })
 
-    void initiateSubscription({
-      plan_id: 'pro',
-      billing_period: billing,
-      provider,
-    })
+    try {
+      await subscriptionsApi.startTrial()
+      await refreshMe()
+      router.push('/profil')
+    } catch (err: any) {
+      setError(err?.response?.data?.error ?? "Impossible d'activer l'essai Pro")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -451,11 +460,7 @@ export default function AbonnementPage() {
                   disabled={loading}
                   className="btn-primary flex w-full items-center justify-center gap-2 px-4 py-3 text-sm font-semibold disabled:opacity-60"
                 >
-                  {loading
-                    ? 'Redirection...'
-                    : hasStripeConfigured
-                      ? 'Commencer l\'essai 14 jours'
-                      : 'Choisir le plan Pro'}
+                  {loading ? 'Activation...' : "Activer mon essai Pro — 30 jours"}
                   {!loading ? <ArrowRight size={16} /> : null}
                 </button>
               </div>
