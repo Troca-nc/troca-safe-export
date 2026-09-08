@@ -340,7 +340,7 @@ async function registerAccount({ email, password, prenom, nom, commune_id, accou
       `INSERT INTO users (email, password_hash, prenom, nom, commune_id, is_pro, account_type, email_verified)
        VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE)
        RETURNING id, email, prenom, nom, is_admin, is_pro, pro_plan, pro_expires_at, last_bon_plan_offer_at, email_verified, onboarding_step, account_type, pro_category, COALESCE(tours_seen, '{}'::text[]) AS tours_seen`,
-      [normalizedEmail, password_hash, prenom.trim(), nom.trim(), commune_id || null, normalizedAccountType === 'professional', normalizedAccountType]
+      [normalizedEmail, password_hash, prenom.trim(), nom.trim(), commune_id || null, false, normalizedAccountType]
     );
     return ins.rows[0];
   });

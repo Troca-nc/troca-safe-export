@@ -1187,7 +1187,6 @@ router.patch('/me', authenticate, async (req, res, next) => {
       return res.status(400).json({ error: 'Aucun champ à modifier.' });
     }
 
-    fields.push(`is_pro = TRUE`);
     fields.push(`updated_at = NOW()`);
 
     params.push(req.user.id);
@@ -1854,7 +1853,6 @@ router.post('/apply', authenticate, async (req, res, next) => {
     }
 
     const updates = {
-      is_pro: true,
       pro_verified: false,
       pro_verified_at: null,
       pro_company_name: normalizeMaybeText(value.company_name),
@@ -1872,27 +1870,25 @@ router.post('/apply', authenticate, async (req, res, next) => {
 
     const result = await query(
       `UPDATE users
-       SET is_pro = $2,
-           pro_verified = $3,
-           pro_verified_at = $4,
-           pro_company_name = $5,
-           pro_category = $6,
-           pro_description = $7,
-            pro_logo_url = $8,
-            pro_banner_url = $9,
-            pro_catalog_pdf_url = $10,
-            pro_website = $11,
-            pro_phone = $12,
-            pro_hours = $13,
-            pro_commune = $14,
-            pro_siret = $15,
-            pro_since = COALESCE(pro_since, NOW()),
-            updated_at = NOW()
+       SET account_type = 'professional',
+           pro_verified = $2,
+           pro_verified_at = $3,
+           pro_company_name = $4,
+           pro_category = $5,
+           pro_description = $6,
+           pro_logo_url = $7,
+           pro_banner_url = $8,
+           pro_catalog_pdf_url = $9,
+           pro_website = $10,
+           pro_phone = $11,
+           pro_hours = $12,
+           pro_commune = $13,
+           pro_siret = $14,
+           updated_at = NOW()
        WHERE id = $1
-       RETURNING id, email, prenom, nom, is_pro, pro_verified, pro_company_name, pro_category`,
+       RETURNING id, email, prenom, nom, account_type, is_pro, pro_verified, pro_company_name, pro_category`,
       [
         req.user.id,
-        updates.is_pro,
         updates.pro_verified,
         updates.pro_verified_at,
         updates.pro_company_name,
@@ -1934,6 +1930,7 @@ router.post('/apply', authenticate, async (req, res, next) => {
     return res.status(201).json({
       data: {
         id: result.rows[0].id,
+        account_type: result.rows[0].account_type,
         is_pro: result.rows[0].is_pro,
         pro_verified: result.rows[0].pro_verified,
         pro_company_name: result.rows[0].pro_company_name,
