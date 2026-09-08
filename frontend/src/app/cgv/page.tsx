@@ -29,7 +29,7 @@ export default function CgvPage() {
             </tr>
           </thead>
           <tbody>
-            <tr><td>Pro mensuel</td><td>4 900 XPF</td><td>4 900 XPF</td></tr>
+            <tr><td>Pro mensuel</td><td>2 900 XPF</td><td>2 900 XPF</td></tr>
             <tr><td>Pro annuel</td><td>44 900 XPF</td><td>44 900 XPF</td></tr>
             <tr><td>Boost 3 jours</td><td>500 XPF</td><td>400 XPF</td></tr>
             <tr><td>Boost 7 jours</td><td>900 XPF</td><td>720 XPF</td></tr>

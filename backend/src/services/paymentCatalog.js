@@ -22,7 +22,7 @@ const BOOST_CATALOG = [
 
 const PRO_PLANS = {
   pro: {
-    monthly: { amount_xpf: 4900, stripe_price_id: process.env.STRIPE_PRICE_PRO_MENSUEL || '' },
+    monthly: { amount_xpf: 2900, stripe_price_id: process.env.STRIPE_PRICE_PRO_MENSUEL || '' },
     yearly: { amount_xpf: 44900, stripe_price_id: process.env.STRIPE_PRICE_PRO_ANNUEL || '' },
   },
 };
@@ -33,7 +33,7 @@ const MOBILE_PLANS = {
 };
 
 const MOBILE_PLANS_XPF = {
-  pro_mensuel: 4900,
+  pro_mensuel: 2900,
   pro_annuel: 44900,
 };
 
