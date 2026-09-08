@@ -53,7 +53,6 @@ const schema = z
 type FormData = z.infer<typeof schema>
 type Step = 1 | 2 | 3
 type ProfileChoice = 'particulier' | 'pro'
-type BillingCycle = 'monthly' | 'annual'
 
 const STEPS: Array<{ id: Step; label: string; helper: string }> = [
   { id: 1, label: 'Profil', helper: 'Compte et accï¿½s' },
@@ -300,7 +299,6 @@ export default function RegisterPage() {
   const [step, setStep] = useState<Step>(1)
   const [stepDirection, setStepDirection] = useState<'forward' | 'backward'>('forward')
   const [selectedProfile, setSelectedProfile] = useState<ProfileChoice>('particulier')
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly')
   const [showPassword, setShowPassword] = useState(false)
   const [serverError, setServerError] = useState<RegistrationError | null>(null)
   const [turnstileToken, setTurnstileToken] = useState('')
@@ -647,25 +645,13 @@ export default function RegisterPage() {
                               <span className="inline-flex items-center rounded-full bg-kalico-blue px-3 py-1 text-xs font-semibold text-white">
                                 Recommandï¿½
                               </span>
-                              <button
-                                type="button"
-                                onClick={() => setBillingCycle((value) => (value === 'monthly' ? 'annual' : 'monthly'))}
-                                className="inline-flex items-center gap-1 rounded-full border border-night/10 bg-white px-3 py-1.5 text-xs font-semibold text-night transition hover:border-kalico-blue/25 hover:text-kalico-blue"
-                              >
-                                <span className={billingCycle === 'monthly' ? 'text-kalico-blue' : 'text-night/50'}>Mensuel</span>
-                                <span className="text-night/25">/</span>
-                                <span className={billingCycle === 'annual' ? 'text-kalico-blue' : 'text-night/50'}>Annuel</span>
-                              </button>
+                              <span className="rounded-full border border-night/10 bg-white px-3 py-1.5 text-xs font-semibold text-kalico-blue">Mensuel</span>
                             </div>
 
                             <p className="mt-4 text-3xl font-bold text-kalico-blue">
-                              {billingCycle === 'monthly' ? '2 900 XPF / mois' : '44 900 XPF / an'}
+                              2 900 XPF / mois
                             </p>
-                            {billingCycle === 'annual' ? (
-                              <p className="mt-2 text-sm font-semibold text-jungle">2 mois offerts</p>
-                            ) : (
-                              <p className="mt-2 text-sm text-night/55">Paiement flexible, ï¿½ tout moment.</p>
-                            )}
+                            <p className="mt-2 text-sm text-night/55">Paiement flexible, à tout moment.</p>
 
                             <div className="mt-5 space-y-3">
                               {PLAN_FEATURES.map((feature) => (

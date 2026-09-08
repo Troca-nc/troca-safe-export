@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import {
   ArrowLeft,
   ArrowRight,
@@ -214,11 +214,6 @@ const WHY_PRO_ITEMS = [
   },
 ]
 
-function getSavingsMonths(monthlyXpf: number, yearlyXpf: number) {
-  if (!monthlyXpf) return 0
-  return Math.max(0, Math.round(12 - yearlyXpf / monthlyXpf))
-}
-
 function PlanFeature({ enabled, text }: { enabled: boolean; text: string }) {
   return (
     <li className={`flex items-start gap-3 text-sm ${enabled ? 'text-night/75' : 'text-night/40'}`}>
@@ -295,22 +290,14 @@ function MetierCard({
 }
 
 export default function AbonnementPage() {
-  const [billing, setBilling] = useState<BillingPeriod>('monthly')
+  const billing: BillingPeriod = 'monthly'
   const [openMetierId, setOpenMetierId] = useState<string | null>(null)
   const [provider] = useState<PaymentProvider>('stripe')
   const { initiateSubscription, loading, error } = useSubscription()
   const stripePk = process.env.NEXT_PUBLIC_STRIPE_PK?.trim()
   const hasStripeConfigured = Boolean(stripePk)
 
-  const annualSavingsMonths = useMemo(
-    () => getSavingsMonths(PRO_PLAN.price_monthly, PRO_PLAN.price_yearly),
-    [],
-  )
-
-  const proPriceLabel =
-    billing === 'yearly'
-      ? `${PRO_PLAN.price_yearly.toLocaleString('fr-FR')} XPF / an`
-      : `${PRO_PLAN.price_monthly.toLocaleString('fr-FR')} XPF / mois`
+  const proPriceLabel = `${PRO_PLAN.price_monthly.toLocaleString('fr-FR')} XPF / mois`
 
   const handleSubscribe = () => {
     void trackEvent('subscription_cta_click', {
@@ -447,33 +434,8 @@ export default function AbonnementPage() {
               <div className="mt-4 rounded-2xl bg-night p-4 text-white">
                 <div className="text-3xl font-bold">{proPriceLabel}</div>
                 <div className="mt-1 text-xs text-white/70">
-                  {billing === 'yearly' ? 'Paiement annuel' : 'Paiement mensuel'}
+                  Paiement mensuel
                 </div>
-                {billing === 'yearly' ? (
-                  <div className="mt-2 inline-flex rounded-full bg-emerald-400/20 px-2 py-1 text-[11px] font-semibold text-emerald-200">
-                    ï¿½conomisez {annualSavingsMonths} mois
-                  </div>
-                ) : null}
-              </div>
-
-              <div className="mt-4 inline-flex w-fit items-center gap-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-1">
-                {(['monthly', 'yearly'] as BillingPeriod[]).map((period) => {
-                  const active = billing === period
-                  return (
-                    <button
-                      key={period}
-                      type="button"
-                      onClick={() => setBilling(period)}
-                      className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
-                        active
-                          ? 'bg-white text-night shadow-sm ring-1 ring-black/5'
-                          : 'text-night/75 hover:bg-white hover:text-night'
-                      }`}
-                    >
-                      {period === 'monthly' ? 'Mensuel' : 'Annuel'}
-                    </button>
-                  )
-                })}
               </div>
 
               <ul className="mt-6 space-y-3">

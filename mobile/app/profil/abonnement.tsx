@@ -17,7 +17,7 @@ import { api } from '@/lib/api'
 import { isDemoModeEnabled } from '@/lib/demo'
 import { useAuthStore } from '@/store/authStore'
 
-type Plan = 'pro_mensuel' | 'pro_annuel'
+type Plan = 'pro_mensuel'
 
 type ErrorLike = {
   response?: {
@@ -35,14 +35,6 @@ const PLANS = [
     price: '2 900',
     period: 'par mois',
     saving: null,
-    highlight: false,
-  },
-  {
-    id: 'pro_annuel' as Plan,
-    label: 'Pro Annuel',
-    price: '144 000',
-    period: 'par an',
-    saving: '2 mois offerts',
     highlight: true,
   },
 ] as const
@@ -59,7 +51,7 @@ const FEATURES = [
 function getSubscriptionPayload(plan: Plan) {
   return {
     plan_id: 'pro',
-    billing_period: plan.includes('annuel') ? 'yearly' : 'monthly',
+    billing_period: 'monthly',
   } as const
 }
 
@@ -77,7 +69,7 @@ function getErrorMessage(err: unknown, fallback: string) {
 export default function AbonnementScreen() {
   const { user, refreshMe } = useAuthStore()
   const { initPaymentSheet, presentPaymentSheet } = useStripe()
-  const [selectedPlan, setSelected] = useState<Plan>('pro_annuel')
+  const [selectedPlan, setSelected] = useState<Plan>('pro_mensuel')
   const [paymentProvider, setPaymentProvider] = useState<PaymentProvider>('stripe')
   const [payplugCheckoutUrl, setPayplugCheckoutUrl] = useState<string | null>(null)
   const [verifyingPayplug, setVerifyingPayplug] = useState(false)

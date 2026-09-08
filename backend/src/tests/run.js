@@ -43,6 +43,7 @@ const SUITES = [
   './push.service.test',
   './payment.route.test',
   './paymentCatalog.test',
+  './subscriptionOfferBoundary.test',
   './trocService.test',
   './eventTicketAccess.test',
   './eventPublicationAccess.test',
