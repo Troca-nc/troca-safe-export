@@ -405,7 +405,7 @@ async function loadProProfile(proId) {
      WHERE u.id = $1
        AND u.is_pro = TRUE
        AND COALESCE(u.pro_verified, FALSE) = TRUE
-       AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW())
+       AND u.pro_expires_at > NOW()
        AND u.deleted_at IS NULL`,
     [proId]
   );
@@ -466,7 +466,7 @@ async function loadProProfile(proId) {
          u.prenom AS seller_prenom,
          u.nom AS seller_nom,
          u.avatar_url AS seller_avatar,
-         CASE WHEN u.is_pro = TRUE AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
+         CASE WHEN u.is_pro = TRUE AND u.pro_expires_at > NOW() THEN TRUE ELSE FALSE END AS is_pro,
          u.pro_verified AS seller_pro_verified,
          u.email_verified AS seller_email_verified,
          u.phone_verified AS seller_phone_verified,
@@ -755,7 +755,7 @@ router.get('/', async (req, res, next) => {
        FROM users u
        WHERE u.is_pro = TRUE
          AND COALESCE(u.pro_verified, FALSE) = TRUE
-         AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW())
+         AND u.pro_expires_at > NOW()
          AND u.deleted_at IS NULL
        ORDER BY avg_rating DESC, listing_count DESC, COALESCE(u.pro_company_name, u.prenom, u.nom) ASC
        LIMIT $1 OFFSET $2`,
@@ -786,7 +786,7 @@ router.post('/:id/quote', optionalAuth, async (req, res, next) => {
        WHERE id = $1
          AND is_pro = TRUE
          AND COALESCE(pro_verified, FALSE) = TRUE
-         AND (pro_expires_at IS NULL OR pro_expires_at > NOW())
+         AND pro_expires_at > NOW()
          AND deleted_at IS NULL
        LIMIT 1`,
       [proId]

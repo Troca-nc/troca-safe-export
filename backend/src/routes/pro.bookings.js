@@ -253,7 +253,7 @@ async function loadBookingProfile(proId) {
      WHERE u.id = $1
        AND u.is_pro = TRUE
        AND COALESCE(u.pro_verified, FALSE) = TRUE
-       AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW())
+       AND u.pro_expires_at > NOW()
        AND u.deleted_at IS NULL
      LIMIT 1`,
     [proId]

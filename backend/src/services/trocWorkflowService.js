@@ -64,7 +64,7 @@ async function loadTrocListing(db, listingId) {
        u.email AS seller_email,
        u.avatar_url AS seller_avatar,
        u.expo_push_token AS seller_push_token,
-       CASE WHEN u.is_pro = TRUE AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS seller_is_pro
+       CASE WHEN u.is_pro = TRUE AND u.pro_expires_at > NOW() THEN TRUE ELSE FALSE END AS seller_is_pro
      FROM annonces a
      JOIN users u ON u.id = a.user_id
      LEFT JOIN categories cat ON cat.id = a.category_id

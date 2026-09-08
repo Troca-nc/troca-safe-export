@@ -183,7 +183,7 @@ async function loadActiveProsForCategory(categorySlug) {
      JOIN users u ON u.id = pp.id
      WHERE u.is_pro = TRUE
        AND u.deleted_at IS NULL
-       AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW())`,
+       AND u.pro_expires_at > NOW()`,
     []
   );
 
@@ -214,7 +214,7 @@ async function loadTargetPros(targetIds) {
      WHERE pp.id = ANY($1::int[])
        AND u.is_pro = TRUE
        AND u.deleted_at IS NULL
-       AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW())`,
+       AND u.pro_expires_at > NOW()`,
     [targetIds]
   );
   return result.rows;

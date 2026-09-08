@@ -337,7 +337,7 @@ async function queryBonPlans(filters = {}) {
       u.id AS author_id,
       u.prenom AS author_prenom,
       u.nom AS author_nom,
-      CASE WHEN u.is_pro = TRUE AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS author_is_pro,
+      CASE WHEN u.is_pro = TRUE AND u.pro_expires_at > NOW() THEN TRUE ELSE FALSE END AS author_is_pro,
       b.badge AS business_badge,
       b.review_avg AS business_review_avg,
       b.review_count AS business_review_count
@@ -659,7 +659,7 @@ router.get('/:id', optionalAuth, async (req, res, next) => {
          u.id AS author_id,
          u.prenom AS author_prenom,
          u.nom AS author_nom,
-         CASE WHEN u.is_pro = TRUE AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS author_is_pro,
+         CASE WHEN u.is_pro = TRUE AND u.pro_expires_at > NOW() THEN TRUE ELSE FALSE END AS author_is_pro,
          b.badge AS business_badge,
          b.review_avg AS business_review_avg,
          b.review_count AS business_review_count

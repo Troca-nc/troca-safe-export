@@ -656,7 +656,7 @@ router.get('/stats/users', async (req, res, next) => {
            COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '30 days')::int AS new_this_month,
            COUNT(*) FILTER (WHERE phone_verified = TRUE)::int AS phone_verified_total,
            COUNT(*) FILTER (WHERE nb_annonces > 0)::int AS activation_total,
-           COUNT(*) FILTER (WHERE is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()))::int AS pro_subscribers
+           COUNT(*) FILTER (WHERE is_pro = TRUE AND pro_expires_at > NOW())::int AS pro_subscribers
          FROM users
          WHERE deleted_at IS NULL`
       ),
