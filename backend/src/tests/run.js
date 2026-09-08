@@ -30,6 +30,7 @@ const SUITES = [
   './proEntitlementBoundary.test',
   './proPublicProjectionBoundary.test',
   './commercialQuotaService.test',
+  './listingVisibilityBoundary.test',
   './proEntitlementService.test',
   './proRenewalGraceService.test',
   './companyIdentityService.test',

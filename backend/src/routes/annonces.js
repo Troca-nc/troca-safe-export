@@ -392,9 +392,11 @@ router.get('/:id', optionalAuth, async (req, res, next) => {
        LEFT JOIN communes seller_com ON seller_com.id = u.commune_id
        LEFT JOIN provinces seller_prov ON seller_prov.id = seller_com.province_id
        LEFT JOIN annonce_images img ON img.annonce_id = a.id
-       WHERE a.id = $1 AND a.deleted_at IS NULL
+       WHERE a.id = $1
+         AND a.deleted_at IS NULL
+         AND (a.status = 'active' OR a.user_id = $2 OR $3::boolean = TRUE)
        GROUP BY a.id, cat.id, parent.id, com.id, prov.id, u.id, seller_com.id, seller_prov.id`,
-      [id]
+      [id, req.user?.id ?? null, Boolean(req.user?.is_admin)]
     );
 
     if (!result.rows[0]) {
