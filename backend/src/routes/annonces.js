@@ -519,7 +519,8 @@ router.post('/', authenticate, rateLimitAnnonces, async (req, res, next) => {
         console.error('[troc:matching] Enqueue erreur:', err.message)
       );
     }
-    await flagIfSuspicious(result.id);
+    const antiScamResult = await flagIfSuspicious(result.id);
+    if (antiScamResult?.reviewPending) result.status = 'pending';
     void clearListCache();
 
     return res.status(201).json({ data: result });

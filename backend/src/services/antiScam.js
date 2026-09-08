@@ -4,13 +4,31 @@
 // Usage : router.post('/annonces', authenticate, antiScam, createAnnonce)
 
 const { checkAnnonceRateLimit, checkAndFlagAnnonce } = require('../services/trustService')
+const { query } = require('../config/database')
+
+async function quarantineAfterCheckFailure(annonceId) {
+  await query(`
+    UPDATE annonces
+    SET status = 'pending',
+        moderation_flag = 'anti_scam_unavailable',
+        updated_at = NOW()
+    WHERE id = $1 AND status NOT IN ('deleted', 'sold')
+  `, [annonceId])
+}
+
+function createAntiScam({
+  rateLimitCheck = checkAnnonceRateLimit,
+  listingCheck = checkAndFlagAnnonce,
+  quarantine = quarantineAfterCheckFailure,
+  sellerQuery = query,
+} = {}) {
 
 /**
  * Middleware 1 : Rate limit création d'annonces (avant insertion en DB)
  */
 async function rateLimitAnnonces(req, res, next) {
   try {
-    const { allowed, limit, current, message } = await checkAnnonceRateLimit(req.user.id)
+    const { allowed, limit, current, message } = await rateLimitCheck(req.user.id)
 
     // Headers informatifs
     res.setHeader('X-RateLimit-Annonces-Limit',     limit)
@@ -21,9 +39,8 @@ async function rateLimitAnnonces(req, res, next) {
     }
     next()
   } catch (err) {
-    // Non bloquant si le service est indisponible
     console.error('[antiScam] Erreur rate limit:', err.message)
-    next()
+    return res.status(503).json({ error: 'Verification anti-fraude temporairement indisponible. Reessayez plus tard.' })
   }
 }
 
@@ -34,14 +51,15 @@ async function rateLimitAnnonces(req, res, next) {
  */
 async function flagIfSuspicious(annonceId) {
   try {
-    const result = await checkAndFlagAnnonce(annonceId)
+    const result = await listingCheck(annonceId)
     if (result?.suspicious) {
       console.warn(`[antiScam] Annonce ${annonceId} mise en révision — score: ${result.score}`)
     }
     return result
   } catch (err) {
     console.error('[antiScam] Erreur vérification:', err.message)
-    return null
+    await quarantine(annonceId)
+    return { suspicious: true, reviewPending: true, flags: ['anti_scam_unavailable'], score: null }
   }
 }
 
@@ -50,13 +68,12 @@ async function flagIfSuspicious(annonceId) {
  * Bloque si le vendeur a trop de signalements non résolus
  */
 async function checkSellerTrust(req, res, next) {
-  const { query } = require('../config/database')
   const sellerId = req.body.seller_id || req.params.seller_id
 
   if (!sellerId) return next()
 
   try {
-    const { rows: [seller] } = await query(`
+    const { rows: [seller] } = await sellerQuery(`
       SELECT trust_score, trust_level,
              (SELECT COUNT(*) FROM signalements s
               JOIN annonces a ON a.id = s.annonce_id
@@ -78,8 +95,11 @@ async function checkSellerTrust(req, res, next) {
     next()
   } catch (err) {
     console.error('[antiScam] Erreur check trust:', err.message)
-    next()
+    return res.status(503).json({ error: 'Verification de confiance temporairement indisponible. Reessayez plus tard.' })
   }
 }
 
-module.exports = { rateLimitAnnonces, flagIfSuspicious, checkSellerTrust }
+  return { rateLimitAnnonces, flagIfSuspicious, checkSellerTrust }
+}
+
+module.exports = { ...createAntiScam(), createAntiScam, quarantineAfterCheckFailure }
