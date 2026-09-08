@@ -5,6 +5,7 @@
 const { verifyAccessToken } = require('../config/jwt');
 const { query } = require('../config/database');
 const { isAccessTokenBlacklisted } = require('../services/authAccountService');
+const { applyCurrentProEntitlement } = require('../services/proEntitlementService');
 
 /**
  * Middleware obligatoire — bloque si non connecté
@@ -42,7 +43,7 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    req.user = user;
+    req.user = applyCurrentProEntitlement(user);
     next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
@@ -76,7 +77,7 @@ const optionalAuth = async (req, res, next) => {
     const user = result.rows[0] || null;
     req.user = user?.banned_until && new Date(user.banned_until) > new Date()
       ? null
-      : user;
+      : applyCurrentProEntitlement(user);
   } catch {
     req.user = null;
   }

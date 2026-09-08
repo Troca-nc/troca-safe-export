@@ -282,8 +282,8 @@ async function rotateRefreshToken(userId, oldRefreshToken) {
 async function findUserByEmail(email) {
   return query(
     `SELECT id, email, password_hash, prenom, nom, is_admin, account_type, pro_category,
-            CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
-            CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN pro_plan ELSE NULL END AS pro_plan,
+            CASE WHEN is_pro = TRUE AND pro_expires_at > NOW() THEN TRUE ELSE FALSE END AS is_pro,
+            CASE WHEN is_pro = TRUE AND pro_expires_at > NOW() THEN pro_plan ELSE NULL END AS pro_plan,
             pro_expires_at, last_bon_plan_offer_at, email_verified, onboarding_step, COALESCE(tours_seen, '{}'::text[]) AS tours_seen, deleted_at
      FROM users WHERE email = $1`,
     [normalizeEmail(email)]
@@ -294,8 +294,8 @@ async function findUserById(userId) {
   return query(
     `SELECT id, email, prenom, nom, telephone, phone_verified, email_verified,
             avatar_url, commune_id, bio, is_admin, account_type, pro_category,
-            CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
-            CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN pro_plan ELSE NULL END AS pro_plan,
+            CASE WHEN is_pro = TRUE AND pro_expires_at > NOW() THEN TRUE ELSE FALSE END AS is_pro,
+            CASE WHEN is_pro = TRUE AND pro_expires_at > NOW() THEN pro_plan ELSE NULL END AS pro_plan,
             pro_expires_at, last_bon_plan_offer_at, onboarding_step, COALESCE(tours_seen, '{}'::text[]) AS tours_seen,
             nb_annonces, note_moyenne, nb_avis, created_at
      FROM users WHERE id = $1`,
@@ -310,8 +310,8 @@ async function findUserByIdentifier(identifier) {
   return query(
     `SELECT id, email, prenom, nom, telephone, phone_verified, email_verified,
             avatar_url, commune_id, bio, is_admin, account_type,
-            CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
-            CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN pro_plan ELSE NULL END AS pro_plan,
+            CASE WHEN is_pro = TRUE AND pro_expires_at > NOW() THEN TRUE ELSE FALSE END AS is_pro,
+            CASE WHEN is_pro = TRUE AND pro_expires_at > NOW() THEN pro_plan ELSE NULL END AS pro_plan,
             pro_expires_at, last_bon_plan_offer_at, onboarding_step, deleted_at
      FROM users
      WHERE deleted_at IS NULL
@@ -437,8 +437,8 @@ async function refreshSessionWithRotation(refreshToken) {
 
   const user = await query(
     `SELECT id, email, prenom, nom, is_admin, account_type,
-            CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
-            CASE WHEN is_pro = TRUE AND (pro_expires_at IS NULL OR pro_expires_at > NOW()) THEN pro_plan ELSE NULL END AS pro_plan,
+            CASE WHEN is_pro = TRUE AND pro_expires_at > NOW() THEN TRUE ELSE FALSE END AS is_pro,
+            CASE WHEN is_pro = TRUE AND pro_expires_at > NOW() THEN pro_plan ELSE NULL END AS pro_plan,
             pro_expires_at, last_bon_plan_offer_at, email_verified
      FROM users WHERE id = $1 AND deleted_at IS NULL`,
     [payload.sub]
