@@ -72,14 +72,14 @@ const boostOneClickSchema = {
 const subscriptionSchema = {
   body: Joi.object({
     plan_id: Joi.string().valid('pro').required(),
-    billing_period: Joi.string().valid('monthly', 'yearly').required(),
+    billing_period: Joi.string().valid('monthly').required(),
     provider: Joi.string().valid('stripe', 'payplug').default('stripe'),
   }),
 };
 
 const mobilePlanSchema = {
   body: Joi.object({
-    plan: Joi.string().valid('pro_mensuel', 'pro_annuel').required(),
+    plan: Joi.string().valid('pro_mensuel').required(),
   }),
 };
 
