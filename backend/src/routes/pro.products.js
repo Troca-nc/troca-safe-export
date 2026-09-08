@@ -9,6 +9,10 @@ const { deletePrefix } = require('../services/sharedCache');
 const { slugifyCategoryName } = require('../shared-copy/categoryTaxonomy');
 const { matchImmediateAlerts } = require('../jobs/scheduler');
 const { flagIfSuspicious } = require('../middleware/antiScam');
+const {
+  assertActiveCatalogCapacity,
+  assertActiveListingCapacity,
+} = require('../services/commercialQuotaService');
 
 const router = express.Router();
 const LIST_CACHE_PREFIX = 'cache:listings:';
@@ -432,6 +436,7 @@ router.post('/', async (req, res, next) => {
     const tempSlug = `${slugBase}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
     const created = await withTransaction(async (client) => {
+      await assertActiveCatalogCapacity(client, req.user);
       const inserted = await client.query(
         `INSERT INTO products
            (owner_id, title, slug, description, price_type, price_xpf, compare_at_price_xpf, stock_quantity,
@@ -511,6 +516,9 @@ router.put('/:id', async (req, res, next) => {
       : null;
 
     await withTransaction(async (client) => {
+      if (value.is_active === true && !existing.is_active) {
+        await assertActiveCatalogCapacity(client, req.user, { excludeProductId: productId });
+      }
       const fields = [];
       const params = [];
       let idx = 1;
@@ -652,6 +660,7 @@ router.post('/:id/publish', async (req, res, next) => {
     }
 
     const createdListing = await withTransaction(async (client) => {
+      await assertActiveListingCapacity(client, req.user);
       const ins = await client.query(
         `INSERT INTO annonces
            (user_id, titre, description, prix, category_id, commune_id, condition, is_negotiable, phone, contre_quoi,

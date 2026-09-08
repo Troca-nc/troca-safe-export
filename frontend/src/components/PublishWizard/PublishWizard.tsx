@@ -174,11 +174,13 @@ function WizardStepper({ step }: { step: number }) {
 
 function PhotoGrid({
   photos,
+  maxPhotos,
   onAddFiles,
   onRemove,
   onMove,
 }: {
   photos: PhotoItem[]
+  maxPhotos: number
   onAddFiles: (files: FileList | File[]) => void | Promise<void>
   onRemove: (index: number) => void
   onMove: (from: number, to: number) => void
@@ -215,10 +217,10 @@ function PhotoGrid({
           </div>
           <div>
             <p className="text-sm font-semibold text-night">
-              {dragOver ? 'Dï¿½posez vos photos ici' : 'Ajoutez 1 ï¿½ 8 photos'}
+              {dragOver ? 'Dï¿½posez vos photos ici' : `Ajoutez 1 ï¿½ ${maxPhotos} photos`}
             </p>
             <p className="mt-1 text-sm text-night/55">
-              Glissez-dï¿½posez ou cliquez pour choisir vos images. Les 8 premiï¿½res sont conservï¿½es.
+              Glissez-dï¿½posez ou cliquez pour choisir vos images. Les {maxPhotos} premiï¿½res sont conservï¿½es.
             </p>
           </div>
           <p className="text-xs text-night/40">JPEG, PNG, WebP, HEIC</p>
@@ -322,6 +324,8 @@ export default function PublishWizard() {
   const router = useRouter()
   const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
   const userId = useAuthStore((state) => state.user?.id ?? 'guest')
+  const isPro = useAuthStore((state) => Boolean(state.user?.is_pro))
+  const maxPhotos = isPro ? 12 : 6
   const [draft, setDraft] = useState<WizardDraft>(INITIAL_DRAFT)
   const [photos, setPhotos] = useState<PhotoItem[]>([])
   const [loadingMeta, setLoadingMeta] = useState(true)
@@ -505,10 +509,10 @@ export default function PublishWizard() {
       )
     }
     if (draft.step === 2) {
-      return photos.length >= 1 && photos.length <= 8
+      return photos.length >= 1 && photos.length <= maxPhotos
     }
     return Boolean(draft.price.trim() && draft.commune_id && draft.duration_days)
-  }, [draft, photos.length, selectedCategory])
+  }, [draft, maxPhotos, photos.length, selectedCategory])
 
   const restoreDraft = () => {
     const pending = pendingDraft
@@ -584,7 +588,7 @@ export default function PublishWizard() {
     if (!incoming.length) return
 
     const optimizedFiles = await Promise.all(
-      incoming.slice(0, 8).map(async (file) => {
+      incoming.slice(0, maxPhotos).map(async (file) => {
         if (!file.type.startsWith('image/')) return file
         try {
           return await compressImage(file)
@@ -597,7 +601,7 @@ export default function PublishWizard() {
     setPhotos((current) => {
       const combined = [...current]
       for (const file of optimizedFiles) {
-        if (combined.length >= 8) break
+        if (combined.length >= maxPhotos) break
         combined.push({
           id: makeId(),
           file,
@@ -674,7 +678,7 @@ export default function PublishWizard() {
     }
     if (draft.step === 2) {
       if (photos.length < 1) return 'Ajoutez au moins une photo.'
-      if (photos.length > 8) return 'Vous ne pouvez pas dï¿½passer 8 photos.'
+      if (photos.length > maxPhotos) return `Vous ne pouvez pas dï¿½passer ${maxPhotos} photos.`
     }
     if (draft.step === 3) {
       if (!draft.price.trim()) return 'Le prix est requis.'
@@ -973,9 +977,9 @@ export default function PublishWizard() {
 
             {draft.step === 2 && (
               <div className="space-y-4">
-                <PhotoGrid photos={photos} onAddFiles={addPhotos} onRemove={removePhoto} onMove={movePhoto} />
+                <PhotoGrid photos={photos} maxPhotos={maxPhotos} onAddFiles={addPhotos} onRemove={removePhoto} onMove={movePhoto} />
                 <p className="text-xs text-night/45">
-                  Ajoutez jusqu&apos;ï¿½ 8 photos. Le rï¿½ordonnancement conserve la premiï¿½re photo comme couverture principale.
+                  Ajoutez jusqu&apos;ï¿½ {maxPhotos} photos. Le rï¿½ordonnancement conserve la premiï¿½re photo comme couverture principale.
                 </p>
               </div>
             )}

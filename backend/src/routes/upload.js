@@ -11,7 +11,7 @@ const sharp   = require('sharp');
 const path    = require('path');
 const fs      = require('fs').promises;
 const { v4: uuidv4 } = require('uuid');
-const { query }      = require('../config/database');
+const { query, withTransaction } = require('../config/database');
 const { authenticate } = require('../middleware/auth');
 const { uploadLimiter } = require('../middleware/rateLimit');
 const {
@@ -19,6 +19,7 @@ const {
   processImageVariants,
   removeImageFiles,
 } = require('../services/imageService');
+const { listingPhotoLimit } = require('../services/commercialQuotaService');
 
 const router = express.Router();
 router.use(authenticate);
@@ -27,7 +28,7 @@ router.use(uploadLimiter);
 // ── Configuration Multer (stockage en mémoire) ──────────────
 
 const MAX_FILE_SIZE = (parseInt(process.env.MAX_FILE_SIZE_MB) || 10) * 1024 * 1024;
-const MAX_IMAGES    = parseInt(process.env.MAX_IMAGES_PER_LISTING) || 8;
+const MAX_IMAGES    = 12;
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -184,64 +185,65 @@ router.post('/listing/:id', uploadLimiter, upload.array('images', MAX_IMAGES), a
       return res.status(400).json({ error: 'Aucune image reçue' });
     }
 
-    // Vérifier que l'annonce appartient à l'utilisateur
-    const listing = await query(
-      'SELECT id FROM annonces WHERE id = $1 AND user_id = $2',
-      [listingId, userId]
-    );
-    if (!listing.rows[0]) {
-      return res.status(403).json({ error: 'Annonce introuvable ou accès refusé' });
-    }
+    const savedImages = await withTransaction(async (client) => {
+      const listing = await client.query(
+        'SELECT id FROM annonces WHERE id = $1 AND user_id = $2 FOR UPDATE',
+        [listingId, userId]
+      );
+      if (!listing.rows[0]) {
+        const error = new Error('Annonce introuvable ou accès refusé');
+        error.status = 403;
+        throw error;
+      }
 
-    // Compter les images existantes
-    const countResult = await query(
-      'SELECT COUNT(*) FROM annonce_images WHERE annonce_id = $1',
-      [listingId]
-    );
-    const existingCount = parseInt(countResult.rows[0].count);
+      const countResult = await client.query(
+        'SELECT COUNT(*) FROM annonce_images WHERE annonce_id = $1',
+        [listingId]
+      );
+      const existingCount = parseInt(countResult.rows[0].count);
+      const photoLimit = listingPhotoLimit(req.user);
+      if (existingCount + req.files.length > photoLimit) {
+        const error = new Error(`Maximum ${photoLimit} photos par annonce. Vous en avez déjà ${existingCount}.`);
+        error.status = 400;
+        throw error;
+      }
 
-    if (existingCount + req.files.length > MAX_IMAGES) {
-      return res.status(400).json({
-        error: `Maximum ${MAX_IMAGES} photos par annonce. Vous en avez déjà ${existingCount}.`,
-      });
-    }
+      const insertedImages = [];
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        const processed = await processImageVariants(file.buffer, file, listingId);
+        const isFirst = existingCount === 0 && i === 0;
 
-    // Traiter chaque image
-    const savedImages = [];
-    for (let i = 0; i < req.files.length; i++) {
-      const file      = req.files[i];
-      const processed = await processImageVariants(file.buffer, file, listingId);
-      const isFirst   = existingCount === 0 && i === 0;
+        const insertResult = await client.query(`
+          INSERT INTO annonce_images (annonce_id, url, thumbnail_url, variants, sort_order, is_cover)
+          VALUES ($1, '', '', $2::jsonb, $3, $4)
+          RETURNING id
+        `, [listingId, JSON.stringify(processed.relativePaths), existingCount + i, isFirst]);
 
-      const insertResult = await query(`
-        INSERT INTO annonce_images (annonce_id, url, thumbnail_url, variants, sort_order, is_cover)
-        VALUES ($1, '', '', $2::jsonb, $3, $4)
-        RETURNING id
-      `, [listingId, JSON.stringify(processed.relativePaths), existingCount + i, isFirst]);
+        const imageId = insertResult.rows[0].id;
+        const publicUrls = {
+          original: buildUploadPublicUrl(imageId, 'original'),
+          thumb_400: buildUploadPublicUrl(imageId, 'thumb_400'),
+          thumb_800: buildUploadPublicUrl(imageId, 'thumb_800'),
+        };
+        const variants = {
+          original: { path: processed.relativePaths.original, url: publicUrls.original },
+          thumb_400: { path: processed.relativePaths.thumb_400, url: publicUrls.thumb_400 },
+          thumb_800: { path: processed.relativePaths.thumb_800, url: publicUrls.thumb_800 },
+        };
 
-      const imageId = insertResult.rows[0].id;
-      const publicUrls = {
-        original: buildUploadPublicUrl(imageId, 'original'),
-        thumb_400: buildUploadPublicUrl(imageId, 'thumb_400'),
-        thumb_800: buildUploadPublicUrl(imageId, 'thumb_800'),
-      };
-      const variants = {
-        original: { path: processed.relativePaths.original, url: publicUrls.original },
-        thumb_400: { path: processed.relativePaths.thumb_400, url: publicUrls.thumb_400 },
-        thumb_800: { path: processed.relativePaths.thumb_800, url: publicUrls.thumb_800 },
-      };
-
-      const result = await query(`
-        UPDATE annonce_images
-        SET url = $1,
-            thumbnail_url = $2,
-            variants = $3::jsonb
-        WHERE id = $4
-        RETURNING id, url, thumbnail_url, variants, sort_order, is_cover
-      `, [publicUrls.original, publicUrls.thumb_400, JSON.stringify(variants), imageId]);
-
-      savedImages.push(result.rows[0]);
-    }
+        const result = await client.query(`
+          UPDATE annonce_images
+          SET url = $1,
+              thumbnail_url = $2,
+              variants = $3::jsonb
+          WHERE id = $4
+          RETURNING id, url, thumbnail_url, variants, sort_order, is_cover
+        `, [publicUrls.original, publicUrls.thumb_400, JSON.stringify(variants), imageId]);
+        insertedImages.push(result.rows[0]);
+      }
+      return insertedImages;
+    });
 
     res.status(201).json({
       message: `${savedImages.length} photo(s) uploadée(s)`,

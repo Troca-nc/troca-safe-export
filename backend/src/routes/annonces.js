@@ -29,6 +29,7 @@ const { getUserPresence, getPresenceLabel } = require('../services/presenceServi
 const { getSellerResponseTime } = require('../services/sellerInsightsService');
 const { createNotification } = require('../services/notificationService');
 const { sendPushToUser } = require('../services/pushService');
+const { assertActiveListingCapacity } = require('../services/commercialQuotaService');
 const {
   isDonCategory,
   validateListingMetadata,
@@ -470,21 +471,8 @@ router.post('/', authenticate, rateLimitAnnonces, async (req, res, next) => {
       return res.status(400).json({ error: 'Le complement XPF maximal doit etre superieur a 0.' });
     }
 
-    // Limite d'annonces actives pour les non-pro
-    if (!req.user.is_pro) {
-      const activeCount = await query(
-        `SELECT COUNT(*) AS n FROM annonces WHERE user_id = $1 AND status = 'active' AND deleted_at IS NULL`,
-        [req.user.id]
-      );
-      if (parseInt(activeCount.rows[0].n) >= 10) {
-        return res.status(403).json({
-          error: 'Limite de 10 annonces actives atteinte. Passez en compte Pro pour publier davantage.',
-          code: 'LIMIT_REACHED',
-        });
-      }
-    }
-
     const result = await withTransaction(async (client) => {
+      await assertActiveListingCapacity(client, req.user);
       const ins = await client.query(
         `INSERT INTO annonces
            (user_id, titre, description, prix, category_id, commune_id, condition, is_negotiable, phone, contre_quoi,
@@ -713,10 +701,15 @@ router.put('/:id', authenticate, async (req, res, next) => {
     if (fields.length === 0) return res.status(400).json({ error: 'Aucun champ à modifier.' });
 
     params.push(id);
-    const result = await query(
-      `UPDATE annonces SET ${fields.join(', ')}, updated_at = NOW() WHERE id = $${p} RETURNING *`,
-      params
-    );
+    const result = await withTransaction(async (client) => {
+      if (value.status === 'active') {
+        await assertActiveListingCapacity(client, req.user, { excludeListingId: id });
+      }
+      return client.query(
+        `UPDATE annonces SET ${fields.join(', ')}, updated_at = NOW() WHERE id = $${p} RETURNING *`,
+        params
+      );
+    });
 
     flagIfSuspicious(id).catch((err) =>
       console.error('[antiScam] Erreur revalidation:', err.message)
@@ -906,15 +899,20 @@ router.patch('/:id/status', authenticate, async (req, res, next) => {
       return res.status(403).json({ error: 'Vous ne pouvez modifier que vos propres annonces.' });
     }
 
-    const updated = await query(
-      `UPDATE annonces
-       SET status = $2,
-           updated_at = NOW(),
-           metadata = COALESCE(metadata, '{}'::jsonb) || jsonb_build_object('status_updated_at', NOW()::text)
-       WHERE id = $1
-       RETURNING *`,
-      [req.params.id, nextStatus]
-    );
+    const updated = await withTransaction(async (client) => {
+      if (nextStatus === 'active') {
+        await assertActiveListingCapacity(client, req.user, { excludeListingId: req.params.id });
+      }
+      return client.query(
+        `UPDATE annonces
+         SET status = $2,
+             updated_at = NOW(),
+             metadata = COALESCE(metadata, '{}'::jsonb) || jsonb_build_object('status_updated_at', NOW()::text)
+         WHERE id = $1
+         RETURNING *`,
+        [req.params.id, nextStatus]
+      );
+    });
 
     const conversationRows = await query(
       `SELECT id, buyer_id
