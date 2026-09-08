@@ -29,15 +29,9 @@ const {
   markConversationMessagesRead,
   startConversation,
 } = require('../services/messageConversationService');
-const { verifyAttachmentDownloadToken } = require('../services/messageAttachmentAccess');
 
 const router = express.Router();
-router.use((req, res, next) => {
-  if (req.method === 'GET' && req.path.startsWith('/attachments/') && req.query?.token) {
-    return next();
-  }
-  return authenticate(req, res, next);
-});
+router.use(authenticate);
 
 const startConversationSchema = Joi.object({
   annonce_id: Joi.alternatives().try(Joi.number().integer(), Joi.string().trim()).optional(),
@@ -89,19 +83,7 @@ router.get('/conversations/:id', async (req, res, next) => {
 router.get('/attachments/:messageId/download', async (req, res, next) => {
   try {
     const messageId = Number(req.params.messageId);
-    const token = String(req.query?.token || '').trim();
-    let userId = req.user?.id || null;
-
-    if (token) {
-      const decoded = verifyAttachmentDownloadToken(token);
-      if (Number(decoded.messageId) !== messageId) {
-        throw createHttpError(401, 'Jeton de téléchargement invalide');
-      }
-      if (userId && Number(userId) !== Number(decoded.userId)) {
-        throw createHttpError(403, 'Téléchargement non autorisé');
-      }
-      userId = decoded.userId;
-    }
+    const userId = req.user?.id || null;
 
     if (!userId || !messageId) {
       throw createHttpError(401, 'Téléchargement non autorisé');

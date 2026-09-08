@@ -13,6 +13,7 @@ import ChatInput from '@/components/messages/ChatInput'
 import { trocApi, usersApi } from '@/lib/api'
 import type { Conversation, Message } from '@/types/messaging.types'
 import { useAuthSessionSync } from '@/hooks/useAuthSessionSync'
+import { openPrivateAttachment } from '@/hooks/usePrivateAttachment'
 
 type MobilePanel = 'chat' | 'media' | 'listing'
 type AttachmentKind = 'image' | 'audio' | 'document'
@@ -201,11 +202,10 @@ function MediaSidebar({
             </div>
           ) : (
             attachments.slice().reverse().map((item) => (
-              <a
+              <button
+                type="button"
                 key={`${item.kind}-${item.id}`}
-                href={item.url}
-                target="_blank"
-                rel="noreferrer"
+                onClick={() => void openPrivateAttachment(item.url)}
                 className="flex items-center gap-3 rounded-2xl border border-night/10 bg-white px-3 py-3 transition-all hover:border-kalico-blue/30 hover:shadow-sm"
               >
                 <div
@@ -231,7 +231,7 @@ function MediaSidebar({
                     {new Date(item.createdAt).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
-              </a>
+              </button>
             ))
           )}
         </div>
@@ -740,11 +740,10 @@ export default function MessagesPage() {
                 </div>
               ) : (
                 attachments.slice().reverse().map((item) => (
-                  <a
+                  <button
+                    type="button"
                     key={`${item.kind}-${item.id}`}
-                    href={item.url}
-                    target="_blank"
-                    rel="noreferrer"
+                    onClick={() => void openPrivateAttachment(item.url)}
                     className="flex items-center gap-3 rounded-2xl border border-night/10 bg-white px-3 py-3"
                   >
                     <div
@@ -770,7 +769,7 @@ export default function MessagesPage() {
                         {new Date(item.createdAt).toLocaleString('fr-FR')}
                       </p>
                     </div>
-                  </a>
+                  </button>
                 ))
               )}
             </div>

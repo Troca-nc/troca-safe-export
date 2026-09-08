@@ -17,40 +17,23 @@ function timeAgo(iso: string) {
   return formatDistanceToNow(parseISO(iso), { addSuffix: false, locale: fr })
 }
 
-function isImageMime(mime?: string | null) {
-  return !!mime && mime.startsWith('image/')
-}
-
 function getAttachmentPreview(conv: Conversation) {
   const last = conv.last_message
   if (!last) return null
 
   if (last.type === 'photo') {
-    const url = last.photo_url || last.attachment_download_url || last.attachment_url || ''
-    if (!url) return null
-
     return {
-      kind: 'image' as const,
-      url,
+      kind: 'document' as const,
       label: last.attachment_name || 'Photo partagï¿½e',
+      mime: 'IMAGE',
     }
   }
 
   if (last.type === 'document') {
-    const url = last.attachment_download_url || last.attachment_url || ''
-    if (!url) return null
-
-    if (isImageMime(last.attachment_mime_type)) {
-      return {
-        kind: 'image' as const,
-        url,
-        label: last.attachment_name || 'Image partagï¿½e',
-      }
-    }
+    if (!last.attachment_download_url && !last.attachment_url) return null
 
     return {
       kind: 'document' as const,
-      url,
       label: last.attachment_name || 'Document partagï¿½',
       mime: last.attachment_mime_type || '',
     }
@@ -196,17 +179,9 @@ export default function ConversationList({ conversations, activeId, onSelect, lo
 
               {attachment && (
                 <div className="mt-1 flex items-center gap-2">
-                  {attachment.kind === 'image' ? (
-                    <img
-                      src={attachment.url}
-                      alt=""
-                      className="h-6 w-6 shrink-0 rounded-lg object-cover ring-1 ring-night/10"
-                    />
-                  ) : (
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-nc-emeraudeLight text-nc-emeraudeText">
                       <FileText className="h-3.5 w-3.5" />
                     </span>
-                  )}
                   <p className="min-w-0 truncate text-[11px] text-night/45">
                     {attachment.kind === 'document' && attachment.mime
                       ? `${attachment.label} ï¿½ ${attachment.mime.split('/').pop()?.toUpperCase() ?? 'DOC'}`
