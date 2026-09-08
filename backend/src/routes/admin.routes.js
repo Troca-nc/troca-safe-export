@@ -26,6 +26,7 @@ const {
   unsuspendUser,
 } = require('../services/adminUserActionService')
 const { resolveReport } = require('../services/adminModerationActionService')
+const { bindVerifiedCompanyIdentity } = require('../services/companyIdentityService')
 
 const router = express.Router()
 router.use(adminRateLimit, requireAdminToken)
@@ -211,7 +212,7 @@ router.post('/pro-documents/:id/validate', async (req, res, next) => {
 
     const result = await query(
       `SELECT d.id, d.pro_id, d.document_type, d.label, d.file_url, d.file_name, d.status,
-              u.email, u.prenom, u.nom, u.pro_company_name
+              u.email, u.prenom, u.nom, u.pro_company_name, u.pro_siret
        FROM pro_documents d
        JOIN users u ON u.id = d.pro_id
        WHERE d.id = $1
@@ -224,21 +225,30 @@ router.post('/pro-documents/:id/validate', async (req, res, next) => {
       return res.status(404).json({ error: 'Document introuvable.' })
     }
 
-    const updated = await query(
-      `UPDATE pro_documents
-       SET status = $1,
-           rejection_reason = $2,
-           validated_at = NOW(),
-           validated_by = $3
-       WHERE id = $4
-       RETURNING id, status, rejection_reason, validated_at, validated_by`,
-      [
-        status,
-        status === 'rejected' ? (rejectionReason || 'Document refusé') : null,
-        getAdminActorId(req) || null,
-        documentId,
-      ]
-    )
+    const updated = await withTransaction(async (client) => {
+      if (status === 'validated' && doc.document_type === 'extrait_ridet') {
+        await bindVerifiedCompanyIdentity(client, {
+          userId: doc.pro_id,
+          ridet: doc.pro_siret,
+          legalName: doc.pro_company_name,
+        })
+      }
+      return client.query(
+        `UPDATE pro_documents
+         SET status = $1,
+             rejection_reason = $2,
+             validated_at = NOW(),
+             validated_by = $3
+         WHERE id = $4
+         RETURNING id, status, rejection_reason, validated_at, validated_by`,
+        [
+          status,
+          status === 'rejected' ? (rejectionReason || 'Document refusé') : null,
+          getAdminActorId(req) || null,
+          documentId,
+        ]
+      )
+    })
 
     const proName = doc.pro_company_name || [doc.prenom, doc.nom].filter(Boolean).join(' ').trim() || doc.email
     const documentLabel = doc.label || formatDocumentTypeLabel(doc.document_type)
