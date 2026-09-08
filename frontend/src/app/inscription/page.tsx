@@ -659,7 +659,7 @@ export default function RegisterPage() {
                             </div>
 
                             <p className="mt-4 text-3xl font-bold text-kalico-blue">
-                              {billingCycle === 'monthly' ? '4 900 XPF / mois' : '44 900 XPF / an'}
+                              {billingCycle === 'monthly' ? '2 900 XPF / mois' : '44 900 XPF / an'}
                             </p>
                             {billingCycle === 'annual' ? (
                               <p className="mt-2 text-sm font-semibold text-jungle">2 mois offerts</p>
@@ -938,4 +938,3 @@ export default function RegisterPage() {
     </div>
   )
 }
-

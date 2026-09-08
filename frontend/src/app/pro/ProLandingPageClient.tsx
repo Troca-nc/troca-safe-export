@@ -672,7 +672,7 @@ function ComparisonTable() {
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-nc-emeraude">Formule Pro</p>
-              <p className="mt-2 text-2xl font-bold text-night">4 900 XPF / mois</p>
+              <p className="mt-2 text-2xl font-bold text-night">2 900 XPF / mois</p>
               <p className="mt-1 text-sm text-night/60">Sans engagement. Rï¿½siliable ï¿½ tout moment.</p>
             </div>
             <Link href="/pro/inscription" className="btn-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm">

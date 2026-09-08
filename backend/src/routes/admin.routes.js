@@ -817,7 +817,7 @@ router.get('/stats/revenue', async (req, res, next) => {
     const [subscriptionMetrics, revenuePeriods, chartRevenue, topProUsers] = await Promise.all([
       query(
         `SELECT
-           COALESCE(SUM(CASE WHEN billing_period = 'monthly' THEN 4900 ELSE 44900.0 / 12 END)
+           COALESCE(SUM(CASE WHEN billing_period = 'monthly' THEN 2900 ELSE 44900.0 / 12 END)
              FILTER (WHERE status = 'active' AND payment_status = 'succeeded' AND current_period_end > NOW()), 0)::int AS mrr_xpf,
            COUNT(*) FILTER (WHERE status = 'active' AND payment_status = 'succeeded' AND current_period_end > NOW())::int AS pro_subscribers_active,
            COUNT(*) FILTER (WHERE payment_status = 'succeeded' AND created_at >= NOW() - INTERVAL '30 days')::int AS pro_subscribers_new,

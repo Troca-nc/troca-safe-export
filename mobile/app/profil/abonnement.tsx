@@ -32,7 +32,7 @@ const PLANS = [
   {
     id: 'pro_mensuel' as Plan,
     label: 'Pro Mensuel',
-    price: '15 000',
+    price: '2 900',
     period: 'par mois',
     saving: null,
     highlight: false,

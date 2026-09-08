@@ -12,7 +12,7 @@ function xpfToEur(xpf) {
 }
 
 router.get('/plans', async (_req, res) => {
-  const pro = PRO_PLANS.pro || { monthly: { amount_xpf: 4900 }, yearly: { amount_xpf: 44900 } };
+  const pro = PRO_PLANS.pro || { monthly: { amount_xpf: 2900 }, yearly: { amount_xpf: 44900 } };
   return res.json({
     data: {
       plans: [

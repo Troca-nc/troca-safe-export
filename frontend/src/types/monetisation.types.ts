@@ -46,7 +46,7 @@ export const PRO_PLANS: ProPlan[] = [
   {
     id: 'pro',
     label: 'Pro',
-    price_monthly: 4900,
+    price_monthly: 2900,
     price_yearly: 44900,
     savings_pct: 17,
     highlight: true,
