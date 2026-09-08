@@ -37,9 +37,36 @@ describe('security harness guards', () => {
     });
   });
 
-  it('refuse l inventaire hors environnement de sécurité', () => {
-    withEnvironment({ NODE_ENV: 'production', KALICO_SECURITY_TEST_ONLY: 'true', DB_NAME: 'kalico_security_test' }, () => {
-      assert.throws(() => inventory.assertSafeEnvironment(), /explicit security-test environment/);
+  it('refuse l inventaire de production sans mode lecture seule explicite', () => {
+    withEnvironment({
+      NODE_ENV: 'production',
+      KALICO_SECURITY_TEST_ONLY: null,
+      KALICO_INVENTORY_READ_ONLY: null,
+      STORAGE_LOCAL_PATH: '/app/uploads',
+    }, () => {
+      assert.throws(() => inventory.assertSafeEnvironment(), /explicit production read-only mode/);
+    });
+  });
+
+  it('autorise uniquement l inventaire agrege de production explicitement arme', () => {
+    withEnvironment({
+      NODE_ENV: 'production',
+      KALICO_SECURITY_TEST_ONLY: null,
+      KALICO_INVENTORY_READ_ONLY: 'true',
+      STORAGE_LOCAL_PATH: '/app/uploads',
+    }, () => {
+      assert.strictEqual(inventory.assertSafeEnvironment(), path.resolve('/app/uploads'));
+      assert.strictEqual(inventory.getSourceEnvironment(), 'production-read-only');
+    });
+  });
+
+  it('refuse une racine de stockage implicite ou relative', () => {
+    withEnvironment({
+      NODE_ENV: 'production',
+      KALICO_INVENTORY_READ_ONLY: 'true',
+      STORAGE_LOCAL_PATH: 'uploads',
+    }, () => {
+      assert.throws(() => inventory.assertSafeEnvironment(), /explicit absolute path/);
     });
   });
 

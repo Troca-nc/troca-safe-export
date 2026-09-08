@@ -7,13 +7,25 @@ const { pool } = require('../../config/database');
 const CLASSES = ['chat', 'pro-documents', 'imports', 'qr-tickets', 'products', 'listings'];
 
 function assertSafeEnvironment() {
-  if (process.env.NODE_ENV !== 'test' || process.env.KALICO_SECURITY_TEST_ONLY !== 'true') {
-    throw new Error('Inventory requires the explicit security-test environment');
+  const isSecurityTest = process.env.NODE_ENV === 'test'
+    && process.env.KALICO_SECURITY_TEST_ONLY === 'true'
+    && String(process.env.DB_NAME || '').endsWith('_security_test');
+  const isProductionReadOnly = process.env.NODE_ENV === 'production'
+    && process.env.KALICO_INVENTORY_READ_ONLY === 'true';
+
+  if (!isSecurityTest && !isProductionReadOnly) {
+    throw new Error('Inventory requires security-test mode or explicit production read-only mode');
   }
-  if (!String(process.env.DB_NAME || '').endsWith('_security_test')) {
-    throw new Error('Inventory refuses databases outside *_security_test');
+
+  const configuredRoot = String(process.env.STORAGE_LOCAL_PATH || '').trim();
+  if (!configuredRoot || !path.isAbsolute(configuredRoot)) {
+    throw new Error('STORAGE_LOCAL_PATH must be an explicit absolute path');
   }
-  return path.resolve(process.env.STORAGE_LOCAL_PATH || '');
+  return path.resolve(configuredRoot);
+}
+
+function getSourceEnvironment() {
+  return process.env.NODE_ENV === 'production' ? 'production-read-only' : 'security-test';
 }
 
 function parseOutput(argv) {
@@ -99,7 +111,7 @@ async function main() {
   const report = {
     schema_version: 1,
     generated_at: new Date().toISOString(),
-    source_environment: 'security-test',
+    source_environment: getSourceEnvironment(),
     db: await readDatabaseCounts(),
     filesystem: await walk(root),
   };
@@ -119,4 +131,4 @@ if (require.main === module) {
   }).finally(() => pool.end());
 }
 
-module.exports = { assertSafeEnvironment, classify, parseOutput, walk };
+module.exports = { assertSafeEnvironment, classify, getSourceEnvironment, parseOutput, walk };
