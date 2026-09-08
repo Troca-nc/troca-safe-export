@@ -63,5 +63,6 @@
 \i /docker-entrypoint-initdb-src/migrations/20260703_envoi_livraison.sql
 \i /docker-entrypoint-initdb-src/migrations/20260705_tours_seen.sql
 \i /docker-entrypoint-initdb-src/migrations/20260909_pro_renewal_grace.sql
+\i /docker-entrypoint-initdb-src/migrations/20260909_companies_and_members.sql
 
 \echo '[init] Database initialization complete.'
