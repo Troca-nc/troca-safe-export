@@ -1083,7 +1083,7 @@ export const proQuotesApi = {
   ),
   getById: (id: string | number, token?: string) => cachedGet(
     buildCacheKey('proQuotes.getById', `/pro-quotes/${id}`, { token: token || '' }),
-    () => api.get(`/pro-quotes/${id}`, { params: token ? { token } : {} }),
+    () => api.get(`/pro-quotes/${id}`, { headers: token ? { 'X-Kalico-Capability': token } : {} }),
     CACHE_TTL.short,
   ),
   update: async (id: string | number, data: object) => {
@@ -1119,7 +1119,7 @@ export const proQuotesApi = {
   },
   downloadPdf: (id: string | number, token?: string) => api.get(`/pro-quotes/${id}/pdf`, {
     responseType: 'blob',
-    params: token ? { token } : {},
+    headers: token ? { 'X-Kalico-Capability': token } : {},
   }),
 }
 
@@ -1148,7 +1148,7 @@ export const proBookingsApi = {
   ),
   getById: (bookingId: string | number, token?: string) => cachedGet(
     buildCacheKey('proBookings.byId', `/pro/bookings/${bookingId}`, token ? { token } : {}),
-    () => api.get(`/pro/bookings/${bookingId}`, { params: token ? { token } : {} }),
+    () => api.get(`/pro/bookings/${bookingId}`, { headers: token ? { 'X-Kalico-Capability': token } : {} }),
     CACHE_TTL.short,
   ),
   getDashboard: () => cachedGet(

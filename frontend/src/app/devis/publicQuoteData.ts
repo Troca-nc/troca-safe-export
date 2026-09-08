@@ -55,7 +55,8 @@ const API_BASE = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? `${SITE_URL
 
 export const fetchPublicQuote = cache(async (id: string, token?: string) => {
   try {
-    const res = await fetch(`${API_BASE}/pro-quotes/${id}${token ? `?token=${encodeURIComponent(token)}` : ''}`, {
+    const res = await fetch(`${API_BASE}/pro-quotes/${id}`, {
+      headers: token ? { 'X-Kalico-Capability': token } : {},
       next: { revalidate: 120 },
     })
     if (!res.ok) return null

@@ -112,4 +112,24 @@ describe('P0-B log and internal-token boundaries', () => {
       'une seule réponse peut émettre booking_access_token'
     );
   });
+
+  it('transporte les capacités devis et réservation hors des query strings', () => {
+    const root = path.resolve(__dirname, '../../../../');
+    const quoteRoute = fs.readFileSync(path.join(root, 'backend/src/routes/pro.quotes.js'), 'utf8');
+    const bookingRoute = fs.readFileSync(path.join(root, 'backend/src/routes/pro.bookings.js'), 'utf8');
+    const scheduler = fs.readFileSync(path.join(root, 'backend/src/jobs/scheduler.js'), 'utf8');
+    const emailService = fs.readFileSync(path.join(root, 'backend/src/services/emailService.js'), 'utf8');
+    const frontendApi = fs.readFileSync(path.join(root, 'frontend/src/lib/api.ts'), 'utf8');
+
+    assert.ok(!quoteRoute.includes('/devis/${quote.id}?token='));
+    assert.ok(!bookingRoute.includes('${path}?token='));
+    assert.ok(!scheduler.includes('?token=${encodeURIComponent(bookingToken)}'));
+    assert.ok(!emailService.includes('?token=${encodeURIComponent(String(details.bookingAccessToken))}'));
+    assert.ok(quoteRoute.includes('#token=${encodeURIComponent(quote.share_token)}'));
+    assert.ok(bookingRoute.includes('#token=${encodeURIComponent(token)}'));
+    assert.ok(quoteRoute.includes("req.get('x-kalico-capability')"));
+    assert.ok(bookingRoute.includes("req.get('x-kalico-capability')"));
+    assert.ok(frontendApi.includes("'X-Kalico-Capability': token"));
+    assert.ok(!frontendApi.includes('params: token ? { token } : {}'));
+  });
 });

@@ -268,7 +268,7 @@ async function assertQuoteAccess(req, quote) {
   if (req.user?.is_admin) return true;
   if (req.user?.id && Number(req.user.id) === Number(quote.pro_id)) return true;
   if (req.user?.id && quote.requester_user_id != null && Number(req.user.id) === Number(quote.requester_user_id)) return true;
-  const token = String(req.query.token || req.body?.token || '').trim();
+  const token = String(req.get('x-kalico-capability') || req.body?.token || '').trim();
   if (token && quote.share_token && token === quote.share_token) return true;
   return false;
 }
@@ -287,7 +287,7 @@ async function loadNextQuoteNumber(client) {
 
 async function sendQuoteSentEmails(quote) {
   const subject = `${quote.quote_number} - Devis envoyé par ${quote.pro.display_name}`;
-  const link = `${BASE_URL}/devis/${quote.id}?token=${quote.share_token}`;
+  const link = `${BASE_URL}/devis/${quote.id}#token=${encodeURIComponent(quote.share_token)}`;
   const htmlItems = quote.items
     .map((item, index) => `
       <tr>
@@ -616,7 +616,7 @@ router.post('/:id/accept', optionalAuth, async (req, res, next) => {
     if (!(await assertQuoteAccess(req, quote))) {
       return res.status(403).json({ error: 'Accès refusé.' });
     }
-    const token = String(req.body?.token || req.query.token || '').trim();
+    const token = String(req.body?.token || req.get('x-kalico-capability') || '').trim();
     if (!req.user?.is_admin && req.user?.id !== quote.requester_user_id && token !== quote.share_token) {
       return res.status(403).json({ error: 'Accès refusé.' });
     }
@@ -676,7 +676,7 @@ router.post('/:id/refuse', optionalAuth, async (req, res, next) => {
     if (!(await assertQuoteAccess(req, quote))) {
       return res.status(403).json({ error: 'Accès refusé.' });
     }
-    const token = String(req.body?.token || req.query.token || '').trim();
+    const token = String(req.body?.token || req.get('x-kalico-capability') || '').trim();
     if (!req.user?.is_admin && req.user?.id !== quote.requester_user_id && token !== quote.share_token) {
       return res.status(403).json({ error: 'Accès refusé.' });
     }
