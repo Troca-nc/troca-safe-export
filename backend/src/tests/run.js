@@ -55,6 +55,7 @@ const SUITES = [
   './eventTicketPaymentIntegrity.test',
   './paymentWebhookRuntime.test',
   './paymentWebhookReceipt.test',
+  './stripeRefundAtomicity.test',
   './eventTicketTransaction.test',
   './ticketEmailOutbox.test',
   './campaignActivation.test',

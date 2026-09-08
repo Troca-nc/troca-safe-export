@@ -152,58 +152,57 @@ async function processStripeWebhookEvent({
     const charge = event.data.object;
     const result = await routeStripeChargeRefund({ event, query, withTransaction });
     if (result.handled) return result;
-    // Non-campaign refunds retain their legacy effects and receipt semantics.
-    const paymentRef = typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id || charge.id;
-    const { rows: paymentRows } = await query(
-      `SELECT id, user_id, metadata, status FROM payments WHERE provider = 'stripe' AND provider_ref = $1 LIMIT 1`,
-      [paymentRef]
-    );
-    const payment = paymentRows[0];
-    if (!payment) return;
-
-    await query(
-      `UPDATE payments SET status = 'refunded', updated_at = NOW()
-       WHERE id = $1`,
-      [payment.id]
-    );
-
-    const meta = payment.metadata ?? {};
-    await upsertBillingDocument(query, {
-      userId: payment.user_id,
-      provider: 'stripe',
-      providerRef: paymentRef,
-      documentType: 'refund',
-      status: 'refunded',
-      amountEurCents: charge.amount_refunded ?? null,
-      amountXpf: Number(payment.metadata?.amount_xpf ?? 0) || null,
-      currency: charge.currency?.toUpperCase?.() ?? 'EUR',
-      payload: charge,
-    }).catch(() => {});
-
-    if (meta.payment_type === 'boost' && meta.annonce_id) {
-      await query(
-        `UPDATE annonces
-         SET is_boosted = FALSE, boost_type = NULL, boost_expires_at = NULL, updated_at = NOW()
-         WHERE id = $1`,
-        [Number(meta.annonce_id)]
+    // Keep the receipt and all durable refund effects in one transaction.
+    return withTransaction(async (client) => {
+      if (!await insertStripeRefundReceipt(client, event)) return { handled: true, duplicate: true };
+      const transactionQuery = client.query.bind(client);
+      const paymentRef = typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id || charge.id;
+      const { rows: paymentRows } = await transactionQuery(
+        `SELECT id, user_id, metadata, status FROM payments
+         WHERE provider = 'stripe' AND provider_ref = $1 LIMIT 1 FOR UPDATE`,
+        [paymentRef]
       );
-      await query(
-        `DELETE FROM annonce_boosts WHERE payment_id = $1`,
-        [payment.id]
-      ).catch(() => {});
-    }
+      const payment = paymentRows[0];
+      if (!payment) throw new Error('Stripe refund payment missing');
 
-    if (meta.payment_type === 'pro_transport_ride') {
-      await query(
-        `UPDATE pro_rides
-         SET payment_status = 'refunded',
-             status = 'refunded',
-             updated_at = NOW()
-         WHERE stripe_payment_id = $1 OR id = $2::int`,
-        [paymentRef, Number(meta.ride_id ?? 0)]
-      ).catch(() => {});
-    }
-    return;
+      await transactionQuery(
+        `UPDATE payments SET status = 'refunded', updated_at = NOW() WHERE id = $1`,
+        [payment.id]
+      );
+
+      const meta = payment.metadata ?? {};
+      await upsertBillingDocument(transactionQuery, {
+        userId: payment.user_id,
+        provider: 'stripe',
+        providerRef: paymentRef,
+        documentType: 'refund',
+        status: 'refunded',
+        amountEurCents: charge.amount_refunded ?? null,
+        amountXpf: Number(meta.amount_xpf ?? 0) || null,
+        currency: charge.currency?.toUpperCase?.() ?? 'EUR',
+        payload: charge,
+      });
+
+      if (meta.payment_type === 'boost' && meta.annonce_id) {
+        await transactionQuery(
+          `UPDATE annonces
+           SET is_boosted = FALSE, boost_type = NULL, boost_expires_at = NULL, updated_at = NOW()
+           WHERE id = $1`,
+          [Number(meta.annonce_id)]
+        );
+        await transactionQuery('DELETE FROM annonce_boosts WHERE payment_id = $1', [payment.id]);
+      }
+
+      if (meta.payment_type === 'pro_transport_ride') {
+        await transactionQuery(
+          `UPDATE pro_rides
+           SET payment_status = 'refunded', status = 'refunded', updated_at = NOW()
+           WHERE stripe_payment_id = $1 OR id = $2::int`,
+          [paymentRef, Number(meta.ride_id ?? 0)]
+        );
+      }
+      return { handled: true, duplicate: false };
+    });
   }
 
   if (event.type === 'payment_intent.succeeded') {
@@ -768,8 +767,7 @@ async function routeStripeChargeRefund({ event, query, withTransaction }) {
   );
   if (candidates.rows.length !== 1) throw new Error('Stripe refund payment unresolved or ambiguous');
   if (candidates.rows[0].type !== 'campaign') {
-    const inserted = await insertStripeRefundReceipt({ query }, event);
-    return inserted ? { handled: false } : { handled: true, duplicate: true };
+    return { handled: false };
   }
   return withTransaction(async client => {
     if (!await insertStripeRefundReceipt(client, event)) return { handled: true, duplicate: true };
