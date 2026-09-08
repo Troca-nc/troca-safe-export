@@ -1392,8 +1392,8 @@ async function runProBookingReminderWindow({
       : new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full', timeStyle: 'short' }).format(startsAt);
     const proName = formatUserName(row.pro_prenom, row.pro_nom) || row.pro_company_name || 'Professionnel';
     const bookingToken = String(row.booking_access_token || '').trim();
-    const bookingUrlForRequester = `${getTrocBaseUrl()}/mes-rdv/${row.booking_id}${bookingToken ? `?token=${encodeURIComponent(bookingToken)}` : ''}`;
-    const bookingUrlForPro = `${getTrocBaseUrl()}/mes-rdv/${row.booking_id}${bookingToken ? `?token=${encodeURIComponent(bookingToken)}` : ''}`;
+    const bookingUrlForRequester = `${getTrocBaseUrl()}/mes-rdv/${row.booking_id}${bookingToken ? `#token=${encodeURIComponent(bookingToken)}` : ''}`;
+    const bookingUrlForPro = `${getTrocBaseUrl()}/mes-rdv/${row.booking_id}${bookingToken ? `#token=${encodeURIComponent(bookingToken)}` : ''}`;
 
     if (row.requester_user_id) {
       const requesterName = formatUserName(row.requester_prenom, row.requester_nom) || row.requester_name || 'Client';
@@ -1576,4 +1576,3 @@ function startAllJobs() {
 }
 
 module.exports = { startAllJobs, matchImmediateAlerts, expireTrocProposals, expireTrocCycles, processTrocMatchingQueue };
-

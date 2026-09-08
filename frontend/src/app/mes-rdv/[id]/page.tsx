@@ -9,20 +9,8 @@ export const metadata: Metadata = {
 
 type PageProps = {
   params: Promise<{ id: string }>
-  searchParams?: Promise<{ token?: string | string[] }>
 }
-
-type ResolvedSearchParams = {
-  token?: string | string[]
-}
-
-function getToken(searchParams?: ResolvedSearchParams) {
-  const raw = searchParams?.token
-  return Array.isArray(raw) ? raw[0] ?? null : raw ?? null
-}
-
-export default async function MesRdvDetailPage({ params, searchParams }: PageProps) {
+export default async function MesRdvDetailPage({ params }: PageProps) {
   const { id } = await params
-  const resolvedSearchParams = searchParams ? await searchParams : undefined
-  return <BookingDetailClient bookingId={id} token={getToken(resolvedSearchParams)} />
+  return <BookingDetailClient bookingId={id} />
 }

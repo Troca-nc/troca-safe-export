@@ -218,7 +218,7 @@ function mapBookingRow(row, options) {
 function buildBookingShareUrl(bookingRow) {
   const token = String(bookingRow.booking_access_token || '').trim();
   const path = `/mes-rdv/${bookingRow.id}`;
-  return token ? `${BASE_URL}${path}?token=${encodeURIComponent(token)}` : `${BASE_URL}${path}`;
+  return token ? `${BASE_URL}${path}#token=${encodeURIComponent(token)}` : `${BASE_URL}${path}`;
 }
 
 async function loadBookingProfile(proId) {
@@ -449,7 +449,7 @@ async function assertBookingAccess(req, booking) {
   if (req.user?.is_admin) return true;
   if (req.user?.id && Number(req.user.id) === Number(booking.pro_id)) return true;
   if (req.user?.id && booking.requester_user_id != null && Number(req.user.id) === Number(booking.requester_user_id)) return true;
-  const token = String(req.query.token || req.body?.token || '').trim();
+  const token = String(req.get('x-kalico-capability') || req.body?.token || '').trim();
   if (token && booking.booking_access_token && token === booking.booking_access_token) return true;
   return false;
 }

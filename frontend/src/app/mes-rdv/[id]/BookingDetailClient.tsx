@@ -1,17 +1,17 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, CalendarDays, Clock3, Loader2, MapPin, MessageSquare, ShieldCheck, User2 } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
 import { type RdvBookingItem } from '@/components/pro/RdvBookingCard'
 import { proBookingsApi } from '@/lib/api'
+import { consumeCapabilityTokenFromFragment } from '@/lib/capabilityToken'
 import { useAuthStore } from '@/store/authStore'
 
 type Props = {
   bookingId: string
-  token: string | null
 }
 
 function getStatusTone(status: string) {
@@ -34,13 +34,24 @@ function getPartnerId(booking: RdvBookingItem) {
   return booking.role === 'client' ? booking.pro.id : booking.requester.id ?? null
 }
 
-export default function BookingDetailClient({ bookingId, token }: Props) {
+export default function BookingDetailClient({ bookingId }: Props) {
   const { isAuthenticated, hasHydrated } = useAuthStore()
   const [booking, setBooking] = useState<RdvBookingItem | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [token, setToken] = useState<string | null>(null)
+  const [tokenReady, setTokenReady] = useState(false)
+  const tokenConsumed = useRef(false)
 
   useEffect(() => {
+    if (tokenConsumed.current) return
+    tokenConsumed.current = true
+    setToken(consumeCapabilityTokenFromFragment())
+    setTokenReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (!tokenReady) return
     let alive = true
 
     async function loadBooking() {
@@ -64,7 +75,7 @@ export default function BookingDetailClient({ bookingId, token }: Props) {
     return () => {
       alive = false
     }
-  }, [bookingId, token])
+  }, [bookingId, token, tokenReady])
 
   const partnerId = useMemo(() => (booking ? getPartnerId(booking) : null), [booking])
 
@@ -77,7 +88,7 @@ export default function BookingDetailClient({ bookingId, token }: Props) {
     window.location.assign(`/messages?user=${partnerId}`)
   }
 
-  if (!hasHydrated && typeof window !== 'undefined') return null
+  if ((!hasHydrated || !tokenReady) && typeof window !== 'undefined') return null
   if (!isAuthenticated && !token) {
     return (
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
