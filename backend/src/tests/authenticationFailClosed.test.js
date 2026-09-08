@@ -2,6 +2,7 @@
 
 const assert = require('assert');
 const { load } = require('./paymentTransactionHarness');
+const { applyCurrentProEntitlement } = require('../services/proEntitlementService');
 
 function harness({ env = 'development', user = { id: 7, deleted_at: null, banned_until: null }, queryError = false } = {}) {
   const queries = [];
@@ -15,6 +16,7 @@ function harness({ env = 'development', user = { id: 7, deleted_at: null, banned
       },
     },
     '../services/authAccountService': { isAccessTokenBlacklisted: async () => false },
+    '../services/proEntitlementService': { applyCurrentProEntitlement },
   }, { process: { env: { NODE_ENV: env } }, Date });
 
   async function invoke() {

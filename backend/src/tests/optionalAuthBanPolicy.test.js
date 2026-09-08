@@ -2,6 +2,7 @@
 
 const assert = require('assert');
 const { load } = require('./paymentTransactionHarness');
+const { applyCurrentProEntitlement } = require('../services/proEntitlementService');
 
 function harness({ user = { id: 7, banned_until: null }, tokenState = 'valid', queryError = false } = {}) {
   const queries = [];
@@ -24,6 +25,7 @@ function harness({ user = { id: 7, banned_until: null }, tokenState = 'valid', q
     '../services/authAccountService': {
       async isAccessTokenBlacklisted() { return tokenState === 'revoked'; },
     },
+    '../services/proEntitlementService': { applyCurrentProEntitlement },
   }, { process: { env: { NODE_ENV: 'test' } }, Date });
   async function invoke(header = 'Bearer synthetic') {
     const req = { headers: header ? { authorization: header } : {} };

@@ -48,7 +48,7 @@ const dbStub = {
       };
     }
 
-    if (normalized.startsWith('SELECT ID, EMAIL, PRENOM, NOM, IS_ADMIN, ACCOUNT_TYPE, CASE WHEN IS_PRO = TRUE AND (PRO_EXPIRES_AT IS NULL OR PRO_EXPIRES_AT > NOW()) THEN TRUE ELSE FALSE END AS IS_PRO')) {
+    if (normalized.startsWith('SELECT ID, EMAIL, PRENOM, NOM, IS_ADMIN, ACCOUNT_TYPE, CASE WHEN IS_PRO = TRUE AND PRO_EXPIRES_AT > NOW() THEN TRUE ELSE FALSE END AS IS_PRO')) {
       return {
         rows: [{
           id: params[0],
