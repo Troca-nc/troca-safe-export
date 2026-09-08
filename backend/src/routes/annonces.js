@@ -30,6 +30,7 @@ const { getSellerResponseTime } = require('../services/sellerInsightsService');
 const { createNotification } = require('../services/notificationService');
 const { sendPushToUser } = require('../services/pushService');
 const { assertActiveListingCapacity } = require('../services/commercialQuotaService');
+const { canChangeListingStatus } = require('../services/listingStatusPolicy');
 const {
   isDonCategory,
   validateListingMetadata,
@@ -552,6 +553,9 @@ router.put('/:id', authenticate, async (req, res, next) => {
 
     const { error, value } = updateSchemaWithStatus.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
+    if (value.status !== undefined && !req.user.is_admin) {
+      return res.status(400).json({ error: "Utilisez l'action dédiée pour modifier le statut d'une annonce." });
+    }
 
     const nextCategoryId = Object.prototype.hasOwnProperty.call(value, 'category_id') && value.category_id !== undefined
       ? value.category_id
@@ -899,6 +903,9 @@ router.patch('/:id/status', authenticate, async (req, res, next) => {
     }
     if (listing.user_id !== req.user.id && !req.user.is_admin) {
       return res.status(403).json({ error: 'Vous ne pouvez modifier que vos propres annonces.' });
+    }
+    if (!canChangeListingStatus(listing.status, nextStatus, { isAdmin: req.user.is_admin })) {
+      return res.status(409).json({ error: 'Cette annonce doit être réexaminée avant de pouvoir être réactivée.' });
     }
 
     const updated = await withTransaction(async (client) => {

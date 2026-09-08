@@ -31,6 +31,7 @@ const SUITES = [
   './proPublicProjectionBoundary.test',
   './commercialQuotaService.test',
   './listingVisibilityBoundary.test',
+  './listingStatusPolicy.test',
   './proEntitlementService.test',
   './proRenewalGraceService.test',
   './companyIdentityService.test',
