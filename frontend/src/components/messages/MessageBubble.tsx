@@ -5,6 +5,7 @@ import { Check, CheckCheck, Clock, AlertCircle, TrendingUp, Play, FileText, Exte
 import { format, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import type { Message, MessageMetadata } from '@/types/messaging.types'
+import { openPrivateAttachment, usePrivateAttachment } from '@/hooks/usePrivateAttachment'
 
 interface MessageBubbleProps {
   message: Message
@@ -26,6 +27,8 @@ function TextBubble({ message, isMine }: { message: Message; isMine: boolean }) 
   const sentClass = 'bg-kalico-blue text-white'
   const documentLabel = message.attachment_name || 'Document partagï¿½'
   const documentUrl = message.attachment_download_url || message.attachment_url || '#'
+  const mediaPath = message.type === 'document' ? documentUrl : message.photo_url
+  const privateMediaUrl = usePrivateAttachment(mediaPath === '#' ? null : mediaPath)
   const documentMime = (message.attachment_mime_type || '').toLowerCase()
   const documentIsImage = documentMime.startsWith('image/')
   const documentIsPdf = documentMime === 'application/pdf'
@@ -35,15 +38,15 @@ function TextBubble({ message, isMine }: { message: Message; isMine: boolean }) 
       {message.type === 'document' && (message.attachment_download_url || message.attachment_url) && (
         <div className={`overflow-hidden rounded-2xl border ${isMine ? 'border-kalico-blue/30 bg-kalico-blue text-white' : 'border-nc-lagonBorder bg-white text-night'}`}>
           {(documentIsImage || documentIsPdf) && (
-            <a
-              href={documentUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              disabled={!privateMediaUrl}
+              onClick={() => privateMediaUrl && window.open(privateMediaUrl, '_blank', 'noopener,noreferrer')}
               className={`block ${documentIsImage ? 'bg-black/5' : 'bg-sand/50'}`}
             >
               {documentIsImage ? (
                 <img
-                  src={documentUrl}
+                  src={privateMediaUrl || undefined}
                   alt={documentLabel}
                   className="max-h-[220px] w-full object-cover"
                 />
@@ -60,7 +63,7 @@ function TextBubble({ message, isMine }: { message: Message; isMine: boolean }) 
                   </div>
                 </div>
               )}
-            </a>
+            </button>
           )}
 
           <div className="border-t border-current/10 px-4 py-3">
@@ -74,10 +77,10 @@ function TextBubble({ message, isMine }: { message: Message; isMine: boolean }) 
                   {message.attachment_mime_type || 'Document'}
                 </p>
               </div>
-              <a
-                href={documentUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
+                disabled={documentUrl === '#'}
+                onClick={() => documentUrl !== '#' && void openPrivateAttachment(documentUrl)}
                 className={`inline-flex h-9 w-9 items-center justify-center rounded-full border transition-colors ${
                   isMine ? 'border-white/20 bg-white/10 text-white hover:bg-white/15' : 'border-night/10 bg-white text-night/50 hover:text-kalico-blue'
                 }`}
@@ -85,33 +88,34 @@ function TextBubble({ message, isMine }: { message: Message; isMine: boolean }) 
                 title={`Ouvrir ${documentLabel}`}
               >
                 <ExternalLink size={15} />
-              </a>
+              </button>
             </div>
 
-            <a
-              href={documentUrl}
-              download
+            <button
+              type="button"
+              disabled={documentUrl === '#'}
+              onClick={() => documentUrl !== '#' && void openPrivateAttachment(documentUrl, documentLabel)}
               className={`mt-3 inline-flex items-center gap-2 text-xs font-medium transition-colors ${
                 isMine ? 'text-white/90 hover:text-white' : 'text-kalico-blue hover:text-kalico-blue-dark'
               }`}
             >
               <ExternalLink size={13} />
               Tï¿½lï¿½charger le fichier
-            </a>
+            </button>
           </div>
         </div>
       )}
 
       {message.type === 'photo' && message.photo_url && (
-        <a href={message.photo_url} target="_blank" rel="noopener noreferrer" className="block">
+        <button type="button" disabled={!privateMediaUrl} onClick={() => privateMediaUrl && window.open(privateMediaUrl, '_blank', 'noopener,noreferrer')} className="block">
           <img
-            src={message.photo_url}
+            src={privateMediaUrl || undefined}
             alt="Photo partagï¿½e"
             className={`max-h-[240px] max-w-[240px] cursor-pointer rounded-2xl object-cover ${
               isMine ? 'rounded-br-sm' : 'rounded-bl-sm border border-nc-lagonBorder'
             }`}
           />
-        </a>
+        </button>
       )}
 
       {message.type === 'audio' && message.photo_url && (
@@ -125,7 +129,7 @@ function TextBubble({ message, isMine }: { message: Message; isMine: boolean }) 
               <p className={`text-[10px] ${isMine ? 'text-white/65' : 'text-nc-lagonText/70'}`}>Appuyez sur lecture</p>
             </div>
           </div>
-          <audio controls src={message.photo_url} className="w-full" />
+          <audio controls src={privateMediaUrl || undefined} className="w-full" />
         </div>
       )}
 
