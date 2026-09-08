@@ -1,4 +1,6 @@
-name: Deploy to Production
+# Historical filename retained to preserve links to earlier workflow runs.
+# This workflow validates backend and browser behavior; it does not deploy.
+name: Backend and E2E Validation
 
 on:
   push:
