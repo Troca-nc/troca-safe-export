@@ -44,6 +44,7 @@ function loadCampaignWebhook(campaignService) {
     './eventTicketingService': { finalizeEventTicketPayment: forbidden },
     './ticketEmailOutboxService': { enqueueTicketEmail: forbidden },
     './paymentCatalog': { xpfToEurCents },
+    './proRenewalGraceService': { startRenewalGrace: forbidden },
   });
 }
 function campaignRefundEvent(changes = {}, id = 'evt_refund') {

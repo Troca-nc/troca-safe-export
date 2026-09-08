@@ -41,6 +41,7 @@ const { checkAdminAlerts } = require('../services/adminAlerts');
 const { ensureNotificationPreferences } = require('../services/notificationPreferencesService');
 const { sendNewsletterBatch } = require('../services/newsletterService');
 const { ticketExpiry, importCleanup } = require('../cron');
+const { processRenewalGraceDeadlines } = require('../services/proRenewalGraceService');
 
 async function runSingletonJob(lockName, ttlMs, task) {
   const started = await withLock(lockName, ttlMs, async () => {
@@ -1551,6 +1552,21 @@ function startNewsletterJob() {
   logger.info('cron_job_started', { job: 'newsletter' });
 }
 
+function startProRenewalGraceJob() {
+  cron.schedule('25 * * * *', async () => {
+    await runSingletonJob('cron:pro-renewal-grace', 50 * 60 * 1000, async () => {
+      try {
+        const result = await processRenewalGraceDeadlines({ query, sendMail, baseUrl: getTrocBaseUrl() });
+        logger.info('cron_pro_renewal_grace', result);
+      } catch (err) {
+        recordJob('error', { job: 'pro-renewal-grace', message: err.message });
+        logger.error('cron_pro_renewal_grace_error', { error: err });
+      }
+    });
+  }, { timezone: 'Pacific/Noumea' });
+  logger.info('cron_job_started', { job: 'pro-renewal-grace' });
+}
+
 function startAllJobs() {
   startBoostExpiryJob();
   startBonPlanMaintenanceJob();
@@ -1567,6 +1583,7 @@ function startAllJobs() {
   startRideReviewReminderJob();
   startProBookingReminderJob();
   startNewsletterJob();
+  startProRenewalGraceJob();
   startDailyAlertsJob();
   startWeeklyAlertsJob();
   startPerformanceReportsJob();

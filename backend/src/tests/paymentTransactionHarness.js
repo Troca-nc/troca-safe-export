@@ -44,6 +44,7 @@ function loadServices(database, sendTicketEmail = async () => {}) {
     './campaignsService': { activateCampaignFromPayment: forbidden },
     './emailService': { sendTicketEmail, sendBoostActivatedEmail: forbidden },
     './paymentCatalog': { xpfToEurCents: forbidden },
+    './proRenewalGraceService': { startRenewalGrace: forbidden },
   });
   return { ...ticketing, ...webhook, ...outbox };
 }
