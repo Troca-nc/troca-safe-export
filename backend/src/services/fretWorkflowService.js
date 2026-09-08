@@ -339,7 +339,7 @@ async function loadEligibleTransporters(client, serviceType = 'fret_pro') {
        AND pt.is_verified = TRUE
        AND pt.is_available = TRUE
        AND (u.has_fret_plan = TRUE OR u.is_pro = TRUE)
-       AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW())
+       AND u.pro_expires_at > NOW()
        AND u.deleted_at IS NULL
      ORDER BY COALESCE(pt.rating, 0) DESC, pt.created_at DESC`
   );
@@ -769,7 +769,7 @@ async function loadTransporterProfile(client, userId) {
        AND pt.is_verified = TRUE
        AND pt.is_available = TRUE
        AND u.is_pro = TRUE
-       AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW())
+       AND u.pro_expires_at > NOW()
      LIMIT 1`,
     [userId]
   );
@@ -1267,6 +1267,5 @@ module.exports = {
   mapRequestStatusLabel,
   mapOfferStatusLabel,
 };
-
 
 

@@ -426,7 +426,7 @@ router.get('/drivers/:id/profile', async (req, res, next) => {
          COALESCE(u.rides_as_driver, 0) AS rides_as_driver,
          COALESCE(u.rides_as_passenger, 0) AS rides_as_passenger,
          COALESCE(u.trust_score, 100) AS trust_score,
-         CASE WHEN u.is_pro = TRUE AND (u.pro_expires_at IS NULL OR u.pro_expires_at > NOW()) THEN TRUE ELSE FALSE END AS is_pro,
+         CASE WHEN u.is_pro = TRUE AND u.pro_expires_at > NOW() THEN TRUE ELSE FALSE END AS is_pro,
          u.nb_avis,
          u.note_moyenne,
          u.created_at,
