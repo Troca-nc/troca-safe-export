@@ -6,6 +6,7 @@ const { sendBoostActivatedEmail } = require('./emailService');
 const { enqueueTicketEmail } = require('./ticketEmailOutboxService');
 const { finalizeEventTicketPayment } = require('./eventTicketingService');
 const { xpfToEurCents } = require('./paymentCatalog');
+const { startRenewalGrace } = require('./proRenewalGraceService');
 
 function isValidEventTicketCheckout(session, payment) {
   const sessionMeta = session?.metadata || {};
@@ -589,6 +590,10 @@ async function processStripeWebhookEvent({
            cancel_at_period_end = $5,
            payment_status = CASE WHEN $2 = 'active' THEN 'succeeded' ELSE payment_status END,
            payment_status_updated_at = CASE WHEN $2 = 'active' THEN NOW() ELSE payment_status_updated_at END,
+           grace_started_at = CASE WHEN $2 = 'active' THEN NULL ELSE grace_started_at END,
+           grace_ends_at = CASE WHEN $2 = 'active' THEN NULL ELSE grace_ends_at END,
+           grace_reminder_sent_at = CASE WHEN $2 = 'active' THEN NULL ELSE grace_reminder_sent_at END,
+           suspended_at = CASE WHEN $2 = 'active' THEN NULL ELSE suspended_at END,
            updated_at = NOW()
        WHERE provider_sub_id = $1`,
       [subId, sub.status, periodStart, periodEnd, sub.cancel_at_period_end]
@@ -627,15 +632,20 @@ async function processStripeWebhookEvent({
       const periodEnd = new Date(stripeSub.current_period_end * 1000);
       await query(
         `UPDATE subscriptions
-         SET current_period_end = $2,
+         SET status = 'active',
+             current_period_end = $2,
              payment_status = 'succeeded',
              payment_status_updated_at = NOW(),
+             grace_started_at = NULL,
+             grace_ends_at = NULL,
+             grace_reminder_sent_at = NULL,
+             suspended_at = NULL,
              updated_at = NOW()
          WHERE provider_sub_id = $1`,
         [subId, periodEnd]
       );
       await query(
-        `UPDATE users SET pro_expires_at = $2, updated_at = NOW()
+        `UPDATE users SET is_pro = TRUE, pro_plan = 'pro', pro_expires_at = $2, updated_at = NOW()
          WHERE id = (SELECT user_id FROM subscriptions WHERE provider_sub_id = $1 LIMIT 1)`,
         [subId, periodEnd]
       );
@@ -686,15 +696,9 @@ async function processStripeWebhookEvent({
     const subId = event.data.object.subscription;
     if (subId) {
       const inv = event.data.object;
-      await query(
-        `UPDATE subscriptions
-         SET status = 'past_due',
-             payment_status = 'failed',
-             payment_status_updated_at = NOW(),
-             updated_at = NOW()
-         WHERE provider_sub_id = $1`,
-        [subId]
-      );
+      if (inv.billing_reason !== 'subscription_cycle') return;
+      const grace = await startRenewalGrace(withTransaction, subId);
+      if (!grace) return;
       const { rows } = await query(
         `SELECT u.id, u.email, u.prenom FROM users u
          JOIN subscriptions s ON s.user_id = u.id
@@ -720,7 +724,8 @@ async function processStripeWebhookEvent({
           subject: '[Kalico] Échec du renouvellement de votre abonnement',
           html: `<p>Bonjour ${rows[0].prenom},</p>
                  <p>Le renouvellement de votre abonnement Kalico Pro a échoué.</p>
-                 <p>Veuillez mettre à jour votre moyen de paiement depuis <a href="${baseUrl}/parametres">vos paramètres</a> pour ne pas perdre vos avantages Pro.</p>`,
+                 <p>Vos outils Pro restent actifs pendant 7 jours, jusqu'au ${new Date(grace.grace_ends_at).toLocaleDateString('fr-FR')}.</p>
+                 <p>Veuillez mettre à jour votre moyen de paiement depuis <a href="${baseUrl}/parametres">vos paramètres</a>.</p>`,
         }).catch(() => {});
       }
     }

@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const { xpfToEurCents } = require('../services/paymentCatalog');
+const proRenewalGraceService = require('../services/proRenewalGraceService');
 
 function harness({ type = 'boost', status = 'pending', activationResult = {} } = {}) {
   const writes = [];
@@ -24,7 +25,11 @@ function harness({ type = 'boost', status = 'pending', activationResult = {} } =
     if (sql.includes("jsonb_build_object('stripe_payment_intent_id'")) return { rows: [], rowCount: 1 };
     if (/FROM payments/.test(sql)) return { rows: [payment] };
     if (/SELECT u\./.test(sql)) return { rows: [{ id: 7, email: 'synthetic@example.invalid' }] };
-    if (/RETURNING user_id/.test(sql)) return { rows: [{ user_id: 7 }] };
+    if (/RETURNING user_id/.test(sql)) return { rows: [{
+      user_id: 7,
+      grace_started_at: '2026-09-09T00:00:00.000Z',
+      grace_ends_at: '2026-09-16T00:00:00.000Z',
+    }] };
     return { rows: [{ id: 9 }] };
   };
   const activate = product => async (...args) => {
@@ -38,6 +43,7 @@ function harness({ type = 'boost', status = 'pending', activationResult = {} } =
     './eventTicketingService': { finalizeEventTicketPayment: async () => null },
     './ticketEmailOutboxService': { enqueueTicketEmail: async () => {} },
     './paymentCatalog': { xpfToEurCents },
+    './proRenewalGraceService': proRenewalGraceService,
   };
   const sandbox = {
     module: { exports: {} },
@@ -121,6 +127,23 @@ async function run() {
     });
     assert.ok(h.writes.some(x => /UPDATE subscriptions/.test(x.sql)));
     assert.strictEqual(h.activations.length, 0);
+  });
+  await check('Stripe failed renewal starts a seven day grace once', async () => {
+    const h = harness();
+    await h.stripeEvent('invoice.payment_failed', {
+      id: 'in_failed', subscription: 'sub_synthetic', billing_reason: 'subscription_cycle', amount_due: 2430, currency: 'eur',
+    });
+    assert.ok(h.writes.some(x => /grace_ends_at/.test(x.sql) && /payment_status = 'failed'/.test(x.sql)));
+    assert.ok(h.writes.some(x => /pro_expires_at = GREATEST/.test(x.sql)));
+    assert.strictEqual(h.emails.length, 1);
+  });
+  await check('Stripe first-payment failure does not open renewal grace', async () => {
+    const h = harness();
+    await h.stripeEvent('invoice.payment_failed', {
+      id: 'in_first_failed', subscription: 'sub_synthetic', billing_reason: 'subscription_create', amount_due: 2430, currency: 'eur',
+    });
+    assert.strictEqual(h.writes.length, 0);
+    assert.strictEqual(h.emails.length, 0);
   });
   for (const product of ['campaign', 'bon_plan']) {
     await check(`Stripe ${product} dispatches from its paid Checkout Session`, async () => {
