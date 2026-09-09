@@ -657,11 +657,11 @@ async function createFretRequest({ user, payload }) {
          volume_bucket, weight_bucket, urgency, description,
          budget_max_xpf, contact_email, contact_phone,
          status, estimated_min_xpf, estimated_max_xpf,
-         quote_amount_xpf, updated_at
+         quote_amount_xpf, response_deadline_at, updated_at
        )
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
                $16, $17, $18, $19, $20, $21, $22,
-               'open', $23, $24, $25, NOW())
+               'open', $23, $24, $25, NOW() + INTERVAL '60 minutes', NOW())
        RETURNING *`,
       [
         user.id,
@@ -957,13 +957,17 @@ async function submitFretOffer({ userId, requestId, payload }) {
       throw error;
     }
 
+    await client.query(
+      `SELECT id FROM delivery_requests WHERE id = $1 FOR UPDATE`,
+      [requestId]
+    );
     const requestRow = await loadRequestById(client, requestId);
     if (!requestRow) {
       const error = new Error('Demande introuvable.');
       error.status = 404;
       throw error;
     }
-    if (requestRow.status !== 'open') {
+    if (requestRow.status !== 'open' || (requestRow.response_deadline_at && new Date(requestRow.response_deadline_at) <= new Date())) {
       const error = new Error('Cette demande n’est plus ouverte.');
       error.status = 409;
       throw error;
@@ -998,7 +1002,12 @@ async function submitFretOffer({ userId, requestId, payload }) {
         payload.pickup_date,
         payload.pickup_slot,
         payload.message || null,
-        null,
+        computeOfferScore(
+          Number(payload.amount_xpf),
+          requestRow.estimated_min_xpf,
+          requestRow.estimated_max_xpf,
+          transporter.rating
+        ),
       ]
     );
 
@@ -1276,11 +1285,60 @@ async function withdrawMyFretOffer({ userId, requestId }) {
   });
 }
 
-async function autoResolveExpiredFretRequests() {
-  return {
-    auto_selected: 0,
-    expired_without_offer: 0,
-  };
+async function autoResolveExpiredFretRequests({ dbQuery = query, selectOffer = selectFretOffer } = {}) {
+  const candidates = await dbQuery(
+    `SELECT r.id, r.author_id, best_offer.id AS offer_id
+     FROM delivery_requests r
+     LEFT JOIN LATERAL (
+       SELECT o.id
+       FROM delivery_offers o
+       WHERE o.request_id = r.id AND o.status = 'pending'
+       ORDER BY o.score DESC NULLS LAST, o.amount_xpf ASC, o.created_at ASC, o.id ASC
+       LIMIT 1
+     ) best_offer ON TRUE
+     WHERE r.status = 'open'
+       AND r.selected_offer_id IS NULL
+       AND r.response_deadline_at <= NOW()
+     ORDER BY r.response_deadline_at ASC, r.id ASC
+     LIMIT 100`
+  );
+
+  let autoSelected = 0;
+  let expiredWithoutOffer = 0;
+  for (const candidate of candidates.rows) {
+    if (candidate.offer_id) {
+      try {
+        await selectOffer({
+          userId: candidate.author_id,
+          requestId: candidate.id,
+          offerId: candidate.offer_id,
+          mode: 'auto',
+        });
+        autoSelected += 1;
+      } catch (error) {
+        if (error?.status !== 409 && error?.status !== 404) throw error;
+      }
+      continue;
+    }
+
+    const expired = await dbQuery(
+      `UPDATE delivery_requests r
+       SET status = 'expired', updated_at = NOW()
+       WHERE r.id = $1
+         AND r.status = 'open'
+         AND r.selected_offer_id IS NULL
+         AND r.response_deadline_at <= NOW()
+         AND NOT EXISTS (
+           SELECT 1 FROM delivery_offers o
+           WHERE o.request_id = r.id AND o.status = 'pending'
+         )
+       RETURNING r.id`,
+      [candidate.id]
+    );
+    expiredWithoutOffer += expired.rowCount || 0;
+  }
+
+  return { auto_selected: autoSelected, expired_without_offer: expiredWithoutOffer };
 }
 
 module.exports = {
