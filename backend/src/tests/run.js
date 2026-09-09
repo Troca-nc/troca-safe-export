@@ -38,6 +38,7 @@ const SUITES = [
   './fretStateTransitions.test',
   './fretAfterCommitEffects.test',
   './fretExpiration.test',
+  './trocStateTransitions.test',
   './proEntitlementService.test',
   './proRenewalGraceService.test',
   './companyIdentityService.test',

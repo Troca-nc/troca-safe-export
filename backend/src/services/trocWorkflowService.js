@@ -25,6 +25,19 @@ function makeError(status, message) {
   return err;
 }
 
+async function transitionTrocProposal(db, proposalId, fromStatuses, toStatus) {
+  const q = getDbRunner(db);
+  const result = await q(
+    `UPDATE troc_proposals
+     SET status = $3, updated_at = NOW()
+     WHERE id = $1 AND status = ANY($2::text[])
+     RETURNING *`,
+    [proposalId, fromStatuses, toStatus]
+  );
+  if (!result.rows[0]) throw makeError(409, 'Cette proposition a deja ete traitee');
+  return result.rows[0];
+}
+
 function xpf(amount) {
   return `${Number(amount || 0).toLocaleString('fr-FR')} XPF`;
 }
@@ -459,13 +472,7 @@ async function acceptTrocProposal(db, { proposalId, actorId }) {
   }
 
   const result = await withTransaction(async (client) => {
-    const updated = await client.query(
-      `UPDATE troc_proposals
-       SET status = 'accepted', updated_at = NOW()
-       WHERE id = $1
-       RETURNING *`,
-      [proposalId]
-    );
+    const updated = await transitionTrocProposal(client, proposalId, ['pending', 'seen'], 'accepted');
 
     await client.query(
       `UPDATE annonces
@@ -511,7 +518,7 @@ async function acceptTrocProposal(db, { proposalId, actorId }) {
       [conversation.id]
     );
 
-    return { proposal: updated.rows[0], conversation, message: systemMessage.rows[0] };
+    return { proposal: updated, conversation, message: systemMessage.rows[0] };
   });
 
   const otherUserId = Number(actorId) === Number(proposal.listing_owner_id)
@@ -560,12 +567,7 @@ async function declineTrocProposal(db, { proposalId, actorId }) {
     throw makeError(409, 'Cette proposition a deja ete traitee');
   }
 
-  await q(
-    `UPDATE troc_proposals
-     SET status = 'declined', updated_at = NOW()
-     WHERE id = $1`,
-    [proposalId]
-  );
+  await transitionTrocProposal(q, proposalId, ['pending', 'seen', 'countered'], 'declined');
 
   const otherUserId = Number(actorId) === Number(proposal.listing_owner_id)
     ? Number(proposal.proposer_id)
@@ -621,8 +623,9 @@ async function counterTrocProposal(db, { proposalId, actorId, counterData }) {
   );
 
   const normalized = validateProposalPayload(listing, ownerListingsResult.rows, counterData);
-  const created = await q(
-    `INSERT INTO troc_proposals
+  const created = await withTransaction(async (client) => {
+    const inserted = await client.query(
+      `INSERT INTO troc_proposals
        (listing_id, proposer_id, offered_listing_ids, offered_description, offered_photos,
         complement_xpf, complement_direction, message, status, expires_at)
      VALUES ($1, $2, $3::int[], $4, $5::text[], $6, $7, $8, 'pending', NOW() + make_interval(days => $9))
@@ -638,16 +641,20 @@ async function counterTrocProposal(db, { proposalId, actorId, counterData }) {
       normalized.message,
       Number(process.env.TROC_PROPOSAL_EXPIRY_DAYS || 7),
     ]
-  );
+    );
 
-  await q(
-    `UPDATE troc_proposals
-     SET status = 'countered',
-         counter_proposal_id = $2,
-         updated_at = NOW()
-     WHERE id = $1`,
-    [proposalId, created.rows[0].id]
-  );
+    const linked = await client.query(
+      `UPDATE troc_proposals
+       SET status = 'countered', counter_proposal_id = $2, updated_at = NOW()
+       WHERE id = $1
+         AND status = ANY($3::text[])
+         AND counter_proposal_id IS NULL
+       RETURNING id`,
+      [proposalId, inserted.rows[0].id, ['pending', 'seen']]
+    );
+    if (!linked.rows[0]) throw makeError(409, 'Cette proposition a deja ete traitee');
+    return inserted;
+  });
 
   const recipientId = Number(original.proposer_id);
   const owner = await q(`SELECT prenom, nom, email FROM users WHERE id = $1`, [actorId]);
@@ -696,18 +703,13 @@ async function completeTrocProposal(db, { proposalId, actorId }) {
     throw makeError(403, 'Non autorise');
   }
 
-  await q(
-    `UPDATE troc_proposals
-     SET status = 'completed', updated_at = NOW()
-     WHERE id = $1`,
-    [proposalId]
-  );
+  await transitionTrocProposal(q, proposalId, ['accepted'], 'completed');
 
   if (proposal.parent_proposal_id) {
     await q(
       `UPDATE troc_proposals
        SET status = 'completed', updated_at = NOW()
-       WHERE id = $1 AND status <> 'completed'`,
+       WHERE id = $1 AND status = 'countered'`,
       [proposal.parent_proposal_id]
     ).catch(() => {});
   }
@@ -903,6 +905,7 @@ async function getUserTrocBadges(db, userId) {
 }
 
 module.exports = {
+  transitionTrocProposal,
   acceptTrocProposal,
   awardTrocBadges,
   completeTrocProposal,
