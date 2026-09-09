@@ -62,6 +62,7 @@ const SUITES = [
   './timePolicy.test',
   './redisAvailabilityPolicy.test',
   './workerHealthService.test',
+  './runtimeConfig.test',
   './push.service.test',
   './payment.route.test',
   './paymentCatalog.test',

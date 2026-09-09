@@ -76,6 +76,7 @@ production_required_vars=(
   TWILIO_ACCOUNT_SID
   TWILIO_AUTH_TOKEN
   TWILIO_VERIFY_SID
+  TURNSTILE_SECRET_KEY
   GOOGLE_CLIENT_ID
   GOOGLE_CLIENT_SECRET
   APPLE_CLIENT_ID
@@ -100,6 +101,8 @@ is_placeholder() {
   [[ -z "$value" ]] && return 0
   local lowered="${value,,}"
   [[ "$lowered" == *"changeme"* ]] && return 0
+  [[ "$lowered" == *"change_me"* ]] && return 0
+  [[ "$lowered" == your_* ]] && return 0
   [[ "$lowered" == *"dev_secret_change_in_prod"* ]] && return 0
   [[ "$lowered" == *"coller_la_cle_ici"* ]] && return 0
   [[ "$lowered" == *"placeholder"* ]] && return 0
