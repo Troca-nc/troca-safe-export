@@ -44,6 +44,7 @@ const SUITES = [
   './proRenewalGraceService.test',
   './companyIdentityService.test',
   './companyTrialService.test',
+  './migrationRunner.test',
   './auth.route.test',
   './adminUserActionService.test',
   './adminModerationActionService.test',

@@ -235,7 +235,7 @@ Sinon, appliquer les migrations manuellement:
 set -a
 . ./.env.production.local
 set +a
-docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/schema.sql
+docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/000_baseline.sql
 docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/001_add_messaging.sql
 docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/002_add_monetisation.sql
 docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/003_add_phone_verification.sql

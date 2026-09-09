@@ -3,12 +3,12 @@
 -- ============================================================
 -- Kalico - initialisation complète de la base vide
 -- Ordre:
---   1) schema.sql
+--   1) migration de baseline
 --   2) migrations chronologiques
 -- ============================================================
 
 \echo '[init] Loading base schema...'
-\i /docker-entrypoint-initdb-src/schema.sql
+\i /docker-entrypoint-initdb-src/migrations/000_baseline.sql
 
 \echo '[init] Applying migrations...'
 \i /docker-entrypoint-initdb-src/migrations/001_add_messaging.sql

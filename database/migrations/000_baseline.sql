@@ -1,7 +1,7 @@
 -- ============================================================
--- Kalico — Schéma principal PostgreSQL
--- À placer dans database/schema.sql
--- Monté automatiquement par docker-compose au 1er démarrage
+-- Kalico — Migration baseline PostgreSQL
+-- Première migration immuable appliquée par le lanceur de migrations
+-- Toute évolution ultérieure doit être ajoutée dans une nouvelle migration
 -- ============================================================
 
 -- ── Extensions ───────────────────────────────────────────────────────────────
