@@ -227,20 +227,13 @@ docker compose -f docker-compose.prod.yml --env-file .env.production.local logs 
 
 ### 4.4 Verifier la base
 
-Si la base est vierge, le schema est applique automatiquement.
-
-Sinon, appliquer les migrations manuellement:
+Le service Compose `migrate` applique la baseline et toutes les migrations avant le démarrage du backend et du worker. Pour relancer explicitement le même runner:
 
 ```bash
 set -a
 . ./.env.production.local
 set +a
-docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/000_baseline.sql
-docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/001_add_messaging.sql
-docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/002_add_monetisation.sql
-docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/003_add_phone_verification.sql
-docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/004_add_search_alerts.sql
-docker exec -i kalico_postgres psql -U "$DB_USER" -d "$DB_NAME" < database/migrations/005_add_push_tokens.sql
+docker compose --env-file .env.production.local -f docker-compose.prod.yml run --rm migrate
 ```
 
 ### 4.5 Creer le compte admin

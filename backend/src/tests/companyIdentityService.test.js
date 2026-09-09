@@ -43,9 +43,9 @@ describe('Company identity', () => {
 
   it('lie la création à la validation administrative du justificatif RIDET', () => {
     const adminRoute = fs.readFileSync(path.join(__dirname, '..', 'routes', 'admin.routes.js'), 'utf8');
-    const init = fs.readFileSync(path.join(__dirname, '..', '..', '..', 'database', 'init.sql'), 'utf8');
+    const migration = fs.readFileSync(path.join(__dirname, '..', '..', '..', 'database', 'migrations', '20260909_companies_and_members.sql'), 'utf8');
     assert.ok(adminRoute.includes("doc.document_type === 'extrait_ridet'"));
     assert.ok(adminRoute.includes('bindVerifiedCompanyIdentity(client'));
-    assert.ok(init.includes('20260909_companies_and_members.sql'));
+    assert.ok(migration.includes('CREATE TABLE IF NOT EXISTS companies'));
   });
 });

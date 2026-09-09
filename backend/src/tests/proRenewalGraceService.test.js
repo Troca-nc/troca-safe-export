@@ -63,10 +63,10 @@ describe('Pro renewal grace', () => {
   });
 
   it('branche la migration, le webhook et le planificateur', () => {
-    const init = fs.readFileSync(path.join(__dirname, '..', '..', '..', 'database', 'init.sql'), 'utf8');
+    const migration = fs.readFileSync(path.join(__dirname, '..', '..', '..', 'database', 'migrations', '20260909_pro_renewal_grace.sql'), 'utf8');
     const webhook = fs.readFileSync(path.join(__dirname, '..', 'services', 'paymentWebhookService.js'), 'utf8');
     const scheduler = fs.readFileSync(path.join(__dirname, '..', 'jobs', 'scheduler.js'), 'utf8');
-    assert.ok(init.includes('20260909_pro_renewal_grace.sql'));
+    assert.ok(migration.includes('grace_ends_at'));
     assert.ok(webhook.includes('startRenewalGrace(withTransaction, subId)'));
     assert.ok(scheduler.includes('processRenewalGraceDeadlines'));
   });
