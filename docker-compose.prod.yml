@@ -50,7 +50,7 @@ x-backend-env: &backend-env
 
 services:
   nginx:
-    image: nginx:1.27-alpine
+    image: ${NGINX_IMAGE:?Set an immutable NGINX_IMAGE digest}
     container_name: kalico_nginx
     restart: unless-stopped
     environment:
@@ -79,7 +79,7 @@ services:
       - kalico_internal
 
   certbot:
-    image: certbot/certbot:v3.0.1
+    image: ${CERTBOT_IMAGE:?Set an immutable CERTBOT_IMAGE digest}
     container_name: kalico_certbot
     restart: unless-stopped
     volumes:
@@ -89,7 +89,7 @@ services:
     command: []
 
   postgres:
-    image: postgis/postgis:16-3.4
+    image: ${POSTGRES_IMAGE:?Set an immutable POSTGRES_IMAGE digest}
     container_name: kalico_postgres
     restart: unless-stopped
     environment:
@@ -109,7 +109,7 @@ services:
       retries: 5
 
   redis:
-    image: redis:7.2-alpine
+    image: ${REDIS_IMAGE:?Set an immutable REDIS_IMAGE digest}
     container_name: kalico_redis
     restart: unless-stopped
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
@@ -126,6 +126,8 @@ services:
     build:
       context: ./docker/pgbouncer
       dockerfile: Dockerfile
+      args:
+        ALPINE_IMAGE: ${ALPINE_IMAGE:?Set an immutable ALPINE_IMAGE digest}
     user: "1000:1000"
     restart: unless-stopped
     environment:
@@ -218,20 +220,7 @@ services:
       start_period: 40s
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
-        NEXT_PUBLIC_STRIPE_PK: ${NEXT_PUBLIC_STRIPE_PK}
-        NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-        NEXT_PUBLIC_DEMO_MODE: ${NEXT_PUBLIC_DEMO_MODE}
-        NEXT_PUBLIC_SHOW_DEMO_BAR: ${NEXT_PUBLIC_SHOW_DEMO_BAR}
-        NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY: ${NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY}
-        NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY: ${NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY}
-        NEXT_PUBLIC_PAYPLUG_PLAN_PRO_MONTHLY: ${NEXT_PUBLIC_PAYPLUG_PLAN_PRO_MONTHLY}
-        NEXT_PUBLIC_PAYPLUG_PLAN_PRO_YEARLY: ${NEXT_PUBLIC_PAYPLUG_PLAN_PRO_YEARLY}
+    image: ${FRONTEND_IMAGE}
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -260,6 +249,8 @@ services:
     build:
       context: ./admin
       dockerfile: Dockerfile
+      args:
+        ADMIN_NODE_IMAGE: ${ADMIN_NODE_IMAGE:?Set an immutable ADMIN_NODE_IMAGE digest}
     container_name: kalico_admin
     restart: unless-stopped
     environment:
@@ -293,6 +284,8 @@ services:
     build:
       context: ./
       dockerfile: backup/Dockerfile
+      args:
+        ALPINE_IMAGE: ${ALPINE_IMAGE:?Set an immutable ALPINE_IMAGE digest}
     container_name: kalico_backup
     restart: unless-stopped
     environment:
