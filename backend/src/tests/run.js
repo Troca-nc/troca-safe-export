@@ -59,6 +59,7 @@ const SUITES = [
   './payment.route.test',
   './paymentCatalog.test',
   './subscriptionOfferBoundary.test',
+  './subscriptionEntitlementWrites.test',
   './trocService.test',
   './eventTicketAccess.test',
   './eventPublicationAccess.test',
