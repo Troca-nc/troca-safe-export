@@ -1230,20 +1230,26 @@ router.post('/bookings/:bookingId/accept', authenticate, async (req, res, next) 
         throw Object.assign(new Error('Cette demande a expiré.'), { statusCode: 400 });
       }
 
-      const newSeatsReserved = Number(booking.seats_reserved || 0) + Number(booking.booking_seats || 1);
+      const requestedSeats = Number(booking.booking_seats || 1);
       const updatedRideRes = await client.query(
         `UPDATE covoiturages
-         SET seats_reserved = $2,
-             seats_remaining = GREATEST(COALESCE(seats_remaining, seats_total) - $3, 0),
+         SET seats_reserved = COALESCE(seats_reserved, 0) + $2,
+             seats_remaining = GREATEST(COALESCE(seats_remaining, seats_total - COALESCE(seats_reserved, 0)) - $2, 0),
              status = CASE
-               WHEN GREATEST(COALESCE(seats_remaining, seats_total) - $3, 0) = 0 THEN 'full'
+               WHEN GREATEST(COALESCE(seats_remaining, seats_total - COALESCE(seats_reserved, 0)) - $2, 0) = 0 THEN 'full'
                ELSE status
              END,
              updated_at = NOW()
          WHERE id = $1
+           AND status IN ('published', 'full')
+           AND GREATEST(COALESCE(seats_remaining, seats_total - COALESCE(seats_reserved, 0)), 0) >= $2
          RETURNING *`,
-        [booking.ride_id, newSeatsReserved, Number(booking.booking_seats || 1)]
+        [booking.ride_id, requestedSeats]
       );
+
+      if (updatedRideRes.rows.length === 0) {
+        throw Object.assign(new Error('Plus assez de places disponibles.'), { statusCode: 409 });
+      }
 
       await client.query(
         `UPDATE ride_bookings
