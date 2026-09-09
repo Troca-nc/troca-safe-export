@@ -53,6 +53,7 @@ services:
     environment:
       SERVER_NAME: ${SERVER_NAME:-51.255.161.64.nip.io}
       ADMIN_SERVER_NAME: ${ADMIN_SERVER_NAME:-admin.51.255.161.64.nip.io}
+      ADMIN_ALLOWLIST: "${ADMIN_ALLOWLIST:?Set ADMIN_ALLOWLIST to trusted admin IPv4 addresses or CIDR ranges}"
       NGINX_SSL_ENABLED: "${NGINX_SSL_ENABLED:?Set NGINX_SSL_ENABLED explicitly to true or false}"
     ports:
       - '80:80'
