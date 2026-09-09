@@ -703,6 +703,32 @@ async function completeTrocProposal(db, { proposalId, actorId }) {
     throw makeError(403, 'Non autorise');
   }
 
+  const confirmation = await q(
+    `UPDATE troc_proposals
+     SET completion_confirmations = CASE
+           WHEN NOT ($2 = ANY(completion_confirmations))
+             THEN array_append(completion_confirmations, $2)
+           ELSE completion_confirmations
+         END,
+         updated_at = NOW()
+     WHERE id = $1 AND status = 'accepted'
+     RETURNING completion_confirmations`,
+    [proposalId, Number(actorId)]
+  );
+  if (!confirmation.rows[0]) throw makeError(409, 'Cette proposition ne peut pas etre finalisee');
+
+  const completionConfirmations = confirmation.rows[0].completion_confirmations.map(Number);
+  const requiredConfirmations = [...allowedIds].filter((id) => Number.isFinite(id) && id > 0);
+  if (!requiredConfirmations.every((id) => completionConfirmations.includes(id))) {
+    return {
+      proposalId,
+      confirmedBy: Number(actorId),
+      completionConfirmations,
+      awaitingConfirmationFrom: requiredConfirmations.filter((id) => !completionConfirmations.includes(id)),
+      completed: false,
+    };
+  }
+
   await transitionTrocProposal(q, proposalId, ['accepted'], 'completed');
 
   if (proposal.parent_proposal_id) {
@@ -755,7 +781,7 @@ async function completeTrocProposal(db, { proposalId, actorId }) {
     }
   }
 
-  return { proposalId, completedBy, badgeRows, completedPairs };
+  return { proposalId, completedBy, completionConfirmations, badgeRows, completedPairs, completed: true };
 }
 
 async function listTrocCycles(db, userId) {
