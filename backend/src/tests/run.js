@@ -34,6 +34,7 @@ const SUITES = [
   './listingStatusPolicy.test',
   './antiScamFailClosed.test',
   './rideManualAcceptanceCapacity.test',
+  './proBookingStateService.test',
   './proEntitlementService.test',
   './proRenewalGraceService.test',
   './companyIdentityService.test',
