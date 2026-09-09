@@ -54,6 +54,7 @@ required_vars=(
 
 production_required_vars=(
   NGINX_SSL_ENABLED
+  ADMIN_ALLOWLIST
   BACKEND_IMAGE
   FRONTEND_IMAGE
   NEXTAUTH_SECRET
