@@ -33,6 +33,7 @@ const SUITES = [
   './listingVisibilityBoundary.test',
   './listingStatusPolicy.test',
   './antiScamFailClosed.test',
+  './rideManualAcceptanceCapacity.test',
   './proEntitlementService.test',
   './proRenewalGraceService.test',
   './companyIdentityService.test',
