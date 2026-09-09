@@ -110,7 +110,9 @@ jobs:
           path: tests/performance/critical-routes.js
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
+          npx playwright install --with-deps chromium
 
       - name: Run blocking Playwright CI gate
         run: npm run test:e2e:gate

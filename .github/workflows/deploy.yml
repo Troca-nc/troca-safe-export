@@ -110,7 +110,9 @@ jobs:
         run: cd frontend && npm ci
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
+          npx playwright install --with-deps chromium
 
       - name: Run blocking Playwright CI gate
         run: npm run test:e2e:gate
