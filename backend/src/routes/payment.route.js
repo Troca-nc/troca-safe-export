@@ -128,7 +128,7 @@ async function verifyStripeSubscriptionStatus(sessionId, userId) {
   });
 
   const { rows: pmtRows } = await query(
-    'SELECT id, type, metadata FROM payments WHERE provider_ref = $1 AND user_id = $2 LIMIT 1',
+    "SELECT id, type, metadata FROM payments WHERE provider = 'stripe' AND provider_ref = $1 AND user_id = $2 LIMIT 1",
     [sessionId, userId]
   );
   const payment = pmtRows[0];
@@ -1075,7 +1075,7 @@ router.get('/verify-session', authenticate, paymentLimiter, async (req, res) => 
     });
 
     const { rows: pmtRows } = await query(
-      'SELECT id, type, metadata FROM payments WHERE provider_ref = $1 AND user_id = $2 LIMIT 1',
+      "SELECT id, type, metadata FROM payments WHERE provider = 'stripe' AND provider_ref = $1 AND user_id = $2 LIMIT 1",
       [session_id, req.user.id]
     );
     const payment = pmtRows[0];
@@ -1197,7 +1197,7 @@ router.post('/webhooks/stripe', async (req, res) => {
         getWebPlan,
         markPaymentSucceeded: (providerRef) => webhookQuery(
           `UPDATE payments SET status = 'succeeded', updated_at = NOW()
-           WHERE provider_ref = $1 AND status = 'pending' RETURNING id`,
+           WHERE provider = 'stripe' AND provider_ref = $1 AND status = 'pending' RETURNING id`,
           [providerRef]
         ),
         formatXpfEur,
@@ -1232,7 +1232,7 @@ router.post('/webhooks/stripe', async (req, res) => {
             `UPDATE annonces SET is_boosted = TRUE, boost_type = $1, boost_expires_at = $2, updated_at = NOW() WHERE id = $3`,
             [boostType, expiresAt, annonceId]
           );
-          const { rows: pmtRows } = await query(`SELECT id FROM payments WHERE provider_ref = $1 LIMIT 1`, [session.id]);
+          const { rows: pmtRows } = await query(`SELECT id FROM payments WHERE provider = 'stripe' AND provider_ref = $1 LIMIT 1`, [session.id]);
           if (pmtRows[0]) {
             await query(
               `INSERT INTO annonce_boosts (annonce_id, type, expires_at, payment_id)
@@ -1275,7 +1275,7 @@ router.post('/webhooks/stripe', async (req, res) => {
             await ensureProReferralCode(client, userId).catch(() => {});
             await refreshTrustScore(userId).catch(() => {});
             await client.query(
-              `UPDATE payments SET metadata = metadata || $2::jsonb, updated_at = NOW() WHERE provider_ref = $1`,
+              `UPDATE payments SET metadata = metadata || $2::jsonb, updated_at = NOW() WHERE provider = 'stripe' AND provider_ref = $1`,
               [session.id, JSON.stringify({ provider_sub_id: subId })]
             );
           });
@@ -1565,7 +1565,7 @@ router.post('/webhooks/payplug', async (req, res) => {
 
       await query(
         `UPDATE payments SET status = 'succeeded', updated_at = NOW()
-         WHERE provider_ref = $1 AND status = 'pending'`,
+         WHERE provider = 'payplug' AND provider_ref = $1 AND status = 'pending'`,
         [resourceId]
       );
 
@@ -1626,7 +1626,7 @@ router.post('/webhooks/payplug', async (req, res) => {
 
           await client.query(
             `UPDATE payments SET status = 'succeeded', updated_at = NOW()
-             WHERE provider_ref = $1 AND status = 'pending'`,
+             WHERE provider = 'payplug' AND provider_ref = $1 AND status = 'pending'`,
             [resourceId]
           );
         });

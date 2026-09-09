@@ -60,6 +60,7 @@ const SUITES = [
   './push.service.test',
   './payment.route.test',
   './paymentCatalog.test',
+  './providerReferenceScope.test',
   './subscriptionOfferBoundary.test',
   './subscriptionEntitlementWrites.test',
   './trocService.test',
