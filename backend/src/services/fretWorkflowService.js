@@ -1049,7 +1049,7 @@ async function selectFretOffer({ userId, requestId, offerId, mode = 'manual' }) 
        FROM delivery_offers o
        JOIN pro_transporters pt ON pt.id = o.transporter_id
        JOIN users u ON u.id = pt.user_id
-       WHERE o.id = $1 AND o.request_id = $2
+       WHERE o.id = $1 AND o.request_id = $2 AND o.status = 'pending'
        LIMIT 1`,
       [offerId, requestId]
     );
@@ -1088,16 +1088,7 @@ async function selectFretOffer({ userId, requestId, offerId, mode = 'manual' }) 
     const selectedOffer = mapOfferPayload(selectedOfferRow);
     const rejectedOffers = allOffers.filter((offer) => Number(offer.id) !== Number(selectedOffer.id));
 
-    await client.query(
-      `UPDATE delivery_offers
-       SET status = CASE WHEN id = $2 THEN 'selected' ELSE 'rejected' END,
-           selected_at = CASE WHEN id = $2 THEN NOW() ELSE selected_at END,
-           updated_at = NOW()
-       WHERE request_id = $1`,
-      [requestId, offerId]
-    );
-
-    await client.query(
+    const requestUpdate = await client.query(
       `UPDATE delivery_requests
        SET selected_offer_id = $2,
            selected_transporter_id = $3,
@@ -1106,8 +1097,25 @@ async function selectFretOffer({ userId, requestId, offerId, mode = 'manual' }) 
            status = 'closed',
            confirmed_at = COALESCE(confirmed_at, NOW()),
            updated_at = NOW()
-       WHERE id = $1`,
+       WHERE id = $1
+         AND status = 'open'
+         AND selected_offer_id IS NULL
+       RETURNING *`,
       [requestId, offerId, selectedOffer.transporter_id, mode]
+    );
+    if (!requestUpdate.rows[0]) {
+      const error = new Error('Une offre a déjà été sélectionnée pour cette demande.');
+      error.status = 409;
+      throw error;
+    }
+
+    await client.query(
+      `UPDATE delivery_offers
+       SET status = CASE WHEN id = $2 THEN 'selected' ELSE 'rejected' END,
+           selected_at = CASE WHEN id = $2 THEN NOW() ELSE selected_at END,
+           updated_at = NOW()
+       WHERE request_id = $1`,
+      [requestId, offerId]
     );
 
     const refreshedRequest = await loadRequestById(client, requestId);
@@ -1148,14 +1156,23 @@ async function markFretDelivered({ userId, requestId }) {
       throw error;
     }
 
-    await client.query(
+    const deliveryUpdate = await client.query(
       `UPDATE delivery_requests
        SET status = 'delivered',
            delivered_at = NOW(),
            updated_at = NOW()
-       WHERE id = $1`,
-      [requestId]
+       WHERE id = $1
+         AND selected_transporter_id = $2
+         AND status = 'closed'
+         AND delivered_at IS NULL
+       RETURNING *`,
+      [requestId, transporter.id]
     );
+    if (!deliveryUpdate.rows[0]) {
+      const error = new Error('Ce transport a déjà été livré ou n’est plus livrable.');
+      error.status = 409;
+      throw error;
+    }
 
     await client.query(
       `UPDATE delivery_offers
@@ -1267,5 +1284,3 @@ module.exports = {
   mapRequestStatusLabel,
   mapOfferStatusLabel,
 };
-
-
