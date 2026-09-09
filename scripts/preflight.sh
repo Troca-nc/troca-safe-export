@@ -46,6 +46,7 @@ required_vars=(
   DB_USER
   DB_PASSWORD
   REDIS_PASSWORD
+  REDIS_REQUIRED
   JWT_SECRET
   JWT_ACCESS_EXPIRES
   JWT_REFRESH_EXPIRES
@@ -148,6 +149,11 @@ if [[ "$ENV_FILE" == *production* ]]; then
 
   if [[ "${NGINX_SSL_ENABLED:-}" != "true" ]]; then
     echo "NGINX_SSL_ENABLED must be true in production" >&2
+    missing=1
+  fi
+
+  if [[ "${REDIS_REQUIRED:-}" != "true" ]]; then
+    echo "REDIS_REQUIRED must be true in production" >&2
     missing=1
   fi
 fi

@@ -6,6 +6,18 @@ let clientPromise = null;
 let client = null;
 let warnedNoRedis = false;
 
+function isRedisRequired() {
+  if (process.env.REDIS_REQUIRED != null) return process.env.REDIS_REQUIRED === 'true';
+  return process.env.NODE_ENV === 'production';
+}
+
+function redisUnavailable(cause) {
+  const error = new Error('Redis is required but unavailable');
+  error.code = 'REDIS_REQUIRED_UNAVAILABLE';
+  error.cause = cause;
+  return error;
+}
+
 function getRedisUrl() {
   if (process.env.REDIS_URL) return process.env.REDIS_URL;
 
@@ -27,7 +39,10 @@ async function getRedisClient() {
   if (clientPromise) return clientPromise;
 
   const url = getRedisUrl();
-  if (!url) return null;
+  if (!url) {
+    if (isRedisRequired()) throw redisUnavailable(new Error('Redis configuration missing'));
+    return null;
+  }
 
   clientPromise = (async () => {
     const nextClient = createClient({
@@ -55,6 +70,7 @@ async function getRedisClient() {
         console.warn('[redis] client non disponible, mode degrade:', err.message);
       }
       try { nextClient.disconnect(); } catch {}
+      if (isRedisRequired()) throw redisUnavailable(err);
       return null;
     }
   })();
@@ -82,4 +98,6 @@ module.exports = {
   getRedisClient,
   getRedisUrl,
   hasRedisConfig,
+  isRedisRequired,
+  redisUnavailable,
 };

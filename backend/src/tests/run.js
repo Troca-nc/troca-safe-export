@@ -59,6 +59,7 @@ const SUITES = [
   './alert.route.test',
   './scheduler.test',
   './timePolicy.test',
+  './redisAvailabilityPolicy.test',
   './push.service.test',
   './payment.route.test',
   './paymentCatalog.test',
