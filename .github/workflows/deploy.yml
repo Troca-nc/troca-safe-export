@@ -111,7 +111,7 @@ jobs:
 
       - name: Install Playwright Browsers
         run: |
-          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
+          sudo find /etc/apt/sources.list.d -maxdepth 1 -type f -exec grep -l 'dl.google.com/linux/chrome' {} + | xargs -r sudo rm -f
           npx playwright install --with-deps chromium
 
       - name: Run blocking Playwright CI gate
