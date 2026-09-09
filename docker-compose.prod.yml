@@ -95,8 +95,6 @@ services:
       PGBOUNCER_AUTH_PASSWORD: ${PGBOUNCER_AUTH_PASSWORD:-}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
-      - ./database:/docker-entrypoint-initdb-src:ro
       - ./docker/postgres/init-pgbouncer-auth.sql:/docker-entrypoint-initdb.d/02_pgbouncer_auth.sql:ro
     networks:
       - db_net
@@ -149,6 +147,20 @@ services:
       timeout: 5s
       retries: 10
 
+  migrate:
+    image: ${BACKEND_IMAGE}
+    restart: "no"
+    command: ['npm', 'run', 'migrate']
+    environment:
+      <<: *backend-env
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+    volumes:
+      - ./database:/database:ro
+    networks:
+      - db_net
+
   backend:
     image: ${BACKEND_IMAGE}
     restart: unless-stopped
@@ -156,8 +168,8 @@ services:
       <<: *backend-env
       RUN_JOBS: 'false'
     depends_on:
-      pgbouncer:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
     volumes:
@@ -182,8 +194,8 @@ services:
       <<: *backend-env
       RUN_JOBS: 'true'
     depends_on:
-      pgbouncer:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
     volumes:

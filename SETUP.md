@@ -169,15 +169,10 @@ Vérification:
 docker exec -it kalico_postgres psql -U kalico -d kalico_prod -c "\dt"
 ```
 
-Si besoin, appliquer manuellement les scripts SQL:
+Appliquer les migrations avec le runner unique:
 
 ```bash
-docker exec -i kalico_postgres psql -U kalico -d kalico_prod < database/migrations/000_baseline.sql
-docker exec -i kalico_postgres psql -U kalico -d kalico_prod < database/migrations/001_add_messaging.sql
-docker exec -i kalico_postgres psql -U kalico -d kalico_prod < database/migrations/002_add_monetisation.sql
-docker exec -i kalico_postgres psql -U kalico -d kalico_prod < database/migrations/003_add_phone_verification.sql
-docker exec -i kalico_postgres psql -U kalico -d kalico_prod < database/migrations/004_add_search_alerts.sql
-docker exec -i kalico_postgres psql -U kalico -d kalico_prod < database/migrations/005_add_push_tokens.sql
+node scripts/migrate.js
 ```
 
 ---
