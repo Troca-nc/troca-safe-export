@@ -1,4 +1,5 @@
-FROM alpine:3.20
+ARG ALPINE_IMAGE=alpine:3.20
+FROM ${ALPINE_IMAGE}
 
 RUN apk add --no-cache age bash ca-certificates curl postgresql-client aws-cli tar tzdata
 

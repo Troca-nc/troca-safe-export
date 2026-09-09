@@ -58,6 +58,12 @@ production_required_vars=(
   ADMIN_ALLOWLIST
   BACKEND_IMAGE
   FRONTEND_IMAGE
+  NGINX_IMAGE
+  CERTBOT_IMAGE
+  POSTGRES_IMAGE
+  REDIS_IMAGE
+  ALPINE_IMAGE
+  ADMIN_NODE_IMAGE
   NEXTAUTH_SECRET
   NEXTAUTH_URL
   ADMIN_EMAIL
@@ -159,6 +165,14 @@ if [[ "$ENV_FILE" == *production* ]]; then
     echo "REDIS_REQUIRED must be true in production" >&2
     missing=1
   fi
+
+  for key in BACKEND_IMAGE FRONTEND_IMAGE NGINX_IMAGE CERTBOT_IMAGE POSTGRES_IMAGE REDIS_IMAGE ALPINE_IMAGE ADMIN_NODE_IMAGE; do
+    value="${!key:-}"
+    if [[ ! "$value" =~ @sha256:([a-fA-F0-9]{64})$ ]] || [[ "${BASH_REMATCH[1]:-}" =~ ^0{64}$ ]]; then
+      echo "$key must use an immutable sha256 digest in production" >&2
+      missing=1
+    fi
+  done
 fi
 
 if [[ -n "${JWT_SECRET:-}" && ${#JWT_SECRET} -lt 64 ]]; then

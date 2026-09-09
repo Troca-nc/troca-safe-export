@@ -11,6 +11,7 @@ const SUITES = [
   './security/adminApiToken.test',
   './security/productionTlsConfig.test',
   './security/backupCompleteness.test',
+  './security/containerReproducibility.test',
   './reviewReportService.test',
   './reviewCreationPolicy.test',
   './reviewTokenService.test',
