@@ -32,4 +32,18 @@ describe('service backup completeness', () => {
     assert.match(backup, /tar[\s\S]*\| age --recipient/);
     assert.match(backup, /\.tar\.gz\.age/);
   });
+
+  it('checks integrity, exercises recovery in CI and alerts on backup failure', () => {
+    const backup = read('scripts/backup.sh');
+    const verifier = read('scripts/verify-backup.sh');
+    const recoveryTest = read('scripts/test-backup-restore.sh');
+    const workflow = read('.github/workflows/ci.yml');
+
+    assert.match(backup, /sha256sum -c/);
+    assert.match(backup, /kalico_backup_failed/);
+    assert.match(verifier, /age --decrypt/);
+    assert.match(verifier, /test -s "\$work_dir\/postgres\.sql"/);
+    assert.match(recoveryTest, /\/verify-backup\.sh/);
+    assert.match(workflow, /Exercise encrypted backup recovery/);
+  });
 });

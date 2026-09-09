@@ -87,6 +87,7 @@ production_required_vars=(
   AWS_ACCESS_KEY_ID
   AWS_SECRET_ACCESS_KEY
   BACKUP_AGE_RECIPIENT
+  BACKUP_ALERT_WEBHOOK_URL
 )
 
 missing=0

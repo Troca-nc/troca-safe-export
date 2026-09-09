@@ -74,6 +74,11 @@ jobs:
       - name: Check k6 request routing and login errors
         run: node --test tests/performance/critical-routes.test.cjs tests/performance/local-services.test.cjs
 
+      - name: Exercise encrypted backup recovery
+        run: |
+          docker build -f backup/Dockerfile -t kalico-backup-test .
+          docker run --rm kalico-backup-test /test-backup-restore.sh
+
       - name: Build optimized frontend for local tests
         run: npm run build --prefix frontend
         env:

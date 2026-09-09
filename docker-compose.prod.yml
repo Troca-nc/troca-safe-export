@@ -300,6 +300,7 @@ services:
       AWS_BUCKET: ${AWS_BUCKET}
       AWS_REGION: ${AWS_REGION}
       BACKUP_AGE_RECIPIENT: ${BACKUP_AGE_RECIPIENT}
+      BACKUP_ALERT_WEBHOOK_URL: ${BACKUP_ALERT_WEBHOOK_URL}
     volumes:
       - backups_data:/backups
       - uploads_data:/source/uploads:ro

@@ -21,7 +21,17 @@ FILEPATH="${BACKUP_DIR}/${FILENAME}"
 STAGING_DIR="$(mktemp -d)"
 AWS_REGION="${AWS_REGION:-ap-southeast-2}"
 
-trap 'rm -rf "$STAGING_DIR"' EXIT
+cleanup_and_alert() {
+  status=$?
+  rm -rf "$STAGING_DIR"
+  if [ "$status" -ne 0 ] && [ -n "${BACKUP_ALERT_WEBHOOK_URL:-}" ]; then
+    curl --fail --silent --show-error --max-time 10 \
+      --header 'Content-Type: application/json' \
+      --data '{"event":"kalico_backup_failed","severity":"critical"}' \
+      "$BACKUP_ALERT_WEBHOOK_URL" >/dev/null || true
+  fi
+}
+trap cleanup_and_alert EXIT
 umask 077
 
 mkdir -p "$BACKUP_DIR"
@@ -32,6 +42,7 @@ mkdir -p "$BACKUP_DIR"
 : "${PGDATABASE:?Variable PGDATABASE manquante — vérifiez docker-compose.prod.yml}"
 : "${PGHOST:?Variable PGHOST manquante — vérifiez docker-compose.prod.yml}"
 : "${BACKUP_AGE_RECIPIENT:?Variable BACKUP_AGE_RECIPIENT manquante — configurez la clé publique age de restauration}"
+: "${BACKUP_ALERT_WEBHOOK_URL:?Variable BACKUP_ALERT_WEBHOOK_URL manquante — configurez le webhook de supervision}"
 
 echo "[$(date)] Début de la sauvegarde..."
 
@@ -51,6 +62,9 @@ tar -C "$STAGING_DIR" -czf - \
   postgres.sql uploads letsencrypt .env.production.local config-template \
   | age --recipient "$BACKUP_AGE_RECIPIENT" --output "$FILEPATH"
 
+(cd "$BACKUP_DIR" && sha256sum "$FILENAME" > "${FILENAME}.sha256")
+(cd "$BACKUP_DIR" && sha256sum -c "${FILENAME}.sha256")
+
 SIZE=$(du -sh "$FILEPATH" | cut -f1)
 echo "[$(date)] Sauvegarde créée : $FILENAME ($SIZE)"
 
@@ -63,6 +77,11 @@ if [ -n "${AWS_ACCESS_KEY_ID:-}" ] && [ -n "${AWS_SECRET_ACCESS_KEY:-}" ] && [ -
     "s3://${AWS_BUCKET}/backups/${FILENAME}" \
     --storage-class STANDARD_IA \
     --region "$AWS_REGION"
+  aws s3 cp \
+    "${FILEPATH}.sha256" \
+    "s3://${AWS_BUCKET}/backups/${FILENAME}.sha256" \
+    --storage-class STANDARD_IA \
+    --region "$AWS_REGION"
 
   echo "[$(date)] Upload S3 réussi"
 else
@@ -71,6 +90,7 @@ fi
 
 # ── Rotation : garder 30 jours ──────────────────────────
 find "$BACKUP_DIR" -name "kalico_*.tar.gz.age" -mtime +30 -delete
+find "$BACKUP_DIR" -name "kalico_*.tar.gz.age.sha256" -mtime +30 -delete
 echo "[$(date)] Anciennes sauvegardes nettoyées"
 
 echo "[$(date)] ✅ Sauvegarde terminée : $FILENAME"
