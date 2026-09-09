@@ -191,10 +191,12 @@ services:
   worker:
     image: ${BACKEND_IMAGE}
     restart: unless-stopped
+    stop_grace_period: 75s
     command: ['npm', 'run', 'worker']
     environment:
       <<: *backend-env
       RUN_JOBS: 'true'
+      WORKER_SHUTDOWN_TIMEOUT_MS: '60000'
     depends_on:
       migrate:
         condition: service_completed_successfully

@@ -105,7 +105,7 @@ async function run() {
     const stop = () => {};
     const job = load('jobs/campaignNotificationOutbox.js', {
       '../config/timePolicy': { BUSINESS_TIME_ZONE: 'Pacific/Noumea' },
-      'node-cron': { schedule(expression, callback) { assert.strictEqual(expression, '* * * * *'); tick = callback; return { stop }; } },
+      '../services/jobRuntime': { scheduleTracked(expression, callback) { assert.strictEqual(expression, '* * * * *'); tick = callback; return { stop }; } },
       '../services/campaignNotificationOutboxService': { async deliverNextCampaignNotification() { calls++; if (calls === 1) await pending; return { status: 'sent' }; } },
       '../services/campaignsService': { deliverCampaignNotification() {} }, '../utils/logger': { logger: { info() {}, error() {} } },
     });

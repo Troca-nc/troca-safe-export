@@ -7,7 +7,7 @@
 //  • Matching immediate des nouvelles annonces
 // ============================================================
 
-const cron                = require('node-cron');
+const { scheduleTracked } = require('../services/jobRuntime');
 const { query }           = require('../config/database');
 const { BUSINESS_TIME_ZONE } = require('../config/timePolicy');
 const {
@@ -366,7 +366,7 @@ async function processTrocMatchingQueue() {
 // Toutes les heures : désactive les boosts dont boost_expires_at est passé
 
 function startBoostExpiryJob() {
-  cron.schedule('0 * * * *', async () => {
+  scheduleTracked('0 * * * *', async () => {
     recordJob('started', { job: 'boost-expiry' });
     await runSingletonJob('cron:boost-expiry', 50 * 60 * 1000, async () => {
       try {
@@ -390,7 +390,7 @@ function startBoostExpiryJob() {
 }
 
 function startListingExpiryJob() {
-  cron.schedule('10 * * * *', async () => {
+  scheduleTracked('10 * * * *', async () => {
     recordJob('started', { job: 'listing-expiry' });
     await runSingletonJob('cron:listing-expiry', 50 * 60 * 1000, async () => {
       try {
@@ -437,7 +437,7 @@ function startListingExpiryJob() {
 }
 
 function startFretExpirationJob() {
-  cron.schedule('*/5 * * * *', async () => {
+  scheduleTracked('*/5 * * * *', async () => {
     recordJob('started', { job: 'fret-expiry' });
     await runSingletonJob('cron:fret-expiry', 4 * 60 * 1000, async () => {
       try {
@@ -456,7 +456,7 @@ function startFretExpirationJob() {
 }
 
 function startProQuoteExpiryJob() {
-  cron.schedule('20 * * * *', async () => {
+  scheduleTracked('20 * * * *', async () => {
     recordJob('started', { job: 'pro-quote-expiry' });
     await runSingletonJob('cron:pro-quote-expiry', 50 * 60 * 1000, async () => {
       try {
@@ -494,7 +494,7 @@ function startProQuoteExpiryJob() {
 function startBonPlanMaintenanceJob() {
   const flushIntervalMs = Math.max(15 * 60 * 1000, Number(process.env.BON_PLAN_VIEWS_FLUSH_INTERVAL_MS || 3600000));
 
-  cron.schedule('15 * * * *', async () => {
+  scheduleTracked('15 * * * *', async () => {
     recordJob('started', { job: 'bon-plan-expiry' });
     await runSingletonJob('cron:bon-plan-expiry', 45 * 60 * 1000, async () => {
       try {
@@ -535,7 +535,7 @@ function startBonPlanMaintenanceJob() {
 }
 
 function startCampaignMaintenanceJob() {
-  cron.schedule('*/5 * * * *', async () => {
+  scheduleTracked('*/5 * * * *', async () => {
     recordJob('started', { job: 'campaign-maintenance' });
     await runSingletonJob('cron:campaign-maintenance', 4 * 60 * 1000, async () => {
       try {
@@ -557,7 +557,7 @@ function startCampaignMaintenanceJob() {
 }
 
 function startWeeklyBonPlanSelectionJob() {
-  cron.schedule('0 8 * * 1', async () => {
+  scheduleTracked('0 8 * * 1', async () => {
     recordJob('started', { job: 'bon-plan-weekly-reminder' });
     await runSingletonJob('cron:bon-plan-weekly-reminder', 60 * 60 * 1000, async () => {
       try {
@@ -572,7 +572,7 @@ function startWeeklyBonPlanSelectionJob() {
     });
   }, { timezone: BUSINESS_TIME_ZONE });
 
-  cron.schedule('0 12 * * 2', async () => {
+  scheduleTracked('0 12 * * 2', async () => {
     recordJob('started', { job: 'bon-plan-weekly-auto-selection' });
     await runSingletonJob('cron:bon-plan-weekly-auto-selection', 60 * 60 * 1000, async () => {
       try {
@@ -651,7 +651,7 @@ async function expireTrocCycles() {
 }
 
 function startTrocMaintenanceJob() {
-  cron.schedule('*/5 * * * *', async () => {
+  scheduleTracked('*/5 * * * *', async () => {
     recordJob('started', { job: 'troc-maintenance' });
     await runSingletonJob('cron:troc-maintenance', 4 * 60 * 1000, async () => {
       try {
@@ -674,7 +674,7 @@ function startTrocMaintenanceJob() {
 }
 
 function startTrocMatchingJob() {
-  cron.schedule('*/30 * * * * *', async () => {
+  scheduleTracked('*/30 * * * * *', async () => {
     recordJob('started', { job: 'troc-matching' });
     await runSingletonJob('cron:troc-matching', 25 * 1000, async () => {
       try {
@@ -693,7 +693,7 @@ function startTrocMatchingJob() {
 }
 
 function startAdminAlertsJob() {
-  cron.schedule('*/5 * * * *', async () => {
+  scheduleTracked('*/5 * * * *', async () => {
     recordJob('started', { job: 'admin-alerts' });
     await runSingletonJob('cron:admin-alerts', 4 * 60 * 1000, async () => {
       try {
@@ -718,7 +718,7 @@ function startAdminAlertsJob() {
 // Tous les jours à 9h00 heure Nouméa
 
 function startExpiringListingsJob() {
-  cron.schedule('0 9 * * *', async () => {
+  scheduleTracked('0 9 * * *', async () => {
     recordJob('started', { job: 'expiring-listings' });
     await runSingletonJob('cron:expiring-listings', 30 * 60 * 1000, async () => {
       try {
@@ -764,7 +764,7 @@ function startExpiringListingsJob() {
 }
 
 function startDailyAlertsJob() {
-  cron.schedule('0 8 * * *', () => runSingletonJob('cron:alerts-daily', 30 * 60 * 1000, () => runAlertJob('daily')), { timezone: BUSINESS_TIME_ZONE });
+  scheduleTracked('0 8 * * *', () => runSingletonJob('cron:alerts-daily', 30 * 60 * 1000, () => runAlertJob('daily')), { timezone: BUSINESS_TIME_ZONE });
   recordJob('started', { job: 'alerts-daily' });
   logger.info('cron_job_started', { job: 'alerts-daily' });
 }
@@ -773,13 +773,13 @@ function startDailyAlertsJob() {
 // Tous les lundis à 8h00 heure Nouméa
 
 function startWeeklyAlertsJob() {
-  cron.schedule('0 8 * * 1', () => runSingletonJob('cron:alerts-weekly', 30 * 60 * 1000, () => runAlertJob('weekly')), { timezone: BUSINESS_TIME_ZONE });
+  scheduleTracked('0 8 * * 1', () => runSingletonJob('cron:alerts-weekly', 30 * 60 * 1000, () => runAlertJob('weekly')), { timezone: BUSINESS_TIME_ZONE });
   recordJob('started', { job: 'alerts-weekly' });
   logger.info('cron_job_started', { job: 'alerts-weekly' });
 }
 
 function startPerformanceReportsJob() {
-  cron.schedule('30 7 * * *', async () => {
+  scheduleTracked('30 7 * * *', async () => {
     recordJob('started', { job: 'performance-reports' });
     await runSingletonJob('cron:performance-reports', 45 * 60 * 1000, async () => {
       await runPerformanceReportsJob();
@@ -790,7 +790,7 @@ function startPerformanceReportsJob() {
 }
 
 function startAnalyticsPurgeJob() {
-  cron.schedule('30 3 * * *', async () => {
+  scheduleTracked('30 3 * * *', async () => {
     recordJob('started', { job: 'analytics-purge' });
     await runSingletonJob('cron:analytics-purge', 20 * 60 * 1000, async () => {
       try {
@@ -1172,7 +1172,7 @@ async function runPerformanceReportsJob() {
 }
 
 function startReviewReminderJob() {
-  cron.schedule('0 10 * * *', async () => {
+  scheduleTracked('0 10 * * *', async () => {
     recordJob('started', { job: 'reviews' });
     await runSingletonJob('cron:review-reminder', 30 * 60 * 1000, async () => {
       try {
@@ -1236,7 +1236,7 @@ function startReviewReminderJob() {
 }
 
 function startRideReviewReminderJob() {
-  cron.schedule('20 10 * * *', async () => {
+  scheduleTracked('20 10 * * *', async () => {
     recordJob('started', { job: 'covoiturage-reviews' });
     await runSingletonJob('cron:covoiturage-review-reminder', 30 * 60 * 1000, async () => {
       try {
@@ -1502,7 +1502,7 @@ async function runProBookingReminderWindow({
 }
 
 function startProBookingReminderJob() {
-  cron.schedule('*/15 * * * *', async () => {
+  scheduleTracked('*/15 * * * *', async () => {
     recordJob('started', { job: 'pro-booking-reminders' });
     await runSingletonJob('cron:pro-booking-reminders', 10 * 60 * 1000, async () => {
       try {
@@ -1546,7 +1546,7 @@ function startProBookingReminderJob() {
 }
 
 function startNewsletterJob() {
-  cron.schedule('0 18 * * 0', async () => {
+  scheduleTracked('0 18 * * 0', async () => {
     recordJob('started', { job: 'newsletter' });
     await runSingletonJob('cron:newsletter-weekly', 60 * 60 * 1000, async () => {
       try {
@@ -1563,7 +1563,7 @@ function startNewsletterJob() {
 }
 
 function startProRenewalGraceJob() {
-  cron.schedule('25 * * * *', async () => {
+  scheduleTracked('25 * * * *', async () => {
     await runSingletonJob('cron:pro-renewal-grace', 50 * 60 * 1000, async () => {
       try {
         const result = await processRenewalGraceDeadlines({ query, sendMail, baseUrl: getTrocBaseUrl() });
