@@ -806,26 +806,32 @@ router.post('/subscribe/mobile', authenticate, paymentLimiter, validate(mobilePl
       { apiVersion: '2023-10-16' }
     );
 
-    await query(
-      `INSERT INTO subscriptions
+    const trialEnd = subscription.trial_end
+      ? new Date(subscription.trial_end * 1000)
+      : new Date(Date.now() + (14 * 24 * 60 * 60 * 1000));
+    await withTransaction(async (client) => {
+      await client.query(
+        `INSERT INTO subscriptions
          (user_id, plan_id, billing_period, provider, provider_sub_id, payment_provider, status,
           current_period_start, current_period_end, cancel_at_period_end)
-       VALUES ($1, $2, $3, 'stripe', $4, 'stripe', $5, NOW(), NOW() + INTERVAL '14 days', FALSE)
+       VALUES ($1, $2, $3, 'stripe', $4, 'stripe', $5, NOW(), $6, FALSE)
        ON CONFLICT (provider_sub_id) DO NOTHING`,
-      [
-        req.user.id,
-        'pro',
-        plan.includes('annuel') ? 'yearly' : 'monthly',
-        subscription.id,
-        subscription.status === 'trialing' ? 'trialing' : 'active',
-      ]
-    );
+        [
+          req.user.id,
+          'pro',
+          plan.includes('annuel') ? 'yearly' : 'monthly',
+          subscription.id,
+          subscription.status === 'trialing' ? 'trialing' : 'active',
+          trialEnd,
+        ]
+      );
 
-    await query(
-      `UPDATE users SET is_pro = TRUE, pro_plan = $2, updated_at = NOW() WHERE id = $1`,
-      [req.user.id, 'pro']
-    );
-    await ensureProReferralCode(query, req.user.id).catch(() => {});
+      await client.query(
+        `UPDATE users SET is_pro = TRUE, pro_plan = $2, pro_expires_at = $3, updated_at = NOW() WHERE id = $1`,
+        [req.user.id, 'pro', trialEnd]
+      );
+      await ensureProReferralCode(client, req.user.id).catch(() => {});
+    });
     await refreshTrustScore(req.user.id).catch(() => {});
 
     return res.json({
@@ -1300,48 +1306,48 @@ router.post('/webhooks/stripe', async (req, res) => {
       const periodStart = new Date(sub.current_period_start * 1000);
       const periodEnd = new Date(sub.current_period_end * 1000);
 
-      await query(
-        `UPDATE subscriptions
+      const activeUserId = await withTransaction(async (client) => {
+        const updated = await client.query(
+          `UPDATE subscriptions
          SET status = $2, current_period_start = $3, current_period_end = $4,
              cancel_at_period_end = $5, updated_at = NOW()
-         WHERE provider_sub_id = $1`,
+         WHERE provider_sub_id = $1
+         RETURNING user_id`,
         [subId, sub.status, periodStart, periodEnd, sub.cancel_at_period_end]
-      );
+        );
 
-      if (sub.status === 'active') {
-        const activeUserRes = await query(
-          `SELECT user_id
-           FROM subscriptions
-           WHERE provider_sub_id = $1
-           LIMIT 1`,
-          [subId]
-        );
-        await query(
-          `UPDATE users SET is_pro = TRUE, pro_expires_at = $2, updated_at = NOW()
-           WHERE id = (SELECT user_id FROM subscriptions WHERE provider_sub_id = $1 LIMIT 1)`,
-          [subId, periodEnd]
-        );
-        if (activeUserRes.rows[0]?.user_id) {
-          await ensureProReferralCode(query, activeUserRes.rows[0].user_id).catch(() => {});
-          await refreshTrustScore(activeUserRes.rows[0].user_id).catch(() => {});
+        const userId = updated.rows[0]?.user_id;
+        if (sub.status === 'active' && userId) {
+          await client.query(
+            `UPDATE users SET is_pro = TRUE, pro_plan = 'pro', pro_expires_at = $2, updated_at = NOW()
+             WHERE id = $1`,
+            [userId, periodEnd]
+          );
+          await ensureProReferralCode(client, userId).catch(() => {});
         }
+        return userId || null;
+      });
+      if (sub.status === 'active' && activeUserId) {
+        await refreshTrustScore(activeUserId).catch(() => {});
       }
     }
 
     if (event.type === 'customer.subscription.deleted') {
       const subId = event.data.object.id;
-      const { rows } = await query(
-        `UPDATE subscriptions SET status = 'cancelled', updated_at = NOW()
-         WHERE provider_sub_id = $1 RETURNING user_id`,
-        [subId]
-      );
-      if (rows[0]) {
-        await query(
-          `UPDATE users SET is_pro = FALSE, pro_plan = NULL, pro_expires_at = NULL, updated_at = NOW()
-           WHERE id = $1`,
-          [rows[0].user_id]
+      await withTransaction(async (client) => {
+        const { rows } = await client.query(
+          `UPDATE subscriptions SET status = 'cancelled', updated_at = NOW()
+           WHERE provider_sub_id = $1 RETURNING user_id`,
+          [subId]
         );
-      }
+        if (rows[0]) {
+          await client.query(
+            `UPDATE users SET is_pro = FALSE, pro_plan = NULL, pro_expires_at = NULL, updated_at = NOW()
+             WHERE id = $1`,
+            [rows[0].user_id]
+          );
+        }
+      });
     }
 
     if (event.type === 'invoice.payment_succeeded') {
@@ -1350,15 +1356,20 @@ router.post('/webhooks/stripe', async (req, res) => {
       if (subId && inv.billing_reason === 'subscription_cycle') {
         const stripeSub = await stripe.subscriptions.retrieve(subId);
         const periodEnd = new Date(stripeSub.current_period_end * 1000);
-        await query(
-          `UPDATE subscriptions SET current_period_end = $2, updated_at = NOW() WHERE provider_sub_id = $1`,
-          [subId, periodEnd]
-        );
-        await query(
-          `UPDATE users SET pro_expires_at = $2, updated_at = NOW()
-           WHERE id = (SELECT user_id FROM subscriptions WHERE provider_sub_id = $1 LIMIT 1)`,
-          [subId, periodEnd]
-        );
+        await withTransaction(async (client) => {
+          const renewed = await client.query(
+            `UPDATE subscriptions SET status = 'active', payment_status = 'succeeded', current_period_end = $2, updated_at = NOW()
+             WHERE provider_sub_id = $1 RETURNING user_id`,
+            [subId, periodEnd]
+          );
+          if (renewed.rows[0]) {
+            await client.query(
+              `UPDATE users SET is_pro = TRUE, pro_plan = 'pro', pro_expires_at = $2, updated_at = NOW()
+               WHERE id = $1`,
+              [renewed.rows[0].user_id, periodEnd]
+            );
+          }
+        });
         const { rows: userRows } = await query(
           `SELECT u.email, u.prenom FROM users u
            JOIN subscriptions s ON s.user_id = u.id
@@ -1647,16 +1658,20 @@ router.post('/webhooks/payplug', async (req, res) => {
 
       const isCancelled = resource.is_cancelled ?? resource.state === 'cancelled';
       if (isCancelled && userId) {
-        await query(
-          `UPDATE subscriptions SET status = 'cancelled', updated_at = NOW()
-           WHERE provider_sub_id = $1`,
-          [resourceId]
-        );
-        await query(
-          `UPDATE users SET is_pro = FALSE, pro_plan = NULL, pro_expires_at = NULL, updated_at = NOW()
-           WHERE id = $1 AND id = (SELECT user_id FROM subscriptions WHERE provider_sub_id = $2 LIMIT 1)`,
-          [userId, resourceId]
-        );
+        await withTransaction(async (client) => {
+          const cancelled = await client.query(
+            `UPDATE subscriptions SET status = 'cancelled', updated_at = NOW()
+             WHERE provider_sub_id = $1 AND user_id = $2 RETURNING user_id`,
+            [resourceId, userId]
+          );
+          if (cancelled.rows[0]) {
+            await client.query(
+              `UPDATE users SET is_pro = FALSE, pro_plan = NULL, pro_expires_at = NULL, updated_at = NOW()
+               WHERE id = $1`,
+              [cancelled.rows[0].user_id]
+            );
+          }
+        });
         logger.info(`[webhook/payplug] Abonnement annulé - user ${userId}`);
       }
     }
