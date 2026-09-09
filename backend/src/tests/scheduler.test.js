@@ -6,6 +6,7 @@
 
 const assert = require('assert');
 const { describe, it } = require('./helpers');
+const { BUSINESS_TIME_ZONE } = require('../config/timePolicy');
 
 // ── Stub node-cron ────────────────────────────────────────────
 const registeredJobs = [];
@@ -80,7 +81,7 @@ describe('scheduler — startAllJobs', () => {
   });
 
   it('tous les jobs sont en timezone Pacific/Noumea', () => {
-    const tzJobs = registeredJobs.filter(j => j.tz === 'Pacific/Noumea');
+    const tzJobs = registeredJobs.filter(j => j.tz === BUSINESS_TIME_ZONE);
     assert.strictEqual(tzJobs.length, registeredJobs.length, 'Tous les jobs doivent être en heure de Nouméa');
   });
 

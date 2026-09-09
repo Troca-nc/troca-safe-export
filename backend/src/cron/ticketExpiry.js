@@ -2,6 +2,7 @@
 
 const cron = require('node-cron');
 const { query } = require('../config/database');
+const { BUSINESS_TIME_ZONE } = require('../config/timePolicy');
 const { logger } = require('../utils/logger');
 const { recordJob } = require('../services/observability');
 
@@ -59,7 +60,7 @@ function startTicketExpiryJob() {
       recordJob('error', { job: 'event-ticket-expiry', message: err.message });
       logger.error('cron_event_ticket_expiry_error', { error: err });
     }
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'event-ticket-expiry' });
 }

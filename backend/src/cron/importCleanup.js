@@ -5,6 +5,7 @@ const path = require('path');
 const cron = require('node-cron');
 
 const { query } = require('../config/database');
+const { BUSINESS_TIME_ZONE } = require('../config/timePolicy');
 const { withLock } = require('../services/sharedCache');
 const { logger } = require('../utils/logger');
 const { recordJob } = require('../services/observability');
@@ -101,7 +102,7 @@ function startImportCleanupJob() {
         logger.error('cron_import_cleanup_error', { error });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'import-cleanup' });
 }

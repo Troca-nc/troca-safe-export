@@ -8,6 +8,7 @@ const { sendMail } = require('./emailService');
 const { sendPushToUsers } = require('./pushService');
 const { sendSms } = require('./fretWorkflowService');
 const { isConfiguredValue } = require('../config/env');
+const { BUSINESS_TIME_ZONE } = require('../config/timePolicy');
 const payplug = require('./payplugService');
 const { ensureStripe, getOrCreateStripeCustomer } = require('./paymentHelpers');
 const { xpfToEurCents, formatXpfEur } = require('./paymentCatalog');
@@ -299,7 +300,7 @@ function serializeCampaign(row) {
 
 function getCurrentWeekKey(reference = new Date()) {
   const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Pacific/Noumea',
+    timeZone: BUSINESS_TIME_ZONE,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -916,7 +917,7 @@ async function notifyWeeklyBonPlanSelectionReminder(db) {
   if (!rows.length) return { reminded: 0 };
 
   const weekLabel = new Intl.DateTimeFormat('fr-FR', {
-    timeZone: 'Pacific/Noumea',
+    timeZone: BUSINESS_TIME_ZONE,
     dateStyle: 'long',
   }).format(new Date());
   const linkUrl = `${process.env.BASE_URL || 'https://kalico.nc'}/pro/dashboard/publicite`;
@@ -1019,7 +1020,7 @@ async function autoSelectWeeklyBonPlans(db) {
     const body = `Bonjour ${displayName}, Kalico a sélectionné automatiquement vos bons plans de la semaine.`;
     const linkUrl = `${process.env.BASE_URL || 'https://kalico.nc'}/pro/dashboard/publicite`;
     const weekLabel = new Intl.DateTimeFormat('fr-FR', {
-      timeZone: 'Pacific/Noumea',
+      timeZone: BUSINESS_TIME_ZONE,
       dateStyle: 'long',
     }).format(new Date());
 
