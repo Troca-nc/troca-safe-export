@@ -4,7 +4,7 @@ const assert = require('assert');
 const { describe, it, makeReq, makeRes, makeQueryMock, assertStatus } = require('./helpers');
 
 const queryMock = makeQueryMock((sql) => {
-  if (sql.includes('FROM users WHERE id = $1')) {
+  if (sql.includes('FROM users') && sql.includes('id = $1')) {
     return { rows: [{ id: 12, email: 'demo@kalico.nc', prenom: 'Demo' }] };
   }
   if (sql.includes('FROM annonces WHERE user_id = $1')) return { rows: [{ id: 1, titre: 'Annonce', created_at: new Date().toISOString() }] };
@@ -31,7 +31,10 @@ require.cache[require.resolve('../config/database')] = {
   id: require.resolve('../config/database'),
   filename: require.resolve('../config/database'),
   loaded: true,
-  exports: { query: queryMock },
+  exports: {
+    query: queryMock,
+    withTransaction: async (fn) => fn({ query: queryMock }),
+  },
 };
 
 require.cache[require.resolve('../middleware/auth')] = {
