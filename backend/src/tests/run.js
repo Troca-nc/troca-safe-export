@@ -27,6 +27,7 @@ const SUITES = [
   './auth.middleware.test',
   './email.service.test',
   './authAccountService.test',
+  './accountDeletionService.test',
   './proEntitlementBoundary.test',
   './proPublicProjectionBoundary.test',
   './commercialQuotaService.test',

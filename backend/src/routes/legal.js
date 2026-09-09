@@ -7,6 +7,7 @@ const { query } = require('../config/database');
 const { authenticate } = require('../middleware/auth');
 const { verifyCsrf } = require('../middleware/csrf');
 const { sendMail } = require('../services/emailService');
+const { anonymizeAccount } = require('../services/accountDeletionService');
 
 const router = express.Router();
 
@@ -221,50 +222,9 @@ router.delete('/users/me', authenticate, verifyCsrf, async (req, res, next) => {
       return res.status(400).json({ error: 'Email de confirmation incorrect' });
     }
 
-    const currentUser = await query(
-      'SELECT id, email, prenom FROM users WHERE id = $1',
-      [req.user.id]
-    );
-    if (!currentUser.rows[0]) {
+    const user = await anonymizeAccount(req.user.id);
+    if (!user) {
       return res.status(404).json({ error: 'Utilisateur introuvable' });
-    }
-
-    const user = currentUser.rows[0];
-    const cleanupStatements = [
-      'DELETE FROM rgpd_consentements WHERE user_id = $1',
-      'DELETE FROM rgpd_logs WHERE user_id = $1',
-      'DELETE FROM notifications WHERE user_id = $1',
-      'DELETE FROM push_tokens WHERE user_id = $1',
-      'DELETE FROM search_alerts WHERE user_id = $1',
-      'DELETE FROM notification_preferences WHERE user_id = $1',
-      'DELETE FROM covoit_alerts WHERE user_id = $1',
-      'DELETE FROM favoris WHERE user_id = $1',
-      'DELETE FROM payments WHERE user_id = $1',
-      'DELETE FROM subscriptions WHERE user_id = $1',
-      'DELETE FROM boosts WHERE user_id = $1',
-      'DELETE FROM troc_swipes WHERE user_id = $1',
-      'DELETE FROM troc_badges WHERE user_id = $1',
-      'DELETE FROM business_reviews WHERE user_id = $1',
-      'DELETE FROM bon_plan_notification_prefs WHERE user_id = $1',
-      'DELETE FROM bon_plans WHERE user_id = $1',
-      `UPDATE messages
-       SET sender_id = NULL,
-           content = '[Message supprimé]',
-           photo_url = NULL,
-           attachment_url = NULL,
-           attachment_name = NULL,
-           attachment_mime_type = NULL,
-           attachment_size_bytes = NULL
-       WHERE sender_id = $1`,
-      'DELETE FROM refresh_tokens WHERE user_id = $1',
-      'DELETE FROM password_reset_tokens WHERE user_id = $1',
-      'DELETE FROM email_verification_tokens WHERE user_id = $1',
-      'DELETE FROM annonces WHERE user_id = $1',
-      'DELETE FROM users WHERE id = $1',
-    ];
-
-    for (const statement of cleanupStatements) {
-      await queryOptional(statement, [user.id]);
     }
 
     const html = renderAccountDeletedEmail({
