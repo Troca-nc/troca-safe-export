@@ -5,6 +5,7 @@ const { startAllJobs } = require('./jobs/scheduler');
 const { startTicketEmailOutboxJob } = require('./jobs/ticketEmailOutbox');
 const { startCampaignNotificationOutboxJob } = require('./jobs/campaignNotificationOutbox');
 const { logger } = require('./utils/logger');
+const { createWorkerHealthService } = require('./services/workerHealthService');
 const {
   recordError,
   registerObservabilityInstance,
@@ -25,11 +26,14 @@ async function start() {
   const ticketEmailJob = startTicketEmailOutboxJob();
   const campaignNotificationJob = startCampaignNotificationOutboxJob();
   void registerObservabilityInstance('worker');
+  const health = createWorkerHealthService({ checkDatabase: checkConnection });
+  await health.start();
   logger.info('worker_started');
 
   const shutdown = (signal) => {
     logger.info('worker_shutdown_signal', { signal });
     stopObservabilityHeartbeat();
+    void health.stop();
     ticketEmailJob.stop();
     campaignNotificationJob.stop();
     setTimeout(() => process.exit(0), 0);

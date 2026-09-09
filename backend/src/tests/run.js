@@ -60,6 +60,7 @@ const SUITES = [
   './scheduler.test',
   './timePolicy.test',
   './redisAvailabilityPolicy.test',
+  './workerHealthService.test',
   './push.service.test',
   './payment.route.test',
   './paymentCatalog.test',
