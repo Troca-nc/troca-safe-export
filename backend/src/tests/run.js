@@ -10,6 +10,7 @@ const SUITES = [
   './security/clientIp.test',
   './security/adminApiToken.test',
   './security/productionTlsConfig.test',
+  './security/backupCompleteness.test',
   './reviewReportService.test',
   './reviewCreationPolicy.test',
   './reviewTokenService.test',
