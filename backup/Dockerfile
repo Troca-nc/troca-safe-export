@@ -1,10 +1,13 @@
 FROM alpine:3.20
 
-RUN apk add --no-cache bash ca-certificates postgresql-client aws-cli tzdata
+RUN apk add --no-cache age bash ca-certificates postgresql-client aws-cli tar tzdata
 
 WORKDIR /app
 
 COPY scripts/backup.sh /backup.sh
+COPY docker-compose.prod.yml /recovery/config-template/docker-compose.prod.yml
+COPY nginx /recovery/config-template/nginx
+COPY docker/nginx/entrypoint.sh /recovery/config-template/docker/nginx/entrypoint.sh
 
 RUN chmod +x /backup.sh \
   && mkdir -p /backups /var/log \

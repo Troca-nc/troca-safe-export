@@ -299,8 +299,12 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_BUCKET: ${AWS_BUCKET}
       AWS_REGION: ${AWS_REGION}
+      BACKUP_AGE_RECIPIENT: ${BACKUP_AGE_RECIPIENT}
     volumes:
       - backups_data:/backups
+      - uploads_data:/source/uploads:ro
+      - certbot_conf:/source/letsencrypt:ro
+      - ./.env.production.local:/source/config/.env.production.local:ro
     depends_on:
       postgres:
         condition: service_healthy

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# Kalico — Sauvegarde automatique PostgreSQL
+# Kalico — Sauvegarde automatique du service
 # Exécuté chaque nuit à 2h00
 # Conserve 30 jours de sauvegardes locales
 # Upload vers AWS S3 pour archivage long terme
@@ -16,9 +16,13 @@ set -eu
 
 DATE=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR="/backups"
-FILENAME="kalico_${DATE}.sql.gz"
+FILENAME="kalico_${DATE}.tar.gz.age"
 FILEPATH="${BACKUP_DIR}/${FILENAME}"
+STAGING_DIR="$(mktemp -d)"
 AWS_REGION="${AWS_REGION:-ap-southeast-2}"
+
+trap 'rm -rf "$STAGING_DIR"' EXIT
+umask 077
 
 mkdir -p "$BACKUP_DIR"
 
@@ -27,15 +31,25 @@ mkdir -p "$BACKUP_DIR"
 : "${PGPASSWORD:?Variable PGPASSWORD manquante — vérifiez docker-compose.prod.yml}"
 : "${PGDATABASE:?Variable PGDATABASE manquante — vérifiez docker-compose.prod.yml}"
 : "${PGHOST:?Variable PGHOST manquante — vérifiez docker-compose.prod.yml}"
+: "${BACKUP_AGE_RECIPIENT:?Variable BACKUP_AGE_RECIPIENT manquante — configurez la clé publique age de restauration}"
 
 echo "[$(date)] Début de la sauvegarde..."
 
-# ── Dump PostgreSQL ─────────────────────────────────────
+# ── Capture cohérente des données et de la configuration ──
 # Les variables PGHOST, PGUSER, PGPASSWORD, PGDATABASE sont
 # automatiquement lues par pg_dump depuis l'environnement Docker
 pg_dump \
   --no-password \
-  | gzip > "$FILEPATH"
+  --file "$STAGING_DIR/postgres.sql"
+
+cp -a /source/uploads "$STAGING_DIR/uploads"
+cp -a /source/letsencrypt "$STAGING_DIR/letsencrypt"
+cp /source/config/.env.production.local "$STAGING_DIR/.env.production.local"
+cp -a /recovery/config-template "$STAGING_DIR/config-template"
+
+tar -C "$STAGING_DIR" -czf - \
+  postgres.sql uploads letsencrypt .env.production.local config-template \
+  | age --recipient "$BACKUP_AGE_RECIPIENT" --output "$FILEPATH"
 
 SIZE=$(du -sh "$FILEPATH" | cut -f1)
 echo "[$(date)] Sauvegarde créée : $FILENAME ($SIZE)"
@@ -56,7 +70,7 @@ else
 fi
 
 # ── Rotation : garder 30 jours ──────────────────────────
-find "$BACKUP_DIR" -name "*.sql.gz" -mtime +30 -delete
+find "$BACKUP_DIR" -name "kalico_*.tar.gz.age" -mtime +30 -delete
 echo "[$(date)] Anciennes sauvegardes nettoyées"
 
 echo "[$(date)] ✅ Sauvegarde terminée : $FILENAME"
