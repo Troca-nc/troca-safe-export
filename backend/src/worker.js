@@ -6,6 +6,7 @@ const { startTicketEmailOutboxJob } = require('./jobs/ticketEmailOutbox');
 const { startCampaignNotificationOutboxJob } = require('./jobs/campaignNotificationOutbox');
 const { logger } = require('./utils/logger');
 const { createWorkerHealthService } = require('./services/workerHealthService');
+const { stopSchedulingAndDrain } = require('./services/jobRuntime');
 const {
   recordError,
   registerObservabilityInstance,
@@ -30,21 +31,29 @@ async function start() {
   await health.start();
   logger.info('worker_started');
 
-  const shutdown = (signal) => {
+  let shuttingDown = false;
+  const shutdown = async (signal) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
     logger.info('worker_shutdown_signal', { signal });
     stopObservabilityHeartbeat();
-    void health.stop();
+    const timeoutMs = Number(process.env.WORKER_SHUTDOWN_TIMEOUT_MS || 60_000);
+    const result = await stopSchedulingAndDrain(timeoutMs);
     ticketEmailJob.stop();
     campaignNotificationJob.stop();
-    setTimeout(() => process.exit(0), 0);
+    await health.stop();
+    if (!result.drained) {
+      logger.error('worker_shutdown_timeout', { active_jobs: result.active, timeout_ms: timeoutMs });
+    }
+    process.exit(result.drained ? 0 : 1);
   };
 
-  process.on('SIGTERM', () => shutdown('SIGTERM'));
-  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => { void shutdown('SIGTERM'); });
+  process.on('SIGINT', () => { void shutdown('SIGINT'); });
   process.on('uncaughtException', (error) => {
     recordError({ source: 'worker', type: 'uncaughtException', message: error.message });
     logger.error('worker_uncaught_exception', { error });
-    shutdown('uncaughtException');
+    void shutdown('uncaughtException');
   });
   process.on('unhandledRejection', (reason) => {
     recordError({ source: 'worker', type: 'unhandledRejection', message: String(reason) });

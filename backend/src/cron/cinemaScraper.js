@@ -1,6 +1,6 @@
 'use strict';
 
-const cron = require('node-cron');
+const { scheduleTracked } = require('../services/jobRuntime');
 const { runCinemaScraper } = require('../services/cinemaScraperService');
 const { logger } = require('../utils/logger');
 
@@ -8,7 +8,7 @@ let job = null;
 
 function startCinemaScraperJob() {
   if (job) return job;
-  job = cron.schedule('0 2 * * *', async () => {
+  job = scheduleTracked('0 2 * * *', async () => {
     try {
       const report = await runCinemaScraper();
       logger.info('cinema_scraper_job_done', { report });

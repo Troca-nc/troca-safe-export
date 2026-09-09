@@ -2,7 +2,7 @@
 
 const fs = require('fs/promises');
 const path = require('path');
-const cron = require('node-cron');
+const { scheduleTracked } = require('../services/jobRuntime');
 
 const { query } = require('../config/database');
 const { BUSINESS_TIME_ZONE } = require('../config/timePolicy');
@@ -74,7 +74,7 @@ async function purgeImportJobs({ statuses, intervalLabel, lockName }) {
 }
 
 function startImportCleanupJob() {
-  cron.schedule('0 3 * * *', async () => {
+  scheduleTracked('0 3 * * *', async () => {
     recordJob('started', { job: 'import-cleanup' });
     await withLock('cron:import-cleanup', 55 * 60 * 1000, async () => {
       try {

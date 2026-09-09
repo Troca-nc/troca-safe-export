@@ -1,6 +1,6 @@
 'use strict';
 
-const cron = require('node-cron');
+const { scheduleTracked } = require('../services/jobRuntime');
 const { query } = require('../config/database');
 const { BUSINESS_TIME_ZONE } = require('../config/timePolicy');
 const { logger } = require('../utils/logger');
@@ -51,7 +51,7 @@ async function expireEventTicketReservations() {
 }
 
 function startTicketExpiryJob() {
-  cron.schedule('*/2 * * * *', async () => {
+  scheduleTracked('*/2 * * * *', async () => {
     recordJob('started', { job: 'event-ticket-expiry' });
     try {
       const result = await expireEventTicketReservations();

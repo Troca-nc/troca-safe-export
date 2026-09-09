@@ -1,13 +1,13 @@
 'use strict';
 
-const cron = require('node-cron');
+const { scheduleTracked } = require('../services/jobRuntime');
 const { BUSINESS_TIME_ZONE } = require('../config/timePolicy');
 const { deliverNextTicketEmail } = require('../services/ticketEmailOutboxService');
 const { logger } = require('../utils/logger');
 
 function startTicketEmailOutboxJob() {
   let busy = false;
-  return cron.schedule('* * * * *', async () => {
+  return scheduleTracked('* * * * *', async () => {
     if (busy) return;
     busy = true;
     try {
