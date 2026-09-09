@@ -9,6 +9,7 @@ const { authenticate, optionalAuth } = require('../middleware/auth');
 const { sendMail } = require('../services/emailService');
 const { sendPushToUser } = require('../services/pushService');
 const { createNotification } = require('../services/notificationService');
+const { transitionProBooking } = require('../services/proBookingStateService');
 
 const router = express.Router();
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
@@ -1229,19 +1230,13 @@ router.post('/bookings/:bookingId/confirm', authenticate, async (req, res, next)
       return res.status(400).json({ error: 'Cette réservation ne peut plus être confirmée.' });
     }
 
-    const updated = await query(
-      `UPDATE pro_bookings
-       SET status = 'confirmed',
-           confirmed_at = NOW(),
-           updated_at = NOW()
-       WHERE id = $1
-       RETURNING *`,
-      [bookingId]
+    const updated = await withTransaction((client) =>
+      transitionProBooking(client, bookingId, 'confirmed')
     );
 
     await notifyBookingDecision(booking, 'confirmed');
 
-    return res.json({ data: mapBookingRow({ ...booking, ...updated.rows[0], role: 'pro' }) });
+    return res.json({ data: mapBookingRow({ ...booking, ...updated, role: 'pro' }) });
   } catch (err) {
     next(err);
   }
@@ -1266,27 +1261,19 @@ router.post('/bookings/:bookingId/decline', authenticate, async (req, res, next)
     }
 
     const updated = await withTransaction(async (client) => {
-      const bookingUpdate = await client.query(
-        `UPDATE pro_bookings
-         SET status = 'declined',
-             declined_at = NOW(),
-             updated_at = NOW()
-         WHERE id = $1
-         RETURNING *`,
-        [bookingId]
-      );
+      const bookingUpdate = await transitionProBooking(client, bookingId, 'declined');
 
-      if (booking.slot_id) {
+      if (bookingUpdate.slot_id) {
         await client.query(
           `UPDATE pro_booking_slots
            SET status = 'available',
                updated_at = NOW()
            WHERE id = $1`,
-          [booking.slot_id]
+          [bookingUpdate.slot_id]
         );
       }
 
-      return bookingUpdate.rows[0];
+      return bookingUpdate;
     });
 
     await notifyBookingDecision(booking, 'declined');
@@ -1318,27 +1305,19 @@ router.post('/bookings/:bookingId/cancel', authenticate, async (req, res, next) 
     }
 
     const updated = await withTransaction(async (client) => {
-      const bookingUpdate = await client.query(
-        `UPDATE pro_bookings
-         SET status = 'cancelled',
-             cancelled_at = NOW(),
-             updated_at = NOW()
-         WHERE id = $1
-         RETURNING *`,
-        [bookingId]
-      );
+      const bookingUpdate = await transitionProBooking(client, bookingId, 'cancelled');
 
-      if (booking.slot_id) {
+      if (bookingUpdate.slot_id) {
         await client.query(
           `UPDATE pro_booking_slots
            SET status = 'available',
                updated_at = NOW()
            WHERE id = $1`,
-          [booking.slot_id]
+          [bookingUpdate.slot_id]
         );
       }
 
-      return bookingUpdate.rows[0];
+      return bookingUpdate;
     });
 
     await notifyBookingDecision(booking, 'cancelled');
@@ -1363,18 +1342,12 @@ router.post('/bookings/:bookingId/complete', authenticate, async (req, res, next
       return res.status(403).json({ error: 'Action non autorisée.' });
     }
 
-    const updated = await query(
-      `UPDATE pro_bookings
-       SET status = 'completed',
-           completed_at = NOW(),
-           updated_at = NOW()
-       WHERE id = $1
-       RETURNING *`,
-      [bookingId]
+    const updated = await withTransaction((client) =>
+      transitionProBooking(client, bookingId, 'completed')
     );
 
     await notifyBookingDecision(booking, 'completed');
-    return res.json({ data: mapBookingRow({ ...booking, ...updated.rows[0], role: 'pro' }) });
+    return res.json({ data: mapBookingRow({ ...booking, ...updated, role: 'pro' }) });
   } catch (err) {
     next(err);
   }
