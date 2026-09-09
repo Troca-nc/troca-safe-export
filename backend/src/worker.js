@@ -7,6 +7,7 @@ const { startCampaignNotificationOutboxJob } = require('./jobs/campaignNotificat
 const { logger } = require('./utils/logger');
 const { createWorkerHealthService } = require('./services/workerHealthService');
 const { stopSchedulingAndDrain } = require('./services/jobRuntime');
+const { validateRuntimeConfig } = require('./config/runtimeConfig');
 const {
   recordError,
   registerObservabilityInstance,
@@ -14,6 +15,13 @@ const {
 } = require('./services/observability');
 
 async function start() {
+  try {
+    validateRuntimeConfig({ role: 'worker' });
+  } catch (error) {
+    logger.error('invalid_production_config', { error });
+    process.exit(1);
+    return;
+  }
   try {
     await checkConnection();
     logger.info('worker_db_connection_ok');

@@ -20,6 +20,7 @@ const { initSocket, shutdownWebsocketBridge }        = require('./services/webso
 const { startAllJobs }      = require('./jobs/scheduler');
 const { ensureDefaultPopupCampaign } = require('./services/campaignsService');
 const { logger }            = require('./utils/logger');
+const { validateRuntimeConfig } = require('./config/runtimeConfig');
 const {
   getSnapshot,
   registerObservabilityInstance,
@@ -272,6 +273,13 @@ app.use(errorHandler);
 // ── Démarrage ─────────────────────────────────────────────────
 
 async function start() {
+  try {
+    validateRuntimeConfig({ role: 'api' });
+  } catch (error) {
+    logger.error('invalid_production_config', { error });
+    process.exit(1);
+    return;
+  }
   let databaseReady = true;
   try {
     await checkConnection();

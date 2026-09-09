@@ -2,6 +2,8 @@
 
 const PLACEHOLDER_MARKERS = [
   'changeme',
+  'change_me',
+  'your_',
   'dev_secret_change_in_prod',
   'replace_me',
   'placeholder',
