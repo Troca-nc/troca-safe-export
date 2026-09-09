@@ -7,6 +7,7 @@ const { query, withTransaction } = require('../config/database');
 const { createNotification } = require('./notificationService');
 const { sendPushToUser, sendPushToUsers } = require('./pushService');
 const { sendMail } = require('./emailService');
+const { logger } = require('../utils/logger');
 const { estimateFreightQuote, VOLUME_BUCKETS, WEIGHT_BUCKETS, URGENCY_BUCKETS } = require('../shared-copy/envoi-livraisonPricing');
 
 const PICKUP_SLOT_LABELS = {
@@ -602,8 +603,26 @@ function computeOfferScore(amountXpf, minAmountXpf, maxAmountXpf, transporterRat
   return (ratingScore * 0.6) + (normalizedPrice * 0.4);
 }
 
+async function runFreightTransaction(work, transaction = withTransaction, log = logger) {
+  const afterCommit = [];
+  const result = await transaction((client) => work(client, (effect) => {
+    if (typeof effect !== 'function') throw new TypeError('Effet post-commit invalide.');
+    afterCommit.push(effect);
+  }));
+  for (const effect of afterCommit) {
+    try {
+      await effect();
+    } catch (error) {
+      log.warn('fret_after_commit_effect_failed', {
+        error: String(error?.message || 'unknown').slice(0, 160),
+      });
+    }
+  }
+  return result;
+}
+
 async function createFretRequest({ user, payload }) {
-  return withTransaction(async (client) => {
+  return runFreightTransaction(async (client, afterCommit) => {
     const communeRes = await client.query(
       `SELECT id, name, slug
        FROM communes
@@ -675,7 +694,7 @@ async function createFretRequest({ user, payload }) {
 
     const requestRow = requestInsert.rows[0];
     const transporters = await loadEligibleTransporters(client, serviceType);
-    await notifyTransportersOfRequest({
+    afterCommit(() => notifyTransportersOfRequest({
       ...requestRow,
       service_type: serviceType,
       departure_commune_name: departure.name,
@@ -684,7 +703,7 @@ async function createFretRequest({ user, payload }) {
       weight_label: mapWeightBucket(payload.weight_bucket)?.label || payload.weight_bucket,
       urgency_label: mapUrgencyBucket(payload.urgency)?.label || payload.urgency,
       budget_max_xpf: payload.budget_max_xpf == null ? null : Number(payload.budget_max_xpf),
-    }, estimate, transporters);
+    }, estimate, transporters));
 
     return {
       request: buildRequestPayload({
@@ -930,7 +949,7 @@ async function listTransporterDashboard(userId) {
 }
 
 async function submitFretOffer({ userId, requestId, payload }) {
-  return withTransaction(async (client) => {
+  return runFreightTransaction(async (client, afterCommit) => {
     const transporter = await loadTransporterProfile(client, userId);
     if (!transporter) {
       const error = new Error('Espace réservé aux transporteurs Envoi & Livraison actifs.');
@@ -1008,7 +1027,7 @@ async function submitFretOffer({ userId, requestId, payload }) {
       pro_company_name: transporter.pro_company_name,
       pro_logo_url: transporter.pro_logo_url,
     });
-    await notifyRequesterOfferReceived(requesterOffer, offerPayload, transporter);
+    afterCommit(() => notifyRequesterOfferReceived(requesterOffer, offerPayload, transporter));
 
     return {
       request: buildRequestPayload(requesterOffer, [offerRow]),
@@ -1018,7 +1037,7 @@ async function submitFretOffer({ userId, requestId, payload }) {
 }
 
 async function selectFretOffer({ userId, requestId, offerId, mode = 'manual' }) {
-  return withTransaction(async (client) => {
+  return runFreightTransaction(async (client, afterCommit) => {
     const requestRow = await loadRequestById(client, requestId);
     if (!requestRow) {
       const error = new Error('Demande introuvable.');
@@ -1125,7 +1144,7 @@ async function selectFretOffer({ userId, requestId, offerId, mode = 'manual' }) 
       status_label: 'Sélectionné',
     };
 
-    await notifySelectionOutcome(refreshedRequest, selectedOfferFull, rejectedOffers, mode);
+    afterCommit(() => notifySelectionOutcome(refreshedRequest, selectedOfferFull, rejectedOffers, mode));
 
     return {
       request: buildRequestPayload(refreshedRequest, allOffers),
@@ -1136,7 +1155,7 @@ async function selectFretOffer({ userId, requestId, offerId, mode = 'manual' }) 
 }
 
 async function markFretDelivered({ userId, requestId }) {
-  return withTransaction(async (client) => {
+  return runFreightTransaction(async (client, afterCommit) => {
     const transporter = await loadTransporterProfile(client, userId);
     if (!transporter) {
       const error = new Error('Espace réservé aux transporteurs Envoi & Livraison actifs.');
@@ -1185,21 +1204,21 @@ async function markFretDelivered({ userId, requestId }) {
     const refreshedRequest = await loadRequestById(client, requestId);
 
     if (refreshedRequest?.author_id) {
-      await createNotification(refreshedRequest.author_id, {
+      afterCommit(() => createNotification(refreshedRequest.author_id, {
         type: 'fret_request_delivered',
         title: 'Transport livré',
         body: `Votre transport ${refreshedRequest.departure_commune_name || refreshedRequest.departure} → ${refreshedRequest.destination_commune_name || refreshedRequest.destination} a été marqué comme livré.`,
         href: `${getBaseUrl()}/envoi-livraison`,
-      }).catch(() => {});
+      }).catch(() => {}));
     }
 
     if (transporter?.user_id) {
-      await createNotification(transporter.user_id, {
+      afterCommit(() => createNotification(transporter.user_id, {
         type: 'fret_transport_delivered',
         title: 'Transport marqué comme livré',
         body: `Le transport ${refreshedRequest.departure_commune_name || refreshedRequest.departure} → ${refreshedRequest.destination_commune_name || refreshedRequest.destination} est passé en livré.`,
         href: `${getBaseUrl()}/pro/dashboard/envoi-livraison`,
-      }).catch(() => {});
+      }).catch(() => {}));
     }
 
     return {
@@ -1283,4 +1302,5 @@ module.exports = {
   autoResolveExpiredFretRequests,
   mapRequestStatusLabel,
   mapOfferStatusLabel,
+  runFreightTransaction,
 };
