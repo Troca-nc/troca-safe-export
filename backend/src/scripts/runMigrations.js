@@ -5,7 +5,6 @@ const path = require('path');
 const { withTransaction } = require('../config/database');
 
 const MIGRATIONS_DIR = path.resolve(__dirname, '../../../database/migrations');
-const SCHEMA_FILE = path.resolve(__dirname, '../../../database/schema.sql');
 const TRACKING_TABLE = 'schema_migrations';
 
 async function ensureTrackingTable(client) {
@@ -23,29 +22,6 @@ async function getAppliedMigrations(client) {
   return new Set(rows.map((row) => row.filename));
 }
 
-async function ensureBaseSchema(client) {
-  const { rows } = await client.query(
-    `SELECT EXISTS (
-      SELECT 1
-      FROM information_schema.tables
-      WHERE table_schema = 'public' AND table_name = 'annonces'
-    ) AS exists`
-  );
-
-  if (rows[0]?.exists) {
-    return false;
-  }
-
-  if (!fs.existsSync(SCHEMA_FILE)) {
-    throw new Error(`Schéma de base introuvable: ${SCHEMA_FILE}`);
-  }
-
-  const schemaSql = fs.readFileSync(SCHEMA_FILE, 'utf8');
-  await client.query(schemaSql);
-  console.log('✅ schéma de base appliqué: database/schema.sql');
-  return true;
-}
-
 async function applyMigration(client, fileName, sql) {
   await client.query(sql);
   await client.query(
@@ -54,34 +30,42 @@ async function applyMigration(client, fileName, sql) {
   );
 }
 
-async function main() {
-  if (!fs.existsSync(MIGRATIONS_DIR)) {
-    throw new Error(`Dossier de migrations introuvable: ${MIGRATIONS_DIR}`);
+function listMigrationFiles(migrationsDir = MIGRATIONS_DIR) {
+  if (!fs.existsSync(migrationsDir)) {
+    throw new Error(`Dossier de migrations introuvable: ${migrationsDir}`);
   }
 
-  const files = fs.readdirSync(MIGRATIONS_DIR)
+  return fs.readdirSync(migrationsDir)
     .filter((file) => file.endsWith('.sql'))
     .sort((a, b) => a.localeCompare(b, 'en'));
+}
 
-  const result = await withTransaction(async (client) => {
-    await ensureBaseSchema(client);
-    const applied = await getAppliedMigrations(client);
-    const pending = files.filter((file) => !applied.has(file));
+async function runPendingMigrations(client, migrationsDir = MIGRATIONS_DIR) {
+  const files = listMigrationFiles(migrationsDir);
+  const applied = await getAppliedMigrations(client);
+  const pending = files.filter((file) => !applied.has(file));
 
-    for (const file of pending) {
-      const sql = fs.readFileSync(path.join(MIGRATIONS_DIR, file), 'utf8');
-      await applyMigration(client, file, sql);
-      console.log(`✅ migration appliquée: ${file}`);
-    }
+  for (const file of pending) {
+    const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf8');
+    await applyMigration(client, file, sql);
+    console.log(`✅ migration appliquée: ${file}`);
+  }
 
-    return { applied: pending.length, total: files.length };
-  });
+  return { applied: pending.length, total: files.length };
+}
+
+async function main() {
+  const result = await withTransaction((client) => runPendingMigrations(client));
 
   console.log('\n=== Migrations Kalico ===');
   console.log(JSON.stringify(result, null, 2));
 }
 
-main().catch((err) => {
-  console.error('[migrate]', err.message);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((err) => {
+    console.error('[migrate]', err.message);
+    process.exit(1);
+  });
+}
+
+module.exports = { listMigrationFiles, runPendingMigrations };
