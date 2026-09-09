@@ -42,6 +42,7 @@ const { ensureNotificationPreferences } = require('../services/notificationPrefe
 const { sendNewsletterBatch } = require('../services/newsletterService');
 const { ticketExpiry, importCleanup } = require('../cron');
 const { processRenewalGraceDeadlines } = require('../services/proRenewalGraceService');
+const { autoResolveExpiredFretRequests } = require('../services/fretWorkflowService');
 
 async function runSingletonJob(lockName, ttlMs, task) {
   const started = await withLock(lockName, ttlMs, async () => {
@@ -438,7 +439,15 @@ function startFretExpirationJob() {
   cron.schedule('*/5 * * * *', async () => {
     recordJob('started', { job: 'fret-expiry' });
     await runSingletonJob('cron:fret-expiry', 4 * 60 * 1000, async () => {
-      logger.info('cron_fret_expiry_skipped', { reason: 'manual_fret_flow' });
+      try {
+        const result = await autoResolveExpiredFretRequests();
+        if (result.auto_selected > 0 || result.expired_without_offer > 0) {
+          logger.info('cron_fret_expiry_resolved', result);
+        }
+      } catch (error) {
+        recordJob('error', { job: 'fret-expiry', message: error.message });
+        logger.error('cron_fret_expiry_error', { error });
+      }
     });
   }, { timezone: 'Pacific/Noumea' });
 
