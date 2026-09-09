@@ -1,5 +1,6 @@
 'use strict';
 const cron = require('node-cron');
+const { BUSINESS_TIME_ZONE } = require('../config/timePolicy');
 const { deliverNextCampaignNotification } = require('../services/campaignNotificationOutboxService');
 const { deliverCampaignNotification } = require('../services/campaignsService');
 const { logger } = require('../utils/logger');
@@ -19,6 +20,6 @@ function startCampaignNotificationOutboxJob() {
     } catch {
       logger.error('campaign_notification_outbox_processing_failed');
     } finally { busy = false; }
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 }
 module.exports = { startCampaignNotificationOutboxJob };

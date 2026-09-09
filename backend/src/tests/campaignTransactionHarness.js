@@ -14,6 +14,7 @@ function loadCampaigns(notify = async () => {}, clock = () => Date.now(), databa
     './pushService': { sendPushToUsers: () => notify('push') },
     './fretWorkflowService': { sendSms: forbidden },
     '../config/env': { isConfiguredValue: () => false }, './payplugService': {},
+    '../config/timePolicy': { BUSINESS_TIME_ZONE: 'Pacific/Noumea' },
     './paymentHelpers': { ensureStripe: forbidden, getOrCreateStripeCustomer: forbidden },
     './paymentCatalog': { xpfToEurCents: forbidden, formatXpfEur: forbidden },
     './campaignNotificationOutboxService': outbox,

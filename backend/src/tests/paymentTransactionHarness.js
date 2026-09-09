@@ -23,6 +23,7 @@ function loadDatabase(pool) {
   return load('config/database.js', {
     pg: { Pool: class { constructor() { return pool; } } },
     '../utils/logger': { logger: { error() {}, debug() {} } },
+    './timePolicy': { DATABASE_TIME_ZONE: 'UTC' },
   }, { process: { env: {} } });
 }
 

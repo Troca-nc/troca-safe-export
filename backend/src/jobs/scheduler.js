@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 
 // ============================================================
 //  Kalico — Jobs planifiés (node-cron)
@@ -9,6 +9,7 @@
 
 const cron                = require('node-cron');
 const { query }           = require('../config/database');
+const { BUSINESS_TIME_ZONE } = require('../config/timePolicy');
 const {
   sendAlertEmail,
   sendPerformanceReportEmail,
@@ -383,7 +384,7 @@ function startBoostExpiryJob() {
         logger.error('cron_boost_error', { error: err });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'boost-expiry' });
 }
@@ -430,7 +431,7 @@ function startListingExpiryJob() {
         logger.error('cron_listing_expiry_error', { error: err });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'listing-expiry' });
 }
@@ -449,7 +450,7 @@ function startFretExpirationJob() {
         logger.error('cron_fret_expiry_error', { error });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'fret-expiry' });
 }
@@ -485,7 +486,7 @@ function startProQuoteExpiryJob() {
         logger.error('cron_pro_quote_expiry_error', { error: err });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'pro-quote-expiry' });
 }
@@ -513,7 +514,7 @@ function startBonPlanMaintenanceJob() {
         logger.error('cron_bon_plans_expiry_error', { error: err });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   setInterval(() => {
     runSingletonJob('cron:bon-plan-views', flushIntervalMs - 5_000, async () => {
@@ -550,7 +551,7 @@ function startCampaignMaintenanceJob() {
         logger.error('cron_campaigns_maintenance_error', { error: err });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'campaign-maintenance' });
 }
@@ -569,7 +570,7 @@ function startWeeklyBonPlanSelectionJob() {
         logger.error('cron_bon_plan_weekly_reminder_error', { error: err });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   cron.schedule('0 12 * * 2', async () => {
     recordJob('started', { job: 'bon-plan-weekly-auto-selection' });
@@ -584,7 +585,7 @@ function startWeeklyBonPlanSelectionJob() {
         logger.error('cron_bon_plan_weekly_auto_selection_error', { error: err });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'bon-plan-weekly-reminder' });
   logger.info('cron_job_started', { job: 'bon-plan-weekly-auto-selection' });
@@ -667,7 +668,7 @@ function startTrocMaintenanceJob() {
         logger.error('cron_troc_maintenance_error', { error: err });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'troc-maintenance' });
 }
@@ -686,7 +687,7 @@ function startTrocMatchingJob() {
         logger.error('cron_troc_matching_error', { error: err });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'troc-matching' });
 }
@@ -705,7 +706,7 @@ function startAdminAlertsJob() {
         logger.error('cron_admin_alerts_error', { error: err });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'admin-alerts' });
 }
@@ -757,13 +758,13 @@ function startExpiringListingsJob() {
         logger.error('cron_expiring_listings_error', { error: err });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'expiring-listings' });
 }
 
 function startDailyAlertsJob() {
-  cron.schedule('0 8 * * *', () => runSingletonJob('cron:alerts-daily', 30 * 60 * 1000, () => runAlertJob('daily')), { timezone: 'Pacific/Noumea' });
+  cron.schedule('0 8 * * *', () => runSingletonJob('cron:alerts-daily', 30 * 60 * 1000, () => runAlertJob('daily')), { timezone: BUSINESS_TIME_ZONE });
   recordJob('started', { job: 'alerts-daily' });
   logger.info('cron_job_started', { job: 'alerts-daily' });
 }
@@ -772,7 +773,7 @@ function startDailyAlertsJob() {
 // Tous les lundis à 8h00 heure Nouméa
 
 function startWeeklyAlertsJob() {
-  cron.schedule('0 8 * * 1', () => runSingletonJob('cron:alerts-weekly', 30 * 60 * 1000, () => runAlertJob('weekly')), { timezone: 'Pacific/Noumea' });
+  cron.schedule('0 8 * * 1', () => runSingletonJob('cron:alerts-weekly', 30 * 60 * 1000, () => runAlertJob('weekly')), { timezone: BUSINESS_TIME_ZONE });
   recordJob('started', { job: 'alerts-weekly' });
   logger.info('cron_job_started', { job: 'alerts-weekly' });
 }
@@ -783,7 +784,7 @@ function startPerformanceReportsJob() {
     await runSingletonJob('cron:performance-reports', 45 * 60 * 1000, async () => {
       await runPerformanceReportsJob();
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'performance-reports' });
 }
@@ -805,7 +806,7 @@ function startAnalyticsPurgeJob() {
         logger.error('cron_analytics_error', { error: err });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'analytics-purge' });
 }
@@ -1229,7 +1230,7 @@ function startReviewReminderJob() {
         logger.error('cron_reviews_error', { error: err });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'reviews' });
 }
@@ -1327,7 +1328,7 @@ function startRideReviewReminderJob() {
         logger.error('cron_covoiturage_reviews_error', { error: err });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'covoiturage-reviews' });
 }
@@ -1539,7 +1540,7 @@ function startProBookingReminderJob() {
         logger.error('cron_pro_booking_reminders_error', { error: err });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'pro-booking-reminders' });
 }
@@ -1556,7 +1557,7 @@ function startNewsletterJob() {
         logger.error('cron_newsletter_error', { error: err });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 
   logger.info('cron_job_started', { job: 'newsletter' });
 }
@@ -1572,7 +1573,7 @@ function startProRenewalGraceJob() {
         logger.error('cron_pro_renewal_grace_error', { error: err });
       }
     });
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
   logger.info('cron_job_started', { job: 'pro-renewal-grace' });
 }
 

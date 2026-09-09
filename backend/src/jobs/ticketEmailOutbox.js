@@ -1,6 +1,7 @@
 'use strict';
 
 const cron = require('node-cron');
+const { BUSINESS_TIME_ZONE } = require('../config/timePolicy');
 const { deliverNextTicketEmail } = require('../services/ticketEmailOutboxService');
 const { logger } = require('../utils/logger');
 
@@ -21,6 +22,6 @@ function startTicketEmailOutboxJob() {
     } finally {
       busy = false;
     }
-  }, { timezone: 'Pacific/Noumea' });
+  }, { timezone: BUSINESS_TIME_ZONE });
 }
 module.exports = { startTicketEmailOutboxJob };

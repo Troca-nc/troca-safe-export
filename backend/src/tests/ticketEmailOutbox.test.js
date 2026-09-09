@@ -89,6 +89,7 @@ async function run() {
     let tick; let resolveSend; let deliveries = 0;
     const first = new Promise(resolve => { resolveSend = resolve; });
     const job = load('jobs/ticketEmailOutbox.js', {
+      '../config/timePolicy': { BUSINESS_TIME_ZONE: 'Pacific/Noumea' },
       'node-cron': { schedule(expression, callback) { assert.strictEqual(expression, '* * * * *'); tick = callback; return { stop() {} }; } },
       '../services/ticketEmailOutboxService': { async deliverNextTicketEmail() {
         deliveries++; if (deliveries === 1) await first; return { id: deliveries, status: 'sent' };
