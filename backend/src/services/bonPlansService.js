@@ -264,8 +264,8 @@ async function activateBonPlanFromPayment(db, payment, paymentMeta, providerRef,
      SET status = 'succeeded',
          updated_at = NOW(),
          metadata = metadata || $2::jsonb
-     WHERE provider_ref = $1`,
-    [providerRef, JSON.stringify({ bon_plan_id: bonPlan.id, activated: true, provider, ...resource })]
+     WHERE provider_ref = $1 AND provider = $3`,
+    [providerRef, JSON.stringify({ bon_plan_id: bonPlan.id, activated: true, provider, ...resource }), provider]
   ).catch(() => {});
 
   return { bonPlan, business };

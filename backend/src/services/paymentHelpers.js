@@ -32,7 +32,7 @@ async function getOrCreateStripeCustomer(stripe, userId, email) {
 async function markPaymentSucceeded(providerRef) {
   return query(
     `UPDATE payments SET status = 'succeeded', updated_at = NOW()
-     WHERE provider_ref = $1 AND status = 'pending' RETURNING id`,
+     WHERE provider = 'stripe' AND provider_ref = $1 AND status = 'pending' RETURNING id`,
     [providerRef]
   );
 }

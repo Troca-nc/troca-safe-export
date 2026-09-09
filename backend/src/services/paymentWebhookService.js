@@ -86,7 +86,7 @@ async function processStripeWebhookEvent({
     const intent = event.data.object;
     const paymentRef = intent.id;
     const { rows: paymentRows } = await query(
-      `SELECT id, metadata, type FROM payments WHERE provider_ref = $1 LIMIT 1`,
+      `SELECT id, metadata, type FROM payments WHERE provider = 'stripe' AND provider_ref = $1 LIMIT 1`,
       [paymentRef]
     );
     if (paymentRows[0]) {
@@ -119,7 +119,7 @@ async function processStripeWebhookEvent({
     const charge = event.data.object;
     const paymentRef = charge.payment_intent || charge.id;
     const { rows: paymentRows } = await query(
-      `SELECT id, metadata, type FROM payments WHERE provider_ref = $1 LIMIT 1`,
+      `SELECT id, metadata, type FROM payments WHERE provider = 'stripe' AND provider_ref = $1 LIMIT 1`,
       [paymentRef]
     );
     if (paymentRows[0]) {
@@ -211,7 +211,7 @@ async function processStripeWebhookEvent({
     const { rows: paymentRows } = await query(
       `SELECT id, user_id, type, metadata, status, amount_xpf
        FROM payments
-       WHERE provider_ref = $1
+       WHERE provider = 'stripe' AND provider_ref = $1
        LIMIT 1`,
       [paymentRef]
     );
@@ -449,7 +449,7 @@ async function processStripeWebhookEvent({
     const { rows: paymentRows } = await query(
       `SELECT id, user_id, type, metadata, status, amount_xpf
        FROM payments
-       WHERE provider_ref = $1
+       WHERE provider = 'stripe' AND provider_ref = $1
        LIMIT 1`,
       [session.id]
     );
@@ -490,7 +490,7 @@ async function processStripeWebhookEvent({
           `UPDATE annonces SET is_boosted = TRUE, boost_type = $1, boost_expires_at = $2, updated_at = NOW() WHERE id = $3`,
           [boostType, expiresAt, annonceId]
         );
-        const { rows: pmtRows } = await query(`SELECT id FROM payments WHERE provider_ref = $1 LIMIT 1`, [session.id]);
+        const { rows: pmtRows } = await query(`SELECT id FROM payments WHERE provider = 'stripe' AND provider_ref = $1 LIMIT 1`, [session.id]);
         if (pmtRows[0]) {
         await query(
           `INSERT INTO annonce_boosts (annonce_id, type, expires_at, payment_id)
@@ -544,7 +544,7 @@ async function processStripeWebhookEvent({
             [userId, planId, periodEnd]
           );
           await client.query(
-            `UPDATE payments SET metadata = metadata || $2::jsonb, updated_at = NOW() WHERE provider_ref = $1`,
+            `UPDATE payments SET metadata = metadata || $2::jsonb, updated_at = NOW() WHERE provider = 'stripe' AND provider_ref = $1`,
             [session.id, JSON.stringify({ provider_sub_id: subId })]
           );
         });
@@ -930,7 +930,7 @@ async function processPayplugWebhook({
     const { rows: paymentRows } = await query(
       `SELECT id, user_id, status, metadata, amount_xpf
        FROM payments
-       WHERE provider_ref = $1
+       WHERE provider = 'payplug' AND provider_ref = $1
        LIMIT 1`,
       [resourceId]
     );
@@ -1044,7 +1044,7 @@ async function processPayplugWebhook({
     const { rows: paymentRows } = await query(
       `SELECT id, user_id, metadata, provider_ref, amount_xpf
        FROM payments
-       WHERE provider_ref = $1
+       WHERE provider = 'payplug' AND provider_ref = $1
        LIMIT 1`,
       [paymentId]
     );
@@ -1112,7 +1112,7 @@ async function processPayplugWebhook({
     const { rows: paymentRows } = await query(
       `SELECT id, user_id, status, metadata, amount_xpf, provider_ref
        FROM payments
-       WHERE provider_ref = $1
+       WHERE provider = 'payplug' AND provider_ref = $1
        LIMIT 1`,
       [resourceId]
     );

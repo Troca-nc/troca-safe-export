@@ -1039,7 +1039,7 @@ async function seedDemoDataset() {
       await client.query(
         `INSERT INTO payments (user_id, type, provider, provider_ref, amount_xpf, status, metadata, created_at, updated_at)
          VALUES ($1, $2, $3, $4, $5, $6, $7, NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day')
-         ON CONFLICT (provider_ref) DO UPDATE SET
+         ON CONFLICT (provider, provider_ref) DO UPDATE SET
           amount_xpf = EXCLUDED.amount_xpf,
           status = EXCLUDED.status,
           metadata = EXCLUDED.metadata,
