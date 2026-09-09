@@ -1,6 +1,6 @@
 'use strict';
 
-const { getRedisClient } = require('../config/redis');
+const { getRedisClient, isRedisRequired, redisUnavailable } = require('../config/redis');
 
 const localCache = new Map();
 const localLocks = new Map();
@@ -30,11 +30,12 @@ function deleteLocalPrefix(prefix) {
 }
 
 async function getJson(key) {
-  const local = readLocalEntry(localCache, key);
-  if (local !== null) return local;
-
   const client = await getRedisClient();
-  if (!client) return null;
+  if (!client) {
+    if (isRedisRequired()) throw redisUnavailable();
+    const local = readLocalEntry(localCache, key);
+    return local;
+  }
 
   try {
     const raw = await client.get(key);
@@ -43,20 +44,25 @@ async function getJson(key) {
     const ttl = await client.pTTL(key);
     if (ttl > 0) writeLocalEntry(localCache, key, parsed, ttl);
     return parsed;
-  } catch {
+  } catch (error) {
+    if (isRedisRequired()) throw redisUnavailable(error);
     return null;
   }
 }
 
 async function setJson(key, value, ttlMs = 60_000) {
-  writeLocalEntry(localCache, key, value, ttlMs);
-
   const client = await getRedisClient();
-  if (!client) return value;
+  if (!client) {
+    if (isRedisRequired()) throw redisUnavailable();
+    writeLocalEntry(localCache, key, value, ttlMs);
+    return value;
+  }
 
   try {
     await client.set(key, JSON.stringify(value), { PX: ttlMs });
-  } catch {}
+  } catch (error) {
+    if (isRedisRequired()) throw redisUnavailable(error);
+  }
   return value;
 }
 
@@ -64,7 +70,10 @@ async function deletePrefix(prefix) {
   deleteLocalPrefix(prefix);
 
   const client = await getRedisClient();
-  if (!client) return;
+  if (!client) {
+    if (isRedisRequired()) throw redisUnavailable();
+    return;
+  }
 
   try {
     const keys = [];
@@ -72,7 +81,9 @@ async function deletePrefix(prefix) {
       keys.push(key);
     }
     if (keys.length) await client.del(keys);
-  } catch {}
+  } catch (error) {
+    if (isRedisRequired()) throw redisUnavailable(error);
+  }
 }
 
 async function acquireLock(name, ttlMs) {
@@ -80,6 +91,7 @@ async function acquireLock(name, ttlMs) {
   const client = await getRedisClient();
 
   if (!client) {
+    if (isRedisRequired()) throw redisUnavailable();
     const existing = localLocks.get(name);
     if (existing && existing.expiresAt > now()) return null;
     localLocks.set(name, { token, expiresAt: now() + ttlMs });
@@ -89,7 +101,8 @@ async function acquireLock(name, ttlMs) {
   try {
     const ok = await client.set(name, token, { NX: true, PX: ttlMs });
     return ok ? token : null;
-  } catch {
+  } catch (error) {
+    if (isRedisRequired()) throw redisUnavailable(error);
     return null;
   }
 }
@@ -98,6 +111,7 @@ async function releaseLock(name, token) {
   const client = await getRedisClient();
 
   if (!client) {
+    if (isRedisRequired()) throw redisUnavailable();
     const existing = localLocks.get(name);
     if (existing?.token === token) localLocks.delete(name);
     return;
@@ -106,7 +120,9 @@ async function releaseLock(name, token) {
   try {
     const current = await client.get(name);
     if (current === token) await client.del(name);
-  } catch {}
+  } catch (error) {
+    if (isRedisRequired()) throw redisUnavailable(error);
+  }
 }
 
 async function withLock(name, ttlMs, fn) {

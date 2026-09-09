@@ -1,6 +1,6 @@
 'use strict';
 
-const { getRedisClient } = require('../config/redis');
+const { getRedisClient, isRedisRequired, redisUnavailable } = require('../config/redis');
 
 function createLocalStore(prefix) {
   const hits = new Map();
@@ -58,7 +58,10 @@ function createRedisRateLimitStore(prefix = 'rate-limit') {
     },
     async increment(key) {
       const client = await getRedisClient();
-      if (!client) return localStore.increment(key);
+      if (!client) {
+        if (isRedisRequired()) throw redisUnavailable();
+        return localStore.increment(key);
+      }
 
       const redisKey = `${redisPrefix}${key}`;
       try {
@@ -78,38 +81,51 @@ function createRedisRateLimitStore(prefix = 'rate-limit') {
         const ttl = Number(result?.[1] ?? windowMs);
         const resetTime = new Date(Date.now() + Math.max(0, ttl));
         return { totalHits, resetTime };
-      } catch {
+      } catch (error) {
+        if (isRedisRequired()) throw redisUnavailable(error);
         return localStore.increment(key);
       }
     },
     async decrement(key) {
       const client = await getRedisClient();
-      if (!client) return localStore.decrement(key);
+      if (!client) {
+        if (isRedisRequired()) throw redisUnavailable();
+        return localStore.decrement(key);
+      }
       try {
         await client.decr(`${redisPrefix}${key}`);
-      } catch {
+      } catch (error) {
+        if (isRedisRequired()) throw redisUnavailable(error);
         await localStore.decrement(key);
       }
     },
     async resetKey(key) {
       const client = await getRedisClient();
-      if (!client) return localStore.resetKey(key);
+      if (!client) {
+        if (isRedisRequired()) throw redisUnavailable();
+        return localStore.resetKey(key);
+      }
       try {
         await client.del(`${redisPrefix}${key}`);
-      } catch {
+      } catch (error) {
+        if (isRedisRequired()) throw redisUnavailable(error);
         await localStore.resetKey(key);
       }
     },
     async resetAll() {
       const client = await getRedisClient();
-      if (!client) return localStore.resetAll();
+      if (!client) {
+        if (isRedisRequired()) throw redisUnavailable();
+        return localStore.resetAll();
+      }
       try {
         const keys = [];
         for await (const key of client.scanIterator({ MATCH: `${redisPrefix}*`, COUNT: 100 })) {
           keys.push(key);
         }
         if (keys.length) await client.del(keys);
-      } catch {
+      } catch (error) {
+        if (isRedisRequired()) throw redisUnavailable(error);
         await localStore.resetAll();
       }
     },
