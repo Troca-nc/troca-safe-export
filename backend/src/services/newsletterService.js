@@ -1,13 +1,9 @@
 'use strict';
 
-const crypto = require('crypto');
+const { generateUnsubscribeToken, hashUnsubscribeToken } = require('./unsubscribeTokenService');
 
 const { query } = require('../config/database');
 const { sendNewsletterEmail } = require('./emailService');
-
-function createToken() {
-  return crypto.randomBytes(24).toString('hex');
-}
 
 function normalizeTextList(value) {
   if (!Array.isArray(value)) return [];
@@ -40,7 +36,7 @@ async function ensureSubscription(userId) {
      )
      VALUES ($1, TRUE, 'weekly', '{}'::text[], '{}'::text[], $2, NOW(), NOW())
      ON CONFLICT (user_id) DO NOTHING`,
-    [userId, createToken()]
+    [userId, hashUnsubscribeToken(generateUnsubscribeToken())]
   );
 
   return getSubscription(userId);
@@ -54,7 +50,7 @@ async function saveSubscription(userId, payload = {}) {
     : String(current?.frequency || 'weekly');
   const categories = normalizeTextList(payload.categories ?? current?.categories ?? []);
   const communes = normalizeTextList(payload.communes ?? current?.communes ?? []);
-  const unsubscribeToken = String(current?.unsubscribe_token || '').trim() || createToken();
+  const unsubscribeToken = String(current?.unsubscribe_token || '').trim() || hashUnsubscribeToken(generateUnsubscribeToken());
 
   const result = await query(
     `INSERT INTO newsletter_subscriptions (
@@ -96,7 +92,7 @@ async function unsubscribeByToken(token) {
      SET enabled = FALSE, frequency = 'off', updated_at = NOW()
      WHERE unsubscribe_token = $1
      RETURNING *`,
-    [tokenValue]
+    [hashUnsubscribeToken(tokenValue)]
   );
 
   return result.rows[0] || null;
@@ -172,6 +168,15 @@ async function listActiveSubscribers() {
   return result.rows;
 }
 
+
+async function issueNewsletterUnsubscribeToken(subscriptionId) {
+  const token = generateUnsubscribeToken();
+  const result = await query(
+    `UPDATE newsletter_subscriptions SET unsubscribe_token = $2, updated_at = NOW() WHERE id = $1 RETURNING id`,
+    [subscriptionId, hashUnsubscribeToken(token)]
+  );
+  return result.rows[0] ? token : null;
+}
 async function sendNewsletterToSubscription(row, options = {}) {
   const preview = await buildNewsletterPreview(row.user_id);
   const payload = {
@@ -181,7 +186,7 @@ async function sendNewsletterToSubscription(row, options = {}) {
     summary: preview?.summary || { total: 0 },
     ctaUrl: options.ctaUrl || `${process.env.BASE_URL || 'https://kalico.nc'}/`,
     ctaLabel: options.ctaLabel || 'Voir sur Kalico',
-    unsubscribeToken: row.unsubscribe_token,
+    unsubscribeToken: null,
   };
 
   if (!payload.items.length) {
@@ -193,6 +198,7 @@ async function sendNewsletterToSubscription(row, options = {}) {
     return { skipped: true, items: [] };
   }
 
+  payload.unsubscribeToken = await issueNewsletterUnsubscribeToken(row.id);
   const emailResult = await sendNewsletterEmail(row.email, row.prenom || 'Bonjour', payload, row.user_id);
   await query(
     `INSERT INTO newsletter_sends (user_id, subscription_id, subject, summary, status, provider_message_id, sent_at, created_at)

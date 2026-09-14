@@ -40,6 +40,7 @@ const {
 } = require('../services/campaignsService');
 const { checkAdminAlerts } = require('../services/adminAlerts');
 const { ensureNotificationPreferences } = require('../services/notificationPreferencesService');
+const { generateUnsubscribeToken, hashUnsubscribeToken } = require('../services/unsubscribeTokenService');
 const { sendNewsletterBatch } = require('../services/newsletterService');
 const { ticketExpiry, importCleanup } = require('../cron');
 const { processRenewalGraceDeadlines } = require('../services/proRenewalGraceService');
@@ -813,6 +814,15 @@ function startAnalyticsPurgeJob() {
 
 // â”€â”€ Logique de matching des alertes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+
+async function issueSearchAlertUnsubscribeToken(alertId) {
+  const token = generateUnsubscribeToken();
+  const result = await query(
+    `UPDATE search_alerts SET unsubscribe_token = $2, updated_at = NOW() WHERE id = $1 RETURNING id`,
+    [alertId, hashUnsubscribeToken(token)]
+  );
+  return result.rows[0] ? token : null;
+}
 async function runAlertJob(frequency) {
   logger.info('cron_alerts_start', { frequency });
   let sent = 0;
@@ -837,6 +847,7 @@ async function runAlertJob(frequency) {
 
         const prefs = await ensureNotificationPreferences(alert.user_id).catch(() => null);
 
+        alert.unsubscribe_token = await issueSearchAlertUnsubscribeToken(alert.id);
         await sendAlertEmail(alert.email, alert.prenom, alert, annonces);
 
         await notifySearchAlert(
@@ -992,6 +1003,7 @@ async function matchImmediateAlerts(annonce) {
 
       const prefs = await ensureNotificationPreferences(alert.user_id).catch(() => null);
 
+      alert.unsubscribe_token = await issueSearchAlertUnsubscribeToken(alert.id);
       await sendAlertEmail(alert.email, alert.prenom, alert, [annonce]).catch(() => {});
       await notifySearchAlert(
         alert.user_id,

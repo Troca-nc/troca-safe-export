@@ -11,7 +11,7 @@
 
 const { Router } = require('express');
 const Joi        = require('joi');
-const { v4: uuidv4 }      = require('uuid');
+const { generateUnsubscribeToken, hashUnsubscribeToken } = require('../services/unsubscribeTokenService');
 const { authenticate }    = require('../middleware/auth');
 const { validate }        = require('../middleware/validate');
 const { query }           = require('../config/database');
@@ -148,7 +148,7 @@ router.get('/unsubscribe/:token', async (req, res) => {
     `UPDATE search_alerts SET status = 'deleted', updated_at = NOW()
      WHERE unsubscribe_token = $1 AND status != 'deleted'
      RETURNING label`,
-    [token]
+    [hashUnsubscribeToken(token)]
   ).catch(() => ({ rows: [] }));
 
   if (!result.rows[0]) {
@@ -214,7 +214,7 @@ router.get('/', async (req, res, next) => {
 router.post('/', validate(createSchema), async (req, res, next) => {
   try {
     const { label, filters, frequency } = req.body;
-    const token = uuidv4().replace(/-/g, '');
+    const token = generateUnsubscribeToken();
     const normalizedFilters = normalizeAlertFilters(filters);
     let nbResults = 0;
 
@@ -228,7 +228,7 @@ router.post('/', validate(createSchema), async (req, res, next) => {
       `INSERT INTO search_alerts (user_id, label, filters, frequency, unsubscribe_token, nb_results)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id, label, filters, frequency, status, nb_results, created_at`,
-      [req.user.id, label, JSON.stringify(normalizedFilters), frequency, token, nbResults]
+      [req.user.id, label, JSON.stringify(normalizedFilters), frequency, hashUnsubscribeToken(token), nbResults]
     );
 
     void sendConfirmationEmail({
