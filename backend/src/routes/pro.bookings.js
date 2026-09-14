@@ -1,6 +1,5 @@
 'use strict';
 
-const crypto = require('crypto');
 const express = require('express');
 const Joi = require('joi');
 
@@ -10,6 +9,11 @@ const { sendMail } = require('../services/emailService');
 const { sendPushToUser } = require('../services/pushService');
 const { createNotification } = require('../services/notificationService');
 const { transitionProBooking } = require('../services/proBookingStateService');
+const {
+  generateBookingAccessToken,
+  hashBookingAccessToken,
+  matchesBookingAccessToken,
+} = require('../services/bookingAccessTokenService');
 
 const router = express.Router();
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
@@ -451,7 +455,7 @@ async function assertBookingAccess(req, booking) {
   if (req.user?.id && Number(req.user.id) === Number(booking.pro_id)) return true;
   if (req.user?.id && booking.requester_user_id != null && Number(req.user.id) === Number(booking.requester_user_id)) return true;
   const token = String(req.get('x-kalico-capability') || req.body?.token || '').trim();
-  if (token && booking.booking_access_token && token === booking.booking_access_token) return true;
+  if (matchesBookingAccessToken(token, booking.booking_access_token)) return true;
   return false;
 }
 
@@ -1075,6 +1079,7 @@ router.post('/:id/bookings', optionalAuth, async (req, res, next) => {
       return res.status(403).json({ error: 'La prise de rendez-vous est actuellement désactivée.' });
     }
 
+    const bookingAccessToken = generateBookingAccessToken();
     const booking = await withTransaction(async (client) => {
       const slotResult = await client.query(
         `SELECT id, pro_id, starts_at, ends_at, label, status
@@ -1120,8 +1125,6 @@ router.post('/:id/bookings', optionalAuth, async (req, res, next) => {
         error.status = 400;
         throw error;
       }
-
-      const bookingAccessToken = crypto.randomBytes(24).toString('hex');
 
       const minDelay = Number(profile.booking_settings.advance_notice_hours || 24) * 60 * 60 * 1000;
       const maxDelay = Number(profile.booking_settings.max_days_ahead || 30) * 24 * 60 * 60 * 1000;
@@ -1172,7 +1175,7 @@ router.post('/:id/bookings', optionalAuth, async (req, res, next) => {
           normalizeMaybeText(value.details),
           slot.starts_at,
           slot.ends_at,
-          bookingAccessToken,
+          hashBookingAccessToken(bookingAccessToken),
         ]
       );
 
@@ -1189,6 +1192,7 @@ router.post('/:id/bookings', optionalAuth, async (req, res, next) => {
 
     const enrichedBooking = {
       ...booking,
+      booking_access_token: bookingAccessToken,
       pro_email: (await query('SELECT email FROM users WHERE id = $1 LIMIT 1', [proId])).rows[0]?.email || null,
       pro_commune: profile.pro_commune || null,
       pro_company_name: profile.pro_company_name || null,
