@@ -132,6 +132,12 @@ describe('P0-B log and internal-token boundaries', () => {
     assert.ok(bookingRoute.includes('#token=${encodeURIComponent(token)}'));
     assert.ok(quoteRoute.includes("req.get('x-kalico-capability')"));
     assert.ok(bookingRoute.includes("req.get('x-kalico-capability')"));
+    assert.ok(bookingRoute.includes('matchesBookingAccessToken(token, booking.booking_access_token)'));
+    assert.ok(!bookingRoute.includes('token === booking.booking_access_token'));
+    assert.ok(bookingRoute.includes('hashBookingAccessToken(bookingAccessToken)'));
+    assert.ok(bookingRoute.includes('booking_access_token: bookingAccessToken'));
+    assert.ok(!scheduler.includes('b.booking_access_token'));
+    assert.ok(!scheduler.includes('bookingAccessToken: row.booking_access_token'));
     assert.ok(frontendApi.includes("'X-Kalico-Capability': token"));
     assert.ok(!frontendApi.includes('params: token ? { token } : {}'));
   });

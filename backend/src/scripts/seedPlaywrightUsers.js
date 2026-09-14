@@ -8,6 +8,7 @@ loadDemoEnv();
 const { withTransaction } = require('../config/database');
 const { seedDemoDataset } = require('../services/demoSeedService');
 const { hashQuoteShareToken } = require('../services/quoteShareTokenService');
+const { hashBookingAccessToken } = require('../services/bookingAccessTokenService');
 
 const PASSWORD = 'Playwright123!';
 const PASSWORD_HASH = bcrypt.hashSync(PASSWORD, 10);
@@ -1022,7 +1023,7 @@ async function seedProContent(client, ids) {
     [
       proId,
       particulierId,
-      'pw-booking-token-1',
+      hashBookingAccessToken('pw-booking-token-1'),
       'Diagnostic rapide',
       15000,
       30,
@@ -1047,7 +1048,7 @@ async function seedProContent(client, ids) {
     [
       proId,
       particulierId,
-      'pw-booking-token-2',
+      hashBookingAccessToken('pw-booking-token-2'),
       'Visite technique',
       0,
       45,
