@@ -126,6 +126,9 @@ describe('P0-B log and internal-token boundaries', () => {
     assert.ok(!scheduler.includes('?token=${encodeURIComponent(bookingToken)}'));
     assert.ok(!emailService.includes('?token=${encodeURIComponent(String(details.bookingAccessToken))}'));
     assert.ok(quoteRoute.includes('#token=${encodeURIComponent(quote.share_token)}'));
+    assert.ok(quoteRoute.includes('matchesQuoteShareToken(token, quote.share_token)'));
+    assert.ok(!quoteRoute.includes('token === quote.share_token'));
+    assert.ok(!quoteRoute.includes('token !== quote.share_token'));
     assert.ok(bookingRoute.includes('#token=${encodeURIComponent(token)}'));
     assert.ok(quoteRoute.includes("req.get('x-kalico-capability')"));
     assert.ok(bookingRoute.includes("req.get('x-kalico-capability')"));

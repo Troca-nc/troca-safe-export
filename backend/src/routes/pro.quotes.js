@@ -1,6 +1,5 @@
 'use strict';
 
-const crypto = require('crypto');
 const express = require('express');
 const Joi = require('joi');
 
@@ -10,6 +9,11 @@ const { sendMail } = require('../services/emailService');
 const { sendPushToUser } = require('../services/pushService');
 const { createNotification } = require('../services/notificationService');
 const { sendSms } = require('../services/fretWorkflowService');
+const {
+  generateQuoteShareToken,
+  hashQuoteShareToken,
+  matchesQuoteShareToken,
+} = require('../services/quoteShareTokenService');
 
 const router = express.Router();
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
@@ -269,7 +273,7 @@ async function assertQuoteAccess(req, quote) {
   if (req.user?.id && Number(req.user.id) === Number(quote.pro_id)) return true;
   if (req.user?.id && quote.requester_user_id != null && Number(req.user.id) === Number(quote.requester_user_id)) return true;
   const token = String(req.get('x-kalico-capability') || req.body?.token || '').trim();
-  if (token && quote.share_token && token === quote.share_token) return true;
+  if (matchesQuoteShareToken(token, quote.share_token)) return true;
   return false;
 }
 
@@ -375,7 +379,7 @@ router.post('/', authenticate, async (req, res, next) => {
 
     const result = await withTransaction(async (client) => {
       const quoteNumber = await loadNextQuoteNumber(client);
-      const shareToken = crypto.randomBytes(24).toString('hex');
+      const shareTokenHash = hashQuoteShareToken(generateQuoteShareToken());
       const inserted = await client.query(
         `INSERT INTO pro_quotes (
            pro_id, requester_user_id, source_quote_request_id,
@@ -394,7 +398,7 @@ router.post('/', authenticate, async (req, res, next) => {
           value.requester_user_id || null,
           value.source_quote_request_id || null,
           quoteNumber,
-          shareToken,
+          shareTokenHash,
           value.requester_name.trim(),
           value.requester_email.trim(),
           value.requester_phone ? value.requester_phone.trim() : null,
@@ -556,16 +560,18 @@ router.post('/:id/send', authenticate, async (req, res, next) => {
     const sentAt = new Date();
     const validUntil = new Date(sentAt.getTime() + validityDays * 24 * 60 * 60 * 1000);
 
+    const shareToken = generateQuoteShareToken();
     const updated = await query(
       `UPDATE pro_quotes
        SET status = 'sent',
            sent_at = NOW(),
            valid_until = $1,
            validity_days = $2,
+           share_token = $3,
            viewed_at = COALESCE(viewed_at, NULL)
-       WHERE id = $3
+       WHERE id = $4
        RETURNING *`,
-      [validUntil.toISOString(), validityDays, quoteId]
+      [validUntil.toISOString(), validityDays, hashQuoteShareToken(shareToken), quoteId]
     );
 
     const fullQuote = parseQuoteRow({
@@ -580,7 +586,7 @@ router.post('/:id/send', authenticate, async (req, res, next) => {
       pro_phone: quote.pro_phone,
       pro_website: quote.pro_website,
     });
-    fullQuote.share_token = quote.share_token;
+    fullQuote.share_token = shareToken;
 
     await sendQuoteSentEmails(fullQuote);
     await Promise.all([
@@ -617,7 +623,7 @@ router.post('/:id/accept', optionalAuth, async (req, res, next) => {
       return res.status(403).json({ error: 'Accès refusé.' });
     }
     const token = String(req.body?.token || req.get('x-kalico-capability') || '').trim();
-    if (!req.user?.is_admin && req.user?.id !== quote.requester_user_id && token !== quote.share_token) {
+    if (!req.user?.is_admin && req.user?.id !== quote.requester_user_id && !matchesQuoteShareToken(token, quote.share_token)) {
       return res.status(403).json({ error: 'Accès refusé.' });
     }
     if (quote.status !== 'sent' && quote.status !== 'viewed') {
@@ -677,7 +683,7 @@ router.post('/:id/refuse', optionalAuth, async (req, res, next) => {
       return res.status(403).json({ error: 'Accès refusé.' });
     }
     const token = String(req.body?.token || req.get('x-kalico-capability') || '').trim();
-    if (!req.user?.is_admin && req.user?.id !== quote.requester_user_id && token !== quote.share_token) {
+    if (!req.user?.is_admin && req.user?.id !== quote.requester_user_id && !matchesQuoteShareToken(token, quote.share_token)) {
       return res.status(403).json({ error: 'Accès refusé.' });
     }
     if (quote.status !== 'sent' && quote.status !== 'viewed') {

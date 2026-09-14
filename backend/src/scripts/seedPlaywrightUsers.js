@@ -7,6 +7,7 @@ loadDemoEnv();
 
 const { withTransaction } = require('../config/database');
 const { seedDemoDataset } = require('../services/demoSeedService');
+const { hashQuoteShareToken } = require('../services/quoteShareTokenService');
 
 const PASSWORD = 'Playwright123!';
 const PASSWORD_HASH = bcrypt.hashSync(PASSWORD, 10);
@@ -930,7 +931,7 @@ async function seedProContent(client, ids) {
       particulierId,
       quoteRequest.rows[0].id,
       'PW-2026-0001',
-      'pw-quote-token-1',
+      hashQuoteShareToken('pw-quote-token-1'),
       'Emma Test',
       'particulier@playwright.kalico.nc',
       '+687700001',
