@@ -13,17 +13,25 @@ let lastInserted = null;
 let lastUpdated  = null;
 let mockCount = 0;
 let sentEmails = [];
+let unsubscribeLookup;
 
 const dbStub = {
   query: async (sql, params) => {
     const s = sql.trim().toUpperCase();
+    if (s.includes('FROM USERS')) return { rows: [{ id: params[0], email: 'test@example.invalid', deleted_at: null, banned_until: null }] };
     if (s.includes('COUNT(*)')) return { rows: [{ total: String(mockCount) }], rowCount: 1 };
     if (s.startsWith('SELECT')) return { rows: mockAlerts, rowCount: mockAlerts.length };
     if (s.startsWith('INSERT')) {
       lastInserted = { label: params[1], filters: params[2], frequency: params[3], nb_results: params[5] };
       return { rows: [{ id: 1, ...lastInserted, status: 'active', created_at: new Date().toISOString() }], rowCount: 1 };
     }
+    if (s.includes('WHERE UNSUBSCRIBE_TOKEN = $1')) {
+      unsubscribeLookup = params[0];
+      const expected = require('../services/unsubscribeTokenService').hashUnsubscribeToken('legacy-alert');
+      return { rows: params[0] === expected ? [{ label: 'Test' }] : [] };
+    }
     if (s.startsWith('UPDATE')) {
+      if (String(params[0]) === '999') return { rows: [], rowCount: 0 };
       lastUpdated = { id: params[params.length - 2], status: params[0] };
       return { rows: [{ id: params[params.length - 2], label: 'test', status: params[0] || 'deleted', frequency: 'daily' }], rowCount: 1 };
     }
@@ -158,13 +166,24 @@ describe('DELETE /api/alerts/:id', () => {
   });
 
   it('retourne 404 si alerte inexistante', async () => {
-    // Simuler rowCount = 0
-    const origQuery = dbStub.query;
-    dbStub.query = async () => ({ rows: [], rowCount: 0 });
     const req = makeAuthReq(1, { params: { id: '999' } });
     const res = makeRes();
     await callRoute('delete', '/999', req, res);
     assertStatus(res, 404);
-    dbStub.query = origQuery;
+  });
+});
+
+
+describe('GET /api/alerts/unsubscribe/:token', () => {
+  it('accepts a legacy raw token and rejects its stored digest', async () => {
+    const hash = require('../services/unsubscribeTokenService').hashUnsubscribeToken;
+    const handler = router.stack.find(l => l.route?.path === '/unsubscribe/:token').route.stack[0].handle;
+    const success = makeRes();
+    await handler({ params: { token: 'legacy-alert' } }, success);
+    assert.strictEqual(unsubscribeLookup, hash('legacy-alert'));
+    assert.ok(success._payload.includes('<!DOCTYPE html>'));
+    const invalid = makeRes();
+    await handler({ params: { token: hash('legacy-alert') } }, invalid);
+    assert.ok(invalid._payload.includes('invalide'));
   });
 });

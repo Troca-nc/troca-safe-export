@@ -1,13 +1,9 @@
 'use strict';
 
-const crypto = require('crypto');
+const { generateUnsubscribeToken, hashUnsubscribeToken } = require('./unsubscribeTokenService');
 const { query } = require('../config/database');
 
 const PERFORMANCE_FREQUENCIES = new Set(['daily', 'weekly', 'monthly', 'never']);
-
-function generateToken() {
-  return crypto.randomBytes(32).toString('hex');
-}
 
 function normalizeFrequency(value, fallback = 'weekly') {
   const candidate = String(value || '').trim().toLowerCase();
@@ -29,12 +25,6 @@ function normalizePrefs(row) {
     email_performance_report: Boolean(row.email_performance_report),
     push_performance_report: Boolean(row.push_performance_report),
     performance_report_frequency: normalizeFrequency(row.performance_report_frequency),
-    new_message_unsubscribe_token: row.new_message_unsubscribe_token,
-    boost_activated_unsubscribe_token: row.boost_activated_unsubscribe_token,
-    offer_received_unsubscribe_token: row.offer_received_unsubscribe_token,
-    listing_expiring_unsubscribe_token: row.listing_expiring_unsubscribe_token,
-    listing_expired_unsubscribe_token: row.listing_expired_unsubscribe_token,
-    performance_report_unsubscribe_token: row.performance_report_unsubscribe_token,
     last_performance_report_at: row.last_performance_report_at || null,
     created_at: row.created_at || null,
     updated_at: row.updated_at || null,
@@ -86,12 +76,12 @@ async function ensureNotificationPreferences(userId) {
 
   const defaults = defaultPrefsForUser(user);
   const tokens = {
-    new_message_unsubscribe_token: generateToken(),
-    boost_activated_unsubscribe_token: generateToken(),
-    offer_received_unsubscribe_token: generateToken(),
-    listing_expiring_unsubscribe_token: generateToken(),
-    listing_expired_unsubscribe_token: generateToken(),
-    performance_report_unsubscribe_token: generateToken(),
+    new_message_unsubscribe_token: hashUnsubscribeToken(generateUnsubscribeToken()),
+    boost_activated_unsubscribe_token: hashUnsubscribeToken(generateUnsubscribeToken()),
+    offer_received_unsubscribe_token: hashUnsubscribeToken(generateUnsubscribeToken()),
+    listing_expiring_unsubscribe_token: hashUnsubscribeToken(generateUnsubscribeToken()),
+    listing_expired_unsubscribe_token: hashUnsubscribeToken(generateUnsubscribeToken()),
+    performance_report_unsubscribe_token: hashUnsubscribeToken(generateUnsubscribeToken()),
   };
 
   await query(
@@ -117,7 +107,7 @@ async function ensureNotificationPreferences(userId) {
        created_at,
        updated_at
      )
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, NOW(), NOW())
      ON CONFLICT (user_id) DO NOTHING`,
     [
       userId,
@@ -226,6 +216,26 @@ async function saveNotificationPreferences(userId, payload = {}) {
   return normalizePrefs(result.rows[0] || null);
 }
 
+
+const UNSUBSCRIBE_COLUMNS = Object.freeze({
+  new_message: 'new_message_unsubscribe_token',
+  boost_activated: 'boost_activated_unsubscribe_token',
+  offer_received: 'offer_received_unsubscribe_token',
+  listing_expiring: 'listing_expiring_unsubscribe_token',
+  listing_expired: 'listing_expired_unsubscribe_token',
+  performance_report: 'performance_report_unsubscribe_token',
+});
+
+async function issueNotificationUnsubscribeToken(userId, kind) {
+  const column = Object.hasOwn(UNSUBSCRIBE_COLUMNS, kind) ? UNSUBSCRIBE_COLUMNS[kind] : null;
+  if (!userId || !column) return null;
+  const token = generateUnsubscribeToken();
+  const result = await query(
+    `UPDATE notification_preferences SET ${column} = $2, updated_at = NOW() WHERE user_id = $1 RETURNING user_id`,
+    [userId, hashUnsubscribeToken(token)]
+  );
+  return result.rows[0] ? token : null;
+}
 async function disableNotificationByToken(token) {
   const tokenValue = String(token || '').trim();
   if (!tokenValue) return null;
@@ -255,7 +265,7 @@ async function disableNotificationByToken(token) {
      FROM notification_preferences
      WHERE performance_report_unsubscribe_token = $1
      LIMIT 1`,
-    [tokenValue]
+    [hashUnsubscribeToken(tokenValue)]
   );
 
   const row = match.rows[0];
@@ -305,6 +315,7 @@ module.exports = {
   disableNotificationByToken,
   ensureNotificationPreferences,
   getNotificationPreferences,
+  issueNotificationUnsubscribeToken,
   normalizeFrequency,
   saveNotificationPreferences,
 };

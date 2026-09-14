@@ -38,6 +38,7 @@ let dbBoostRows    = [];
 let dbAlertRows    = [];
 let dbAnnoncesRows = [];
 let dbUpdated      = false;
+let alertTokenHash;
 
 const dbStub = {
   query: async (sql, params) => {
@@ -58,7 +59,10 @@ const dbStub = {
     // Upsert alert_sent_log
     if (s.includes('ALERT_SENT_LOG')) return { rows: [], rowCount: 0 };
     // Update last_sent_at
-    if (s.includes('UPDATE SEARCH_ALERTS')) return { rows: [], rowCount: 1 };
+    if (s.includes('UPDATE SEARCH_ALERTS')) {
+      if (s.includes('UNSUBSCRIBE_TOKEN = $2')) alertTokenHash = params[1];
+      return { rows: [{ id: params[0] }], rowCount: 1 };
+    }
     return { rows: [], rowCount: 0 };
   },
 };
@@ -118,6 +122,10 @@ describe('scheduler — matchImmediateAlerts', () => {
     await matchImmediateAlerts({ id: 10, titre: 'iPhone 14 Pro', user_id: 99, prix_xpf: 120000 });
     assert.strictEqual(sentAlertEmails.length, 1);
     assert.strictEqual(sentAlertEmails[0].to, 'u@test.nc');
+    const raw = sentAlertEmails[0].alert.unsubscribe_token;
+    assert.match(raw, /^[a-f0-9]{64}$/);
+    assert.notStrictEqual(raw, alertTokenHash);
+    assert.strictEqual(require('../services/unsubscribeTokenService').hashUnsubscribeToken(raw), alertTokenHash);
   });
 
   it('ne notifie pas le vendeur de sa propre annonce', async () => {

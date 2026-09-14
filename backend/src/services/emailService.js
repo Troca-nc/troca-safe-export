@@ -7,7 +7,7 @@
 
 const { isConfiguredValue } = require('../config/env');
 const { query } = require('../config/database');
-const { ensureNotificationPreferences } = require('./notificationPreferencesService');
+const { ensureNotificationPreferences, issueNotificationUnsubscribeToken } = require('./notificationPreferencesService');
 const { generateQrCode } = require('./qrCodeService');
 const { logger } = require('../utils/logger');
 
@@ -62,6 +62,11 @@ async function sendMail({ to, subject, html, text, replyTo, cc, bcc }) {
 // â”€â”€ Templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const BASE_URL = () => process.env.BASE_URL || 'https://kalico.nc';
+async function notificationUnsubscribeUrl(userId, kind) {
+  if (!userId) return null;
+  const token = await issueNotificationUnsubscribeToken(userId, kind);
+  return token ? `${BASE_URL()}/api/users/notifications/unsubscribe/${token}` : null;
+}
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -268,9 +273,7 @@ async function sendNewMessageEmail(to, prenom, senderName, annonceTitle, convId,
   if (prefs && prefs.email_new_message === false) return null;
 
   const link = `${BASE_URL()}/messages/${convId}`;
-  const unsubLink = prefs?.new_message_unsubscribe_token
-    ? `${BASE_URL()}/api/users/notifications/unsubscribe/${prefs.new_message_unsubscribe_token}`
-    : null;
+  const unsubLink = recipientUserId ? await notificationUnsubscribeUrl(recipientUserId, 'new_message') : null;
   return sendMail({
     to,
     subject: `${escapeHtml(senderName)} vous a envoyÃ© un message sur Kalico`,
@@ -307,9 +310,7 @@ async function sendPerformanceReportEmail({ to, prenom, report, recipientUserId 
     </tr>
   `).join('');
 
-  const unsubLink = prefs?.performance_report_unsubscribe_token
-    ? `${BASE_URL()}/api/users/notifications/unsubscribe/${prefs.performance_report_unsubscribe_token}`
-    : null;
+  const unsubLink = recipientUserId ? await notificationUnsubscribeUrl(recipientUserId, 'performance_report') : null;
 
   const summaryCards = `
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin:22px 0;">
@@ -366,9 +367,7 @@ async function sendBoostActivatedEmail(to, prenom, details = {}, recipientUserId
   if (prefs && prefs.email_boost_activated === false) return null;
 
   const boostDays = Number(details.boostDays || 0);
-  const unsubscribeUrl = prefs?.boost_activated_unsubscribe_token
-    ? `${BASE_URL()}/api/users/notifications/unsubscribe/${prefs.boost_activated_unsubscribe_token}`
-    : null;
+  const unsubscribeUrl = recipientUserId ? await notificationUnsubscribeUrl(recipientUserId, 'boost_activated') : null;
 
   const payload = buildListingEmail({
     prenom,
@@ -394,9 +393,7 @@ async function sendOfferReceivedEmail(to, prenom, details = {}, recipientUserId)
   if (prefs && prefs.email_offer_received === false) return null;
 
   const amountXpf = Number(details.amountXpf || 0);
-  const unsubscribeUrl = prefs?.offer_received_unsubscribe_token
-    ? `${BASE_URL()}/api/users/notifications/unsubscribe/${prefs.offer_received_unsubscribe_token}`
-    : null;
+  const unsubscribeUrl = recipientUserId ? await notificationUnsubscribeUrl(recipientUserId, 'offer_received') : null;
 
   const payload = buildListingEmail({
     prenom,
@@ -421,9 +418,7 @@ async function sendListingExpiringEmail(to, prenom, details = {}, recipientUserI
   if (prefs && prefs.email_listing_expiring === false) return null;
 
   const daysLeft = Number(details.daysLeft || 3);
-  const unsubscribeUrl = prefs?.listing_expiring_unsubscribe_token
-    ? `${BASE_URL()}/api/users/notifications/unsubscribe/${prefs.listing_expiring_unsubscribe_token}`
-    : null;
+  const unsubscribeUrl = recipientUserId ? await notificationUnsubscribeUrl(recipientUserId, 'listing_expiring') : null;
   const listingEditUrl = details.annonceId
     ? `${BASE_URL()}/annonces/nouvelle?edit=${details.annonceId}`
     : `${BASE_URL()}/annonces/nouvelle`;
@@ -465,9 +460,7 @@ async function sendListingExpiredEmail(to, prenom, details = {}, recipientUserId
   const prefs = recipientUserId ? await ensureNotificationPreferences(recipientUserId) : null;
   if (prefs && prefs.email_listing_expired === false) return null;
 
-  const unsubscribeUrl = prefs?.listing_expired_unsubscribe_token
-    ? `${BASE_URL()}/api/users/notifications/unsubscribe/${prefs.listing_expired_unsubscribe_token}`
-    : null;
+  const unsubscribeUrl = recipientUserId ? await notificationUnsubscribeUrl(recipientUserId, 'listing_expired') : null;
 
   const payload = buildListingEmail({
     prenom,

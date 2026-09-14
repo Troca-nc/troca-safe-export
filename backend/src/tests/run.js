@@ -16,6 +16,7 @@ const SUITES = [
   './reviewReportService.test',
   './reviewCreationPolicy.test',
   './reviewTokenService.test',
+  './unsubscribeTokens.test',
   './authenticationFailClosed.test',
   './optionalAuthBanPolicy.test',
   './websocketBanEnforcement.test',
