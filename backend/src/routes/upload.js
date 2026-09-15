@@ -32,7 +32,7 @@ const MAX_IMAGES    = 12;
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits:  { fileSize: MAX_FILE_SIZE, files: MAX_IMAGES },
+  limits:  { fieldArrayIndexLimit: 1000, fieldNestingDepth: 8, fileSize: MAX_FILE_SIZE, files: MAX_IMAGES },
   fileFilter: (req, file, cb) => {
     const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
     if (!allowed.includes(file.mimetype)) {
@@ -46,7 +46,7 @@ const upload = multer({
 
 const chatDocumentUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: (parseInt(process.env.MAX_CHAT_FILE_SIZE_MB) || 20) * 1024 * 1024, files: 1 },
+  limits: { fieldArrayIndexLimit: 1000, fieldNestingDepth: 8, fileSize: (parseInt(process.env.MAX_CHAT_FILE_SIZE_MB) || 20) * 1024 * 1024, files: 1 },
   fileFilter: (req, file, cb) => {
     const allowed = [
       'application/pdf',
