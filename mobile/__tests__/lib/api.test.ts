@@ -28,20 +28,20 @@ describe('tokenStorage', () => {
 
   test('getAccess appelle SecureStore avec la bonne clé', async () => {
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue('my_token');
-    const { tokenStorage } = require('../../lib/api');
+    const { tokenStorage } = require('../../lib/tokenStorage');
     const token = await tokenStorage.getAccess();
     expect(SecureStore.getItemAsync).toHaveBeenCalledWith('kalico_access_token');
     expect(token).toBe('my_token');
   });
 
   test('setAccess sauvegarde dans SecureStore', async () => {
-    const { tokenStorage } = require('../../lib/api');
+    const { tokenStorage } = require('../../lib/tokenStorage');
     await tokenStorage.setAccess('new_token');
     expect(SecureStore.setItemAsync).toHaveBeenCalledWith('kalico_access_token', 'new_token');
   });
 
   test('clear supprime les deux tokens', async () => {
-    const { tokenStorage } = require('../../lib/api');
+    const { tokenStorage } = require('../../lib/tokenStorage');
     await tokenStorage.clear();
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledTimes(2);
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith('kalico_access_token');
