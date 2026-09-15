@@ -3,7 +3,7 @@ packages:
 
 overrides:
   sharp: 0.35.4
-  postcss@8.4.31: 8.5.15
+  postcss@8.4.31: 8.5.23
 
 neverBuiltDependencies:
   - sharp
