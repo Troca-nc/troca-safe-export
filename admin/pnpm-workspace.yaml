@@ -6,3 +6,6 @@ overrides:
 
 neverBuiltDependencies:
   - sharp
+
+allowBuilds:
+  sharp: false
