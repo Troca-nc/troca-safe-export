@@ -16,17 +16,17 @@ import { useAuthActionStore } from '@/store/authActionStore'
 import { useAuthStore } from '@/store/authStore'
 
 const SORT_OPTIONS = [
-  { value: 'date', label: 'Plus rï¿½centes' },
+  { value: 'date', label: 'Plus récentes' },
   { value: 'price_asc', label: 'Prix croissant' },
-  { value: 'price_desc', label: 'Prix dï¿½croissant' },
+  { value: 'price_desc', label: 'Prix décroissant' },
 ]
 
 const CONDITION_OPTIONS = [
   { value: 'new', label: 'Neuf' },
   { value: 'like_new', label: 'Comme neuf' },
-  { value: 'good', label: 'Bon Ãtat' },
+  { value: 'good', label: 'Bon état' },
   { value: 'fair', label: 'Correct' },
-  { value: 'for_parts', label: 'Pour piï¿½ces' },
+  { value: 'for_parts', label: 'Pour pièces' },
 ]
 
 const RADIUS_OPTIONS = [5, 10, 20, 50, 100]
@@ -190,7 +190,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
 
   const handleUseLocation = () => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
-      window.alert('La gï¿½olocalisation nest pas disponible dans ce navigateur.')
+      window.alert('La géolocalisation n’est pas disponible dans ce navigateur.')
       return
     }
 
@@ -199,7 +199,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
         setLocation(position.coords.latitude.toFixed(6), position.coords.longitude.toFixed(6))
       },
       () => {
-        window.alert('Impossible de rï¿½cupï¿½rer votre position pour le moment.')
+        window.alert('Impossible de récupérer votre position pour le moment.')
       },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 60_000 }
     )
@@ -281,7 +281,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
             className="inline-flex items-center gap-2 rounded-xl border border-kalico-blue/20 bg-kalico-blue/6 px-3 py-2 text-sm font-semibold text-kalico-blue transition hover:border-kalico-blue/30 hover:bg-kalico-blue/10"
           >
             <Bell className="h-4 w-4" />
-            Crï¿½er une alerte
+            Créer une alerte
           </button>
         </div>
 
@@ -289,9 +289,9 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
           <aside className="hidden lg:block">
             <div className="card p-5 sticky top-20 space-y-6">
               <div className="rounded-2xl border border-night/8 bg-sand/20 p-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-night/40">CatÃ©gorie</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-night/40">Catégorie</p>
                 <p className="mt-1 text-sm font-semibold text-night">{selectedCategoryLabel}</p>
-                <p className="mt-1 text-xs text-night/45">Ce feed est prï¿½-filtrï¿½ sur cette catï¿½gorie.</p>
+                <p className="mt-1 text-xs text-night/45">Ce feed est pré-filtré sur cette catégorie.</p>
               </div>
 
               <div>
@@ -371,7 +371,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
                       Rayon de recherche
                     </label>
                     <p className="mt-1 text-xs text-night/45">
-                      Distance max autour de votre position partagï¿½e.
+                      Distance max autour de votre position partagée.
                     </p>
                   </div>
                   <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-night shadow-sm">
@@ -448,7 +448,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
               </div>
 
               <div>
-                <h3 className="font-semibold text-night text-sm mb-3">Ãtat</h3>
+                <h3 className="font-semibold text-night text-sm mb-3">État</h3>
                 <div className="space-y-1">
                   {CONDITION_OPTIONS.map((opt) => (
                     <label key={opt.value} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-sand cursor-pointer">
@@ -468,7 +468,7 @@ export default function CategoryFeedPage({ title, subtitle, categorySlug, accent
 
               {activeFilterCount > 0 && (
                 <button onClick={clearFilters} className="btn-ghost text-sm text-red-500 w-full justify-center">
-                  <X className="w-4 h-4" /> Rï¿½initialiser les filtres ({activeFilterCount})
+                  <X className="w-4 h-4" /> Réinitialiser les filtres ({activeFilterCount})
                 </button>
               )}
             </div>
