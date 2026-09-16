@@ -30,35 +30,35 @@ const METIER_CARDS = [
   {
     id: 'artisans',
     title: 'Artisans et BTP',
-    description: 'Devis, chantiers et clientï¿½le locale. Tout depuis votre espace pro.',
+    description: 'Devis, chantiers et clientèle locale. Tout depuis votre espace pro.',
     Icon: Wrench,
     details: [
       {
         title: 'Devis PDF',
-        description: 'Crï¿½ez et envoyez des devis professionnels en XPF avec TGC intï¿½grï¿½e. Le client signe en ligne.',
+        description: 'Créez et envoyez des devis professionnels en XPF avec TGC intégrée. Le client signe en ligne.',
       },
       {
         title: "Appels d'offres",
-        description: 'Recevez des demandes de particuliers qui cherchent un artisan dans votre commune. Rï¿½pondez en 2 clics.',
+        description: 'Recevez des demandes de particuliers qui cherchent un artisan dans votre commune. Répondez en 2 clics.',
       },
       {
-        title: 'Rï¿½servations',
-        description: 'Vos clients rï¿½servent un crï¿½neau directement depuis votre vitrine. Vous confirmez ou proposez une autre date.',
+        title: 'Réservations',
+        description: 'Vos clients réservent un créneau directement depuis votre vitrine. Vous confirmez ou proposez une autre date.',
       },
       {
         title: 'Vitrine Pro',
-        description: 'Une page ï¿½ votre nom avec vos rï¿½alisations, avis clients et coordonnï¿½es. Visible dans l\'annuaire des pros.',
+        description: 'Une page à votre nom avec vos réalisations, avis clients et coordonnées. Visible dans l\'annuaire des pros.',
       },
       {
         title: 'Documents',
-        description: 'Dï¿½posez vos justificatifs pour obtenir le badge Pro vï¿½rifiï¿½.',
+        description: 'Déposez vos justificatifs pour obtenir le badge Pro vérifié.',
       },
     ],
   },
   {
     id: 'transport',
     title: 'Transport et livraison',
-    description: 'Courses, colis et fret entre communes. Gï¿½rez tout depuis un tableau de bord.',
+    description: 'Courses, colis et fret entre communes. Gérez tout depuis un tableau de bord.',
     Icon: Truck,
     details: [
       {
@@ -67,22 +67,22 @@ const METIER_CARDS = [
       },
       {
         title: 'Livraison de colis',
-        description: 'Gï¿½rez les demandes de livraison, soumettez une offre et suivez chaque remise jusqu\'ï¿½ la confirmation.',
+        description: 'Gérez les demandes de livraison, soumettez une offre et suivez chaque remise jusqu\'à la confirmation.',
       },
       {
         title: 'Fret',
-        description: 'Rï¿½pondez aux demandes de fret professionnel entre communes ou vers les ï¿½les. Devis intï¿½grï¿½, suivi de livraison.',
+        description: 'Répondez aux demandes de fret professionnel entre communes ou vers les îles. Devis intégré, suivi de livraison.',
       },
       {
-        title: 'Devis automatisï¿½',
-        description: 'Le client dï¿½crit son besoin, vous recevez une notification et rï¿½pondez avec votre tarif en quelques secondes.',
+        title: 'Devis automatisé',
+        description: 'Le client décrit son besoin, vous recevez une notification et répondez avec votre tarif en quelques secondes.',
       },
     ],
   },
   {
     id: 'boutique',
-    title: 'Commerï¿½ants et boutiques',
-    description: 'Votre boutique en ligne locale avec catalogue, promos et visibilitï¿½ boostï¿½e.',
+    title: 'Commerçants et boutiques',
+    description: 'Votre boutique en ligne locale avec catalogue, promos et visibilité boostée.',
     Icon: ShoppingBag,
     details: [
       {
@@ -90,16 +90,16 @@ const METIER_CARDS = [
         description: 'Publiez vos produits avec photos, prix et stock. Visibles sur votre vitrine et dans les recherches Kalico.',
       },
       {
-        title: 'Bons plans sponsorisï¿½s',
-        description: 'Crï¿½ez une offre promotionnelle visible sur la home Kalico et dans la section Bons Plans.',
+        title: 'Bons plans sponsorisés',
+        description: 'Créez une offre promotionnelle visible sur la home Kalico et dans la section Bons Plans.',
       },
       {
         title: 'Campagnes',
-        description: 'Achetez un emplacement publicitaire sur la home ou dans une catï¿½gorie pour une durï¿½e dï¿½finie.',
+        description: 'Achetez un emplacement publicitaire sur la home ou dans une catégorie pour une durée définie.',
       },
       {
         title: 'Coupons',
-        description: 'Gï¿½nï¿½rez des codes promo pour vos clients rï¿½guliers ou vos campagnes de fidï¿½lisation.',
+        description: 'Générez des codes promo pour vos clients réguliers ou vos campagnes de fidélisation.',
       },
       {
         title: 'Import produits',
@@ -109,53 +109,53 @@ const METIER_CARDS = [
   },
   {
     id: 'culture',
-    title: 'ï¿½vï¿½nementiel et culture',
-    description: 'Concerts, marchï¿½s, confï¿½rences. Touchez toute la NC avec une visibilitï¿½ locale forte.',
+    title: 'Événementiel et culture',
+    description: 'Concerts, marchés, conférences. Touchez toute la NC avec une visibilité locale forte.',
     Icon: Calendar,
     details: [
       {
-        title: 'ï¿½vï¿½nements',
-        description: 'Publiez votre ï¿½vï¿½nement dans l\'agenda Kalico visible par toute la Nouvelle-CalÃ©donie.',
+        title: 'Événements',
+        description: 'Publiez votre événement dans l\'agenda Kalico visible par toute la Nouvelle-Calédonie.',
       },
       {
         title: 'Billetterie avec QR code',
-        description: 'Vendez vos billets en ligne avec paiement intï¿½grï¿½. Chaque billet gï¿½nï¿½re un QR code scannable ï¿½ l\'entrï¿½e.',
+        description: 'Vendez vos billets en ligne avec paiement intégré. Chaque billet génère un QR code scannable à l\'entrée.',
       },
       {
         title: 'Campagne homepage',
-        description: 'Mettez votre ï¿½vï¿½nement en avant sur la page d\'accueil Kalico pendant la pï¿½riode de votre choix.',
+        description: 'Mettez votre événement en avant sur la page d\'accueil Kalico pendant la période de votre choix.',
       },
       {
         title: 'Bons plans culturels',
-        description: 'Publiez vos rï¿½ductions et offres spï¿½ciales dans la section Bons Plans.',
+        description: 'Publiez vos réductions et offres spéciales dans la section Bons Plans.',
       },
     ],
   },
   {
     id: 'transversal',
     title: 'Tous les pros',
-    description: 'Les outils transversaux qui font la diffï¿½rence au quotidien.',
+    description: 'Les outils transversaux qui font la différence au quotidien.',
     Icon: BarChart2,
     details: [
       {
         title: 'Tableau de bord',
-        description: 'Suivez vos vues, contacts, conversions et performances en temps rï¿½el.',
+        description: 'Suivez vos vues, contacts, conversions et performances en temps réel.',
       },
       {
-        title: 'Rï¿½ponse automatique',
-        description: 'Configurez un message envoyï¿½ automatiquement ï¿½ chaque nouveau contact. Ne ratez plus aucune opportunitï¿½.',
+        title: 'Réponse automatique',
+        description: 'Configurez un message envoyé automatiquement à chaque nouveau contact. Ne ratez plus aucune opportunité.',
       },
       {
-        title: 'Statistiques avancï¿½es',
-        description: 'Analysez les performances de vos annonces et campagnes pour optimiser votre visibilitï¿½.',
+        title: 'Statistiques avancées',
+        description: 'Analysez les performances de vos annonces et campagnes pour optimiser votre visibilité.',
       },
       {
         title: 'Parrainage Pro',
-        description: 'Recommandez Kalico Pro ï¿½ d\'autres professionnels et bï¿½nï¿½ficiez d\'avantages pour chaque parrainage.',
+        description: 'Recommandez Kalico Pro à d\'autres professionnels et bénéficiez d\'avantages pour chaque parrainage.',
       },
       {
-        title: 'Import de donnï¿½es',
-        description: 'Importez vos contacts, produits ou annonces depuis un fichier externe pour dï¿½marrer plus vite.',
+        title: 'Import de données',
+        description: 'Importez vos contacts, produits ou annonces depuis un fichier externe pour démarrer plus vite.',
       },
     ],
   },
@@ -164,9 +164,9 @@ const METIER_CARDS = [
 const FREE_FEATURES = [
   '5 annonces actives',
   '6 photos par annonce',
-  'Chat intï¿½grï¿½',
-  'Boosts ï¿½ l\'acte',
-  'Vï¿½rification tï¿½lï¿½phone',
+  'Chat intégré',
+  'Boosts à l\'acte',
+  'Vérification téléphone',
 ]
 
 const BOOST_PRICING = [
@@ -177,42 +177,42 @@ const BOOST_PRICING = [
 ]
 
 const PRO_FEATURES = [
-  'Annonces illimitï¿½es',
+  'Annonces illimitées',
   '12 photos par annonce',
   'Vitrine et catalogue',
   'Devis PDF',
-  'Rï¿½servations',
+  'Réservations',
   'Fret et livraison',
   'Billetterie',
   'Campagnes',
   'Statistiques',
   'Boosts -20%',
-  'Rï¿½ponse auto',
-  'Badge Pro vï¿½rifiï¿½',
+  'Réponse auto',
+  'Badge Pro vérifié',
 ]
 
 const BOOST_FEATURES = [
-  'Boost ï¿½ la une',
+  'Boost à la une',
   'Badge urgent',
-  'Photos supplï¿½mentaires',
+  'Photos supplémentaires',
   'Disponible pour particuliers et pros',
 ]
 
 const WHY_PRO_ITEMS = [
   {
     icon: TrendingUp,
-    title: 'Plus de visibilitï¿½',
-    description: 'Vos annonces remontent et votre vitrine apparaï¿½t dans l\'annuaire des pros.',
+    title: 'Plus de visibilité',
+    description: 'Vos annonces remontent et votre vitrine apparaît dans l\'annuaire des pros.',
   },
   {
     icon: FileText,
     title: 'Moins de va-et-vient',
-    description: 'Devis, rÃ©servations et messages au mï¿½me endroit.',
+    description: 'Devis, réservations et messages au même endroit.',
   },
   {
     icon: Shield,
     title: 'Un badge qui inspire confiance',
-    description: 'Le badge Pro vï¿½rifiï¿½ rassure vos clients avant mï¿½me le premier contact.',
+    description: 'Le badge Pro vérifié rassure vos clients avant même le premier contact.',
   },
 ]
 
@@ -328,25 +328,25 @@ export default function AbonnementPage() {
         <div className="mx-auto max-w-5xl">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-kalico-blue/20 px-3 py-1.5 text-xs font-medium text-kalico-blue">
             <TrendingUp size={12} />
-            Dï¿½veloppez votre activitï¿½ sur Kalico
+            Développez votre activité sur Kalico
           </div>
           <h1 className="font-display text-4xl font-bold leading-tight md:text-5xl">
             La plateforme des professionnels
             <br />
-            en Nouvelle-CalÃ©donie
+            en Nouvelle-Calédonie
           </h1>
           <p className="mx-auto mt-4 max-w-3xl text-sm leading-6 text-white/70 md:text-base">
             Gratuit pour commencer sans friction. Pro pour les professionnels qui veulent plus de
-            visibilitï¿½, plus de photos, des statistiques et des boosts moins chers.
+            visibilité, plus de photos, des statistiques et des boosts moins chers.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-white/45">
             <span className="flex items-center gap-1">
               <ShieldCheck size={12} />
-              Paiement sï¿½curisï¿½
+              Paiement sécurisé
             </span>
             <span className="flex items-center gap-1">
               <Check size={12} />
-              Rï¿½siliation ï¿½ tout moment
+              Résiliation à tout moment
             </span>
           </div>
         </div>
@@ -358,19 +358,19 @@ export default function AbonnementPage() {
           className="mb-5 inline-flex items-center gap-1 text-sm text-night/50 transition-colors hover:text-night"
         >
           <ArrowLeft size={14} />
-          Retour ï¿½ l'accueil
+          Retour à l'accueil
         </Link>
 
         <section>
           <div className="mb-6">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">
-              Fait pour votre mï¿½tier
+              Fait pour votre métier
             </p>
             <h2 className="mt-1 font-display text-2xl font-bold text-night md:text-3xl">
-              Fait pour votre mï¿½tier
+              Fait pour votre métier
             </h2>
             <p className="mt-1 max-w-2xl text-sm text-night/60">
-              Cliquez sur votre secteur pour voir ce que le Pro change concrï¿½tement.
+              Cliquez sur votre secteur pour voir ce que le Pro change concrètement.
             </p>
           </div>
 
@@ -404,11 +404,11 @@ export default function AbonnementPage() {
           <div className="grid gap-6 lg:grid-cols-3">
             <article className="flex h-full flex-col rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">
-                Pour dï¿½marrer
+                Pour démarrer
               </p>
               <h3 className="mt-2 text-2xl font-bold text-night">Gratuit</h3>
               <p className="mt-2 text-sm leading-6 text-night/60">
-                Ouvrez votre compte et publiez vos premiï¿½res annonces sans frais.
+                Ouvrez votre compte et publiez vos premières annonces sans frais.
               </p>
               <div className="mt-4 rounded-2xl bg-[var(--color-surface-raised)] p-4">
                 <div className="text-3xl font-bold text-night">0 XPF</div>
@@ -424,7 +424,7 @@ export default function AbonnementPage() {
                   href="/inscription"
                   className="btn-secondary flex w-full items-center justify-center gap-2 px-4 py-3 text-sm font-semibold"
                 >
-                  Crï¿½er un compte gratuit
+                  Créer un compte gratuit
                   <ArrowRight size={16} />
                 </Link>
               </div>
@@ -432,10 +432,10 @@ export default function AbonnementPage() {
 
             <article className="relative flex h-full flex-col rounded-[2rem] border-2 border-kalico-blue bg-[var(--color-surface)] p-6 shadow-xl ring-2 ring-kalico-blue/10 lg:scale-[1.02]">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-kalico-blue px-4 py-1 text-xs font-bold text-white shadow">
-                Recommandï¿½
+                Recommandé
               </div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">Pro</p>
-              <h3 className="mt-2 text-2xl font-bold text-night">Dï¿½veloppez votre activitï¿½</h3>
+              <h3 className="mt-2 text-2xl font-bold text-night">Développez votre activité</h3>
               <p className="mt-2 text-sm leading-6 text-night/60">
                 Le meilleur choix pour les professionnels qui veulent plus de volume, plus de
                 photos et moins de frais sur les boosts.
@@ -468,11 +468,11 @@ export default function AbonnementPage() {
 
             <article className="flex h-full flex-col rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-night/35">
-                ï¿½ la carte
+                À la carte
               </p>
               <h3 className="mt-2 text-2xl font-bold text-night">Boosts</h3>
               <p className="mt-2 text-sm leading-6 text-night/60">
-                Les boosts restent disponibles pour tous les utilisateurs. Les abonnï¿½s Pro paient
+                Les boosts restent disponibles pour tous les utilisateurs. Les abonnés Pro paient
                 moins cher.
               </p>
               <div className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-4">
@@ -523,7 +523,7 @@ export default function AbonnementPage() {
                 Pourquoi Pro ?
               </p>
               <h2 className="mt-1 text-2xl font-bold text-night md:text-3xl">
-                Un usage pro, un revenu rï¿½current
+                Un usage pro, un revenu récurrent
               </h2>
             </div>
           </div>
@@ -551,7 +551,7 @@ export default function AbonnementPage() {
         ) : null}
 
         <div className="mt-8 text-center text-sm text-night/55">
-          Besoin d&apos;un dï¿½tail avant de vous lancer ?{' '}
+          Besoin d&apos;un détail avant de vous lancer ?{' '}
           <Link href="/contact" className="font-semibold text-kalico-blue hover:underline">
             Contactez-nous
           </Link>

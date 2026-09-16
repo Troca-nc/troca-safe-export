@@ -25,11 +25,11 @@ function getStatusCopy(status: SubscriptionStatusResponse['data']) {
     return {
       tone: 'danger' as const,
       icon: AlertTriangle,
-      title: 'Votre paiement a ï¿½chouï¿½',
-      description: 'Mettez ï¿½ jour votre moyen de paiement pour conserver vos avantages Pro.',
+      title: 'Votre paiement a échoué',
+      description: 'Mettez à jour votre moyen de paiement pour conserver vos avantages Pro.',
       cta: {
         href: '/parametres#factures',
-        label: 'Mettre ï¿½ jour mon moyen de paiement',
+        label: 'Mettre à jour mon moyen de paiement',
       },
     }
   }
@@ -38,11 +38,11 @@ function getStatusCopy(status: SubscriptionStatusResponse['data']) {
     return {
       tone: 'danger' as const,
       icon: AlertTriangle,
-      title: 'Votre abonnement a expirï¿½',
-      description: 'Rï¿½activez votre abonnement pour retrouver vos avantages Pro.',
+      title: 'Votre abonnement a expiré',
+      description: 'Réactivez votre abonnement pour retrouver vos avantages Pro.',
       cta: {
         href: '/abonnement',
-        label: 'Rï¿½activer mon abonnement',
+        label: 'Réactiver mon abonnement',
       },
     }
   }
@@ -108,7 +108,7 @@ export default function PaymentFailureBanner() {
               {copy.tone === 'danger' ? <AlertTriangle className="h-3 w-3" /> : null}
               {status?.plan === 'pro' ? 'Pro' : 'Gratuit'}
               {typeof status?.days_remaining === 'number' && status.days_remaining > 0
-                ? ` ï¿½ ${status.days_remaining} j restants`
+                ? ` · ${status.days_remaining} j restants`
                 : null}
             </div>
           </div>
