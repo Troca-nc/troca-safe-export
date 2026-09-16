@@ -11,16 +11,27 @@ const TARGET_EXTENSIONS = new Set(['.ts', '.tsx'])
 const GUARDED_FILES = new Set([
   'frontend/src/app/abonnement/confirmation/page.tsx',
   'frontend/src/app/abonnement/page.tsx',
+  'frontend/src/app/connexion/ConnexionClient.tsx',
   'frontend/src/app/cgu/page.tsx',
   'frontend/src/app/cgv/page.tsx',
+  'frontend/src/app/inscription/page.tsx',
+  'frontend/src/app/inscription/telephone/page.tsx',
   'frontend/src/app/mentions-legales/page.tsx',
+  'frontend/src/app/mot-de-passe-oublie/page.tsx',
+  'frontend/src/app/mot-de-passe-oublie/reset/page.tsx',
   'frontend/src/app/paiement/annule/page.tsx',
   'frontend/src/app/paiement/succes/page.tsx',
   'frontend/src/app/politique-cookies/page.tsx',
   'frontend/src/app/politique-de-confidentialite/page.tsx',
+  'frontend/src/app/verification-email/page.tsx',
   'frontend/src/components/PaymentFailureBanner.tsx',
+  'frontend/src/components/auth/AuthMapPanel.tsx',
+  'frontend/src/components/auth/AuthRequiredModal.tsx',
+  'frontend/src/components/auth/SocialAuthButtons.tsx',
+  'frontend/src/components/auth/TurnstileChallenge.tsx',
   'frontend/src/components/monetisation/PaymentProviderSelector.tsx',
   'frontend/src/hooks/usePayment.ts',
+  'frontend/src/hooks/usePhoneVerification.ts',
 ])
 
 function walk(dir, files = []) {

@@ -151,7 +151,7 @@ export default function SocialAuthButtons({ redirectTo = '/', mode = 'connexion'
       const { data } = await axios.post(`${API_ORIGIN}/api/auth/google`, { id_token })
       handleSocialSuccess(data.data)
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'La connexion Google a ï¿½chouï¿½.')
+      setError(err?.response?.data?.error || 'La connexion Google a échoué.')
     }
   })
 
@@ -176,7 +176,7 @@ export default function SocialAuthButtons({ redirectTo = '/', mode = 'connexion'
       handleSocialSuccess(data.data)
     } catch (err: any) {
       if (err?.error !== 'popup_closed_by_user') {
-        setError(err?.response?.data?.error || 'La connexion Apple a ï¿½chouï¿½.')
+        setError(err?.response?.data?.error || 'La connexion Apple a échoué.')
       }
     } finally {
       setAppleLoading(false)
@@ -250,7 +250,7 @@ export default function SocialAuthButtons({ redirectTo = '/', mode = 'connexion'
           </a>{' '}
           et notre{' '}
           <a href="/politique-de-confidentialite" className="underline transition hover:text-night/60">
-            politique de confidentialitï¿½
+            politique de confidentialité
           </a>
           .
         </p>

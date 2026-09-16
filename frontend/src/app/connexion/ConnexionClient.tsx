@@ -37,7 +37,7 @@ function parseLoginError(raw?: string | null) {
     normalized.includes('timeout') ||
     normalized.includes('failed to fetch')
   ) {
-    return { message: 'Connexion impossible. Vï¿½rifiez votre rï¿½seau.' }
+    return { message: 'Connexion impossible. Vérifiez votre réseau.' }
   }
 
   if (
@@ -69,8 +69,8 @@ function parseLoginError(raw?: string | null) {
 
 function RightPanel() {
   const stats = [
-    { value: 'Gratuit', label: 'Pour dï¿½marrer' },
-    { value: 'Local', label: 'De NoumÃ©a aux Loyautï¿½' },
+    { value: 'Gratuit', label: 'Pour démarrer' },
+    { value: 'Local', label: 'De Nouméa aux Loyauté' },
     { value: 'Pro', label: 'Pour aller plus loin' },
   ] as const
 
@@ -109,7 +109,7 @@ function RightPanel() {
               className="connexion-anim mt-3 mb-7 max-w-[300px] font-display text-[16px] italic leading-6 text-[var(--color-text-secondary)] dark:text-white/65"
               style={{ animationDelay: '220ms', fontFamily: 'var(--font-display), Georgia, serif' }}
             >
-              Nouvelle-CalÃ©donie dans l'ï¿½me, Kalico dans la poche.
+              Nouvelle-Calédonie dans l'âme, Kalico dans la poche.
             </p>
 
             <div className="connexion-anim mb-6 w-full max-w-[360px]" style={{ animationDelay: '300ms' }}>
@@ -144,7 +144,7 @@ function RightPanel() {
 
             <div className="connexion-anim mt-5 w-full max-w-[360px] border-t border-[0.5px] border-[var(--color-border)] pt-5 text-center" style={{ animationDelay: '480ms' }}>
               <Link href="/inscription" className="inline-flex items-center gap-1 text-sm font-semibold text-kalico-blue hover:underline">
-                Pas encore de compte ? Rejoindre Kalico ï¿½
+                Pas encore de compte ? Rejoindre Kalico →
               </Link>
             </div>
           </div>
@@ -197,7 +197,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
         data.password === DEMO_ACCOUNTS[demoProfile].password
 
       if (turnstileEnabled && !turnstileToken && !isDemoLogin) {
-        setServerError("Merci de confirmer que vous n'ï¿½tes pas un robot.")
+        setServerError("Merci de confirmer que vous n'êtes pas un robot.")
         return
       }
 
@@ -235,7 +235,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
       useAuthStore.getState().setDemoProfile(demoProfile)
       router.push('/profil')
     } catch {
-      setServerError("Impossible d'activer le compte dï¿½mo pour le moment.")
+      setServerError("Impossible d'activer le compte démo pour le moment.")
     }
   }
 
@@ -274,7 +274,7 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
 
           {turnstileEnabled ? (
             <div className="mt-5 rounded-2xl border border-night/10 bg-sand/40 p-4">
-              <p className="text-sm font-semibold text-night">Vï¿½rification anti-bot</p>
+              <p className="text-sm font-semibold text-night">Vérification anti-bot</p>
               <div className="mt-3">
                 <TurnstileChallenge action="login" label="Connexion" onTokenChange={setTurnstileToken} />
               </div>
@@ -305,14 +305,15 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
                 <div className="flex items-center justify-between gap-3">
                   <label className="field-label mb-0">Mot de passe</label>
                   <Link href="/reset-password" className="text-sm font-medium text-kalico-blue hover:underline">
-                    Mot de passe oubliï¿½ ?
+                    Mot de passe oublié ?
                   </Link>
                 </div>
                 <div className="relative">
                   <input
                     {...register('password')}
                     ref={passwordInputRef}
-                    type={showPassword ? 'text' : 'password'}                    placeholder=""
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
                     className="input h-12 w-full pr-12"
                     autoComplete="current-password"
                   />
@@ -340,19 +341,19 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
                   'Se connecter'
                 )
               ) : (
-                'Continuer ï¿½'
+                'Continuer →'
               )}
             </button>
           </form>
 
           {demoProfile ? (
             <div className="mt-4 rounded-2xl border border-kalico-blue/20 bg-kalico-blue/5 p-4">
-              <p className="text-sm font-semibold text-night">Compte dï¿½mo dï¿½tectï¿½</p>
+              <p className="text-sm font-semibold text-night">Compte démo détecté</p>
               <p className="mt-1 text-sm text-night/60">
-                Vous pouvez entrer dans l'application sans vï¿½rification supplï¿½mentaire.
+                Vous pouvez entrer dans l'application sans vérification supplémentaire.
               </p>
               <button type="button" onClick={() => void handleDemoQuickLogin()} className="btn-primary mt-3 w-full py-3">
-                Se connecter en mode dï¿½mo
+                Se connecter en mode démo
               </button>
               <p className="mt-2 text-[11px] text-night/45">
                 Email: {demoProfile === 'particulier' ? 'particulier@demo.kalico.nc' : demoProfile === 'pro' ? 'pro@demo.kalico.nc' : 'bonplan@demo.kalico.nc'}
@@ -381,11 +382,11 @@ export default function ConnexionClient({ nextPath }: ConnexionClientProps) {
             </Link>
             ,{' '}
             <Link href="/mentions-legales" className="transition hover:text-kalico-blue hover:underline">
-              mentions lï¿½gales
+              mentions légales
             </Link>{' '}
             et notre{' '}
             <Link href="/politique-de-confidentialite" className="transition hover:text-kalico-blue hover:underline">
-              politique de confidentialitï¿½
+              politique de confidentialité
             </Link>
             .
           </p>
