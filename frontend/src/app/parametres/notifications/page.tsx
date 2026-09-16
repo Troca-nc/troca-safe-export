@@ -51,7 +51,7 @@ const BON_PLANS_STORAGE_PREFIX = 'kalico-demo-bon-plan-prefs'
 const BON_PLAN_CATEGORIES = [
   { value: 'alimentation', label: 'Alimentation' },
   { value: 'mode', label: 'Mode' },
-  { value: 'beaute', label: 'Beautï¿½' },
+  { value: 'beaute', label: 'Beauté' },
   { value: 'high_tech', label: 'High-tech' },
   { value: 'auto_moto', label: 'Auto / Moto' },
   { value: 'maison', label: 'Maison' },
@@ -284,7 +284,7 @@ export default function NotificationPreferencesPage() {
         setBonPlanBusinesses(Array.isArray(businessesResponse.data?.data) ? businessesResponse.data.data : [])
       } catch {
         if (!alive) return
-        setMessage('Les prï¿½fï¿½rences sont momentanï¿½ment indisponibles.')
+        setMessage('Les préférences sont momentanément indisponibles.')
       } finally {
         if (alive) setLoading(false)
       }
@@ -342,7 +342,7 @@ export default function NotificationPreferencesPage() {
       if (isDemo) {
         saveDemoPrefs(notificationStorageKey, notificationPrefs)
         saveDemoPrefs(bonPlanStorageKey, bonPlanPrefs)
-        setMessage('Prï¿½fï¿½rences dï¿½mo enregistrï¿½es localement.')
+        setMessage('Préférences démo enregistrées localement.')
         return
       }
 
@@ -350,9 +350,9 @@ export default function NotificationPreferencesPage() {
         notificationsApi.savePreferences(notificationPrefs),
         bonPlansApi.savePrefs(bonPlanPrefs),
       ])
-      setMessage('Vos prï¿½fï¿½rences ont ï¿½tï¿½ enregistrï¿½es.')
+      setMessage('Vos préférences ont été enregistrées.')
     } catch {
-      setMessage('Impossible denregistrer vos prï¿½fï¿½rences pour le moment.')
+      setMessage('Impossible d’enregistrer vos préférences pour le moment.')
     } finally {
       setSaving(false)
     }
@@ -392,8 +392,8 @@ export default function NotificationPreferencesPage() {
                 Choisissez ce qui vous alerte, et comment.
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-night/65 md:text-base">
-                Centralisez ici les messages, les alertes doffres, les rapports de performance et les Bons Plans.
-                Chaque catï¿½gorie peut ï¿½tre ajustï¿½e pour lemail, le push mobile ou les deux.
+                Centralisez ici les messages, les alertes d’offres, les rapports de performance et les Bons Plans.
+                Chaque catégorie peut être ajustée pour l’email, le push mobile ou les deux.
               </p>
             </div>
 
@@ -402,7 +402,7 @@ export default function NotificationPreferencesPage() {
                 {activeMessageChannels} canal{activeMessageChannels > 1 ? 'aux' : ''} actif{activeMessageChannels > 1 ? 's' : ''}
               </span>
               <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-night/65 shadow-xs">
-                {activeBonPlanCategories} catï¿½gorie{activeBonPlanCategories > 1 ? 's' : ''} Bons Plans
+                {activeBonPlanCategories} catégorie{activeBonPlanCategories > 1 ? 's' : ''} Bons Plans
               </span>
               <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-night/65 shadow-xs">
                 Email + push
@@ -440,14 +440,14 @@ export default function NotificationPreferencesPage() {
             <SectionCard
               id="messages"
               title="Nouveau message"
-              description="Recevez les rï¿½ponses dannonce et les nouvelles conversations par email ou en push."
+              description="Recevez les réponses d’annonce et les nouvelles conversations par email ou en push."
               icon={MessageCircle}
               tone="coral"
             >
               <div className="grid gap-3 md:grid-cols-2">
                 <ToggleRow
                   title="Email"
-                  description="Un email ï¿½ chaque nouveau message reï¿½u."
+                  description="Un email à chaque nouveau message reçu."
                   checked={notificationPrefs.email_new_message}
                   onChange={(checked) => updateNotificationPrefs('email_new_message', checked)}
                   icon={Mail}
@@ -455,7 +455,7 @@ export default function NotificationPreferencesPage() {
                 />
                 <ToggleRow
                   title="Push mobile"
-                  description="Une notification discrï¿½te saffiche sur votre tï¿½lï¿½phone."
+                  description="Une notification discrète s’affiche sur votre téléphone."
                   checked={notificationPrefs.push_new_message}
                   onChange={(checked) => updateNotificationPrefs('push_new_message', checked)}
                   icon={MonitorSmartphone}
@@ -466,15 +466,15 @@ export default function NotificationPreferencesPage() {
 
             <SectionCard
               id="alerts"
-              title="Alertes doffres"
-              description="Les nouvelles annonces correspondant ï¿½ vos recherches peuvent vous ï¿½tre envoyï¿½es par email et/ou en push."
+              title="Alertes d’offres"
+              description="Les nouvelles annonces correspondant à vos recherches peuvent vous être envoyées par email et/ou en push."
               icon={Megaphone}
               tone="lagoon"
             >
               <div className="grid gap-3 md:grid-cols-2">
                 <ToggleRow
                   title="Email"
-                  description="Recevez les alertes dannonces qui correspondent ï¿½ vos critï¿½res."
+                  description="Recevez les alertes d’annonces qui correspondent à vos critères."
                   checked={notificationPrefs.email_search_alert}
                   onChange={(checked) => updateNotificationPrefs('email_search_alert', checked)}
                   icon={Mail}
@@ -482,7 +482,7 @@ export default function NotificationPreferencesPage() {
                 />
                 <ToggleRow
                   title="Push mobile"
-                  description="Une alerte push complï¿½te lemail sur les recherches importantes."
+                  description="Une alerte push complète l’email sur les recherches importantes."
                   checked={notificationPrefs.push_search_alert}
                   onChange={(checked) => updateNotificationPrefs('push_search_alert', checked)}
                   icon={Volume2}
@@ -494,14 +494,14 @@ export default function NotificationPreferencesPage() {
             <SectionCard
               id="listing-alerts"
               title="Annonces, boosts et expirations"
-              description="Suivez les boosts, les offres reï¿½ues et les rappels dexpiration dannonce par email."
+              description="Suivez les boosts, les offres reçues et les rappels d’expiration d’annonce par email."
               icon={Tag}
               tone="ocean"
             >
               <div className="grid gap-3 md:grid-cols-2">
                 <ToggleRow
-                  title="Boost dannonce"
-                  description="Recevez un email quand votre boost est activï¿½."
+                  title="Boost d’annonce"
+                  description="Recevez un email quand votre boost est activé."
                   checked={notificationPrefs.email_boost_activated}
                   onChange={(checked) => updateNotificationPrefs('email_boost_activated', checked)}
                   icon={Sparkles}
@@ -509,23 +509,23 @@ export default function NotificationPreferencesPage() {
                 />
                 <ToggleRow
                   title="Nouvelle offre"
-                  description="Un email dï¿½s quune offre arrive dans la messagerie."
+                  description="Un email dès qu’une offre arrive dans la messagerie."
                   checked={notificationPrefs.email_offer_received}
                   onChange={(checked) => updateNotificationPrefs('email_offer_received', checked)}
                   icon={MessageCircle}
                   tone="ocean"
                 />
                 <ToggleRow
-                  title="Annonce bientï¿½t expirï¿½e"
-                  description="Recevez le rappel 3 jours avant lï¿½chï¿½ance."
+                  title="Annonce bientôt expirée"
+                  description="Recevez le rappel 3 jours avant l’échéance."
                   checked={notificationPrefs.email_listing_expiring}
                   onChange={(checked) => updateNotificationPrefs('email_listing_expiring', checked)}
                   icon={Bell}
                   tone="ocean"
                 />
                 <ToggleRow
-                  title="Annonce expirï¿½e"
-                  description="Un email quand lannonce est rï¿½ellement expirï¿½e."
+                  title="Annonce expirée"
+                  description="Un email quand l’annonce est réellement expirée."
                   checked={notificationPrefs.email_listing_expired}
                   onChange={(checked) => updateNotificationPrefs('email_listing_expired', checked)}
                   icon={Tag}
@@ -537,13 +537,13 @@ export default function NotificationPreferencesPage() {
             <SectionCard
               id="reports"
               title="Rapports de performance"
-              description="Suivez les vues, clics et favoris de vos annonces avec une cadence adaptï¿½e ï¿½ votre activitï¿½."
+              description="Suivez les vues, clics et favoris de vos annonces avec une cadence adaptée à votre activité."
               icon={Sparkles}
               tone="jungle"
             >
               <div className="grid gap-3 md:grid-cols-2">
                 <ToggleRow
-                  title="Email rï¿½capitulatif"
+                  title="Email récapitulatif"
                   description="Un rapport simple pour les particuliers, plus complet pour les professionnels."
                   checked={notificationPrefs.email_performance_report}
                   onChange={(checked) => updateNotificationPrefs('email_performance_report', checked)}
@@ -552,7 +552,7 @@ export default function NotificationPreferencesPage() {
                 />
                 <ToggleRow
                   title="Push mobile"
-                  description="Recevez un rappel discret quand un rapport est prï¿½t."
+                  description="Recevez un rappel discret quand un rapport est prêt."
                   checked={notificationPrefs.push_performance_report}
                   onChange={(checked) => updateNotificationPrefs('push_performance_report', checked)}
                   icon={MonitorSmartphone}
@@ -561,9 +561,9 @@ export default function NotificationPreferencesPage() {
               </div>
 
               <div className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-                <label className="block text-sm font-semibold text-night">Frï¿½quence du rapport</label>
+                <label className="block text-sm font-semibold text-night">Fréquence du rapport</label>
                 <p className="mt-1 text-xs leading-relaxed text-night/55">
-                  Les comptes professionnels peuvent choisir une cadence quotidienne, hebdomadaire, mensuelle ou larrï¿½ter.
+                  Les comptes professionnels peuvent choisir une cadence quotidienne, hebdomadaire, mensuelle ou l’arrêter.
                 </p>
                 <select
                   value={notificationPrefs.performance_report_frequency}
@@ -583,14 +583,14 @@ export default function NotificationPreferencesPage() {
             <SectionCard
               id="bons-plans"
               title="Bons Plans & promotions"
-              description="Choisissez si vous voulez recevoir les promos, par canal, par catï¿½gorie ou par enseigne."
+              description="Choisissez si vous voulez recevoir les promos, par canal, par catégorie ou par enseigne."
               icon={Store}
               tone="ocean"
             >
               <div className="space-y-4">
                 <ToggleRow
                   title="Toutes les nouvelles promos"
-                  description="Recevoir chaque bon plan publiï¿½ sur Kalico."
+                  description="Recevoir chaque bon plan publié sur Kalico."
                   checked={bonPlanPrefs.notify_all}
                   onChange={(checked) => updateBonPlanPrefs('notify_all', checked)}
                   icon={Tag}
@@ -608,7 +608,7 @@ export default function NotificationPreferencesPage() {
                   />
                   <ToggleRow
                     title="Par email"
-                    description="Une synthï¿½se des meilleures promos dans votre boï¿½te de rï¿½ception."
+                    description="Une synthèse des meilleures promos dans votre boîte de réception."
                     checked={bonPlanPrefs.via_email}
                     onChange={(checked) => updateBonPlanPrefs('via_email', checked)}
                     icon={Mail}
@@ -619,13 +619,13 @@ export default function NotificationPreferencesPage() {
                 <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <label className="block text-sm font-semibold text-night">CatÃ©gories favorites</label>
+                      <label className="block text-sm font-semibold text-night">Catégories favorites</label>
                       <p className="mt-1 text-xs leading-relaxed text-night/55">
                         Cochez une ou plusieurs familles pour filtrer les promotions utiles.
                       </p>
                     </div>
                     <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-night/50">
-                      {activeBonPlanCategories} sï¿½lectionnï¿½e{activeBonPlanCategories > 1 ? 's' : ''}
+                      {activeBonPlanCategories} sélectionnée{activeBonPlanCategories > 1 ? 's' : ''}
                     </span>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -679,7 +679,7 @@ export default function NotificationPreferencesPage() {
                   <div className="mt-3 flex flex-wrap gap-2">
                     {bonPlanPrefs.notify_businesses.length === 0 ? (
                       <span className="rounded-full bg-white px-3 py-1.5 text-xs text-night/45">
-                        Aucune enseigne enregistrï¿½e pour le moment
+                        Aucune enseigne enregistrée pour le moment
                       </span>
                     ) : (
                       bonPlanPrefs.notify_businesses.map((business) => (
@@ -694,7 +694,7 @@ export default function NotificationPreferencesPage() {
                             className="text-night/30 transition hover:text-kalico-blue"
                             aria-label={`Retirer ${business}`}
                           >
-                            ï¿½
+                            ×
                           </button>
                         </span>
                       ))
@@ -703,7 +703,7 @@ export default function NotificationPreferencesPage() {
                 </div>
 
                 <div className="rounded-2xl border border-jungle/15 bg-jungle/5 p-4 text-sm text-night/65">
-                  Les Bons Plans sont gï¿½rï¿½s dans le mï¿½me centre que vos alertes et rappels. Vous pouvez tout ajuster en une seule fois.
+                  Les Bons Plans sont gérés dans le même centre que vos alertes et rappels. Vous pouvez tout ajuster en une seule fois.
                 </div>
               </div>
             </SectionCard>
@@ -714,9 +714,9 @@ export default function NotificationPreferencesPage() {
                   <Bell className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-base font-semibold text-night">Confidentialitï¿½ et dï¿½sabonnement</h2>
+                  <h2 className="text-base font-semibold text-night">Confidentialité et désabonnement</h2>
                   <p className="mt-1 text-sm leading-relaxed text-night/60">
-                    Chaque email contient un lien direct pour couper la catï¿½gorie concernï¿½e sans connexion. Vous pouvez aussi revenir ici ï¿½ tout moment.
+                    Chaque email contient un lien direct pour couper la catégorie concernée sans connexion. Vous pouvez aussi revenir ici à tout moment.
                   </p>
                 </div>
               </div>
@@ -725,7 +725,7 @@ export default function NotificationPreferencesPage() {
                   Lire la politique
                 </Link>
                 <Link href="/parametres" className="btn-secondary px-4 py-2 text-sm">
-                  Retour aux paramï¿½tres
+                  Retour aux paramètres
                 </Link>
               </div>
             </section>
@@ -736,16 +736,16 @@ export default function NotificationPreferencesPage() {
           <div className="max-w-2xl">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Enregistrement</p>
             <p className="mt-2 text-sm leading-relaxed text-night/65">
-              Vous pouvez modifier vos canaux ï¿½ tout moment. Les changements sappliquent immï¿½diatement sur le web et sur mobile.
+              Vous pouvez modifier vos canaux à tout moment. Les changements s’appliquent immédiatement sur le web et sur mobile.
             </p>
           </div>
           <button onClick={handleSave} disabled={saving} className="btn-primary px-5 py-3 text-sm">
             {saving ? (
-              'Enregistrement&'
+              'Enregistrement…'
             ) : (
               <span className="inline-flex items-center gap-2">
                 <Save className="h-4 w-4" />
-                Enregistrer mes prï¿½fï¿½rences
+                Enregistrer mes préférences
                 <ArrowRight className="h-4 w-4" />
               </span>
             )}
