@@ -30,15 +30,15 @@ export default function AuthRequiredModal() {
 
         <div className="p-6 sm:p-7">
           <div className="inline-flex rounded-full bg-kalico-blue/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-kalico-blue">
-            {isFavoriteAction ? 'Favoris synchronisï¿½s' : 'Connexion rapide'}
+            {isFavoriteAction ? 'Favoris synchronisés' : 'Connexion rapide'}
           </div>
           <h2 className="mt-4 text-2xl font-bold text-night">
             {isFavoriteAction ? 'Sauvegardez vos favoris partout' : 'On vous remet au bon endroit.'}
           </h2>
           <p className="mt-2 text-sm leading-6 text-night/60">
             {isFavoriteAction
-              ? 'Crï¿½ez un compte en quelques secondes pour retrouver vos annonces prï¿½fï¿½rï¿½es sur votre tï¿½lï¿½phone, votre ordinateur et votre tablette. Sans compte, vos favoris restent seulement sur cet appareil.'
-              : 'Connectez-vous en quelques secondes. Votre action reprend automatiquement aprï¿½s la connexion si besoin.'}
+              ? 'Créez un compte en quelques secondes pour retrouver vos annonces préférées sur votre téléphone, votre ordinateur et votre tablette. Sans compte, vos favoris restent seulement sur cet appareil.'
+              : 'Connectez-vous en quelques secondes. Votre action reprend automatiquement après la connexion si besoin.'}
           </p>
 
           <div className="mt-5 space-y-3">
@@ -49,7 +49,7 @@ export default function AuthRequiredModal() {
                   className="inline-flex w-full items-center justify-center rounded-2xl bg-kalico-blue px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#b83e28]"
                   onClick={() => closeAuthModal()}
                 >
-                  Crï¿½er un compte
+                  Créer un compte
                 </Link>
                 <Link
                   href="/connexion"
@@ -59,7 +59,7 @@ export default function AuthRequiredModal() {
                   Se connecter
                 </Link>
                 <p className="pt-1 text-center text-xs text-night/40">
-                  Vous restez sur la page actuelle. Vos favoris seront synchronisï¿½s automatiquement aprï¿½s inscription.
+                  Vous restez sur la page actuelle. Vos favoris seront synchronisés automatiquement après inscription.
                 </p>
               </>
             ) : (
