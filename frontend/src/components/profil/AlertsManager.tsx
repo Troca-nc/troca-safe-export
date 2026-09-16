@@ -58,7 +58,7 @@ function AlertCard({
     }`}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 min-w-0">
-          {/* Icï¿½ne statut */}
+          {/* Icône statut */}
           <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
             isActive ? 'bg-kalico-blue/10 text-kalico-blue' : 'bg-sand text-night/30'
           }`}>
@@ -78,7 +78,7 @@ function AlertCard({
               )}
               {alert.filters.commune && (
                 <span className="text-[10px] bg-sand text-night/60 px-2 py-0.5 rounded-full">
-                  =ï¿½ {alert.filters.commune}
+                  📍 {alert.filters.commune}
                 </span>
               )}
               {alert.filters.prix_max && (
@@ -88,7 +88,7 @@ function AlertCard({
               )}
             </div>
 
-            {/* Mï¿½ta */}
+            {/* Méta */}
             <div className="flex items-center gap-3 mt-2 text-[10px] text-night/40">
               <span className="flex items-center gap-1">
                 <Mail size={9} /> {freqLabel}
@@ -103,7 +103,7 @@ function AlertCard({
                 href={`/annonces?${searchParams}`}
                 className="text-kalico-blue hover:underline"
               >
-                Voir les annonces ï¿½
+                Voir les annonces →
               </Link>
             </div>
           </div>
@@ -111,12 +111,12 @@ function AlertCard({
 
         {/* Actions */}
         <div className="flex items-center gap-1 shrink-0">
-          {/* Changement frï¿½quence */}
+          {/* Changement fréquence */}
           <select
             value={alert.frequency}
             onChange={e => onFrequencyChange(alert.id, e.target.value as AlertFrequency)}
             className="text-[10px] border border-night/10 rounded-lg px-1.5 py-1 bg-white text-night/60"
-            aria-label="Frï¿½quence de l'alerte"
+            aria-label="Fréquence de l'alerte"
           >
             {FREQUENCY_OPTIONS.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -170,7 +170,7 @@ export default function AlertesPage() {
         <div>
           <h1 className="font-display font-bold text-2xl text-night">Mes alertes</h1>
           <p className="text-sm text-night/50 mt-1">
-            Soyez notifiï¿½ dï¿½s qu'une annonce correspond ï¿½ vos critï¿½res
+            Soyez notifié dès qu'une annonce correspond à vos critères
           </p>
         </div>
         {alerts.length > 0 && (
@@ -219,7 +219,7 @@ export default function AlertesPage() {
         </div>
       )}
 
-      {/* Ãtat vide */}
+      {/* État vide */}
       {!loading && alerts.length === 0 && (
         <div className="text-center py-16 px-4">
           <div className="w-16 h-16 bg-sand rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -227,7 +227,7 @@ export default function AlertesPage() {
           </div>
           <h2 className="font-semibold text-night mb-2">Aucune alerte</h2>
           <p className="text-sm text-night/50 mb-6">
-            Sauvegardez une recherche pour ï¿½tre notifiï¿½ dï¿½s qu'une nouvelle annonce correspond ï¿½ vos critï¿½res.
+            Sauvegardez une recherche pour être notifié dès qu'une nouvelle annonce correspond à vos critères.
           </p>
           <Link href="/annonces" className="btn-primary inline-flex">
             Parcourir les annonces
@@ -239,7 +239,7 @@ export default function AlertesPage() {
       {!loading && alerts.length > 0 && (
         <p className="text-center text-xs text-night/35 mt-6 flex items-center justify-center gap-1">
           <Mail size={11} />
-          Les alertes sont envoyï¿½es ï¿½ votre adresse email principale
+          Les alertes sont envoyées à votre adresse email principale
         </p>
       )}
     </div>
