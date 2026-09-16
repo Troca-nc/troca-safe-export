@@ -1,6 +1,6 @@
-// 211 fichiers contiennent ï¿½ (double-encoded U+FFFD)
-// introduits par commit fe407ca — correction progressive
-// Build n'est pas affecté — exit code non bloquant
+// Dette historique introduite par les reconversions d405ae9 et fe407ca.
+// Les fichiers restaurés deviennent bloquants ; les autres restent signalés
+// jusqu'à leur correction progressive.
 
 const fs = require('fs')
 const path = require('path')
@@ -8,6 +8,20 @@ const path = require('path')
 const ROOT = path.resolve(__dirname, '..')
 const FRONTEND_SRC = path.join(ROOT, 'frontend', 'src')
 const TARGET_EXTENSIONS = new Set(['.ts', '.tsx'])
+const GUARDED_FILES = new Set([
+  'frontend/src/app/abonnement/confirmation/page.tsx',
+  'frontend/src/app/abonnement/page.tsx',
+  'frontend/src/app/cgu/page.tsx',
+  'frontend/src/app/cgv/page.tsx',
+  'frontend/src/app/mentions-legales/page.tsx',
+  'frontend/src/app/paiement/annule/page.tsx',
+  'frontend/src/app/paiement/succes/page.tsx',
+  'frontend/src/app/politique-cookies/page.tsx',
+  'frontend/src/app/politique-de-confidentialite/page.tsx',
+  'frontend/src/components/PaymentFailureBanner.tsx',
+  'frontend/src/components/monetisation/PaymentProviderSelector.tsx',
+  'frontend/src/hooks/usePayment.ts',
+])
 
 function walk(dir, files = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -23,6 +37,10 @@ function walk(dir, files = []) {
 
 function detectIssues(buffer) {
   const issues = []
+
+  if (buffer.includes(0)) {
+    issues.push('NUL byte')
+  }
 
   if (buffer.length >= 2 && buffer[0] === 0xff && buffer[1] === 0xfe) {
     issues.push('UTF-16 LE BOM')
@@ -52,6 +70,11 @@ const suspectFiles = walk(FRONTEND_SRC).reduce((acc, file) => {
   return acc
 }, [])
 
+const guardedIssues = suspectFiles.filter(({ file }) => {
+  const relativePath = path.relative(ROOT, file).split(path.sep).join('/')
+  return GUARDED_FILES.has(relativePath)
+})
+
 if (suspectFiles.length) {
   console.error('Encoding issues detected:')
   for (const item of suspectFiles) {
@@ -59,4 +82,11 @@ if (suspectFiles.length) {
   }
 } else {
   console.log('No encoding issues detected.')
+}
+
+if (guardedIssues.length) {
+  console.error('Encoding regression detected in a guarded file.')
+  process.exitCode = 1
+} else {
+  console.log(`${GUARDED_FILES.size} guarded files are free of known encoding issues.`)
 }

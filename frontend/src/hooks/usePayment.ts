@@ -16,7 +16,7 @@ const authHeaders = () => ({
   Authorization: `Bearer ${getToken()}`,
 })
 
-// useBoostPayment
+// ── useBoostPayment ───────────────────────────────────────────────────────────
 
 interface BoostPayload {
   annonce_id: number
@@ -44,8 +44,8 @@ export function useBoostPayment() {
     setError(null)
     try {
       if (isDemoMode()) {
-        showDemoToast('Dï¿½sactivï¿½ en mode dï¿½mo')
-        const msg = 'Dï¿½sactivï¿½ en mode dï¿½mo'
+        showDemoToast('Désactivé en mode démo')
+        const msg = 'Désactivé en mode démo'
         setError(msg)
         return { ok: false, error: msg }
       }
@@ -99,7 +99,7 @@ export function useBoostPayment() {
       const cards = Array.isArray(data?.data) ? data.data : []
       return { ok: true, cards }
     } catch (err: any) {
-      const msg = err?.response?.data?.error ?? 'Impossible de charger les cartes enregistrï¿½es'
+      const msg = err?.response?.data?.error ?? 'Impossible de charger les cartes enregistrées'
       setError(msg)
       return { ok: false, error: msg, cards: [] as SavedCard[] }
     }
@@ -115,7 +115,7 @@ export function useBoostPayment() {
     setError(null)
     try {
       if (isDemoMode()) {
-        showDemoToast('Dï¿½sactivï¿½ en mode dï¿½mo')
+        showDemoToast('Désactivé en mode démo')
         return { ok: true, demo: true }
       }
 
@@ -151,7 +151,7 @@ export function useBoostPayment() {
   return { initiateBoost, initiateBoostOneClick, loadSavedCards, loading, error }
 }
 
-// useSubscription
+// ── useSubscription ───────────────────────────────────────────────────────────
 
 interface SubscriptionPayload {
   plan_id:        string
@@ -168,8 +168,8 @@ export function useSubscription() {
     setError(null)
     try {
       if (isDemoMode()) {
-        showDemoToast('Dï¿½sactivï¿½ en mode dï¿½mo')
-        const msg = 'Dï¿½sactivï¿½ en mode dï¿½mo'
+        showDemoToast('Désactivé en mode démo')
+        const msg = 'Désactivé en mode démo'
         setError(msg)
         return { ok: false, error: msg }
       }
@@ -203,8 +203,8 @@ export function useSubscription() {
     setError(null)
     try {
       if (isDemoMode()) {
-        showDemoToast('Dï¿½sactivï¿½ en mode dï¿½mo')
-        const msg = 'Dï¿½sactivï¿½ en mode dï¿½mo'
+        showDemoToast('Désactivé en mode démo')
+        const msg = 'Désactivé en mode démo'
         setError(msg)
         return { ok: false, error: msg }
       }
