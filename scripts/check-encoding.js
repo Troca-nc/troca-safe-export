@@ -35,6 +35,10 @@ const GUARDED_FILES = new Set([
   'frontend/src/components/auth/AuthRequiredModal.tsx',
   'frontend/src/components/auth/SocialAuthButtons.tsx',
   'frontend/src/components/auth/TurnstileChallenge.tsx',
+  'frontend/src/components/messages/ChatInput.tsx',
+  'frontend/src/components/messages/ConversationList.tsx',
+  'frontend/src/components/messages/MessageBubble.tsx',
+  'frontend/src/components/messages/MessagesPage.tsx',
   'frontend/src/components/monetisation/PaymentProviderSelector.tsx',
   'frontend/src/components/profil/AlertsManager.tsx',
   'frontend/src/components/profil/PhoneVerification.tsx',
@@ -43,6 +47,8 @@ const GUARDED_FILES = new Set([
   'frontend/src/components/ui/NotificationBell.tsx',
   'frontend/src/hooks/usePayment.ts',
   'frontend/src/hooks/usePhoneVerification.ts',
+  'frontend/src/hooks/useMessaging.ts',
+  'frontend/src/types/messaging.types.ts',
 ])
 
 function walk(dir, files = []) {

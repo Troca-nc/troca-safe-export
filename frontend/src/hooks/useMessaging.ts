@@ -327,7 +327,7 @@ export function useConversation(convId: number | null) {
   const sendMessage = useCallback(async (content: string): Promise<void> => {
     if (!convId || !content.trim()) return
     if (isDemoMode()) {
-      showDemoToast('Dï¿½sactivï¿½ en mode dï¿½mo')
+      showDemoToast('Désactivé en mode démo')
       return
     }
     await sendMessageMutation.mutateAsync(content)
@@ -336,7 +336,7 @@ export function useConversation(convId: number | null) {
   const sendPhoto = useCallback(async (url: string): Promise<void> => {
     if (!convId) return
     if (isDemoMode()) {
-      showDemoToast('Dï¿½sactivï¿½ en mode dï¿½mo')
+      showDemoToast('Désactivé en mode démo')
       return
     }
     await sendPhotoMutation.mutateAsync(url)
@@ -347,7 +347,7 @@ export function useConversation(convId: number | null) {
   ): Promise<void> => {
     if (!convId) return
     if (isDemoMode()) {
-      showDemoToast('Dï¿½sactivï¿½ en mode dï¿½mo')
+      showDemoToast('Désactivé en mode démo')
       return
     }
     await sendDocumentMutation.mutateAsync(payload)
@@ -356,7 +356,7 @@ export function useConversation(convId: number | null) {
   const sendAudio = useCallback(async (url: string): Promise<void> => {
     if (!convId) return
     if (isDemoMode()) {
-      showDemoToast('Dï¿½sactivï¿½ en mode dï¿½mo')
+      showDemoToast('Désactivé en mode démo')
       return
     }
     await sendAudioMutation.mutateAsync(url)

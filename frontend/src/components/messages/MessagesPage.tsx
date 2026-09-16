@@ -605,7 +605,7 @@ export default function MessagesPage() {
               <span>{activeConversation.annonce.titre}</span>
               {activeConversation.annonce.prix != null && (
                 <>
-                  <span>"</span>
+                  <span>•</span>
                   <span>{activeConversation.annonce.prix.toLocaleString('fr-FR')} XPF</span>
                 </>
               )}
@@ -639,7 +639,7 @@ export default function MessagesPage() {
               {connected
                 ? 'Connecté'
                 : connectionState === 'reconnecting'
-                  ? `Reconnexion& ${Math.max(1, Math.ceil((reconnectInMs ?? 1000) / 1000))}s`
+                  ? `Reconnexion… ${Math.max(1, Math.ceil((reconnectInMs ?? 1000) / 1000))}s`
                   : 'Hors ligne'}
             </span>
           </div>

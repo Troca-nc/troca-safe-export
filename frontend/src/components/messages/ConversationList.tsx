@@ -24,7 +24,7 @@ function getAttachmentPreview(conv: Conversation) {
   if (last.type === 'photo') {
     return {
       kind: 'document' as const,
-      label: last.attachment_name || 'Photo partagï¿½e',
+      label: last.attachment_name || 'Photo partagée',
       mime: 'IMAGE',
     }
   }
@@ -34,7 +34,7 @@ function getAttachmentPreview(conv: Conversation) {
 
     return {
       kind: 'document' as const,
-      label: last.attachment_name || 'Document partagï¿½',
+      label: last.attachment_name || 'Document partagé',
       mime: last.attachment_mime_type || '',
     }
   }
@@ -47,9 +47,9 @@ function getLastMessagePreview(conv: Conversation) {
   if (!last) return 'Nouvelle conversation'
   if (last.type === 'photo') return 'Photo'
   if (last.type === 'audio') return 'Message vocal'
-  if (last.type === 'document') return last.attachment_name || 'Document partagï¿½'
+  if (last.type === 'document') return last.attachment_name || 'Document partagé'
   if (last.type === 'offer') return 'Offre de prix'
-  if (last.type === 'system') return last.content ?? 'Message systï¿½me'
+  if (last.type === 'system') return last.content ?? 'Message système'
   return last.content ?? 'Message'
 }
 
@@ -85,11 +85,11 @@ export default function ConversationList({ conversations, activeId, onSelect, lo
         </div>
         <p className="text-sm font-semibold text-night">Votre messagerie est vide</p>
         <p className="mt-2 max-w-xs text-sm leading-relaxed text-night/50">
-          Dï¿½s quun acheteur ou un vendeur vous contacte depuis une annonce, la conversation apparaï¿½tra ici.
+          Dès qu’un acheteur ou un vendeur vous contacte depuis une annonce, la conversation apparaîtra ici.
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-2">
-          <span className="rounded-full bg-sand px-3 py-1 text-[11px] font-medium text-night/60">Rï¿½ponses rapides</span>
-          <span className="rounded-full bg-sand px-3 py-1 text-[11px] font-medium text-night/60">Piï¿½ces jointes</span>
+          <span className="rounded-full bg-sand px-3 py-1 text-[11px] font-medium text-night/60">Réponses rapides</span>
+          <span className="rounded-full bg-sand px-3 py-1 text-[11px] font-medium text-night/60">Pièces jointes</span>
           <span className="rounded-full bg-sand px-3 py-1 text-[11px] font-medium text-night/60">Offres de prix</span>
         </div>
       </div>
@@ -155,7 +155,7 @@ export default function ConversationList({ conversations, activeId, onSelect, lo
                 )}
                 {u.avg_response_time_label && (
                   <span className="rounded-full bg-nc-emeraudeLight px-2 py-0.5 font-medium text-nc-emeraudeText">
-                    Rï¿½pond en {u.avg_response_time_label}
+                    Répond en {u.avg_response_time_label}
                   </span>
                 )}
                 {trocConversation && (
@@ -167,8 +167,8 @@ export default function ConversationList({ conversations, activeId, onSelect, lo
               </div>
 
               <p className="mb-1 truncate text-[10px] text-night/40">
-                =ï¿½ {conv.annonce.titre}
-                {conv.annonce.prix && ` ï¿½ ${conv.annonce.prix.toLocaleString('fr-FR')} XPF`}
+                📦 {conv.annonce.titre}
+                {conv.annonce.prix && ` · ${conv.annonce.prix.toLocaleString('fr-FR')} XPF`}
               </p>
 
               {conv.last_message && (
@@ -184,7 +184,7 @@ export default function ConversationList({ conversations, activeId, onSelect, lo
                     </span>
                   <p className="min-w-0 truncate text-[11px] text-night/45">
                     {attachment.kind === 'document' && attachment.mime
-                      ? `${attachment.label} ï¿½ ${attachment.mime.split('/').pop()?.toUpperCase() ?? 'DOC'}`
+                      ? `${attachment.label} · ${attachment.mime.split('/').pop()?.toUpperCase() ?? 'DOC'}`
                       : attachment.label}
                   </p>
                 </div>
