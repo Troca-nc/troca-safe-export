@@ -24,4 +24,5 @@ overrides:
   "@tootallnate/once@2.0.1": 2.0.1
 
 patchedDependencies:
+  decode-uri-component@0.2.2: patches/decode-uri-component@0.2.2.patch
   image-size@1.2.1: patches/image-size@1.2.1.patch
