@@ -11,6 +11,7 @@ const TARGET_EXTENSIONS = new Set(['.ts', '.tsx'])
 const GUARDED_FILES = new Set([
   'frontend/src/app/abonnement/confirmation/page.tsx',
   'frontend/src/app/abonnement/page.tsx',
+  'frontend/src/app/annonces/[id]/page.tsx',
   'frontend/src/app/bienvenue/page.tsx',
   'frontend/src/app/connexion/ConnexionClient.tsx',
   'frontend/src/app/cgu/page.tsx',
@@ -41,6 +42,7 @@ const GUARDED_FILES = new Set([
   'frontend/src/components/annonces/AnnonceSimilaires.tsx',
   'frontend/src/components/annonces/ListingCoachCard.tsx',
   'frontend/src/components/annonces/ShareButton.tsx',
+  'frontend/src/components/annonces/ShareFloating.tsx',
   'frontend/src/components/messages/ChatInput.tsx',
   'frontend/src/components/messages/ConversationList.tsx',
   'frontend/src/components/messages/MessageBubble.tsx',
