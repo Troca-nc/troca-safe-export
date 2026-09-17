@@ -41,6 +41,7 @@ const GUARDED_FILES = new Set([
   'frontend/src/components/auth/SocialAuthButtons.tsx',
   'frontend/src/components/auth/TurnstileChallenge.tsx',
   'frontend/src/components/annonces/AnnonceSimilaires.tsx',
+  'frontend/src/components/annonces/AnnoncesMap.tsx',
   'frontend/src/components/annonces/ListingCoachCard.tsx',
   'frontend/src/components/annonces/ShareButton.tsx',
   'frontend/src/components/annonces/ShareFloating.tsx',
