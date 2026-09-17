@@ -44,6 +44,7 @@ const GUARDED_FILES = new Set([
   'frontend/src/components/annonces/ListingCoachCard.tsx',
   'frontend/src/components/annonces/ShareButton.tsx',
   'frontend/src/components/annonces/ShareFloating.tsx',
+  'frontend/src/components/annonces/SaveSearchAlert.tsx',
   'frontend/src/components/messages/ChatInput.tsx',
   'frontend/src/components/messages/ConversationList.tsx',
   'frontend/src/components/messages/MessageBubble.tsx',
