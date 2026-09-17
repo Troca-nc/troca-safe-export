@@ -1,7 +1,7 @@
 'use client'
 // ============================================================
-//  Kalico  Champs dynamiques par catï¿½gorie
-//  Apparaissent dans le formulaire de publication selon la catï¿½gorie choisie
+//  Kalico — Champs dynamiques par catégorie
+//  Apparaissent dans le formulaire de publication selon la catégorie choisie
 // ============================================================
 
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
@@ -19,9 +19,9 @@ export interface CategoryField {
 
 const VEHICLE_FIELDS: CategoryField[] = [
   { name: 'marque', label: 'Marque', type: 'text', placeholder: 'Toyota, Renault, Honda&', required: true },
-  { name: 'modele', label: 'Modï¿½le', type: 'text', placeholder: 'Hilux, Clio, Jazz&', required: true },
-  { name: 'annee', label: 'Annï¿½e', type: 'number', placeholder: '2020', required: true },
-  { name: 'kilometrage', label: 'Kilomï¿½trage', type: 'number', unit: 'km', placeholder: '45000' },
+  { name: 'modele', label: 'Modèle', type: 'text', placeholder: 'Hilux, Clio, Jazz&', required: true },
+  { name: 'annee', label: 'Année', type: 'number', placeholder: '2020', required: true },
+  { name: 'kilometrage', label: 'Kilométrage', type: 'number', unit: 'km', placeholder: '45000' },
   {
     name: 'carburant',
     label: 'Carburant',
@@ -30,13 +30,13 @@ const VEHICLE_FIELDS: CategoryField[] = [
       { value: 'essence', label: 'Essence' },
       { value: 'diesel', label: 'Diesel' },
       { value: 'hybride', label: 'Hybride' },
-      { value: 'electrique', label: 'ï¿½lectrique' },
+      { value: 'electrique', label: 'Électrique' },
       { value: 'gpl', label: 'GPL' },
     ],
   },
   {
     name: 'boite',
-    label: 'Boï¿½te de vitesse',
+    label: 'Boîte de vitesse',
     type: 'select',
     options: [
       { value: 'manuelle', label: 'Manuelle' },
@@ -46,8 +46,8 @@ const VEHICLE_FIELDS: CategoryField[] = [
 ]
 
 const REAL_ESTATE_FIELDS: CategoryField[] = [
-  { name: 'surface', label: 'Surface', type: 'number', unit: 'mï¿½', placeholder: '85', required: true },
-  { name: 'nb_pieces', label: 'Nombre de piï¿½ces', type: 'number', placeholder: '3' },
+  { name: 'surface', label: 'Surface', type: 'number', unit: 'm²', placeholder: '85', required: true },
+  { name: 'nb_pieces', label: 'Nombre de pièces', type: 'number', placeholder: '3' },
   {
     name: 'type_bien',
     label: 'Type de bien',
@@ -77,8 +77,8 @@ const REAL_ESTATE_FIELDS: CategoryField[] = [
 
 const ELECTRONICS_FIELDS: CategoryField[] = [
   { name: 'marque', label: 'Marque', type: 'text', placeholder: 'Apple, Samsung, Sony&' },
-  { name: 'modele', label: 'Modï¿½le', type: 'text', placeholder: 'iPhone 14, Galaxy S23&' },
-  { name: 'stockage', label: 'Stockage / Capacitï¿½', type: 'text', placeholder: '256 Go, 1 To&' },
+  { name: 'modele', label: 'Modèle', type: 'text', placeholder: 'iPhone 14, Galaxy S23&' },
+  { name: 'stockage', label: 'Stockage / Capacité', type: 'text', placeholder: '256 Go, 1 To&' },
 ]
 
 const EMPLOYMENT_FIELDS: CategoryField[] = [
@@ -89,22 +89,22 @@ const EMPLOYMENT_FIELDS: CategoryField[] = [
     options: [
       { value: 'cdi', label: 'CDI' },
       { value: 'cdd', label: 'CDD' },
-      { value: 'interim', label: 'Intï¿½rim' },
+      { value: 'interim', label: 'Intérim' },
       { value: 'freelance', label: 'Freelance / Mission' },
       { value: 'stage', label: 'Stage / Alternance' },
       { value: 'autre', label: 'Autre' },
     ],
     required: true,
   },
-  { name: 'secteur', label: "Secteur d'activitï¿½", type: 'text', placeholder: 'BTP, Commerce, Santï¿½&' },
+  { name: 'secteur', label: "Secteur d'activité", type: 'text', placeholder: 'BTP, Commerce, Santé&' },
   {
     name: 'experience',
-    label: 'Expï¿½rience requise',
+    label: 'Expérience requise',
     type: 'select',
     options: [
-      { value: 'debutant', label: 'Dï¿½butant acceptï¿½' },
-      { value: '1_3', label: '13 ans' },
-      { value: '3_5', label: '35 ans' },
+      { value: 'debutant', label: 'Débutant accepté' },
+      { value: '1_3', label: '1–3 ans' },
+      { value: '3_5', label: '3–5 ans' },
       { value: '5_plus', label: '5 ans et plus' },
     ],
   },
@@ -125,17 +125,17 @@ const LOCATION_FIELDS: CategoryField[] = [
       { value: 'chambre', label: 'Chambre' },
     ],
   },
-  { name: 'metadata.capacite_personnes', label: 'Capacitï¿½', type: 'number', required: true, placeholder: '4' },
+  { name: 'metadata.capacite_personnes', label: 'Capacité', type: 'number', required: true, placeholder: '4' },
   { name: 'metadata.nb_chambres', label: 'Nombre de chambres', type: 'number', placeholder: '2' },
-  { name: 'metadata.surface_m2', label: 'Surface', type: 'number', unit: 'mï¿½', placeholder: '45' },
-  { name: 'metadata.meuble', label: 'Meublï¿½', type: 'checkbox', helper: 'Activer si le logement est meublï¿½' },
+  { name: 'metadata.surface_m2', label: 'Surface', type: 'number', unit: 'm²', placeholder: '45' },
+  { name: 'metadata.meuble', label: 'Meublé', type: 'checkbox', helper: 'Activer si le logement est meublé' },
   { name: 'metadata.prix_nuit_xpf', label: 'Prix par nuit', type: 'number', required: true, unit: 'XPF', placeholder: '8000' },
-  { name: 'metadata.prix_semaine_xpf', label: 'Prix par semaine', type: 'number', unit: 'XPF', placeholder: '45000', helper: 'Suggï¿½rï¿½ = nuit ï¿½ 6' },
+  { name: 'metadata.prix_semaine_xpf', label: 'Prix par semaine', type: 'number', unit: 'XPF', placeholder: '45000', helper: 'Suggéré = nuit × 6' },
   { name: 'metadata.disponible_du', label: 'Disponible du', type: 'date' },
   { name: 'metadata.disponible_au', label: 'Disponible au', type: 'date' },
   {
     name: 'metadata.equipements',
-    label: 'ï¿½quipements',
+    label: 'Équipements',
     type: 'checkbox-group',
     options: [
       { value: 'wifi', label: 'Wifi' },
@@ -144,13 +144,13 @@ const LOCATION_FIELDS: CategoryField[] = [
       { value: 'barbecue', label: 'Barbecue' },
       { value: 'parking', label: 'Parking' },
       { value: 'vue_mer', label: 'Vue mer' },
-      { value: 'cuisine_equipee', label: 'Cuisine ï¿½quipï¿½e' },
+      { value: 'cuisine_equipee', label: 'Cuisine équipée' },
       { value: 'lave_linge', label: 'Lave-linge' },
     ],
   },
-  { name: 'metadata.animaux_acceptes', label: 'Animaux acceptï¿½s', type: 'checkbox' },
-  { name: 'metadata.fumeurs_acceptes', label: 'Fumeurs acceptï¿½s', type: 'checkbox' },
-  { name: 'metadata.localisation_precise', label: 'Localisation prï¿½cise', type: 'text', placeholder: 'Quartier, lieu-dit&' },
+  { name: 'metadata.animaux_acceptes', label: 'Animaux acceptés', type: 'checkbox' },
+  { name: 'metadata.fumeurs_acceptes', label: 'Fumeurs acceptés', type: 'checkbox' },
+  { name: 'metadata.localisation_precise', label: 'Localisation précise', type: 'text', placeholder: 'Quartier, lieu-dit&' },
 ]
 
 const SERVICES_FIELDS: CategoryField[] = [
@@ -162,18 +162,18 @@ const SERVICES_FIELDS: CategoryField[] = [
     options: [
       { value: 'jardinage', label: 'Jardinage' },
       { value: 'plomberie', label: 'Plomberie' },
-      { value: 'electricite', label: 'ï¿½lectricitï¿½' },
-      { value: 'menage', label: 'Mï¿½nage' },
+      { value: 'electricite', label: 'Électricité' },
+      { value: 'menage', label: 'Ménage' },
       { value: 'baby_sitting', label: 'Baby-sitting' },
       { value: 'cours_particuliers', label: 'Cours particuliers' },
       { value: 'informatique', label: 'Informatique' },
       { value: 'couture', label: 'Couture' },
       { value: 'transport', label: 'Transport' },
-      { value: 'renovation', label: 'Rï¿½novation' },
+      { value: 'renovation', label: 'Rénovation' },
       { value: 'autre', label: 'Autre' },
     ],
   },
-  { name: 'metadata.type_service_autre', label: 'Prï¿½cisez', type: 'text', placeholder: 'Saisie libre si autre service' },
+  { name: 'metadata.type_service_autre', label: 'Précisez', type: 'text', placeholder: 'Saisie libre si autre service' },
   {
     name: 'metadata.tarif_type',
     label: 'Tarification',
@@ -182,15 +182,15 @@ const SERVICES_FIELDS: CategoryField[] = [
     options: [
       { value: 'heure', label: 'Au tarif horaire' },
       { value: 'forfait', label: 'Forfait' },
-      { value: 'a_negocier', label: 'ï¿½ nï¿½gocier' },
+      { value: 'a_negocier', label: 'À négocier' },
     ],
   },
   { name: 'metadata.tarif_xpf', label: 'Tarif', type: 'number', unit: 'XPF', placeholder: '2500' },
-  { name: 'metadata.tarif_description', label: 'Description du tarif', type: 'text', placeholder: 'ï¿½ partir de 2 500 XPF / h selon la complexitï¿½' },
-  { name: 'metadata.zone_intervention', label: 'Zone dintervention', type: 'text', required: true, placeholder: 'NoumÃ©a, DumbÃ©a, Mont-Dore' },
+  { name: 'metadata.tarif_description', label: 'Description du tarif', type: 'text', placeholder: 'À partir de 2 500 XPF / h selon la complexité' },
+  { name: 'metadata.zone_intervention', label: 'Zone d’intervention', type: 'text', required: true, placeholder: 'Nouméa, Dumbéa, Mont-Dore' },
   {
     name: 'metadata.disponibilite',
-    label: 'Disponibilitï¿½',
+    label: 'Disponibilité',
     type: 'radio',
     options: [
       { value: 'semaine', label: 'Semaine' },
@@ -198,20 +198,20 @@ const SERVICES_FIELDS: CategoryField[] = [
       { value: 'les_deux', label: 'Les deux' },
     ],
   },
-  { name: 'metadata.experience_annees', label: 'Expï¿½rience', type: 'number', placeholder: '5' },
-  { name: 'metadata.diplome_certifie', label: 'Certifiï¿½ / diplï¿½mï¿½', type: 'checkbox', helper: 'Afficher ce badge sur la carte' },
+  { name: 'metadata.experience_annees', label: 'Expérience', type: 'number', placeholder: '5' },
+  { name: 'metadata.diplome_certifie', label: 'Certifié / diplômé', type: 'checkbox', helper: 'Afficher ce badge sur la carte' },
 ]
 
 const DON_FIELDS: CategoryField[] = [
   {
     name: 'metadata.etat',
-    label: "Ãtat de l'objet",
+    label: "État de l'objet",
     type: 'radio',
     required: true,
     options: [
-      { value: 'bon', label: 'Bon Ãtat' },
+      { value: 'bon', label: 'Bon État' },
       { value: 'usage', label: 'Usage' },
-      { value: 'a_reparer', label: 'ï¿½ rï¿½parer' },
+      { value: 'a_reparer', label: 'À réparer' },
     ],
   },
   {
@@ -219,13 +219,13 @@ const DON_FIELDS: CategoryField[] = [
     label: 'Raison du don',
     type: 'select',
     options: [
-      { value: 'demenagement', label: 'Dï¿½mï¿½nagement' },
+      { value: 'demenagement', label: 'Déménagement' },
       { value: 'surplus', label: 'Surplus' },
       { value: 'upgrade', label: 'Upgrade' },
       { value: 'autre', label: 'Autre' },
     ],
   },
-  { name: 'metadata.commune_remise', label: 'Commune de remise', type: 'text', required: true, placeholder: 'NoumÃ©a' },
+  { name: 'metadata.commune_remise', label: 'Commune de remise', type: 'text', required: true, placeholder: 'Nouméa' },
   { name: 'metadata.remise_en_main_propre', label: 'Remise en main propre', type: 'checkbox', helper: 'Les dons restent en remise directe' },
 ]
 
@@ -237,7 +237,7 @@ const IMMOBILIER_V2_FIELDS: CategoryField[] = [
     required: true,
     options: [
       { value: 'vente', label: 'Vente' },
-      { value: 'location_longue_duree', label: 'Location longue durï¿½e' },
+      { value: 'location_longue_duree', label: 'Location longue durée' },
     ],
   },
   {
@@ -256,24 +256,24 @@ const IMMOBILIER_V2_FIELDS: CategoryField[] = [
       { value: 'case', label: 'Case' },
     ],
   },
-  { name: 'metadata.surface_m2', label: 'Surface (mï¿½)', type: 'number', required: true, placeholder: '85' },
-  { name: 'metadata.nb_pieces', label: 'Nombre de piï¿½ces', type: 'number', required: true, placeholder: '3' },
+  { name: 'metadata.surface_m2', label: 'Surface (m²)', type: 'number', required: true, placeholder: '85' },
+  { name: 'metadata.nb_pieces', label: 'Nombre de pièces', type: 'number', required: true, placeholder: '3' },
   { name: 'metadata.nb_chambres', label: 'Nombre de chambres', type: 'number', placeholder: '2' },
   { name: 'metadata.nb_sdb', label: 'Nombre de salles de bain', type: 'number', placeholder: '1' },
-  { name: 'metadata.etage', label: 'ï¿½tage', type: 'number', placeholder: '2' },
-  { name: 'metadata.nb_etages_total', label: "Nombre d'ï¿½tages total", type: 'number', placeholder: '5' },
-  { name: 'metadata.meuble', label: 'Meublï¿½', type: 'checkbox' },
+  { name: 'metadata.etage', label: 'Étage', type: 'number', placeholder: '2' },
+  { name: 'metadata.nb_etages_total', label: "Nombre d'Étages total", type: 'number', placeholder: '5' },
+  { name: 'metadata.meuble', label: 'Meublé', type: 'checkbox' },
   { name: 'metadata.parking', label: 'Parking', type: 'checkbox' },
   { name: 'metadata.nb_places_parking', label: 'Nombre de places parking', type: 'number', placeholder: '1' },
-  { name: 'metadata.annee_construction', label: 'Annï¿½e de construction', type: 'number', placeholder: '1998' },
+  { name: 'metadata.annee_construction', label: 'Année de construction', type: 'number', placeholder: '1998' },
   {
     name: 'metadata.etat_bien',
-    label: 'Ãtat du bien',
+    label: 'État du bien',
     type: 'radio',
     options: [
       { value: 'neuf', label: 'Neuf' },
-      { value: 'bon', label: 'Bon Ãtat' },
-      { value: 'a_renover', label: 'ï¿½ rï¿½nover' },
+      { value: 'bon', label: 'Bon État' },
+      { value: 'a_renover', label: 'À rénover' },
     ],
   },
   {
@@ -292,11 +292,11 @@ const IMMOBILIER_V2_FIELDS: CategoryField[] = [
     ],
   },
   { name: 'metadata.charges_mensuelles_xpf', label: 'Charges mensuelles', type: 'number', unit: 'XPF', placeholder: '15000' },
-  { name: 'metadata.depot_garantie_xpf', label: 'Dï¿½pï¿½t de garantie', type: 'number', unit: 'XPF', placeholder: '60000' },
+  { name: 'metadata.depot_garantie_xpf', label: 'Dépôt de garantie', type: 'number', unit: 'XPF', placeholder: '60000' },
   { name: 'metadata.disponible_le', label: 'Disponible le', type: 'date' },
   {
     name: 'metadata.equipements',
-    label: 'ï¿½quipements',
+    label: 'Équipements',
     type: 'checkbox-group',
     options: [
       { value: 'climatisation', label: 'Climatisation' },
@@ -326,7 +326,7 @@ const IMMOBILIER_V2_FIELDS: CategoryField[] = [
   },
 ]
 
-// Map catï¿½gorie slug ï¿½ champs
+// Map catégorie slug → champs
 const CATEGORY_FIELDS: Record<string, CategoryField[]> = {
   vehicules: VEHICLE_FIELDS,
   voitures: VEHICLE_FIELDS,
@@ -386,7 +386,7 @@ export default function CategoryFields({ categorySlug, register, errors }: Props
     <div className="border-t border-night/8 pt-6 mt-2">
       <p className="text-sm font-semibold text-night mb-4 flex items-center gap-2">
         <span className="w-5 h-5 bg-kalico-blue/10 text-kalico-blue rounded-full flex items-center justify-center text-xs">&</span>
-        Caractï¿½ristiques spï¿½cifiques
+        Caractéristiques spécifiques
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
