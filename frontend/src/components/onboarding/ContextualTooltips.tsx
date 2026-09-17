@@ -21,7 +21,7 @@ const STORAGE_KEYS: Record<TooltipKey, string> = {
 }
 
 const TOOLTIP_TEXTS: Record<TooltipKey, string> = {
-  search: 'Cherchez par commune, catï¿½gorie ou mot-clï¿½',
+  search: 'Cherchez par commune, catégorie ou mot-clé',
   deposit: "Publiez en 2 minutes, c'est gratuit",
   messages: 'Vos conversations avec acheteurs et vendeurs',
 }
@@ -67,7 +67,7 @@ function findDepositTarget() {
   const candidates = Array.from(document.querySelectorAll<HTMLElement>('button, a'))
   return candidates.find((element) => {
     const text = getTextMatch(element)
-    return isVisibleElement(element) && (text === 'DÃ©poser' || text.includes('DÃ©poser'))
+    return isVisibleElement(element) && (text === 'Déposer' || text.includes('Déposer'))
   }) ?? null
 }
 
@@ -122,7 +122,7 @@ export default function ContextualTooltips() {
         }
 
         const text = getTextMatch(element)
-        return (text === 'DÃ©poser' || text.includes('DÃ©poser')) && (target === element || element.contains(target))
+        return (text === 'Déposer' || text.includes('Déposer')) && (target === element || element.contains(target))
       })
 
       if (!nextKey) return
