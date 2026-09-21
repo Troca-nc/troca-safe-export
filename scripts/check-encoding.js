@@ -12,6 +12,7 @@ const GUARDED_FILES = new Set([
   'frontend/src/app/abonnement/confirmation/page.tsx',
   'frontend/src/app/abonnement/page.tsx',
   'frontend/src/app/annonces/[id]/page.tsx',
+  'frontend/src/app/annonces/page.tsx',
   'frontend/src/app/annonces/preview/page.tsx',
   'frontend/src/app/bienvenue/page.tsx',
   'frontend/src/app/connexion/ConnexionClient.tsx',
