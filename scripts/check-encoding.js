@@ -30,6 +30,8 @@ const GUARDED_FILES = new Set([
   'frontend/src/app/parametres/page.tsx',
   'frontend/src/app/politique-cookies/page.tsx',
   'frontend/src/app/politique-de-confidentialite/page.tsx',
+  'frontend/src/app/pro/page.tsx',
+  'frontend/src/app/pro/ProLandingPageClient.tsx',
   'frontend/src/app/profil/[id]/page.tsx',
   'frontend/src/app/profil/alertes-trajet/page.tsx',
   'frontend/src/app/profil/page.tsx',
