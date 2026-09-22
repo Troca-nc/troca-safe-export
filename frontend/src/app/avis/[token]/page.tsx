@@ -47,7 +47,7 @@ function StarPicker({
             type="button"
             onClick={() => onChange(index + 1)}
             className="rounded-full p-1 transition hover:scale-110"
-            aria-label={`${index + 1} ï¿½toiles`}
+            aria-label={`${index + 1} étoiles`}
           >
             <BadgeCheck className={`h-6 w-6 ${active ? 'text-amber-500' : 'text-night/20'}`} />
           </button>
@@ -175,13 +175,13 @@ export default function ReviewInvitePage() {
         <Header />
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
           <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Avis vï¿½rifiï¿½</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Avis vérifié</p>
             <h1 className="mt-3 font-display text-3xl font-bold text-night">Lien introuvable</h1>
             <p className="mt-3 text-sm leading-relaxed text-night/60">
-              Ce lien d&apos;avis est invalide, expirï¿½ ou a dï¿½jï¿½ ï¿½tï¿½ utilisï¿½.
+              Ce lien d&apos;avis est invalide, expiré ou a déjà été utilisé.
             </p>
             <Link href="/pro" className="btn-primary mt-6 inline-flex items-center gap-2 px-5 py-3 text-sm">
-              DÃ©couvrir l&apos;espace Pro
+              Découvrir l&apos;espace Pro
             </Link>
           </div>
         </div>
@@ -218,14 +218,14 @@ export default function ReviewInvitePage() {
                     <h1 className="font-display text-3xl font-bold text-night">{displayName}</h1>
                     <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
                       <BadgeCheck className="h-3.5 w-3.5" />
-                      Avis vï¿½rifiï¿½
+                      Avis vérifié
                     </span>
                   </div>
                   <p className="mt-2 text-sm text-night/60">
-                    {invite.pro.pro_category || 'Professionnel local'} ï¿½ {invite.pro.pro_commune || 'Nouvelle-CalÃ©donie'}
+                    {invite.pro.pro_category || 'Professionnel local'} · {invite.pro.pro_commune || 'Nouvelle-Calédonie'}
                   </p>
                   <p className="mt-3 max-w-3xl text-sm leading-relaxed text-night/65">
-                    {invite.pro.pro_description || 'Partagez votre expï¿½rience avec ce professionnel local.'}
+                    {invite.pro.pro_description || 'Partagez votre expérience avec ce professionnel local.'}
                   </p>
                 </div>
               </div>
@@ -248,16 +248,16 @@ export default function ReviewInvitePage() {
                 </div>
                 <h2 className="mt-4 font-display text-2xl font-bold text-night">Merci pour votre avis !</h2>
                 <p className="mt-2 text-sm leading-relaxed text-night/60">
-                  Votre retour a bien ï¿½tï¿½ envoyï¿½ au professionnel.
+                  Votre retour a bien été envoyé au professionnel.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Votre avis</p>
-                  <h2 className="mt-1 font-display text-2xl font-bold text-night">Partagez votre expï¿½rience</h2>
+                  <h2 className="mt-1 font-display text-2xl font-bold text-night">Partagez votre expérience</h2>
                   <p className="mt-1 text-sm text-night/55">
-                    Votre avis vï¿½rifiï¿½ aide la communautï¿½ Kalico ï¿½ faire le bon choix.
+                    Votre avis vérifié aide la communauté Kalico à faire le bon choix.
                   </p>
                 </div>
 
@@ -277,7 +277,7 @@ export default function ReviewInvitePage() {
                     rows={5}
                     maxLength={1000}
                     className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-night outline-none transition focus:border-[#0A7EA4] focus:ring-4 focus:ring-[#0A7EA4]/10"
-                    placeholder="Racontez votre expï¿½rience..."
+                    placeholder="Racontez votre expérience..."
                   />
                 </div>
 
@@ -291,7 +291,7 @@ export default function ReviewInvitePage() {
                     onChange={(e) => setTitle(e.target.value)}
                     maxLength={80}
                     className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-night outline-none transition focus:border-[#0A7EA4] focus:ring-4 focus:ring-[#0A7EA4]/10"
-                    placeholder="Trï¿½s satisfait du service"
+                    placeholder="Très satisfait du service"
                   />
                 </div>
 
@@ -306,7 +306,6 @@ export default function ReviewInvitePage() {
                     </Link>
                   </div>
                 ) : null}
-
                 {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
                 <button
