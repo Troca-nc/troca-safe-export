@@ -34,7 +34,7 @@ type SlotForm = {
 const DEFAULT_SETTINGS: SettingsForm = {
   is_enabled: false,
   title: 'Prendre rendez-vous',
-  subtitle: 'Rï¿½servez un crï¿½neau directement avec ce professionnel.',
+  subtitle: 'Réservez un créneau directement avec ce professionnel.',
   location_label: 'Lieu du rendez-vous',
   location_text: '',
   instructions: '',
@@ -98,7 +98,7 @@ function formatSlot(slot: Pick<ProPublicBookingSlot, 'starts_at'> & { ends_at?: 
         minute: '2-digit',
       }).format(endsAt)
     : null
-  return `${date} ï¿½ ${endTime || '...'}`
+  return `${date} · ${endTime || '...'}`
 }
 
 export default function ProDashboardRdvPage() {
@@ -205,18 +205,18 @@ export default function ProDashboardRdvPage() {
     if (!reminderType) {
       return {
         title: 'Prochain rendez-vous',
-        subtitle: `${target.requester_name} ï¿½ ${formatSlot(target)}`,
+        subtitle: `${target.requester_name} · ${formatSlot(target)}`,
         href: '/mes-rdv',
         tone: 'bg-nc-lagonLight text-nc-lagon',
       }
     }
 
     const sentAt = reminderType === 'H-2' ? target.reminder_2h_sent_at : target.reminder_24h_sent_at
-    const label = sentAt ? `${reminderType} envoyï¿½` : `${reminderType} ï¿½ venir`
+    const label = sentAt ? `${reminderType} envoyé` : `${reminderType} à venir`
 
     return {
       title: `Prochain rappel ${reminderType}`,
-      subtitle: `${target.requester_name} ï¿½ ${formatSlot(target)}`,
+      subtitle: `${target.requester_name} · ${formatSlot(target)}`,
       href: '/mes-rdv',
       tone: sentAt ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700',
       label,
@@ -258,15 +258,15 @@ export default function ProDashboardRdvPage() {
       await loadDashboard()
       showToast({
         tone: 'success',
-        title: 'Rï¿½glages enregistrï¿½s',
-        message: 'Votre prise de rendez-vous est ï¿½ jour.',
+        title: 'Réglages enregistrés',
+        message: 'Votre prise de rendez-vous est à jour.',
       })
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Impossible denregistrer les rï¿½glages.'
+      const message = err?.response?.data?.error || 'Impossible d’enregistrer les réglages.'
       setError(message)
       showToast({
         tone: 'error',
-        title: 'Rï¿½glages non enregistrï¿½s',
+        title: 'Réglages non enregistrés',
         message,
       })
     } finally {
@@ -276,7 +276,7 @@ export default function ProDashboardRdvPage() {
 
   const handleCreateSlot = async () => {
     if (!slotForm.starts_at || !slotForm.ends_at) {
-      setError('Merci de renseigner un crï¿½neau complet.')
+      setError('Merci de renseigner un créneau complet.')
       return
     }
 
@@ -292,15 +292,15 @@ export default function ProDashboardRdvPage() {
       await loadDashboard()
       showToast({
         tone: 'success',
-        title: 'Crï¿½neau publiï¿½',
-        message: 'Les visiteurs peuvent dï¿½sormais rï¿½server ce crï¿½neau.',
+        title: 'Créneau publié',
+        message: 'Les visiteurs peuvent désormais réserver ce créneau.',
       })
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Impossible de crï¿½er ce crï¿½neau.'
+      const message = err?.response?.data?.error || 'Impossible de créer ce créneau.'
       setError(message)
       showToast({
         tone: 'error',
-        title: 'Crï¿½neau non crï¿½ï¿½',
+        title: 'Créneau non créé',
         message,
       })
     } finally {
@@ -316,15 +316,15 @@ export default function ProDashboardRdvPage() {
       await loadDashboard()
       showToast({
         tone: 'success',
-        title: 'Crï¿½neau supprimï¿½',
-        message: 'Le crï¿½neau a ï¿½tï¿½ retirï¿½ de la vitrine.',
+        title: 'Créneau supprimé',
+        message: 'Le créneau a été retiré de la vitrine.',
       })
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Impossible de supprimer ce crï¿½neau.'
+      const message = err?.response?.data?.error || 'Impossible de supprimer ce créneau.'
       setError(message)
       showToast({
         tone: 'error',
-        title: 'Crï¿½neau non supprimï¿½',
+        title: 'Créneau non supprimé',
         message,
       })
     } finally {
@@ -334,7 +334,7 @@ export default function ProDashboardRdvPage() {
 
   const handleAddException = async () => {
     if (!exceptionForm.exception_date) {
-      setError('Merci de choisir une date dindisponibilitï¿½.')
+      setError('Merci de choisir une date d’indisponibilité.')
       return
     }
 
@@ -354,15 +354,15 @@ export default function ProDashboardRdvPage() {
       await loadDashboard()
       showToast({
         tone: 'success',
-        title: 'Indisponibilitï¿½ ajoutï¿½e',
-        message: 'Le calendrier public a ï¿½tï¿½ mis ï¿½ jour.',
+        title: 'Indisponibilité ajoutée',
+        message: 'Le calendrier public a été mis à jour.',
       })
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Impossible de crï¿½er cette exception.'
+      const message = err?.response?.data?.error || 'Impossible de créer cette exception.'
       setError(message)
       showToast({
         tone: 'error',
-        title: 'Exception non ajoutï¿½e',
+        title: 'Exception non ajoutée',
         message,
       })
     } finally {
@@ -378,11 +378,11 @@ export default function ProDashboardRdvPage() {
       await loadDashboard()
       showToast({
         tone: 'success',
-        title: 'Indisponibilitï¿½ supprimï¿½e',
-        message: 'Le crï¿½neau redeviendra publiquement rï¿½servable.',
+        title: 'Indisponibilité supprimée',
+        message: 'Le créneau redeviendra publiquement réservable.',
       })
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Impossible de supprimer cette indisponibilitï¿½.'
+      const message = err?.response?.data?.error || 'Impossible de supprimer cette indisponibilité.'
       setError(message)
       showToast({
         tone: 'error',
@@ -444,11 +444,11 @@ export default function ProDashboardRdvPage() {
       await loadDashboard()
       showToast({
         tone: 'success',
-        title: 'Rendez-vous actualisï¿½',
-        message: 'La rï¿½servation a ï¿½tï¿½ mise ï¿½ jour.',
+        title: 'Rendez-vous actualisé',
+        message: 'La réservation a été mise à jour.',
       })
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Impossible de mettre ï¿½ jour cette rï¿½servation.'
+      const message = err?.response?.data?.error || 'Impossible de mettre à jour cette réservation.'
       setError(message)
       showToast({
         tone: 'error',
@@ -479,14 +479,14 @@ export default function ProDashboardRdvPage() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Rendez-vous en ligne</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-night">Gï¿½rez vos crï¿½neaux et vos demandes</h1>
+            <h1 className="mt-2 font-display text-3xl font-bold text-night">Gérez vos créneaux et vos demandes</h1>
             <p className="mt-2 text-sm text-night/60">
-              Activez la rï¿½servation en ligne, publiez vos crï¿½neaux et traitez les demandes reï¿½ues depuis votre vitrine.
+              Activez la réservation en ligne, publiez vos créneaux et traitez les demandes reçues depuis votre vitrine.
             </p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-[#0A7EA4]/15 bg-nc-lagonLight px-3 py-1.5 text-sm font-semibold text-[#0A7EA4]">
             <CalendarDays className="h-4 w-4" />
-            {stats.slots} crï¿½neau{stats.slots > 1 ? 'x' : ''} publiï¿½{stats.slots > 1 ? 's' : ''}
+            {stats.slots} créneau{stats.slots > 1 ? 'x' : ''} publié{stats.slots > 1 ? 's' : ''}
           </div>
         </div>
       </section>
@@ -499,7 +499,7 @@ export default function ProDashboardRdvPage() {
 
       <section className="grid gap-4 md:grid-cols-4">
         <article className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-          <p className="text-sm font-semibold text-night/55">Crï¿½neaux publiï¿½s</p>
+          <p className="text-sm font-semibold text-night/55">Créneaux publiés</p>
           <p className="mt-2 text-3xl font-bold text-night">{stats.slots}</p>
         </article>
         <article className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
@@ -507,11 +507,11 @@ export default function ProDashboardRdvPage() {
           <p className="mt-2 text-3xl font-bold text-night">{stats.pending}</p>
         </article>
         <article className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-          <p className="text-sm font-semibold text-night/55">Confirmï¿½s</p>
+          <p className="text-sm font-semibold text-night/55">Confirmés</p>
           <p className="mt-2 text-3xl font-bold text-night">{stats.confirmed}</p>
         </article>
         <article className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-          <p className="text-sm font-semibold text-night/55">Terminï¿½s</p>
+          <p className="text-sm font-semibold text-night/55">Terminés</p>
           <p className="mt-2 text-3xl font-bold text-night">{stats.completed}</p>
         </article>
       </section>
@@ -520,9 +520,9 @@ export default function ProDashboardRdvPage() {
         <section className="rounded-[2rem] border border-[#0A7EA4]/15 bg-[linear-gradient(135deg,_rgba(214,240,246,0.72),_rgba(255,255,255,0.96))] p-5 shadow-sm">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Aujourdhui</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-lagon">Aujourd’hui</p>
               <h2 className="mt-1 font-display text-2xl font-bold text-night">Votre timeline du jour</h2>
-              <p className="mt-1 text-sm text-night/60">Les rendez-vous ï¿½ venir aujourdhui, classï¿½s par heure.</p>
+              <p className="mt-1 text-sm text-night/60">Les rendez-vous à venir aujourd’hui, classés par heure.</p>
             </div>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white px-3 py-1.5 text-sm font-semibold text-[#0A7EA4] shadow-sm">
               <Clock3 className="h-4 w-4" />
@@ -550,12 +550,12 @@ export default function ProDashboardRdvPage() {
                       </p>
                     </div>
                     <span className="rounded-full bg-[#0A7EA4]/10 px-3 py-1 text-xs font-semibold text-[#0A7EA4]">
-                      {isPending ? 'En attente' : isCompleted ? 'Terminï¿½' : booking.status}
+                      {isPending ? 'En attente' : isCompleted ? 'Terminé' : booking.status}
                     </span>
                   </div>
 
                   <p className="mt-3 text-sm text-night/65">
-                    {booking.commune || booking.pro.pro_commune || 'Nouvelle-CalÃ©donie'}
+                    {booking.commune || booking.pro.pro_commune || 'Nouvelle-Calédonie'}
                   </p>
 
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -635,7 +635,7 @@ export default function ProDashboardRdvPage() {
         <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Rï¿½glages</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Réglages</p>
               <h2 className="mt-1 font-display text-2xl font-bold text-night">Configurer la prise de rendez-vous</h2>
             </div>
             <button
@@ -658,16 +658,16 @@ export default function ProDashboardRdvPage() {
                 className="h-4 w-4 rounded border-[var(--color-border)] text-[#0A7EA4] focus:ring-[#0A7EA4]/20"
               />
               <span>
-                <span className="block text-sm font-semibold text-night">Activer la rï¿½servation en ligne</span>
+                <span className="block text-sm font-semibold text-night">Activer la réservation en ligne</span>
                 <span className="mt-1 block text-xs text-night/55">
-                  Vos visiteurs pourront rï¿½server un crï¿½neau visible depuis votre vitrine.
+                  Vos visiteurs pourront réserver un créneau visible depuis votre vitrine.
                 </span>
               </span>
             </label>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-night">Titre de la rï¿½servation</span>
+                <span className="text-sm font-semibold text-night">Titre de la réservation</span>
                 <input
                   value={settingsForm.title}
                   onChange={(event) => setSettingsForm((current) => ({ ...current, title: event.target.value }))}
@@ -681,14 +681,14 @@ export default function ProDashboardRdvPage() {
                   value={settingsForm.subtitle}
                   onChange={(event) => setSettingsForm((current) => ({ ...current, subtitle: event.target.value }))}
                   className="input w-full rounded-2xl"
-                  placeholder="Rï¿½servez un crï¿½neau directement..."
+                  placeholder="Réservez un créneau directement..."
                 />
               </label>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-night">Libellï¿½ du lieu</span>
+                <span className="text-sm font-semibold text-night">Libellé du lieu</span>
                 <input
                   value={settingsForm.location_label}
                   onChange={(event) => setSettingsForm((current) => ({ ...current, location_label: event.target.value }))}
@@ -702,7 +702,7 @@ export default function ProDashboardRdvPage() {
                   value={settingsForm.location_text || ''}
                   onChange={(event) => setSettingsForm((current) => ({ ...current, location_text: event.target.value }))}
                   className="input w-full rounded-2xl"
-                  placeholder="ï¿½ l'atelier / au bureau / sur site"
+                  placeholder="À l'atelier / au bureau / sur site"
                 />
               </label>
             </div>
@@ -714,13 +714,13 @@ export default function ProDashboardRdvPage() {
                 onChange={(event) => setSettingsForm((current) => ({ ...current, instructions: event.target.value }))}
                 rows={4}
                 className="input w-full rounded-2xl py-3"
-                placeholder="Ajoutez les documents ï¿½ prï¿½parer, les consignes, le stationnement..."
+                placeholder="Ajoutez les documents à préparer, les consignes, le stationnement..."
               />
             </label>
 
             <div className="grid gap-4 sm:grid-cols-3">
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-night">Durï¿½e d'un crï¿½neau (min)</span>
+                <span className="text-sm font-semibold text-night">Durée d'un créneau (min)</span>
                 <input
                   type="number"
                   min={15}
@@ -731,7 +731,7 @@ export default function ProDashboardRdvPage() {
                 />
               </label>
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-night">Prï¿½venance min. (h)</span>
+                <span className="text-sm font-semibold text-night">Prévenance min. (h)</span>
                 <input
                   type="number"
                   min={0}
@@ -742,7 +742,7 @@ export default function ProDashboardRdvPage() {
                 />
               </label>
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-night">Jours max. ï¿½ l'avance</span>
+                <span className="text-sm font-semibold text-night">Jours max. à l'avance</span>
                 <input
                   type="number"
                   min={1}
@@ -757,8 +757,8 @@ export default function ProDashboardRdvPage() {
             <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-night">Services rï¿½servable</p>
-                  <p className="mt-1 text-xs text-night/55">Ajoutez vos prestations pour guider le client vers le bon crï¿½neau.</p>
+                  <p className="text-sm font-semibold text-night">Services réservable</p>
+                  <p className="mt-1 text-xs text-night/55">Ajoutez vos prestations pour guider le client vers le bon créneau.</p>
                 </div>
                 <button
                   type="button"
@@ -796,7 +796,7 @@ export default function ProDashboardRdvPage() {
                           />
                         </label>
                         <label className="block space-y-2">
-                          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Durï¿½e (min)</span>
+                          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-night/45">Durée (min)</span>
                           <input
                             type="number"
                             min={15}
@@ -839,7 +839,7 @@ export default function ProDashboardRdvPage() {
                   ))
                 ) : (
                   <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-white px-4 py-5 text-sm text-night/55">
-                    Aucun service ajoutï¿½ pour le moment.
+                    Aucun service ajouté pour le moment.
                   </div>
                 )}
               </div>
@@ -849,7 +849,7 @@ export default function ProDashboardRdvPage() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold text-night">Horaires hebdomadaires</p>
-                  <p className="mt-1 text-xs text-night/55">Activez ou fermez chaque jour selon vos disponibilitï¿½s.</p>
+                  <p className="mt-1 text-xs text-night/55">Activez ou fermez chaque jour selon vos disponibilités.</p>
                 </div>
               </div>
 
@@ -874,7 +874,7 @@ export default function ProDashboardRdvPage() {
                         value={entry.label || ''}
                         onChange={(event) => handleUpdateWeeklyHour(dayIndex, { label: event.target.value })}
                         className="input w-full rounded-2xl"
-                        placeholder="Libellï¿½"
+                        placeholder="Libellé"
                       />
                       <input
                         type="time"
@@ -902,14 +902,14 @@ export default function ProDashboardRdvPage() {
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
             <div className="flex items-end justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Nouveau crï¿½neau</p>
-                <h2 className="mt-1 font-display text-2xl font-bold text-night">Publier un crï¿½neau visible</h2>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Nouveau créneau</p>
+                <h2 className="mt-1 font-display text-2xl font-bold text-night">Publier un créneau visible</h2>
               </div>
             </div>
 
             <div className="mt-4 space-y-4">
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-night">Dï¿½but</span>
+                <span className="text-sm font-semibold text-night">Début</span>
                 <input
                   type="datetime-local"
                   value={slotForm.starts_at}
@@ -940,7 +940,7 @@ export default function ProDashboardRdvPage() {
               </label>
 
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-night">Libellï¿½ (optionnel)</span>
+                <span className="text-sm font-semibold text-night">Libellé (optionnel)</span>
                 <input
                   value={slotForm.label}
                   onChange={(event) => setSlotForm((current) => ({ ...current, label: event.target.value }))}
@@ -956,13 +956,13 @@ export default function ProDashboardRdvPage() {
                 className="inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#065f7a] disabled:opacity-60"
               >
                 {savingSlot ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                Publier le crï¿½neau
+                Publier le créneau
               </button>
             </div>
           </article>
 
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Mes crï¿½neaux</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Mes créneaux</p>
             {data?.slots?.length ? (
               <div className="mt-4 space-y-3">
                 {data.slots.map((slot) => (
@@ -987,14 +987,14 @@ export default function ProDashboardRdvPage() {
               </div>
             ) : (
               <div className="mt-4 rounded-2xl border border-dashed border-[var(--color-border)] p-4 text-sm text-night/60">
-                Aucun crï¿½neau publiï¿½ pour le moment.
+                Aucun créneau publié pour le moment.
               </div>
             )}
           </article>
           <article className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Indisponibilitï¿½s</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Indisponibilités</p>
             <p className="mt-1 text-sm text-night/60">
-              Bloquez un jour entier ou notez une raison temporaire pour masquer la rï¿½servation en ligne.
+              Bloquez un jour entier ou notez une raison temporaire pour masquer la réservation en ligne.
             </p>
 
             <div className="mt-4 space-y-3">
@@ -1014,7 +1014,7 @@ export default function ProDashboardRdvPage() {
                   value={exceptionForm.reason}
                   onChange={(event) => setExceptionForm((current) => ({ ...current, reason: event.target.value }))}
                   className="input w-full rounded-2xl"
-                  placeholder="Vacances, fermeture, dï¿½placement..."
+                  placeholder="Vacances, fermeture, déplacement..."
                 />
               </label>
 
@@ -1054,7 +1054,7 @@ export default function ProDashboardRdvPage() {
                 </div>
               ) : (
                 <div className="rounded-2xl border border-dashed border-[var(--color-border)] p-4 text-sm text-night/60">
-                  Aucune indisponibilitï¿½ enregistrï¿½e.
+                  Aucune indisponibilité enregistrée.
                 </div>
               )}
             </div>
@@ -1065,10 +1065,10 @@ export default function ProDashboardRdvPage() {
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Demandes reï¿½ues</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Traitez les rÃ©servations entrantes</h2>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Demandes reçues</p>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Traitez les réservations entrantes</h2>
             <p className="mt-2 text-sm text-night/60">
-              Confirmez, refusez ou suivez les demandes envoyï¿½es depuis votre vitrine.
+              Confirmez, refusez ou suivez les demandes envoyées depuis votre vitrine.
             </p>
           </div>
           <Link href="/mes-rdv" className="inline-flex items-center gap-2 rounded-2xl border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10">
@@ -1093,7 +1093,7 @@ export default function ProDashboardRdvPage() {
             </div>
           ) : (
             <FeedbackAlert tone="info" title="Aucune demande pour le moment">
-              Les demandes de rendez-vous reï¿½ues depuis votre vitrine apparaï¿½tront ici dï¿½s qu&apos;un visiteur rï¿½servera un crï¿½neau.
+              Les demandes de rendez-vous reçues depuis votre vitrine apparaîtront ici dès qu&apos;un visiteur réservera un créneau.
             </FeedbackAlert>
           )}
         </div>
