@@ -23,7 +23,7 @@ type FormState = {
 const TRANSPORT_TYPES = [
   { value: 'taxi', label: 'Taxi / VTC' },
   { value: 'navette', label: 'Navette' },
-  { value: 'aeroport', label: 'Transfert aï¿½roport' },
+  { value: 'aeroport', label: 'Transfert aéroport' },
   { value: 'excursion', label: 'Excursion' },
   { value: 'scolaire', label: 'Transport scolaire' },
   { value: 'chauffeur', label: 'Location avec chauffeur' },
@@ -31,19 +31,19 @@ const TRANSPORT_TYPES = [
 ]
 
 const COMMUNES = [
-  'NoumÃ©a',
+  'Nouméa',
   'Mont-Dore',
-  'DumbÃ©a',
-  'Paï¿½ta',
+  'Dumbéa',
+  'Païta',
   'Boulouparis',
   'La Foa',
   'Bourail',
-  'Konï¿½',
+  'Koné',
   'Koumac',
-  'Poindimiï¿½',
+  'Poindimié',
   'Lifou',
-  'Marï¿½',
-  'Ouvï¿½a',
+  'Maré',
+  'Ouvéa',
   'Autre',
 ]
 
@@ -54,7 +54,7 @@ export default function ProTransportInscriptionPage() {
     company_name: '',
     transport_type: 'taxi',
     description: '',
-    commune: 'NoumÃ©a',
+    commune: 'Nouméa',
     phone: '',
     website: '',
     hours: '',
@@ -102,7 +102,7 @@ export default function ProTransportInscriptionPage() {
       })
       setSuccess(true)
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'La demande a ï¿½chouï¿½.')
+      setError(err?.response?.data?.error || 'La demande a échoué.')
     } finally {
       setSaving(false)
     }
@@ -130,7 +130,7 @@ export default function ProTransportInscriptionPage() {
           </div>
           <h1 className="mt-4 font-display text-4xl font-bold md:text-5xl">Devenez transporteur partenaire sur Kalico</h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/75 md:text-base">
-            Dï¿½posez votre demande, prï¿½sentez votre activitï¿½ et commencez ï¿½ recevoir des rÃ©servations de clients calï¿½doniens.
+            Déposez votre demande, présentez votre activité et commencez à recevoir des réservations de clients calédoniens.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link href="#formulaire" className="btn-primary rounded-2xl px-4 py-2.5">
@@ -145,10 +145,10 @@ export default function ProTransportInscriptionPage() {
         <section id="formulaire" className="mt-8 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm md:p-6">
           {success ? (
             <div className="rounded-[1.75rem] border border-emerald-200 bg-emerald-50 p-6 text-center">
-              <p className="text-lg font-semibold text-emerald-700"> Demande envoyï¿½e !</p>
-              <p className="mt-2 text-sm text-emerald-700/80">Notre ï¿½quipe valide votre compte sous 48h.</p>
+              <p className="text-lg font-semibold text-emerald-700">✅ Demande envoyée !</p>
+              <p className="mt-2 text-sm text-emerald-700/80">Notre équipe valide votre compte sous 48h.</p>
               <Link href="/pro" className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-[#0A7EA4] shadow-sm">
-                Retour ï¿½ l&apos;espace Pro
+                Retour à l&apos;espace Pro
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -156,8 +156,8 @@ export default function ProTransportInscriptionPage() {
             <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
               <div className="md:col-span-2">
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-nc-lagon">Formulaire</p>
-                <h2 className="mt-1 font-display text-2xl font-bold text-night">Crï¿½er mon compte Transport Pro</h2>
-                <p className="mt-1 text-sm text-night/55">Gratuit pour commencer - validï¿½ par notre ï¿½quipe sous 48h.</p>
+                <h2 className="mt-1 font-display text-2xl font-bold text-night">Créer mon compte Transport Pro</h2>
+                <p className="mt-1 text-sm text-night/55">Gratuit pour commencer - validé par notre équipe sous 48h.</p>
               </div>
 
               <label className="block md:col-span-2">
@@ -171,7 +171,7 @@ export default function ProTransportInscriptionPage() {
               </label>
 
               <label className="block">
-                <span className="mb-1 block text-sm font-semibold text-night">CatÃ©gorie *</span>
+                <span className="mb-1 block text-sm font-semibold text-night">Catégorie *</span>
                 <select
                   required
                   value={form.transport_type}
@@ -215,7 +215,7 @@ export default function ProTransportInscriptionPage() {
               </label>
 
               <label className="block">
-                <span className="mb-1 block text-sm font-semibold text-night">Tï¿½lï¿½phone professionnel</span>
+                <span className="mb-1 block text-sm font-semibold text-night">Téléphone professionnel</span>
                 <input
                   value={form.phone}
                   onChange={(e) => setForm((current) => ({ ...current, phone: e.target.value }))}
@@ -243,7 +243,7 @@ export default function ProTransportInscriptionPage() {
               </label>
 
               <label className="block">
-                <span className="mb-1 block text-sm font-semibold text-night">Numï¿½ro RIDET (optionnel)</span>
+                <span className="mb-1 block text-sm font-semibold text-night">Numéro RIDET (optionnel)</span>
                 <input
                   value={form.ridet}
                   onChange={(e) => setForm((current) => ({ ...current, ridet: e.target.value }))}
@@ -256,7 +256,7 @@ export default function ProTransportInscriptionPage() {
                   <Upload className="h-4 w-4" />
                   {saving ? 'Envoi en cours...' : 'Envoyer ma demande'}
                 </button>
-                <p className="text-sm text-night/55">Votre demande sera vï¿½rifiï¿½e par notre ï¿½quipe avant publication.</p>
+                <p className="text-sm text-night/55">Votre demande sera vérifiée par notre équipe avant publication.</p>
               </div>
 
               {error ? <p className="md:col-span-2 text-sm font-medium text-red-600">{error}</p> : null}
