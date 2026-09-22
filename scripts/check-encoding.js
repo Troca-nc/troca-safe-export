@@ -83,6 +83,8 @@ const GUARDED_FILES = new Set([
   'frontend/src/components/onboarding/OnboardingToast.tsx',
   'frontend/src/components/onboarding/WelcomeToast.tsx',
   'frontend/src/components/pro/ProCard.tsx',
+  'frontend/src/components/pro/ProBookingModal.tsx',
+  'frontend/src/components/pro/RdvBookingCard.tsx',
   'frontend/src/components/profil/AlertsManager.tsx',
   'frontend/src/components/profil/PhoneVerification.tsx',
   'frontend/src/components/profil/SellerStatsDashboard.tsx',
