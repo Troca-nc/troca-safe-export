@@ -40,6 +40,7 @@ const GUARDED_FILES = new Set([
   'frontend/src/app/pro/dashboard/devis/page.tsx',
   'frontend/src/app/pro/dashboard/factures/page.tsx',
   'frontend/src/app/pro/dashboard/fret/page.tsx',
+  'frontend/src/app/pro/dashboard/import/page.tsx',
   'frontend/src/app/pro/dashboard/pack-lancement/page.tsx',
   'frontend/src/app/pro/dashboard/transport/page.tsx',
   'frontend/src/app/pro/ProLandingPageClient.tsx',
