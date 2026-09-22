@@ -127,12 +127,12 @@ function formatDate(value?: string | null) {
 function formatProductPrice(product: ProductItem) {
   if (product.price_type === 'free') return 'Gratuit'
   if (product.price_type === 'on_quote') return 'Sur devis'
-  if (product.price_type === 'from') return `ï¿½ partir de ${formatPrice(product.price_xpf)}`
+  if (product.price_type === 'from') return `À partir de ${formatPrice(product.price_xpf)}`
   return `${formatPrice(product.price_xpf)}${product.unit_label ? ` / ${product.unit_label}` : ''}`
 }
 
 function formatStockQuantity(stockQuantity: number | null) {
-  if (stockQuantity == null) return 'Stock illimitï¿½'
+  if (stockQuantity == null) return 'Stock illimité'
   if (stockQuantity <= 0) return 'Rupture'
   if (stockQuantity <= 5) return `Plus que ${stockQuantity}`
   return `Stock: ${stockQuantity}`
@@ -150,7 +150,7 @@ function getDraftProductPreview(form: ProductFormState, categories: CatalogCateg
     : priceType === 'on_quote'
       ? 'Sur devis'
       : priceType === 'from'
-        ? `ï¿½ partir de ${formatPrice(Number(form.price_xpf || 0))}`
+        ? `À partir de ${formatPrice(Number(form.price_xpf || 0))}`
         : `${formatPrice(Number(form.price_xpf || 0))}${form.unit_label ? ` / ${form.unit_label}` : ''}`
 
   return {
@@ -193,7 +193,7 @@ function ProductSteps() {
   const steps = [
     {
       icon: Package,
-      title: '1. Crï¿½ez votre produit',
+      title: '1. Créez votre produit',
       text: 'Nom, prix fixe, stock et description pour votre catalogue.',
     },
     {
@@ -204,7 +204,7 @@ function ProductSteps() {
     {
       icon: Sparkles,
       title: '3. Suivez vos retours',
-      text: 'Gardez un Sil sur vos publications et revenez modifier le stock.',
+      text: 'Gardez un œil sur vos publications et revenez modifier le stock.',
     },
   ]
 
@@ -341,7 +341,7 @@ export default function ProductsManager() {
       const uploaded = Array.isArray(response.data?.data) ? response.data.data : []
       const urls = uploaded.map((item: { url?: string }) => String(item.url || '').trim()).filter(Boolean)
       if (!urls.length) {
-        throw new Error('Aucune image na pu ï¿½tre importï¿½e.')
+        throw new Error('Aucune image n’a pu être importée.')
       }
 
       setForm((current) => {
@@ -353,9 +353,9 @@ export default function ProductsManager() {
           image_urls_text: mergedUrls.join('\n'),
         }
       })
-      setSuccess({ title: `${urls.length} photo${urls.length > 1 ? 's' : ''} importï¿½e${urls.length > 1 ? 's' : ''}.` })
+      setSuccess({ title: `${urls.length} photo${urls.length > 1 ? 's' : ''} importée${urls.length > 1 ? 's' : ''}.` })
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || 'Impossible dimporter ces photos.')
+      setError(err?.response?.data?.error || err?.message || 'Impossible d’importer ces photos.')
     } finally {
       setProductUploading(false)
       if (productImagesInputRef.current) {
@@ -423,11 +423,11 @@ export default function ProductsManager() {
       return
     }
     if (!form.category_id) {
-      setError('La catï¿½gorie est requise.')
+      setError('La catégorie est requise.')
       return
     }
     if (!selectedCategory || !isLeafCategory(selectedCategory)) {
-      setError('Choisissez une sous-catï¿½gorie finale.')
+      setError('Choisissez une sous-catégorie finale.')
       return
     }
     if (!form.commune_id) {
@@ -435,7 +435,7 @@ export default function ProductsManager() {
       return
     }
     if (!form.catalog_category_id) {
-      setError('La catï¿½gorie du catalogue est requise.')
+      setError('La catégorie du catalogue est requise.')
       return
     }
 
@@ -469,9 +469,9 @@ export default function ProductsManager() {
       }
       await loadProducts()
       resetForm()
-      setSuccess({ title: editingId ? 'Produit mis ï¿½ jour.' : 'Produit crï¿½ï¿½.' })
+      setSuccess({ title: editingId ? 'Produit mis à jour.' : 'Produit créé.' })
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible denregistrer ce produit.')
+      setError(err?.response?.data?.error || 'Impossible d’enregistrer ce produit.')
     } finally {
       setSaving(false)
     }
@@ -483,9 +483,9 @@ export default function ProductsManager() {
     try {
       await proApi.archiveProduct(productId)
       await loadProducts()
-      setSuccess({ title: 'Produit archivï¿½.' })
+      setSuccess({ title: 'Produit archivé.' })
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible darchiver ce produit.')
+      setError(err?.response?.data?.error || 'Impossible d’archiver ce produit.')
     } finally {
       setArchivingId(null)
     }
@@ -500,7 +500,7 @@ export default function ProductsManager() {
       const listingId = response.data?.data?.listing_id
       const publishedProduct = products.find((item) => item.id === productId)
       setSuccess({
-        title: publishedProduct ? `Annonce crï¿½ï¿½e depuis ${publishedProduct.title}.` : 'Annonce publiï¿½e depuis le catalogue.',
+        title: publishedProduct ? `Annonce créée depuis “${publishedProduct.title}”.` : 'Annonce publiée depuis le catalogue.',
         listingId,
       })
     } catch (err: any) {
@@ -511,11 +511,11 @@ export default function ProductsManager() {
   }
 
   const handleRestock = async (product: ProductItem) => {
-    const nextValue = window.prompt(`Nouvelle quantitï¿½ pour ${product.title}`, String(Math.max(1, product.stock_quantity ?? 1)))
+    const nextValue = window.prompt(`Nouvelle quantité pour ${product.title}`, String(Math.max(1, product.stock_quantity ?? 1)))
     if (nextValue == null) return
     const quantity = Number(nextValue)
     if (!Number.isFinite(quantity) || quantity < 0) {
-      setError('La quantitï¿½ saisie est invalide.')
+      setError('La quantité saisie est invalide.')
       return
     }
 
@@ -524,9 +524,9 @@ export default function ProductsManager() {
     try {
       await proApi.updateProduct(product.id, { stock_quantity: quantity })
       await loadProducts()
-      setSuccess({ title: quantity > 0 ? 'Stock mis ï¿½ jour.' : 'Produit masquï¿½ car stock nul.' })
+      setSuccess({ title: quantity > 0 ? 'Stock mis à jour.' : 'Produit masqué car stock nul.' })
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible de mettre ï¿½ jour le stock.')
+      setError(err?.response?.data?.error || 'Impossible de mettre à jour le stock.')
     } finally {
       setSaving(false)
     }
@@ -547,7 +547,7 @@ export default function ProductsManager() {
 
   const handleCatalogCategorySubmit = async () => {
     if (!catalogCategoryForm.name.trim()) {
-      setError('Le nom de la catï¿½gorie catalogue est requis.')
+      setError('Le nom de la catégorie catalogue est requis.')
       return
     }
 
@@ -565,9 +565,9 @@ export default function ProductsManager() {
       }
       await loadCatalogCategories()
       resetCatalogCategoryForm()
-      setSuccess({ title: catalogCategoryEditingId ? 'CatÃ©gorie catalogue mise ï¿½ jour.' : 'CatÃ©gorie catalogue crï¿½ï¿½e.' })
+      setSuccess({ title: catalogCategoryEditingId ? 'Catégorie catalogue mise à jour.' : 'Catégorie catalogue créée.' })
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible denregistrer cette catï¿½gorie catalogue.')
+      setError(err?.response?.data?.error || 'Impossible d’enregistrer cette catégorie catalogue.')
     } finally {
       setCatalogCategorySaving(false)
     }
@@ -582,9 +582,9 @@ export default function ProductsManager() {
       if (catalogCategoryEditingId === categoryId) {
         resetCatalogCategoryForm()
       }
-      setSuccess({ title: 'CatÃ©gorie catalogue supprimï¿½e.' })
+      setSuccess({ title: 'Catégorie catalogue supprimée.' })
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible de supprimer cette catï¿½gorie catalogue.')
+      setError(err?.response?.data?.error || 'Impossible de supprimer cette catégorie catalogue.')
     } finally {
       setCatalogCategorySaving(false)
     }
@@ -608,9 +608,9 @@ export default function ProductsManager() {
         proApi.updateCatalogCategory(target.id, { position: current.position }),
       ])
       await loadCatalogCategories()
-      setSuccess({ title: 'Ordre des catï¿½gories catalogue mis ï¿½ jour.' })
+      setSuccess({ title: 'Ordre des catégories catalogue mis à jour.' })
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible de rï¿½ordonner cette catï¿½gorie catalogue.')
+      setError(err?.response?.data?.error || 'Impossible de réordonner cette catégorie catalogue.')
     } finally {
       setCatalogCategorySaving(false)
     }
@@ -631,9 +631,9 @@ export default function ProductsManager() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Catalogue produits</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-night">Gï¿½rez vos produits fixes sï¿½parï¿½ment des annonces</h1>
+            <h1 className="mt-2 font-display text-3xl font-bold text-night">Gérez vos produits fixes séparément des annonces</h1>
             <p className="mt-2 max-w-2xl text-sm text-night/60">
-              Crï¿½ez une fiche produit durable, suivez votre stock et publiez une annonce ponctuelle quand vous voulez la mettre en avant.
+              Créez une fiche produit durable, suivez votre stock et publiez une annonce ponctuelle quand vous voulez la mettre en avant.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -659,10 +659,10 @@ export default function ProductsManager() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">
-                {editingId ? 'Modifier un produit' : 'Crï¿½er un produit'}
+                {editingId ? 'Modifier un produit' : 'Créer un produit'}
               </p>
               <h2 className="mt-1 font-display text-2xl font-bold text-night">
-                {editingId ? 'Mise ï¿½ jour du catalogue' : 'Nouveau produit'}
+                {editingId ? 'Mise à jour du catalogue' : 'Nouveau produit'}
               </h2>
             </div>
             {editingId ? (
@@ -680,7 +680,7 @@ export default function ProductsManager() {
           <div className="mt-5 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)]/40 p-4">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">CatÃ©gories du catalogue</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Catégories du catalogue</p>
                 <h3 className="mt-1 font-semibold text-night">Organisez vos produits par famille</h3>
               </div>
               {catalogCategoryEditingId ? (
@@ -762,7 +762,7 @@ export default function ProductsManager() {
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-night/55">Aucune catï¿½gorie catalogue pour le moment.</p>
+                <p className="text-sm text-night/55">Aucune catégorie catalogue pour le moment.</p>
               )}
             </div>
           </div>
@@ -784,7 +784,7 @@ export default function ProductsManager() {
                 value={form.description}
                 onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
                 rows={5}
-                placeholder="Dï¿½crivez votre produit, son usage, ses atouts, ses variantes ï¿½ventuelles..."
+                placeholder="Décrivez votre produit, son usage, ses atouts, ses variantes éventuelles..."
                 className="input w-full rounded-2xl py-3"
               />
             </label>
@@ -797,7 +797,7 @@ export default function ProductsManager() {
                 className="input w-full rounded-2xl"
               >
                 <option value="fixed">Prix fixe</option>
-                <option value="from">ï¿½ partir de</option>
+                <option value="from">À partir de</option>
                 <option value="on_quote">Sur devis</option>
                 <option value="free">Gratuit</option>
               </select>
@@ -817,7 +817,7 @@ export default function ProductsManager() {
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-night">Prix barrï¿½ / promo</span>
+              <span className="text-sm font-semibold text-night">Prix barré / promo</span>
               <input
                 type="number"
                 min="0"
@@ -846,29 +846,29 @@ export default function ProductsManager() {
                   onChange={(event) => setForm((current) => ({ ...current, stock_unlimited: event.target.checked }))}
                   className="h-4 w-4 rounded border-[var(--color-border)] text-[#0A7EA4] focus:ring-[#0A7EA4]"
                 />
-                Stock illimitï¿½
+                Stock illimité
               </label>
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-night">Unitï¿½ / format</span>
+              <span className="text-sm font-semibold text-night">Unité / format</span>
               <input
                 value={form.unit_label}
                 onChange={(event) => setForm((current) => ({ ...current, unit_label: event.target.value }))}
                 className="input w-full rounded-2xl"
-                placeholder="ï¿½ lunitï¿½, lot de 6, 1 kg..."
+                placeholder="à l’unité, lot de 6, 1 kg..."
               />
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-night">CatÃ©gorie *</span>
+              <span className="text-sm font-semibold text-night">Catégorie *</span>
               <select
                 value={form.category_id}
                 onChange={(event) => setForm((current) => ({ ...current, category_id: event.target.value }))}
                 disabled={loadingMeta}
                 className="input w-full rounded-2xl"
               >
-                <option value="">{loadingMeta ? 'Chargement...' : 'Choisir une catï¿½gorie'}</option>
+                <option value="">{loadingMeta ? 'Chargement...' : 'Choisir une catégorie'}</option>
                 {leafCategories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.label}
@@ -878,14 +878,14 @@ export default function ProductsManager() {
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-night">CatÃ©gorie catalogue *</span>
+              <span className="text-sm font-semibold text-night">Catégorie catalogue *</span>
               <select
                 value={form.catalog_category_id}
                 onChange={(event) => setForm((current) => ({ ...current, catalog_category_id: event.target.value }))}
                 disabled={loadingMeta || catalogCategoryLoading}
                 className="input w-full rounded-2xl"
               >
-                <option value="">{loadingMeta || catalogCategoryLoading ? 'Chargement...' : 'Choisir une catï¿½gorie catalogue'}</option>
+                <option value="">{loadingMeta || catalogCategoryLoading ? 'Chargement...' : 'Choisir une catégorie catalogue'}</option>
                 {catalogCategories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
@@ -912,7 +912,7 @@ export default function ProductsManager() {
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-night">SKU / Rï¿½fï¿½rence</span>
+              <span className="text-sm font-semibold text-night">SKU / Référence</span>
               <input
                 value={form.sku}
                 onChange={(event) => setForm((current) => ({ ...current, sku: event.target.value }))}
@@ -937,7 +937,7 @@ export default function ProductsManager() {
                 value={form.cover_image_url}
                 onChange={(event) => setForm((current) => ({ ...current, cover_image_url: event.target.value }))}
                 className="input w-full rounded-2xl"
-                placeholder="La premiï¿½re photo importï¿½e sera utilisï¿½e par dï¿½faut"
+                placeholder="La première photo importée sera utilisée par défaut"
               />
             </label>
 
@@ -945,7 +945,7 @@ export default function ProductsManager() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <span className="text-sm font-semibold text-night">Importer des photos</span>
-                  <p className="mt-1 text-xs text-night/55">Choisissez vos fichiers image, nous gï¿½nï¿½rons automatiquement les URLs du catalogue. Limport est dï¿½sormais la voie principale.</p>
+                  <p className="mt-1 text-xs text-night/55">Choisissez vos fichiers image, nous générons automatiquement les URLs du catalogue. L’import est désormais la voie principale.</p>
                 </div>
                 <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-night/60">
                   {parseImageUrls(form.image_urls_text).length} photo{parseImageUrls(form.image_urls_text).length > 1 ? 's' : ''}
@@ -965,7 +965,7 @@ export default function ProductsManager() {
               {parseImageUrls(form.image_urls_text).length ? (
                 <div className="mt-4">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-night">Photos importï¿½es</p>
+                    <p className="text-sm font-semibold text-night">Photos importées</p>
                     <button
                       type="button"
                       onClick={handleClearUploadedPhotos}
@@ -979,7 +979,7 @@ export default function ProductsManager() {
                       <div key={url} className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]">
                         <div className="relative aspect-[4/3] bg-sand">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={url} alt="Photo produit importï¿½e" className="h-full w-full object-cover" />
+                          <img src={url} alt="Photo produit importée" className="h-full w-full object-cover" />
                         </div>
                         <div className="flex items-center justify-between gap-2 px-3 py-2">
                           <p className="truncate text-xs text-night/60">{url}</p>
@@ -1000,9 +1000,9 @@ export default function ProductsManager() {
             </div>
 
             <div className="md:col-span-2 rounded-[1.5rem] border border-dashed border-[var(--color-border)] bg-[var(--color-background-secondary)]/40 p-4">
-              <p className="text-sm font-semibold text-night">URLs manuelles avancï¿½es</p>
+              <p className="text-sm font-semibold text-night">URLs manuelles avancées</p>
               <p className="mt-1 text-xs text-night/55">
-                Si vous avez dï¿½jï¿½ des images hï¿½bergï¿½es, vous pouvez encore les coller ci-dessous. Sinon, l&apos;import de fichiers suffit.
+                Si vous avez déjà des images hébergées, vous pouvez encore les coller ci-dessous. Sinon, l&apos;import de fichiers suffit.
               </p>
               <textarea
                 value={form.image_urls_text}
@@ -1029,7 +1029,7 @@ export default function ProductsManager() {
             <div className="md:col-span-2 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Aperï¿½u en direct</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Aperçu en direct</p>
                   <h3 className="mt-1 font-semibold text-night">Ce que verra le client</h3>
                 </div>
                 <span className="rounded-full bg-nc-lagonLight px-3 py-1 text-xs font-semibold text-nc-lagon">
@@ -1042,7 +1042,7 @@ export default function ProductsManager() {
                   {draftPreview.cover ? (
                     <Image
                       src={draftPreview.cover}
-                      alt={form.title || 'Aperï¿½u du produit'}
+                      alt={form.title || 'Aperçu du produit'}
                       width={640}
                       height={480}
                       className="h-56 w-full object-cover"
@@ -1054,7 +1054,7 @@ export default function ProductsManager() {
                   )}
                   {form.is_featured ? (
                     <span className="absolute left-3 top-3 rounded-full bg-[#0A7EA4] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
-                      ï¿½ la une
+                      À la une
                     </span>
                   ) : null}
                 </div>
@@ -1062,13 +1062,13 @@ export default function ProductsManager() {
                 <div className="space-y-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">
-                      {draftPreview.categoryName} ï¿½ {draftPreview.communeName}
+                      {draftPreview.categoryName} · {draftPreview.communeName}
                     </p>
                     <h4 className="mt-1 text-2xl font-bold text-night">
                       {form.title || 'Nom du produit'}
                     </h4>
                     <p className="mt-1 text-sm text-night/60">
-                      {form.brand || 'Marque'} ï¿½ {form.unit_label || 'Format'}
+                      {form.brand || 'Marque'} · {form.unit_label || 'Format'}
                     </p>
                   </div>
 
@@ -1085,7 +1085,7 @@ export default function ProductsManager() {
                   </div>
 
                   <p className="line-clamp-4 text-sm leading-relaxed text-night/65">
-                    {form.description || 'Ajoutez une description pour mieux prï¿½senter votre produit.'}
+                    {form.description || 'Ajoutez une description pour mieux présenter votre produit.'}
                   </p>
 
                   <div className="flex flex-wrap gap-2 text-xs font-medium text-night/55">
@@ -1116,7 +1116,7 @@ export default function ProductsManager() {
                 <span>{success.title}</span>
                 {success.listingId ? (
                   <Link href={`/annonces/${success.listingId}`} className="font-semibold underline">
-                    Voir lannonce
+                    Voir l’annonce
                   </Link>
                 ) : null}
               </div>
@@ -1131,7 +1131,7 @@ export default function ProductsManager() {
               className="btn-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              {editingId ? 'Enregistrer les modifications' : 'Crï¿½er le produit'}
+              {editingId ? 'Enregistrer les modifications' : 'Créer le produit'}
             </button>
             {!editingId ? (
               <button
@@ -1139,7 +1139,7 @@ export default function ProductsManager() {
                 onClick={resetForm}
                 className="rounded-2xl border border-[var(--color-border)] px-5 py-3 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
               >
-                Rï¿½initialiser
+                Réinitialiser
               </button>
             ) : null}
           </div>
@@ -1157,9 +1157,9 @@ export default function ProductsManager() {
               </div>
             </div>
             <div className="mt-4 space-y-3 text-sm text-night/65">
-              <p>" Le produit reste votre fiche permanente avec prix et stock.</p>
-              <p>" Lannonce est une publication ponctuelle visible dans le flux.</p>
-              <p>" Vous pouvez publier le mï¿½me produit plusieurs fois sans ressaisir le contenu.</p>
+              <p>• Le produit reste votre fiche permanente avec prix et stock.</p>
+              <p>• L’annonce est une publication ponctuelle visible dans le flux.</p>
+              <p>• Vous pouvez publier le même produit plusieurs fois sans ressaisir le contenu.</p>
             </div>
           </article>
 
@@ -1167,7 +1167,7 @@ export default function ProductsManager() {
             <div className="mb-3 flex items-end justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Statut</p>
-                <h2 className="mt-1 font-display text-xl font-bold text-night">Aperï¿½u du catalogue</h2>
+                <h2 className="mt-1 font-display text-xl font-bold text-night">Aperçu du catalogue</h2>
               </div>
               <span className="rounded-full bg-nc-lagonLight px-3 py-1 text-xs font-semibold text-nc-lagon">
                 {products.filter((product) => product.is_active).length} actifs
@@ -1183,7 +1183,7 @@ export default function ProductsManager() {
                 <p className="mt-1 text-xl font-bold text-night">{products.reduce((acc, product) => acc + Math.max(0, Number(product.stock_quantity ?? 0)), 0)}</p>
               </div>
               <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
-                <p className="text-night/55">Annonces publiï¿½es</p>
+                <p className="text-night/55">Annonces publiées</p>
                 <p className="mt-1 text-xl font-bold text-night">{products.reduce((acc, product) => acc + Number(product.published_listing_count ?? 0), 0)}</p>
               </div>
               <div className="rounded-2xl bg-[var(--color-background-secondary)] p-4">
@@ -1202,7 +1202,7 @@ export default function ProductsManager() {
             <h2 className="mt-1 font-display text-2xl font-bold text-night">Votre catalogue</h2>
           </div>
           <p className="text-sm text-night/55">
-            {loadingProducts ? 'Chargement&' : `${products.length} fiche${products.length > 1 ? 's' : ''} produit${products.length > 1 ? 's' : ''}`}
+            {loadingProducts ? 'Chargement…' : `${products.length} fiche${products.length > 1 ? 's' : ''} produit${products.length > 1 ? 's' : ''}`}
           </p>
         </div>
 
@@ -1225,27 +1225,27 @@ export default function ProductsManager() {
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="line-clamp-1 text-base font-semibold text-night">{product.title}</h3>
                         {product.is_featured ? (
-                          <span className="rounded-full bg-kalico-blue/10 px-2.5 py-1 text-[11px] font-semibold text-kalico-blue">Mise en avant</span>
+                          <span className="rounded-full bg-coral/10 px-2.5 py-1 text-[11px] font-semibold text-kalico-blue">Mise en avant</span>
                         ) : null}
                         {product.is_active ? (
                           <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">Actif</span>
                         ) : (
-                          <span className="rounded-full bg-sand px-2.5 py-1 text-[11px] font-semibold text-night/60">Archivï¿½</span>
+                          <span className="rounded-full bg-sand px-2.5 py-1 text-[11px] font-semibold text-night/60">Archivé</span>
                         )}
                         {!product.is_available ? (
-                          <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">Masquï¿½ stock nul</span>
+                          <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">Masqué stock nul</span>
                         ) : null}
                       </div>
                       <p className="mt-1 text-sm text-night/60">
-                        {product.category_name || 'CatÃ©gorie'} ï¿½ {product.catalog_category_name || 'Catalogue'} ï¿½ {product.commune_name || 'Commune'} ï¿½ {formatProductPrice(product)}
+                        {product.category_name || 'Catégorie'} · {product.catalog_category_name || 'Catalogue'} · {product.commune_name || 'Commune'} · {formatProductPrice(product)}
                       </p>
                       <p className="mt-1 text-sm text-night/60">
                         {formatStockQuantity(product.stock_quantity)}
-                        {product.unit_label ? ` ï¿½ ${product.unit_label}` : ''}
+                        {product.unit_label ? ` · ${product.unit_label}` : ''}
                       </p>
                       <p className="mt-1 text-xs text-night/45">
-                        Derniï¿½re publication: {product.last_published_at ? formatDate(product.last_published_at) : 'Aucune'}
-                        {' '}ï¿½ Publiï¿½ {product.published_listing_count} fois
+                        Dernière publication: {product.last_published_at ? formatDate(product.last_published_at) : 'Aucune'}
+                        {' '}· Publié {product.published_listing_count} fois
                       </p>
                       <p className="mt-2 line-clamp-2 text-sm text-night/65">{product.description}</p>
                     </div>
@@ -1275,7 +1275,7 @@ export default function ProductsManager() {
                       className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
                     >
                       <Sparkles className="h-4 w-4" />
-                      Rï¿½approvisionner
+                      Réapprovisionner
                     </button>
                     <button
                       type="button"
@@ -1290,10 +1290,10 @@ export default function ProductsManager() {
                 </div>
                 {product.last_published_listing_id ? (
                   <div className="mt-4 rounded-2xl border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-3 text-sm text-night/70">
-                    Derniï¿½re annonce publiï¿½e:
+                    Dernière annonce publiée:
                     {' '}
                     <Link href={`/annonces/${product.last_published_listing_id}`} className="font-semibold text-[#0A7EA4] underline">
-                      {product.last_published_listing_title || 'Voir lannonce'}
+                      {product.last_published_listing_title || 'Voir l’annonce'}
                     </Link>
                   </div>
                 ) : null}
@@ -1302,7 +1302,7 @@ export default function ProductsManager() {
           ) : (
             <div className="rounded-[1.75rem] border border-dashed border-[var(--color-border)] p-8 text-center text-sm text-night/60">
               <p className="font-semibold text-night">Aucun produit pour le moment</p>
-              <p className="mt-2">Crï¿½ez votre premiï¿½re fiche produit pour construire un vrai catalogue sï¿½parï¿½ de vos annonces.</p>
+              <p className="mt-2">Créez votre première fiche produit pour construire un vrai catalogue séparé de vos annonces.</p>
             </div>
           )}
         </div>
