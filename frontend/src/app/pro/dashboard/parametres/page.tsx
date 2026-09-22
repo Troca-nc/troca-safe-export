@@ -20,34 +20,34 @@ import {
 } from '@/components/pro/quoteTemplate'
 
 const PRO_CATEGORIES = [
-  'Commerï¿½ant',
+  'Commerçant',
   'Restaurateur',
   'Artisan BTP',
   'Garagiste',
   'Paysagiste',
   'Prestataire IT',
-  'Agence immobiliï¿½re',
-  'Activitï¿½ nautique',
+  'Agence immobilière',
+  'Activité nautique',
   'Transporteur',
-  'Professionnel de santï¿½',
-  'Organisateur dï¿½vï¿½nements',
+  'Professionnel de santé',
+  'Organisateur d’événements',
   'Agriculteur',
 ] as const
 
 const COMMUNES = [
-  'NoumÃ©a',
+  'Nouméa',
   'Mont-Dore',
-  'DumbÃ©a',
-  'Paï¿½ta',
+  'Dumbéa',
+  'Païta',
   'Boulouparis',
   'La Foa',
   'Bourail',
-  'Konï¿½',
+  'Koné',
   'Koumac',
-  'Poindimiï¿½',
+  'Poindimié',
   'Lifou',
-  'Marï¿½',
-  'Ouvï¿½a',
+  'Maré',
+  'Ouvéa',
   'Autre',
 ] as const
 
@@ -118,9 +118,9 @@ export default function ProDashboardSettingsPage() {
   const previewProfile = useMemo(
     () => ({
       name: form.company_name || user?.first_name || 'Votre entreprise',
-      category: form.category || 'CatÃ©gorie',
+      category: form.category || 'Catégorie',
       description: form.description || 'Votre description appara?tra ici.',
-      commune: form.commune || 'NoumÃ©a',
+      commune: form.commune || 'Nouméa',
       website: form.website || '',
       phone: form.phone || '',
       hours: form.hours || 'Horaires ? compl?ter',
@@ -228,7 +228,7 @@ export default function ProDashboardSettingsPage() {
         setBannerPreview(url)
       }
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible de tï¿½lï¿½verser limage.')
+      setError(err?.response?.data?.error || 'Impossible de téléverser l’image.')
     } finally {
       setUploading(null)
       event.target.value = ''
@@ -255,7 +255,7 @@ export default function ProDashboardSettingsPage() {
         setPortfolioPhotos((current) => Array.from(new Set([...current, ...uploadedUrls])))
       }
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible de tï¿½lï¿½verser ces photos de portfolio.')
+      setError(err?.response?.data?.error || 'Impossible de téléverser ces photos de portfolio.')
     } finally {
       setUploading(null)
       event.target.value = ''
@@ -266,7 +266,7 @@ export default function ProDashboardSettingsPage() {
     const file = event.target.files?.[0]
     if (!file) return
     if (file.type !== 'application/pdf') {
-      setError('Le catalogue doit ï¿½tre un PDF.')
+      setError('Le catalogue doit être un PDF.')
       event.target.value = ''
       return
     }
@@ -281,7 +281,7 @@ export default function ProDashboardSettingsPage() {
       setCatalogPdfUrl(url)
       setCatalogPdfName(file.name)
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible de tï¿½lï¿½verser le PDF.')
+      setError(err?.response?.data?.error || 'Impossible de téléverser le PDF.')
     } finally {
       setUploading(null)
       event.target.value = ''
@@ -310,9 +310,9 @@ export default function ProDashboardSettingsPage() {
         portfolio_photos: portfolioPhotos,
         quote_template: quoteTemplate,
       })
-      setSuccess(' ParamÃ¨tres enregistrï¿½s avec succï¿½s.')
+      setSuccess('✅ Paramètres enregistrés avec succès.')
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible denregistrer vos paramï¿½tres pour le moment.')
+      setError(err?.response?.data?.error || 'Impossible d’enregistrer vos paramètres pour le moment.')
     } finally {
       setLoading(false)
     }
@@ -326,9 +326,9 @@ export default function ProDashboardSettingsPage() {
       <section className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
           <div className="flex items-end justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">ParamÃ¨tres Pro</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Paramètres Pro</p>
               <h1 className="mt-2 font-display text-3xl font-bold text-night">Ma vitrine professionnelle</h1>
-              <p className="mt-2 text-sm text-night/60">Mettez ï¿½ jour votre marque, vos coordonnï¿½es et vos visuels.</p>
+              <p className="mt-2 text-sm text-night/60">Mettez à jour votre marque, vos coordonnées et vos visuels.</p>
             </div>
           <div className="flex flex-col items-end gap-2">
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
@@ -346,7 +346,7 @@ export default function ProDashboardSettingsPage() {
                 }}
               className="inline-flex items-center gap-2 rounded-2xl border border-[#0A7EA4]/15 bg-nc-lagonLight px-4 py-2 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10"
             >
-              Prï¿½visualiser ma vitrine
+              Prévisualiser ma vitrine
               <Eye className="h-4 w-4" />
             </button>
           </div>
@@ -368,7 +368,7 @@ export default function ProDashboardSettingsPage() {
               <input value={form.company_name} onChange={(e) => handleChange('company_name', e.target.value)} className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm" />
             </label>
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-night">CatÃ©gorie</span>
+              <span className="text-sm font-semibold text-night">Catégorie</span>
               <select value={form.category} onChange={(e) => handleChange('category', e.target.value)} className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm">
                 <option value="">Choisir un secteur</option>
                 {PRO_CATEGORIES.map((item) => (
@@ -397,7 +397,7 @@ export default function ProDashboardSettingsPage() {
               </select>
             </label>
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-night">Tï¿½lï¿½phone</span>
+              <span className="text-sm font-semibold text-night">Téléphone</span>
               <input value={form.phone} onChange={(e) => handleChange('phone', e.target.value)} className="input w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm" />
             </label>
             <label className="space-y-2">
@@ -429,7 +429,7 @@ export default function ProDashboardSettingsPage() {
                   className="inline-flex items-center gap-2 rounded-2xl border border-[#0A7EA4]/15 bg-white px-3 py-2 text-sm font-semibold text-[#0A7EA4] transition hover:bg-[#0A7EA4]/10"
                 >
                   <PlayCircle className="h-4 w-4" />
-                  Prï¿½visualiser
+                  Prévisualiser
                 </button>
               ) : null}
             </div>
@@ -444,7 +444,7 @@ export default function ProDashboardSettingsPage() {
             </label>
             {catalogPdfUrl ? (
               <div className="mt-4 rounded-2xl border border-white/60 bg-white px-4 py-3 text-sm text-night/70">
-                <p className="font-semibold text-night">{catalogPdfName || 'Catalogue PDF tï¿½lï¿½versï¿½'}</p>
+                <p className="font-semibold text-night">{catalogPdfName || 'Catalogue PDF téléversé'}</p>
                 <p className="mt-1 text-xs text-night/45 break-all">{catalogPdfUrl}</p>
               </div>
             ) : null}
@@ -484,7 +484,7 @@ export default function ProDashboardSettingsPage() {
             </div>
 
             <div className="mt-4">
-              <p className="text-sm font-semibold text-night">Modï¿½les rapides</p>
+              <p className="text-sm font-semibold text-night">Modèles rapides</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
                   type="button"
@@ -505,7 +505,7 @@ export default function ProDashboardSettingsPage() {
                   onClick={() => applyPreset('commercant')}
                   className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-night transition hover:border-[#0A7EA4]/30 hover:bg-nc-lagonLight hover:text-[#0A7EA4]"
                 >
-                  Commerï¿½ant
+                  Commerçant
                 </button>
                 <button
                   type="button"
@@ -519,17 +519,17 @@ export default function ProDashboardSettingsPage() {
                   onClick={resetTemplate}
                   className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-night transition hover:border-red-300 hover:bg-red-50 hover:text-red-700"
                 >
-                  Rï¿½initialiser la template
+                  Réinitialiser la template
                 </button>
               </div>
               <p className="mt-2 text-xs text-night/45">
-                Ces modï¿½les prï¿½-remplissent la template et restent modifiables champ par champ.
+                Ces modèles pré-remplissent la template et restent modifiables champ par champ.
               </p>
             </div>
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-night">Libellï¿½ du besoin</span>
+                <span className="text-sm font-semibold text-night">Libellé du besoin</span>
                 <input
                   value={quoteTemplate.need_type_label}
                   onChange={(e) => handleTemplateChange('need_type_label', e.target.value)}
@@ -545,7 +545,7 @@ export default function ProDashboardSettingsPage() {
                 />
               </label>
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-night">Libellï¿½ de commune</span>
+                <span className="text-sm font-semibold text-night">Libellé de commune</span>
                 <input
                   value={quoteTemplate.commune_label}
                   onChange={(e) => handleTemplateChange('commune_label', e.target.value)}
@@ -570,7 +570,7 @@ export default function ProDashboardSettingsPage() {
                   onChange={(e) => handleTemplateChange('show_phone', e.target.checked)}
                   className="h-4 w-4 rounded border-[var(--color-border)] text-[#0A7EA4]"
                 />
-                Tï¿½lï¿½phone visible
+                Téléphone visible
               </label>
               <label className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm font-semibold text-night">
                 <input
@@ -594,7 +594,7 @@ export default function ProDashboardSettingsPage() {
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-night">Libellï¿½ budget</span>
+                <span className="text-sm font-semibold text-night">Libellé budget</span>
                 <input
                   value={quoteTemplate.budget_label}
                   onChange={(e) => handleTemplateChange('budget_label', e.target.value)}
@@ -602,7 +602,7 @@ export default function ProDashboardSettingsPage() {
                 />
               </label>
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-night">Montants rapides (sï¿½parï¿½s par des virgules)</span>
+                <span className="text-sm font-semibold text-night">Montants rapides (séparés par des virgules)</span>
                 <input
                   value={formatBudgetPresetInput(quoteTemplate.budget_presets)}
                   onChange={(e) => handleBudgetPresetInput(e.target.value)}
@@ -614,7 +614,7 @@ export default function ProDashboardSettingsPage() {
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-night">Libellï¿½ dï¿½tails</span>
+                <span className="text-sm font-semibold text-night">Libellé détails</span>
                 <input
                   value={quoteTemplate.details_label}
                   onChange={(e) => handleTemplateChange('details_label', e.target.value)}
@@ -622,7 +622,7 @@ export default function ProDashboardSettingsPage() {
                 />
               </label>
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-night">Libellï¿½ tï¿½lï¿½phone</span>
+                <span className="text-sm font-semibold text-night">Libellé téléphone</span>
                 <input
                   value={quoteTemplate.requester_phone_label}
                   onChange={(e) => handleTemplateChange('requester_phone_label', e.target.value)}
@@ -633,7 +633,7 @@ export default function ProDashboardSettingsPage() {
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-night">Placeholder tï¿½lï¿½phone</span>
+                <span className="text-sm font-semibold text-night">Placeholder téléphone</span>
                 <input
                   value={quoteTemplate.requester_phone_placeholder}
                   onChange={(e) => handleTemplateChange('requester_phone_placeholder', e.target.value)}
@@ -641,7 +641,7 @@ export default function ProDashboardSettingsPage() {
                 />
               </label>
               <label className="space-y-2">
-                <span className="text-sm font-semibold text-night">Placeholder dï¿½tails</span>
+                <span className="text-sm font-semibold text-night">Placeholder détails</span>
                 <input
                   value={quoteTemplate.details_placeholder}
                   onChange={(e) => handleTemplateChange('details_placeholder', e.target.value)}
@@ -678,13 +678,13 @@ export default function ProDashboardSettingsPage() {
           <div className="rounded-[1.5rem] border border-[#0A7EA4]/15 bg-[linear-gradient(180deg,_rgba(214,240,246,0.55),_rgba(255,255,255,0.95))] p-4 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Aperï¿½u en direct</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Aperçu en direct</p>
                 <h4 className="mt-1 font-display text-xl font-bold text-night">{quoteTemplate.title}</h4>
                 <p className="mt-1 text-sm text-night/60">{quoteTemplate.subtitle}</p>
               </div>
               <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#0A7EA4] shadow-sm">
                 <Eye className="h-3.5 w-3.5" />
-                Mise ï¿½ jour instantanï¿½e
+                Mise à jour instantanée
               </span>
             </div>
 
@@ -697,7 +697,7 @@ export default function ProDashboardSettingsPage() {
                       {quoteTemplate.show_phone ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
                           <Phone className="h-3.5 w-3.5 text-[#0A7EA4]" />
-                          Tï¿½lï¿½phone
+                          Téléphone
                         </span>
                       ) : null}
                       {quoteTemplate.show_budget ? (
@@ -709,7 +709,7 @@ export default function ProDashboardSettingsPage() {
                       {quoteTemplate.show_date ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
                           <Clock3 className="h-3.5 w-3.5 text-[#0A7EA4]" />
-                          Date souhaitï¿½e
+                          Date souhaitée
                         </span>
                       ) : null}
                     </div>
@@ -733,7 +733,7 @@ export default function ProDashboardSettingsPage() {
                     {quoteTemplate.show_date ? (
                       <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">{quoteTemplate.desired_date_label}</p>
-                        <p className="mt-1 text-sm text-night/65">Date ï¿½ sï¿½lectionner par le client</p>
+                        <p className="mt-1 text-sm text-night/65">Date à sélectionner par le client</p>
                       </div>
                     ) : null}
                   </div>
@@ -763,19 +763,19 @@ export default function ProDashboardSettingsPage() {
                 </div>
 
                 <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Rï¿½sumï¿½</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Résumé</p>
                   <div className="mt-2 space-y-2 text-sm text-night/65">
-                    <p>" Champ tï¿½lï¿½phone : {quoteTemplate.show_phone ? 'visible' : 'masquï¿½'}</p>
-                    <p>" Champ budget : {quoteTemplate.show_budget ? 'visible' : 'masquï¿½'}</p>
-                    <p>" Champ date : {quoteTemplate.show_date ? 'visible' : 'masquï¿½'}</p>
-                    <p>" Champ dï¿½tails : {quoteTemplate.show_details ? 'visible' : 'masquï¿½'}</p>
+                    <p>• Champ téléphone : {quoteTemplate.show_phone ? 'visible' : 'masqué'}</p>
+                    <p>• Champ budget : {quoteTemplate.show_budget ? 'visible' : 'masqué'}</p>
+                    <p>• Champ date : {quoteTemplate.show_date ? 'visible' : 'masqué'}</p>
+                    <p>• Champ détails : {quoteTemplate.show_details ? 'visible' : 'masqué'}</p>
                   </div>
                 </div>
 
                 <div className="rounded-2xl border border-emerald-100 bg-emerald-50/80 p-3 text-sm text-night/70">
                   <p className="font-semibold text-emerald-800">Astuce</p>
                   <p className="mt-1">
-                    Ce bloc montre le rendu final que verra le visiteur avant mï¿½me la sauvegarde.
+                    Ce bloc montre le rendu final que verra le visiteur avant même la sauvegarde.
                   </p>
                 </div>
               </div>
@@ -791,13 +791,13 @@ export default function ProDashboardSettingsPage() {
         <div className="space-y-4 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Visuels</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">Logo et banniï¿½re</h2>
+            <h2 className="mt-1 font-display text-2xl font-bold text-night">Logo et bannière</h2>
           </div>
 
           <div className="space-y-3">
             <div className="overflow-hidden rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)]">
               <div className="relative h-36 bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.28))]">
-                {bannerPreview ? <Image src={bannerPreview} alt="Banniï¿½re" fill className="object-cover" /> : null}
+                {bannerPreview ? <Image src={bannerPreview} alt="Bannière" fill className="object-cover" /> : null}
               </div>
               <div className="-mt-8 px-4 pb-4">
                 <div className="flex items-end gap-3">
@@ -815,20 +815,20 @@ export default function ProDashboardSettingsPage() {
             <label className="block space-y-2">
               <span className="text-sm font-semibold text-night">Logo</span>
               <input type="file" accept="image/*" onChange={(e) => uploadImage('logo', e)} className="block w-full text-sm text-night/65 file:mr-4 file:rounded-xl file:border-0 file:bg-nc-lagonLight file:px-4 file:py-2 file:text-sm file:font-semibold file:text-nc-lagon hover:file:bg-[#d7eef3]" />
-              {uploading === 'logo' ? <p className="text-xs text-night/55">Tï¿½lï¿½versement du logo...</p> : null}
+              {uploading === 'logo' ? <p className="text-xs text-night/55">Téléversement du logo...</p> : null}
             </label>
 
           <label className="block space-y-2">
-            <span className="text-sm font-semibold text-night">Banniï¿½re</span>
+            <span className="text-sm font-semibold text-night">Bannière</span>
             <input type="file" accept="image/*" onChange={(e) => uploadImage('banner', e)} className="block w-full text-sm text-night/65 file:mr-4 file:rounded-xl file:border-0 file:bg-nc-lagonLight file:px-4 file:py-2 file:text-sm file:font-semibold file:text-nc-lagon hover:file:bg-[#d7eef3]" />
-            {uploading === 'banner' ? <p className="text-xs text-night/55">Tï¿½lï¿½versement de la banniï¿½re...</p> : null}
+            {uploading === 'banner' ? <p className="text-xs text-night/55">Téléversement de la bannière...</p> : null}
           </label>
 
           <div className="space-y-3 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Portfolio</p>
-                <h3 className="mt-1 font-display text-xl font-bold text-night">Photos de rï¿½alisations</h3>
+                <h3 className="mt-1 font-display text-xl font-bold text-night">Photos de réalisations</h3>
                 <p className="mt-1 text-sm text-night/60">Ajoutez quelques images pour renforcer votre vitrine Pro.</p>
               </div>
               {portfolioPhotos.length ? (
@@ -847,7 +847,7 @@ export default function ProDashboardSettingsPage() {
                 onChange={uploadPortfolioPhotos}
                 className="block w-full text-sm text-night/65 file:mr-4 file:rounded-xl file:border-0 file:bg-nc-lagonLight file:px-4 file:py-2 file:text-sm file:font-semibold file:text-nc-lagon hover:file:bg-[#d7eef3]"
               />
-              {uploading === 'portfolio' ? <p className="text-xs text-night/55">Tï¿½lï¿½versement des photos de portfolio...</p> : null}
+              {uploading === 'portfolio' ? <p className="text-xs text-night/55">Téléversement des photos de portfolio...</p> : null}
             </label>
 
             {portfolioPhotos.length ? (
@@ -885,7 +885,7 @@ export default function ProDashboardSettingsPage() {
         <div className="fixed inset-0 z-50 bg-night/70 p-4 backdrop-blur-sm">
           <div className="mx-auto flex h-full max-w-6xl items-center justify-center">
             <div className="h-[92vh] w-full overflow-hidden rounded-[2rem] bg-white">
-              <PdfViewer url={catalogPdfUrl} onClose={() => setCatalogPreviewOpen(false)} title="Aperï¿½u du catalogue" />
+              <PdfViewer url={catalogPdfUrl} onClose={() => setCatalogPreviewOpen(false)} title="Aperçu du catalogue" />
             </div>
           </div>
         </div>
@@ -938,7 +938,7 @@ export default function ProDashboardSettingsPage() {
                   onClick={() => setShowPreview(false)}
                   className="rounded-2xl border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-night transition hover:bg-[var(--color-background-secondary)]"
                 >
-                  Fermer laperï¿½u
+                  Fermer l’aperçu
                 </button>
               </div>
             </div>
