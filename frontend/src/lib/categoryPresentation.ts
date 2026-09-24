@@ -257,26 +257,26 @@ function resolveLegacyIconKey(iconKey?: string | null) {
 }
 
 export const CATEGORY_VISUALS: Record<string, CategoryVisual> = {
-  vehicules: { icon: Car, label: 'VÃ©hicules' },
+  vehicules: { icon: Car, label: 'Véhicules' },
   nautisme: { icon: Anchor, label: 'Nautisme' },
   immobilier: { icon: Home, label: 'Immobilier' },
   emploi: { icon: Briefcase, label: 'Emploi' },
   mode: { icon: Shirt, label: 'Mode' },
   'maison-jardin': { icon: Sofa, label: 'Maison & Jardin' },
   'bricolage-outillage': { icon: Wrench, label: 'Bricolage & Outillage' },
-  'famille-puericulture': { icon: Baby, label: 'Famille & Puï¿½riculture' },
-  'electronique-multimedia': { icon: Smartphone, label: 'ï¿½lectronique & Multimï¿½dia' },
+  'famille-puericulture': { icon: Baby, label: 'Famille & Puériculture' },
+  'electronique-multimedia': { icon: Smartphone, label: 'Électronique & Multimédia' },
   loisirs: { icon: Gamepad2, label: 'Loisirs' },
-  'collections-antiquites': { icon: Archive, label: 'Collections & Antiquitï¿½s' },
+  'collections-antiquites': { icon: Archive, label: 'Collections & Antiquités' },
   animaux: { icon: PawPrint, label: 'Animaux' },
   services: { icon: HeartHandshake, label: 'Services' },
-  'materiel-professionnel': { icon: HardHat, label: 'Matï¿½riel professionnel' },
+  'materiel-professionnel': { icon: HardHat, label: 'Matériel professionnel' },
   divers: { icon: Package, label: 'Divers' },
   // legacy aliases kept for backward compatibility
-  location_courte_duree: { icon: Home, label: 'Locations courte durï¿½e' },
+  location_courte_duree: { icon: Home, label: 'Locations courte durée' },
   don: { icon: Gift, label: 'Dons' },
   'location-vacances': { icon: MapPin, label: 'Location vacances' },
-  electronique: { icon: Smartphone, label: 'ï¿½lectronique' },
+  electronique: { icon: Smartphone, label: 'Électronique' },
   famille: { icon: UsersRound, label: 'Famille' },
   troc: { icon: Handshake, label: 'Troc' },
   mobilier: { icon: Sofa, label: 'Maison & Jardin' },
@@ -341,7 +341,7 @@ function resolveIconKey(slug: string, label?: string, iconKey?: string) {
   if (/(collection|antiquit)/.test(text)) return 'gift'
   if (/(loisirs|musique|lecture|jeux|sport|fitness|camping|creatif|modelisme|airsoft|tir)/.test(text)) return 'dumbbell'
   if (/(banque|finance|assurance|prix|tarif|salaire)/.test(text)) return 'banknote'
-  if (/(mï¿½dical|medical|sante|santï¿½|formation|stage)/.test(text)) return 'stethoscope'
+  if (/(médical|medical|sante|santé|formation|stage)/.test(text)) return 'stethoscope'
   if (/(industrie|environnement)/.test(text)) return 'factory'
 
   return CATEGORY_VISUALS[slug]?.icon ? slug : 'layers'
@@ -349,19 +349,19 @@ function resolveIconKey(slug: string, label?: string, iconKey?: string) {
 
 export const FEATURED_SEARCHES = [
   { label: 'Emploi', slug: 'emploi' },
-  { label: 'VÃ©hicules', slug: 'vehicules' },
+  { label: 'Véhicules', slug: 'vehicules' },
   { label: 'Immobilier', slug: 'immobilier' },
   { label: 'Nautisme', slug: 'nautisme' },
   { label: 'Services', slug: 'services' },
   { label: 'Mode', slug: 'mode' },
   { label: 'Maison & Jardin', slug: 'maison-jardin' },
   { label: 'Bricolage & Outillage', slug: 'bricolage-outillage' },
-  { label: 'Famille & Puï¿½riculture', slug: 'famille-puericulture' },
-  { label: 'ï¿½lectronique & Multimï¿½dia', slug: 'electronique-multimedia' },
+  { label: 'Famille & Puériculture', slug: 'famille-puericulture' },
+  { label: 'Électronique & Multimédia', slug: 'electronique-multimedia' },
   { label: 'Loisirs', slug: 'loisirs' },
-  { label: 'Collections & Antiquitï¿½s', slug: 'collections-antiquites' },
+  { label: 'Collections & Antiquités', slug: 'collections-antiquites' },
   { label: 'Animaux', slug: 'animaux' },
-  { label: 'Matï¿½riel professionnel', slug: 'materiel-professionnel' },
+  { label: 'Matériel professionnel', slug: 'materiel-professionnel' },
   { label: 'Divers', slug: 'divers' },
 ]
 
