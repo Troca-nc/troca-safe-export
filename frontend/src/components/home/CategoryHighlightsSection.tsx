@@ -131,7 +131,7 @@ export default function CategoryHighlightsSection({
         <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] py-14 text-center text-night/45">
           <p className="text-sm">Aucune annonce pour le moment.</p>
           <Link href="/annonces/nouvelle" className="btn-primary mt-4 inline-block">
-            Publier la premiï¿½re annonce
+            Publier la première annonce
           </Link>
         </div>
       )}

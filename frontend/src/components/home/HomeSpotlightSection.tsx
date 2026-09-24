@@ -99,9 +99,9 @@ function formatDateLabel(value?: string | null) {
 }
 
 function formatRelative(value?: string | null) {
-  if (!value) return 'Rï¿½cemment'
+  if (!value) return 'Récemment'
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'Rï¿½cemment'
+  if (Number.isNaN(date.getTime())) return 'Récemment'
   return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(date)
 }
 
@@ -109,7 +109,7 @@ function getListingLabel(listing: ListingItem) {
   if (listing.is_featured || (listing.boosted_until && new Date(listing.boosted_until) > new Date())) return 'Mise en avant'
   if (listing.is_urgent) return 'Urgent'
   if (listing.is_pro) return 'Pro'
-  return 'Annonce rï¿½cente'
+  return 'Annonce récente'
 }
 
 function SpotlightCard({
@@ -176,11 +176,11 @@ export function HomeSpotlightSection({
     return [
       {
         key: 'latest',
-        label: 'Derniï¿½res annonces',
+        label: 'Dernières annonces',
         href: '/annonces',
         items: latestListings,
         badge: 'Flux chaud',
-        intro: 'Les nouvelles annonces ï¿½ ne pas manquer.',
+        intro: 'Les nouvelles annonces à ne pas manquer.',
         tone: 'lagon',
       },
       {
@@ -189,7 +189,7 @@ export function HomeSpotlightSection({
         href: '/annonces?sort=date',
         items: premium.length > 0 ? premium : latestListings,
         badge: 'Premium',
-        intro: 'Les annonces boostï¿½es et les produits qui remontent en tï¿½te.',
+        intro: 'Les annonces boostées et les produits qui remontent en tête.',
         tone: 'lagon',
       },
       {
@@ -203,11 +203,11 @@ export function HomeSpotlightSection({
       },
       {
         key: 'events',
-        label: 'ï¿½vï¿½nements',
+        label: 'Événements',
         href: '/bons-plans#evenements',
         items: eventItems,
         badge: 'Culture',
-        intro: 'Concerts, marchï¿½s, animations et rendez-vous locaux.',
+        intro: 'Concerts, marchés, animations et rendez-vous locaux.',
         tone: 'sable',
       },
       {
@@ -215,8 +215,8 @@ export function HomeSpotlightSection({
         label: 'Covoiturage',
         href: '/covoiturage',
         items: rideItems,
-        badge: 'MobilitÃ©',
-        intro: 'Les trajets rï¿½cents et les places encore ouvertes.',
+        badge: 'Mobilité',
+        intro: 'Les trajets récents et les places encore ouvertes.',
         tone: 'corail',
       },
     ] as const
@@ -242,35 +242,35 @@ export function HomeSpotlightSection({
   const emptyState =
     active.key === 'premium'
       ? {
-          title: 'Les meilleures annonces apparaÃ®tront ici',
-          subtitle: 'Boostez votre annonce pour apparaÃ®tre en tÃªte de page.',
-          cta: 'DÃ©poser une annonce',
+          title: 'Les meilleures annonces apparaîtront ici',
+          subtitle: 'Boostez votre annonce pour apparaître en tête de page.',
+          cta: 'Déposer une annonce',
           href: '/annonces/nouvelle',
         }
       : active.key === 'latest'
         ? {
             title: 'Soyez parmi les premiers !',
-            subtitle: 'Aucune annonce pour l&apos;instant - publiez la vï¿½tre et lancez la communautï¿½.',
+            subtitle: 'Aucune annonce pour l&apos;instant - publiez la vôtre et lancez la communauté.',
             cta: 'Publier une annonce',
             href: '/annonces/nouvelle',
           }
         : active.key === 'promos'
           ? {
-              title: 'Les meilleures promos apparaï¿½tront ici',
+              title: 'Les meilleures promos apparaîtront ici',
               subtitle: 'Publiez un bon plan pour le mettre en avant sur Kalico.',
               cta: 'Publier une promo',
               href: '/annonces/nouvelle',
             }
           : active.key === 'events'
             ? {
-                title: 'Les meilleurs rendez-vous apparaï¿½tront ici',
-                subtitle: 'Ajoutez un ï¿½vï¿½nement pour faire vibrer la communautï¿½ locale.',
-                cta: 'Publier un ï¿½vï¿½nement',
+                title: 'Les meilleurs rendez-vous apparaîtront ici',
+                subtitle: 'Ajoutez un événement pour faire vibrer la communauté locale.',
+                cta: 'Publier un événement',
                 href: '/annonces/nouvelle',
               }
             : {
-                title: 'La mobilitï¿½ locale dï¿½marre ici',
-                subtitle: 'Proposez un trajet pour lancer les premiers ï¿½changes.',
+                title: 'La mobilité locale démarre ici',
+                subtitle: 'Proposez un trajet pour lancer les premiers échanges.',
                 cta: 'Proposer un trajet',
                 href: '/covoiturage?mode=publish',
               }
@@ -288,7 +288,7 @@ export function HomeSpotlightSection({
               Le meilleur de Kalico, en direct, sans rien manquer.
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">
-              Suivez les derniï¿½res annonces, les contenus premium, les promotions, les ï¿½vï¿½nements et le covoiturage depuis un seul espace rapide et cliquable.
+              Suivez les dernières annonces, les contenus premium, les promotions, les événements et le covoiturage depuis un seul espace rapide et cliquable.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
@@ -335,7 +335,7 @@ export function HomeSpotlightSection({
                   onClick={() => void trackEvent('home_spotlight_cta_click', { cta: 'featured_jump', tab: active.key })}
                   className={`btn-secondary rounded-2xl px-4 py-2.5 ${activeTone.cta}`}
                 >
-                  Voir les annonces ï¿½ la une
+                  Voir les annonces à la une
                 </a>
               </div>
             </div>
@@ -351,22 +351,22 @@ export function HomeSpotlightSection({
                 title={primary?.title || 'Contenu'}
                 subtitle={
                   isListingTab
-                    ? `${primaryListing?.category_name || 'Annonce locale'} ï¿½ ${primaryListing?.commune_name || 'Nouvelle-CalÃ©donie'}`
+                    ? `${primaryListing?.category_name || 'Annonce locale'} · ${primaryListing?.commune_name || 'Nouvelle-Calédonie'}`
                     : `${(primaryService?.description || '').slice(0, 120)}${(primaryService?.description?.length || 0) > 120 ? '...' : ''}`
                 }
                 meta={
                   isListingTab
-                    ? `${getListingLabel(primaryListing || { id: 0, title: '', price: null })} ï¿½ ${formatRelative(primaryListing?.published_at || primaryListing?.created_at)}`
-                    : `${formatDateLabel(primaryService?.event_date)} ï¿½ ${primaryService?.commune_name || primaryService?.location_name || 'Nouvelle-CalÃ©donie'}`
+                    ? `${getListingLabel(primaryListing || { id: 0, title: '', price: null })} · ${formatRelative(primaryListing?.published_at || primaryListing?.created_at)}`
+                    : `${formatDateLabel(primaryService?.event_date)} · ${primaryService?.commune_name || primaryService?.location_name || 'Nouvelle-Calédonie'}`
                 }
-                primaryLabel={isListingTab ? 'Ouvrir' : 'DÃ©couvrir'}
+                primaryLabel={isListingTab ? 'Ouvrir' : 'Découvrir'}
                 accent={active.key === 'premium' || active.key === 'promos' || active.key === 'events'}
                 tone={activeTone.card}
               />
             ) : (
               <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-[var(--color-text-secondary)]">
                 <p className="text-sm font-semibold text-[var(--color-text-primary)]">Aucun rappel pour le moment</p>
-                <p className="mt-1 text-sm">Les contenus rï¿½cents apparaï¿½tront ici dï¿½s qu&apos;ils seront publiï¿½s.</p>
+                <p className="mt-1 text-sm">Les contenus récents apparaîtront ici dès qu&apos;ils seront publiés.</p>
               </div>
             )}
 
@@ -385,8 +385,8 @@ export function HomeSpotlightSection({
                         <p className="truncate text-sm font-semibold text-[var(--color-text-primary)]">{item.title}</p>
                         <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
                           {isListing
-                            ? `${item.category_name || 'Annonce'} ï¿½ ${item.commune_name || 'Nouvelle-CalÃ©donie'}`
-                            : `${formatDateLabel(item.event_date)} ï¿½ ${item.commune_name || item.location_name || 'Local'}`}
+                            ? `${item.category_name || 'Annonce'} · ${item.commune_name || 'Nouvelle-Calédonie'}`
+                            : `${formatDateLabel(item.event_date)} · ${item.commune_name || item.location_name || 'Local'}`}
                         </p>
                       </div>
                       <ChevronRight className={`h-4 w-4 shrink-0 ${activeTone.accentText}`} />
@@ -401,7 +401,7 @@ export function HomeSpotlightSection({
                 Bons plans
               </Link>
               <Link href="/evenements" className="badge-sable rounded-full px-3 py-1.5 text-xs font-semibold">
-                ï¿½vï¿½nements
+                Événements
               </Link>
               <Link href="/covoiturage" className="badge-corail rounded-full px-3 py-1.5 text-xs font-semibold">
                 Covoiturage
