@@ -121,6 +121,8 @@ const GUARDED_FILES = new Set([
   'frontend/src/lib/categoryCatalog.ts',
   'frontend/src/lib/categoryPresentation.ts',
   'frontend/src/shared-copy/categoryFields.ts',
+  'frontend/src/components/PublishWizard/PublishWizard.tsx',
+  'frontend/src/hooks/useImageUpload.ts',
   'frontend/src/hooks/usePayment.ts',
   'frontend/src/lib/demoMode.ts',
   'frontend/src/hooks/usePhoneVerification.ts',
