@@ -1,0 +1,70 @@
+:root {
+  --color-accent: #e8832a;
+  --color-accent-strong: #a94f0a;
+  --color-accent-strong-hover: #8f420a;
+  --color-accent-text: #9e4e06;
+  --color-accent-soft: rgba(232, 131, 42, 0.14);
+  --color-accent-border: rgba(232, 131, 42, 0.34);
+  --color-text: #123a44;
+  --color-text-muted: rgba(18, 58, 68, 0.68);
+  --color-text-subtle: rgba(18, 58, 68, 0.55);
+  --color-text-faint: rgba(18, 58, 68, 0.42);
+  --color-deep: #0e2a31;
+  --color-bg: #fbf6ec;
+  --color-surface-sunken: #f3e9d8;
+  --color-border-inner: #efe3d0;
+  --color-info-text: #2e7b84;
+  --color-info-soft: rgba(85, 173, 179, 0.14);
+  --color-info-border: rgba(85, 173, 179, 0.32);
+  --color-success-text: #3f6b3c;
+  --color-success-soft: rgba(110, 154, 106, 0.14);
+  --color-success-border: rgba(110, 154, 106, 0.3);
+  --color-warning-soft: rgba(184, 92, 0, 0.14);
+  --color-error: #b0431c;
+  --color-error-soft: rgba(176, 67, 28, 0.14);
+  --color-on-deep: #fbf6ec;
+  --color-on-deep-muted: rgba(251, 246, 236, 0.72);
+  --color-on-deep-subtle: rgba(251, 246, 236, 0.45);
+  --color-on-deep-border: rgba(251, 246, 236, 0.16);
+  --color-success-on-deep: #9fc79b;
+  --radius-control: 10px;
+  --radius-field: 11px;
+  --radius-card: 16px;
+  --radius-block: 24px;
+  --radius-pill: 9999px;
+  --shadow-card-v2: 0 3px 14px rgba(18, 58, 68, 0.06);
+  --shadow-raised: 0 6px 24px rgba(18, 58, 68, 0.09);
+  --shadow-panel: 0 8px 30px rgba(18, 58, 68, 0.1);
+  --shadow-modal-v2: 0 30px 90px rgba(14, 42, 49, 0.4);
+  --shadow-accent: 0 2px 12px rgba(169, 79, 10, 0.22);
+  --motif-opacity: 0.045;
+}
+
+.on-deep {
+  --color-text: var(--color-on-deep);
+  --color-text-muted: var(--color-on-deep-muted);
+  --color-text-subtle: var(--color-on-deep-subtle);
+  --color-border: var(--color-on-deep-border);
+  --color-surface: rgba(251, 246, 236, 0.07);
+  --color-accent-text: var(--color-accent);
+  --color-success-text: var(--color-success-on-deep);
+  background: var(--color-deep);
+  color: var(--color-on-deep);
+}
+
+.motif-tressage {
+  position: relative;
+  isolation: isolate;
+}
+
+.motif-tressage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: var(--motif-opacity);
+  background-image:
+    repeating-linear-gradient(45deg, currentColor 0 1px, transparent 1px 9px),
+    repeating-linear-gradient(-45deg, currentColor 0 1px, transparent 1px 9px);
+}

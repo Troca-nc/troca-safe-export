@@ -9,6 +9,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Design system v2. Legacy names below stay available during migration.
+        accent: {
+          DEFAULT: '#E8832A',
+          strong: '#A94F0A',
+          strongHover: '#8F420A',
+          text: '#9E4E06',
+        },
+        ink: { DEFAULT: '#123A44', deep: '#0E2A31' },
+        cream: { DEFAULT: '#FBF6EC', surface: '#FEFAF3', sunken: '#F3E9D8' },
+        'warm-border': { DEFAULT: '#E4D7C3', inner: '#EFE3D0' },
+        info: { DEFAULT: '#55ADB3', text: '#2E7B84' },
+        reef: { DEFAULT: '#6E9A6A', text: '#3F6B3C', onDeep: '#9FC79B' },
+        alert: { warn: '#B85C00', error: '#B0431C' },
         // Palette de marque existante
         'kalico-blue': { DEFAULT: '#0A7EA4', light: '#1C9BC2', dark: '#075B77' },
         ocean: { DEFAULT: '#08324F', light: '#0D4C75', dark: '#051E30' },
@@ -61,6 +74,11 @@ module.exports = {
         '5xl': '128px',
       },
       borderRadius: {
+        control: '10px',
+        field: '11px',
+        card: '16px',
+        block: '24px',
+        pill: '9999px',
         sm: '4px',
         md: '8px',
         lg: '12px',
@@ -69,6 +87,9 @@ module.exports = {
         full: '9999px',
       },
       boxShadow: {
+        raised: '0 6px 24px rgba(18, 58, 68, 0.09)',
+        panel: '0 8px 30px rgba(18, 58, 68, 0.10)',
+        accent: '0 2px 12px rgba(169, 79, 10, 0.22)',
         xs: '0 1px 2px rgba(8, 32, 50, 0.04)',
         sm: '0 2px 8px rgba(8, 32, 50, 0.08), 0 0 1px rgba(8, 32, 50, 0.06)',
         md: '0 8px 24px rgba(8, 32, 50, 0.10), 0 0 1px rgba(8, 32, 50, 0.06)',
@@ -79,6 +100,27 @@ module.exports = {
         modal: '0 24px 64px rgba(8, 32, 50, 0.24)',
       },
       fontSize: {
+        'display-xl': ['78px', { lineHeight: '0.98', letterSpacing: '-0.015em' }],
+        h1: ['70px', { lineHeight: '0.99', letterSpacing: '-0.015em' }],
+        'h1-form': ['52px', { lineHeight: '1.03', letterSpacing: '-0.015em' }],
+        h2: ['46px', { lineHeight: '1.05', letterSpacing: '-0.01em' }],
+        h3: ['32px', { lineHeight: '1.08' }],
+        h4: ['20px', { lineHeight: '1.30', fontWeight: '600' }],
+        h5: ['17px', { lineHeight: '1.35', fontWeight: '600' }],
+        h6: ['15px', { lineHeight: '1.40', fontWeight: '600' }],
+        'price-lg': ['56px', { lineHeight: '1' }],
+        price: ['30px', { lineHeight: '1' }],
+        'price-sm': ['24px', { lineHeight: '1' }],
+        'body-lg': ['19px', { lineHeight: '1.60' }],
+        body: ['17px', { lineHeight: '1.65' }],
+        'body-sm': ['15px', { lineHeight: '1.55' }],
+        label: ['15px', { lineHeight: '1.20', fontWeight: '600' }],
+        'label-sm': ['13px', { lineHeight: '1.20', fontWeight: '600' }],
+        meta: ['13px', { lineHeight: '1.45' }],
+        caption: ['12px', { lineHeight: '1.40', fontWeight: '500' }],
+        eyebrow: ['12px', { lineHeight: '1.20', letterSpacing: '0.18em', fontWeight: '600' }],
+        'eyebrow-sm': ['11px', { lineHeight: '1.20', letterSpacing: '0.16em', fontWeight: '600' }],
+        'mono-xs': ['11px', { lineHeight: '1.40', letterSpacing: '0.06em' }],
         xs: ['12px', { lineHeight: '16px' }],
         sm: ['14px', { lineHeight: '20px' }],
         base: ['16px', { lineHeight: '24px' }],
@@ -96,6 +138,16 @@ module.exports = {
       },
       transitionTimingFunction: {
         'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
+      },
+      maxWidth: {
+        container: '1440px',
+        'container-narrow': '1280px',
+        prose: '720px',
+        title: '860px',
+      },
+      backgroundImage: {
+        tressage:
+          'repeating-linear-gradient(45deg, currentColor 0 1px, transparent 1px 9px), repeating-linear-gradient(-45deg, currentColor 0 1px, transparent 1px 9px)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out forwards',
