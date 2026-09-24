@@ -163,7 +163,7 @@ export default function ShareSheet({ content, variant = 'full', label = 'Partage
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-night">Partage natif</p>
-                <p className="truncate text-[11px] text-night/45">Apps installï¿½es et fonctions systï¿½me</p>
+                <p className="truncate text-[11px] text-night/45">Apps installées et fonctions système</p>
               </div>
             </button>
 
@@ -191,7 +191,7 @@ export default function ShareSheet({ content, variant = 'full', label = 'Partage
               </div>
               <div>
                 <p className="text-sm font-semibold text-night">Messenger</p>
-                <p className="text-[11px] text-night/45">Lien partagï¿½ ï¿½ vos contacts</p>
+                <p className="text-[11px] text-night/45">Lien partagé à vos contacts</p>
               </div>
             </button>
 
@@ -290,7 +290,7 @@ export default function ShareSheet({ content, variant = 'full', label = 'Partage
                 {copied ? <Check size={16} /> : <Link2 size={16} />}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-night">{copied ? 'Lien copiï¿½' : 'Copier le lien'}</p>
+                <p className="text-sm font-semibold text-night">{copied ? 'Lien copié' : 'Copier le lien'}</p>
                 <p className="truncate text-[11px] text-night/45">{share.url}</p>
               </div>
             </button>
