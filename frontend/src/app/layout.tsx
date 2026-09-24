@@ -1,6 +1,7 @@
 // src/app/layout.tsx
 import type { Metadata } from 'next'
 import { Instrument_Serif, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google'
+import '@/styles/kalico-tokens.css'
 import './globals.css'
 import Footer from '@/components/layout/Footer'
 import CookieBanner from '@/components/legal/CookieBanner'
