@@ -146,7 +146,7 @@ function StepBadge({ index, active, done }: { index: number; active: boolean; do
 
 function WizardStepper({ step }: { step: number }) {
   const items = [
-    { label: 'Dï¿½tails', index: 1 },
+    { label: 'Détails', index: 1 },
     { label: 'Photos', index: 2 },
     { label: 'Publication', index: 3 },
   ]
@@ -217,10 +217,10 @@ function PhotoGrid({
           </div>
           <div>
             <p className="text-sm font-semibold text-night">
-              {dragOver ? 'Dï¿½posez vos photos ici' : `Ajoutez 1 ï¿½ ${maxPhotos} photos`}
+              {dragOver ? 'Déposez vos photos ici' : `Ajoutez 1 à ${maxPhotos} photos`}
             </p>
             <p className="mt-1 text-sm text-night/55">
-              Glissez-dï¿½posez ou cliquez pour choisir vos images. Les {maxPhotos} premiï¿½res sont conservï¿½es.
+              Glissez-déposez ou cliquez pour choisir vos images. Les {maxPhotos} premières sont conservées.
             </p>
           </div>
           <p className="text-xs text-night/40">JPEG, PNG, WebP, HEIC</p>
@@ -295,25 +295,25 @@ function PublicationPreview({
     <div className="rounded-[2rem] border border-night/8 bg-[#0c2a35] p-5 text-white shadow-[0_24px_80px_rgba(8,32,50,0.18)]">
       <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-lagoon">
         <Sparkles className="h-3.5 w-3.5" />
-        Aperï¿½u
+        Aperçu
       </div>
 
-      <p className="mt-4 text-sm uppercase tracking-[0.18em] text-white/45">Rï¿½sumï¿½ rapide</p>
+      <p className="mt-4 text-sm uppercase tracking-[0.18em] text-white/45">Résumé rapide</p>
       <p className="mt-2 text-3xl font-bold text-white">
         {draft.price ? `${Number(draft.price || 0).toLocaleString('fr-FR')} XPF` : '0 XPF'}
       </p>
       <p className="mt-3 text-sm leading-relaxed text-white/70">
-        {draft.title.trim() || "Votre annonce s'affichera ici en temps rï¿½el."}
+        {draft.title.trim() || "Votre annonce s'affichera ici en temps réel."}
       </p>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lagoon">CatÃ©gorie</p>
-          <p className="mt-2 text-sm font-semibold text-white">{selectedCategory?.name || 'ï¿½ choisir'}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lagoon">Catégorie</p>
+          <p className="mt-2 text-sm font-semibold text-white">{selectedCategory?.name || 'À choisir'}</p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lagoon">Commune</p>
-          <p className="mt-2 text-sm font-semibold text-white">{selectedCommune?.name || 'ï¿½ complï¿½ter'}</p>
+          <p className="mt-2 text-sm font-semibold text-white">{selectedCommune?.name || 'À compléter'}</p>
         </div>
       </div>
     </div>
@@ -635,7 +635,7 @@ export default function PublishWizard() {
     }
 
     if (selectedCategory?.slug && isLeafCategory(selectedCategory) && !(await metadataForm.trigger())) {
-      setError('Merci de complï¿½ter les caractï¿½ristiques spï¿½cifiques.')
+      setError('Merci de compléter les caractéristiques spécifiques.')
       return
     }
 
@@ -665,25 +665,25 @@ export default function PublishWizard() {
       window.sessionStorage.setItem(PREVIEW_STORAGE_KEY, JSON.stringify(payload))
       window.open('/annonces/preview', '_blank')
     } catch {
-      setError('Impossible douvrir la prï¿½visualisation pour le moment.')
+      setError('Impossible d’ouvrir la prévisualisation pour le moment.')
     }
   }
 
   const validateStep = () => {
     if (draft.step === 1) {
       if (!draft.title.trim()) return 'Le titre est requis.'
-      if (!draft.category_id) return 'La catï¿½gorie est requise.'
-      if (!selectedCategory || !isLeafCategory(selectedCategory)) return 'Choisissez la sous-catï¿½gorie finale.'
+      if (!draft.category_id) return 'La catégorie est requise.'
+      if (!selectedCategory || !isLeafCategory(selectedCategory)) return 'Choisissez la sous-catégorie finale.'
       if (!draft.description.trim()) return 'La description est requise.'
     }
     if (draft.step === 2) {
       if (photos.length < 1) return 'Ajoutez au moins une photo.'
-      if (photos.length > maxPhotos) return `Vous ne pouvez pas dï¿½passer ${maxPhotos} photos.`
+      if (photos.length > maxPhotos) return `Vous ne pouvez pas dépasser ${maxPhotos} photos.`
     }
     if (draft.step === 3) {
       if (!draft.price.trim()) return 'Le prix est requis.'
       if (!draft.commune_id) return 'La localisation est requise.'
-      if (!draft.duration_days) return 'La durï¿½e est requise.'
+      if (!draft.duration_days) return 'La durée est requise.'
     }
     return ''
   }
@@ -695,7 +695,7 @@ export default function PublishWizard() {
       return
     }
     if (draft.step === 1 && selectedCategory?.slug && isLeafCategory(selectedCategory) && !(await metadataForm.trigger())) {
-      setError('Merci de complï¿½ter les caractï¿½ristiques spï¿½cifiques.')
+      setError('Merci de compléter les caractéristiques spécifiques.')
       return
     }
     setError('')
@@ -715,7 +715,7 @@ export default function PublishWizard() {
     }
 
     if (selectedCategory?.slug && isLeafCategory(selectedCategory) && !(await metadataForm.trigger())) {
-      setError('Merci de complï¿½ter les caractï¿½ristiques spï¿½cifiques.')
+      setError('Merci de compléter les caractéristiques spécifiques.')
       return
     }
 
@@ -754,7 +754,7 @@ export default function PublishWizard() {
       const response = await listingsApi.create(payload)
       const createdId = response.data?.data?.id
       if (!createdId) {
-        throw new Error('Impossible de crï¿½er lannonce.')
+        throw new Error('Impossible de créer l’annonce.')
       }
 
       if (photos.length) {
@@ -762,10 +762,10 @@ export default function PublishWizard() {
       }
 
       clearDraft()
-      setSuccess('Annonce publiï¿½e avec succï¿½s.')
+      setSuccess('Annonce publiée avec succès.')
       router.push(`/annonces/${createdId}?published=1`)
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'La publication a ï¿½chouï¿½.'
+      const message = err instanceof Error ? err.message : 'La publication a échoué.'
       setError(message)
     } finally {
       setSubmitting(false)
@@ -773,10 +773,10 @@ export default function PublishWizard() {
   }
 
   const stepTitle = draft.step === 1
-    ? 'Dï¿½crivez votre annonce'
+    ? 'Décrivez votre annonce'
     : draft.step === 2
       ? 'Ajoutez vos photos'
-      : 'Derniers dï¿½tails'
+      : 'Derniers détails'
 
   return (
     <div className="min-h-screen bg-sand-light">
@@ -785,7 +785,7 @@ export default function PublishWizard() {
           <div>
             <h1 className="mt-3 font-display text-3xl font-bold text-night md:text-4xl">{stepTitle}</h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-night/60 md:text-base">
-              Un parcours en 3 ï¿½tapes pour publier vite, sans perdre de donnï¿½es.
+              Un parcours en 3 étapes pour publier vite, sans perdre de données.
             </p>
           </div>
 
@@ -805,9 +805,9 @@ export default function PublishWizard() {
           <div className="mb-6 rounded-[1.5rem] border border-lagoon/20 bg-lagoon/8 p-4 text-night shadow-sm">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-sm font-semibold">Brouillon restaurï¿½</p>
+                <p className="text-sm font-semibold">Brouillon restauré</p>
                 <p className="mt-1 text-sm text-night/70">
-                  Brouillon restaurï¿½ {draftAgeLabel ? `- ${draftAgeLabel}` : ''}
+                  Brouillon restauré {draftAgeLabel ? `- ${draftAgeLabel}` : ''}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -845,13 +845,13 @@ export default function PublishWizard() {
                   <input
                     value={draft.title}
                     onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
-                    placeholder="Ex. iPhone 14 en excellent Ãtat"
+                    placeholder="Ex. iPhone 14 en excellent état"
                     className="w-full rounded-2xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/20"
                   />
                 </label>
 
                 <div className="space-y-2">
-                  <span className="text-sm font-semibold text-night">CatÃ©gorie *</span>
+                  <span className="text-sm font-semibold text-night">Catégorie *</span>
                   <div className="rounded-[1.5rem] border border-night/10 bg-sand/30 p-4">
                     <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
                       <Layers3 className="h-3.5 w-3.5 text-lagoon" />
@@ -871,24 +871,24 @@ export default function PublishWizard() {
                           </button>
                         ))
                       ) : (
-                        <span>Choisissez une famille puis la sous-catï¿½gorie finale</span>
+                        <span>Choisissez une famille puis la sous-catégorie finale</span>
                       )}
                     </div>
 
                     {loadingMeta ? (
                       <div className="mt-4 rounded-2xl border border-dashed border-night/10 bg-white/70 px-4 py-6 text-center text-sm text-night/45">
-                        Chargement des catï¿½gories...
+                        Chargement des catégories...
                       </div>
                     ) : (
                       <div className="mt-4 space-y-3">
                         <div className="flex items-center justify-between gap-3">
                           <div>
                             <p className="text-sm font-semibold text-night">
-                              {activeCategoryNode ? activeCategoryNode.name : 'CatÃ©gories principales'}
+                              {activeCategoryNode ? activeCategoryNode.name : 'Catégories principales'}
                             </p>
                             <p className="mt-1 text-xs text-night/45">
                               {activeCategoryNode
-                                ? 'Choisissez une sous-catï¿½gorie finale.'
+                                ? 'Choisissez une sous-catégorie finale.'
                                 : 'Commencez par une famille.'}
                             </p>
                           </div>
@@ -932,8 +932,8 @@ export default function PublishWizard() {
                                   <span className="block font-semibold">{category.name}</span>
                                   <span className={`mt-1 block text-xs ${selected ? 'text-white/70' : 'text-night/45'}`}>
                                     {children.length > 0
-                                      ? `${children.length} sous-catï¿½gorie${children.length > 1 ? 's' : ''}`
-                                      : 'CatÃ©gorie finale'}
+                                      ? `${children.length} sous-catégorie${children.length > 1 ? 's' : ''}`
+                                      : 'Catégorie finale'}
                                   </span>
                                 </span>
                               </button>
@@ -943,7 +943,7 @@ export default function PublishWizard() {
 
                         {selectedCategoryPath.length > 0 ? (
                           <div className="rounded-2xl border border-nc-lagon/20 bg-nc-lagon/8 px-4 py-3 text-sm text-night">
-                            <p className="font-semibold text-night">CatÃ©gorie finale sï¿½lectionnï¿½e</p>
+                            <p className="font-semibold text-night">Catégorie finale sélectionnée</p>
                             <p className="mt-1 text-night/65">
                               {selectedCategoryPath.map((node) => node.name).join(' / ')}
                             </p>
@@ -960,7 +960,7 @@ export default function PublishWizard() {
                     value={draft.description}
                     onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))}
                     rows={6}
-                    placeholder="Dï¿½crivez l'Ãtat, l'historique, les accessoires inclus et ce qui rassure l'acheteur."
+                    placeholder="Décrivez l'état, l'historique, les accessoires inclus et ce qui rassure l'acheteur."
                     className="w-full rounded-3xl border border-night/10 bg-sand px-4 py-3 text-sm outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/20"
                   />
                 </label>
@@ -979,7 +979,7 @@ export default function PublishWizard() {
               <div className="space-y-4">
                 <PhotoGrid photos={photos} maxPhotos={maxPhotos} onAddFiles={addPhotos} onRemove={removePhoto} onMove={movePhoto} />
                 <p className="text-xs text-night/45">
-                  Ajoutez jusqu&apos;ï¿½ {maxPhotos} photos. Le rï¿½ordonnancement conserve la premiï¿½re photo comme couverture principale.
+                  Ajoutez jusqu&apos;à {maxPhotos} photos. Le réordonnancement conserve la première photo comme couverture principale.
                 </p>
               </div>
             )}
@@ -1003,19 +1003,19 @@ export default function PublishWizard() {
                     <span className="flex-1">
                       <span className="block text-sm font-semibold text-night">Troc possible</span>
                       <span className="mt-1 block text-xs leading-relaxed text-night/60">
-                        Les autres utilisateurs pourront vous proposer un ï¿½change au lieu d&apos;un paiement.
+                        Les autres utilisateurs pourront vous proposer un échange au lieu d&apos;un paiement.
                       </span>
                     </span>
                   </label>
 
                   {draft.is_troc ? (
                     <label className="mt-4 block space-y-2">
-                      <span className="text-sm font-semibold text-night">Contre quoi souhaitez-vous ï¿½changer ?</span>
+                      <span className="text-sm font-semibold text-night">Contre quoi souhaitez-vous échanger ?</span>
                       <input
                         type="text"
                         value={draft.contre_quoi}
                         onChange={(event) => setDraft((current) => ({ ...current, contre_quoi: event.target.value }))}
-                        placeholder="Ex. vï¿½lo, smartphone, console, outillage..."
+                        placeholder="Ex. vélo, smartphone, console, outillage..."
                         className="w-full rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-nc-lagon focus:ring-4 focus:ring-nc-lagon/20"
                       />
                     </label>
@@ -1089,7 +1089,7 @@ export default function PublishWizard() {
                   </label>
 
                   <div className="rounded-2xl border border-dashed border-night/10 bg-white px-4 py-3 text-xs text-night/55">
-                    Optionnel : vous pouvez prï¿½ciser un quartier ou une tribu.
+                    Optionnel : vous pouvez préciser un quartier ou une tribu.
                   </div>
                 </div>
 
@@ -1097,7 +1097,7 @@ export default function PublishWizard() {
                   <label className="block space-y-2">
                     <span className="flex items-center gap-2 text-sm font-semibold text-night">
                       <CalendarDays className="h-4 w-4 text-kalico-blue" />
-                      Durï¿½e de mise en ligne *
+                      Durée de mise en ligne *
                     </span>
                     <select
                       value={draft.duration_days}
@@ -1111,7 +1111,7 @@ export default function PublishWizard() {
                   </label>
 
                   <label className="block space-y-2">
-                    <span className="text-sm font-semibold text-night">Ãtat</span>
+                    <span className="text-sm font-semibold text-night">État</span>
                     <select
                       value={draft.condition}
                       onChange={(event) => setDraft((current) => ({ ...current, condition: event.target.value as WizardDraft['condition'] }))}
@@ -1119,9 +1119,9 @@ export default function PublishWizard() {
                     >
                       <option value="new">Neuf</option>
                       <option value="like_new">Comme neuf</option>
-                      <option value="good">Bon Ãtat</option>
+                      <option value="good">Bon état</option>
                       <option value="fair">Correct</option>
-                      <option value="for_parts">Pour piï¿½ces</option>
+                      <option value="for_parts">Pour pièces</option>
                     </select>
                   </label>
 
@@ -1132,7 +1132,7 @@ export default function PublishWizard() {
                       onChange={(event) => setDraft((current) => ({ ...current, price_negotiable: event.target.checked }))}
                       className="mt-1 h-4 w-4 rounded border-night/20 text-kalico-blue focus:ring-kalico-blue/25"
                     />
-                    <span className="text-sm text-night">Prix nï¿½gociable</span>
+                    <span className="text-sm text-night">Prix négociable</span>
                   </label>
                 </div>
               </div>
@@ -1146,7 +1146,7 @@ export default function PublishWizard() {
                   className="inline-flex items-center gap-2 rounded-2xl border border-night/10 bg-white px-5 py-3 text-sm font-semibold text-night transition hover:bg-sand"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                  Prï¿½cï¿½dent
+                  Précédent
                 </button>
               ) : null}
 
@@ -1167,7 +1167,7 @@ export default function PublishWizard() {
                   disabled={submitting}
                   className="inline-flex items-center gap-2 rounded-2xl bg-kalico-blue px-5 py-3 text-sm font-semibold text-white transition hover:bg-kalico-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {submitting ? 'Publication...' : 'Publier lannonce'}
+                  {submitting ? 'Publication...' : 'Publier l’annonce'}
                 </button>
               )}
 
@@ -1177,7 +1177,7 @@ export default function PublishWizard() {
                   onClick={handlePreview}
                   className="inline-flex items-center gap-2 rounded-2xl border border-lagoon/25 bg-lagoon/8 px-5 py-3 text-sm font-semibold text-night transition hover:bg-lagoon/12"
                 >
-                  Prï¿½visualiser
+                  Prévisualiser
                 </button>
               ) : null}
 
@@ -1197,7 +1197,7 @@ export default function PublishWizard() {
                   onClick={() => setShowMobilePreview((current) => !current)}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-semibold text-night transition hover:bg-sand"
                 >
-                  {showMobilePreview ? 'Masquer l&apos;aperï¿½u' : 'Voir l&apos;aperï¿½u'}
+                  {showMobilePreview ? 'Masquer l&apos;aperçu' : 'Voir l&apos;aperçu'}
                 </button>
 
                 {showMobilePreview ? (
@@ -1218,15 +1218,15 @@ export default function PublishWizard() {
               <div className="mt-4 space-y-3 text-sm text-night/65">
                 <p className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-jungle" />
-                  Titre et catï¿½gorie renseignï¿½s
+                  Titre et catégorie renseignés
                 </p>
                 <p className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-jungle" />
-                  Photos prï¿½parï¿½es pour l&apos;upload
+                  Photos préparées pour l&apos;upload
                 </p>
                 <p className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-jungle" />
-                  Prix, commune et durï¿½e validï¿½s
+                  Prix, commune et durée validés
                 </p>
               </div>
             </div>
