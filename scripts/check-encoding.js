@@ -134,6 +134,8 @@ const GUARDED_FILES = new Set([
   'frontend/src/app/not-found.tsx',
   'frontend/src/app/maintenance/page.tsx',
   'frontend/src/components/ui/EmptyStates.tsx',
+  'frontend/src/components/legal/CookieManager.tsx',
+  'frontend/src/components/legal/LegalLayout.tsx',
   'frontend/src/hooks/usePayment.ts',
   'frontend/src/lib/demoMode.ts',
   'frontend/src/hooks/usePhoneVerification.ts',

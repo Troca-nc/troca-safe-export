@@ -51,7 +51,7 @@ function CookieToggle({
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">{title}</p>
-          <p className="mt-2 text-sm font-medium text-night">{enabled ? 'Activï¿½' : 'Dï¿½sactivï¿½'}</p>
+          <p className="mt-2 text-sm font-medium text-night">{enabled ? 'Activé' : 'Désactivé'}</p>
         </div>
         {enabled ? <ToggleRight className="h-9 w-9 text-kalico-blue" /> : <ToggleLeft className="h-9 w-9 text-night/20" />}
       </div>
@@ -116,20 +116,20 @@ export default function CookieManager() {
         <div className="max-w-2xl">
           <p className="inline-flex items-center gap-2 rounded-full bg-kalico-blue/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue">
             <Sparkles className="h-3.5 w-3.5" />
-            Prï¿½fï¿½rences
+            Préférences
           </p>
-          <h2 className="mt-3 font-display text-3xl font-bold text-night">Gï¿½rer mes cookies</h2>
+          <h2 className="mt-3 font-display text-3xl font-bold text-night">Gérer mes cookies</h2>
           <p className="mt-2 text-sm leading-relaxed text-night/65">
-            Choisissez en un clin d&apos;Sil ce que vous autorisez. Les cookies essentiels restent actifs pour la connexion et la sÃ©curitÃ©.
+            Choisissez en un clin d&apos;œil ce que vous autorisez. Les cookies essentiels restent actifs pour la connexion et la sécurité.
           </p>
         </div>
 
         <div className="rounded-2xl border border-night/10 bg-sand/40 px-4 py-3 text-sm text-night/65">
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-kalico-blue" />
-            Choix mï¿½morisï¿½s localement
+            Choix mémorisés localement
           </div>
-          <p className="mt-1 text-xs text-night/45">Vous pouvez revenir ici ï¿½ tout moment.</p>
+          <p className="mt-1 text-xs text-night/45">Vous pouvez revenir ici à tout moment.</p>
         </div>
       </div>
 
@@ -137,19 +137,19 @@ export default function CookieManager() {
         <div className="rounded-2xl border border-night/10 bg-sand/40 p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Essentiels</p>
           <p className="mt-2 text-sm font-medium text-night">Toujours actifs</p>
-          <p className="mt-1 text-sm text-night/55">Connexion, sÃ©curitÃ© et prï¿½fï¿½rences de base.</p>
+          <p className="mt-1 text-sm text-night/55">Connexion, sécurité et préférences de base.</p>
         </div>
 
         <CookieToggle
-          title="Mesure daudience"
-          description="Aide ï¿½ amï¿½liorer le service avec des statistiques limitï¿½es."
+          title="Mesure d’audience"
+          description="Aide à améliorer le service avec des statistiques limitées."
           enabled={analytics}
           onToggle={() => setAnalytics((value) => !value)}
         />
 
         <CookieToggle
           title="Marketing"
-          description="Rï¿½servï¿½ aux communications promotionnelles futures."
+          description="Réservé aux communications promotionnelles futures."
           enabled={marketing}
           onToggle={() => setMarketing((value) => !value)}
         />
@@ -168,7 +168,7 @@ export default function CookieManager() {
         {saved ? (
           <span className="inline-flex items-center gap-2 text-sm font-medium text-jungle">
             <Check className="h-4 w-4" />
-            Prï¿½fï¿½rences enregistrï¿½es
+            Préférences enregistrées
           </span>
         ) : null}
       </div>
