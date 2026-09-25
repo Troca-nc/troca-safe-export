@@ -18,21 +18,21 @@ export default function AuthRequiredModal() {
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end justify-center bg-night/55 px-4 py-6 backdrop-blur-sm sm:items-center">
-      <div className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-night/10 bg-white shadow-[0_24px_80px_rgba(8,32,50,0.2)]">
+      <div className="relative w-full max-w-lg overflow-hidden rounded-[24px] border border-night/10 bg-surface shadow-card">
         <button
           type="button"
           onClick={closeAuthModal}
-          className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-night/10 bg-white text-night/50 transition hover:text-night"
+          className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-night/10 bg-sand text-night/50 transition hover:text-night"
           aria-label="Fermer"
         >
           <X className="h-4 w-4" />
         </button>
 
         <div className="p-6 sm:p-7">
-          <div className="inline-flex rounded-full bg-kalico-blue/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-kalico-blue">
+          <div className="eyebrow text-accent-strong">
             {isFavoriteAction ? 'Favoris synchronisés' : 'Connexion rapide'}
           </div>
-          <h2 className="mt-4 text-2xl font-bold text-night">
+          <h2 className="mt-4 font-display text-2xl font-bold text-night">
             {isFavoriteAction ? 'Sauvegardez vos favoris partout' : 'On vous remet au bon endroit.'}
           </h2>
           <p className="mt-2 text-sm leading-6 text-night/60">
@@ -46,14 +46,14 @@ export default function AuthRequiredModal() {
               <>
                 <Link
                   href="/inscription"
-                  className="inline-flex w-full items-center justify-center rounded-2xl bg-kalico-blue px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#b83e28]"
+                  className="btn-primary inline-flex w-full items-center justify-center px-4 py-3"
                   onClick={() => closeAuthModal()}
                 >
                   Créer un compte
                 </Link>
                 <Link
                   href="/connexion"
-                  className="inline-flex w-full items-center justify-center rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-semibold text-night transition hover:bg-night/5"
+                  className="btn-secondary inline-flex w-full items-center justify-center px-4 py-3"
                   onClick={() => closeAuthModal()}
                 >
                   Se connecter
@@ -66,7 +66,7 @@ export default function AuthRequiredModal() {
               <>
                 <Link
                   href={redirectTo ? `/connexion?next=${encodeURIComponent(redirectTo)}` : '/connexion'}
-                  className="inline-flex w-full items-center justify-center rounded-2xl bg-night px-4 py-3 text-sm font-semibold text-white transition hover:bg-night/90"
+                  className="btn-primary inline-flex w-full items-center justify-center px-4 py-3"
                   onClick={() => closeAuthModal()}
                 >
                   Continuer avec email

@@ -45,13 +45,13 @@ function SocialPhoneCompletionContent() {
   }
 
   return (
-    <div className="min-h-screen bg-sand-light px-4 py-10">
-      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-5xl items-center">
-        <div className="grid w-full gap-8 lg:grid-cols-[1.05fr_0.95fr]">
-          <section className="rounded-[2rem] border border-night/10 bg-white p-6 shadow-sm md:p-8">
+    <div className="min-h-screen bg-sand-light px-4 py-10 sm:px-6 lg:px-12">
+      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-[1440px] items-center">
+        <div className="grid w-full gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.72fr)]">
+          <section className="rounded-[24px] border border-night/10 bg-surface p-6 shadow-card md:p-8">
             <div className="flex items-center justify-between gap-4">
               <Link href="/" className="inline-flex items-center gap-3">
-                <span className="relative h-11 w-11 overflow-hidden rounded-2xl border border-night/10 bg-white shadow-[0_8px_24px_rgba(8,32,50,0.08)]">
+                <span className="relative h-11 w-11 overflow-hidden rounded-[12px] border border-night/10 bg-surface shadow-sm">
                   <Image src="/brand/kalico1.svg" alt="Kalico" fill sizes="44px" className="object-cover" priority />
                 </span>
                 <span>
@@ -59,7 +59,7 @@ function SocialPhoneCompletionContent() {
                 </span>
               </Link>
 
-              <span className="inline-flex items-center gap-2 rounded-full bg-kalico-blue/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-kalico-blue">
+              <span className="eyebrow inline-flex items-center gap-2 text-accent-strong">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 Sécurisation
               </span>
@@ -70,7 +70,7 @@ function SocialPhoneCompletionContent() {
                 <Phone className="h-3.5 w-3.5" />
                 Étape de finalisation
               </div>
-              <h1 className="mt-5 text-3xl font-semibold leading-tight text-night md:text-4xl">
+              <h1 className="mt-5 font-display text-3xl font-semibold leading-tight text-night md:text-4xl">
                 Ajoutez votre numéro de téléphone
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-night/60">
@@ -78,7 +78,7 @@ function SocialPhoneCompletionContent() {
               </p>
             </div>
 
-            <div className="mt-6 rounded-[1.75rem] border border-kalico-blue/15 bg-kalico-blue/5 p-4 text-sm text-night/70">
+            <div className="mt-6 rounded-[16px] border border-accent/20 bg-accent/10 p-4 text-sm text-night/70">
               Si votre numéro est déjà renseigné dans votre compte, il sera pré-rempli. Sinon, ajoutez-le maintenant puis validez le code reçu.
             </div>
 
@@ -106,14 +106,14 @@ function SocialPhoneCompletionContent() {
             </div>
           </section>
 
-          <aside className="rounded-[2rem] border border-night/10 bg-night px-6 py-8 text-white shadow-[0_20px_60px_rgba(8,32,50,0.22)] md:px-8">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/45">
+          <aside className="motif-tressage rounded-[24px] border border-on-deep/10 bg-[var(--color-deep)] px-6 py-8 text-on-deep shadow-card md:px-8">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-on-deep/50">
               Pourquoi ce numéro ?
             </p>
             <h2 className="mt-3 text-2xl font-semibold leading-tight">
               Récupération plus simple, sécurité renforcée
             </h2>
-            <p className="mt-3 text-sm leading-6 text-white/70">
+            <p className="mt-3 text-sm leading-6 text-on-deep/70">
               En cas d'oubli de mot de passe, vous pourrez recevoir un SMS de réinitialisation. Si le téléphone n'est pas vérifié, la récupération bascule automatiquement par email.
             </p>
 
@@ -123,13 +123,13 @@ function SocialPhoneCompletionContent() {
                 'Fallback email si le téléphone n\'est pas vérifié',
                 'Compte mieux protégé contre les accès non autorisés',
               ].map((item) => (
-                <div key={item} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80">
+                <div key={item} className="rounded-[12px] border border-on-deep/15 bg-on-deep/10 px-4 py-3 text-sm text-on-deep/80">
                   {item}
                 </div>
               ))}
             </div>
 
-            <p className="mt-6 text-xs leading-relaxed text-white/45">
+            <p className="mt-6 text-xs leading-relaxed text-on-deep/50">
               Vous pourrez compléter ou modifier ce numéro plus tard depuis les paramètres de votre compte.
             </p>
           </aside>
@@ -146,4 +146,3 @@ export default function SocialPhoneCompletionPage() {
     </Suspense>
   )
 }
-
