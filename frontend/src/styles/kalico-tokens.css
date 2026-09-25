@@ -40,6 +40,16 @@
   --motif-opacity: 0.045;
 }
 
+.dark {
+  --color-text: var(--color-text-primary);
+  --color-text-muted: var(--color-text-secondary);
+  --color-text-subtle: var(--color-text-tertiary);
+  --color-text-faint: var(--color-text-tertiary);
+  --color-bg: var(--color-bg-page);
+  --color-surface-sunken: var(--color-surface-raised);
+  --color-border-inner: var(--color-border);
+}
+
 .on-deep {
   --color-text: var(--color-on-deep);
   --color-text-muted: var(--color-on-deep-muted);
