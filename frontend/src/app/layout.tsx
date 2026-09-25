@@ -81,7 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className={`${ibmPlexSans.className} bg-[var(--color-bg-page)] text-[var(--color-text-primary)] font-body antialiased overflow-x-clip pt-24 md:overflow-x-visible`}>
+      <body className={`${ibmPlexSans.className} bg-[var(--color-bg-page)] text-[var(--color-text-primary)] font-body antialiased overflow-x-clip pt-[88px] md:overflow-x-visible`}>
         <ThemeProvider>
           <ReactQueryProvider>
             <JsonLd data={buildOrganizationSchema()} />
