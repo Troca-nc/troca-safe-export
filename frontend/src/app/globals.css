@@ -183,8 +183,12 @@ h3,
 }
 
 :focus-visible {
-  outline: 2px solid rgba(10, 126, 164, 0.62);
+  outline: 2px solid var(--color-text);
   outline-offset: 2px;
+}
+
+.on-deep :focus-visible {
+  outline-color: var(--color-on-deep);
 }
 
 button:focus-visible,
@@ -261,15 +265,12 @@ header nav button {
   }
 
   .card {
-    background: var(--color-surface-raised);
+    background: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(8, 32, 50, 0.08), 0 0 1px rgba(8, 32, 50, 0.06);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card-v2);
     padding: 24px;
-    transition:
-      transform 150ms ease-out,
-      box-shadow 150ms ease-out,
-      border-color 150ms ease-out;
+    transition: border-color var(--duration-fast) ease-out;
   }
 
   .card-hover {
@@ -277,37 +278,40 @@ header nav button {
   }
 
   .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 28px rgba(8, 32, 50, 0.12), 0 0 1px rgba(8, 32, 50, 0.06);
-    border-color: var(--color-border-strong);
+    border-color: var(--color-text);
   }
 
   .btn-primary,
   .btn-secondary,
   .btn-ghost,
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-5 py-2.5 font-semibold
-      transition-all duration-100 ease-out cursor-pointer disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-11 items-center justify-center gap-2 px-5 font-semibold
+      cursor-pointer disabled:cursor-not-allowed;
+    height: 48px;
+    border-radius: var(--radius-control);
+    font-size: 15px;
+    line-height: 1.2;
+    transition:
+      background-color var(--duration-fast) ease-out,
+      border-color var(--duration-fast) ease-out,
+      color var(--duration-fast) ease-out,
+      transform var(--duration-fast) ease-out;
   }
 
   .btn-primary {
-    background: var(--coral);
-    color: white;
-    box-shadow: 0 2px 8px rgba(10, 126, 164, 0.18);
-  }
-
-  .btn-primary,
-  .btn-secondary {
-    @apply active:scale-[0.97];
+    background: var(--color-accent-strong);
+    color: var(--color-on-deep);
+    box-shadow: var(--shadow-accent);
   }
 
   .btn-primary:hover {
-    background: var(--ocean);
+    background: var(--color-accent-strong-hover);
   }
 
   .btn-primary:active,
   .btn-secondary:active {
-    transform: scale(0.97);
+    transform: translateY(1px);
+    box-shadow: none;
   }
 
   .btn-ghost:active,
@@ -316,13 +320,13 @@ header nav button {
   }
 
   .btn-secondary {
-    border: 1px solid var(--color-border-strong);
-    color: var(--color-text-primary);
+    border: 1px solid var(--color-text);
+    color: var(--color-text);
     background: transparent;
   }
 
   .btn-secondary:hover {
-    background: rgba(10, 126, 164, 0.04);
+    background: var(--color-surface-sunken);
   }
 
   .dark .btn-secondary:hover {
@@ -331,12 +335,12 @@ header nav button {
   }
 
   .btn-ghost {
-    color: #c96a1a;
+    color: var(--color-accent-text);
     background: transparent;
   }
 
   .btn-ghost:hover {
-    background: rgba(10, 126, 164, 0.06);
+    background: var(--color-accent-soft);
   }
 
   .dark .btn-ghost:hover {
@@ -345,83 +349,117 @@ header nav button {
   }
 
   .btn-danger {
-    background: var(--color-danger);
-    color: white;
+    background: var(--color-error);
+    color: var(--color-on-deep);
   }
 
   .btn-danger:hover {
     filter: brightness(0.96);
   }
 
+  .btn-primary:disabled,
+  .btn-secondary:disabled,
+  .btn-ghost:disabled,
+  .btn-danger:disabled {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-sunken);
+    color: var(--color-text-subtle);
+    box-shadow: none;
+    filter: none;
+    transform: none;
+  }
+
   .input {
-    @apply w-full rounded-md border px-4 py-2.5 transition-colors transition-shadow duration-150 ease-out;
-    background: var(--color-surface-raised);
+    @apply w-full border px-4;
+    min-height: 50px;
+    border-radius: var(--radius-field);
+    background: var(--color-surface);
     border-color: var(--color-border);
-    color: var(--color-text-primary);
+    color: var(--color-text);
+    font-size: 16px;
+    line-height: 1;
+    transition:
+      border-color var(--duration-fast) ease-out,
+      box-shadow var(--duration-fast) ease-out;
   }
 
   .input::placeholder {
-    color: var(--color-text-tertiary);
+    color: var(--color-text-faint);
+  }
+
+  .input:hover:not(:disabled) {
+    border-color: rgba(18, 58, 68, 0.28);
   }
 
   .input:focus {
     outline: none;
-    border-color: var(--coral);
-    box-shadow: none;
+    border-color: var(--color-text);
+    box-shadow: 0 0 0 3px rgba(18, 58, 68, 0.1);
+  }
+
+  .input[aria-invalid='true'] {
+    border-color: var(--color-error);
+    box-shadow: 0 0 0 3px var(--color-error-soft);
+  }
+
+  .input:disabled {
+    background: var(--color-surface-sunken);
+    color: var(--color-text-subtle);
+    cursor: not-allowed;
   }
 
   .field-label {
-    @apply mb-1.5 block text-sm font-medium;
-    color: var(--color-text-secondary);
+    @apply mb-2 block text-[13px] font-semibold;
+    color: var(--color-text-muted);
   }
 
   .field-help {
-    @apply mt-1 text-sm;
-    color: var(--color-text-tertiary);
+    @apply mt-2 text-[13px];
+    color: var(--color-text-subtle);
   }
 
   .field-error {
-    @apply mt-1 flex items-center gap-1 text-sm font-medium;
-    color: var(--color-danger);
+    @apply mt-2 flex items-center gap-1 text-[13px] font-medium;
+    color: var(--color-error);
   }
 
   .field-success {
-    @apply mt-1 flex items-center gap-1 text-sm font-medium;
-    color: var(--color-success);
+    @apply mt-2 flex items-center gap-1 text-[13px] font-medium;
+    color: var(--color-success-text);
   }
 
   .badge {
-    @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold;
+    @apply inline-flex min-h-6 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium;
   }
 
   .badge-primary {
-    background: rgba(10, 126, 164, 0.12);
-    color: #c96a1a;
+    background: var(--color-accent-soft);
+    color: var(--color-accent-text);
   }
 
   .badge-success {
-    background: rgba(45, 106, 79, 0.12);
-    color: var(--color-success);
+    background: var(--color-success-soft);
+    color: var(--color-success-text);
   }
 
   .badge-info {
-    background: rgba(72, 202, 228, 0.15);
-    color: var(--color-info);
+    background: var(--color-info-soft);
+    color: var(--color-info-text);
   }
 
   .badge-warning {
-    background: rgba(217, 119, 6, 0.12);
+    background: var(--color-warning-soft);
     color: var(--color-warning);
   }
 
   .badge-danger {
-    background: rgba(215, 38, 61, 0.12);
-    color: var(--color-danger);
+    background: var(--color-error-soft);
+    color: var(--color-error);
   }
 
   .badge-muted {
-    background: rgba(8, 32, 50, 0.08);
-    color: var(--color-text-secondary);
+    background: var(--color-surface-sunken);
+    color: var(--color-text-muted);
   }
 
   .badge-lagon {
