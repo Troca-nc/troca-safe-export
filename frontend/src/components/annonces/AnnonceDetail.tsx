@@ -553,8 +553,8 @@ export default function AnnonceDetail({ id, initialData }: Props) {
 
   if (loading || !listing) {
     return (
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        <div className="rounded-3xl border border-night/8 bg-white p-8 text-center text-night/60 shadow-sm">
+      <main className="mx-auto max-w-[1440px] px-4 py-6 sm:px-6 lg:px-12">
+        <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center text-[var(--color-text-muted)] shadow-[var(--shadow-card)]">
           Chargement de l'annonce...
         </div>
       </main>
@@ -562,9 +562,9 @@ export default function AnnonceDetail({ id, initialData }: Props) {
   }
 
   return (
-    <main className="max-w-7xl mx-auto px-4 py-6">
+    <main className="mx-auto max-w-[1440px] px-4 py-6 pb-24 sm:px-6 lg:px-12 lg:pb-10">
       <div className="flex items-center justify-between gap-3 mb-5">
-        <Link href="/annonces" className="inline-flex items-center gap-2 text-sm text-night/50 hover:text-night">
+        <Link href="/annonces" className="inline-flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
           <ArrowLeft size={16} />
           Retour aux annonces
         </Link>
@@ -573,10 +573,10 @@ export default function AnnonceDetail({ id, initialData }: Props) {
             type="button"
             onClick={handleFavorite}
             className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-sm transition-colors ${
-              saved ? 'border-kalico-blue/30 bg-kalico-blue/8 text-kalico-blue' : 'border-night/10 bg-white text-night/65 hover:text-night'
+              saved ? 'border-[var(--color-accent-border)] bg-[var(--color-accent-soft)] text-[var(--color-accent-text)]' : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
             }`}
           >
-            <Heart size={16} className={saved ? 'fill-kalico-blue' : ''} />
+            <Heart size={16} className={saved ? 'fill-[var(--color-accent)]' : ''} />
             Favori
           </button>
           {shareAnnonce && <ShareButton annonce={shareAnnonce} variant="icon" />}
@@ -590,11 +590,11 @@ export default function AnnonceDetail({ id, initialData }: Props) {
       )}
 
       {publishedBannerOpen ? (
-        <div className="mb-5 rounded-[2rem] border border-[var(--color-success)]/30 bg-[var(--color-success)]/10 p-5 shadow-sm">
+        <div className="mb-5 rounded-[var(--radius-card)] border border-[var(--color-success-border)] bg-[var(--color-success-soft)] p-5">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-success)]">Publication réussie</p>
-              <h2 className="mt-2 text-2xl font-bold text-[var(--color-success)]">Votre annonce est en ligne</h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-success-text)]">Publication réussie</p>
+              <h2 className="mt-2 font-display text-3xl font-normal text-[var(--color-success-text)]">Votre annonce est en ligne</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-success)]/70">
                 Partagez-la maintenant, retrouvez-la dans vos annonces et découvrez les options de visibilité pour lui donner un coup de pouce.
               </p>
@@ -602,7 +602,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
             <button
               type="button"
               onClick={() => setPublishedBannerOpen(false)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-success)]/30 bg-white text-[var(--color-success)] transition hover:bg-[var(--color-success)]/10"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-success-border)] bg-[var(--color-surface)] text-[var(--color-success-text)] transition hover:bg-[var(--color-success-soft)]"
               aria-label="Fermer le message de publication"
             >
               <X className="h-4 w-4" />
@@ -613,13 +613,13 @@ export default function AnnonceDetail({ id, initialData }: Props) {
             {shareAnnonce && <ShareButton annonce={shareAnnonce} variant="full" className="rounded-2xl" />}
             <Link
               href="/profil?tab=listings"
-              className="inline-flex items-center justify-center rounded-2xl border border-[var(--color-success)]/30 bg-white px-4 py-3 text-sm font-semibold text-[var(--color-success)] transition hover:bg-[var(--color-success)]/10"
+              className="btn-secondary inline-flex items-center justify-center px-4 text-sm font-semibold"
             >
               Voir mes annonces
             </Link>
             <Link
               href="/pro"
-              className="inline-flex items-center justify-center rounded-2xl bg-[var(--color-success)] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+              className="btn-primary inline-flex items-center justify-center px-4 text-sm font-semibold"
             >
               Mettre en avant
             </Link>
@@ -627,7 +627,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
         </div>
       ) : null}
 
-      <div className="grid lg:grid-cols-[1.25fr_0.95fr] gap-6 items-start">
+      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_396px]">
         <ListingHeroCard
           listing={listing}
           activeCover={activeCover}
@@ -637,7 +637,7 @@ export default function AnnonceDetail({ id, initialData }: Props) {
           trustScore={listing.user.trust_score}
         />
 
-        <div className="space-y-4 lg:sticky lg:top-24">
+        <div className="space-y-4 lg:sticky lg:top-[112px]">
           <SellerSidebar
             listing={listing}
             currentUserId={currentUserId}
