@@ -139,35 +139,35 @@ export function ListingHeroCard({
 
   return (
     <section className="space-y-4">
-      <div className="bg-white dark:bg-[var(--color-surface)] rounded-3xl border border-night/8 overflow-hidden shadow-sm">
-        <div className="aspect-[4/3] bg-sand relative">
+      <div className="overflow-hidden rounded-[20px] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-card)]">
+        <div className="relative aspect-[16/10] bg-[var(--color-surface-sunken)]">
           {activeCover ? (
             <ListingImageComponent src={activeCover} alt={listing.title} sizes="(max-width: 768px) 100vw, 60vw" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-5xl text-night/20">📦</div>
+            <div className="motif-tressage flex h-full w-full items-center justify-center text-[var(--color-text-faint)]"><Package className="h-6 w-6" /></div>
           )}
           <div className="absolute top-4 left-4 flex flex-wrap gap-2">
             {listing.is_featured && (
-              <span className="px-3 py-1 rounded-full bg-kalico-blue text-white text-xs font-semibold">À la une</span>
+              <span className="rounded-full bg-[var(--color-accent)] px-3 py-1 text-xs font-semibold text-[var(--color-deep)]">À la une</span>
             )}
             {listing.is_urgent && (
               <span className="px-3 py-1 rounded-full bg-[var(--color-warning)]/10 text-[var(--color-warning)] text-xs font-semibold">Urgent</span>
             )}
             {listing.contre_quoi && (
-              <span className="px-3 py-1 rounded-full bg-night text-white text-xs font-semibold">Troc</span>
+              <span className="rounded-full bg-[rgba(110,154,106,0.92)] px-3 py-1 text-xs font-semibold text-[var(--color-deep)]">Troc</span>
             )}
           </div>
         </div>
 
         {images.length > 1 && (
-          <div className="p-3 flex gap-2 overflow-x-auto snap-x scroll-smooth border-t border-night/8">
+          <div className="flex gap-3 overflow-x-auto border-t border-[var(--color-border-inner)] p-3 snap-x scroll-smooth">
             {images.map((image, index) => (
               <button
                 key={image.id}
                 type="button"
                 onClick={() => onPickImage(index)}
-                className={`relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 border-2 transition-colors snap-center ${
-                  index === activeImage ? 'border-kalico-blue' : 'border-transparent'
+                className={`relative h-[82px] w-[104px] shrink-0 overflow-hidden rounded-[12px] border-2 transition-colors snap-center ${
+                  index === activeImage ? 'border-[var(--color-border-strong)]' : 'border-transparent'
                 }`}
               >
                 <ListingImageComponent
@@ -181,10 +181,9 @@ export function ListingHeroCard({
         )}
       </div>
 
-      <div className="bg-white dark:bg-[var(--color-surface)] rounded-3xl border border-night/8 p-5 shadow-sm">
+      <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-card)]">
         <div className="flex flex-wrap items-center gap-2 text-xs text-night/45 mb-3">
           <Link href={primaryCategoryHref} className="inline-flex items-center gap-1 rounded-full bg-night/5 px-3 py-1 hover:bg-night/10">
-            {listing.category_icon && <span>{listing.category_icon}</span>}
             <span>{listing.category_name ?? 'Annonce'}</span>
           </Link>
           <span className="inline-flex items-center gap-1 rounded-full bg-night/5 px-3 py-1">
@@ -201,14 +200,14 @@ export function ListingHeroCard({
 
         <div className="flex items-start justify-between gap-4 mb-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-semibold text-night leading-tight">{listing.title}</h1>
+            <h1 className="text-balance font-display text-[38px] font-normal leading-[1.03] text-[var(--color-text-primary)] md:text-[46px]">{listing.title}</h1>
             <div className="mt-2 flex flex-wrap gap-3 text-xs text-night/50">
               <span className="inline-flex items-center gap-1.5"><Clock size={13} /> {formatDate(listing.published_at)}</span>
               <span className="inline-flex items-center gap-1.5"><Heart size={13} /> {listing.nb_favoris ?? 0} favoris</span>
             </div>
           </div>
           <div className="text-right shrink-0">
-            <p className="text-2xl font-bold text-kalico-blue">{formatPrice(listing)}</p>
+            <p className="font-display text-[38px] font-normal leading-none text-[var(--color-text-primary)] md:text-[56px]">{formatPrice(listing)}</p>
             {listing.price_negotiable && !listing.is_free && (
               <p className="text-xs text-night/45">Prix negociable</p>
             )}
@@ -216,11 +215,11 @@ export function ListingHeroCard({
         </div>
 
         <div className="grid sm:grid-cols-2 gap-3">
-          <div className="rounded-2xl bg-sand/60 p-4">
+          <div className="rounded-[14px] bg-[var(--color-surface-sunken)] p-4">
             <p className="text-[11px] uppercase tracking-wide text-night/40 mb-1">Etat</p>
             <p className="font-medium text-night">{listing.condition}</p>
           </div>
-          <div className="rounded-2xl bg-sand/60 p-4">
+          <div className="rounded-[14px] bg-[var(--color-surface-sunken)] p-4">
             <p className="text-[11px] uppercase tracking-wide text-night/40 mb-1">Paiement</p>
             <p className="font-medium text-night">
               {listing.is_free ? 'Gratuit' : listing.price_negotiable ? 'Negotiable' : 'Prix fixe'}
@@ -228,14 +227,14 @@ export function ListingHeroCard({
           </div>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-night/8 bg-night/[0.03] p-4">
+        <div className="mt-5 border-t border-[var(--color-border-inner)] pt-5">
           <div className="flex items-center gap-2 text-night mb-2">
             <MessageCircle size={16} className="text-kalico-blue" />
             <h2 className="font-semibold">Description</h2>
           </div>
-          <p className="text-sm leading-7 text-night/75 whitespace-pre-line">{listing.description}</p>
+          <p className="whitespace-pre-line text-[17px] leading-[1.75] text-[var(--color-text-muted)]">{listing.description}</p>
           {listing.contre_quoi && (
-            <div className="mt-4 rounded-2xl border border-dashed border-night/15 bg-white p-4">
+            <div className="mt-4 rounded-[14px] border border-dashed border-[var(--color-border)] bg-[var(--color-surface-sunken)] p-4">
               <p className="text-xs uppercase tracking-wide text-night/40 mb-1">Echange possible contre</p>
               <p className="text-sm text-night/80">{listing.contre_quoi}</p>
             </div>
@@ -274,10 +273,10 @@ export function SellerSidebar({
   formatDateFn: (value?: string) => string
 }) {
   return (
-    <aside className="space-y-4 lg:sticky lg:top-24">
-      <div className="bg-white rounded-3xl border border-night/8 p-5 shadow-sm">
+    <aside className="space-y-4">
+      <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-card)]">
         <div className="flex items-start gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-kalico-blue/10 text-kalico-blue font-bold flex items-center justify-center overflow-hidden shrink-0">
+          <div className="flex h-[60px] w-[60px] shrink-0 items-center justify-center overflow-hidden rounded-[16px] bg-[var(--color-info-soft)] font-display text-[22px] font-normal text-[var(--color-info-text)]">
             {listing.user.avatar_url ? (
               <Image src={listing.user.avatar_url} alt="" width={56} height={56} className="w-full h-full object-cover" />
             ) : (
@@ -370,7 +369,7 @@ export function SellerSidebar({
             type="button"
             onClick={onMessageSeller}
             disabled={sendingMessage || isOwner}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-kalico-blue text-white px-4 py-3 text-sm font-medium disabled:opacity-50"
+            className="btn-primary inline-flex items-center justify-center gap-2 px-4 text-sm font-semibold"
           >
             <MessageCircle size={16} />
             {isOwner ? 'Votre annonce' : sendingMessage ? 'Ouverture...' : 'Envoyer un message'}
@@ -380,7 +379,7 @@ export function SellerSidebar({
               <button
                 type="button"
                 onClick={onMakeOffer}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-medium text-night transition hover:border-kalico-blue/20 hover:bg-kalico-blue/5 hover:text-kalico-blue"
+                className="btn-secondary inline-flex items-center justify-center gap-2 px-4 text-sm font-semibold"
               >
                 <BadgeDollarSign size={16} />
                 Faire une offre
@@ -599,16 +598,16 @@ export function ReviewFormSection({
 
 export function SecurityTipsCard() {
   return (
-    <div className="bg-[var(--color-warning)]/10 rounded-3xl border border-[var(--color-warning)]/30 p-5">
-      <div className="flex items-center gap-2 mb-2 text-[var(--color-warning)]">
+    <div className="on-deep motif-tressage rounded-[var(--radius-block)] bg-[var(--color-deep)] p-5">
+      <div className="mb-3 flex items-center gap-2 text-[var(--color-accent)]">
         <AlertTriangle size={16} />
         <h2 className="font-semibold">Conseils de sécurité</h2>
       </div>
-      <ul className="space-y-2 text-sm text-[var(--color-warning)] leading-6">
-        <li>- N'envoyez jamais d'argent avant d'avoir verifie l'annonce et le vendeur.</li>
-        <li>- Preferez l'echange en personne dans un lieu public.</li>
-        <li>- Gardez toutes les discussions dans Kalico pour faciliter la modération.</li>
-      </ul>
+      <ol className="space-y-3 text-sm leading-6 text-[var(--color-on-deep-muted)]">
+        <li><span className="mr-2 font-display text-xl text-[var(--color-on-deep)]">1.</span>N'envoyez jamais d'argent avant d'avoir vérifié l'annonce et le vendeur.</li>
+        <li><span className="mr-2 font-display text-xl text-[var(--color-on-deep)]">2.</span>Préférez l'échange en personne dans un lieu public.</li>
+        <li><span className="mr-2 font-display text-xl text-[var(--color-on-deep)]">3.</span>Gardez les discussions dans Kalico pour faciliter la modération.</li>
+      </ol>
     </div>
   )
 }
@@ -639,30 +638,25 @@ export function SellerListingsSection({
           <Link
             key={item.id}
             href={`/annonces/${item.id}`}
-            className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-night/5"
+            className="group overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] transition-colors hover:border-[var(--color-border-strong)]"
           >
-            <div className="aspect-[4/3] bg-sand overflow-hidden relative">
+            <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-surface-sunken)]">
               {item.cover_image ? (
                 <ListingImageComponent
                   src={item.cover_image}
                   alt={item.title ?? item.titre ?? 'Annonce'}
                   sizes="(max-width: 768px) 50vw, 25vw"
-                  imgClassName="group-hover:scale-105 transition-transform duration-300"
+                  imgClassName="object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-3xl opacity-30">📦</div>
-              )}
-              {item.category_icon && (
-                <span className="absolute top-2 left-2 bg-white/90 rounded-full px-2 py-1 text-xs shadow-sm">
-                  {item.category_icon}
-                </span>
+                <div className="motif-tressage flex h-full w-full items-center justify-center text-[var(--color-text-faint)]"><Package className="h-5 w-5" /></div>
               )}
             </div>
             <div className="p-3">
               <p className="text-sm font-medium text-night line-clamp-2 leading-tight mb-1">
                 {item.title ?? item.titre}
               </p>
-              <p className="text-base font-bold text-kalico-blue">
+              <p className="font-display text-2xl font-normal text-[var(--color-text-primary)]">
                 {item.prix != null || item.price != null
                   ? `${(item.prix ?? item.price ?? 0).toLocaleString('fr-FR')} XPF`
                   : <span className="text-night/40 font-normal text-sm">Prix libre</span>}
@@ -687,7 +681,7 @@ export function RelatedSearchesSection({
   searches: Array<{ label: string; href: string; tone: string }>
 }) {
   return (
-    <section className="mt-8 bg-white rounded-3xl border border-night/8 p-5 shadow-sm">
+    <section className="mt-8 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-card)]">
       <div className="flex items-center gap-2 mb-4 text-night">
         <Search size={16} className="text-ocean" />
         <h2 className="font-semibold">Recherches associees</h2>
@@ -698,7 +692,7 @@ export function RelatedSearchesSection({
           <Link
             key={`${search.label}-${search.href}`}
             href={search.href}
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-transform hover:-translate-y-0.5 ${search.tone}`}
+            className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-sunken)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-text-primary)]"
           >
             {search.label}
           </Link>
