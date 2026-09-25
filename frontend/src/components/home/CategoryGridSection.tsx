@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
 
 const CATEGORY_ITEMS = [
   { initial: 'V', label: 'Véhicules', hint: 'voitures, 4×4, bateaux', href: '/annonces?categorie=vehicules' },
@@ -15,10 +16,10 @@ const CATEGORY_ITEMS = [
 
 export default function CategoryGridSection() {
   return (
-    <section className="bg-[var(--color-bg-page)] p-[72px_48px_0]">
+    <section className="mx-auto max-w-[1440px] bg-[var(--color-bg)] px-4 pt-[72px] sm:px-6 lg:px-12">
       <div className="flex items-end justify-between gap-8 mb-7">
         <div>
-          <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-lagon)]">
+          <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-accent-text)]">
             Catégories
           </p>
           <h2 className="mt-3 mb-0 font-display font-normal text-[46px] leading-[1.05]">
@@ -30,10 +31,7 @@ export default function CategoryGridSection() {
           className="inline-flex items-center gap-[6px] text-[15px] font-semibold text-[var(--color-text-primary)] pb-[6px]"
         >
           Toutes les catégories
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="w-4 h-4">
-            <path d="M5 12h14" />
-            <path d="m12 5 7 7-7 7" />
-          </svg>
+          <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
 
@@ -42,9 +40,9 @@ export default function CategoryGridSection() {
           <Link
             key={cat.label}
             href={cat.href}
-            className="flex items-center gap-4 rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] p-[20px_22px] hover:border-[var(--color-lagon-dark)]"
+            className="flex items-center gap-4 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-[20px_22px] shadow-[var(--shadow-card)] transition-colors hover:border-[var(--color-border-strong)]"
           >
-            <span className="flex h-[46px] w-[46px] flex-shrink-0 items-center justify-center rounded-[12px] bg-[rgba(232,131,42,0.14)] font-display text-[24px] text-[var(--color-lagon-dark)]">
+            <span className="flex h-[46px] w-[46px] flex-shrink-0 items-center justify-center rounded-[12px] bg-[var(--color-accent-soft)] font-display text-[24px] text-[var(--color-accent-text)]">
               {cat.initial}
             </span>
             <span className="min-w-0">

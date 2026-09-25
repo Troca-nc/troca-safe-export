@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { type FormEvent, useEffect, useRef, useState } from 'react'
-import { ArrowRight, ChevronRight, MapPin, Search } from 'lucide-react'
+import { ArrowRight, BadgeCheck, ChevronRight, MapPin, Search, Star } from 'lucide-react'
 
 import PlatformStats from '@/components/PlatformStats'
 import CategoryTreeSection from '@/components/home/CategoryTreeSection'
@@ -91,13 +91,13 @@ function HeroListingCard({ listing }: { listing: HomeListing }) {
   return (
     <Link
       href={getHeroListingHref(listing)}
-      className="group flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-[#e7dbcd] bg-white shadow-[0_20px_60px_rgba(3,31,45,0.12)] transition duration-300 hover:-translate-y-1 hover:border-[#d4c4b0] hover:shadow-[0_24px_64px_rgba(3,31,45,0.14)] dark:border-white/10 dark:bg-white/8 dark:hover:border-white/20 dark:hover:bg-white/12"
+      className="group flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] transition-colors hover:border-[var(--color-border-strong)]"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-[#f1e7da] dark:bg-[linear-gradient(160deg,_rgba(255,255,255,0.12),_rgba(255,255,255,0.03))]">
+      <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-surface-sunken)]">
         {image && !errored ? (
           <>
             <div
-              className={`absolute inset-0 flex items-center justify-center bg-[#1d9e75] text-5xl font-bold text-white transition-opacity duration-300 ${
+              className={`absolute inset-0 flex items-center justify-center bg-[var(--color-success-soft)] font-display text-5xl font-normal text-[var(--color-success-text)] transition-opacity duration-300 ${
                 loaded ? 'opacity-0' : 'opacity-100'
               }`}
             >
@@ -114,9 +114,9 @@ function HeroListingCard({ listing }: { listing: HomeListing }) {
             />
           </>
         ) : (
-          <div className="flex h-full flex-col items-center justify-center bg-[#1d9e75] text-white">
-            <span className="text-5xl font-bold leading-none">{categoryInitial}</span>
-            <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85">{categoryLabel}</span>
+          <div className="motif-tressage flex h-full flex-col items-center justify-center bg-[var(--color-surface-sunken)] text-[var(--color-text-primary)]">
+            <span className="font-display text-5xl font-normal leading-none">{categoryInitial}</span>
+            <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">{categoryLabel}</span>
           </div>
         )}
         <span className="absolute left-4 top-4 rounded-full border border-white/15 bg-[rgba(6,36,52,0.75)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/90 backdrop-blur-sm">
@@ -124,17 +124,17 @@ function HeroListingCard({ listing }: { listing: HomeListing }) {
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col gap-2.5 p-4 text-[#17313d] dark:text-white">
+      <div className="flex flex-1 flex-col gap-2.5 p-4 text-[var(--color-text-primary)]">
         <div className="space-y-1">
-          <p className="line-clamp-2 font-display text-xl font-bold leading-tight">{listing.title || 'Annonce locale'}</p>
-          <p className="text-lg font-semibold text-[#1d9e75] dark:text-[#8ce3d2]">{normalizeHeroPrice(listing)}</p>
+          <p className="line-clamp-2 text-[15px] font-medium leading-snug">{listing.title || 'Annonce locale'}</p>
+          <p className="font-display text-[30px] font-normal leading-none">{normalizeHeroPrice(listing)}</p>
         </div>
-        <div className="mt-auto flex items-center justify-between gap-3 text-sm text-[#39505b] dark:text-white/75">
+        <div className="mt-auto flex items-center justify-between gap-3 text-[13px] text-[var(--color-text-muted)]">
           <span className="inline-flex min-w-0 items-center gap-1.5 truncate">
-            <MapPin className="h-4 w-4 shrink-0 text-[#1d9e75] dark:text-[#8ce3d2]" />
+            <MapPin className="h-4 w-4 shrink-0 text-[var(--color-info-text)]" />
             {getHeroListingCommune(listing)}
           </span>
-          <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#6d5d4b] dark:text-white/55">
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-accent-text)]">
             Voir
             <ArrowRight className="h-3.5 w-3.5" />
           </span>
@@ -150,7 +150,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
 
   return (
     <section
-      className="relative overflow-hidden px-4 pb-10 pt-6 text-[#17313d] dark:text-white dark:!bg-[#0c2a35] bg-[var(--color-bg-page)]"
+      className="relative overflow-hidden bg-[var(--color-bg)] px-4 pb-12 pt-8 text-[var(--color-text-primary)]"
     >
       <div
         className="absolute inset-0 opacity-[0.06] pointer-events-none"
@@ -160,14 +160,14 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
         }}
       />
 
-      <div className="relative mx-auto max-w-7xl">
+      <div className="relative mx-auto max-w-[1440px]">
         <div className="grid gap-6 md:grid-cols-[1.05fr_0.95fr] md:p-8">
           <div className="flex min-w-0 flex-col justify-center">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-lagon)] m-0">
+            <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-accent-text)]">
               Marketplace calédonienne · Bientôt ouvert
             </p>
 
-            <h1 className="font-display font-normal text-[42px] sm:text-[56px] md:text-[68px] lg:text-[82px] leading-[0.97] tracking-[-0.015em] max-w-[860px] mt-[22px] mb-0">
+            <h1 className="mb-0 mt-[22px] max-w-[860px] text-balance font-display text-[40px] font-normal leading-[0.98] tracking-[-0.01em] sm:text-[56px] lg:text-[78px] lg:tracking-[-0.015em]">
               Ce que vous cherchez est déjà sur le territoire.
             </h1>
             <p className="mt-6 text-[19px] leading-[1.6] text-[var(--color-text-secondary)] max-w-[560px]">
@@ -176,30 +176,30 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
 
             <form
               onSubmit={onSubmit}
-              className="mt-6 flex w-full max-w-2xl items-center rounded-[14px] border border-[#123A44] bg-[var(--color-surface)] p-1.5 shadow-[0_6px_24px_rgba(18,58,68,0.09)]"
+              className="mt-6 flex w-full max-w-2xl items-center rounded-[var(--radius-card)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] p-1.5 shadow-[var(--shadow-raised)]"
             >
               <div className="relative min-w-0 flex-1">
-                <Search className="absolute left-4 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-[#71838d]" />
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-faint)]" />
                 <input
                   value={q}
                   onChange={(event) => onQueryChange(event.target.value)}
                   placeholder="Toyota, studio Nouméa, plombier, iPhone..."
                   aria-label="Rechercher une annonce"
-                  className="w-full bg-transparent px-4 py-3 pl-11 text-sm text-[#17313d] placeholder:text-[#6d5d4b]/55 outline-none"
+                  className="w-full bg-transparent px-4 py-3 pl-11 text-base text-[var(--color-text-primary)] placeholder:text-[var(--color-text-faint)] outline-none"
                   autoComplete="off"
                 />
               </div>
               <button
                 type="button"
-                className="hidden shrink-0 items-center gap-1.5 whitespace-nowrap px-3 py-3 text-sm font-medium text-[#17313d] sm:inline-flex"
+                className="hidden shrink-0 items-center gap-1.5 whitespace-nowrap px-3 py-3 text-sm font-medium text-[var(--color-text-primary)] sm:inline-flex"
               >
-                <MapPin className="h-4 w-4 text-[#71838d]" />
+                <MapPin className="h-4 w-4 text-[var(--color-info-text)]" />
                 Toute la NC
               </button>
               <span className="hidden h-6 w-px shrink-0 bg-[var(--color-border)] sm:block" aria-hidden="true" />
               <button
                 type="submit"
-                className="btn-primary inline-flex shrink-0 items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold"
+                className="btn-primary inline-flex shrink-0 items-center justify-center px-5 text-sm font-semibold"
               >
                 Rechercher
               </button>
@@ -211,7 +211,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
                 <Link
                   key={tag}
                   href={`/annonces?q=${encodeURIComponent(tag)}`}
-                  className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-[14px] font-medium text-[var(--color-text-primary)] hover:border-[var(--color-lagon-dark)]"
+                  className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-[14px] font-medium text-[var(--color-text-primary)] hover:border-[var(--color-border-strong)]"
                 >
                   {tag}
                 </Link>
@@ -223,7 +223,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
             {cards.length > 0 ? (
               cards.map((listing) => <HeroListingCard key={String(listing.id)} listing={listing} />)
             ) : (
-              <aside className="rounded-[24px] bg-[#0E2A31] relative overflow-hidden p-[34px_32px] text-[#FBF6EC]">
+              <aside className="on-deep relative overflow-hidden rounded-[var(--radius-block)] bg-[var(--color-deep)] p-[34px_32px] text-[var(--color-on-deep)]">
                 <div
                   className="absolute inset-0 opacity-10 pointer-events-none"
                   style={{
@@ -232,7 +232,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
                   }}
                 />
                 <div className="relative">
-                  <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-emeraude)]">
+                  <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-accent)]">
                     Rejoignez les premiers
                   </p>
                   <p className="mt-[18px] mb-0 font-display text-[38px] leading-[1.08]">
@@ -243,7 +243,7 @@ export function HomeHeroSection({ q, onQueryChange, onSubmit, listings }: HomeHe
                   </p>
                   <Link
                     href="/annonces/nouvelle"
-                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-[10px] bg-[var(--coral)] text-[#0E2A31] px-5 py-[14px] text-[16px] font-semibold"
+                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-[var(--radius-control)] bg-[var(--color-accent)] px-5 py-[14px] text-[16px] font-semibold text-[var(--color-deep)]"
                   >
                     + Déposer une annonce
                   </Link>
@@ -284,8 +284,8 @@ const NEARBY_COMMUNES = ['Nouméa', 'Dumbéa', 'Mont-Dore', 'Païta', 'Bourail',
 
 export function CommunesBarSection() {
   return (
-    <section className="bg-[var(--color-surface-2)] border-b border-[var(--color-border)] py-[22px] px-12">
-      <div className="flex items-center gap-5">
+    <section className="border-y border-[var(--color-border)] bg-[var(--color-surface-sunken)] px-4 py-[22px] sm:px-6 lg:px-12">
+      <div className="mx-auto flex max-w-[1440px] flex-wrap items-center gap-5">
         <p className="m-0 flex-shrink-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
           Près de chez vous
         </p>
@@ -294,7 +294,7 @@ export function CommunesBarSection() {
             <Link
               key={name}
               href={`/annonces?commune=${encodeURIComponent(name)}`}
-              className="inline-flex items-baseline gap-[7px] rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] px-[15px] py-[7px] text-[14px] font-medium text-[var(--color-text-primary)] hover:border-[var(--color-lagon-dark)]"
+              className="inline-flex items-baseline gap-[7px] rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-[15px] py-[7px] text-[14px] font-medium text-[var(--color-text-primary)] hover:border-[var(--color-border-strong)]"
             >
               {name}
             </Link>
@@ -594,10 +594,10 @@ export function ExpandedCategoriesGridSection({
 
 export function BoostedListingsSection() {
   return (
-    <section className="px-12 pt-[72px]">
+    <section className="mx-auto max-w-[1440px] px-4 pt-[72px] sm:px-6 lg:px-12">
       <div className="flex items-end justify-between gap-8 mb-7">
         <div>
-          <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-lagon)]">
+          <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-accent-text)]">
             Annonces mises en avant
           </p>
           <h2 className="mt-3 mb-0 font-display font-normal text-[46px] leading-[1.05]">
@@ -624,7 +624,7 @@ export function BoostedListingsSection() {
         </p>
         <Link
           href="/pro/dashboard/boosts"
-          className="inline-flex items-center gap-2 rounded-[10px] bg-[var(--coral)] text-white px-6 py-3 text-[15px] font-semibold"
+          className="btn-primary inline-flex items-center gap-2 px-6 text-[15px] font-semibold"
         >
           Découvrir les boosts
         </Link>
@@ -650,7 +650,7 @@ const TRUST_ITEMS = [
 
 export function TrustSection() {
   return (
-    <section className="px-12 pt-[72px]">
+    <section className="mx-auto max-w-[1440px] px-4 pt-[72px] sm:px-6 lg:px-12">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {TRUST_ITEMS.map((item) => (
           <div key={item.title} className="rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] p-8">
@@ -702,10 +702,10 @@ const LOCAL_PROS = [
 
 export function LocalProsSection() {
   return (
-    <section className="px-12 pt-[72px]">
+    <section className="mx-auto max-w-[1440px] px-4 pt-[72px] sm:px-6 lg:px-12">
       <div className="flex items-end justify-between gap-8 mb-7">
         <div>
-          <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-lagon)]">
+          <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-accent-text)]">
             Pros locaux
           </p>
           <h2 className="mt-3 mb-0 font-display font-normal text-[46px] leading-[1.05]">
@@ -728,7 +728,7 @@ export function LocalProsSection() {
         {LOCAL_PROS.map((pro) => (
           <div key={pro.name} className="rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
             <div className="flex items-center gap-3 mb-4">
-              <span className="flex h-[46px] w-[46px] flex-shrink-0 items-center justify-center rounded-full bg-[rgba(85,173,179,0.16)] text-[15px] font-semibold text-[var(--color-lagon)]">
+              <span className="flex h-[46px] w-[46px] flex-shrink-0 items-center justify-center rounded-full bg-[var(--color-info-soft)] text-[15px] font-semibold text-[var(--color-info-text)]">
                 {pro.initials}
               </span>
               <div className="min-w-0">
@@ -738,11 +738,12 @@ export function LocalProsSection() {
             </div>
             <p className="text-[14px] leading-[1.5] text-[var(--color-text-secondary)] mb-4">{pro.blurb}</p>
             <div className="flex items-center justify-between">
-              <span className="text-[13px] text-[var(--color-text-muted)]">
-                ★ {pro.rating} · {pro.reviews} avis
+              <span className="inline-flex items-center gap-1 text-[13px] text-[var(--color-text-muted)]">
+                <Star className="h-3.5 w-3.5 text-[var(--color-accent-text)]" />
+                {pro.rating} · {pro.reviews} avis
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(110,154,106,0.14)] border border-[rgba(110,154,106,0.3)] px-2 py-1 text-[11px] font-semibold text-[#3F6B3C]">
-                ✓ Vérifié
+              <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-success-border)] bg-[var(--color-success-soft)] px-2 py-1 text-[11px] font-semibold text-[var(--color-success-text)]">
+                <BadgeCheck className="h-3 w-3" /> Vérifié
               </span>
             </div>
           </div>
@@ -760,10 +761,10 @@ const HOME_ALERTS = [
 
 export function AlertsCtaSection() {
   return (
-    <section className="bg-[var(--color-bg-page)] px-12 pt-[72px] pb-[72px]">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+    <section className="bg-[var(--color-bg)] px-4 pb-[72px] pt-[72px] sm:px-6 lg:px-12">
+      <div className="mx-auto grid max-w-[1440px] grid-cols-1 items-start gap-12 md:grid-cols-2">
         <div>
-          <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-lagon)]">
+          <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-accent-text)]">
             Alertes
           </p>
           <h2 className="mt-4 mb-0 font-display font-normal text-[42px] leading-[1.08] text-[var(--color-text-primary)]">
@@ -774,7 +775,7 @@ export function AlertsCtaSection() {
           </p>
           <Link
             href="/alertes"
-            className="mt-6 inline-flex items-center gap-2 rounded-[10px] border border-[var(--color-lagon-dark)] bg-transparent text-[var(--color-text-primary)] px-6 py-3 text-[15px] font-semibold"
+            className="btn-secondary mt-6 inline-flex items-center gap-2 px-6 text-[15px] font-semibold"
           >
             Créer une alerte
           </Link>
@@ -787,8 +788,8 @@ export function AlertsCtaSection() {
                 <span
                   className={`text-[12px] font-semibold px-2 py-1 rounded-full ${
                     alert.status === '2 nouvelles'
-                      ? 'bg-[var(--coral)] text-white'
-                      : 'bg-[var(--color-surface-2)] text-[var(--color-text-muted)]'
+                      ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent-text)]'
+                      : 'bg-[var(--color-surface-sunken)] text-[var(--color-text-muted)]'
                   }`}
                 >
                   {alert.status}
