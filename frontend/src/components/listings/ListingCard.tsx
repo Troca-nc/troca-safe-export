@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
-import { BadgeCheck, Clock, Heart, MailCheck, MapPin, Phone, ShieldCheck } from 'lucide-react'
+import { BadgeCheck, Clock, Heart, MapPin } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useAuthStore } from '@/store/authStore'
@@ -118,7 +118,7 @@ function SellerAvatar({ listing }: { listing: Listing }) {
 
   if (listing.seller_avatar) {
     return (
-      <span className="relative flex h-9 w-9 shrink-0 overflow-hidden rounded-full border border-white/80 bg-sand">
+      <span className="relative flex h-[34px] w-[34px] shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface-sunken)]">
         <Image
           src={listing.seller_avatar}
           alt=""
@@ -132,7 +132,7 @@ function SellerAvatar({ listing }: { listing: Listing }) {
   }
 
   return (
-    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/80 bg-kalico-blue/10 text-xs font-bold text-kalico-blue">
+    <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border border-[var(--color-info-border)] bg-[var(--color-info-soft)] text-xs font-semibold text-[var(--color-info-text)]">
       {initials}
     </span>
   )
@@ -173,7 +173,7 @@ function ListingImageFrame({
   }, [hasCoverImage, listing.id])
 
   return (
-    <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-surface-raised)]">
+    <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-surface-sunken)]">
       {hasCoverImage ? (
         <ListingImage
           src={listing.cover_image}
@@ -183,11 +183,11 @@ function ListingImageFrame({
           placeholder="blur"
           blurDataURL={blurPlaceholder}
           onLoadingComplete={() => setLoaded(true)}
-          imgClassName={`h-full w-full object-cover transition-transform ease-out ${featuredCard ? 'duration-200 group-hover:scale-[1.02]' : 'duration-150 group-hover:scale-[1.01]'} motion-reduce:transition-none motion-reduce:transform-none ${loaded ? 'opacity-100' : 'opacity-0'}`}
+          imgClassName={`h-full w-full object-cover transition-opacity duration-150 ${loaded ? 'opacity-100' : 'opacity-0'}`}
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center bg-[var(--color-surface-raised)]">
-          <span className="text-6xl font-semibold text-night/20">{categoryInitial}</span>
+        <div className="motif-tressage flex h-full w-full items-center justify-center bg-[var(--color-surface-sunken)]">
+          <span className="font-display text-6xl font-normal text-[var(--color-text-faint)]">{categoryInitial}</span>
         </div>
       )}
 
@@ -195,9 +195,9 @@ function ListingImageFrame({
 
       {featuredCard ? (
         <>
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.55))]" />
-          <div className="absolute bottom-3 left-3 z-10 text-base font-medium text-white">{priceLabel}</div>
-          <div className="absolute right-3 top-3 z-10 rounded bg-kalico-blue px-2 py-0.5 text-xs font-medium text-white shadow-sm">
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent,rgba(14,42,49,0.72))]" />
+          <div className="absolute bottom-3 left-3 z-10 font-display text-2xl font-normal text-[var(--color-on-deep)]">{priceLabel}</div>
+          <div className="absolute left-3 top-3 z-10 rounded-full bg-[var(--color-accent)] px-3 py-1 text-xs font-semibold text-[var(--color-deep)]">
             À la une
           </div>
         </>
@@ -208,11 +208,11 @@ function ListingImageFrame({
         onClick={onFavorite}
         disabled={isLoading}
         aria-label={saved ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-        className={`absolute bottom-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/85 text-night/50 shadow-md backdrop-blur-sm transition duration-150 hover:scale-110 active:scale-95 motion-reduce:transition-none motion-reduce:hover:scale-100 ${
+        className={`absolute bottom-3 right-3 z-10 flex h-[34px] w-[34px] items-center justify-center rounded-full bg-[rgba(254,250,243,0.92)] text-[var(--color-text-muted)] shadow-[var(--shadow-card)] transition-colors hover:text-[var(--color-accent-text)] ${
           isLoading ? 'cursor-wait opacity-50' : ''
         }`}
       >
-        <Heart className={`h-3.5 w-3.5 ${saved ? 'fill-kalico-blue text-kalico-blue' : ''}`} />
+        <Heart className={`h-4 w-4 ${saved ? 'fill-[var(--color-accent)] text-[var(--color-accent-text)]' : ''}`} />
       </button>
     </div>
   )
@@ -290,7 +290,7 @@ export default function ListingCard({ listing, className = '', boosted, featured
     : listing.price
       ? `${listing.price.toLocaleString('fr-FR')} XPF`
       : 'Prix à débattre'
-  const priceClassName = listing.is_free ? 'text-jungle' : 'text-kalico-blue'
+  const priceClassName = listing.is_free ? 'text-[var(--color-success-text)]' : 'text-[var(--color-text-primary)]'
 
   const publishedAt = listing.published_at ?? listing.created_at ?? new Date().toISOString()
   const timeAgo = formatDistanceToNow(new Date(publishedAt), {
@@ -318,10 +318,8 @@ export default function ListingCard({ listing, className = '', boosted, featured
   return (
     <Link
       href={`/annonces/${listing.id}`}
-      className={`group block overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-white shadow-sm transform-gpu transition-all ease-out motion-reduce:transition-none motion-reduce:transform-none ${
-        level2
-          ? 'duration-200 hover:scale-[1.02] hover:shadow-[0_14px_36px_rgba(8,32,50,0.18)]'
-          : 'duration-150 hover:-translate-y-[2px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)]'
+      className={`group block overflow-hidden rounded-[var(--radius-card)] border bg-[var(--color-surface)] shadow-[var(--shadow-card)] transition-colors hover:border-[var(--color-border-strong)] ${
+        level2 ? 'border-l-[3px] border-l-[var(--color-accent)]' : 'border-[var(--color-border)]'
       } ${className}`}
     >
       <ListingImageFrame
@@ -336,19 +334,19 @@ export default function ListingCard({ listing, className = '', boosted, featured
 
       <div className="space-y-3 p-4">
         <div className="space-y-1.5">
-          <h3 className="line-clamp-2 text-[15px] font-medium leading-6 text-night transition-colors duration-150 group-hover:text-kalico-blue">
+          <h3 className="line-clamp-2 text-[15px] font-medium leading-[1.55] text-[var(--color-text-primary)]">
             {listing.title}
           </h3>
           {level2 ? null : (
-            <div className={`text-lg font-medium leading-tight ${priceClassName}`}>
+            <div className={`font-display text-[30px] font-normal leading-none ${priceClassName}`}>
               {priceText}
             </div>
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-3 text-xs text-[var(--color-text-tertiary)]">
+        <div className="flex items-center justify-between gap-3 text-[13px] text-[var(--color-text-muted)]">
           <span className="flex min-w-0 items-center gap-1 truncate">
-            <MapPin className="h-3.5 w-3.5 shrink-0" />
+            <MapPin className="h-3.5 w-3.5 shrink-0 text-[var(--color-info-text)]" />
             <span className="truncate">{locationText}</span>
           </span>
           <span className="flex shrink-0 items-center gap-1">
@@ -357,59 +355,35 @@ export default function ListingCard({ listing, className = '', boosted, featured
           </span>
         </div>
 
-        <div className="flex items-center justify-between gap-3 pt-1">
+        <div className="flex items-center justify-between gap-3 border-t border-[var(--color-border-inner)] pt-3">
           <div className="flex min-w-0 items-center gap-2">
             <SellerAvatar listing={listing} />
             <div className="min-w-0">
               <div className="flex min-w-0 items-center gap-2">
-                <p className="truncate text-sm font-semibold text-night">{sellerName}</p>
+                <p className="truncate text-sm font-semibold text-[var(--color-text-primary)]">{sellerName}</p>
                 {isProVerified ? (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-success-border)] bg-[var(--color-success-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-success-text)]">
                     <BadgeCheck className="h-3 w-3" />
                     Pro
                   </span>
                 ) : null}
               </div>
-              <div className="flex flex-wrap items-center gap-2 text-[11px] text-night/50">
-                {listing.seller_email_verified ? (
-                  <span className="inline-flex items-center gap-1">
-                    <MailCheck className="h-3 w-3" />
-                    Email vérifié
-                  </span>
-                ) : null}
-                {listing.seller_phone_verified ? (
-                  <span className="inline-flex items-center gap-1">
-                    <Phone className="h-3 w-3" />
-                    Téléphone vérifié
-                  </span>
-                ) : null}
-                {listing.seller_trust_score != null ? (
-                  <span className="inline-flex items-center gap-1">
-                    <ShieldCheck className="h-3 w-3" />
-                    {Math.round(listing.seller_trust_score)}/100
-                  </span>
-                ) : null}
+              <div className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--color-text-subtle)]">
                 {isConditionVisible ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2 py-0.5 text-[10px] font-semibold text-night/65">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-sunken)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-text-muted)]">
                     {CONDITION_LABELS[listing.condition!]}
                   </span>
                 ) : null}
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5 text-[10px]">
-                <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium ${
-                  listing.seller_is_online ? 'bg-emerald-50 text-emerald-700' : 'bg-sand text-night/45'
-                }`}>
-                  <span className={`h-1.5 w-1.5 rounded-full ${listing.seller_is_online ? 'bg-emerald-500' : 'bg-night/25'}`} />
-                  {listing.seller_is_online ? 'En ligne' : (listing.seller_last_seen_label ?? 'Hors ligne')}
-                </span>
                 {listing.seller_avg_response_time_label && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-nc-lagonLight px-2 py-0.5 font-medium text-nc-lagonText">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-info-border)] bg-[var(--color-info-soft)] px-2 py-0.5 font-medium text-[var(--color-info-text)]">
                     <Clock className="h-3 w-3" />
                     {listing.seller_avg_response_time_label}
                   </span>
                 )}
-                {typeof listing.seller_note_moyenne === 'number' && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-nc-emeraudeLight px-2 py-0.5 font-medium text-nc-emeraudeText">
+                {!isProVerified && typeof listing.seller_note_moyenne === 'number' && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent-border)] bg-[var(--color-accent-soft)] px-2 py-0.5 font-medium text-[var(--color-accent-text)]">
                     <BadgeCheck className="h-3 w-3" />
                     {listing.seller_note_moyenne.toFixed(1)}/5
                     <span className="text-current/70">({listing.seller_nb_avis ?? 0})</span>

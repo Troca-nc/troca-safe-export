@@ -204,7 +204,7 @@ function CategoryTreeBrowser({
   toggleCategoryNode: (slug: string) => void
 }) {
   return (
-    <div className="space-y-3 rounded-2xl border border-night/8 bg-white/80 p-3 shadow-sm">
+    <div className="space-y-3 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-sm">
       <button
         type="button"
         onClick={() => updateFilter('category', '')}
@@ -302,7 +302,7 @@ function FilterSidebar({
   return (
     <div className="space-y-6">
       {/* Localisation */}
-      <div className="rounded-2xl border border-night/8 bg-white/80 p-4 shadow-sm">
+      <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
         <div className="mb-3">
           <h3 className="text-sm font-semibold text-night">Localisation</h3>
           <p className="mt-1 text-xs text-night/45">
@@ -325,7 +325,7 @@ function FilterSidebar({
                 className={`rounded-full border px-4 py-2 text-sm transition-colors ${
                   !filters.province_id
                     ? 'border-nc-lagon bg-nc-lagon text-white'
-                    : 'border-night/12 bg-white text-night/65 hover:bg-sand'
+                    : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-sunken)]'
                 }`}
               >
                 Toute la NC
@@ -340,7 +340,7 @@ function FilterSidebar({
                     className={`rounded-full border px-4 py-2 text-sm transition-colors ${
                       isActiveProvince
                         ? 'border-nc-lagon bg-nc-lagon text-white'
-                        : 'border-night/12 bg-white text-night/65 hover:bg-sand'
+                        : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-sunken)]'
                     }`}
                   >
                     {province.name}
@@ -367,7 +367,7 @@ function FilterSidebar({
                     className={`rounded-full border px-3 py-2 text-sm transition-colors ${
                       !filters.commune_id
                         ? 'border-nc-lagon bg-nc-lagon text-white'
-                        : 'border-night/12 bg-white text-night/65 hover:bg-sand'
+                        : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-sunken)]'
                     }`}
                   >
                     Toutes les communes
@@ -380,7 +380,7 @@ function FilterSidebar({
                       className={`rounded-full border px-3 py-2 text-sm transition-colors ${
                         String(filters.commune_id) === String(c.id)
                           ? 'border-nc-lagon bg-nc-lagon text-white'
-                          : 'border-night/12 bg-white text-night/65 hover:bg-sand'
+                          : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-sunken)]'
                       }`}
                     >
                       {c.name}
@@ -408,7 +408,7 @@ function FilterSidebar({
                     className={`rounded-full border px-3 py-2 text-sm transition-colors ${
                       !filters.quartier_zone
                         ? 'border-nc-lagon bg-nc-lagon text-white'
-                        : 'border-night/12 bg-white text-night/65 hover:bg-sand'
+                        : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-sunken)]'
                     }`}
                   >
                     Aucune préférence
@@ -426,7 +426,7 @@ function FilterSidebar({
                         className={`rounded-full border px-3 py-2 text-sm transition-colors ${
                           String(filters.quartier_zone) === String(zone)
                             ? 'border-nc-lagon bg-nc-lagon text-white'
-                            : 'border-night/12 bg-white text-night/65 hover:bg-sand'
+                            : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-sunken)]'
                         }`}
                       >
                         {zone}
@@ -475,7 +475,7 @@ function FilterSidebar({
                     className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
                       active
                         ? 'border-kalico-blue bg-kalico-blue text-white shadow-sm'
-                        : 'border-night/10 bg-white text-night/60 hover:bg-sand'
+                        : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-sunken)]'
                     }`}
                   >
                     {value} km
@@ -490,7 +490,7 @@ function FilterSidebar({
                 disabled={geoLoading}
                 className="rounded-full bg-night px-3 py-2 text-xs font-medium text-white disabled:opacity-60"
               >
-                {geoLoading ? 'Localisation&' : 'Utiliser ma position'}
+                {geoLoading ? 'Localisation…' : 'Utiliser ma position'}
               </button>
               {filters.lat && filters.lng && (
                 <button
@@ -577,7 +577,7 @@ function FilterSidebar({
             </span>
           </div>
 
-          <div className="rounded-2xl border border-night/8 bg-white/80 p-3 backdrop-blur-sm">
+          <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-3 backdrop-blur-sm">
             <div className="mb-2 flex items-center justify-between gap-3 text-[10px] text-night/40">
               <span>0 XPF</span>
               <span className="rounded-full bg-white/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-night/50 shadow-sm">
@@ -594,7 +594,7 @@ function FilterSidebar({
                 min={0}
                 onChange={(e) => updateFilter('price_min', e.target.value)}
                 onBlur={(e) => updateFilter('price_min', snapTo10(e.target.value))}
-                className="input w-full bg-white/90 text-sm"
+                className="input w-full text-sm"
               />
               <span className="text-sm text-night/30">-</span>
               <input
@@ -605,7 +605,7 @@ function FilterSidebar({
                 min={0}
                 onChange={(e) => updateFilter('price_max', e.target.value)}
                 onBlur={(e) => updateFilter('price_max', snapTo10(e.target.value))}
-                className="input w-full bg-white/90 text-sm"
+                className="input w-full text-sm"
               />
             </div>
             <div className="mt-2 flex items-center justify-between gap-3 text-[10px] text-night/35">
@@ -1172,7 +1172,7 @@ function ListingsPageContent() {
       {/* Catégories */}
       <div>
         <h3 className="font-semibold text-night text-sm mb-3">Catégorie</h3>
-        <div className="space-y-3 rounded-2xl border border-night/8 bg-white/80 p-3 shadow-sm">
+        <div className="space-y-3 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-sm">
           <button
             type="button"
             onClick={() => updateFilter('category', '')}
@@ -1212,7 +1212,7 @@ function ListingsPageContent() {
       </div>
 
       {/* Localisation */}
-      <div className="rounded-2xl border border-night/8 bg-white/80 p-4 shadow-sm">
+      <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
         <div className="mb-3">
           <h3 className="font-semibold text-night text-sm">Localisation</h3>
           <p className="mt-1 text-xs text-night/45">
@@ -1235,7 +1235,7 @@ function ListingsPageContent() {
                 className={`rounded-full border px-4 py-2 text-sm transition-colors ${
                   !filters.province_id
                   ? 'bg-nc-lagon text-white border-nc-lagon'
-                    : 'bg-white text-night/65 border-night/12 hover:bg-sand'
+                    : 'bg-[var(--color-surface)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:bg-[var(--color-surface-sunken)]'
                 }`}
               >
                 Toute la NC
@@ -1250,7 +1250,7 @@ function ListingsPageContent() {
                     className={`rounded-full border px-4 py-2 text-sm transition-colors ${
                       isActiveProvince
                         ? 'bg-nc-lagon text-white border-nc-lagon'
-                        : 'bg-white text-night/65 border-night/12 hover:bg-sand'
+                        : 'bg-[var(--color-surface)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:bg-[var(--color-surface-sunken)]'
                     }`}
                   >
                     {province.name}
@@ -1277,7 +1277,7 @@ function ListingsPageContent() {
                     className={`rounded-full border px-3 py-2 text-sm transition-colors ${
                         !filters.commune_id
                           ? 'bg-nc-lagon text-white border-nc-lagon'
-                        : 'bg-white text-night/65 border-night/12 hover:bg-sand'
+                        : 'bg-[var(--color-surface)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:bg-[var(--color-surface-sunken)]'
                     }`}
                   >
                     Toutes les communes
@@ -1290,7 +1290,7 @@ function ListingsPageContent() {
                       className={`rounded-full border px-3 py-2 text-sm transition-colors ${
                         String(filters.commune_id) === String(c.id)
                           ? 'bg-nc-lagon text-white border-nc-lagon'
-                          : 'bg-white text-night/65 border-night/12 hover:bg-sand'
+                          : 'bg-[var(--color-surface)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:bg-[var(--color-surface-sunken)]'
                       }`}
                     >
                       {c.name}
@@ -1338,7 +1338,7 @@ function ListingsPageContent() {
                     className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
                       active
                         ? 'border-kalico-blue bg-kalico-blue text-white shadow-sm'
-                        : 'border-night/10 bg-white text-night/60 hover:bg-sand'
+                        : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-sunken)]'
                     }`}
                   >
                     {value} km
@@ -1353,7 +1353,7 @@ function ListingsPageContent() {
                 disabled={geoLoading}
                 className="rounded-full bg-night px-3 py-2 text-xs font-medium text-white disabled:opacity-60"
               >
-                {geoLoading ? 'Localisation&' : 'Utiliser ma position'}
+                {geoLoading ? 'Localisation…' : 'Utiliser ma position'}
               </button>
               {filters.lat && filters.lng && (
                 <button
@@ -1441,7 +1441,7 @@ function ListingsPageContent() {
             </span>
           </div>
 
-          <div className="rounded-2xl border border-night/8 bg-white/80 p-3 backdrop-blur-sm">
+          <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-3 backdrop-blur-sm">
             <div className="mb-2 flex items-center justify-between gap-3 text-[10px] text-night/40">
               <span>0 XPF</span>
               <span className="rounded-full bg-white/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-night/50 shadow-sm">
@@ -1458,7 +1458,7 @@ function ListingsPageContent() {
                 min={0}
                 onChange={(e) => updateFilter('price_min', e.target.value)}
                 onBlur={(e) => updateFilter('price_min', snapTo10(e.target.value))}
-                className="input text-sm w-full bg-white/90"
+                className="input w-full text-sm"
               />
               <span className="text-night/30 text-sm">-</span>
               <input
@@ -1469,7 +1469,7 @@ function ListingsPageContent() {
                 min={0}
                 onChange={(e) => updateFilter('price_max', e.target.value)}
                 onBlur={(e) => updateFilter('price_max', snapTo10(e.target.value))}
-                className="input text-sm w-full bg-white/90"
+                className="input w-full text-sm"
               />
             </div>
             <div className="mt-2 flex items-center justify-between gap-3 text-[10px] text-night/35">
@@ -1538,13 +1538,13 @@ function ListingsPageContent() {
       </h1>
       <Header />
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="mx-auto max-w-[1440px] px-4 py-6 sm:px-6 lg:px-12">
 
         {/* Barre superieure */}
-        <div className="mb-6 flex flex-col gap-3 rounded-[2rem] border border-night/8 border-l-4 border-l-nc-lagon bg-white/90 p-4 shadow-sm lg:flex-row lg:items-center">
+        <div className="sticky top-[88px] z-30 mb-7 flex flex-col gap-3 border-b border-[var(--color-border)] bg-[var(--color-bg)] py-5 lg:flex-row lg:items-center">
           {/* Recherche */}
           <div className="relative w-full lg:max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-night/35 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-faint)]" />
             <input
               type="text"
               value={filters.q}
@@ -1557,14 +1557,14 @@ function ListingsPageContent() {
 
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center lg:ml-auto">
             {/* Toggle Annonces / Troc */}
-            <div className="flex w-full items-center rounded-2xl border border-night/12 bg-[var(--color-surface)] p-1 shadow-sm sm:w-auto">
+            <div className="flex w-full items-center rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface-sunken)] p-[3px] sm:w-auto">
               <button
                 type="button"
                 onClick={() => updateFilter('troc', '')}
-                className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition sm:flex-none ${
+                className={`flex-1 rounded-[9px] px-3 py-2 text-sm font-semibold transition sm:flex-none ${
                   filters.troc === 'true'
-                    ? 'text-night/60 hover:bg-[var(--color-surface-raised)] hover:text-night'
-                    : 'bg-nc-lagon text-white shadow-sm shadow-nc-lagon/25'
+                    ? 'text-[var(--color-text-subtle)] hover:text-[var(--color-text-primary)]'
+                    : 'bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-[0_2px_8px_rgba(18,58,68,0.10)]'
                 }`}
                 aria-pressed={filters.troc !== 'true'}
                 aria-label="Afficher les annonces classiques"
@@ -1574,10 +1574,10 @@ function ListingsPageContent() {
               <button
                 type="button"
                 onClick={() => updateFilter('troc', 'true')}
-                className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold transition sm:flex-none ${
+                className={`flex-1 rounded-[9px] px-3 py-2 text-sm font-semibold transition sm:flex-none ${
                   filters.troc === 'true'
-                    ? 'bg-nc-corail text-white shadow-sm shadow-nc-corail/25'
-                    : 'text-night/60 hover:bg-[var(--color-surface-raised)] hover:text-night'
+                    ? 'bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-[0_2px_8px_rgba(18,58,68,0.10)]'
+                    : 'text-[var(--color-text-subtle)] hover:text-[var(--color-text-primary)]'
                 }`}
                 aria-pressed={filters.troc === 'true'}
                 aria-label="Afficher uniquement les annonces avec troc"
@@ -1607,7 +1607,7 @@ function ListingsPageContent() {
                   id="annonces-sort-menu"
                   role="menu"
                   aria-label="Tri des annonces"
-                  className="absolute right-0 top-full z-40 mt-2 w-64 overflow-hidden rounded-2xl border border-night/10 bg-white shadow-[0_18px_60px_rgba(8,32,50,0.14)]"
+                  className="absolute right-0 top-full z-40 mt-2 w-64 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] shadow-[var(--shadow-panel)]"
                 >
                   {SORT_OPTIONS.map((opt) => {
                     const active = filters.sort === opt.value
@@ -1621,11 +1621,11 @@ function ListingsPageContent() {
                           setSortMenuOpen(false)
                         }}
                         className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm transition ${
-                          active ? 'bg-nc-lagon/6 text-night' : 'text-night/70 hover:bg-sand'
+                          active ? 'bg-[var(--color-surface-sunken)] text-[var(--color-text-primary)]' : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-sunken)]'
                         }`}
                       >
                         <span className={active ? 'font-semibold' : ''}>{opt.label}</span>
-                        {active ? <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-lagon">Actif</span> : null}
+                        {active ? <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-accent-text)]">Actif</span> : null}
                       </button>
                     )
                   })}
@@ -1636,7 +1636,7 @@ function ListingsPageContent() {
             <button
               type="button"
               onClick={handleCreateSearchAlert}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-nc-lagon/20 bg-nc-lagon/6 px-3 py-2 text-sm font-semibold text-nc-lagon transition hover:border-nc-lagon/30 hover:bg-nc-lagon/10 sm:w-auto"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-[var(--radius-control)] border border-[var(--color-info-border)] bg-[var(--color-info-soft)] px-3 py-2 text-sm font-semibold text-[var(--color-info-text)] transition hover:border-[var(--color-info-text)] sm:w-auto"
             >
               <Bell className="h-4 w-4" />
               Créer une alerte
@@ -1645,7 +1645,7 @@ function ListingsPageContent() {
             {/* Bouton filtres mobile */}
             <button
               onClick={() => setFiltersOpen(!filtersOpen)}
-              className="relative inline-flex w-full items-center justify-center gap-2 rounded-xl border border-night/12 bg-white px-3 py-2 text-sm font-semibold text-night shadow-sm lg:hidden"
+              className="relative inline-flex w-full items-center justify-center gap-2 rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-semibold text-[var(--color-text-primary)] lg:hidden"
               aria-expanded={filtersOpen}
               aria-controls="mobile-filters-drawer"
               aria-haspopup="dialog"
@@ -1653,18 +1653,18 @@ function ListingsPageContent() {
               <SlidersHorizontal className="h-4 w-4" />
               Filtres
               {activeFilterCount > 0 && (
-                <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-kalico-blue text-[10px] font-bold text-white">
+                <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-accent-strong)] text-[10px] font-semibold text-[var(--color-on-deep)]">
                   {activeFilterCount}
                 </span>
               )}
             </button>
 
-            <div className="hidden items-center rounded-xl border border-night/12 bg-white p-1 lg:flex">
+            <div className="hidden items-center rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface-sunken)] p-[3px] lg:flex">
             <button
               type="button"
               onClick={() => setViewMode('list')}
               className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
-                viewMode === 'list' ? 'bg-night text-white' : 'text-night/60 hover:text-night'
+                viewMode === 'list' ? 'bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-[0_2px_8px_rgba(18,58,68,0.10)]' : 'text-[var(--color-text-subtle)] hover:text-[var(--color-text-primary)]'
               }`}
               aria-pressed={viewMode === 'list'}
             >
@@ -1675,7 +1675,7 @@ function ListingsPageContent() {
               type="button"
               onClick={() => setViewMode('map')}
               className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
-                viewMode === 'map' ? 'bg-night text-white' : 'text-night/60 hover:text-night'
+                viewMode === 'map' ? 'bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-[0_2px_8px_rgba(18,58,68,0.10)]' : 'text-[var(--color-text-subtle)] hover:text-[var(--color-text-primary)]'
               }`}
               aria-pressed={viewMode === 'map'}
             >
@@ -1687,7 +1687,7 @@ function ListingsPageContent() {
         </div>
 
         <div className="mb-4 lg:hidden">
-          <div className="rounded-[1.5rem] border border-night/8 bg-white/90 shadow-sm">
+          <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-card)]">
             <button
               type="button"
               className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
@@ -1695,7 +1695,7 @@ function ListingsPageContent() {
               onClick={() => setMobileCategoriesOpen((current) => !current)}
             >
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-kalico-blue/80">Catégories</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-accent-text)]">Catégories</p>
                 <p className="mt-1 text-sm font-semibold text-night">
                   {selectedCategoryLabel ?? 'Toutes les catégories'}
                 </p>
@@ -1718,11 +1718,11 @@ function ListingsPageContent() {
           </div>
         </div>
 
-        <div className="flex gap-6">
+        <div className="flex gap-7">
 
           {/* Sidebar desktop */}
-          <aside className="hidden lg:block w-80 xl:w-96 shrink-0">
-            <div className="card sticky top-20 space-y-5 border-l-4 border-l-nc-lagon p-5">
+          <aside className="hidden w-[296px] shrink-0 lg:block">
+            <div className="sticky top-[212px] max-h-[calc(100vh-236px)] space-y-5 overflow-y-auto rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-[var(--shadow-card)]">
               <CategoryTreeBrowser
                 filters={filters}
                 selectedCategoryLabel={selectedCategoryLabel}
@@ -1758,11 +1758,12 @@ function ListingsPageContent() {
 
           {/* Drawer filtres mobile */}
           {filtersOpen && (
-            <div className="lg:hidden fixed inset-0 z-50 flex">
-              <div className="absolute inset-0 bg-black/40" onClick={() => setFiltersOpen(false)} />
-              <div id="mobile-filters-drawer" role="dialog" aria-modal="true" aria-label="Filtres de recherche" className="relative ml-auto h-full w-[min(100vw,24rem)] overflow-y-auto border-l-4 border-l-nc-lagon bg-white p-5 shadow-modal animate-slide-up sm:w-80 sm:p-6">
+            <div className="fixed inset-0 z-50 flex items-end lg:hidden">
+              <div className="absolute inset-0 bg-[var(--color-deep)]/60" onClick={() => setFiltersOpen(false)} />
+              <div id="mobile-filters-drawer" role="dialog" aria-modal="true" aria-label="Filtres de recherche" className="relative max-h-[92vh] w-full overflow-y-auto rounded-t-[var(--radius-block)] bg-[var(--color-bg)] p-5 shadow-[var(--shadow-modal)] animate-slide-up sm:p-6">
+                <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-[var(--color-border)]" />
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="font-display font-bold text-lg">Filtres</h2>
+                  <h2 className="font-display text-[30px] font-normal">Filtres</h2>
                   <button type="button" onClick={() => setFiltersOpen(false)} aria-label="Fermer les filtres">
                     <X className="w-5 h-5" />
                   </button>
@@ -1833,13 +1834,13 @@ function ListingsPageContent() {
             </div>
 
             {categoryBanner ? (
-              <div className="mb-4 hidden overflow-hidden rounded-[2rem] border border-nc-lagon/15 bg-white/95 shadow-sm md:block">
+              <div className="mb-4 hidden overflow-hidden rounded-[var(--radius-block)] border border-[var(--color-info-border)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] md:block">
                 <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
                   <div className="space-y-3 p-5 lg:p-6">
-                    <div className="inline-flex items-center rounded-full border border-nc-lagon/20 bg-nc-lagon/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-nc-lagon">
+                    <div className="inline-flex items-center rounded-full border border-[var(--color-info-border)] bg-[var(--color-info-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-info-text)]">
                       Sponsorisé
                     </div>
-                    <h3 className="font-display text-2xl font-bold text-night">
+                    <h3 className="font-display text-3xl font-normal text-[var(--color-text-primary)]">
                       {categoryBanner.title || 'Mettez votre offre en avant'}
                     </h3>
                     <p className="max-w-2xl text-sm leading-relaxed text-night/65">
@@ -1848,7 +1849,7 @@ function ListingsPageContent() {
                     <div className="flex flex-wrap gap-3">
                       <a
                         href={categoryBanner.link_url || '/annonces'}
-                        className="inline-flex items-center justify-center rounded-2xl bg-nc-lagon px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-sm"
+                        className="btn-primary inline-flex items-center justify-center px-4 text-sm font-semibold"
                       >
                         {categoryBanner.cta_text || 'Découvrir'}
                       </a>
@@ -1870,14 +1871,14 @@ function ListingsPageContent() {
             {isInitialLoading ? (
               <ListingSkeletonGrid count={6} className="grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4" />
             ) : displayedListings.length === 0 ? (
-              <div className="rounded-[2rem] border border-night/8 bg-white/90 px-6 py-16 text-center shadow-sm">
+              <div className="rounded-[var(--radius-block)] border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-16 text-center shadow-[var(--shadow-card)]">
                 <div
-                  className="mx-auto mb-5 flex h-28 w-28 items-center justify-center rounded-[2rem] border border-nc-lagon/12 bg-[linear-gradient(180deg,_rgba(10,126,164,0.12),_rgba(10,126,164,0.02))] text-nc-lagon shadow-[0_18px_50px_rgba(10,126,164,0.12)]"
+                  className="mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-[var(--radius-block)] border border-[var(--color-info-border)] bg-[var(--color-info-soft)] text-[var(--color-info-text)]"
                   aria-hidden="true"
                 >
-                  <PackageSearch className="h-20 w-20" strokeWidth={1.6} />
+                  <PackageSearch className="h-6 w-6" strokeWidth={2} />
                 </div>
-                <h3 className="mt-4 font-display text-xl font-bold text-night mb-2">
+                <h3 className="mb-2 mt-4 font-display text-[32px] font-normal text-[var(--color-text-primary)]">
                   Aucune annonce trouvée pour ces critères
                 </h3>
                 <p className="mx-auto mb-6 max-w-lg text-sm leading-relaxed text-night/55">
@@ -1894,7 +1895,7 @@ function ListingsPageContent() {
                   ) : null}
                 </div>
                 <div className="mt-4">
-                  <Link href="/annonces/nouvelle" className="btn-primary inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm">
+                  <Link href="/annonces/nouvelle" className="btn-primary inline-flex items-center justify-center gap-2 px-4 text-sm">
                     Publier une annonce
                   </Link>
                 </div>
