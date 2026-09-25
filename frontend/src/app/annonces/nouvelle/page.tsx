@@ -38,13 +38,13 @@ export default function NewListingPage() {
     return (
       <div className="min-h-screen bg-sand-light">
         <Header />
-        <main className="mx-auto max-w-3xl px-4 py-10 md:py-14">
-          <div className="rounded-[2rem] border border-night/8 bg-white p-6 shadow-sm md:p-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-kalico-blue/15 bg-kalico-blue/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue">
+        <main className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 lg:px-12 md:py-14">
+          <div className="mx-auto max-w-3xl rounded-[24px] border border-night/10 bg-surface p-6 shadow-card md:p-8">
+            <div className="eyebrow inline-flex items-center gap-2 text-accent-strong">
               <Lock className="h-3.5 w-3.5" />
               Connexion requise
             </div>
-            <h1 className="mt-4 text-3xl font-bold text-night">Publier une annonce</h1>
+            <h1 className="mt-4 font-display text-3xl font-bold text-night">Publier une annonce</h1>
             <p className="mt-3 text-sm leading-6 text-night/60">
               Connectez-vous pour conserver votre brouillon, joindre vos photos et publier sans perdre vos données.
             </p>
@@ -56,7 +56,7 @@ export default function NewListingPage() {
                   redirectTo: '/annonces/nouvelle',
                 })
               }
-              className="mt-6 inline-flex items-center justify-center rounded-2xl bg-night px-4 py-3 text-sm font-semibold text-white transition hover:bg-night/90"
+              className="btn-primary mt-6 inline-flex items-center justify-center px-5 py-3"
             >
               Se connecter pour continuer
             </button>
@@ -280,10 +280,10 @@ function SimpleBonPlanPage() {
   return (
     <div className="min-h-screen bg-sand-light">
       <Header />
-      <main className="mx-auto max-w-7xl px-4 py-8 md:py-12">
+      <main className="mx-auto max-w-[1440px] px-4 py-8 sm:px-6 lg:px-12 md:py-12">
         <div className="mb-6 flex items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-kalico-blue/15 bg-kalico-blue/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue">
+            <div className="eyebrow inline-flex items-center gap-2 text-accent-strong">
               <Sparkles className="h-3.5 w-3.5" />
               Bon plan
             </div>
@@ -293,7 +293,7 @@ function SimpleBonPlanPage() {
               les pros ont plus de visibilité, et les abonnés Pro ont un bon plan offert chaque mois.
             </p>
           </div>
-          <Link href="/annonces" className="hidden items-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-2.5 text-sm font-semibold text-night shadow-sm transition hover:-translate-y-0.5 md:inline-flex">
+          <Link href="/annonces" className="btn-secondary hidden items-center gap-2 px-4 py-2.5 md:inline-flex">
             <ArrowLeft className="h-4 w-4" />
             Retour
           </Link>
@@ -344,8 +344,8 @@ function SimpleBonPlanPage() {
           </div>
         ) : null}
 
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <form onSubmit={handleSubmit} className="space-y-5 rounded-[2rem] border border-night/8 bg-white/95 p-5 shadow-card">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <form onSubmit={handleSubmit} className="space-y-5 rounded-[24px] border border-night/10 bg-surface p-5 shadow-card md:p-6">
             {error ? (
               <div className="rounded-2xl border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 p-4 text-sm text-[var(--color-danger)]">
                 {error}
@@ -597,15 +597,15 @@ function SimpleBonPlanPage() {
             </div>
           </form>
 
-          <aside className="space-y-5">
-            <div className="rounded-[2rem] border border-night/8 bg-[#0c2a35] p-5 text-white shadow-[0_24px_80px_rgba(8,32,50,0.18)]">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-lagoon">
+          <aside className="space-y-5 lg:sticky lg:top-28 lg:self-start">
+            <div className="motif-tressage rounded-[24px] border border-on-deep/10 bg-[var(--color-deep)] p-5 text-on-deep shadow-card">
+              <div className="inline-flex items-center gap-2 rounded-full border border-on-deep/15 bg-on-deep/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">
                 <Sparkles className="h-3.5 w-3.5" />
                 Apercu prix
               </div>
-              <p className="mt-4 text-sm uppercase tracking-[0.18em] text-white/45">Estimation</p>
-              <p className="mt-2 text-4xl font-bold text-white">{formatPrice(estimatedPrice)}</p>
-              <p className="mt-3 text-sm leading-relaxed text-white/70">
+              <p className="mt-4 text-sm uppercase tracking-[0.18em] text-on-deep/50">Estimation</p>
+              <p className="mt-2 font-display text-4xl font-bold text-on-deep">{formatPrice(estimatedPrice)}</p>
+              <p className="mt-3 text-sm leading-relaxed text-on-deep/70">
                 Le prix est calculé selon le profil choisi et la durée. Si vous êtes Pro et que votre bon plan offert
                 du mois est encore disponible, le tarif peut tomber à 0 XPF.
               </p>
@@ -624,8 +624,8 @@ function SimpleBonPlanPage() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-night/8 bg-white p-5 shadow-card">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">Résumé</p>
+            <div className="rounded-[16px] border border-night/10 bg-surface p-5 shadow-card">
+              <p className="eyebrow text-accent-strong">Résumé</p>
               <div className="mt-4 space-y-3 text-sm text-night/65">
                 <p><span className="font-semibold text-night">Profil:</span> {form.target_audience === 'pro' ? 'Professionnel' : 'Particulier'}</p>
                 <p><span className="font-semibold text-night">Durée:</span> {form.duration_days} jours</p>

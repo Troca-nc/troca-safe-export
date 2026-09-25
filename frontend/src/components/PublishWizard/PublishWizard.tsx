@@ -136,7 +136,7 @@ function StepBadge({ index, active, done }: { index: number; active: boolean; do
   return (
     <div
       className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
-        done ? 'bg-jungle text-white' : active ? 'bg-night text-white' : 'bg-sand text-night/45'
+        done ? 'bg-jungle text-on-deep' : active ? 'bg-[var(--color-deep)] text-on-deep' : 'bg-sand text-night/45'
       }`}
     >
       {done ? <Check className="h-4 w-4" /> : index}
@@ -152,7 +152,7 @@ function WizardStepper({ step }: { step: number }) {
   ]
 
   return (
-    <div className="rounded-[1.75rem] border border-night/8 bg-white p-4 shadow-sm">
+    <div className="rounded-[16px] border border-night/10 bg-surface p-4">
       <div className="flex items-center justify-between gap-3">
         {items.map((item, idx) => {
           const active = step === item.index
@@ -193,7 +193,7 @@ function PhotoGrid({
     <div className="space-y-4">
       <div
         className={`rounded-[1.75rem] border-2 border-dashed p-5 transition-colors ${
-          dragOver ? 'border-kalico-blue bg-kalico-blue/5' : 'border-night/15 bg-sand/20'
+          dragOver ? 'border-accent-strong bg-accent/10' : 'border-night/15 bg-sand/20'
         }`}
         onDragOver={(event) => {
           event.preventDefault()
@@ -212,7 +212,7 @@ function PhotoGrid({
         tabIndex={0}
       >
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-kalico-blue shadow-sm">
+          <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-surface text-accent-strong shadow-sm">
             <ImagePlus className="h-5 w-5" />
           </div>
           <div>
@@ -270,7 +270,7 @@ function PhotoGrid({
                 </button>
               </div>
               {index === 0 && (
-                <div className="absolute left-3 top-3 rounded-full bg-kalico-blue px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white">
+                <div className="absolute left-3 top-3 rounded-full bg-accent-strong px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-on-deep">
                   Principale
                 </div>
               )}
@@ -292,28 +292,28 @@ function PublicationPreview({
   selectedCommune?: CommuneOption | null
 }) {
   return (
-    <div className="rounded-[2rem] border border-night/8 bg-[#0c2a35] p-5 text-white shadow-[0_24px_80px_rgba(8,32,50,0.18)]">
-      <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-lagoon">
+    <div className="motif-tressage rounded-[24px] border border-on-deep/10 bg-[var(--color-deep)] p-5 text-on-deep shadow-card">
+      <div className="inline-flex items-center gap-2 rounded-full border border-on-deep/15 bg-on-deep/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">
         <Sparkles className="h-3.5 w-3.5" />
         Aperçu
       </div>
 
-      <p className="mt-4 text-sm uppercase tracking-[0.18em] text-white/45">Résumé rapide</p>
-      <p className="mt-2 text-3xl font-bold text-white">
+      <p className="mt-4 text-sm uppercase tracking-[0.18em] text-on-deep/50">Résumé rapide</p>
+      <p className="mt-2 font-display text-3xl font-bold text-on-deep">
         {draft.price ? `${Number(draft.price || 0).toLocaleString('fr-FR')} XPF` : '0 XPF'}
       </p>
-      <p className="mt-3 text-sm leading-relaxed text-white/70">
+      <p className="mt-3 text-sm leading-relaxed text-on-deep/70">
         {draft.title.trim() || "Votre annonce s'affichera ici en temps réel."}
       </p>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lagoon">Catégorie</p>
-          <p className="mt-2 text-sm font-semibold text-white">{selectedCategory?.name || 'À choisir'}</p>
+        <div className="rounded-[12px] border border-on-deep/15 bg-on-deep/10 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Catégorie</p>
+          <p className="mt-2 text-sm font-semibold text-on-deep">{selectedCategory?.name || 'À choisir'}</p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lagoon">Commune</p>
-          <p className="mt-2 text-sm font-semibold text-white">{selectedCommune?.name || 'À compléter'}</p>
+        <div className="rounded-[12px] border border-on-deep/15 bg-on-deep/10 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Commune</p>
+          <p className="mt-2 text-sm font-semibold text-on-deep">{selectedCommune?.name || 'À compléter'}</p>
         </div>
       </div>
     </div>
@@ -780,7 +780,7 @@ export default function PublishWizard() {
 
   return (
     <div className="min-h-screen bg-sand-light">
-      <main className="mx-auto max-w-6xl px-4 py-8 md:py-12">
+      <main className="mx-auto max-w-[1440px] px-4 py-8 sm:px-6 lg:px-12 md:py-12">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <h1 className="mt-3 font-display text-3xl font-bold text-night md:text-4xl">{stepTitle}</h1>
@@ -793,7 +793,7 @@ export default function PublishWizard() {
             <button
               type="button"
               onClick={() => router.push('/annonces/nouvelle?mode=simple')}
-              className="inline-flex items-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-2.5 text-sm font-semibold text-night shadow-sm transition hover:-translate-y-0.5"
+              className="btn-secondary inline-flex items-center gap-2 px-4 py-2.5"
             >
               <ArrowLeft className="h-4 w-4" />
               Mode simple
@@ -822,8 +822,8 @@ export default function PublishWizard() {
           </div>
         ) : null}
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-          <section className="space-y-5 rounded-[2rem] border border-night/8 bg-white/95 p-5 shadow-card">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <section className="space-y-5 rounded-[24px] border border-night/10 bg-surface p-5 shadow-card md:p-6">
             <WizardStepper step={draft.step} />
 
             {error ? (
@@ -1155,7 +1155,7 @@ export default function PublishWizard() {
                   type="button"
                   onClick={handleNext}
                   disabled={!canGoNext}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-night px-5 py-3 text-sm font-semibold text-white transition hover:bg-night/90 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="btn-primary inline-flex items-center gap-2 px-5 py-3 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Suivant
                   <ChevronRight className="h-4 w-4" />
@@ -1165,7 +1165,7 @@ export default function PublishWizard() {
                   type="button"
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-kalico-blue px-5 py-3 text-sm font-semibold text-white transition hover:bg-kalico-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
+                  className="btn-primary inline-flex items-center gap-2 px-5 py-3 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {submitting ? 'Publication...' : 'Publier l’annonce'}
                 </button>
@@ -1209,12 +1209,12 @@ export default function PublishWizard() {
             ) : null}
           </section>
 
-          <aside className="hidden space-y-5 lg:block">
+          <aside className="hidden space-y-5 lg:sticky lg:top-28 lg:block lg:self-start">
             <ListingCoachCard photoCount={photos.length} description={draft.description} />
             <PublicationPreview draft={draft} selectedCategory={selectedCategory} selectedCommune={selectedCommune} />
 
-            <div className="rounded-[2rem] border border-night/8 bg-white p-5 shadow-card">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">Checklist</p>
+            <div className="rounded-[16px] border border-night/10 bg-surface p-5 shadow-card">
+              <p className="eyebrow text-accent-strong">Checklist</p>
               <div className="mt-4 space-y-3 text-sm text-night/65">
                 <p className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-jungle" />
