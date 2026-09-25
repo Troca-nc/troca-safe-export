@@ -108,7 +108,7 @@ export function MobileBottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border)] bg-[var(--color-bg)] shadow-[0_-8px_32px_rgba(39,34,28,0.08)] md:hidden"
       aria-label="Navigation principale"
     >
       <div className="flex items-center justify-around px-1 pt-2 pb-[max(env(safe-area-inset-bottom),8px)]">
@@ -116,10 +116,10 @@ export function MobileBottomNav() {
           isCta ? (
             isAuthenticated ? (
               <Link key={href} href={href} className="mt-[-1rem] flex flex-col items-center gap-0.5">
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-kalico-blue shadow-lg shadow-kalico-blue/30 ring-4 ring-white">
-                  <Icon className="h-4 w-4 text-white" strokeWidth={2.5} />
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-accent-strong)] shadow-lg shadow-[var(--color-accent-strong)]/20 ring-4 ring-[var(--color-bg)]">
+                  <Icon className="h-4 w-4 text-[var(--color-on-deep)]" strokeWidth={2.5} />
                 </span>
-                <span className="text-[10px] font-semibold text-kalico-blue">{label}</span>
+                <span className="text-[10px] font-semibold text-[var(--color-accent-strong)]">{label}</span>
               </Link>
             ) : (
               <button
@@ -133,10 +133,10 @@ export function MobileBottomNav() {
                 }
                 className="mt-[-1rem] flex flex-col items-center gap-0.5"
               >
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-kalico-blue shadow-lg shadow-kalico-blue/30 ring-4 ring-white">
-                  <Icon className="h-4 w-4 text-white" strokeWidth={2.5} />
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-accent-strong)] shadow-lg shadow-[var(--color-accent-strong)]/20 ring-4 ring-[var(--color-bg)]">
+                  <Icon className="h-4 w-4 text-[var(--color-on-deep)]" strokeWidth={2.5} />
                 </span>
-                <span className="text-[10px] font-semibold text-kalico-blue">{label}</span>
+                <span className="text-[10px] font-semibold text-[var(--color-accent-strong)]">{label}</span>
               </button>
             )
           ) : isDrawer ? (
@@ -145,22 +145,22 @@ export function MobileBottomNav() {
               type="button"
               onClick={() => setMoreOpen((value) => !value)}
               className={`flex flex-col items-center gap-0.5 rounded-xl px-2 py-1 transition-colors ${
-                moreOpen ? 'bg-sand/70 text-night' : 'text-night/70 hover:bg-sand/60 hover:text-night'
+                moreOpen ? 'bg-[var(--color-surface-sunken)] text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-text-primary)]'
               }`}
             >
               <Icon className="h-4 w-4 text-current" strokeWidth={moreOpen ? 2.5 : 2} />
-              <span className={`text-[10px] font-medium ${moreOpen ? 'font-semibold text-night' : ''}`}>{label}</span>
+              <span className={`text-[10px] font-medium ${moreOpen ? 'font-semibold text-[var(--color-text-primary)]' : ''}`}>{label}</span>
             </button>
           ) : (
             <Link
               key={href}
               href={href}
               className={`flex flex-col items-center gap-0.5 rounded-xl px-2 py-1 transition-colors ${
-                isActive(href) ? 'bg-sand/70 text-night' : 'text-night/70 hover:bg-sand/60 hover:text-night'
+                isActive(href) ? 'bg-[var(--color-surface-sunken)] text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-text-primary)]'
               }`}
             >
               <Icon className="h-4 w-4 text-current" strokeWidth={isActive(href) ? 2.5 : 2} />
-              <span className={`text-[10px] font-medium ${isActive(href) ? 'font-semibold text-night' : ''}`}>
+              <span className={`text-[10px] font-medium ${isActive(href) ? 'font-semibold text-[var(--color-text-primary)]' : ''}`}>
                 {label}
               </span>
             </Link>
@@ -170,9 +170,9 @@ export function MobileBottomNav() {
 
       {moreOpen ? (
         <>
-          <div className="fixed inset-0 z-40 bg-black/40" onClick={closeDrawer} />
+          <div className="fixed inset-0 z-40 bg-[var(--color-deep)]/45 backdrop-blur-[2px]" onClick={closeDrawer} />
           <div
-            className="fixed inset-x-0 bottom-0 z-50 max-h-[calc(100dvh-4.5rem)] overflow-y-auto rounded-t-3xl bg-[var(--color-surface)] p-5 shadow-[0_-18px_60px_rgba(8,32,50,0.18)] overscroll-contain"
+            className="fixed inset-x-0 bottom-0 z-50 max-h-[92vh] overflow-y-auto rounded-t-[24px] bg-[var(--color-bg)] p-5 shadow-[0_-18px_60px_rgba(39,34,28,0.2)] overscroll-contain"
             style={{
               transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : 'translateY(0)',
               transition: dragOffset > 0 ? 'none' : 'transform 250ms ease',
@@ -181,18 +181,18 @@ export function MobileBottomNav() {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-night/10" />
-            <p className="mb-3 text-xs uppercase tracking-wide text-night/40">Navigation</p>
+            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[var(--color-border-strong)]" />
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">Navigation</p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {drawerItems.map(({ href, icon: Icon, label }) => (
                 <Link
                   key={href}
                   href={href}
                   onClick={closeDrawer}
-                  className="flex flex-col items-center justify-center rounded-2xl border border-[var(--color-border)] p-3 text-center transition hover:bg-sand/60"
+                  className="flex flex-col items-center justify-center rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-center transition hover:bg-[var(--color-surface-sunken)]"
                 >
-                  <Icon className="h-6 w-6 text-[#0A7EA4]" />
-                  <span className="mt-2 text-xs font-medium text-night">{label}</span>
+                  <Icon className="h-6 w-6 text-[var(--color-accent)]" />
+                  <span className="mt-2 text-xs font-medium text-[var(--color-text-primary)]">{label}</span>
                 </Link>
               ))}
             </div>
@@ -374,8 +374,8 @@ export default function Header() {
 
   return (
     <>
-      <header data-kalico-header className="fixed top-0 left-0 right-0 z-50 h-24 border-b border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-        <div ref={desktopNavRef} className="mx-auto flex h-24 max-w-[120rem] items-center gap-3 px-6 lg:px-10">
+      <header data-kalico-header className="fixed top-0 left-0 right-0 z-50 h-[88px] border-b border-[var(--color-border)] bg-[var(--color-bg)]">
+        <div ref={desktopNavRef} className="mx-auto flex h-[88px] max-w-[1440px] items-center gap-3 px-4 sm:px-6 lg:px-12">
           <Link href="/" className="flex shrink-0 items-center gap-2">
             <Image
               src="/brand/kalico1.svg"
@@ -383,31 +383,31 @@ export default function Header() {
               width={160}
               height={40}
               priority
-              className="block h-12 w-auto shrink-0"
-              style={{ width: 'auto', height: '48px' }}
+              className="block h-[46px] w-auto shrink-0"
+              style={{ width: 'auto', height: '46px' }}
             />
-            <span className="block font-display text-lg font-bold leading-none text-night md:text-xl">Kalico</span>
+            <span className="block font-display text-[28px] font-normal leading-none text-[var(--color-text-primary)]">Kalico</span>
           </Link>
 
-          <form onSubmit={handleSearch} className="mx-auto hidden w-full max-w-lg md:block">
+          <form onSubmit={handleSearch} className="mx-auto hidden w-full max-w-[440px] md:block">
             <label htmlFor="header-search" className="sr-only">
               Rechercher sur Kalico
             </label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-night/35" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]" />
               <input
                 id="header-search"
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Rechercher sur Kalico&"
+                placeholder="Rechercher sur Kalico"
                 aria-label="Rechercher sur Kalico"
-                className="input h-12 py-2 pl-9 pr-4 text-sm"
+                className="input !h-[46px] !min-h-[46px] py-2 pl-9 pr-4 text-sm"
               />
             </div>
           </form>
 
-          <div className="hidden xl:flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-0.5">
+          <div className="hidden xl:flex items-center gap-0.5">
             {GLOBAL_NAV_LINKS.filter((link) => link.href === '/').map((link) => (
               <Link
                 key={link.href}
