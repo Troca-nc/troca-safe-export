@@ -137,11 +137,6 @@ export default function SocialAuthButtons({ redirectTo = '/', mode = 'connexion'
     const target = consumeRedirectAfterLogin(redirectTo)
     saveStoredTokens(data.access_token, data.refresh_token)
     setUser(data.user as any)
-    if (!data.user.phone_verified || !data.user.telephone) {
-      router.push(`/inscription/telephone?next=${encodeURIComponent(target)}`)
-      return
-    }
-
     router.push(target)
   }
 

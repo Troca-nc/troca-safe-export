@@ -61,25 +61,25 @@ function SocialPhoneCompletionContent() {
 
               <span className="eyebrow inline-flex items-center gap-2 text-accent-strong">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                Sécurisation
+                Facultatif
               </span>
             </div>
 
             <div className="mt-8">
               <div className="inline-flex items-center gap-2 rounded-full bg-night/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-night/50">
                 <Phone className="h-3.5 w-3.5" />
-                Étape de finalisation
+                À votre rythme
               </div>
               <h1 className="mt-5 font-display text-3xl font-semibold leading-tight text-night md:text-4xl">
-                Ajoutez votre numéro de téléphone
+                Ajouter un numéro de téléphone
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-night/60">
-                Le téléphone est utilisé pour la récupération de mot de passe par SMS et pour renforcer la sécurité de votre compte.
+                Recevez un SMS si vous devez récupérer votre compte. Vous pouvez aussi passer cette étape.
               </p>
             </div>
 
             <div className="mt-6 rounded-[16px] border border-accent/20 bg-accent/10 p-4 text-sm text-night/70">
-              Si votre numéro est déjà renseigné dans votre compte, il sera pré-rempli. Sinon, ajoutez-le maintenant puis validez le code reçu.
+              Si vous ajoutez un numéro, nous vous enverrons un code pour le vérifier.
             </div>
 
             <div className="mt-6">
@@ -92,7 +92,7 @@ function SocialPhoneCompletionContent() {
               />
             </div>
             <p className="mt-4 text-sm leading-6 text-night/60">
-              Vous pourrez ajouter votre numéro plus tard depuis votre profil.
+              Vous pourrez toujours ajouter ou modifier ce numéro depuis votre profil.
             </p>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -100,7 +100,7 @@ function SocialPhoneCompletionContent() {
                 Retour à la connexion
               </Link>
                             <Link href={next} className="btn-secondary w-full justify-center px-5 py-3 sm:w-auto">
-                Continuer sans vérification →
+                Passer pour le moment
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>

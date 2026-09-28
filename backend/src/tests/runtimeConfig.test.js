@@ -4,7 +4,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const { describe, it } = require('./helpers');
-const { REQUIRED_PRODUCTION, validateRuntimeConfig } = require('../config/runtimeConfig');
+const { OPTIONAL_INTEGRATIONS, REQUIRED_PRODUCTION, validateRuntimeConfig } = require('../config/runtimeConfig');
 
 function validProductionEnv() {
   const env = Object.fromEntries(REQUIRED_PRODUCTION.map((name) => [name, `valid-${name.toLowerCase()}-configuration-value`]));
@@ -31,8 +31,6 @@ describe('runtime production configuration', () => {
 
   it('rejects every missing, placeholder or unsafe critical value before startup', () => {
     for (const [name, value] of [
-      ['STRIPE_WEBHOOK_SECRET', ''],
-      ['PAYPLUG_WEBHOOK_SECRET', 'CHANGE_ME'],
       ['TURNSTILE_SECRET_KEY', 'your_turnstile_secret_key'],
       ['JWT_SECRET', 'short'],
       ['REDIS_REQUIRED', 'false'],
@@ -41,6 +39,19 @@ describe('runtime production configuration', () => {
     ]) {
       const env = { ...validProductionEnv(), [name]: value };
       assert.throws(() => validateRuntimeConfig({ env }), { code: 'INVALID_PRODUCTION_CONFIG' }, name);
+    }
+  });
+
+  it('allows disabled optional integrations and rejects partially configured providers', () => {
+    assert.doesNotThrow(() => validateRuntimeConfig({ env: validProductionEnv() }));
+
+    for (const [provider, names] of Object.entries(OPTIONAL_INTEGRATIONS)) {
+      const env = { ...validProductionEnv(), [names[0]]: `configured-${provider.toLowerCase()}` };
+      assert.throws(
+        () => validateRuntimeConfig({ env }),
+        (error) => error.code === 'INVALID_PRODUCTION_CONFIG' && error.fields.includes(names[1]),
+        provider,
+      );
     }
   });
 

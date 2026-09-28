@@ -9,21 +9,16 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
   AlertCircle,
-  ArrowLeftRight,
   ArrowRight,
   BarChart3,
-  Camera,
   CalendarHeart,
-  Car,
   CheckCircle2,
   Eye,
   EyeOff,
-  FileText,
   Lock,
   Megaphone,
   ShieldCheck,
   Store,
-  Truck,
   UserRound,
   X,
 } from 'lucide-react'
@@ -36,7 +31,12 @@ const schema = z
     first_name: z.string().min(2, 'Prénom requis'),
     last_name: z.string().min(2, 'Nom requis'),
     email: z.string().email('Adresse e-mail invalide'),
-    phone: z.string().regex(/^(\+687|0)[0-9]{6}$/, 'Numéro NC invalide'),
+    phone: z
+      .string()
+      .trim()
+      .transform((value) => value.replace(/[\s.-]/g, ''))
+      .refine((value) => value === '' || /^(\+687|0)[0-9]{6}$/.test(value), 'Numéro NC invalide')
+      .default(''),
     commune_id: z.string().optional(),
     password: z
       .string()
@@ -55,24 +55,18 @@ type Step = 1 | 2 | 3
 type ProfileChoice = 'particulier' | 'pro'
 
 const STEPS: Array<{ id: Step; label: string; helper: string }> = [
-  { id: 1, label: 'Profil', helper: 'Compte et accès' },
-  { id: 2, label: 'Identité', helper: 'Vos informations' },
-  { id: 3, label: 'Formule', helper: 'Votre compte' },
+  { id: 1, label: 'Compte', helper: 'E-mail et mot de passe' },
+  { id: 2, label: 'Profil', helper: 'Quelques informations' },
+  { id: 3, label: 'Offre Pro', helper: 'Seulement pour les pros' },
 ]
 
 const COMMUNE_PLACEHOLDER = 'Choisir une commune'
 
 const PLAN_FEATURES = [
-  { label: 'Annonces actives', free: '5', pro: 'âˆž' },
+  { label: 'Annonces actives', free: '5', pro: 'Illimitées' },
   { label: 'Photos par annonce', free: '6', pro: '12' },
   { label: 'Badge visible', free: 'Non', pro: 'Oui' },
   { label: 'Statistiques', free: 'Non', pro: 'Oui' },
-] as const
-
-const PANEL_STATS = [
-  { value: '0 F', label: 'Pour publier' },
-  { value: '17', label: 'Catégories' },
-  { value: '100%', label: 'Local NC' },
 ] as const
 
 const PANEL_FEATURES = [
@@ -82,35 +76,20 @@ const PANEL_FEATURES = [
     description: 'Publiez en quelques minutes, visibles partout en NC.',
   },
   {
-    icon: ArrowLeftRight,
-    title: 'Troc',
-    description: "Échangez ce que vous avez contre ce qu'il vous faut.",
-  },
-  {
-    icon: Car,
-    title: 'Covoiturage',
-    description: 'Trajets entre communes, réservation simple.',
-  },
-  {
-    icon: FileText,
-    title: 'Devis Pro',
-    description: 'Créez et envoyez vos devis en XPF avec TGC.',
-  },
-  {
-    icon: Truck,
-    title: 'Livraison',
-    description: 'Colis et fret entre communes et vers les îles.',
-  },
-  {
     icon: CalendarHeart,
-    title: 'Bons plans et événements',
-    description: 'Offres locales, concerts, marchés près de chez vous.',
+    title: 'Tout près de chez vous',
+    description: 'Annonces, bonnes adresses et événements partout en Nouvelle-Calédonie.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Un compte simple',
+    description: 'Ajoutez votre téléphone ou votre photo seulement si vous en avez envie.',
   },
 ] as const
 
 const TRUST_ITEMS = [
-  { icon: ShieldCheck, label: 'Paiement sécurisé' },
-  { icon: Lock, label: 'Données locales' },
+  { icon: ShieldCheck, label: 'Inscription gratuite' },
+  { icon: Lock, label: 'Pensé pour la NC' },
   { icon: CheckCircle2, label: 'Pros vérifiés' },
 ] as const
 
@@ -198,7 +177,7 @@ function getRegistrationError(err: any): RegistrationError {
     return {
       message: 'Cet email est déjà utilisé. Connectez-vous ou utilisez un autre email.',
       ctaHref: '/connexion',
-      ctaLabel: 'Se connecter â†’',
+      ctaLabel: 'Se connecter',
     }
   }
 
@@ -233,17 +212,17 @@ function StepPill({
       disabled={!clickable}
       className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition duration-150 ${
         active
-          ? 'border-kalico-blue/25 bg-kalico-blue/5 shadow-sm'
+          ? 'border-accent-strong/30 bg-accent/10'
           : completed
             ? 'border-jungle/20 bg-jungle/5 hover:border-jungle/30'
-            : 'border-night/10 bg-white/75 text-night/40'
+            : 'border-night/10 bg-surface/70 text-night/40'
       }`}
       aria-current={active ? 'step' : undefined}
     >
       <span
         className={`flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold transition-colors duration-200 ${
           active
-            ? 'bg-kalico-blue text-white'
+            ? 'bg-accent-strong text-on-deep'
             : completed
               ? 'bg-jungle text-white'
               : 'bg-night/5 text-night/35'
@@ -280,11 +259,11 @@ function AccountTypeCard({
       onClick={onClick}
       className={`flex h-full flex-col rounded-[1.5rem] border p-5 text-left transition duration-150 ${
         active
-          ? 'border-kalico-blue/30 bg-kalico-blue/5 shadow-sm'
-          : 'border-night/10 bg-white hover:-translate-y-0.5 hover:border-kalico-blue/20 hover:bg-sand/40 hover:shadow-sm'
+          ? 'border-accent-strong/30 bg-accent/10'
+          : 'border-night/10 bg-surface hover:border-accent-strong/25 hover:bg-sand/40'
       }`}
     >
-      <span className={`flex h-12 w-12 items-center justify-center rounded-2xl ${active ? 'bg-kalico-blue/10 text-kalico-blue' : 'bg-night/5 text-night/55'}`}>
+      <span className={`flex h-12 w-12 items-center justify-center rounded-[12px] ${active ? 'bg-accent/15 text-accent-strong' : 'bg-night/5 text-night/55'}`}>
         <Icon className="h-5 w-5" />
       </span>
       <span className="mt-4 text-base font-semibold text-night">{title}</span>
@@ -320,7 +299,6 @@ export default function RegisterPage() {
   })
 
   const password = watch('password') || ''
-  const profileName = watch('first_name') || watch('last_name') || 'Vous'
 
   useEffect(() => {
     metaApi
@@ -337,7 +315,13 @@ export default function RegisterPage() {
   const submitRegistration = async (data: FormData, accountType: ProfileChoice = selectedProfile) => {
     setServerError(null)
     try {
-      const { password_confirm: _passwordConfirm, ...payload } = data
+      const {
+        password_confirm: _passwordConfirm,
+        first_name,
+        last_name,
+        phone,
+        ...payload
+      } = data
       if (turnstileEnabled && !turnstileToken) {
         setServerError({
           message: "Veuillez confirmer que vous n'êtes pas un robot.",
@@ -348,7 +332,9 @@ export default function RegisterPage() {
       await registerUser(
         {
           ...payload,
-          telephone: payload.phone,
+          prenom: first_name.trim(),
+          nom: last_name.trim(),
+          telephone: phone?.trim() || undefined,
           commune_id: payload.commune_id ? parseInt(payload.commune_id, 10) : undefined,
           account_type: accountType,
         },
@@ -382,11 +368,12 @@ export default function RegisterPage() {
   }
 
   const canSubmitAtStep2 = selectedProfile === 'particulier'
+  const visibleSteps = selectedProfile === 'pro' ? STEPS : STEPS.slice(0, 2)
 
   return (
-    <div className="min-h-screen bg-white lg:grid lg:grid-cols-2">
-      <section className="flex min-h-screen items-center justify-center px-6 py-10 md:px-8 lg:px-12">
-        <div className="flex w-full max-w-[540px] flex-col gap-6">
+    <div className="min-h-screen bg-sand-light lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(420px,0.95fr)]">
+      <section className="flex min-h-screen items-center justify-center px-4 py-8 sm:px-6 md:px-8 lg:px-12">
+        <div className="flex w-full max-w-[620px] flex-col gap-5">
           <div className="text-center">
             <Link href="/" className="inline-flex flex-col items-center">
               <p className="font-display text-3xl font-bold text-night">Kalico</p>
@@ -394,18 +381,18 @@ export default function RegisterPage() {
             </Link>
           </div>
 
-          <div className="card card-hover overflow-hidden p-6 md:p-8">
+          <div className="overflow-hidden rounded-[24px] border border-night/10 bg-surface p-5 shadow-card sm:p-6 md:p-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="max-w-2xl">
-                <h1 className="mt-2 font-display text-4xl font-bold text-night md:text-5xl">Rejoindre Kalico</h1>
+                <h1 className="mt-2 font-display text-4xl font-bold text-night md:text-5xl">Créer votre compte</h1>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-night/60 md:text-base">
-                  Trois étapes, deux minutes. Votre annonce peut être en ligne dès maintenant.
+                  Commencez avec votre e-mail. Vous pourrez compléter votre profil plus tard.
                 </p>
               </div>
             </div>
 
             <div className="mt-5 grid gap-3 md:grid-cols-3">
-              {STEPS.map((item) => (
+              {visibleSteps.map((item) => (
                 <StepPill key={item.id} step={item.id} current={step} onClick={goToStep} />
               ))}
             </div>
@@ -417,7 +404,7 @@ export default function RegisterPage() {
                   <p>{serverError.message}</p>
                   {serverError.ctaHref ? (
                     <Link href={serverError.ctaHref} className="mt-1 inline-flex items-center gap-1 font-semibold underline underline-offset-2">
-                      {serverError.ctaLabel || 'Se connecter â†’'}
+                      {serverError.ctaLabel || 'Se connecter'}
                     </Link>
                   ) : null}
                 </div>
@@ -427,12 +414,12 @@ export default function RegisterPage() {
             <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-6">
               <div key={step} className={stepDirection === 'forward' ? 'step-enter-forward' : 'step-enter-backward'}>
                 {step === 1 ? (
-                  <section className="space-y-4 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
+                  <section className="space-y-4 rounded-[16px] border border-night/10 bg-sand/25 p-5 md:p-6">
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Étape 1</p>
-                        <h2 className="mt-2 text-2xl font-semibold text-night">Créez votre compte</h2>
-                        <p className="mt-1 text-sm text-night/55">E-mail, mot de passe et accès rapide avec Google si vous le souhaitez.</p>
+                        <p className="eyebrow text-accent-strong">Étape 1</p>
+                        <h2 className="mt-2 font-display text-2xl font-semibold text-night">Vos identifiants</h2>
+                        <p className="mt-1 text-sm text-night/55">Utilisez votre e-mail ou continuez avec Google.</p>
                       </div>
                     </div>
 
@@ -506,32 +493,14 @@ export default function RegisterPage() {
                 ) : null}
 
                 {step === 2 ? (
-                  <section className="space-y-5 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
+                  <section className="space-y-5 rounded-[16px] border border-night/10 bg-sand/25 p-5 md:p-6">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Étape 2</p>
-                      <h2 className="mt-2 text-2xl font-semibold text-night">Parlez-nous de vous</h2>
-                      <p className="mt-1 text-sm text-night/55">Juste l'essentiel pour commencer.</p>
+                      <p className="eyebrow text-accent-strong">Étape 2</p>
+                      <h2 className="mt-2 font-display text-2xl font-semibold text-night">Votre profil</h2>
+                      <p className="mt-1 text-sm text-night/55">Votre nom suffit pour créer le compte.</p>
                     </div>
 
                     <div className="grid gap-5">
-                      <div className="rounded-[1.5rem] border border-night/10 bg-sand/40 p-5">
-                        <div className="flex items-center gap-4">
-                          <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-night/10 bg-white">
-                            <span className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(72,202,228,0.22),transparent_65%)]" />
-                            <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-kalico-blue/10 text-lg font-bold text-kalico-blue">
-                              {profileName.trim().charAt(0).toUpperCase() || 'T'}
-                            </span>
-                            <span className="absolute bottom-1 right-1 flex h-7 w-7 items-center justify-center rounded-full border border-white bg-night text-white shadow-sm">
-                              <Camera className="h-3.5 w-3.5" />
-                            </span>
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-night/45">Avatar optionnel</p>
-                            <p className="mt-1 text-sm leading-6 text-night/60">Votre photo peut venir plus tard. Un avatar clair s'affiche en attendant.</p>
-                          </div>
-                        </div>
-                      </div>
-
                       <div className="grid gap-4 md:grid-cols-2">
                         <label className="space-y-2">
                           <span className="field-label">Prénom</span>
@@ -545,11 +514,11 @@ export default function RegisterPage() {
                         </label>
 
                         <label className="space-y-2 md:col-span-2">
-                          <span className="field-label">Téléphone mobile</span>
-                          <input {...register('phone')} className="input h-12 w-full" placeholder="+687..." />
+                          <span className="field-label">Téléphone <span className="font-normal text-night/45">(facultatif)</span></span>
+                          <input {...register('phone')} type="tel" inputMode="tel" className="input h-12 w-full" placeholder="Ex. +687 75 12 34" />
                           {errors.phone ? <p className="field-error">{errors.phone.message}</p> : null}
                           <p className="text-xs text-night/45">
-                            Nécessaire pour la récupération de mot de passe si vous choisissez l'option SMS.
+                            Utile pour récupérer votre compte par SMS. Vous pourrez l’ajouter plus tard.
                           </p>
                         </label>
 
@@ -587,12 +556,12 @@ export default function RegisterPage() {
                 ) : null}
 
                 {step === 3 && selectedProfile === 'pro' ? (
-                  <section className="space-y-5 rounded-[1.75rem] border border-night/10 bg-white p-5 shadow-sm md:p-6">
+                  <section className="space-y-5 rounded-[16px] border border-night/10 bg-sand/25 p-5 md:p-6">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Étape 3</p>
-                      <h2 className="mt-2 text-2xl font-semibold text-night">Choisissez votre plan</h2>
+                      <p className="eyebrow text-accent-strong">Étape 3</p>
+                      <h2 className="mt-2 font-display text-2xl font-semibold text-night">Démarrez gratuitement</h2>
                       <p className="mt-1 text-sm text-night/55">
-                        Vous pouvez commencer gratuitement ou profiter du Pro quand votre activité le justifie.
+                        Passez à Pro maintenant ou plus tard, depuis votre compte.
                       </p>
                     </div>
 
@@ -612,7 +581,7 @@ export default function RegisterPage() {
                         className="inline-flex items-center gap-1 text-sm font-semibold text-kalico-blue hover:underline"
                         aria-expanded={showProOptions}
                       >
-                        Voir les options Pro â†’
+                        Comparer les offres
                       </button>
                     </div>
 
@@ -651,7 +620,7 @@ export default function RegisterPage() {
                             <p className="mt-4 text-3xl font-bold text-kalico-blue">
                               2 900 XPF / mois
                             </p>
-                            <p className="mt-2 text-sm text-night/55">Paiement flexible, à tout moment.</p>
+                            <p className="mt-2 text-sm text-night/55">Sans engagement.</p>
 
                             <div className="mt-5 space-y-3">
                               {PLAN_FEATURES.map((feature) => (
@@ -718,9 +687,9 @@ export default function RegisterPage() {
                     ) : null}
 
                     <p className="text-center text-sm text-night/55">
-                      Pas encore décidé ?{' '}
+                      Vous hésitez ?{' '}
                       <button type="button" onClick={() => setSelectedProfile('particulier')} className="font-semibold text-kalico-blue hover:underline">
-                        Commencez gratuitement →
+                        Créer le compte gratuit
                       </button>
                     </p>
                   </section>
@@ -734,7 +703,7 @@ export default function RegisterPage() {
                     if (step > 1) goToStep((step - 1) as Step)
                   }}
                   disabled={step === 1}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-semibold text-night transition hover:border-kalico-blue/30 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="btn-secondary inline-flex items-center gap-2 px-4 py-3 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <span>Retour</span>
                 </button>
@@ -760,9 +729,9 @@ export default function RegisterPage() {
         </div>
       </section>
 
-      <aside className="hidden min-h-screen overflow-hidden bg-[#fdf8f1] dark:bg-[#0c2a35] lg:flex">
+      <aside className="motif-tressage hidden min-h-screen overflow-hidden bg-[var(--color-deep)] lg:flex">
         <div className="flex w-full items-center justify-center px-8 py-8">
-          <div className="signup-panel relative w-full max-w-[680px] rounded-[16px] p-7 text-left text-night dark:text-white">
+          <div className="signup-panel relative w-full max-w-[560px] rounded-[24px] border border-on-deep/10 bg-on-deep/5 p-8 text-left text-on-deep backdrop-blur-sm">
             <div className="absolute inset-0 rounded-[16px] bg-transparent dark:bg-transparent" />
 
             <div className="relative z-10 space-y-6">
@@ -776,7 +745,7 @@ export default function RegisterPage() {
                   priority
                 />
                 <div>
-                  <p className="text-[18px] font-medium leading-none text-night dark:text-white">Kalico</p>
+                  <p className="text-[18px] font-medium leading-none text-on-deep">Kalico</p>
 
                 </div>
               </div>
@@ -785,48 +754,26 @@ export default function RegisterPage() {
 
               <div className="signup-panel-anim space-y-1" style={{ animationDelay: '140ms' }}>
                 <h2
-                  className="font-display text-[clamp(20px,2.5vw,26px)] font-semibold leading-tight text-night dark:text-white"
+                  className="font-display text-[clamp(24px,2.5vw,34px)] font-semibold leading-tight text-on-deep"
                   style={{ fontFamily: 'var(--font-display), Georgia, serif' }}
                 >
-                  <span className="block">Ce que vous pouvez faire</span>
-                  <span className="block text-kalico-blue">dès maintenant.</span>
+                  <span className="block">La Nouvelle-Calédonie</span>
+                  <span className="block text-accent">à portée de main.</span>
                 </h2>
-              </div>
-
-              <p
-                className="signup-panel-anim mx-auto max-w-[300px] font-display text-[15px] italic leading-6 text-[var(--color-text-secondary)] dark:text-white/65"
-                style={{ animationDelay: '180ms', fontFamily: 'var(--font-display), Georgia, serif' }}
-              >
-                Nouvelle-Calédonie dans l'âme, Kalico dans la poche.
-              </p>
-
-              <div
-                className="signup-panel-anim grid grid-cols-3 overflow-hidden rounded-[10px] border border-night/10 bg-white dark:border-white/10 dark:bg-[var(--color-surface)]"
-                style={{ animationDelay: '220ms' }}
-              >
-                {PANEL_STATS.map((stat, index) => (
-                  <div
-                    key={stat.label}
-                    className={`group border-l border-night/10 px-4 py-4 transition-colors duration-200 hover:bg-[rgba(29,158,117,0.06)] dark:border-white/10 dark:hover:bg-white/5 ${index === 0 ? 'border-l-0' : ''}`}
-                  >
-                    <p className="text-lg font-semibold text-night dark:text-white">{stat.value}</p>
-                    <p className="mt-1 text-[11px] text-night/55 dark:text-white/55">{stat.label}</p>
-                  </div>
-                ))}
               </div>
 
               <div
                 className="signup-panel-anim overflow-hidden rounded-[10px]"
-                style={{ animationDelay: '260ms' }}
+                style={{ animationDelay: '200ms' }}
               >
-                <div className="grid grid-cols-1 gap-3 overflow-hidden sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 overflow-hidden">
                   {PANEL_FEATURES.map((item, index) => {
                     const Icon = item.icon
                     const delays = ['260ms', '300ms', '340ms', '380ms', '420ms', '460ms']
                     return (
                       <div
                         key={item.title}
-                        className="group rounded-[10px] border border-night/10 bg-white p-[11px] text-left transition-colors duration-200 hover:border-[var(--nc-emeraude)] hover:shadow-[0_4px_12px_rgba(29,158,117,0.12)] dark:border-white/10 dark:bg-[var(--color-surface)]"
+                        className="group rounded-[12px] border border-on-deep/10 bg-on-deep/10 p-4 text-left transition-colors duration-200 hover:border-accent/40"
                         style={{ animationDelay: delays[index] }}
                       >
                         <div className="flex items-start gap-3">
@@ -834,8 +781,8 @@ export default function RegisterPage() {
                             <Icon className="h-4 w-4" />
                           </span>
                           <div>
-                            <p className="text-[11px] font-medium text-night dark:text-white">{item.title}</p>
-                            <p className="mt-1 text-[10px] leading-4 text-night/55 dark:text-white/60">{item.description}</p>
+                            <p className="text-sm font-semibold text-on-deep">{item.title}</p>
+                            <p className="mt-1 text-xs leading-5 text-on-deep/65">{item.description}</p>
                           </div>
                         </div>
                       </div>
@@ -844,7 +791,7 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              <div className="signup-panel-anim flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[10px] text-night/55 dark:text-white/55" style={{ animationDelay: '500ms' }}>
+              <div className="signup-panel-anim flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-on-deep/60" style={{ animationDelay: '400ms' }}>
                 {TRUST_ITEMS.map(({ icon: Icon, label }) => (
                   <span key={label} className="inline-flex items-center gap-1.5">
                     <Icon className="h-3.5 w-3.5 text-nc-emeraude" />

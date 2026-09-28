@@ -54,7 +54,7 @@ const registerSchema = Joi.object({
   prenom: Joi.string().min(1).max(100).required(),
   nom: Joi.string().min(1).max(100).required(),
   commune_id: Joi.number().integer().optional(),
-  telephone: Joi.string().pattern(/^(\+687|0)[0-9]{6}$/).required(),
+  telephone: Joi.string().pattern(/^(\+687|0)[0-9]{6}$/).allow('', null).optional(),
   account_type: Joi.string().valid('personal', 'professional', 'particulier', 'pro').default('personal'),
   turnstile_token: Joi.string().allow('').optional(),
 });
@@ -103,8 +103,10 @@ router.post('/register', registerLimiter, async (req, res, next) => {
 
     await verifyTurnstileToken({ req, token: value.turnstile_token, ip: req.ip, action: 'register' });
     const { user, verificationToken, accessToken, refreshToken } = await registerAccount(value);
-    const normalizedPhone = normalizePhoneNumber(value.telephone);
-    await query('UPDATE users SET telephone = $1, phone_verified = FALSE, updated_at = NOW() WHERE id = $2', [normalizedPhone, user.id]);
+    if (value.telephone) {
+      const normalizedPhone = normalizePhoneNumber(value.telephone);
+      await query('UPDATE users SET telephone = $1, phone_verified = FALSE, updated_at = NOW() WHERE id = $2', [normalizedPhone, user.id]);
+    }
     setRefreshCookie(res, refreshToken);
 
     sendVerificationEmail(user.email, user.prenom, verificationToken).catch((err) => {
