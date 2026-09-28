@@ -10,14 +10,17 @@ const REQUIRED_PRODUCTION = [
   'INTERNAL_API_TOKEN', 'BUSINESS_TIME_ZONE', 'STORAGE_LOCAL_PATH',
   'AWS_BUCKET', 'AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY',
   'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM',
-  'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'STRIPE_PRICE_PRO_MENSUEL',
-  'PAYPLUG_SECRET_KEY', 'PAYPLUG_WEBHOOK_SECRET',
   'TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_VERIFY_SID',
-  'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET',
-  'APPLE_CLIENT_ID', 'APPLE_TEAM_ID', 'APPLE_KEY_ID', 'APPLE_PRIVATE_KEY',
   'TURNSTILE_SECRET_KEY',
   'ADMIN_EMAIL', 'ADMIN_API_TOKEN', 'ADMIN_ALERT_EMAIL',
 ];
+
+const OPTIONAL_INTEGRATIONS = {
+  STRIPE: ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'STRIPE_PRICE_PRO_MENSUEL', 'STRIPE_PRICE_PRO_ANNUEL'],
+  PAYPLUG: ['PAYPLUG_SECRET_KEY', 'PAYPLUG_WEBHOOK_SECRET'],
+  GOOGLE: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'],
+  APPLE: ['APPLE_CLIENT_ID', 'APPLE_TEAM_ID', 'APPLE_KEY_ID', 'APPLE_PRIVATE_KEY'],
+};
 
 const MIN_LENGTHS = {
   JWT_SECRET: 64,
@@ -39,6 +42,17 @@ function validateRuntimeConfig({ env = process.env, role = 'api' } = {}) {
     }
     if (MIN_LENGTHS[name] && value.length < MIN_LENGTHS[name]) {
       errors.push(`${name} shorter than ${MIN_LENGTHS[name]} characters`);
+    }
+  }
+
+  for (const [provider, names] of Object.entries(OPTIONAL_INTEGRATIONS)) {
+    const configured = names.filter((name) => isConfiguredValue(String(env[name] || '').trim()));
+    if (configured.length > 0 && configured.length < names.length) {
+      for (const name of names) {
+        if (!isConfiguredValue(String(env[name] || '').trim())) {
+          errors.push(`${name} missing for enabled ${provider} integration`);
+        }
+      }
     }
   }
 
@@ -64,4 +78,4 @@ function validateRuntimeConfig({ env = process.env, role = 'api' } = {}) {
   return { role, validated: true };
 }
 
-module.exports = { REQUIRED_PRODUCTION, validateRuntimeConfig };
+module.exports = { OPTIONAL_INTEGRATIONS, REQUIRED_PRODUCTION, validateRuntimeConfig };
