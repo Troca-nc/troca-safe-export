@@ -28,6 +28,7 @@ import {
   X,
 } from 'lucide-react'
 import SocialAuthButtons from '@/components/auth/SocialAuthButtons'
+import TurnstileChallenge from '@/components/auth/TurnstileChallenge'
 import { metaApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 
@@ -726,6 +727,18 @@ export default function RegisterPage() {
                   </section>
                 ) : null}
               </div>
+
+              {turnstileEnabled && (
+                (step === 2 && selectedProfile === 'particulier')
+                || (step === 3 && selectedProfile === 'pro')
+              ) ? (
+                <TurnstileChallenge
+                  action="register"
+                  label="Vérification de sécurité"
+                  onTokenChange={setTurnstileToken}
+                  className="rounded-2xl border border-night/10 bg-sand/30 p-4"
+                />
+              ) : null}
 
               <div className="flex items-center justify-between gap-3 border-t border-night/10 pt-5">
                 <button
