@@ -12,18 +12,18 @@ type ToastItem = ToastPayload & {
 
 const TONE_STYLES: Record<ToastTone, { root: string; icon: string; Icon: typeof CheckCircle2 }> = {
   success: {
-    root: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-    icon: 'text-emerald-600',
+    root: 'border-reef/30 bg-reef/15 text-reef-text',
+    icon: 'text-reef-text',
     Icon: CheckCircle2,
   },
   error: {
-    root: 'border-red-200 bg-red-50 text-red-700',
-    icon: 'text-red-600',
+    root: 'border-alert-error/30 bg-alert-error/15 text-alert-error',
+    icon: 'text-alert-error',
     Icon: AlertCircle,
   },
   info: {
-    root: 'border-[#0A7EA4]/15 bg-white text-night',
-    icon: 'text-[#0A7EA4]',
+    root: 'border-lagoon-text/15 bg-cream-surface dark:bg-[var(--color-surface)] text-night',
+    icon: 'text-lagoon-text',
     Icon: Info,
   },
 }
@@ -72,7 +72,7 @@ export default function ToastCenter() {
               <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${config.icon}`} />
               <div className="min-w-0 flex-1">
                 {toast.title ? <p className="font-semibold">{toast.title}</p> : null}
-                <p className={toast.title ? 'mt-1 text-sm leading-5' : 'text-sm leading-5'}>{toast.message}</p>
+                <p className={toast.title ? 'mt-1 text-body-sm leading-5' : 'text-sm leading-5'}>{toast.message}</p>
               </div>
               <button
                 type="button"

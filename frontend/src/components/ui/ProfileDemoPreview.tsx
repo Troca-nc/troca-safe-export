@@ -85,7 +85,7 @@ export default function ProfileDemoPreview({
 
   if (activeProfile === 'visitor') {
     return (
-      <div className="rounded-[1.5rem] border border-night/10 bg-white dark:bg-[var(--color-surface)] p-5 shadow-sm">
+      <div className="rounded-[1.5rem] border border-night/10 bg-cream-surface dark:bg-[var(--color-surface)] dark:bg-[var(--color-surface)] p-5 shadow-sm">
         <div className="flex items-start gap-3">
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-night/5 text-night/60">
             <UsersRound className="h-5 w-5" />
@@ -124,9 +124,9 @@ export default function ProfileDemoPreview({
 
   return (
     <div className={`rounded-[1.75rem] border border-night/10 bg-gradient-to-br ${config.accent} p-5 shadow-[0_20px_70px_rgba(8,32,50,0.08)]`}>
-      <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-white/70 bg-white/75 dark:bg-[var(--color-surface)] px-4 py-3 shadow-sm backdrop-blur">
+      <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-cream-surface/70 bg-cream-surface/75 dark:bg-[var(--color-surface)] px-4 py-3 shadow-sm backdrop-blur">
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-night text-white shadow-sm">
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-night text-cream-surface shadow-sm">
             <BadgeCheck className="h-4 w-4" />
           </span>
           <div>
@@ -134,25 +134,25 @@ export default function ProfileDemoPreview({
             <p className="text-sm font-semibold text-night">{profileLabel}</p>
           </div>
         </div>
-        <span className="rounded-full bg-night/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-night/65">
+        <span className="rounded-full bg-night/5 px-3 py-1 text-caption font-semibold uppercase tracking-[0.16em] text-night/65">
           {config.title}
         </span>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">{config.badge}</p>
+          <p className="text-caption font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">{config.badge}</p>
           <h3 className="mt-1 text-xl font-bold text-night">{config.title}</h3>
           <p className="text-sm text-night/60">{config.subtitle}</p>
         </div>
-        <span className="rounded-full border border-night/10 bg-white dark:bg-[var(--color-surface)] px-3 py-1 text-xs font-semibold text-night/70">
+        <span className="rounded-full border border-night/10 bg-cream-surface dark:bg-[var(--color-surface)] dark:bg-[var(--color-surface)] px-3 py-1 text-xs font-semibold text-night/70">
           {mode === 'deposit' ? 'Comment votre annonce apparaît' : 'Votre espace personnel'}
         </span>
       </div>
 
       {mode === 'deposit' ? (
         <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-2xl border border-white/70 bg-white/90 dark:bg-[var(--color-surface)] p-4">
+          <div className="rounded-2xl border border-cream-surface/70 bg-cream-surface/90 dark:bg-[var(--color-surface)] p-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-night">
               <Plus className="h-4 w-4 text-kalico-blue" />
               {config.depositLabel}
@@ -164,7 +164,7 @@ export default function ProfileDemoPreview({
               <div className="rounded-xl border border-night/10 bg-sand px-3 py-2 text-sm text-night/70">Photos + description</div>
             </div>
           </div>
-          <div className="rounded-2xl border border-white/70 bg-white/90 dark:bg-[var(--color-surface)] p-4">
+          <div className="rounded-2xl border border-cream-surface/70 bg-cream-surface/90 dark:bg-[var(--color-surface)] p-4">
             <p className="text-sm font-semibold text-night">{config.accountLabel}</p>
             <p className="mt-1 text-sm text-night/60">{config.accountHint}</p>
             <div className="mt-4 space-y-2">
@@ -182,7 +182,7 @@ export default function ProfileDemoPreview({
       ) : (
         <>
           <div className="mt-4 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="rounded-2xl border border-white/70 bg-white/90 dark:bg-[var(--color-surface)] p-4">
+            <div className="rounded-2xl border border-cream-surface/70 bg-cream-surface/90 dark:bg-[var(--color-surface)] p-4">
               <p className="text-sm font-semibold text-night">{config.accountLabel}</p>
               <p className="mt-1 text-sm text-night/60">{config.accountHint}</p>
               <div className="mt-4 space-y-2">
@@ -201,7 +201,7 @@ export default function ProfileDemoPreview({
                 })}
               </div>
             </div>
-            <div className="rounded-2xl border border-white/70 bg-white/90 dark:bg-[var(--color-surface)] p-4">
+            <div className="rounded-2xl border border-cream-surface/70 bg-cream-surface/90 dark:bg-[var(--color-surface)] p-4">
               <div className="flex items-center gap-2 text-sm font-semibold text-night">
                 <Store className="h-4 w-4 text-kalico-blue" />
                 Vue rapide du compte
@@ -229,7 +229,7 @@ export default function ProfileDemoPreview({
           </div>
 
           {activeProfile === 'particulier' ? (
-            <div className="mt-4 rounded-2xl border border-night/10 bg-white dark:bg-[var(--color-surface)] p-4 shadow-sm">
+            <div className="mt-4 rounded-2xl border border-night/10 bg-cream-surface dark:bg-[var(--color-surface)] dark:bg-[var(--color-surface)] p-4 shadow-sm">
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
                   <p className="text-sm font-semibold text-night">Vous n'avez pas encore d'annonce. Publiez la vôtre.</p>
@@ -255,7 +255,7 @@ export default function ProfileDemoPreview({
                   ? { title: 'Statistiques à suivre', meta: 'Suivi de visibilité et clics.' }
                   : { title: 'Paramètres à compléter', meta: 'Retrouvez vos préférences ici.' },
               ].map((item) => (
-                <div key={item.title} className="rounded-2xl border border-night/10 bg-white dark:bg-[var(--color-surface)] p-4 shadow-sm">
+                <div key={item.title} className="rounded-2xl border border-night/10 bg-cream-surface dark:bg-[var(--color-surface)] dark:bg-[var(--color-surface)] p-4 shadow-sm">
                   <p className="text-sm font-semibold text-night">{item.title}</p>
                   <p className="mt-1 text-sm text-night/60">{item.meta}</p>
                 </div>
