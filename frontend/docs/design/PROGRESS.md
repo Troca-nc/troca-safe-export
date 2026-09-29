@@ -5,7 +5,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 
 | Fiche | Page | Route | Statut | PR |
 | --- | --- | --- | --- | --- |
-| [00](specs/00-fondations.md) | Fondations : tokens et composants de base | /dev/ui (galerie) | À relire | À publier |
+| [00](specs/00-fondations.md) | Fondations : tokens et composants de base | /dev/ui (galerie) | À relire | [#215](https://github.com/Troca-nc/troca-safe-export/pull/215) |
 | [01](specs/01-layout.md) | En-tête, pied de page, onglets de compte | toutes | À faire | — |
 | [02](specs/02-accueil.md) | Accueil | / | À faire | — |
 | [03](specs/03-annonces.md) | Liste des annonces | /annonces | À faire | — |
