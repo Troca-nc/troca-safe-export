@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#FBF6EC; -webkit-font-smoothing:antialiased; }
+  a { color:#2E7B84; text-decoration:none; }
+  a:hover { color:#123A44; }
+  input::placeholder, textarea::placeholder { color:rgba(18,58,68,0.42); }
+</style>
+</helmet>
+
+<div style="width:1440px;min-height:100vh;background:#FBF6EC;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#123A44">
+
+  <!-- ===== HEADER ===== -->
+  <header style="position:sticky;top:0;z-index:40;height:88px;background:#FBF6EC;border-bottom:1px solid #E4D7C3">
+    <div style="display:flex;height:88px;align-items:center;gap:20px;padding:0 48px">
+      <a href="Accueil v2.dc.html" style="display:flex;flex-shrink:0;align-items:center;gap:10px">
+        <img src="assets/kalico1.svg" alt="Kalico" style="height:46px;width:auto;display:block" />
+        <span style="font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1;color:#123A44;letter-spacing:-0.01em">Kalico</span>
+      </a>
+      <span style="border-radius:9999px;padding:5px 12px;font-size:12px;font-weight:600;background:#123A44;color:#FEFAF3">Espace Pro</span>
+      <nav style="display:flex;align-items:center;gap:2px;margin-left:auto">
+        <a href="Annonces v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44" style-hover="background:#F3E9D8">Annonces</a>
+        <a href="Services v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44" style-hover="background:#F3E9D8">Services</a>
+        <a href="Pros côté client v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44" style-hover="background:#F3E9D8">Voir ma vitrine</a>
+      </nav>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;padding-left:14px;border-left:1px solid #E4D7C3">
+        <a href="#" title="Messages" style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:10px;color:#123A44" style-hover="background:#F3E9D8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"></path></svg>
+          <span style="position:absolute;top:6px;right:6px;min-width:17px;height:17px;box-sizing:border-box;padding:0 4px;border-radius:9999px;background:#A94F0A;color:#FEFAF3;font-size:11px;font-weight:600;line-height:17px;text-align:center">5</span>
+        </a>
+        <div style="display:flex;align-items:center;gap:9px;height:44px;padding:0 12px 0 6px;border-radius:10px;border:1px solid #E4D7C3;background:#FEFAF3">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;background:rgba(232,131,42,0.14);color:#9E4E06;font-family:'Instrument Serif',Georgia,serif;font-size:18px">M</span>
+          <span style="font-size:15px;font-weight:600">Menuiserie Cocotier</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== BANDEAU ===== -->
+  <section style="position:relative;overflow:hidden;border-bottom:1px solid #E4D7C3">
+    <div style="position:absolute;inset:0;pointer-events:none;opacity:0.045;background-image:repeating-linear-gradient(45deg,#123A44 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#123A44 0 1px,transparent 1px 9px)"></div>
+    <div style="position:relative;padding:40px 48px 0">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px">
+        <div>
+          <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">{{ eyebrow }}</p>
+          <h1 style="margin:12px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:52px;line-height:1.03;letter-spacing:-0.015em;text-wrap:balance">{{ title }}</h1>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">
+            <span style="display:inline-flex;align-items:center;gap:6px;border-radius:9999px;padding:5px 12px;font-size:12px;font-weight:600;background:rgba(110,154,106,0.14);color:#3F6B3C;border:1px solid rgba(110,154,106,0.30)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:12px;height:12px"><path d="M20 6 9 17l-5-5"></path></svg>
+              Pro vérifié · RIDET 1 234 567.001
+            </span>
+            <span style="display:inline-flex;align-items:center;border-radius:9999px;padding:5px 12px;font-size:12px;font-weight:600;background:#F3E9D8;color:#123A44;border:1px solid #E4D7C3">Kalico Pro · période offerte jusqu'au 29 déc.</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-shrink:0">
+          <button onClick="{{ goTemplates }}" style="display:inline-flex;align-items:center;gap:8px;height:48px;border:1px solid #123A44;border-radius:10px;background:transparent;padding:0 20px;font-size:15px;font-weight:600;font-family:inherit;color:#123A44;cursor:pointer">Nouveau devis</button>
+          <a href="Déposer une annonce v2.dc.html" style="display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 20px;border-radius:10px;background:#A94F0A;color:#FEFAF3;font-size:15px;font-weight:600;box-shadow:0 2px 12px rgba(169,79,10,0.22)" style-hover="background:#8F420A">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+            Ajouter un article
+          </a>
+        </div>
+      </div>
+      <nav style="display:flex;gap:4px;margin-top:30px">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+          <button onClick="{{ t.select }}" style="display:flex;align-items:center;gap:8px;border:0;border-bottom:2px solid {{ t.bar }};background:transparent;padding:14px 16px;font-size:15px;font-weight:{{ t.weight }};font-family:inherit;color:{{ t.color }};cursor:pointer">
+            {{ t.label }}
+            <sc-if value="{{ t.hasCount }}" hint-placeholder-val="{{ false }}">
+              <span style="min-width:20px;height:20px;box-sizing:border-box;padding:0 6px;border-radius:9999px;background:#E8832A;color:#0E2A31;font-size:11px;font-weight:600;line-height:20px;text-align:center">{{ t.count }}</span>
+            </sc-if>
+          </button>
+        </sc-for>
+      </nav>
+    </div>
+  </section>
+
+  <div style="padding:36px 48px 0">
+
+    <!-- ================= TABLEAU DE BORD ================= -->
+    <sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:24px">
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+            <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);padding:20px 22px">
+              <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.62)">{{ k.label }}</p>
+              <p style="margin:12px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:36px;line-height:1">{{ k.value }}</p>
+              <p style="margin:10px 0 0;font-size:13px;color:{{ k.deltaColor }}">{{ k.delta }}</p>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:24px;align-items:start">
+          <div style="display:flex;flex-direction:column;gap:24px;min-width:0">
+            <section style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);padding:22px 24px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px">
+                <p style="margin:0;font-size:15px;font-weight:600">Vues de la vitrine et des annonces · 30 jours</p>
+                <div style="display:flex;gap:16px;font-size:13px;color:rgba(18,58,68,0.68)">
+                  <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#55ADB3"></span>Vues</span>
+                  <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#E8832A"></span>Demandes de devis</span>
+                </div>
+              </div>
+              <div style="position:relative;margin-top:20px;height:200px;display:flex;align-items:flex-end;gap:6px;border-bottom:1px solid #E4D7C3">
+                <div style="position:absolute;left:0;right:0;top:50%;border-top:1px dashed #EFE3D0"></div>
+                <sc-for list="{{ bars }}" as="b" hint-placeholder-count="30">
+                  <div style="position:relative;flex:1;height:{{ b.h }};border-radius:3px 3px 0 0;background:rgba(85,173,179,0.55)">
+                    <div style="position:absolute;left:0;right:0;bottom:0;height:{{ b.q }};border-radius:3px 3px 0 0;background:#E8832A"></div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px;color:rgba(18,58,68,0.62)"><span>31 août</span><span>14 sept.</span><span>29 sept.</span></div>
+            </section>
+
+            <section style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);overflow:hidden">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 22px">
+                <p style="margin:0;font-size:15px;font-weight:600">Demandes à traiter</p>
+                <button onClick="{{ goTracking }}" style="border:0;background:transparent;padding:0;font-size:13px;font-weight:600;font-family:inherit;color:#9E4E06;cursor:pointer">Suivi des devis →</button>
+              </div>
+              <sc-for list="{{ toHandle }}" as="r" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:16px;padding:16px 22px;border-top:1px solid #EFE3D0">
+                  <span style="display:flex;width:44px;height:44px;flex-shrink:0;align-items:center;justify-content:center;border-radius:9999px;background:rgba(85,173,179,0.14);color:#2E7B84;font-size:14px;font-weight:600">{{ r.initials }}</span>
+                  <div style="flex:1;min-width:0">
+                    <p style="margin:0;font-size:15px;font-weight:600">{{ r.project }}</p>
+                    <p style="margin:3px 0 0;font-size:13px;color:rgba(18,58,68,0.62)">{{ r.client }} · {{ r.commune }} · budget {{ r.budget }}</p>
+                  </div>
+                  <span style="font-size:13px;font-weight:600;color:{{ r.ageColor }};white-space:nowrap">{{ r.age }}</span>
+                  <button onClick="{{ goTemplates }}" style="height:40px;border:0;border-radius:10px;background:#A94F0A;padding:0 16px;font-size:15px;font-weight:600;font-family:inherit;color:#FEFAF3;cursor:pointer;white-space:nowrap">Faire le devis</button>
+                </div>
+              </sc-for>
+            </section>
+          </div>
+
+          <aside style="display:flex;flex-direction:column;gap:20px">
+            <div style="position:relative;overflow:hidden;border-radius:24px;background:#0E2A31;color:#FBF6EC;padding:24px">
+              <div style="position:absolute;inset:0;pointer-events:none;opacity:0.09;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+              <div style="position:relative">
+                <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#E8832A">Cette semaine</p>
+                <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
+                  <sc-for list="{{ agenda }}" as="a" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;gap:14px;border-radius:12px;background:rgba(251,246,236,0.07);padding:12px 14px">
+                      <div style="width:44px;flex-shrink:0;text-align:center">
+                        <p style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-size:26px;line-height:1">{{ a.day }}</p>
+                        <p style="margin:3px 0 0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.14em;color:rgba(251,246,236,0.72)">{{ a.dow }}</p>
+                      </div>
+                      <div style="flex:1;min-width:0;padding-left:14px;border-left:1px solid rgba(251,246,236,0.16)">
+                        <p style="margin:0;font-size:15px;font-weight:600">{{ a.title }}</p>
+                        <p style="margin:3px 0 0;font-size:13px;color:rgba(251,246,236,0.72)">{{ a.detail }}</p>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+
+            <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;padding:20px 22px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+                <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.62)">Derniers avis</p>
+                <span style="font-size:13px;color:rgba(18,58,68,0.62)"><span style="font-weight:600;color:#123A44">4,9 ★</span> · 41 avis</span>
+              </div>
+              <div style="margin-top:14px;display:flex;flex-direction:column;gap:14px">
+                <sc-for list="{{ reviews }}" as="rv" hint-placeholder-count="2">
+                  <div>
+                    <p style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:22px;line-height:1.3">« {{ rv.text }} »</p>
+                    <p style="margin:6px 0 0;font-size:13px;color:rgba(18,58,68,0.62)">{{ rv.who }} · {{ rv.stars }} · {{ rv.when }}</p>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="border:1px solid #E4D7C3;border-radius:16px;background:#F3E9D8;padding:18px 20px">
+              <p style="margin:0;font-size:15px;font-weight:600">Stock bas</p>
+              <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ lowStock }}" as="ls" hint-placeholder-count="2">
+                  <div style="display:flex;justify-content:space-between;gap:12px;font-size:15px">
+                    <span>{{ ls.name }}</span>
+                    <span style="font-weight:600;color:#B0431C">{{ ls.qty }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <button onClick="{{ goStock }}" style="margin-top:12px;border:0;background:transparent;padding:0;font-size:13px;font-weight:600;font-family:inherit;color:#9E4E06;cursor:pointer">Gérer le stock →</button>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ================= VITRINE & STOCK ================= -->
+    <sc-if value="{{ isStock }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:400px minmax(0,1fr);gap:28px;align-items:start">
+        <aside style="position:sticky;top:112px;display:flex;flex-direction:column;gap:16px">
+          <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 6px 24px rgba(18,58,68,0.09);overflow:hidden">
+            <div style="position:relative;height:130px;background:#F3E9D8;display:flex;align-items:center;justify-content:center">
+              <span style="position:absolute;inset:0;opacity:0.07;background-image:repeating-linear-gradient(45deg,#123A44 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#123A44 0 1px,transparent 1px 9px)"></span>
+              <span style="position:relative;font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(18,58,68,0.55)">bannière · atelier Boulari</span>
+              <span style="position:absolute;left:20px;bottom:-26px;display:flex;width:64px;height:64px;align-items:center;justify-content:center;border-radius:16px;border:3px solid #FEFAF3;background:rgba(232,131,42,0.2);color:#9E4E06;font-family:'Instrument Serif',Georgia,serif;font-size:30px">M</span>
+            </div>
+            <div style="padding:36px 20px 20px">
+              <p style="margin:0;font-size:19px;font-weight:600">Menuiserie Cocotier</p>
+              <p style="margin:4px 0 0;font-size:13px;color:rgba(18,58,68,0.62)">Menuiserie · Mont-Dore · kalico.nc/pros/menuiserie-cocotier</p>
+              <div style="margin-top:16px;display:flex;align-items:center;gap:12px">
+                <div style="flex:1;height:4px;border-radius:9999px;background:#E4D7C3;overflow:hidden"><div style="height:4px;width:{{ vitrineDone }};background:#A94F0A"></div></div>
+                <span style="font-size:13px;font-weight:600">{{ vitrineDone }}</span>
+              </div>
+            </div>
+            <sc-for list="{{ vitrineItems }}" as="v" hint-placeholder-count="6">
+              <button onClick="{{ v.toggle }}" style="display:flex;width:100%;align-items:center;gap:12px;border:0;border-top:1px solid #EFE3D0;background:transparent;padding:13px 20px;font-family:inherit;text-align:left;cursor:pointer;color:#123A44">
+                <svg viewBox="0 0 24 24" fill="none" stroke="{{ v.color }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-5" style="opacity:{{ v.check }}"></path></svg>
+                <span style="flex:1;font-size:15px">{{ v.label }}</span>
+                <span style="font-size:13px;color:rgba(18,58,68,0.62)">{{ v.meta }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <a href="Pros côté client v2.dc.html" style="display:flex;height:48px;align-items:center;justify-content:center;border-radius:10px;border:1px solid #123A44;font-size:15px;font-weight:600;color:#123A44">Voir ma vitrine publique</a>
+        </aside>
+
+        <main style="min-width:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+            <div style="display:flex;gap:8px">
+              <sc-for list="{{ stockFilters }}" as="sf" hint-placeholder-count="4">
+                <button onClick="{{ sf.select }}" style="display:inline-flex;align-items:center;gap:8px;height:40px;border-radius:9999px;border:1px solid {{ sf.border }};background:{{ sf.bg }};padding:0 16px;font-size:15px;font-weight:500;font-family:inherit;color:{{ sf.color }};cursor:pointer">{{ sf.label }} <span style="font-size:12px;font-weight:600;opacity:0.8">{{ sf.count }}</span></button>
+              </sc-for>
+            </div>
+            <p style="margin:0;font-size:13px;color:rgba(18,58,68,0.62)">Valeur du stock : <span style="font-weight:600;color:#123A44">{{ stockValue }}</span></p>
+          </div>
+
+          <div style="margin-top:16px;border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);overflow:hidden">
+            <div style="display:grid;grid-template-columns:64px minmax(0,1fr) 110px 150px 70px 90px;gap:16px;padding:12px 20px;background:#F3E9D8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.62)">
+              <span></span><span>Article</span><span>Prix TTC</span><span>Stock</span><span>Vues</span><span>En ligne</span>
+            </div>
+            <sc-for list="{{ items }}" as="it" hint-placeholder-count="7">
+              <div style="display:grid;grid-template-columns:64px minmax(0,1fr) 110px 150px 70px 90px;gap:16px;align-items:center;padding:12px 20px;border-top:1px solid #EFE3D0;opacity:{{ it.opacity }}">
+                <span style="display:flex;width:64px;height:52px;align-items:center;justify-content:center;border-radius:10px;background:#F3E9D8;font-family:'IBM Plex Mono',monospace;font-size:9px;color:rgba(18,58,68,0.55);text-align:center">{{ it.photo }}</span>
+                <div style="min-width:0">
+                  <p style="margin:0;font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ it.name }}</p>
+                  <p style="margin:3px 0 0;font-size:13px;color:rgba(18,58,68,0.62)">{{ it.kind }} · {{ it.cat }}</p>
+                </div>
+                <span style="font-family:'Instrument Serif',Georgia,serif;font-size:22px;line-height:1">{{ it.price }}</span>
+                <sc-if value="{{ it.isProduct }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:inline-flex;align-items:center;border:1px solid {{ it.stockBorder }};border-radius:10px;background:#FBF6EC;width:fit-content">
+                    <button onClick="{{ it.dec }}" style="width:40px;height:40px;border:0;background:transparent;font-size:18px;font-family:inherit;color:#123A44;cursor:pointer">−</button>
+                    <span style="min-width:40px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:15px;color:{{ it.stockInk }}">{{ it.qty }}</span>
+                    <button onClick="{{ it.inc }}" style="width:40px;height:40px;border:0;background:transparent;font-size:18px;font-family:inherit;color:#123A44;cursor:pointer">+</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ it.isService }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size:13px;color:rgba(18,58,68,0.62)">Sur devis</span>
+                </sc-if>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:rgba(18,58,68,0.68)">{{ it.views }}</span>
+                <button onClick="{{ it.toggle }}" style="position:relative;width:42px;height:24px;border:0;border-radius:9999px;background:{{ it.track }};cursor:pointer;padding:0">
+                  <span style="position:absolute;top:3px;left:{{ it.knob }};width:18px;height:18px;border-radius:9999px;background:#FEFAF3;transition:left 150ms"></span>
+                </button>
+              </div>
+            </sc-for>
+          </div>
+          <p style="margin:12px 0 0;font-size:13px;color:rgba(18,58,68,0.62)">Un article à 0 en stock est masqué automatiquement de la vitrine. Les services n'ont pas de stock.</p>
+        </main>
+      </div>
+    </sc-if>
+
+    <!-- ================= MODÈLES DE DEVIS ================= -->
+    <sc-if value="{{ isTemplates }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:300px minmax(0,1fr);gap:28px;align-items:start">
+        <aside style="position:sticky;top:112px;display:flex;flex-direction:column;gap:8px">
+          <p style="margin:0 0 6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.62)">Mes modèles</p>
+          <sc-for list="{{ templates }}" as="tp" hint-placeholder-count="4">
+            <button onClick="{{ tp.select }}" style="display:block;border:1px solid {{ tp.border }};border-radius:12px;background:{{ tp.bg }};padding:14px 16px;font-family:inherit;text-align:left;cursor:pointer;color:#123A44">
+              <span style="display:block;font-size:15px;font-weight:600">{{ tp.name }}</span>
+              <span style="display:block;margin-top:4px;font-size:13px;color:rgba(18,58,68,0.62)">{{ tp.meta }}</span>
+            </button>
+          </sc-for>
+          <button style="display:flex;height:46px;align-items:center;justify-content:center;gap:8px;border:1.5px dashed #D5C4AC;border-radius:12px;background:transparent;font-size:15px;font-weight:600;font-family:inherit;color:#123A44;cursor:pointer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:15px;height:15px"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+            Nouveau modèle
+          </button>
+        </aside>
+
+        <main style="min-width:0;display:flex;flex-direction:column;gap:20px">
+          <section style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);padding:26px 28px">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:16px">
+              <label style="display:block">
+                <span style="display:block;margin-bottom:8px;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Nom du modèle</span>
+                <input value="{{ tplName }}" onChange="{{ onTplName }}" style="width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 15px;font-size:16px;font-family:inherit;color:#123A44;outline:none" />
+              </label>
+              <label style="display:block">
+                <span style="display:block;margin-bottom:8px;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Appliquer à une demande</span>
+                <select style="width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 13px;font-size:16px;font-family:inherit;color:#123A44;cursor:pointer;outline:none">
+                  <option>Terrasse 25 m² · Anaïs R.</option>
+                  <option>Cuisine sur mesure · Paul V.</option>
+                  <option>Escalier bois · SARL Nakéty</option>
+                </select>
+              </label>
+            </div>
+
+            <div style="margin-top:24px;border:1px solid #E4D7C3;border-radius:12px;overflow:hidden">
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) 80px 80px 130px 100px 120px 40px;gap:10px;padding:10px 14px;background:#F3E9D8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.14em;color:rgba(18,58,68,0.62)">
+                <span>Désignation</span><span>Qté</span><span>Unité</span><span>PU HT</span><span>TGC</span><span style="text-align:right">Total HT</span><span></span>
+              </div>
+              <sc-for list="{{ lines }}" as="ln" hint-placeholder-count="4">
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) 80px 80px 130px 100px 120px 40px;gap:10px;align-items:center;padding:8px 14px;border-top:1px solid #EFE3D0;background:#FEFAF3">
+                  <input value="{{ ln.label }}" onChange="{{ ln.onLabel }}" style="min-width:0;height:42px;box-sizing:border-box;border-radius:9px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 12px;font-size:15px;font-family:inherit;color:#123A44;outline:none" />
+                  <input value="{{ ln.qty }}" onChange="{{ ln.onQty }}" style="min-width:0;height:42px;box-sizing:border-box;border-radius:9px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 10px;font-family:'IBM Plex Mono',monospace;font-size:15px;color:#123A44;outline:none" />
+                  <span style="font-size:15px;color:rgba(18,58,68,0.68)">{{ ln.unit }}</span>
+                  <input value="{{ ln.pu }}" onChange="{{ ln.onPu }}" style="min-width:0;height:42px;box-sizing:border-box;border-radius:9px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 10px;font-family:'IBM Plex Mono',monospace;font-size:15px;color:#123A44;outline:none" />
+                  <select value="{{ ln.tgc }}" onChange="{{ ln.onTgc }}" style="height:42px;border-radius:9px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 8px;font-size:15px;font-family:inherit;color:#123A44;cursor:pointer;outline:none">
+                    <sc-for list="{{ tgcRates }}" as="r" hint-placeholder-count="5"><option value="{{ r.v }}">{{ r.l }}</option></sc-for>
+                  </select>
+                  <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:15px">{{ ln.total }}</span>
+                  <button onClick="{{ ln.remove }}" title="Supprimer" style="width:36px;height:36px;border:0;border-radius:8px;background:transparent;font-size:18px;color:rgba(18,58,68,0.55);cursor:pointer">×</button>
+                </div>
+              </sc-for>
+              <div style="display:flex;gap:8px;padding:10px 14px;border-top:1px solid #EFE3D0;background:#FEFAF3">
+                <button onClick="{{ addLine }}" style="height:38px;border:1px solid #E4D7C3;border-radius:9px;background:transparent;padding:0 14px;font-size:13px;font-weight:600;font-family:inherit;color:#123A44;cursor:pointer">+ Ligne libre</button>
+                <button onClick="{{ addFromStock }}" style="height:38px;border:1px solid #E4D7C3;border-radius:9px;background:transparent;padding:0 14px;font-size:13px;font-weight:600;font-family:inherit;color:#123A44;cursor:pointer">+ Depuis mon stock</button>
+              </div>
+            </div>
+
+            <div style="margin-top:20px;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <label style="display:block">
+                  <span style="display:block;margin-bottom:8px;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Acompte à la signature</span>
+                  <select value="{{ deposit }}" onChange="{{ onDeposit }}" style="width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 13px;font-size:16px;font-family:inherit;color:#123A44;cursor:pointer;outline:none">
+                    <option value="0">Aucun</option><option value="30">30 %</option><option value="40">40 %</option><option value="50">50 %</option>
+                  </select>
+                </label>
+                <label style="display:block">
+                  <span style="display:block;margin-bottom:8px;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Validité du devis</span>
+                  <select style="width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 13px;font-size:16px;font-family:inherit;color:#123A44;cursor:pointer;outline:none">
+                    <option>30 jours</option><option>15 jours</option><option>60 jours</option>
+                  </select>
+                </label>
+                <label style="display:block;grid-column:span 2">
+                  <span style="display:block;margin-bottom:8px;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Conditions et mentions</span>
+                  <textarea rows="3" style="width:100%;box-sizing:border-box;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:12px 15px;font-size:15px;line-height:1.55;font-family:inherit;color:#123A44;outline:none;resize:vertical">Bois traité classe 4, garantie décennale. Paiement du solde à la réception des travaux, par virement ou chèque.</textarea>
+                </label>
+              </div>
+              <div style="border-radius:16px;background:#0E2A31;color:#FBF6EC;padding:20px 22px">
+                <sc-for list="{{ totals }}" as="tt" hint-placeholder-count="4">
+                  <div style="display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:15px">
+                    <span style="color:rgba(251,246,236,0.72)">{{ tt.label }}</span>
+                    <span style="font-family:'IBM Plex Mono',monospace">{{ tt.value }}</span>
+                  </div>
+                </sc-for>
+                <div style="margin-top:10px;padding-top:12px;border-top:1px solid rgba(251,246,236,0.16);display:flex;align-items:baseline;justify-content:space-between">
+                  <span style="font-size:15px;font-weight:600">Total TTC</span>
+                  <span style="font-family:'Instrument Serif',Georgia,serif;font-size:40px;line-height:1">{{ ttc }}</span>
+                </div>
+                <p style="margin:8px 0 0;font-size:13px;color:rgba(251,246,236,0.72)">{{ depositLabel }}</p>
+              </div>
+            </div>
+          </section>
+
+          <div style="display:flex;align-items:center;gap:12px">
+            <button style="height:50px;border:1px solid #123A44;border-radius:10px;background:transparent;padding:0 22px;font-size:16px;font-weight:600;font-family:inherit;color:#123A44;cursor:pointer">Enregistrer le modèle</button>
+            <button style="height:50px;border:1px solid #E4D7C3;border-radius:10px;background:transparent;padding:0 22px;font-size:16px;font-weight:600;font-family:inherit;color:#123A44;cursor:pointer">Aperçu PDF</button>
+            <button onClick="{{ goTracking }}" style="display:inline-flex;align-items:center;gap:9px;height:50px;border:0;border-radius:10px;background:#A94F0A;padding:0 26px;font-size:16px;font-weight:600;font-family:inherit;color:#FEFAF3;cursor:pointer;box-shadow:0 2px 12px rgba(169,79,10,0.22)">
+              Envoyer à Anaïs R.
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+            </button>
+            <p style="margin:0 0 0 6px;font-size:13px;color:rgba(18,58,68,0.62)">Le client signe en ligne. Vous êtes prévenu à l'ouverture.</p>
+          </div>
+        </main>
+      </div>
+    </sc-if>
+
+    <!-- ================= SUIVI DES DEVIS ================= -->
+    <sc-if value="{{ isTracking }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+          <sc-for list="{{ columns }}" as="col" hint-placeholder-count="4">
+            <section style="display:flex;flex-direction:column;gap:10px;min-width:0">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:0 4px 10px;border-bottom:2px solid {{ col.bar }}">
+                <p style="margin:0;font-size:15px;font-weight:600">{{ col.label }} <span style="font-weight:400;color:rgba(18,58,68,0.62)">· {{ col.count }}</span></p>
+                <span style="font-family:'Instrument Serif',Georgia,serif;font-size:22px;line-height:1">{{ col.sum }}</span>
+              </div>
+              <sc-for list="{{ col.cards }}" as="c" hint-placeholder-count="3">
+                <article style="border:1px solid #E4D7C3;border-radius:14px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);padding:16px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                    <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(18,58,68,0.62)">{{ c.ref }}</span>
+                    <span style="border-radius:9999px;padding:3px 9px;font-size:11px;font-weight:600;background:{{ c.tagBg }};color:{{ c.tagInk }}">{{ c.tag }}</span>
+                  </div>
+                  <p style="margin:10px 0 0;font-size:15px;font-weight:600;line-height:1.35">{{ c.project }}</p>
+                  <p style="margin:4px 0 0;font-size:13px;color:rgba(18,58,68,0.62)">{{ c.client }} · {{ c.commune }}</p>
+                  <div style="margin-top:12px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                    <span style="font-family:'Instrument Serif',Georgia,serif;font-size:26px;line-height:1">{{ c.amount }}</span>
+                    <span style="font-size:12px;color:rgba(18,58,68,0.62)">{{ c.date }}</span>
+                  </div>
+                  <sc-if value="{{ c.hasAction }}" hint-placeholder-val="{{ true }}">
+                    <div style="margin-top:12px;padding-top:12px;border-top:1px solid #EFE3D0;display:flex;gap:8px">
+                      <button onClick="{{ c.action }}" style="flex:1;height:36px;border:0;border-radius:9px;background:{{ c.actionBg }};font-size:13px;font-weight:600;font-family:inherit;color:{{ c.actionInk }};cursor:pointer">{{ c.actionLabel }}</button>
+                      <button onClick="{{ c.advance }}" title="Étape suivante" style="width:36px;height:36px;border:1px solid #E4D7C3;border-radius:9px;background:transparent;font-size:15px;color:#123A44;cursor:pointer">→</button>
+                    </div>
+                  </sc-if>
+                </article>
+              </sc-for>
+            </section>
+          </sc-for>
+        </div>
+        <div style="margin-top:28px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+          <sc-for list="{{ trackStats }}" as="ts" hint-placeholder-count="3">
+            <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;padding:18px 20px">
+              <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.62)">{{ ts.label }}</p>
+              <p style="margin:10px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:32px;line-height:1">{{ ts.value }}</p>
+              <p style="margin:8px 0 0;font-size:13px;color:rgba(18,58,68,0.62)">{{ ts.note }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+
+  <footer style="margin-top:80px;background:#0E2A31;color:#FBF6EC;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;opacity:0.07;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+    <div style="position:relative;padding:32px 48px;display:flex;align-items:center;justify-content:space-between;gap:24px">
+      <span style="font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:22px;color:rgba(251,246,236,0.85)">Nouvelle-Calédonie dans l'âme, Kalico dans la poche.</span>
+      <div style="display:flex;gap:24px;font-size:13px">
+        <a href="#" style="color:rgba(251,246,236,0.72)">Aide Pro</a>
+        <a href="#" style="color:rgba(251,246,236,0.72)">CGV Pro</a>
+        <a href="#" style="color:rgba(251,246,236,0.72)">pro@kalico.nc</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;onglet&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Tableau de bord&quot;,&quot;options&quot;:[&quot;Tableau de bord&quot;,&quot;Vitrine et stock&quot;,&quot;Modèles de devis&quot;,&quot;Suivi des devis&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Page&quot;}}">
+const F = (n) => Math.round(Number(n) || 0).toLocaleString('fr-FR').replace(/\u202f|\u00a0/g, ' ') + ' F';
+const seed = (i, k) => { const x = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
+const TGC = [{ v: '0', l: '0 %' }, { v: '3', l: '3 %' }, { v: '6', l: '6 %' }, { v: '11', l: '11 %' }, { v: '22', l: '22 %' }];
+
+const ITEMS = [
+  { id: 1, photo: 'terrasse', name: 'Terrasse en niaouli sur mesure', kind: 'Service', cat: 'Extérieur', price: 0, views: 1204, on: true },
+  { id: 2, photo: 'cuisine', name: 'Cuisine équipée en kohu', kind: 'Service', cat: 'Intérieur', price: 0, views: 842, on: true },
+  { id: 3, photo: 'planche', name: 'Planche de niaouli 27 × 145 mm', kind: 'Produit', cat: 'Bois brut', price: 2400, qty: 184, views: 316, on: true },
+  { id: 4, photo: 'étagère', name: 'Étagère murale en kohu, 120 cm', kind: 'Produit', cat: 'Mobilier', price: 18500, qty: 3, views: 408, on: true },
+  { id: 5, photo: 'table', name: 'Table basse pieds épingle', kind: 'Produit', cat: 'Mobilier', price: 42000, qty: 1, views: 522, on: true },
+  { id: 6, photo: 'huile', name: 'Huile de protection teck, 1 L', kind: 'Produit', cat: 'Entretien', price: 3900, qty: 0, views: 96, on: false },
+  { id: 7, photo: 'escalier', name: 'Escalier quart tournant', kind: 'Service', cat: 'Intérieur', price: 0, views: 377, on: true },
+];
+const TEMPLATES = {
+  terrasse: { name: 'Terrasse niaouli · forfait m²', meta: '6 lignes · utilisé 14 fois', lines: [
+    ['Lames niaouli 27 × 145, traitées classe 4', 25, 'm²', 7800, '11'], ['Lambourdes et plots réglables', 25, 'm²', 2600, '11'],
+    ['Visserie inox A4', 1, 'lot', 18000, '11'], ['Main-d\u2019œuvre pose', 25, 'm²', 4500, '6'], ['Évacuation des chutes', 1, 'forfait', 8000, '6'],
+  ] },
+  cuisine: { name: 'Cuisine sur mesure', meta: '9 lignes · utilisé 6 fois', lines: [
+    ['Caissons bas en kohu', 6, 'u', 38000, '11'], ['Plan de travail massif 3 m', 1, 'u', 95000, '11'], ['Pose et ajustements', 3, 'jour', 42000, '6'],
+  ] },
+  escalier: { name: 'Escalier bois', meta: '5 lignes · utilisé 4 fois', lines: [
+    ['Limon et marches en kohu', 1, 'u', 280000, '11'], ['Rampe et balustres', 1, 'u', 95000, '11'], ['Pose', 2, 'jour', 42000, '6'],
+  ] },
+  sav: { name: 'Déplacement et petite réparation', meta: '2 lignes · utilisé 22 fois', lines: [
+    ['Déplacement Grand Nouméa', 1, 'forfait', 3000, '6'], ['Main-d\u2019œuvre', 2, 'h', 5500, '6'],
+  ] },
+};
+const QUOTES = [
+  { id: 'D-0412', project: 'Terrasse 25 m² en niaouli', client: 'Anaïs R.', commune: 'Mont-Dore', amount: 590000, date: 'reçue il y a 3 h', stage: 0 },
+  { id: 'D-0411', project: 'Porte d\u2019entrée en kohu', client: 'Paul V.', commune: 'Nouméa', amount: 180000, date: 'reçue hier', stage: 0 },
+  { id: 'D-0409', project: 'Cuisine sur mesure', client: 'Famille Wénéhoua', commune: 'Dumbéa', amount: 452000, date: 'envoyé il y a 6 j', stage: 1, opened: false },
+  { id: 'D-0406', project: 'Escalier quart tournant', client: 'SARL Nakéty', commune: 'Païta', amount: 459000, date: 'ouvert hier', stage: 1, opened: true },
+  { id: 'D-0405', project: 'Bibliothèque murale', client: 'Claire M.', commune: 'Nouméa', amount: 215000, date: 'envoyé il y a 2 j', stage: 1, opened: true },
+  { id: 'D-0401', project: 'Pergola 4 × 3 m', client: 'Jean T.', commune: 'Mont-Dore', amount: 385000, date: 'signé le 24 sept.', stage: 2 },
+  { id: 'D-0398', project: 'Deck de piscine', client: 'Hôtel Le Lagon', commune: 'Nouméa', amount: 1240000, date: 'signé le 18 sept.', stage: 2 },
+  { id: 'D-0392', project: 'Placards chambre', client: 'Marie L.', commune: 'Mont-Dore', amount: 168000, date: 'payé le 12 sept.', stage: 3 },
+];
+
+class Component extends DCLogic {
+  state = { tab: null, items: ITEMS, stockFilter: 'Tout', vitrine: { logo: true, banner: true, bio: true, hours: true, zone: true, gallery: false }, tpl: 'terrasse', lines: null, tplName: null, deposit: '30', quotes: QUOTES, relanced: [] };
+
+  componentDidUpdate(prev) { if (prev.onglet !== this.props.onglet) this.setState({ tab: null }); }
+
+  renderVals() {
+    const s = this.state;
+    const tab = s.tab ?? ({ 'Tableau de bord': 'dash', 'Vitrine et stock': 'stock', 'Modèles de devis': 'templates', 'Suivi des devis': 'tracking' }[this.props.onglet ?? 'Tableau de bord'] || 'dash');
+    const chip = (on) => ({ bg: on ? '#123A44' : '#FEFAF3', border: on ? '#123A44' : '#E4D7C3', color: on ? '#FEFAF3' : '#123A44' });
+    const toReceive = s.quotes.filter((q) => q.stage === 0).length;
+    const heads = {
+      dash: ['Tableau de bord', 'Bonjour Tehani, deux demandes attendent un devis.'],
+      stock: ['Vitrine et stock', 'Ce que vos clients voient'],
+      templates: ['Modèles de devis', 'Chiffrez en deux minutes'],
+      tracking: ['Suivi des devis', 'De la demande au paiement'],
+    }[tab];
+
+    // stock
+    const items = s.items.filter((i) => s.stockFilter === 'Tout' || (s.stockFilter === 'Produits' && i.kind === 'Produit') || (s.stockFilter === 'Services' && i.kind === 'Service') || (s.stockFilter === 'Stock bas' && i.kind === 'Produit' && i.qty <= 3));
+    const setItem = (id, patch) => this.setState((st) => ({ items: st.items.map((i) => (i.id === id ? { ...i, ...patch } : i)) }));
+    const vDefs = [['logo', 'Logo', 'carré 400 px'], ['banner', 'Bannière', '1600 × 500'], ['bio', 'Présentation', '184 / 400'], ['hours', 'Horaires', 'lun.–sam.'], ['zone', 'Zone d\u2019intervention', 'Grand Nouméa'], ['gallery', 'Galerie de réalisations', '0 / 12 photos']];
+    const vDone = Math.round((vDefs.filter(([k]) => s.vitrine[k]).length / vDefs.length) * 100);
+
+    // devis
+    const tpl = TEMPLATES[s.tpl];
+    const lines = s.lines ?? tpl.lines.map(([label, qty, unit, pu, tgc]) => ({ label, qty: String(qty), unit, pu: String(pu), tgc }));
+    const setLine = (i, patch) => this.setState({ lines: lines.map((l, j) => (j === i ? { ...l, ...patch } : l)) });
+    const ht = lines.reduce((a, l) => a + (Number(l.qty) || 0) * (Number(l.pu) || 0), 0);
+    const byRate = {};
+    lines.forEach((l) => { const b = (Number(l.qty) || 0) * (Number(l.pu) || 0); byRate[l.tgc] = (byRate[l.tgc] || 0) + b; });
+    const tgcTotal = Object.entries(byRate).reduce((a, [r, b]) => a + (b * Number(r)) / 100, 0);
+    const ttc = ht + tgcTotal;
+
+    // suivi
+    const stages = [['Demandes reçues', '#55ADB3'], ['Devis envoyés', '#E8832A'], ['Acceptés', '#6E9A6A'], ['Payés', '#123A44']];
+    const advance = (id) => this.setState((st) => ({ quotes: st.quotes.map((q) => (q.id === id ? { ...q, stage: Math.min(3, q.stage + 1), date: 'à l\u2019instant' } : q)) }));
+    const columns = stages.map(([label, bar], si) => {
+      const qs = s.quotes.filter((q) => q.stage === si);
+      return {
+        label, bar, count: String(qs.length), sum: F(qs.reduce((a, q) => a + q.amount, 0)),
+        cards: qs.map((q) => {
+          const relanced = s.relanced.includes(q.id);
+          const tag = si === 0 ? ['Nouveau', 'rgba(85,173,179,0.14)', '#2E7B84'] : si === 1 ? (q.opened ? ['Ouvert', 'rgba(110,154,106,0.14)', '#3F6B3C'] : ['Non ouvert', 'rgba(232,131,42,0.14)', '#9E4E06']) : si === 2 ? ['Acompte reçu', 'rgba(110,154,106,0.14)', '#3F6B3C'] : ['Soldé', '#F3E9D8', '#123A44'];
+          const act = si === 0 ? ['Faire le devis', '#A94F0A', '#FEFAF3', () => this.setState({ tab: 'templates' })] : si === 1 ? [relanced ? 'Relancé ✓' : 'Relancer', relanced ? '#F3E9D8' : '#123A44', relanced ? '#123A44' : '#FEFAF3', () => this.setState({ relanced: [...s.relanced, q.id] })] : si === 2 ? ['Facturer le solde', '#123A44', '#FEFAF3', () => advance(q.id)] : null;
+          return {
+            ref: q.id, project: q.project, client: q.client, commune: q.commune, amount: si === 0 ? `≈ ${F(q.amount)}` : F(q.amount), date: q.date,
+            tag: tag[0], tagBg: tag[1], tagInk: tag[2], hasAction: Boolean(act),
+            actionLabel: act ? act[0] : '', actionBg: act ? act[1] : '', actionInk: act ? act[2] : '', action: act ? act[3] : () => {}, advance: () => advance(q.id),
+          };
+        }),
+      };
+    });
+
+    const views = Array.from({ length: 30 }, (_, i) => 60 + seed(i, 1) * 50 + i * 2.2 + (i % 7 >= 5 ? 25 : 0));
+    const vmax = Math.max(...views);
+
+    return {
+      eyebrow: heads[0], title: heads[1],
+      tabs: [['dash', 'Tableau de bord', 0], ['stock', 'Vitrine et stock', 0], ['templates', 'Modèles de devis', 0], ['tracking', 'Suivi des devis', toReceive]].map(([id, label, n]) => {
+        const on = tab === id;
+        return { label, count: String(n), hasCount: n > 0, bar: on ? '#A94F0A' : 'transparent', weight: on ? '600' : '500', color: on ? '#123A44' : 'rgba(18,58,68,0.62)', select: () => this.setState({ tab: id }) };
+      }),
+      isDash: tab === 'dash', isStock: tab === 'stock', isTemplates: tab === 'templates', isTracking: tab === 'tracking',
+      goTemplates: () => this.setState({ tab: 'templates' }), goTracking: () => this.setState({ tab: 'tracking' }), goStock: () => this.setState({ tab: 'stock' }),
+
+      kpis: [
+        { label: 'Vues · 30 jours', value: '4 380', delta: '+26 % vs août', deltaColor: '#3F6B3C' },
+        { label: 'Demandes de devis', value: '19', delta: `${toReceive} sans réponse`, deltaColor: '#9E4E06' },
+        { label: 'Taux de signature', value: '42 %', delta: 'moyenne du métier : 31 %', deltaColor: 'rgba(18,58,68,0.62)' },
+        { label: 'Signé ce mois', value: '1,63 M F', delta: '2 chantiers · 546 000 F d\u2019acomptes', deltaColor: '#3F6B3C' },
+      ],
+      bars: views.map((v, i) => ({ h: `${Math.round((v / vmax) * 100)}%`, q: `${Math.round(8 + seed(i, 4) * 18)}%` })),
+      toHandle: s.quotes.filter((q) => q.stage === 0).map((q, i) => ({ initials: q.client.split(' ').map((w) => w[0]).join('').slice(0, 2), project: q.project, client: q.client, commune: q.commune, budget: F(q.amount), age: q.date.replace('reçue ', ''), ageColor: i === 0 ? '#3F6B3C' : '#9E4E06' })),
+      agenda: [
+        { day: '30', dow: 'mer.', title: 'Visite · terrasse Anaïs R.', detail: '9 h 00 · Boulari, Mont-Dore' },
+        { day: '02', dow: 'ven.', title: 'Pose pergola · Jean T.', detail: 'Journée · Plum, Mont-Dore' },
+        { day: '03', dow: 'sam.', title: 'Livraison étagère', detail: '10 h 30 · Magenta, Nouméa' },
+      ],
+      reviews: [
+        { text: 'Travail propre, délais tenus, terrasse magnifique.', who: 'Jean T.', stars: '5 ★', when: 'il y a 3 j' },
+        { text: 'Très bons conseils sur le choix du bois.', who: 'Marie L.', stars: '5 ★', when: 'il y a 2 sem.' },
+      ],
+      lowStock: s.items.filter((i) => i.kind === 'Produit' && i.qty <= 3).map((i) => ({ name: i.name, qty: i.qty === 0 ? 'Épuisé' : `${i.qty} restant${i.qty > 1 ? 's' : ''}` })),
+
+      vitrineDone: `${vDone}%`,
+      vitrineItems: vDefs.map(([k, label, meta]) => ({ label, meta, color: s.vitrine[k] ? '#6E9A6A' : 'rgba(18,58,68,0.42)', check: s.vitrine[k] ? '1' : '0', toggle: () => this.setState((st) => ({ vitrine: { ...st.vitrine, [k]: !st.vitrine[k] } })) })),
+      stockFilters: ['Tout', 'Produits', 'Services', 'Stock bas'].map((f) => ({ label: f, count: String(s.items.filter((i) => f === 'Tout' || (f === 'Produits' && i.kind === 'Produit') || (f === 'Services' && i.kind === 'Service') || (f === 'Stock bas' && i.kind === 'Produit' && i.qty <= 3)).length), ...chip(s.stockFilter === f), select: () => this.setState({ stockFilter: f }) })),
+      stockValue: F(s.items.filter((i) => i.kind === 'Produit').reduce((a, i) => a + i.price * i.qty, 0)),
+      items: items.map((i) => {
+        const product = i.kind === 'Produit';
+        const low = product && i.qty <= 3;
+        return {
+          ...i, price: product ? F(i.price) : 'Sur devis', isProduct: product, isService: !product, qty: String(i.qty ?? ''), views: String(i.views),
+          stockBorder: low ? 'rgba(176,67,28,0.45)' : '#E4D7C3', stockInk: i.qty === 0 ? '#B0431C' : '#123A44',
+          dec: () => setItem(i.id, { qty: Math.max(0, i.qty - 1), on: i.qty - 1 > 0 ? i.on : false }), inc: () => setItem(i.id, { qty: i.qty + 1, on: true }),
+          track: i.on ? '#123A44' : '#D5C4AC', knob: i.on ? '21px' : '3px', opacity: i.on ? '1' : '0.6',
+          toggle: () => setItem(i.id, { on: !i.on }),
+        };
+      }),
+
+      templates: Object.entries(TEMPLATES).map(([k, t]) => {
+        const on = s.tpl === k;
+        return { name: t.name, meta: t.meta, bg: on ? '#FEFAF3' : 'transparent', border: on ? '#123A44' : '#E4D7C3', select: () => this.setState({ tpl: k, lines: null, tplName: null }) };
+      }),
+      tplName: s.tplName ?? tpl.name, onTplName: (e) => this.setState({ tplName: e.target.value }),
+      tgcRates: TGC,
+      lines: lines.map((l, i) => ({
+        ...l, total: F((Number(l.qty) || 0) * (Number(l.pu) || 0)),
+        onLabel: (e) => setLine(i, { label: e.target.value }), onQty: (e) => setLine(i, { qty: e.target.value.replace(/[^\d.,]/g, '') }),
+        onPu: (e) => setLine(i, { pu: e.target.value.replace(/\D/g, '') }), onTgc: (e) => setLine(i, { tgc: e.target.value }),
+        remove: () => this.setState({ lines: lines.filter((_, j) => j !== i) }),
+      })),
+      addLine: () => this.setState({ lines: [...lines, { label: 'Nouvelle ligne', qty: '1', unit: 'u', pu: '0', tgc: '11' }] }),
+      addFromStock: () => this.setState({ lines: [...lines, { label: 'Huile de protection teck, 1 L', qty: '2', unit: 'u', pu: String(Math.round(3900 / 1.11)), tgc: '11' }] }),
+      deposit: s.deposit, onDeposit: (e) => this.setState({ deposit: e.target.value }),
+      totals: [{ label: 'Total HT', value: F(ht) }, ...Object.entries(byRate).filter(([r]) => r !== '0').sort((a, b) => Number(a[0]) - Number(b[0])).map(([r, b]) => ({ label: `TGC ${r} %`, value: F((b * Number(r)) / 100) }))],
+      ttc: F(ttc),
+      depositLabel: s.deposit === '0' ? 'Aucun acompte demandé.' : `Acompte de ${s.deposit} % à la signature : ${F((ttc * Number(s.deposit)) / 100)}.`,
+
+      columns,
+      trackStats: [
+        { label: 'Délai moyen de réponse', value: '5 h', note: 'Les clients choisissent souvent le premier devis reçu.' },
+        { label: 'En attente de signature', value: F(s.quotes.filter((q) => q.stage === 1).reduce((a, q) => a + q.amount, 0)), note: `${s.quotes.filter((q) => q.stage === 1 && !q.opened).length} devis pas encore ouvert` },
+        { label: 'Encaissé en septembre', value: '714 000 F', note: 'Acomptes et soldes, TGC incluse.' },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

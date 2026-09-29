@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#FBF6EC; -webkit-font-smoothing:antialiased; }
+  a { color:#2E7B84; text-decoration:none; }
+  a:hover { color:#123A44; }
+  input::placeholder { color:rgba(18,58,68,0.42); }
+</style>
+</helmet>
+
+<div style="display:grid;grid-template-columns:560px 1fr;width:1440px;min-height:960px;background:#FBF6EC;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#123A44">
+
+  <!-- =============== VOLET MARQUE =============== -->
+  <aside style="position:relative;overflow:hidden;background:#0E2A31;color:#FBF6EC;padding:52px 56px;display:flex;flex-direction:column">
+    <div style="position:absolute;inset:0;pointer-events:none;opacity:0.09;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+
+    <a href="Accueil v2.dc.html" style="position:relative;display:inline-flex;align-items:center;gap:12px;width:fit-content">
+      <img src="assets/kalico1.svg" alt="Kalico" style="height:46px;width:auto;display:block" />
+      <span style="font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1;color:#FBF6EC">Kalico</span>
+    </a>
+
+    <div style="position:relative;margin-top:auto">
+      <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#E8832A">{{ brandEyebrow }}</p>
+      <p style="margin:16px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:44px;line-height:1.06;letter-spacing:-0.01em;text-wrap:balance">{{ brandHeadline }}</p>
+      <p style="margin:18px 0 0;font-size:17px;line-height:1.6;color:rgba(251,246,236,0.72);text-wrap:pretty">{{ brandBody }}</p>
+
+      <div style="margin-top:34px;display:flex;flex-direction:column;gap:14px">
+        <sc-for list="{{ brandPoints }}" as="p" hint-placeholder-count="3">
+          <div style="display:flex;gap:13px;border-top:1px solid rgba(251,246,236,0.16);padding-top:14px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#E8832A" stroke-width="2" stroke-linecap="round" style="width:17px;height:17px;flex-shrink:0;margin-top:3px"><path d="M20 6 9 17l-5-5"></path></svg>
+            <p style="margin:0;font-size:15px;line-height:1.55;color:rgba(251,246,236,0.86)">{{ p }}</p>
+          </div>
+        </sc-for>
+      </div>
+
+      <p style="margin:40px 0 0;font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:22px;line-height:1.3;color:rgba(251,246,236,0.55)">Nouvelle-Calédonie dans l'âme, Kalico dans la poche.</p>
+    </div>
+  </aside>
+
+  <!-- =============== VOLET FORMULAIRE =============== -->
+  <main style="display:flex;flex-direction:column;padding:40px 88px 44px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:24px">
+      <a href="Accueil v2.dc.html" style="display:inline-flex;align-items:center;gap:7px;font-size:15px;font-weight:500;color:rgba(18,58,68,0.62)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="m15 18-6-6 6-6"></path></svg>
+        Retour au site
+      </a>
+      <p style="margin:0;font-size:15px;color:rgba(18,58,68,0.62)">Déjà inscrit ? <a href="Connexion v2.dc.html" style="font-weight:600;color:#9E4E06">Se connecter</a></p>
+    </div>
+
+    <!-- stepper -->
+    <sc-if value="{{ showStepper }}" hint-placeholder-val="{{ true }}">
+      <div style="margin-top:44px;display:flex;align-items:center">
+        <sc-for list="{{ steps }}" as="st" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center;flex:{{ st.flex }};min-width:0">
+            <button onClick="{{ st.select }}" style="display:flex;flex-shrink:0;align-items:center;gap:10px;border:0;background:transparent;padding:0;font-family:inherit;cursor:{{ st.cursor }};text-align:left">
+              <span style="display:flex;height:32px;width:32px;flex-shrink:0;align-items:center;justify-content:center;border-radius:10px;border:1px solid {{ st.dotBorder }};background:{{ st.dotBg }};font-size:13px;font-weight:600;color:{{ st.dotColor }}">{{ st.n }}</span>
+              <span style="font-size:13px;font-weight:600;color:{{ st.labelColor }};white-space:nowrap">{{ st.label }}</span>
+            </button>
+            <sc-if value="{{ st.hasLine }}" hint-placeholder-val="{{ true }}">
+              <span style="flex:1;height:1px;min-width:16px;margin:0 14px;background:{{ st.lineColor }}"></span>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <div style="margin-top:40px;flex:1;display:flex;flex-direction:column;max-width:640px">
+      <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">{{ eyebrow }}</p>
+      <h1 style="margin:12px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:52px;line-height:1.03;letter-spacing:-0.015em;text-wrap:balance">{{ title }}</h1>
+      <p style="margin:16px 0 0;font-size:17px;line-height:1.6;color:rgba(18,58,68,0.68);text-wrap:pretty">{{ subtitle }}</p>
+
+      <!-- ===== ÉTAPE : TYPE ===== -->
+      <sc-if value="{{ isType }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-top:32px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <sc-for list="{{ accountTypes }}" as="a" hint-placeholder-count="2">
+              <button onClick="{{ a.select }}" style="position:relative;display:flex;flex-direction:column;border:1px solid {{ a.border }};border-radius:16px;background:{{ a.bg }};padding:24px;font-family:inherit;cursor:pointer;text-align:left">
+                <span style="display:flex;align-items:center;justify-content:space-between;width:100%">
+                  <span style="display:flex;height:46px;width:46px;align-items:center;justify-content:center;border-radius:12px;background:{{ a.iconBg }};font-family:'Instrument Serif',Georgia,serif;font-size:22px;color:{{ a.iconColor }}">{{ a.initial }}</span>
+                  <span style="display:flex;height:22px;width:22px;align-items:center;justify-content:center;border-radius:9999px;border:1.5px solid {{ a.radioBorder }};background:{{ a.radioBg }}">
+                    <span style="height:8px;width:8px;border-radius:9999px;background:#0E2A31;opacity:{{ a.radioDot }}"></span>
+                  </span>
+                </span>
+                <span style="display:block;margin-top:18px;font-size:20px;font-weight:600;color:{{ a.titleColor }}">{{ a.title }}</span>
+                <span style="display:block;margin-top:8px;font-size:15px;line-height:1.55;color:{{ a.bodyColor }}">{{ a.description }}</span>
+                <span style="display:block;margin-top:16px;padding-top:14px;border-top:1px solid {{ a.divider }};font-size:13px;font-weight:600;color:{{ a.priceColor }}">{{ a.price }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="margin-top:24px;display:flex;flex-direction:column;gap:11px">
+            <sc-for list="{{ typeBenefits }}" as="b" hint-placeholder-count="3">
+              <div style="display:flex;gap:11px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#6E9A6A" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px;flex-shrink:0;margin-top:3px"><path d="M20 6 9 17l-5-5"></path></svg>
+                <p style="margin:0;font-size:15px;line-height:1.5;color:rgba(18,58,68,0.72)">{{ b }}</p>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== ÉTAPE : INFORMATIONS ===== -->
+      <sc-if value="{{ isInfo }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:32px;display:flex;flex-direction:column;gap:24px">
+          <sc-if value="{{ isPro }}" hint-placeholder-val="{{ false }}">
+            <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;padding:22px">
+              <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.55)">Entreprise</p>
+              <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <label style="display:block;grid-column:span 2">
+                  <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Raison sociale</span>
+                  <input placeholder="Menuiserie Cocotier" style="margin-top:8px;width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 15px;font-size:16px;font-family:inherit;color:#123A44;outline:none" />
+                </label>
+                <label style="display:block">
+                  <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Numéro RIDET</span>
+                  <div style="margin-top:8px;display:flex;align-items:center;border-radius:11px;border:1px solid {{ ridetBorder }};background:#FBF6EC">
+                    <input value="{{ ridet }}" onChange="{{ onRidet }}" placeholder="1 234 567.001" style="min-width:0;flex:1;box-sizing:border-box;height:50px;border:0;background:transparent;padding:0 15px;font-family:'IBM Plex Mono',monospace;font-size:16px;color:#123A44;outline:none" />
+                    <sc-if value="{{ ridetOk }}" hint-placeholder-val="{{ false }}">
+                      <span style="display:inline-flex;align-items:center;gap:6px;margin-right:12px;border-radius:9999px;padding:4px 10px;font-size:12px;font-weight:600;background:rgba(110,154,106,0.14);color:#3F6B3C">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:12px;height:12px"><path d="M20 6 9 17l-5-5"></path></svg>
+                        Trouvé
+                      </span>
+                    </sc-if>
+                  </div>
+                  <span style="display:block;margin-top:7px;font-size:13px;color:rgba(18,58,68,0.55)">{{ ridetHelp }}</span>
+                </label>
+                <label style="display:block">
+                  <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Secteur d'activité</span>
+                  <select style="margin-top:8px;width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 13px;font-size:16px;font-family:inherit;color:#123A44;cursor:pointer;outline:none">
+                    <sc-for list="{{ sectors }}" as="sec" hint-placeholder-count="6">
+                      <option>{{ sec }}</option>
+                    </sc-for>
+                  </select>
+                </label>
+              </div>
+            </div>
+          </sc-if>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <label style="display:block">
+              <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Prénom</span>
+              <input value="{{ firstName }}" onChange="{{ onFirstName }}" placeholder="Marie" style="margin-top:8px;width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FEFAF3;padding:0 15px;font-size:16px;font-family:inherit;color:#123A44;outline:none" />
+            </label>
+            <label style="display:block">
+              <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Nom</span>
+              <input placeholder="Wamytan" style="margin-top:8px;width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FEFAF3;padding:0 15px;font-size:16px;font-family:inherit;color:#123A44;outline:none" />
+            </label>
+            <label style="display:block">
+              <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Commune</span>
+              <select value="{{ commune }}" onChange="{{ onCommune }}" style="margin-top:8px;width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FEFAF3;padding:0 13px;font-size:16px;font-family:inherit;color:#123A44;cursor:pointer;outline:none">
+                <sc-for list="{{ communes }}" as="c" hint-placeholder-count="10">
+                  <option value="{{ c }}">{{ c }}</option>
+                </sc-for>
+              </select>
+            </label>
+            <label style="display:block">
+              <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Téléphone mobile</span>
+              <div style="margin-top:8px;display:flex;align-items:center;border-radius:11px;border:1px solid #E4D7C3;background:#FEFAF3">
+                <span style="flex-shrink:0;border-right:1px solid #E4D7C3;padding:0 13px;font-family:'IBM Plex Mono',monospace;font-size:15px;color:rgba(18,58,68,0.62);line-height:50px">+687</span>
+                <input value="{{ phone }}" onChange="{{ onPhone }}" placeholder="__ __ __" style="min-width:0;flex:1;box-sizing:border-box;height:50px;border:0;background:transparent;padding:0 14px;font-family:'IBM Plex Mono',monospace;font-size:16px;color:#123A44;outline:none" />
+              </div>
+            </label>
+          </div>
+          <p style="margin:-8px 0 0;font-size:13px;line-height:1.55;color:rgba(18,58,68,0.55)">Un code de vérification sera envoyé sur ce numéro. Il n'est jamais affiché publiquement sans votre accord.</p>
+        </div>
+      </sc-if>
+
+      <!-- ===== ÉTAPE : IDENTIFIANTS ===== -->
+      <sc-if value="{{ isCreds }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:32px">
+          <label style="display:block">
+            <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Adresse e-mail</span>
+            <input value="{{ email }}" onChange="{{ onEmail }}" placeholder="vous@exemple.nc" style="margin-top:8px;width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FEFAF3;padding:0 15px;font-size:16px;font-family:inherit;color:#123A44;outline:none" />
+          </label>
+          <label style="margin-top:16px;display:block">
+            <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Mot de passe</span>
+            <div style="margin-top:8px;display:flex;align-items:center;border-radius:11px;border:1px solid #E4D7C3;background:#FEFAF3">
+              <input value="{{ password }}" onChange="{{ onPassword }}" type="{{ passwordType }}" placeholder="Au moins 8 caractères" style="min-width:0;flex:1;box-sizing:border-box;height:50px;border:0;background:transparent;padding:0 15px;font-size:16px;font-family:inherit;color:#123A44;outline:none" />
+              <button onClick="{{ toggleReveal }}" style="flex-shrink:0;height:50px;border:0;background:transparent;padding:0 15px;font-size:15px;font-weight:600;font-family:inherit;color:rgba(18,58,68,0.62);cursor:pointer">{{ revealLabel }}</button>
+            </div>
+          </label>
+          <div style="margin-top:16px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px">
+              <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.55)">Solidité</p>
+              <p style="margin:0;font-size:13px;font-weight:600;color:{{ strengthColor }}">{{ strengthLabel }}</p>
+            </div>
+            <div style="margin-top:10px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px">
+              <sc-for list="{{ strengthBars }}" as="bar" hint-placeholder-count="4">
+                <span style="height:5px;border-radius:3px;background:{{ bar }}"></span>
+              </sc-for>
+            </div>
+            <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:7px">
+              <sc-for list="{{ passwordRules }}" as="rule" hint-placeholder-count="4">
+                <span style="display:inline-flex;align-items:center;gap:6px;border-radius:9999px;background:{{ rule.bg }};border:1px solid {{ rule.border }};padding:5px 12px;font-size:13px;font-weight:500;color:{{ rule.color }}">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:12px;height:12px;opacity:{{ rule.iconOpacity }}"><path d="M20 6 9 17l-5-5"></path></svg>
+                  {{ rule.label }}
+                </span>
+              </sc-for>
+            </div>
+          </div>
+          <div style="margin-top:24px;display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ checks }}" as="ck" hint-placeholder-count="2">
+              <button onClick="{{ ck.toggle }}" style="display:flex;width:100%;box-sizing:border-box;align-items:flex-start;gap:13px;border:0;background:transparent;padding:0;font-family:inherit;cursor:pointer;text-align:left">
+                <span style="display:flex;height:21px;width:21px;flex-shrink:0;align-items:center;justify-content:center;border-radius:6px;border:1.5px solid {{ ck.border }};background:{{ ck.bg }};margin-top:1px">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#FEFAF3" stroke-width="3.5" stroke-linecap="round" style="width:13px;height:13px;opacity:{{ ck.check }}"><path d="M20 6 9 17l-5-5"></path></svg>
+                </span>
+                <span style="font-size:15px;line-height:1.55;color:rgba(18,58,68,0.72)">{{ ck.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== ÉTAPE : VÉRIFICATION ===== -->
+      <sc-if value="{{ isVerify }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:32px">
+          <div style="display:flex;gap:12px">
+            <sc-for list="{{ codeCells }}" as="cell" hint-placeholder-count="6">
+              <span style="display:flex;height:68px;width:58px;align-items:center;justify-content:center;border-radius:11px;border:1px solid {{ cell.border }};background:#FEFAF3;box-shadow:{{ cell.ring }};font-family:'IBM Plex Mono',monospace;font-size:28px;color:#123A44">{{ cell.v }}</span>
+            </sc-for>
+          </div>
+          <div style="margin-top:18px;display:flex;align-items:center;gap:18px">
+            <p style="margin:0;font-size:15px;color:rgba(18,58,68,0.62)">Pas reçu ? Nouveau code dans <span style="font-family:'IBM Plex Mono',monospace;color:#123A44">0:42</span></p>
+            <button onClick="{{ fillCode }}" style="border:0;background:transparent;padding:0;font-size:15px;font-weight:600;font-family:inherit;color:#9E4E06;cursor:pointer">Simuler le code</button>
+          </div>
+
+          <div style="margin-top:28px;display:flex;align-items:flex-start;gap:14px;border-radius:16px;padding:16px 18px;background:rgba(85,173,179,0.14);border-left:3px solid #55ADB3">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#2E7B84" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px;flex-shrink:0;margin-top:2px"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-10 6L2 7"></path></svg>
+            <div>
+              <p style="margin:0;font-size:15px;font-weight:600;color:#2E7B84">Un e-mail de confirmation est aussi parti</p>
+              <p style="margin:5px 0 0;font-size:15px;line-height:1.55;color:rgba(18,58,68,0.68)">Cliquez sur le lien reçu à {{ emailShown }} pour activer la messagerie. Vous pouvez le faire plus tard.</p>
+            </div>
+          </div>
+          <p style="margin:18px 0 0;font-size:15px;color:rgba(18,58,68,0.62)">Mauvais numéro ? <button onClick="{{ backToInfo }}" style="border:0;background:transparent;padding:0;font-size:15px;font-weight:600;font-family:inherit;color:#9E4E06;cursor:pointer">Le modifier</button></p>
+        </div>
+      </sc-if>
+
+      <!-- ===== ÉTAPE : OFFRE (pro) ===== -->
+      <sc-if value="{{ isPlan }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:32px;display:flex;flex-direction:column;gap:12px">
+          <sc-for list="{{ plans }}" as="pl" hint-placeholder-count="3">
+            <button onClick="{{ pl.select }}" style="display:grid;grid-template-columns:22px 1fr auto;gap:16px;align-items:start;border:1px solid {{ pl.border }};border-radius:16px;background:{{ pl.bg }};padding:20px 22px;font-family:inherit;cursor:pointer;text-align:left;box-shadow:{{ pl.shadow }}">
+              <span style="display:flex;height:22px;width:22px;margin-top:2px;align-items:center;justify-content:center;border-radius:9999px;border:1.5px solid {{ pl.radioBorder }}">
+                <span style="height:10px;width:10px;border-radius:9999px;background:#123A44;opacity:{{ pl.radioDot }}"></span>
+              </span>
+              <span style="display:block;min-width:0">
+                <span style="display:flex;align-items:center;gap:10px">
+                  <span style="font-size:17px;font-weight:600;color:#123A44">{{ pl.name }}</span>
+                  <sc-if value="{{ pl.hasTag }}" hint-placeholder-val="{{ false }}">
+                    <span style="border-radius:9999px;padding:4px 10px;font-size:11px;font-weight:600;background:#E8832A;color:#0E2A31">{{ pl.tag }}</span>
+                  </sc-if>
+                </span>
+                <span style="display:block;margin-top:6px;font-size:15px;line-height:1.55;color:rgba(18,58,68,0.68)">{{ pl.body }}</span>
+              </span>
+              <span style="display:block;text-align:right">
+                <span style="display:block;font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1;color:#123A44;white-space:nowrap">{{ pl.price }}</span>
+                <span style="display:block;margin-top:6px;font-size:13px;color:rgba(18,58,68,0.55);white-space:nowrap">{{ pl.unit }}</span>
+              </span>
+            </button>
+          </sc-for>
+          <p style="margin:6px 0 0;font-size:13px;line-height:1.55;color:rgba(18,58,68,0.55)">Prix TTC, TGC incluse. Aucun prélèvement pendant la période offerte. Résiliable à tout moment depuis Mon compte.</p>
+        </div>
+      </sc-if>
+
+      <!-- ===== SUCCÈS ===== -->
+      <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:32px">
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <sc-for list="{{ doneBadges }}" as="db" hint-placeholder-count="2">
+              <span style="display:inline-flex;align-items:center;gap:6px;border-radius:9999px;padding:5px 12px;font-size:12px;font-weight:600;background:rgba(110,154,106,0.14);color:#3F6B3C;border:1px solid rgba(110,154,106,0.30)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:12px;height:12px"><path d="M20 6 9 17l-5-5"></path></svg>
+                {{ db }}
+              </span>
+            </sc-for>
+          </div>
+          <p style="margin:32px 0 0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.55)">Pour bien démarrer</p>
+          <div style="margin-top:14px;border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);overflow:hidden">
+            <sc-for list="{{ nextActions }}" as="na" hint-placeholder-count="3">
+              <a href="{{ na.href }}" style="display:flex;align-items:center;gap:16px;padding:18px 22px;border-bottom:1px solid #EFE3D0;color:inherit" style-hover="background:#F3E9D8">
+                <span style="display:flex;height:40px;width:40px;flex-shrink:0;align-items:center;justify-content:center;border-radius:10px;background:#F3E9D8;font-family:'Instrument Serif',Georgia,serif;font-size:20px;color:#123A44">{{ na.n }}</span>
+                <span style="flex:1;min-width:0;display:block">
+                  <span style="display:block;font-size:17px;font-weight:600;color:#123A44">{{ na.title }}</span>
+                  <span style="display:block;margin-top:4px;font-size:15px;color:rgba(18,58,68,0.62)">{{ na.body }}</span>
+                </span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="rgba(18,58,68,0.45)" stroke-width="2" stroke-linecap="round" style="width:17px;height:17px;flex-shrink:0"><path d="m9 18 6-6-6-6"></path></svg>
+              </a>
+            </sc-for>
+          </div>
+          <div style="margin-top:28px;display:flex;align-items:center;gap:12px">
+            <a href="#" style="display:inline-flex;align-items:center;gap:8px;height:50px;padding:0 26px;border-radius:10px;background:#A94F0A;color:#FEFAF3;font-size:16px;font-weight:600;box-shadow:0 2px 12px rgba(169,79,10,0.22)" style-hover="background:#8F420A">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+              {{ doneCta }}
+            </a>
+            <a href="Mon compte v2.dc.html" style="display:inline-flex;align-items:center;height:50px;padding:0 22px;border-radius:10px;border:1px solid #123A44;color:#123A44;font-size:16px;font-weight:600" style-hover="background:#F3E9D8">Aller à mon compte</a>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- navigation -->
+      <sc-if value="{{ showNav }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-top:36px;display:flex;align-items:center;gap:12px">
+          <sc-if value="{{ canGoBack }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ prevStep }}" style="height:50px;border:1px solid #E4D7C3;border-radius:10px;background:transparent;padding:0 22px;font-size:16px;font-weight:600;font-family:inherit;color:#123A44;cursor:pointer">Retour</button>
+          </sc-if>
+          <button onClick="{{ nextStep }}" style="display:inline-flex;align-items:center;gap:9px;height:50px;border:1px solid {{ ctaBorder }};border-radius:10px;background:{{ ctaBg }};color:{{ ctaColor }};padding:0 28px;font-size:16px;font-weight:600;font-family:inherit;cursor:{{ ctaCursor }};box-shadow:{{ ctaShadow }}">
+            {{ ctaLabel }}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+          </button>
+          <p style="margin:0 0 0 6px;font-size:13px;color:rgba(18,58,68,0.62)">{{ ctaHint }}</p>
+        </div>
+      </sc-if>
+
+      <div style="margin-top:auto;padding-top:36px">
+        <div style="display:flex;align-items:center;gap:22px;padding-top:20px;border-top:1px solid #E4D7C3">
+          <sc-for list="{{ reassurance }}" as="r" hint-placeholder-count="3">
+            <span style="display:inline-flex;align-items:center;gap:8px;font-size:13px;color:rgba(18,58,68,0.62)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#6E9A6A" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px;flex-shrink:0"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
+              {{ r }}
+            </span>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:960},&quot;typeCompte&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Particulier&quot;,&quot;options&quot;:[&quot;Particulier&quot;,&quot;Pro&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Parcours&quot;},&quot;etape&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Type de compte&quot;,&quot;options&quot;:[&quot;Type de compte&quot;,&quot;Informations&quot;,&quot;Identifiants&quot;,&quot;Vérification&quot;,&quot;Offre (pro)&quot;,&quot;Bienvenue&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Parcours&quot;}}">
+const COMMUNES = ['Nouméa', 'Dumbéa', 'Mont-Dore', 'Païta', 'Bourail', 'La Foa', 'Boulouparis', 'Thio', 'Yaté', 'Île des Pins', 'Koné', 'Koumac', 'Poindimié', 'Voh', 'Houaïlou', 'Canala', 'Hienghène', 'Lifou', 'Maré', 'Ouvéa'];
+const SECTORS = ['Bâtiment & travaux', 'Automobile', 'Immobilier', 'Commerce', 'Restauration', 'Tourisme & loisirs', 'Services à la personne', 'Autre'];
+const STEP_LABELS = { type: 'Type de compte', info: 'Informations', creds: 'Identifiants', verify: 'Vérification', plan: 'Offre' };
+const START_MAP = { 'Type de compte': 'type', 'Informations': 'info', 'Identifiants': 'creds', 'Vérification': 'verify', 'Offre (pro)': 'plan', 'Bienvenue': 'done' };
+
+class Component extends DCLogic {
+  state = {
+    accountType: null, stepId: null,
+    firstName: 'Marie', commune: 'Mont-Dore', phone: '78 42 16', ridet: '1 234 567.001',
+    email: 'marie.w@lagoon.nc', password: 'Lagon2026', reveal: false,
+    terms: true, newsletter: false, code: '', plan: 'pro',
+  };
+
+  componentDidUpdate(prev) {
+    if (prev.typeCompte !== this.props.typeCompte || prev.etape !== this.props.etape) {
+      this.setState({ accountType: null, stepId: null });
+    }
+  }
+
+  renderVals() {
+    const s = this.state;
+    const type = s.accountType ?? ((this.props.typeCompte ?? 'Particulier') === 'Pro' ? 'pro' : 'particulier');
+    const pro = type === 'pro';
+    const order = pro ? ['type', 'info', 'creds', 'verify', 'plan'] : ['type', 'info', 'creds', 'verify'];
+    let stepId = s.stepId ?? START_MAP[this.props.etape ?? 'Type de compte'] ?? 'type';
+    if (stepId === 'plan' && !pro) stepId = 'done';
+    const idx = stepId === 'done' ? order.length : order.indexOf(stepId);
+    const go = (id) => this.setState({ stepId: id, accountType: type });
+
+    const steps = order.map((id, i) => {
+      const active = i === idx, done = i < idx, reach = active || done;
+      return {
+        n: done ? '✓' : String(i + 1), label: STEP_LABELS[id],
+        flex: i === order.length - 1 ? '0 0 auto' : '1 1 auto', hasLine: i < order.length - 1,
+        lineColor: done ? 'rgba(110,154,106,0.55)' : '#E4D7C3',
+        dotBg: active ? '#123A44' : done ? 'rgba(110,154,106,0.16)' : '#F3E9D8',
+        dotBorder: active ? '#123A44' : done ? 'rgba(110,154,106,0.4)' : '#E4D7C3',
+        dotColor: active ? '#FEFAF3' : done ? '#3F6B3C' : 'rgba(18,58,68,0.55)',
+        labelColor: reach ? '#123A44' : 'rgba(18,58,68,0.55)',
+        cursor: reach ? 'pointer' : 'default',
+        select: () => { if (reach) go(id); },
+      };
+    });
+
+    const accountTypes = [
+      { id: 'particulier', initial: 'P', title: 'Particulier', description: 'Acheter, vendre, troquer et donner entre voisins.', price: 'Gratuit, sans limite de durée' },
+      { id: 'pro', initial: 'K', title: 'Professionnel', description: 'Vitrine, devis en XPF, statistiques et badge vérifié.', price: 'Trois mois offerts, puis 4 900 XPF / mois' },
+    ].map((t) => {
+      const on = type === t.id;
+      return {
+        ...t,
+        bg: on ? '#0E2A31' : '#FEFAF3', border: on ? '#0E2A31' : '#E4D7C3',
+        iconBg: on ? 'rgba(232,131,42,0.2)' : '#F3E9D8', iconColor: on ? '#E8832A' : '#123A44',
+        titleColor: on ? '#FBF6EC' : '#123A44', bodyColor: on ? 'rgba(251,246,236,0.72)' : 'rgba(18,58,68,0.68)',
+        priceColor: on ? '#E8832A' : '#9E4E06', divider: on ? 'rgba(251,246,236,0.16)' : '#EFE3D0',
+        radioBorder: on ? '#E8832A' : '#D5C4AC', radioBg: on ? '#E8832A' : 'transparent', radioDot: on ? '1' : '0',
+        select: () => this.setState({ accountType: t.id, stepId: 'type' }),
+      };
+    });
+
+    const pwd = s.password || '';
+    const rules = [
+      { ok: pwd.length >= 8, label: '8 caractères' },
+      { ok: /[A-Z]/.test(pwd), label: '1 majuscule' },
+      { ok: /[0-9]/.test(pwd), label: '1 chiffre' },
+      { ok: /[^A-Za-z0-9]/.test(pwd), label: '1 symbole' },
+    ];
+    const score = rules.filter((r) => r.ok).length;
+    const fill = ['#D5C4AC', '#B0431C', '#A94F0A', '#E8832A', '#6E9A6A'][score];
+
+    const box = (on, label, key) => ({
+      label, bg: on ? '#123A44' : '#FEFAF3', border: on ? '#123A44' : '#D5C4AC', check: on ? '1' : '0',
+      toggle: (e) => { e.preventDefault(); this.setState((st) => ({ [key]: !st[key] })); },
+    });
+
+    const code = s.code;
+    const codeCells = [0, 1, 2, 3, 4, 5].map((i) => ({
+      v: code[i] || '',
+      border: i === code.length ? '#123A44' : code[i] ? 'rgba(110,154,106,0.5)' : '#E4D7C3',
+      ring: i === code.length ? '0 0 0 4px rgba(18,58,68,0.10)' : 'none',
+    }));
+
+    const plans = [
+      { id: 'free', name: 'Découverte', body: 'Cinq annonces actives, fiche entreprise simple. Idéal pour tester.', price: '0 F', unit: 'pour toujours' },
+      { id: 'pro', name: 'Kalico Pro', tag: '3 mois offerts', body: 'Annonces illimitées, vitrine, devis en XPF, statistiques, badge Pro vérifié.', price: '4 900 F', unit: 'par mois' },
+      { id: 'year', name: 'Kalico Pro annuel', tag: '2 mois gratuits', body: 'Tout Kalico Pro, facturé une fois par an.', price: '49 000 F', unit: 'par an' },
+    ].map((p) => {
+      const on = s.plan === p.id;
+      return {
+        ...p, hasTag: Boolean(p.tag),
+        bg: on ? '#FEFAF3' : 'transparent', border: on ? '#123A44' : '#E4D7C3',
+        shadow: on ? '0 3px 14px rgba(18,58,68,0.06)' : 'none',
+        radioBorder: on ? '#123A44' : '#D5C4AC', radioDot: on ? '1' : '0',
+        select: () => this.setState({ plan: p.id, stepId: 'plan', accountType: type }),
+      };
+    });
+
+    const ridetOk = /^\d[\d ]{6,}\.\d{3}$/.test((s.ridet || '').trim());
+    const emailOk = /.+@.+\..+/.test(s.email || '');
+    const canNext = {
+      type: true,
+      info: (s.phone || '').replace(/\D/g, '').length === 6 && (!pro || ridetOk),
+      creds: emailOk && score >= 3 && s.terms,
+      verify: code.length === 6,
+      plan: true,
+    }[stepId];
+    const last = idx === order.length - 1;
+    const ctaLabel = {
+      type: 'Continuer', info: 'Continuer', creds: 'Créer mon compte',
+      verify: 'Vérifier', plan: s.plan === 'free' ? 'Terminer' : 'Activer ma période offerte',
+    }[stepId];
+    const ctaHint = !canNext
+      ? { info: pro ? 'Numéro à 6 chiffres et RIDET valide requis.' : 'Numéro à 6 chiffres requis.', creds: 'E-mail valide, mot de passe « Bon » et conditions acceptées.', verify: 'Saisissez les 6 chiffres reçus par SMS.' }[stepId]
+      : stepId === 'creds' ? 'Gratuit, sans carte bancaire.' : `Étape ${idx + 1} sur ${order.length}`;
+
+    const name = s.firstName || 'vous';
+    const copy = {
+      type: ['Inscription', 'Créer votre compte', 'Deux minutes suffisent. Vous pourrez passer Pro plus tard sans rien perdre.'],
+      info: ['Inscription', pro ? 'Votre entreprise et vous' : 'Parlez-nous de vous', pro ? 'Le RIDET est vérifié automatiquement auprès du registre de l\u2019ISEE. Ces informations apparaîtront sur votre vitrine.' : 'Votre commune sert à vous montrer d\u2019abord les annonces proches de chez vous.'],
+      creds: ['Inscription', 'Vos identifiants', 'Vous vous connecterez avec cet e-mail. Un lien de confirmation y sera envoyé.'],
+      verify: ['Vérification', 'Entrez le code reçu par SMS', `Nous avons envoyé un code à 6 chiffres au +687 ${s.phone || '•• •• ••'}. Il est valable 10 minutes.`],
+      plan: ['Offre professionnelle', 'Choisissez votre formule', 'Vous pouvez changer de formule à tout moment. Les trois premiers mois de Kalico Pro sont offerts.'],
+      done: [pro ? 'Compte Pro créé' : 'Compte créé', `Bienvenue sur Kalico, ${name}.`, pro ? 'Votre vitrine est en ligne. Le badge Pro vérifié s\u2019affichera dès la validation de votre RIDET, sous 24 heures.' : 'Votre compte est prêt. Voici trois choses à faire pour en tirer le meilleur.'],
+    }[stepId];
+
+    const brand = {
+      done: ['C\u2019est parti', 'De Nouméa aux Loyauté, votre marché est ouvert.', 'Vos annonces sont visibles dans les 33 communes. Vos alertes vous préviennent dès qu\u2019une annonce correspond.'],
+      verify: ['Sécurité', 'Un compte vérifié inspire confiance.', 'Les annonces des comptes vérifiés reçoivent en moyenne deux fois plus de contacts.'],
+      plan: ['Kalico Pro', 'Votre vitrine, là où le territoire cherche.', 'Annuaire des pros, devis en XPF et statistiques de vos annonces au même endroit.'],
+    }[stepId] || ['Rejoindre Kalico', 'Rejoignez le marché du territoire.', 'Une inscription, et vos annonces sont visibles de Nouméa aux Loyauté. Gratuit pour les particuliers, sans commission sur vos ventes.'];
+
+    const brandPoints = pro
+      ? ['Badge Pro vérifié sur toutes vos annonces.', 'Devis en XPF avec TGC calculée automatiquement.', 'Statistiques de vues et de contacts par annonce.']
+      : ['Publication gratuite, aucune commission entre particuliers.', 'Identité vérifiée : e-mail puis téléphone.', 'Alertes par commune dès qu\u2019une annonce correspond.'];
+
+    return {
+      brandEyebrow: brand[0], brandHeadline: brand[1], brandBody: brand[2], brandPoints,
+      showStepper: stepId !== 'done', steps,
+      eyebrow: copy[0], title: copy[1], subtitle: copy[2],
+      isType: stepId === 'type', isInfo: stepId === 'info', isCreds: stepId === 'creds',
+      isVerify: stepId === 'verify', isPlan: stepId === 'plan', isDone: stepId === 'done', isPro: pro,
+      accountTypes,
+      typeBenefits: pro
+        ? ['Vitrine publique dans l\u2019annuaire des pros.', 'Annonces illimitées et mise en avant.', 'Trois mois offerts, sans engagement.']
+        : ['Cinq annonces actives et six photos par annonce.', 'Alertes sur vos recherches enregistrées.', 'Messagerie intégrée, aucune commission sur vos ventes.'],
+      sectors: SECTORS, communes: COMMUNES,
+      ridet: s.ridet, ridetOk, ridetBorder: ridetOk ? 'rgba(110,154,106,0.5)' : '#E4D7C3',
+      ridetHelp: ridetOk ? 'Entreprise trouvée au registre RIDET.' : 'Format : 7 chiffres, un point, 3 chiffres.',
+      onRidet: (e) => this.setState({ ridet: e.target.value }),
+      firstName: s.firstName, onFirstName: (e) => this.setState({ firstName: e.target.value }),
+      commune: s.commune, onCommune: (e) => this.setState({ commune: e.target.value }),
+      phone: s.phone, onPhone: (e) => this.setState({ phone: e.target.value }),
+      email: s.email, onEmail: (e) => this.setState({ email: e.target.value }), emailShown: s.email || 'votre adresse',
+      password: s.password, onPassword: (e) => this.setState({ password: e.target.value }),
+      passwordType: s.reveal ? 'text' : 'password', revealLabel: s.reveal ? 'Masquer' : 'Afficher',
+      toggleReveal: (e) => { e.preventDefault(); this.setState((st) => ({ reveal: !st.reveal })); },
+      strengthBars: [0, 1, 2, 3].map((i) => (i < score ? fill : '#EFE3D0')),
+      strengthLabel: ['Trop court', 'Faible', 'Moyen', 'Bon', 'Excellent'][score],
+      strengthColor: score >= 4 ? '#3F6B3C' : score >= 2 ? '#9E4E06' : '#B0431C',
+      passwordRules: rules.map((r) => ({
+        label: r.label, bg: r.ok ? 'rgba(110,154,106,0.14)' : '#F3E9D8', border: r.ok ? 'rgba(110,154,106,0.32)' : '#E4D7C3',
+        color: r.ok ? '#3F6B3C' : 'rgba(18,58,68,0.62)', iconOpacity: r.ok ? '1' : '0.3',
+      })),
+      checks: [
+        box(s.terms, 'J\u2019accepte les conditions générales et la politique de confidentialité de Kalico.', 'terms'),
+        box(s.newsletter, 'Je souhaite recevoir les bons plans et les nouvelles annonces de ma commune.', 'newsletter'),
+      ],
+      codeCells, fillCode: () => this.setState({ code: '482916', stepId: 'verify', accountType: type }),
+      backToInfo: () => go('info'),
+      plans,
+      doneBadges: pro ? ['E-mail envoyé', 'Téléphone vérifié', 'RIDET en cours de validation'] : ['E-mail envoyé', 'Téléphone vérifié'],
+      nextActions: pro
+        ? [
+            { n: '1', title: 'Compléter ma vitrine', body: 'Logo, horaires, zone d\u2019intervention et photos de réalisations.', href: 'Pros côté client v2.dc.html' },
+            { n: '2', title: 'Publier ma première annonce', body: 'Elle sera mise en avant pendant 7 jours.', href: '#' },
+            { n: '3', title: 'Paramétrer mes devis', body: 'Taux de TGC, mentions légales et conditions de paiement.', href: '#' },
+          ]
+        : [
+            { n: '1', title: 'Publier ma première annonce', body: 'Photos, prix en XPF, commune : trois minutes suffisent.', href: '#' },
+            { n: '2', title: 'Créer une alerte de recherche', body: `Soyez prévenu dès qu\u2019une annonce correspond à ${s.commune}.`, href: 'Annonces v2.dc.html' },
+            { n: '3', title: 'Ajouter une photo de profil', body: 'Les acheteurs répondent plus volontiers à un visage.', href: 'Mon compte v2.dc.html' },
+          ],
+      doneCta: pro ? 'Compléter ma vitrine' : 'Déposer une annonce',
+      showNav: stepId !== 'done', canGoBack: idx > 0,
+      prevStep: () => go(order[Math.max(0, idx - 1)]),
+      nextStep: () => { if (canNext) go(last ? 'done' : order[idx + 1]); },
+      ctaLabel,
+      ctaBg: canNext ? '#A94F0A' : '#F3E9D8', ctaBorder: canNext ? '#A94F0A' : '#E4D7C3',
+      ctaColor: canNext ? '#FEFAF3' : 'rgba(18,58,68,0.55)', ctaShadow: canNext ? '0 2px 12px rgba(169,79,10,0.22)' : 'none',
+      ctaCursor: canNext ? 'pointer' : 'not-allowed', ctaHint,
+      reassurance: ['Données hébergées en France', 'Aucune revente de vos coordonnées', 'Suppression du compte en un clic'],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

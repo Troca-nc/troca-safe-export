@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#FBF6EC; -webkit-font-smoothing:antialiased; }
+  a { color:#2E7B84; text-decoration:none; }
+  a:hover { color:#123A44; }
+  input::placeholder { color:rgba(18,58,68,0.42); }
+</style>
+</helmet>
+
+<div style="display:grid;grid-template-columns:248px minmax(0,1fr);width:1440px;min-height:100vh;background:#FBF6EC;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#123A44">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside style="position:sticky;top:0;height:100vh;box-sizing:border-box;overflow:hidden;background:#0E2A31;color:#FBF6EC;display:flex;flex-direction:column;padding:24px 16px">
+    <div style="position:absolute;inset:0;pointer-events:none;opacity:0.07;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+    <div style="position:relative;display:flex;align-items:center;gap:10px;padding:0 8px">
+      <img src="assets/kalico1.svg" alt="Kalico" style="height:38px;width:auto" />
+      <span style="font-family:'Instrument Serif',Georgia,serif;font-size:26px;line-height:1">Kalico</span>
+      <span style="margin-left:auto;border-radius:6px;border:1px solid rgba(251,246,236,0.28);padding:3px 7px;font-size:10px;font-weight:600;letter-spacing:0.14em;color:rgba(251,246,236,0.72)">ADMIN</span>
+    </div>
+
+    <nav style="position:relative;margin-top:32px;display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="8">
+        <button onClick="{{ n.select }}" style="display:flex;align-items:center;gap:12px;height:42px;border:0;border-radius:10px;background:{{ n.bg }};padding:0 12px;font-size:15px;font-weight:{{ n.weight }};font-family:inherit;color:{{ n.color }};text-align:left;cursor:pointer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px;flex-shrink:0"><path d="{{ n.icon }}"></path></svg>
+          <span style="flex:1">{{ n.label }}</span>
+          <sc-if value="{{ n.hasCount }}" hint-placeholder-val="{{ false }}">
+            <span style="min-width:22px;height:20px;box-sizing:border-box;padding:0 6px;border-radius:9999px;background:{{ n.countBg }};color:{{ n.countInk }};font-size:12px;font-weight:600;line-height:20px;text-align:center">{{ n.count }}</span>
+          </sc-if>
+        </button>
+      </sc-for>
+    </nav>
+
+    <div style="position:relative;margin-top:auto;display:flex;align-items:center;gap:10px;padding:14px 8px 0;border-top:1px solid rgba(251,246,236,0.16)">
+      <span style="display:flex;width:36px;height:36px;align-items:center;justify-content:center;border-radius:9999px;background:rgba(232,131,42,0.22);color:#E8832A;font-size:13px;font-weight:600">CM</span>
+      <div style="min-width:0">
+        <p style="margin:0;font-size:15px;font-weight:600">Céline M.</p>
+        <p style="margin:2px 0 0;font-size:12px;color:rgba(251,246,236,0.72)">Modération · Super admin</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== CONTENU ===== -->
+  <div style="min-width:0">
+    <header style="position:sticky;top:0;z-index:30;height:72px;box-sizing:border-box;display:flex;align-items:center;gap:16px;padding:0 40px;background:#FBF6EC;border-bottom:1px solid #E4D7C3">
+      <div style="position:relative;flex:1;max-width:460px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(18,58,68,0.55)" stroke-width="2" stroke-linecap="round" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <input placeholder="Membre, annonce, RIDET, n° de transaction…" style="width:100%;box-sizing:border-box;height:44px;border-radius:10px;border:1px solid #E4D7C3;background:#FEFAF3;padding:0 60px 0 40px;font-size:15px;font-family:inherit;color:#123A44;outline:none" />
+        <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border-radius:6px;border:1px solid #E4D7C3;padding:2px 7px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(18,58,68,0.62)">⌘ K</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+        <div style="display:flex;gap:3px;border-radius:12px;border:1px solid #E4D7C3;background:#F3E9D8;padding:3px">
+          <sc-for list="{{ periods }}" as="p" hint-placeholder-count="3">
+            <button onClick="{{ p.select }}" style="height:34px;border:0;border-radius:9px;background:{{ p.bg }};padding:0 14px;font-size:13px;font-weight:{{ p.weight }};font-family:inherit;color:{{ p.color }};cursor:pointer;box-shadow:{{ p.shadow }}">{{ p.label }}</button>
+          </sc-for>
+        </div>
+        <button style="display:inline-flex;align-items:center;gap:7px;height:40px;border:1px solid #E4D7C3;border-radius:10px;background:#FEFAF3;padding:0 14px;font-size:15px;font-weight:600;font-family:inherit;color:#123A44;cursor:pointer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path><path d="M12 15V3"></path></svg>
+          Exporter
+        </button>
+        <a href="Accueil v2.dc.html" style="display:inline-flex;align-items:center;height:40px;padding:0 14px;border-radius:10px;font-size:15px;font-weight:600;color:#9E4E06">Voir le site →</a>
+      </div>
+    </header>
+
+    <div style="padding:32px 40px 64px">
+      <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">{{ viewEyebrow }}</p>
+      <h1 style="margin:10px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:46px;line-height:1.05;letter-spacing:-0.01em">{{ viewTitle }}</h1>
+
+      <!-- ================= VUE D'ENSEMBLE ================= -->
+      <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-top:28px;display:flex;flex-direction:column;gap:24px">
+          <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px">
+            <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="5">
+              <div style="border:1px solid {{ k.border }};border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);padding:18px 20px">
+                <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.62)">{{ k.label }}</p>
+                <p style="margin:12px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:36px;line-height:1">{{ k.value }}</p>
+                <p style="margin:10px 0 0;font-size:13px;color:{{ k.deltaColor }}">{{ k.delta }}</p>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:24px">
+            <section style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);padding:22px 24px">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+                <div>
+                  <p style="margin:0;font-size:15px;font-weight:600">{{ chartTitle }}</p>
+                  <p style="margin:6px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:32px;line-height:1">{{ chartTotal }} <span style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:#3F6B3C">{{ chartDelta }}</span></p>
+                </div>
+                <div style="display:flex;gap:3px;border-radius:12px;border:1px solid #E4D7C3;background:#F3E9D8;padding:3px">
+                  <sc-for list="{{ metrics }}" as="m" hint-placeholder-count="3">
+                    <button onClick="{{ m.select }}" style="height:34px;border:0;border-radius:9px;background:{{ m.bg }};padding:0 14px;font-size:13px;font-weight:{{ m.weight }};font-family:inherit;color:{{ m.color }};cursor:pointer;box-shadow:{{ m.shadow }}">{{ m.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="position:relative;margin-top:22px;height:220px;display:flex;align-items:flex-end;gap:5px;border-bottom:1px solid #E4D7C3">
+                <div style="position:absolute;left:0;right:0;top:0;border-top:1px dashed #EFE3D0"></div>
+                <div style="position:absolute;left:0;right:0;top:50%;border-top:1px dashed #EFE3D0"></div>
+                <sc-for list="{{ bars }}" as="b" hint-placeholder-count="30">
+                  <div title="{{ b.title }}" style="position:relative;flex:1;height:{{ b.h }};border-radius:3px 3px 0 0;background:{{ b.color }};transition:height 300ms"></div>
+                </sc-for>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px;color:rgba(18,58,68,0.62)">
+                <span>31 août</span><span>14 sept.</span><span>29 sept.</span>
+              </div>
+            </section>
+
+            <section style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);padding:22px 24px">
+              <p style="margin:0;font-size:15px;font-weight:600">Annonces en ligne par type</p>
+              <div style="margin-top:18px;display:flex;flex-direction:column;gap:14px">
+                <sc-for list="{{ byType }}" as="t" hint-placeholder-count="6">
+                  <div>
+                    <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px">
+                      <span style="font-weight:600">{{ t.label }}</span>
+                      <span style="color:rgba(18,58,68,0.62)">{{ t.value }}</span>
+                    </div>
+                    <div style="margin-top:6px;height:8px;border-radius:9999px;background:#EFE3D0;overflow:hidden">
+                      <div style="height:8px;border-radius:9999px;background:{{ t.color }};width:{{ t.w }}"></div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <p style="margin:20px 0 0;padding-top:14px;border-top:1px solid #EFE3D0;font-size:13px;color:rgba(18,58,68,0.62)">Grand Nouméa 71 % · Nord 17 % · Îles 12 %</p>
+            </section>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px">
+            <section style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);overflow:hidden">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px">
+                <p style="margin:0;font-size:15px;font-weight:600">File de modération</p>
+                <button onClick="{{ goModeration }}" style="border:0;background:transparent;padding:0;font-size:13px;font-weight:600;font-family:inherit;color:#9E4E06;cursor:pointer">Tout traiter →</button>
+              </div>
+              <sc-for list="{{ queuePreview }}" as="q" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 20px;border-top:1px solid #EFE3D0">
+                  <span style="width:8px;height:8px;flex-shrink:0;border-radius:9999px;background:{{ q.dot }}"></span>
+                  <div style="flex:1;min-width:0">
+                    <p style="margin:0;font-size:15px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ q.title }}</p>
+                    <p style="margin:2px 0 0;font-size:12px;color:rgba(18,58,68,0.62)">{{ q.reason }} · {{ q.age }}</p>
+                  </div>
+                  <span style="flex-shrink:0;border-radius:9999px;padding:3px 9px;font-size:11px;font-weight:600;background:#F3E9D8;color:#123A44">{{ q.type }}</span>
+                </div>
+              </sc-for>
+            </section>
+
+            <section style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);overflow:hidden">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px">
+                <p style="margin:0;font-size:15px;font-weight:600">RIDET à valider</p>
+                <span style="font-size:13px;color:rgba(18,58,68,0.62)">délai cible 24 h</span>
+              </div>
+              <sc-for list="{{ ridets }}" as="r" hint-placeholder-count="3">
+                <div style="padding:14px 20px;border-top:1px solid #EFE3D0">
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                    <p style="margin:0;font-size:15px;font-weight:600">{{ r.name }}</p>
+                    <span style="font-size:12px;font-weight:600;color:{{ r.ageColor }}">{{ r.age }}</span>
+                  </div>
+                  <p style="margin:3px 0 0;font-family:'IBM Plex Mono',monospace;font-size:13px;color:rgba(18,58,68,0.68)">{{ r.ridet }} · {{ r.status }}</p>
+                  <div style="margin-top:10px;display:flex;gap:8px">
+                    <button style="height:34px;border:0;border-radius:9px;background:#A94F0A;padding:0 12px;font-size:13px;font-weight:600;font-family:inherit;color:#FEFAF3;cursor:pointer">Valider</button>
+                    <button style="height:34px;border:1px solid #E4D7C3;border-radius:9px;background:transparent;padding:0 12px;font-size:13px;font-weight:600;font-family:inherit;color:#123A44;cursor:pointer">Voir le justificatif</button>
+                  </div>
+                </div>
+              </sc-for>
+            </section>
+
+            <section style="display:flex;flex-direction:column;gap:24px">
+              <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);overflow:hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px">
+                  <p style="margin:0;font-size:15px;font-weight:600">Paiements échoués</p>
+                  <button onClick="{{ goPayments }}" style="border:0;background:transparent;padding:0;font-size:13px;font-weight:600;font-family:inherit;color:#9E4E06;cursor:pointer">Voir →</button>
+                </div>
+                <sc-for list="{{ failed }}" as="f" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 20px;border-top:1px solid #EFE3D0">
+                    <div style="flex:1;min-width:0">
+                      <p style="margin:0;font-size:15px;font-weight:500">{{ f.name }}</p>
+                      <p style="margin:2px 0 0;font-size:12px;color:#B0431C">{{ f.reason }}</p>
+                    </div>
+                    <span style="font-family:'Instrument Serif',Georgia,serif;font-size:22px">{{ f.amount }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="position:relative;overflow:hidden;border-radius:16px;background:#0E2A31;color:#FBF6EC;padding:18px 20px">
+                <p style="margin:0;font-size:15px;font-weight:600">État des services</p>
+                <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px 16px">
+                  <sc-for list="{{ health }}" as="h" hint-placeholder-count="6">
+                    <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+                      <span style="width:7px;height:7px;border-radius:9999px;background:{{ h.dot }}"></span>
+                      <span style="flex:1">{{ h.label }}</span>
+                      <span style="color:{{ h.stateColor }}">{{ h.state }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <section style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);padding:20px 24px">
+            <p style="margin:0;font-size:15px;font-weight:600">Journal d'activité</p>
+            <div style="margin-top:12px;display:flex;flex-direction:column">
+              <sc-for list="{{ log }}" as="l" hint-placeholder-count="5">
+                <div style="display:grid;grid-template-columns:90px 140px 1fr;gap:16px;align-items:baseline;padding:10px 0;border-top:1px solid #EFE3D0;font-size:13px">
+                  <span style="font-family:'IBM Plex Mono',monospace;color:rgba(18,58,68,0.62)">{{ l.time }}</span>
+                  <span style="font-weight:600">{{ l.who }}</span>
+                  <span style="color:rgba(18,58,68,0.72)">{{ l.what }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </div>
+      </sc-if>
+
+      <!-- ================= MODÉRATION ================= -->
+      <sc-if value="{{ isModeration }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:24px">
+          <div style="display:flex;gap:8px">
+            <sc-for list="{{ modFilters }}" as="mf" hint-placeholder-count="5">
+              <button onClick="{{ mf.select }}" style="display:inline-flex;align-items:center;gap:8px;height:40px;border-radius:9999px;border:1px solid {{ mf.border }};background:{{ mf.bg }};padding:0 16px;font-size:15px;font-weight:500;font-family:inherit;color:{{ mf.color }};cursor:pointer">
+                {{ mf.label }}
+                <span style="font-size:12px;font-weight:600;opacity:0.8">{{ mf.count }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="margin-top:20px;display:grid;grid-template-columns:420px minmax(0,1fr);gap:24px;align-items:start">
+            <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);overflow:hidden">
+              <sc-for list="{{ queue }}" as="q" hint-placeholder-count="7">
+                <button onClick="{{ q.select }}" style="display:flex;width:100%;align-items:flex-start;gap:12px;border:0;border-bottom:1px solid #EFE3D0;border-left:3px solid {{ q.bar }};background:{{ q.bg }};padding:14px 18px;font-family:inherit;text-align:left;cursor:pointer;color:#123A44">
+                  <span style="display:flex;width:52px;height:52px;flex-shrink:0;align-items:center;justify-content:center;border-radius:10px;background:#F3E9D8;font-family:'IBM Plex Mono',monospace;font-size:9px;color:rgba(18,58,68,0.55);text-align:center">{{ q.type }}</span>
+                  <span style="flex:1;min-width:0;display:block">
+                    <span style="display:block;font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ q.title }}</span>
+                    <span style="display:block;margin-top:3px;font-size:13px;color:rgba(18,58,68,0.62)">{{ q.author }} · {{ q.age }}</span>
+                    <span style="display:inline-flex;align-items:center;gap:6px;margin-top:7px;border-radius:9999px;padding:3px 9px;font-size:11px;font-weight:600;background:{{ q.reasonBg }};color:{{ q.reasonInk }}">{{ q.reason }}</span>
+                  </span>
+                </button>
+              </sc-for>
+              <sc-if value="{{ queueEmpty }}" hint-placeholder-val="{{ false }}">
+                <p style="margin:0;padding:32px;text-align:center;font-size:15px;color:rgba(18,58,68,0.62)">File vide. Beau travail.</p>
+              </sc-if>
+            </div>
+
+            <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column;gap:16px">
+                <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);overflow:hidden">
+                  <div style="display:grid;grid-template-columns:260px 1fr">
+                    <div style="position:relative;background:#F3E9D8;display:flex;align-items:center;justify-content:center;min-height:240px">
+                      <span style="position:absolute;inset:0;opacity:0.07;background-image:repeating-linear-gradient(45deg,#123A44 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#123A44 0 1px,transparent 1px 9px)"></span>
+                      <span style="position:relative;font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(18,58,68,0.55)">{{ sel.photo }}</span>
+                    </div>
+                    <div style="padding:22px 24px">
+                      <div style="display:flex;align-items:center;gap:8px">
+                        <span style="border-radius:9999px;padding:4px 10px;font-size:11px;font-weight:600;background:#F3E9D8;color:#123A44;border:1px solid #E4D7C3">{{ sel.type }}</span>
+                        <span style="border-radius:9999px;padding:4px 10px;font-size:11px;font-weight:600;background:{{ sel.reasonBg }};color:{{ sel.reasonInk }}">{{ sel.reason }}</span>
+                      </div>
+                      <h2 style="margin:12px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:32px;line-height:1.08">{{ sel.title }}</h2>
+                      <p style="margin:8px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:26px;line-height:1">{{ sel.price }}</p>
+                      <p style="margin:12px 0 0;font-size:15px;line-height:1.55;color:rgba(18,58,68,0.72);text-wrap:pretty">{{ sel.body }}</p>
+                      <p style="margin:12px 0 0;font-size:13px;color:rgba(18,58,68,0.62)">{{ sel.meta }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                  <div style="border-radius:16px;padding:16px 18px;background:{{ sel.reasonBg }};border-left:3px solid {{ sel.reasonBar }}">
+                    <p style="margin:0;font-size:15px;font-weight:600;color:{{ sel.reasonInk }}">{{ sel.signalTitle }}</p>
+                    <p style="margin:6px 0 0;font-size:15px;line-height:1.55;color:rgba(18,58,68,0.72)">{{ sel.signalBody }}</p>
+                  </div>
+                  <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;padding:16px 18px">
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <span style="display:flex;width:36px;height:36px;align-items:center;justify-content:center;border-radius:9999px;background:rgba(85,173,179,0.14);color:#2E7B84;font-size:13px;font-weight:600">{{ sel.authorInitials }}</span>
+                      <div>
+                        <p style="margin:0;font-size:15px;font-weight:600">{{ sel.author }}</p>
+                        <p style="margin:2px 0 0;font-size:12px;color:rgba(18,58,68,0.62)">{{ sel.authorMeta }}</p>
+                      </div>
+                    </div>
+                    <div style="margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">
+                      <sc-for list="{{ sel.authorStats }}" as="as" hint-placeholder-count="3">
+                        <div style="border-radius:10px;background:#F3E9D8;padding:8px">
+                          <p style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-size:22px;line-height:1">{{ as.v }}</p>
+                          <p style="margin:4px 0 0;font-size:11px;color:rgba(18,58,68,0.62)">{{ as.l }}</p>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;padding:18px 20px">
+                  <p style="margin:0;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Motif en cas de refus</p>
+                  <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px">
+                    <sc-for list="{{ refuseReasons }}" as="rr" hint-placeholder-count="5">
+                      <button onClick="{{ rr.select }}" style="height:38px;border-radius:9999px;border:1px solid {{ rr.border }};background:{{ rr.bg }};padding:0 14px;font-size:13px;font-weight:500;font-family:inherit;color:{{ rr.color }};cursor:pointer">{{ rr.label }}</button>
+                    </sc-for>
+                  </div>
+                  <div style="margin-top:18px;display:flex;align-items:center;gap:10px">
+                    <button onClick="{{ approve }}" style="display:inline-flex;align-items:center;gap:8px;height:46px;border:0;border-radius:10px;background:#3F6B3C;padding:0 20px;font-size:15px;font-weight:600;font-family:inherit;color:#FEFAF3;cursor:pointer">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:15px;height:15px"><path d="M20 6 9 17l-5-5"></path></svg>
+                      Approuver
+                    </button>
+                    <button onClick="{{ approve }}" style="height:46px;border:1px solid #123A44;border-radius:10px;background:transparent;padding:0 18px;font-size:15px;font-weight:600;font-family:inherit;color:#123A44;cursor:pointer">Demander une modification</button>
+                    <button onClick="{{ approve }}" style="height:46px;border:1px solid #B0431C;border-radius:10px;background:transparent;padding:0 18px;font-size:15px;font-weight:600;font-family:inherit;color:#B0431C;cursor:pointer">Refuser</button>
+                    <span style="margin-left:auto;font-size:12px;color:rgba(18,58,68,0.62)">Raccourcis : A · M · R</span>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ================= MEMBRES ================= -->
+      <sc-if value="{{ isUsers }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:24px;display:flex;flex-direction:column;gap:20px">
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px">
+            <sc-for list="{{ userKpis }}" as="k" hint-placeholder-count="4">
+              <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;padding:18px 20px">
+                <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.62)">{{ k.label }}</p>
+                <p style="margin:10px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:32px;line-height:1">{{ k.value }}</p>
+                <p style="margin:8px 0 0;font-size:13px;color:{{ k.deltaColor }}">{{ k.delta }}</p>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:8px">
+            <sc-for list="{{ userFilters }}" as="uf" hint-placeholder-count="5">
+              <button onClick="{{ uf.select }}" style="height:40px;border-radius:9999px;border:1px solid {{ uf.border }};background:{{ uf.bg }};padding:0 16px;font-size:15px;font-weight:500;font-family:inherit;color:{{ uf.color }};cursor:pointer">{{ uf.label }}</button>
+            </sc-for>
+          </div>
+          <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);overflow:hidden">
+            <div style="display:grid;grid-template-columns:2fr 110px 1fr 1fr 90px 130px 110px;gap:16px;padding:12px 20px;background:#F3E9D8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.62)">
+              <span>Membre</span><span>Compte</span><span>Commune</span><span>Inscrit</span><span>Annonces</span><span>Statut</span><span></span>
+            </div>
+            <sc-for list="{{ users }}" as="u" hint-placeholder-count="8">
+              <div style="display:grid;grid-template-columns:2fr 110px 1fr 1fr 90px 130px 110px;gap:16px;align-items:center;padding:12px 20px;border-top:1px solid #EFE3D0;font-size:15px">
+                <div style="display:flex;align-items:center;gap:10px;min-width:0">
+                  <span style="display:flex;width:34px;height:34px;flex-shrink:0;align-items:center;justify-content:center;border-radius:9999px;background:rgba(85,173,179,0.14);color:#2E7B84;font-size:12px;font-weight:600">{{ u.initials }}</span>
+                  <div style="min-width:0">
+                    <p style="margin:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ u.name }}</p>
+                    <p style="margin:2px 0 0;font-size:12px;color:rgba(18,58,68,0.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ u.email }}</p>
+                  </div>
+                </div>
+                <span style="justify-self:start;border-radius:9999px;padding:3px 10px;font-size:12px;font-weight:600;background:{{ u.typeBg }};color:{{ u.typeInk }}">{{ u.type }}</span>
+                <span>{{ u.commune }}</span>
+                <span style="color:rgba(18,58,68,0.68)">{{ u.joined }}</span>
+                <span style="font-family:'IBM Plex Mono',monospace">{{ u.listings }}</span>
+                <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:{{ u.statusInk }}"><span style="width:7px;height:7px;border-radius:9999px;background:{{ u.statusDot }}"></span>{{ u.status }}</span>
+                <a href="#" style="justify-self:end;font-size:13px;font-weight:600;color:#9E4E06">Ouvrir →</a>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ================= PAIEMENTS ================= -->
+      <sc-if value="{{ isPayments }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:24px;display:flex;flex-direction:column;gap:20px">
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px">
+            <sc-for list="{{ payKpis }}" as="k" hint-placeholder-count="4">
+              <div style="border:1px solid {{ k.border }};border-radius:16px;background:#FEFAF3;padding:18px 20px">
+                <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.62)">{{ k.label }}</p>
+                <p style="margin:10px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:32px;line-height:1">{{ k.value }}</p>
+                <p style="margin:8px 0 0;font-size:13px;color:{{ k.deltaColor }}">{{ k.delta }}</p>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:24px">
+            <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);overflow:hidden">
+              <div style="display:grid;grid-template-columns:130px 1.6fr 1.4fr 120px 120px 90px;gap:16px;padding:12px 20px;background:#F3E9D8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.62)">
+                <span>Référence</span><span>Client</span><span>Produit</span><span>Montant</span><span>Statut</span><span>Date</span>
+              </div>
+              <sc-for list="{{ txs }}" as="t" hint-placeholder-count="8">
+                <div style="display:grid;grid-template-columns:130px 1.6fr 1.4fr 120px 120px 90px;gap:16px;align-items:center;padding:13px 20px;border-top:1px solid #EFE3D0;font-size:15px">
+                  <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:rgba(18,58,68,0.68)">{{ t.ref }}</span>
+                  <span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ t.who }}</span>
+                  <span style="color:rgba(18,58,68,0.72)">{{ t.what }}</span>
+                  <span style="font-family:'Instrument Serif',Georgia,serif;font-size:22px">{{ t.amount }}</span>
+                  <span style="justify-self:start;border-radius:9999px;padding:3px 10px;font-size:12px;font-weight:600;background:{{ t.bg }};color:{{ t.ink }}">{{ t.status }}</span>
+                  <span style="font-size:13px;color:rgba(18,58,68,0.62)">{{ t.date }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;padding:20px 22px">
+              <p style="margin:0;font-size:15px;font-weight:600">Revenus par produit · septembre</p>
+              <div style="margin-top:16px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px">
+                <sc-for list="{{ revenue }}" as="r" hint-placeholder-count="5">
+                  <div>
+                    <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px">
+                      <span style="font-weight:600">{{ r.label }}</span>
+                      <span style="color:rgba(18,58,68,0.62)">{{ r.value }}</span>
+                    </div>
+                    <div style="margin-top:6px;height:8px;border-radius:9999px;background:#EFE3D0;overflow:hidden">
+                      <div style="height:8px;border-radius:9999px;background:{{ r.color }};width:{{ r.w }}"></div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <p style="margin:18px 0 0;padding-top:14px;border-top:1px solid #EFE3D0;font-size:13px;line-height:1.5;color:rgba(18,58,68,0.62)">Montants TTC en XPF. TGC reversée : 72 680 F.</p>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;vue&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Vue d’ensemble&quot;,&quot;options&quot;:[&quot;Vue d’ensemble&quot;,&quot;Modération&quot;,&quot;Membres&quot;,&quot;Paiements&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Page&quot;}}">
+const I = {
+  home: 'M3 10 12 3l9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z',
+  mod: 'M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6Z M9 12l2 2 4-4',
+  flag: 'M4 22V4 M4 4h12l-2 4 2 4H4',
+  list: 'M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01',
+  users: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M22 21v-2a4 4 0 0 0-3-3.9 M16 3.1a4 4 0 0 1 0 7.8',
+  pro: 'M2 7h20v14H2z M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2',
+  pay: 'M2 5h20v14H2z M2 10h20',
+  stats: 'M3 3v18h18 M7 15v3 M12 10v8 M17 6v12',
+  settings: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6 M19 12h2 M3 12h2 M12 3v2 M12 19v2 M5.6 5.6l1.4 1.4 M17 17l1.4 1.4 M5.6 18.4 7 17 M17 7l1.4-1.4',
+};
+const QUEUE = [
+  { id: 1, type: 'Vente', title: 'iPhone 15 Pro neuf sous blister', price: '35 000 F', author: 'Kevin D.', authorInitials: 'KD', age: 'il y a 12 min', reason: 'Prix suspect', tone: 'error', cat: 'signal', photo: 'iPhone', body: 'Neuf jamais ouvert, reçu en cadeau. Paiement par virement uniquement, envoi depuis la métropole.', meta: 'Nouméa · Multimédia · publiée il y a 12 min', signalTitle: 'Détection automatique', signalBody: 'Prix inférieur de 78 % au marché, paiement hors plateforme et compte créé hier. Schéma d\u2019arnaque fréquent.', authorMeta: 'Particulier · inscrit hier · téléphone non vérifié', stats: [['1', 'annonce'], ['0', 'avis'], ['0', 'ventes']] },
+  { id: 2, type: 'Bon plan', title: '−50 % sur toute la boutique', price: '−50 %', author: 'Surf Shop Anse Vata', authorInitials: 'SS', age: 'il y a 34 min', reason: 'Nouveau bon plan', tone: 'info', cat: 'bonplan', photo: 'vitrine surf shop', body: 'Toute la boutique à moitié prix ce week-end, hors nouveautés.', meta: 'Nouméa · Sport & loisirs · du 3 au 5 oct.', signalTitle: 'Vérification standard', signalBody: 'Contrôler que « hors nouveautés » est explicite et que les dates sont cohérentes avec l\u2019affichage en magasin.', authorMeta: 'Pro vérifié · RIDET 1 102 334.001', stats: [['14', 'bons plans'], ['4,8', 'note'], ['0', 'refus']] },
+  { id: 3, type: 'Troc', title: 'Fusil de chasse contre quad', price: '120 000 F', author: 'Marc T.', authorInitials: 'MT', age: 'il y a 1 h', reason: 'Objet réglementé', tone: 'error', cat: 'signal', photo: 'fusil', body: 'Fusil calibre 12 en bon état, échange contre quad ou moto.', meta: 'Bourail · Loisirs · signalée par 2 membres', signalTitle: 'Signalée par 2 membres', signalBody: 'Les armes sont interdites à la publication (article 4.2 des règles). Refus recommandé.', authorMeta: 'Particulier · inscrit en 2025', stats: [['6', 'annonces'], ['4,6', 'note'], ['1', 'refus']] },
+  { id: 4, type: 'Pro', title: 'Élec Services Païta', price: 'RIDET', author: 'Jérôme L.', authorInitials: 'JL', age: 'il y a 2 h', reason: 'Nouveau compte Pro', tone: 'warn', cat: 'pro', photo: 'logo', body: 'Mise aux normes, tableaux électriques, dépannage 7 j / 7.', meta: 'Païta · Électricité · RIDET 1 398 210.001', signalTitle: 'RIDET introuvable', signalBody: 'Entreprise récente : avis de situation ISEE fourni en pièce jointe. Vérifier la concordance du nom.', authorMeta: 'Passage en Pro · inscrit en 2024', stats: [['3', 'annonces'], ['4,7', 'note'], ['0', 'refus']] },
+  { id: 5, type: 'Covoit', title: 'Nouméa → Koné tous les lundis', price: '4 500 F', author: 'Sarah K.', authorInitials: 'SK', age: 'il y a 3 h', reason: 'Prix au-dessus du barème', tone: 'warn', cat: 'signal', photo: 'trajet', body: 'Départ 6 h, Hilux, trois places.', meta: 'Barème conseillé : 1 600 F par place', signalTitle: 'Participation trop élevée', signalBody: 'Le covoiturage doit rester sans bénéfice. 4 500 F dépasse de 180 % le barème : demander une modification.', authorMeta: 'Particulier · 16 trajets', stats: [['16', 'trajets'], ['5,0', 'note'], ['0', 'refus']] },
+  { id: 6, type: 'Événement', title: 'Vide-grenier de Magenta', price: 'Gratuit', author: 'Asso Magenta', authorInitials: 'AM', age: 'il y a 5 h', reason: 'Nouvel événement', tone: 'info', cat: 'event', photo: 'affiche', body: 'Plus de 80 exposants, restauration sur place.', meta: 'Nouméa · 11 oct. · 7 h – 13 h', signalTitle: 'Vérification standard', signalBody: 'Aucune anomalie détectée. Vérifier la lisibilité de l\u2019affiche.', authorMeta: 'Association · 4 événements', stats: [['4', 'événements'], ['—', 'note'], ['0', 'refus']] },
+  { id: 7, type: 'Vente', title: 'Toyota Hilux 2019 — 78 000 km', price: '4 250 000 F', author: 'Garage Ducos', authorInitials: 'GD', age: 'il y a 6 h', reason: 'Photos en double', tone: 'warn', cat: 'signal', photo: 'Hilux', body: 'Première main, carnet d\u2019entretien complet.', meta: 'Nouméa · Véhicules · 4 photos déjà publiées ailleurs', signalTitle: 'Photos déjà utilisées', signalBody: 'Trois photos correspondent à une annonce supprimée en août. Vérifier auprès du vendeur.', authorMeta: 'Pro vérifié · 12 annonces', stats: [['12', 'annonces'], ['4,9', 'note'], ['0', 'refus']] },
+];
+const TONES = { error: ['rgba(176,67,28,0.14)', '#B0431C', '#B0431C'], warn: ['rgba(232,131,42,0.14)', '#9E4E06', '#E8832A'], info: ['rgba(85,173,179,0.14)', '#2E7B84', '#55ADB3'] };
+const seed = (i, k) => { const x = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
+
+class Component extends DCLogic {
+  state = { view: null, period: '30 j', metric: 'Annonces', modFilter: 'Tout', sel: 1, done: [], refuse: 'Arnaque', userFilter: 'Tous' };
+
+  componentDidUpdate(prev) { if (prev.vue !== this.props.vue) this.setState({ view: null }); }
+
+  renderVals() {
+    const s = this.state;
+    const view = s.view ?? ({ 'Vue d\u2019ensemble': 'overview', 'Modération': 'moderation', 'Membres': 'users', 'Paiements': 'payments' }[this.props.vue ?? 'Vue d\u2019ensemble'] || 'overview');
+    const pill = (on) => ({ bg: on ? '#FEFAF3' : 'transparent', color: on ? '#123A44' : 'rgba(18,58,68,0.62)', weight: on ? '600' : '500', shadow: on ? '0 2px 8px rgba(18,58,68,0.10)' : 'none' });
+    const chip = (on) => ({ bg: on ? '#123A44' : '#FEFAF3', border: on ? '#123A44' : '#E4D7C3', color: on ? '#FEFAF3' : '#123A44' });
+    const pending = QUEUE.filter((q) => !s.done.includes(q.id));
+
+    const titles = {
+      overview: ['Mardi 29 septembre 2026', 'Bonjour Céline, 37 éléments attendent une décision.'],
+      moderation: ['Modération', `${pending.length} éléments à traiter`],
+      users: ['Membres', '18 406 membres inscrits'],
+      payments: ['Paiements', 'Abonnements et options payantes'],
+    }[view];
+
+    const metricDefs = {
+      Annonces: { base: 380, amp: 120, color: '#55ADB3', total: '12 482', delta: '+3,1 % vs août', title: 'Annonces publiées par jour', fmt: (n) => `${n} annonces` },
+      Inscriptions: { base: 14, amp: 9, color: '#6E9A6A', total: '486', delta: '+12 % vs août', title: 'Nouveaux membres par jour', fmt: (n) => `${n} inscriptions` },
+      Revenus: { base: 38000, amp: 26000, color: '#E8832A', total: '1 284 000 F', delta: '+8,4 % vs août', title: 'Revenus par jour', fmt: (n) => `${n.toLocaleString('fr-FR')} F` },
+    };
+    const md = metricDefs[s.metric];
+    const k = ['Annonces', 'Inscriptions', 'Revenus'].indexOf(s.metric);
+    const vals = Array.from({ length: 30 }, (_, i) => Math.round(md.base + md.amp * (seed(i, k) - 0.35) + (i / 29) * md.amp * 0.6 + ((i % 7 === 5 || i % 7 === 6) ? md.amp * 0.4 : 0)));
+    const max = Math.max(...vals);
+
+    const sel = pending.find((q) => q.id === s.sel) || pending[0];
+    const filtered = pending.filter((q) => s.modFilter === 'Tout' || q.cat === { 'Signalements': 'signal', 'Comptes Pro': 'pro', 'Bons plans': 'bonplan', 'Événements': 'event' }[s.modFilter]);
+
+    const USERS = [
+      ['Loïc G.', 'loic.g@lagoon.nc', 'Particulier', 'Mont-Dore', '12 janv. 2026', 3, 'Actif'],
+      ['Menuiserie Cocotier', 'contact@cocotier.nc', 'Pro', 'Mont-Dore', '4 mars 2024', 12, 'Actif'],
+      ['Kevin D.', 'kev.d88@mail.com', 'Particulier', 'Nouméa', 'hier', 1, 'Sous surveillance'],
+      ['Tehani R.', 'tehani.r@lagoon.nc', 'Particulier', 'Nouméa', '8 juin 2025', 5, 'Actif'],
+      ['Surf Shop Anse Vata', 'shop@surfav.nc', 'Pro', 'Nouméa', '19 nov. 2024', 28, 'Actif'],
+      ['Marc T.', 'marc.t@canl.nc', 'Particulier', 'Bourail', '2 févr. 2025', 6, 'Averti'],
+      ['Asso Magenta', 'asso.magenta@gmail.com', 'Association', 'Nouméa', '30 juil. 2025', 4, 'Actif'],
+      ['Jean-Pierre W.', 'jpw@mls.nc', 'Particulier', 'Bourail', '15 mai 2023', 9, 'Suspendu'],
+    ].map(([name, email, type, commune, joined, listings, status]) => {
+      const st = { 'Actif': ['#6E9A6A', '#3F6B3C'], 'Sous surveillance': ['#E8832A', '#9E4E06'], 'Averti': ['#E8832A', '#9E4E06'], 'Suspendu': ['#B0431C', '#B0431C'] }[status];
+      const ty = { 'Pro': ['rgba(232,131,42,0.14)', '#9E4E06'], 'Association': ['rgba(110,154,106,0.14)', '#3F6B3C'], 'Particulier': ['#F3E9D8', '#123A44'] }[type];
+      return { name, email, type, commune, joined, listings: String(listings), status, initials: name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase(), statusDot: st[0], statusInk: st[1], typeBg: ty[0], typeInk: ty[1] };
+    }).filter((u) => s.userFilter === 'Tous' || (s.userFilter === 'Pros' && u.type === 'Pro') || (s.userFilter === 'Particuliers' && u.type === 'Particulier') || (s.userFilter === 'À surveiller' && u.status !== 'Actif'));
+
+    const txStatus = { 'Payé': ['rgba(110,154,106,0.14)', '#3F6B3C'], 'Échoué': ['rgba(176,67,28,0.14)', '#B0431C'], 'Remboursé': ['#F3E9D8', '#123A44'], 'En attente': ['rgba(232,131,42,0.14)', '#9E4E06'] };
+
+    return {
+      nav: [
+        ['overview', 'Vue d\u2019ensemble', I.home, null], ['moderation', 'Modération', I.mod, pending.length], ['reports', 'Signalements', I.flag, 12], ['listings', 'Annonces', I.list, null],
+        ['users', 'Membres', I.users, null], ['pros', 'Comptes Pro', I.pro, 3], ['payments', 'Paiements', I.pay, 3], ['stats', 'Statistiques', I.stats, null], ['settings', 'Paramètres', I.settings, null],
+      ].map(([id, label, icon, count]) => {
+        const on = view === id;
+        return {
+          label, icon, count: String(count ?? ''), hasCount: Boolean(count), bg: on ? 'rgba(251,246,236,0.10)' : 'transparent', weight: on ? '600' : '500', color: on ? '#FBF6EC' : 'rgba(251,246,236,0.72)',
+          countBg: id === 'moderation' || id === 'payments' ? '#E8832A' : 'rgba(251,246,236,0.16)', countInk: id === 'moderation' || id === 'payments' ? '#0E2A31' : '#FBF6EC',
+          select: () => { if (['overview', 'moderation', 'users', 'payments'].includes(id)) this.setState({ view: id }); },
+        };
+      }),
+      periods: ['7 j', '30 j', '12 mois'].map((p) => ({ label: p, ...pill(s.period === p), select: () => this.setState({ period: p }) })),
+      viewEyebrow: titles[0], viewTitle: titles[1],
+      isOverview: view === 'overview', isModeration: view === 'moderation', isUsers: view === 'users', isPayments: view === 'payments',
+
+      kpis: [
+        { label: 'Annonces en ligne', value: '12 482', delta: '+3,1 % sur 30 j', deltaColor: '#3F6B3C', border: '#E4D7C3' },
+        { label: 'Nouveaux membres', value: '486', delta: '+12 % sur 30 j', deltaColor: '#3F6B3C', border: '#E4D7C3' },
+        { label: 'Revenus · sept.', value: '1,28 M F', delta: '+8,4 % vs août', deltaColor: '#3F6B3C', border: '#E4D7C3' },
+        { label: 'À modérer', value: String(pending.length + 30), delta: '5 prioritaires', deltaColor: '#B0431C', border: 'rgba(176,67,28,0.35)' },
+        { label: 'Délai de modération', value: '42 min', delta: 'cible : 1 h', deltaColor: 'rgba(18,58,68,0.62)', border: '#E4D7C3' },
+      ],
+      metrics: ['Annonces', 'Inscriptions', 'Revenus'].map((m) => ({ label: m, ...pill(s.metric === m), select: () => this.setState({ metric: m }) })),
+      chartTitle: md.title, chartTotal: md.total, chartDelta: md.delta,
+      bars: vals.map((v, i) => ({ h: `${Math.round((v / max) * 100)}%`, color: i === 29 ? '#A94F0A' : md.color, title: md.fmt(v) })),
+      byType: [['Vente', 7820, '#55ADB3'], ['Services', 1640, '#2E7B84'], ['Troc', 1210, '#6E9A6A'], ['Bons plans', 890, '#E8832A'], ['Covoiturage', 620, '#123A44'], ['Événements', 302, '#A94F0A']].map(([label, n, color]) => ({ label, value: n.toLocaleString('fr-FR').replace(/\u202f/g, ' '), color, w: `${Math.round((n / 7820) * 100)}%` })),
+      queuePreview: pending.slice(0, 5).map((q) => ({ ...q, dot: TONES[q.tone][2] })),
+      goModeration: () => this.setState({ view: 'moderation' }), goPayments: () => this.setState({ view: 'payments' }),
+      ridets: [
+        { name: 'Élec Services Païta', ridet: '1 398 210.001', status: 'avis ISEE fourni', age: 'depuis 2 h', ageColor: 'rgba(18,58,68,0.62)' },
+        { name: 'Jardins de Tina', ridet: '1 287 004.002', status: 'nom différent', age: 'depuis 19 h', ageColor: '#9E4E06' },
+        { name: 'Bâti Caillou', ridet: '1 410 876.001', status: 'avis ISEE fourni', age: 'depuis 26 h', ageColor: '#B0431C' },
+      ],
+      failed: [
+        { name: 'Menuiserie Cocotier', reason: 'Carte expirée · 2e essai', amount: '4 900 F' },
+        { name: 'Plomberie du Lagon', reason: 'Fonds insuffisants', amount: '9 900 F' },
+        { name: 'Déménagements du Nord', reason: 'Refus banque', amount: '49 000 F' },
+      ],
+      health: [['Site', 'OK', true], ['API', 'OK', true], ['Paiements', 'OK', true], ['SMS', 'Lent', false], ['E-mails', 'OK', true], ['Recherche', 'OK', true]].map(([label, state, ok]) => ({ label, state, dot: ok ? '#6E9A6A' : '#E8832A', stateColor: ok ? '#9FC79B' : '#E8832A' })),
+      log: [
+        { time: '09:42', who: 'Céline M.', what: 'a refusé « Lot de 10 chiots » · motif : vente d\u2019animaux' },
+        { time: '09:31', who: 'Système', what: 'a masqué 3 annonces en double du compte kev.d88@mail.com' },
+        { time: '09:15', who: 'Paul T.', what: 'a validé le RIDET de Froid Pacifique' },
+        { time: '08:58', who: 'Système', what: 'a relancé 4 paiements échoués (2 réussis)' },
+        { time: '08:12', who: 'Céline M.', what: 'a suspendu le compte Jean-Pierre W. · 3 signalements confirmés' },
+      ],
+
+      modFilters: ['Tout', 'Signalements', 'Comptes Pro', 'Bons plans', 'Événements'].map((f) => {
+        const cat = { 'Signalements': 'signal', 'Comptes Pro': 'pro', 'Bons plans': 'bonplan', 'Événements': 'event' }[f];
+        return { label: f, count: String(f === 'Tout' ? pending.length : pending.filter((q) => q.cat === cat).length), ...chip(s.modFilter === f), select: () => this.setState({ modFilter: f }) };
+      }),
+      queue: filtered.map((q) => {
+        const on = sel && q.id === sel.id;
+        const t = TONES[q.tone];
+        return { ...q, bg: on ? '#F3E9D8' : 'transparent', bar: on ? '#123A44' : 'transparent', reasonBg: t[0], reasonInk: t[1], select: () => this.setState({ sel: q.id }) };
+      }),
+      queueEmpty: filtered.length === 0, hasSel: Boolean(sel),
+      sel: sel ? { ...sel, reasonBg: TONES[sel.tone][0], reasonInk: TONES[sel.tone][1], reasonBar: TONES[sel.tone][2], authorStats: sel.stats.map(([v, l]) => ({ v, l })) } : { authorStats: [] },
+      refuseReasons: ['Arnaque', 'Objet interdit', 'Prix trompeur', 'Photos non conformes', 'Doublon', 'Autre'].map((r) => ({ label: r, ...chip(s.refuse === r), select: () => this.setState({ refuse: r }) })),
+      approve: () => { if (!sel) return; const rest = pending.filter((q) => q.id !== sel.id); this.setState({ done: [...s.done, sel.id], sel: rest[0] ? rest[0].id : null }); },
+
+      userKpis: [
+        { label: 'Membres', value: '18 406', delta: '+486 ce mois', deltaColor: '#3F6B3C' },
+        { label: 'Comptes Pro', value: '642', delta: '+38 ce mois', deltaColor: '#3F6B3C' },
+        { label: 'Téléphone vérifié', value: '71 %', delta: '+4 pts', deltaColor: '#3F6B3C' },
+        { label: 'Suspendus', value: '27', delta: '3 cette semaine', deltaColor: '#B0431C' },
+      ],
+      userFilters: ['Tous', 'Particuliers', 'Pros', 'À surveiller'].map((f) => ({ label: f, ...chip(s.userFilter === f), select: () => this.setState({ userFilter: f }) })),
+      users: USERS,
+
+      payKpis: [
+        { label: 'Revenu mensuel récurrent', value: '2,94 M F', delta: '+6,2 % vs août', deltaColor: '#3F6B3C', border: '#E4D7C3' },
+        { label: 'Abonnés Pro payants', value: '514', delta: '128 en période offerte', deltaColor: 'rgba(18,58,68,0.62)', border: '#E4D7C3' },
+        { label: 'Résiliations · 30 j', value: '2,1 %', delta: '−0,4 pt', deltaColor: '#3F6B3C', border: '#E4D7C3' },
+        { label: 'Paiements échoués', value: '3', delta: '63 800 F à récupérer', deltaColor: '#B0431C', border: 'rgba(176,67,28,0.35)' },
+      ],
+      txs: [
+        ['KAL-10482', 'Menuiserie Cocotier', 'Kalico Pro · mensuel', '4 900 F', 'Échoué', '29 sept.'],
+        ['KAL-10481', 'Loïc G.', 'À la une · 14 j', '1 500 F', 'Payé', '29 sept.'],
+        ['KAL-10480', 'Surf Shop Anse Vata', 'Bon plan · accueil', '2 000 F', 'Payé', '28 sept.'],
+        ['KAL-10479', 'Déménagements du Nord', 'Kalico Pro · annuel', '49 000 F', 'Échoué', '28 sept.'],
+        ['KAL-10478', 'Tehani R.', 'Remonter en tête', '500 F', 'Payé', '28 sept.'],
+        ['KAL-10477', 'Asso Magenta', 'Agenda à la une', '1 500 F', 'En attente', '27 sept.'],
+        ['KAL-10476', 'Garage Ducos', 'Pro+ · mensuel', '9 900 F', 'Payé', '27 sept.'],
+        ['KAL-10475', 'Marc T.', 'À la une · 14 j', '1 500 F', 'Remboursé', '26 sept.'],
+      ].map(([ref, who, what, amount, status, date]) => ({ ref, who, what, amount, status, date, bg: txStatus[status][0], ink: txStatus[status][1] })),
+      revenue: [['Abonnements Pro', 812000, '#123A44'], ['Pro+', 208000, '#2E7B84'], ['À la une', 142500, '#E8832A'], ['Bons plans mis en avant', 86000, '#A94F0A'], ['Remonter en tête', 35500, '#6E9A6A']].map(([label, n, color]) => ({ label, value: n.toLocaleString('fr-FR').replace(/\u202f/g, ' ') + ' F', color, w: `${Math.round((n / 812000) * 100)}%` })),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

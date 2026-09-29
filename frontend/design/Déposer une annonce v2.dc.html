@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#FBF6EC; -webkit-font-smoothing:antialiased; }
+  a { color:#2E7B84; text-decoration:none; }
+  a:hover { color:#123A44; }
+  input::placeholder, textarea::placeholder { color:rgba(18,58,68,0.42); }
+  input[type=range] { accent-color:#A94F0A; }
+</style>
+</helmet>
+
+<div style="width:1440px;min-height:100vh;background:#FBF6EC;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#123A44">
+
+  <!-- ===== HEADER RÉDUIT ===== -->
+  <header style="position:sticky;top:0;z-index:40;height:72px;background:#FBF6EC;border-bottom:1px solid #E4D7C3">
+    <div style="display:flex;height:72px;align-items:center;gap:20px;padding:0 48px">
+      <a href="Accueil v2.dc.html" style="display:flex;align-items:center;gap:10px">
+        <img src="assets/kalico1.svg" alt="Kalico" style="height:40px;width:auto;display:block" />
+        <span style="font-family:'Instrument Serif',Georgia,serif;font-size:26px;line-height:1;color:#123A44">Kalico</span>
+      </a>
+      <span style="height:24px;width:1px;background:#E4D7C3"></span>
+      <span style="font-size:15px;font-weight:600">Déposer une annonce</span>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:16px">
+        <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:rgba(18,58,68,0.62)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#6E9A6A" stroke-width="2.5" stroke-linecap="round" style="width:13px;height:13px"><path d="M20 6 9 17l-5-5"></path></svg>
+          Brouillon enregistré
+        </span>
+        <a href="Mon compte v2.dc.html" style="display:inline-flex;align-items:center;height:40px;padding:0 16px;border-radius:10px;border:1px solid #E4D7C3;font-size:15px;font-weight:600;color:#123A44" style-hover="border-color:#123A44">Quitter</a>
+      </div>
+    </div>
+  </header>
+
+  <div style="display:grid;grid-template-columns:260px minmax(0,1fr) 380px;gap:48px;padding:40px 48px 80px;align-items:start">
+
+    <!-- ===== RAIL D'ÉTAPES ===== -->
+    <nav style="position:sticky;top:112px">
+      <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.55)">Type d'annonce</p>
+      <div style="margin-top:10px;display:inline-flex;align-items:center;gap:8px;border-radius:9999px;padding:6px 14px 6px 8px;background:#123A44;color:#FEFAF3">
+        <span style="display:flex;height:24px;width:24px;align-items:center;justify-content:center;border-radius:9999px;background:rgba(232,131,42,0.22)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#E8832A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="{{ typeIcon }}"></path></svg>
+        </span>
+        <span style="font-size:13px;font-weight:600">{{ typeLabel }}</span>
+      </div>
+
+      <div style="margin-top:28px;display:flex;flex-direction:column">
+        <sc-for list="{{ rail }}" as="r" hint-placeholder-count="6">
+          <button onClick="{{ r.select }}" style="position:relative;display:flex;align-items:center;gap:12px;border:0;background:{{ r.bg }};border-radius:10px;padding:10px 12px;margin-left:-12px;font-family:inherit;text-align:left;cursor:{{ r.cursor }}">
+            <span style="display:flex;height:28px;width:28px;flex-shrink:0;align-items:center;justify-content:center;border-radius:8px;border:1px solid {{ r.dotBorder }};background:{{ r.dotBg }};font-size:12px;font-weight:600;color:{{ r.dotColor }}">{{ r.n }}</span>
+            <span style="font-size:15px;font-weight:{{ r.weight }};color:{{ r.color }}">{{ r.label }}</span>
+          </button>
+        </sc-for>
+      </div>
+
+      <div style="margin-top:28px;padding-top:20px;border-top:1px solid #E4D7C3">
+        <div style="height:4px;border-radius:9999px;background:#E4D7C3;overflow:hidden">
+          <div style="height:4px;border-radius:9999px;background:#A94F0A;width:{{ progress }};transition:width 250ms"></div>
+        </div>
+        <p style="margin:10px 0 0;font-size:13px;color:rgba(18,58,68,0.62)">{{ progressLabel }}</p>
+      </div>
+    </nav>
+
+    <!-- ===== FORMULAIRE ===== -->
+    <main style="min-width:0">
+      <sc-if value="{{ notDone }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">{{ eyebrow }}</p>
+          <h1 style="margin:12px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:52px;line-height:1.03;letter-spacing:-0.015em;text-wrap:balance">{{ stepTitle }}</h1>
+          <p style="margin:14px 0 0;font-size:17px;line-height:1.6;color:rgba(18,58,68,0.68);max-width:620px;text-wrap:pretty">{{ stepSub }}</p>
+
+          <!-- choix du type -->
+          <sc-if value="{{ isTypeStep }}" hint-placeholder-val="{{ true }}">
+            <div style="margin-top:32px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px">
+              <sc-for list="{{ typeCards }}" as="t" hint-placeholder-count="5">
+                <button onClick="{{ t.select }}" style="display:flex;align-items:flex-start;gap:16px;border:1px solid {{ t.border }};border-radius:16px;background:{{ t.bg }};padding:22px;font-family:inherit;text-align:left;cursor:pointer" style-hover="border-color:#123A44">
+                  <span style="display:flex;height:46px;width:46px;flex-shrink:0;align-items:center;justify-content:center;border-radius:12px;background:{{ t.iconBg }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="{{ t.iconColor }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:21px;height:21px"><path d="{{ t.icon }}"></path></svg>
+                  </span>
+                  <span style="display:block;min-width:0">
+                    <span style="display:block;font-size:19px;font-weight:600;color:{{ t.ink }}">{{ t.label }}</span>
+                    <span style="display:block;margin-top:6px;font-size:15px;line-height:1.5;color:{{ t.muted }}">{{ t.desc }}</span>
+                    <span style="display:block;margin-top:12px;font-size:13px;font-weight:600;color:{{ t.meta }}">{{ t.info }}</span>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <!-- champs génériques -->
+          <sc-if value="{{ hasFields }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:32px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 16px">
+              <sc-for list="{{ fields }}" as="f" hint-placeholder-count="4">
+                <div style="grid-column:{{ f.col }};min-width:0">
+                  <sc-if value="{{ f.hasLabel }}" hint-placeholder-val="{{ true }}">
+                    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:8px">
+                      <span style="font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">{{ f.label }}<span style="font-weight:400;color:rgba(18,58,68,0.55)">{{ f.optLabel }}</span></span>
+                      <span style="font-size:13px;color:rgba(18,58,68,0.55)">{{ f.counter }}</span>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ f.isText }}" hint-placeholder-val="{{ true }}">
+                    <input value="{{ f.value }}" onChange="{{ f.onInput }}" type="{{ f.inputType }}" placeholder="{{ f.placeholder }}" style="width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FEFAF3;padding:0 15px;font-size:16px;font-family:inherit;color:#123A44;outline:none" style-focus="border-color:#123A44;box-shadow:0 0 0 4px rgba(18,58,68,0.10)" />
+                  </sc-if>
+
+                  <sc-if value="{{ f.isMoney }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;align-items:center;border-radius:11px;border:1px solid #E4D7C3;background:#FEFAF3">
+                      <input value="{{ f.value }}" onChange="{{ f.onInput }}" inputMode="numeric" placeholder="{{ f.placeholder }}" style="min-width:0;flex:1;box-sizing:border-box;height:50px;border:0;background:transparent;padding:0 15px;font-family:'IBM Plex Mono',monospace;font-size:16px;color:#123A44;outline:none" />
+                      <span style="flex-shrink:0;border-left:1px solid #E4D7C3;padding:0 14px;font-family:'IBM Plex Mono',monospace;font-size:15px;color:rgba(18,58,68,0.62);line-height:50px">{{ f.suffix }}</span>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ f.isTextarea }}" hint-placeholder-val="{{ false }}">
+                    <textarea value="{{ f.value }}" onChange="{{ f.onInput }}" rows="5" placeholder="{{ f.placeholder }}" style="width:100%;box-sizing:border-box;border-radius:11px;border:1px solid #E4D7C3;background:#FEFAF3;padding:13px 15px;font-size:16px;line-height:1.55;font-family:inherit;color:#123A44;outline:none;resize:vertical" style-focus="border-color:#123A44;box-shadow:0 0 0 4px rgba(18,58,68,0.10)"></textarea>
+                  </sc-if>
+
+                  <sc-if value="{{ f.isSelect }}" hint-placeholder-val="{{ false }}">
+                    <select value="{{ f.value }}" onChange="{{ f.onInput }}" style="width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FEFAF3;padding:0 13px;font-size:16px;font-family:inherit;color:#123A44;cursor:pointer;outline:none">
+                      <sc-for list="{{ f.options }}" as="o" hint-placeholder-count="6">
+                        <option value="{{ o }}">{{ o }}</option>
+                      </sc-for>
+                    </select>
+                  </sc-if>
+
+                  <sc-if value="{{ f.isChips }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-wrap:wrap;gap:8px">
+                      <sc-for list="{{ f.opts }}" as="o" hint-placeholder-count="4">
+                        <button onClick="{{ o.toggle }}" style="display:inline-flex;align-items:center;gap:7px;height:42px;border-radius:{{ f.chipRadius }};border:1px solid {{ o.border }};background:{{ o.bg }};padding:0 16px;font-size:15px;font-weight:500;font-family:inherit;color:{{ o.color }};cursor:pointer">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:13px;height:13px;display:{{ o.checkDisplay }}"><path d="M20 6 9 17l-5-5"></path></svg>
+                          {{ o.label }}
+                        </button>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ f.isToggle }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ f.onToggle }}" style="display:flex;width:100%;align-items:center;justify-content:space-between;gap:16px;border:1px solid #E4D7C3;border-radius:12px;background:#FEFAF3;padding:14px 16px;font-family:inherit;text-align:left;cursor:pointer">
+                      <span style="display:block">
+                        <span style="display:block;font-size:15px;font-weight:600;color:#123A44">{{ f.label }}</span>
+                        <span style="display:block;margin-top:3px;font-size:13px;line-height:1.45;color:rgba(18,58,68,0.62)">{{ f.toggleHelp }}</span>
+                      </span>
+                      <span style="position:relative;flex-shrink:0;width:42px;height:24px;border-radius:9999px;background:{{ f.track }};transition:background 150ms">
+                        <span style="position:absolute;top:3px;left:{{ f.knob }};width:18px;height:18px;border-radius:9999px;background:#FEFAF3;transition:left 150ms"></span>
+                      </span>
+                    </button>
+                  </sc-if>
+
+                  <sc-if value="{{ f.isRange }}" hint-placeholder-val="{{ false }}">
+                    <div style="border:1px solid #E4D7C3;border-radius:12px;background:#FEFAF3;padding:14px 16px">
+                      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+                        <span style="font-size:13px;color:rgba(18,58,68,0.62)">{{ f.rangeMinLabel }}</span>
+                        <span style="font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1">{{ f.rangeLabel }}</span>
+                        <span style="font-size:13px;color:rgba(18,58,68,0.62)">{{ f.rangeMaxLabel }}</span>
+                      </div>
+                      <input type="range" min="{{ f.min }}" max="{{ f.max }}" step="{{ f.step }}" value="{{ f.value }}" onChange="{{ f.onInput }}" style="margin-top:10px;width:100%;height:24px;cursor:pointer" />
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ f.isNumber }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:inline-flex;align-items:center;border:1px solid #E4D7C3;border-radius:11px;background:#FEFAF3">
+                      <button onClick="{{ f.dec }}" style="width:50px;height:50px;border:0;background:transparent;font-size:22px;font-family:inherit;color:#123A44;cursor:pointer">−</button>
+                      <span style="min-width:56px;text-align:center;font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:50px;border-left:1px solid #E4D7C3;border-right:1px solid #E4D7C3">{{ f.value }}</span>
+                      <button onClick="{{ f.inc }}" style="width:50px;height:50px;border:0;background:transparent;font-size:22px;font-family:inherit;color:#123A44;cursor:pointer">+</button>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ f.isPhotos }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px">
+                      <sc-for list="{{ f.slots }}" as="sl" hint-placeholder-count="8">
+                        <button onClick="{{ sl.click }}" style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;aspect-ratio:1 / 1;border-radius:12px;border:{{ sl.border }};background:{{ sl.bg }};overflow:hidden;font-family:inherit;cursor:pointer;grid-column:{{ sl.col }};grid-row:{{ sl.row }}">
+                          <span style="position:absolute;inset:0;opacity:{{ sl.motif }};background-image:repeating-linear-gradient(45deg,#123A44 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#123A44 0 1px,transparent 1px 9px)"></span>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(18,58,68,0.55)" stroke-width="2" stroke-linecap="round" style="position:relative;width:18px;height:18px;display:{{ sl.plusDisplay }}"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                          <span style="position:relative;font-family:{{ sl.font }};font-size:{{ sl.size }};font-weight:{{ sl.weight }};color:rgba(18,58,68,0.62)">{{ sl.label }}</span>
+                          <sc-if value="{{ sl.isCover }}" hint-placeholder-val="{{ false }}">
+                            <span style="position:absolute;left:10px;bottom:10px;border-radius:9999px;padding:4px 10px;font-size:11px;font-weight:600;background:#123A44;color:#FEFAF3">Couverture</span>
+                          </sc-if>
+                        </button>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ f.hasHelp }}" hint-placeholder-val="{{ false }}">
+                    <p style="margin:8px 0 0;font-size:13px;line-height:1.5;color:{{ f.helpColor }}">{{ f.help }}</p>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <!-- publication -->
+          <sc-if value="{{ isPublish }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:32px;display:flex;flex-direction:column;gap:24px">
+              <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);overflow:hidden">
+                <sc-for list="{{ recap }}" as="rc" hint-placeholder-count="6">
+                  <div style="display:grid;grid-template-columns:180px 1fr auto;gap:16px;align-items:baseline;padding:14px 20px;border-bottom:1px solid #EFE3D0">
+                    <span style="font-size:13px;color:rgba(18,58,68,0.62)">{{ rc.label }}</span>
+                    <span style="font-size:15px;font-weight:500;color:#123A44;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ rc.value }}</span>
+                    <button onClick="{{ rc.edit }}" style="border:0;background:transparent;padding:0;font-size:13px;font-weight:600;font-family:inherit;color:#9E4E06;cursor:pointer">Modifier</button>
+                  </div>
+                </sc-for>
+              </div>
+
+              <sc-if value="{{ hasBoosts }}" hint-placeholder-val="{{ true }}">
+                <div>
+                  <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.55)">Plus de visibilité · facultatif</p>
+                  <div style="margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+                    <sc-for list="{{ boosts }}" as="b" hint-placeholder-count="2">
+                      <button onClick="{{ b.toggle }}" style="display:flex;align-items:flex-start;gap:14px;border:1px solid {{ b.border }};border-radius:16px;background:{{ b.bg }};padding:18px;font-family:inherit;text-align:left;cursor:pointer">
+                        <span style="display:flex;height:21px;width:21px;flex-shrink:0;align-items:center;justify-content:center;border-radius:6px;border:1.5px solid {{ b.boxBorder }};background:{{ b.boxBg }};margin-top:1px">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="#FEFAF3" stroke-width="3.5" stroke-linecap="round" style="width:13px;height:13px;opacity:{{ b.check }}"><path d="M20 6 9 17l-5-5"></path></svg>
+                        </span>
+                        <span style="display:block;flex:1;min-width:0">
+                          <span style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                            <span style="font-size:15px;font-weight:600;color:#123A44">{{ b.label }}</span>
+                            <span style="font-family:'Instrument Serif',Georgia,serif;font-size:24px;line-height:1;color:#123A44">{{ b.price }}</span>
+                          </span>
+                          <span style="display:block;margin-top:6px;font-size:13px;line-height:1.5;color:rgba(18,58,68,0.68)">{{ b.desc }}</span>
+                        </span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ noBoosts }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:flex-start;gap:14px;border-radius:16px;padding:16px 18px;background:rgba(110,154,106,0.14);border-left:3px solid #6E9A6A">
+                  <p style="margin:0;font-size:15px;line-height:1.55;color:#123A44">{{ noBoostText }}</p>
+                </div>
+              </sc-if>
+
+              <button onClick="{{ toggleRules }}" style="display:flex;align-items:flex-start;gap:13px;border:0;background:transparent;padding:0;font-family:inherit;text-align:left;cursor:pointer">
+                <span style="display:flex;height:21px;width:21px;flex-shrink:0;align-items:center;justify-content:center;border-radius:6px;border:1.5px solid {{ rulesBorder }};background:{{ rulesBg }};margin-top:1px">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#FEFAF3" stroke-width="3.5" stroke-linecap="round" style="width:13px;height:13px;opacity:{{ rulesCheck }}"><path d="M20 6 9 17l-5-5"></path></svg>
+                </span>
+                <span style="font-size:15px;line-height:1.55;color:rgba(18,58,68,0.72)">{{ rulesText }}</span>
+              </button>
+            </div>
+          </sc-if>
+
+          <!-- navigation -->
+          <div style="margin-top:40px;padding-top:24px;border-top:1px solid #E4D7C3;display:flex;align-items:center;gap:12px">
+            <sc-if value="{{ canBack }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ back }}" style="height:50px;border:1px solid #E4D7C3;border-radius:10px;background:transparent;padding:0 22px;font-size:16px;font-weight:600;font-family:inherit;color:#123A44;cursor:pointer">Retour</button>
+            </sc-if>
+            <button onClick="{{ next }}" style="display:inline-flex;align-items:center;gap:9px;height:50px;border:1px solid {{ ctaBorder }};border-radius:10px;background:{{ ctaBg }};color:{{ ctaColor }};padding:0 28px;font-size:16px;font-weight:600;font-family:inherit;cursor:{{ ctaCursor }};box-shadow:{{ ctaShadow }}">
+              {{ ctaLabel }}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+            </button>
+            <p style="margin:0 0 0 6px;font-size:13px;color:{{ hintColor }}">{{ ctaHint }}</p>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== PUBLIÉE ===== -->
+      <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <span style="display:inline-flex;align-items:center;gap:6px;border-radius:9999px;padding:5px 12px;font-size:12px;font-weight:600;background:{{ doneBadgeBg }};color:{{ doneBadgeColor }}">{{ doneBadge }}</span>
+          <h1 style="margin:18px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:52px;line-height:1.03;letter-spacing:-0.015em;text-wrap:balance">{{ doneTitle }}</h1>
+          <p style="margin:14px 0 0;font-size:17px;line-height:1.6;color:rgba(18,58,68,0.68);max-width:600px;text-wrap:pretty">{{ doneBody }}</p>
+          <div style="margin-top:28px;display:flex;gap:12px">
+            <a href="{{ doneHref }}" style="display:inline-flex;align-items:center;height:50px;padding:0 26px;border-radius:10px;background:#A94F0A;color:#FEFAF3;font-size:16px;font-weight:600;box-shadow:0 2px 12px rgba(169,79,10,0.22)" style-hover="background:#8F420A">{{ doneCta }}</a>
+            <button onClick="{{ restart }}" style="height:50px;border:1px solid #123A44;border-radius:10px;background:transparent;padding:0 22px;font-size:16px;font-weight:600;font-family:inherit;color:#123A44;cursor:pointer">Déposer une autre annonce</button>
+          </div>
+          <div style="margin-top:36px;border-radius:16px;background:#F3E9D8;padding:20px 22px;max-width:600px">
+            <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.62)">Et maintenant</p>
+            <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ doneNext }}" as="d" hint-placeholder-count="3">
+                <div style="display:flex;gap:12px">
+                  <span style="font-family:'Instrument Serif',Georgia,serif;font-size:22px;line-height:1;color:#9E4E06;width:14px;flex-shrink:0">{{ d.n }}</span>
+                  <p style="margin:0;font-size:15px;line-height:1.5;color:rgba(18,58,68,0.72)">{{ d.t }}</p>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </main>
+
+    <!-- ===== APERÇU ===== -->
+    <aside style="position:sticky;top:112px;display:flex;flex-direction:column;gap:16px">
+      <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.55)">Aperçu dans les résultats</p>
+      <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 6px 24px rgba(18,58,68,0.09);overflow:hidden">
+        <sc-if value="{{ pv.hasPhoto }}" hint-placeholder-val="{{ true }}">
+          <div style="position:relative;height:210px;background:#F3E9D8;display:flex;align-items:center;justify-content:center">
+            <span style="position:absolute;inset:0;opacity:0.07;background-image:repeating-linear-gradient(45deg,#123A44 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#123A44 0 1px,transparent 1px 9px)"></span>
+            <span style="position:relative;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.06em;color:rgba(18,58,68,0.55)">{{ pv.photoLabel }}</span>
+            <span style="position:absolute;top:12px;left:12px;border-radius:9999px;padding:5px 11px;font-size:12px;font-weight:600;background:{{ pv.badgeBg }};color:{{ pv.badgeColor }}">{{ pv.badge }}</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ pv.hasRoute }}" hint-placeholder-val="{{ false }}">
+          <div style="position:relative;overflow:hidden;background:#0E2A31;color:#FBF6EC;padding:22px">
+            <div style="position:absolute;inset:0;opacity:0.09;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+            <div style="position:relative;display:grid;grid-template-columns:14px 1fr;gap:4px 12px;align-items:center">
+              <span style="width:10px;height:10px;border-radius:9999px;border:2px solid #E8832A;box-sizing:border-box"></span>
+              <span style="font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1.1">{{ pv.from }}</span>
+              <span style="justify-self:center;width:2px;height:22px;background:rgba(251,246,236,0.3)"></span>
+              <span style="font-size:13px;color:rgba(251,246,236,0.72)">{{ pv.via }}</span>
+              <span style="width:10px;height:10px;border-radius:9999px;background:#E8832A"></span>
+              <span style="font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1.1">{{ pv.to }}</span>
+            </div>
+          </div>
+        </sc-if>
+        <div style="padding:18px 20px 20px">
+          <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:#9E4E06">{{ pv.kicker }}</p>
+          <p style="margin:8px 0 0;font-size:17px;font-weight:600;line-height:1.3;color:#123A44;text-wrap:pretty">{{ pv.title }}</p>
+          <div style="display:flex;align-items:baseline;gap:10px;margin-top:12px">
+            <span style="font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1;color:#123A44">{{ pv.big }}</span>
+            <span style="font-size:15px;color:rgba(18,58,68,0.55);text-decoration:line-through">{{ pv.strike }}</span>
+            <span style="font-size:13px;color:rgba(18,58,68,0.62)">{{ pv.bigNote }}</span>
+          </div>
+          <p style="margin:10px 0 0;font-size:13px;color:rgba(18,58,68,0.62)">{{ pv.meta }}</p>
+          <sc-if value="{{ pv.hasChips }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid #EFE3D0">
+              <span style="font-size:12px;font-weight:600;color:rgba(18,58,68,0.62)">{{ pv.chipsLabel }}</span>
+              <sc-for list="{{ pv.chips }}" as="c" hint-placeholder-count="2">
+                <span style="border-radius:9999px;padding:3px 10px;font-size:12px;font-weight:500;background:#F3E9D8;color:#123A44;border:1px solid #E4D7C3">{{ c }}</span>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <sc-if value="{{ hasTip }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;gap:12px;border-radius:16px;padding:16px 18px;background:rgba(85,173,179,0.14);border-left:3px solid #55ADB3">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2E7B84" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px;flex-shrink:0;margin-top:2px"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2Z"></path></svg>
+          <p style="margin:0;font-size:15px;line-height:1.55;color:#123A44">{{ tip }}</p>
+        </div>
+      </sc-if>
+    </aside>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;typeAnnonce&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Vente&quot;,&quot;options&quot;:[&quot;Vente&quot;,&quot;Troc&quot;,&quot;Bon plan&quot;,&quot;Covoiturage&quot;,&quot;Événement&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Parcours&quot;},&quot;etape&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Choix du type&quot;,&quot;options&quot;:[&quot;Choix du type&quot;,&quot;Étape 2&quot;,&quot;Publication&quot;,&quot;Annonce publiée&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Parcours&quot;}}">
+const COMMUNES = ['Nouméa', 'Dumbéa', 'Mont-Dore', 'Païta', 'Bouloupari', 'La Foa', 'Bourail', 'Koné', 'Voh', 'Koumac', 'Poindimié', 'Houaïlou', 'Canala', 'Thio', 'Yaté', 'Hienghène', 'Île des Pins', 'Lifou', 'Maré', 'Ouvéa'];
+const KM = { 'Nouméa': 0, 'Dumbéa': 18, 'Mont-Dore': 20, 'Païta': 30, 'Bouloupari': 75, 'La Foa': 110, 'Bourail': 165, 'Koné': 270, 'Voh': 290, 'Koumac': 365, 'Poindimié': 320, 'Houaïlou': 230, 'Canala': 170, 'Thio': 115, 'Yaté': 80, 'Hienghène': 380 };
+const CATS = ['Véhicules', 'Immobilier', 'Maison', 'Électroménager', 'Nautisme', 'Multimédia', 'Jeux vidéo', 'Mode', 'Loisirs', 'Outillage', 'Vélos', 'Camping'];
+const MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+const F = (n) => (Number(n) || 0).toLocaleString('fr-FR').replace(/\u202f|\u00a0/g, ' ') + ' F';
+const D = (iso) => { if (!iso) return ''; const [y, m, d] = iso.split('-'); return `${Number(d)} ${MONTHS[Number(m) - 1]}`; };
+
+const ICONS = {
+  vente: 'M12 2H2v10l9.3 9.3a1 1 0 0 0 1.4 0l8.6-8.6a1 1 0 0 0 0-1.4Z M7 7h.01',
+  troc: 'M16 3l4 4-4 4 M20 7H4 M8 21l-4-4 4-4 M4 17h16',
+  bonplan: 'M19 5 5 19 M6.5 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z M17.5 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z',
+  covoit: 'M3 17v-5l2.2-5.2A2 2 0 0 1 7 5.5h10a2 2 0 0 1 1.8 1.3L21 12v5 M3 12h18 M7 17a2 2 0 1 0 0 .01 M17 17a2 2 0 1 0 0 .01',
+  event: 'M3 5h18v16H3z M3 10h18 M8 3v4 M16 3v4',
+};
+
+const T = (id, label, o = {}) => ({ id, kind: 'text', label, ...o });
+const TA = (id, label, o = {}) => ({ id, kind: 'textarea', label, span: 2, ...o });
+const SEL = (id, label, options, o = {}) => ({ id, kind: 'select', label, options, ...o });
+const CH = (id, label, options, o = {}) => ({ id, kind: 'chips', label, options, span: 2, ...o });
+const SEG = (id, label, options, o = {}) => ({ id, kind: 'seg', label, options, span: 2, ...o });
+const M = (id, label, o = {}) => ({ id, kind: 'money', label, ...o });
+const TG = (id, label, help, o = {}) => ({ id, kind: 'toggle', label, help, span: 2, ...o });
+const RG = (id, label, o = {}) => ({ id, kind: 'range', label, span: 2, ...o });
+const N = (id, label, o = {}) => ({ id, kind: 'number', label, ...o });
+const PH = (id, label, o = {}) => ({ id, kind: 'photos', label, span: 2, req: true, ...o });
+
+const LIEU = {
+  id: 'lieu', label: 'Lieu et contact', title: 'Où se fait la remise ?', sub: 'La commune apparaît sur l\u2019annonce. Le quartier aide les acheteurs proches, l\u2019adresse exacte n\u2019est jamais affichée.',
+  fields: [
+    SEL('commune', 'Commune', COMMUNES, { req: true }),
+    T('quartier', 'Quartier ou lieu-dit', { opt: true, placeholder: 'Ex. Boulari' }),
+    CH('contact', 'Être contacté par', ['Messagerie Kalico', 'Téléphone'], { req: true }),
+    TG('showTel', 'Afficher mon numéro sur l\u2019annonce', 'Sinon, seuls les membres connectés peuvent vous écrire par la messagerie.'),
+  ],
+};
+const PUBLISH = { id: 'publish', label: 'Publication', title: 'Vérifiez et publiez', sub: 'Relisez votre annonce. Vous pourrez la modifier à tout moment depuis Mon compte.' };
+const DETAILS = (placeholder) => ({
+  id: 'details', label: 'Description', title: 'Décrivez votre objet', sub: 'Un titre précis et une description honnête évitent les allers-retours par message.',
+  fields: [
+    T('titre', 'Titre', { span: 2, req: true, max: 70, placeholder }),
+    SEL('categorie', 'Catégorie', CATS, { req: true }),
+    SEL('etat', 'État', ['Neuf', 'Très bon état', 'Bon état', 'État correct', 'À réparer'], { req: true }),
+    TA('description', 'Description', { req: true, max: 2000, placeholder: 'Dimensions, marque, ancienneté, défauts éventuels…' }),
+  ],
+});
+
+const TYPES = {
+  vente: {
+    label: 'Vente', desc: 'Vendez un objet, un véhicule ou un bien entre particuliers.', info: 'Gratuit · sans commission',
+    steps: [
+      { id: 'photos', label: 'Photos', title: 'Ajoutez vos photos', sub: 'Jusqu\u2019à 10 photos. La première sert de couverture dans les résultats.', fields: [PH('photos', 'Photos')] },
+      DETAILS('Ex. Planche de surf 6\u20194 avec housse'),
+      { id: 'prix', label: 'Prix', title: 'Fixez votre prix', sub: 'Regardez les annonces similaires : un prix juste se vend en moyenne trois fois plus vite.', fields: [
+        M('prix', 'Prix', { req: true, suffix: 'XPF', placeholder: '45 000' }),
+        { id: 'priceHint', kind: 'info' },
+        TG('negociable', 'Prix négociable', 'Les acheteurs pourront vous faire une offre depuis l\u2019annonce.'),
+        CH('remise', 'Mode de remise', ['En main propre', 'Envoi vers les Îles', 'Livraison par mes soins'], { req: true }),
+      ] },
+      LIEU, PUBLISH,
+    ],
+  },
+  troc: {
+    label: 'Troc', desc: 'Échangez un objet contre un autre, avec ou sans complément.', info: 'Gratuit · trocomètre inclus',
+    steps: [
+      { id: 'photos', label: 'Photos', title: 'Ajoutez vos photos', sub: 'Les troqueurs comparent avant d\u2019écrire : montrez bien l\u2019état réel.', fields: [PH('photos', 'Photos')] },
+      DETAILS('Ex. Planche de surf 7\u20192 mini-malibu'),
+      { id: 'echange', label: 'Échange', title: 'Qu\u2019aimeriez-vous en échange ?', sub: 'Ces informations alimentent le trocomètre : il compare votre objet à ceux qu\u2019on vous propose.', fields: [
+        M('valeur', 'Valeur estimée', { req: true, suffix: 'XPF', placeholder: '45 000', help: 'Sert uniquement à équilibrer la balance du trocomètre. Elle est affichée sur l\u2019annonce.' }),
+        { id: 'spacer', kind: 'info' },
+        CH('wants', 'Catégories recherchées', CATS, { req: true, help: 'Les membres qui ont une annonce dans ces catégories verront la vôtre comme compatible.' }),
+        TA('wish', 'Ce que vous aimeriez idéalement', { opt: true, max: 200, placeholder: 'Ex. Un kayak ou un paddle pour sortir en famille.' }),
+        RG('cashMax', 'Complément en argent accepté', { min: 0, max: 50000, step: 1000, help: 'Montant maximum que vous acceptez de verser ou de recevoir pour équilibrer un échange.' }),
+      ] },
+      LIEU, PUBLISH,
+    ],
+  },
+  bonplan: {
+    label: 'Bon plan', desc: 'Promotion, réduction ou offre spéciale de votre commerce.', info: 'Comptes Pro · vérifié sous 2 h',
+    steps: [
+      { id: 'photos', label: 'Visuel', title: 'Le visuel de votre offre', sub: 'Une photo du produit ou de la vitrine. Évitez les affiches chargées de texte, peu lisibles sur mobile.', fields: [PH('photos', 'Visuel')] },
+      { id: 'offre', label: 'Offre', title: 'Décrivez l\u2019offre', sub: 'Soyez précis sur ce qui est inclus. Les offres floues sont refusées à la vérification.', fields: [
+        T('titre', 'Titre de l\u2019offre', { span: 2, req: true, max: 70, placeholder: 'Ex. −30 % sur les planches de surf' }),
+        T('commerce', 'Commerce', { req: true, placeholder: 'Ex. Surf Shop Anse Vata' }),
+        SEL('categorie', 'Catégorie', ['Restauration', 'Sport & loisirs', 'Mode', 'Maison', 'Beauté', 'Services', 'Tourisme'], { req: true }),
+        SEG('typeRemise', 'Type de réduction', ['Pourcentage', 'Prix barré', 'Offert']),
+        RG('pct', 'Réduction', { min: 5, max: 70, step: 5, when: (v) => v.typeRemise === 'Pourcentage' }),
+        M('prixAvant', 'Prix habituel', { suffix: 'XPF', req: true, when: (v) => v.typeRemise === 'Prix barré' }),
+        M('prixApres', 'Prix remisé', { suffix: 'XPF', req: true, when: (v) => v.typeRemise === 'Prix barré' }),
+        T('offert', 'Ce qui est offert', { span: 2, req: true, placeholder: 'Ex. Un café offert pour une formule midi', when: (v) => v.typeRemise === 'Offert' }),
+        T('code', 'Code promo', { opt: true, placeholder: 'Ex. LAGON30' }),
+      ] },
+      { id: 'validite', label: 'Validité', title: 'Quand l\u2019offre est-elle valable ?', sub: 'L\u2019offre disparaît automatiquement des résultats à la date de fin.', fields: [
+        T('debut', 'Début', { inputType: 'date', req: true }),
+        T('fin', 'Fin', { inputType: 'date', req: true }),
+        N('stock', 'Nombre de coupons', { min: 0, max: 999, help: '0 = sans limite.' }),
+        { id: 'spacer', kind: 'info' },
+        TA('conditions', 'Conditions', { opt: true, max: 300, placeholder: 'Ex. Hors articles déjà soldés, une utilisation par client.' }),
+      ] },
+      { id: 'magasin', label: 'Où en profiter', title: 'Où en profiter ?', sub: 'Les bons plans sont d\u2019abord montrés aux membres de la même commune.', fields: [
+        SEG('mode', 'Canal', ['En magasin', 'En ligne', 'Les deux']),
+        T('adresse', 'Adresse du commerce', { span: 2, req: true, placeholder: 'Ex. 12 promenade Roger Laroque', when: (v) => v.mode !== 'En ligne' }),
+        SEL('commune', 'Commune', COMMUNES, { req: true, when: (v) => v.mode !== 'En ligne' }),
+        T('site', 'Lien vers l\u2019offre', { req: true, placeholder: 'https://', when: (v) => v.mode !== 'En magasin' }),
+      ] },
+      PUBLISH,
+    ],
+  },
+  covoit: {
+    label: 'Covoiturage', desc: 'Proposez des places dans votre véhicule sur un trajet.', info: 'Gratuit · sans commission',
+    steps: [
+      { id: 'trajet', label: 'Trajet', title: 'Où allez-vous ?', sub: 'Ajoutez les arrêts possibles sur la route : vous toucherez plus de passagers.', fields: [
+        SEL('depart', 'Départ', COMMUNES, { req: true }),
+        SEL('arrivee', 'Arrivée', COMMUNES, { req: true }),
+        T('rdv', 'Point de rendez-vous', { span: 2, opt: true, placeholder: 'Ex. Parking de la Baie de l\u2019Orphelinat' }),
+        CH('etapes', 'Arrêts possibles', ['Tontouta', 'Païta', 'Bouloupari', 'La Foa', 'Bourail', 'Poya', 'Pouembout'], { opt: true }),
+      ] },
+      { id: 'horaire', label: 'Date et heure', title: 'Quand partez-vous ?', sub: 'Pour un trajet régulier, une seule annonce suffit : elle se répète chaque semaine.', fields: [
+        SEG('frequence', 'Fréquence', ['Une fois', 'Aller-retour', 'Chaque semaine']),
+        T('date', 'Date', { inputType: 'date', req: true, when: (v) => v.frequence !== 'Chaque semaine' }),
+        T('heure', 'Heure de départ', { inputType: 'time', req: true }),
+        T('retour', 'Date du retour', { inputType: 'date', req: true, when: (v) => v.frequence === 'Aller-retour' }),
+        T('heureRetour', 'Heure du retour', { inputType: 'time', req: true, when: (v) => v.frequence === 'Aller-retour' }),
+        CH('jours', 'Jours', ['Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.', 'Dim.'], { req: true, when: (v) => v.frequence === 'Chaque semaine' }),
+      ] },
+      { id: 'places', label: 'Places et prix', title: 'Places et participation', sub: 'La participation couvre les frais d\u2019essence et de péage. Kalico ne prend aucune commission.', fields: [
+        N('places', 'Places disponibles', { min: 1, max: 7 }),
+        M('prix', 'Participation par place', { req: true, suffix: 'XPF' }),
+        SEG('bagages', 'Bagages acceptés', ['Petit sac', 'Valise', 'Volumineux']),
+        CH('prefs', 'Préférences', ['Non-fumeur', 'Animaux acceptés', 'Musique', 'Calme', 'Femmes uniquement'], { opt: true }),
+      ] },
+      { id: 'vehicule', label: 'Véhicule', title: 'Votre véhicule', sub: 'Pour que vos passagers vous reconnaissent au point de rendez-vous.', fields: [
+        T('modele', 'Modèle', { req: true, placeholder: 'Ex. Toyota Hilux' }),
+        T('couleur', 'Couleur', { req: true, placeholder: 'Ex. Blanc' }),
+        TG('instant', 'Réservation instantanée', 'Les passagers réservent sans attendre votre accord.'),
+      ] },
+      PUBLISH,
+    ],
+  },
+  event: {
+    label: 'Événement', desc: 'Concert, marché, vide-grenier, tournoi ou atelier.', info: 'Gratuit · agenda des communes',
+    steps: [
+      { id: 'photos', label: 'Affiche', title: 'L\u2019affiche de l\u2019événement', sub: 'Format paysage de préférence. Elle apparaît dans l\u2019agenda et sur la page Bons plans.', fields: [PH('photos', 'Affiche')] },
+      { id: 'infos', label: 'Informations', title: 'Présentez l\u2019événement', sub: 'Dites en une phrase ce que le public va vivre, puis détaillez le programme.', fields: [
+        T('titre', 'Nom de l\u2019événement', { span: 2, req: true, max: 80, placeholder: 'Ex. Marché nocturne de la Baie des Citrons' }),
+        SEL('categorie', 'Catégorie', ['Concert', 'Marché', 'Vide-grenier', 'Sport', 'Festival', 'Atelier', 'Exposition'], { req: true }),
+        T('orga', 'Organisateur', { req: true, placeholder: 'Ex. Association Citrons en fête' }),
+        TA('description', 'Programme', { req: true, max: 2000, placeholder: 'Horaires des animations, artistes, restauration sur place…' }),
+      ] },
+      { id: 'quand', label: 'Date et lieu', title: 'Quand et où ?', sub: 'L\u2019événement est rangé dans l\u2019agenda de la commune choisie.', fields: [
+        T('debut', 'Date de début', { inputType: 'date', req: true }),
+        T('heureDebut', 'Heure de début', { inputType: 'time', req: true }),
+        T('fin', 'Date de fin', { inputType: 'date', opt: true }),
+        T('heureFin', 'Heure de fin', { inputType: 'time', opt: true }),
+        T('lieu', 'Lieu', { req: true, placeholder: 'Ex. Place des Cocotiers' }),
+        SEL('commune', 'Commune', COMMUNES, { req: true }),
+      ] },
+      { id: 'billets', label: 'Accès', title: 'Comment y accéder ?', sub: 'Indiquez si l\u2019entrée est libre, payante ou sur inscription.', fields: [
+        SEG('acces', 'Entrée', ['Gratuite', 'Payante', 'Sur inscription']),
+        M('prix', 'Prix d\u2019entrée', { req: true, suffix: 'XPF', when: (v) => v.acces === 'Payante' }),
+        T('lien', 'Lien de billetterie ou d\u2019inscription', { span: 2, opt: true, placeholder: 'https://', when: (v) => v.acces !== 'Gratuite' }),
+        N('capacite', 'Capacité', { min: 0, max: 5000, step: 10, help: '0 = non précisée.' }),
+        TG('famille', 'Adapté aux enfants', 'Un badge « En famille » s\u2019affiche dans l\u2019agenda.'),
+      ] },
+      PUBLISH,
+    ],
+  },
+};
+const ORDER = ['vente', 'troc', 'bonplan', 'covoit', 'event'];
+const LABEL_TO_KEY = { 'Vente': 'vente', 'Troc': 'troc', 'Bon plan': 'bonplan', 'Covoiturage': 'covoit', 'Événement': 'event' };
+
+const DEFAULTS = {
+  vente: { photos: 3, titre: 'Planche de surf 6\u20194 avec housse', categorie: 'Nautisme', etat: 'Très bon état', description: 'Planche shapée localement, utilisée une saison à la Roche Percée. Housse et leash fournis, aucune réparation.', prix: '45000', negociable: true, remise: ['En main propre'], commune: 'Mont-Dore', quartier: 'Boulari', contact: ['Messagerie Kalico'], showTel: false },
+  troc: { photos: 2, titre: 'Planche de surf 7\u20192 mini-malibu', categorie: 'Nautisme', etat: 'Très bon état', description: 'Idéale pour débuter, très stable. Quelques marques d\u2019usage sur les rails.', valeur: '45000', wants: ['Nautisme', 'Vélos'], wish: 'Un kayak ou un paddle pour sortir en famille.', cashMax: 10000, commune: 'Nouméa', quartier: 'Magenta', contact: ['Messagerie Kalico'], showTel: false },
+  bonplan: { photos: 1, titre: '−30 % sur les planches de surf', commerce: 'Surf Shop Anse Vata', categorie: 'Sport & loisirs', typeRemise: 'Pourcentage', pct: 30, prixAvant: '65000', prixApres: '45500', offert: '', code: 'LAGON30', debut: '2026-10-01', fin: '2026-10-31', stock: 50, conditions: 'Hors planches déjà soldées. Une utilisation par client.', mode: 'En magasin', adresse: '12 promenade Roger Laroque', commune: 'Nouméa', site: '' },
+  covoit: { depart: 'Nouméa', arrivee: 'Koné', rdv: 'Parking de la Baie de l\u2019Orphelinat', etapes: ['Païta', 'Bourail'], frequence: 'Une fois', date: '2026-10-09', heure: '07:30', retour: '2026-10-11', heureRetour: '16:00', jours: ['Ven.'], places: 3, prix: '1600', bagages: 'Valise', prefs: ['Non-fumeur', 'Musique'], modele: 'Toyota Hilux', couleur: 'Blanc', instant: false },
+  event: { photos: 1, titre: 'Marché nocturne de la Baie des Citrons', categorie: 'Marché', orga: 'Association Citrons en fête', description: 'Artisans, producteurs et food trucks tout le long de la promenade. Concert à 20 h.', debut: '2026-10-17', heureDebut: '17:00', fin: '', heureFin: '22:00', lieu: 'Promenade de la Baie des Citrons', commune: 'Nouméa', acces: 'Gratuite', prix: '', lien: '', capacite: 0, famille: true },
+};
+
+const TIPS = {
+  type: 'Un doute sur le type ? Vous pourrez le changer tant que l\u2019annonce n\u2019est pas publiée.',
+  photos: 'Photographiez en lumière du jour, sur un fond neutre. Les annonces avec trois photos ou plus reçoivent deux fois plus de messages.',
+  details: 'Commencez le titre par l\u2019objet, puis la marque et la taille. Évitez « À saisir » ou « Urgent » : ils n\u2019aident pas la recherche.',
+  prix: 'Le prix s\u2019affiche en francs pacifiques. Arrondir au millier rend l\u2019annonce plus lisible.',
+  echange: 'Plus vous cochez de catégories, plus votre annonce sera proposée comme compatible dans le trocomètre des autres membres.',
+  lieu: 'Pour une remise en main propre, préférez un lieu public et fréquenté.',
+  offre: 'Un titre qui commence par la réduction (« −30 % », « 1 acheté = 1 offert ») est deux fois plus cliqué.',
+  validite: 'Une offre courte (moins de deux semaines) crée plus d\u2019urgence qu\u2019une offre permanente.',
+  magasin: 'Les membres reçoivent une alerte quand un bon plan est publié dans leur commune.',
+  trajet: 'Les passagers cherchent surtout par commune d\u2019arrivée. Un point de rendez-vous précis rassure.',
+  horaire: 'Publiez au moins 48 h à l\u2019avance : la plupart des réservations arrivent la veille.',
+  places: 'Prix conseillé calculé sur la distance et le prix du carburant en Nouvelle-Calédonie.',
+  vehicule: 'La réservation instantanée double le nombre de réservations, mais vous ne choisissez plus vos passagers.',
+  infos: 'Un nom court et concret se retient mieux. Le programme détaillé se lit sur la page de l\u2019événement.',
+  quand: 'Pour un événement sur plusieurs jours, indiquez la date de fin : il restera visible dans l\u2019agenda jusqu\u2019au bout.',
+  billets: 'Les événements gratuits apparaissent aussi dans la sélection « Ce week-end » de la page d\u2019accueil.',
+  publish: 'Votre annonce reste en ligne 60 jours. Kalico vous prévient avant son expiration.',
+};
+
+class Component extends DCLogic {
+  state = { type: null, step: null, values: JSON.parse(JSON.stringify(DEFAULTS)), boosts: {}, rules: true, done: null };
+
+  componentDidUpdate(prev) {
+    if (prev.typeAnnonce !== this.props.typeAnnonce || prev.etape !== this.props.etape) this.setState({ type: null, step: null, done: null });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const type = s.type ?? LABEL_TO_KEY[this.props.typeAnnonce ?? 'Vente'] ?? 'vente';
+    const def = TYPES[type];
+    const all = [{ id: 'type', label: 'Type d\u2019annonce', title: 'Que souhaitez-vous publier ?', sub: 'Chaque type a son propre formulaire, adapté à ce que les membres cherchent.' }, ...def.steps];
+    const etape = this.props.etape ?? 'Choix du type';
+    const propStep = { 'Choix du type': 0, 'Étape 2': 1, 'Publication': all.length - 1, 'Annonce publiée': all.length - 1 }[etape] ?? 0;
+    const idx = Math.min(s.step ?? propStep, all.length - 1);
+    const done = s.done ?? (etape === 'Annonce publiée');
+    const step = all[idx];
+    const v = s.values[type];
+    const setV = (id, val) => this.setState((st) => ({ values: { ...st.values, [type]: { ...st.values[type], [id]: val } } }));
+    const go = (i) => this.setState({ step: i, type, done: false });
+
+    const empty = (f) => {
+      const x = v[f.id];
+      if (f.kind === 'chips') return !x || x.length === 0;
+      if (f.kind === 'photos') return !x;
+      if (f.kind === 'money') return !(Number(String(x || '').replace(/\D/g, '')) > 0);
+      return x === undefined || x === null || String(x).trim() === '';
+    };
+    const visible = (st) => (st.fields || []).filter((f) => !f.when || f.when(v));
+    const stepValid = (st) => visible(st).every((f) => !f.req || !empty(f));
+
+    // prix conseillé covoiturage
+    const km = Math.abs((KM[v.depart] ?? 0) - (KM[v.arrivee] ?? 0));
+    const suggested = Math.max(300, Math.round((km * 6) / 100) * 100);
+
+    const fields = visible(step).map((f) => {
+      const val = v[f.id];
+      const kind = f.kind;
+      const onInput = (e) => setV(f.id, kind === 'money' ? e.target.value.replace(/[^\d]/g, '') : kind === 'range' ? Number(e.target.value) : e.target.value);
+      const base = {
+        col: f.span === 2 || kind === 'info' && false ? 'span 2' : 'span 1',
+        hasLabel: !['toggle', 'info'].includes(kind), label: f.label || '', optLabel: f.opt ? ' · facultatif' : '',
+        counter: f.max ? `${String(val || '').length} / ${f.max}` : '',
+        isText: kind === 'text', isMoney: kind === 'money', isTextarea: kind === 'textarea', isSelect: kind === 'select',
+        isChips: kind === 'chips' || kind === 'seg', isToggle: kind === 'toggle', isRange: kind === 'range', isNumber: kind === 'number', isPhotos: kind === 'photos',
+        value: kind === 'money' && val ? String(val) : val ?? '', inputType: f.inputType || 'text', placeholder: f.placeholder || '', suffix: f.suffix || '',
+        options: f.options || [], onInput, help: f.help || '', hasHelp: Boolean(f.help), helpColor: 'rgba(18,58,68,0.62)',
+      };
+      if (f.span === 2) base.col = 'span 2';
+      if (kind === 'chips' || kind === 'seg') {
+        const multi = kind === 'chips';
+        base.chipRadius = multi ? '9999px' : '10px';
+        base.opts = f.options.map((o) => {
+          const on = multi ? (val || []).includes(o) : val === o;
+          return {
+            label: o, bg: on ? '#123A44' : '#FEFAF3', border: on ? '#123A44' : '#E4D7C3', color: on ? '#FEFAF3' : '#123A44', checkDisplay: on && multi ? 'block' : 'none',
+            toggle: () => setV(f.id, multi ? (on ? val.filter((x) => x !== o) : [...(val || []), o]) : o),
+          };
+        });
+      }
+      if (kind === 'toggle') Object.assign(base, { toggleHelp: f.help, hasHelp: false, track: val ? '#123A44' : '#D5C4AC', knob: val ? '21px' : '3px', onToggle: () => setV(f.id, !val) });
+      if (kind === 'range') {
+        const pct = f.id === 'pct';
+        Object.assign(base, { min: f.min, max: f.max, step: f.step, rangeLabel: pct ? `−${val} %` : val ? F(val) : 'Aucun', rangeMinLabel: pct ? `${f.min} %` : '0 F', rangeMaxLabel: pct ? `${f.max} %` : F(f.max) });
+      }
+      if (kind === 'number') Object.assign(base, {
+        value: String(val ?? 0),
+        dec: () => setV(f.id, Math.max(f.min ?? 0, (val ?? 0) - (f.step || 1))),
+        inc: () => setV(f.id, Math.min(f.max ?? 99, (val ?? 0) + (f.step || 1))),
+      });
+      if (kind === 'photos') {
+        const n = val || 0;
+        base.counter = `${n} / 10`;
+        base.slots = Array.from({ length: 7 }, (_, i) => {
+          const filled = i < n;
+          const cover = i === 0;
+          return {
+            col: cover ? 'span 2' : 'auto', row: cover ? 'span 2' : 'auto',
+            border: filled ? '1px solid #E4D7C3' : '1.5px dashed #D5C4AC', bg: filled ? '#F3E9D8' : '#FEFAF3', motif: filled ? '0.07' : '0',
+            plusDisplay: filled ? 'none' : 'block', label: filled ? `photo ${i + 1}` : i === n ? 'Ajouter' : '',
+            font: filled ? "'IBM Plex Mono',monospace" : 'inherit', size: filled ? '11px' : '13px', weight: filled ? '400' : '600',
+            isCover: filled && cover,
+            click: () => setV(f.id, filled ? n - 1 : Math.min(10, n + 1)),
+          };
+        });
+        base.help = 'Glissez vos photos ici ou cliquez pour les choisir. JPG ou PNG, 10 Mo maximum.';
+        base.hasHelp = true;
+      }
+      if (f.id === 'priceHint') Object.assign(base, { col: 'span 1', hasHelp: true, help: 'Annonces similaires à Mont-Dore : entre 35 000 et 55 000 F.', helpColor: '#2E7B84' });
+      if (f.id === 'spacer') Object.assign(base, { hasHelp: false });
+      if (type === 'covoit' && f.id === 'prix') {
+        const cur = Number(val || 0);
+        Object.assign(base, { hasHelp: true, help: `Prix conseillé : ${F(suggested)} par place pour ${v.depart} → ${v.arrivee} (${km} km).`, helpColor: cur > suggested * 1.5 ? '#B0431C' : '#2E7B84' });
+      }
+      return base;
+    });
+
+    // aperçu
+    const pvBase = { hasPhoto: true, hasRoute: false, photoLabel: 'photo de couverture', badge: def.label, badgeBg: '#FEFAF3', badgeColor: '#123A44', kicker: '', title: v.titre || 'Titre de votre annonce', big: '', strike: '', bigNote: '', meta: '', hasChips: false, chips: [], chipsLabel: '' };
+    let pv;
+    if (type === 'vente') pv = { ...pvBase, kicker: v.categorie, big: v.prix ? F(v.prix) : '— F', bigNote: v.negociable ? 'négociable' : '', meta: [v.commune, v.etat].filter(Boolean).join(' · ') };
+    else if (type === 'troc') pv = { ...pvBase, badgeBg: '#123A44', badgeColor: '#FEFAF3', kicker: v.categorie, big: v.valeur ? F(v.valeur) : '— F', bigNote: 'valeur estimée', meta: [v.commune, v.etat].filter(Boolean).join(' · '), hasChips: (v.wants || []).length > 0, chips: v.wants || [], chipsLabel: 'Cherche' };
+    else if (type === 'bonplan') {
+      const pct = v.typeRemise === 'Pourcentage' ? `−${v.pct} %` : v.typeRemise === 'Prix barré' && Number(v.prixAvant) ? `−${Math.round((1 - Number(v.prixApres) / Number(v.prixAvant)) * 100)} %` : 'Offert';
+      pv = { ...pvBase, badge: pct, badgeBg: '#E8832A', badgeColor: '#0E2A31', kicker: v.commerce || 'Votre commerce', big: v.typeRemise === 'Prix barré' ? F(v.prixApres) : v.typeRemise === 'Offert' ? 'Offert' : pct, strike: v.typeRemise === 'Prix barré' ? F(v.prixAvant) : '', meta: [v.mode === 'En ligne' ? 'En ligne' : v.commune, v.fin ? `jusqu\u2019au ${D(v.fin)}` : ''].filter(Boolean).join(' · '), hasChips: Boolean(v.code), chips: v.code ? [v.code] : [], chipsLabel: 'Code' };
+    } else if (type === 'covoit') {
+      const when = v.frequence === 'Chaque semaine' ? `Chaque ${(v.jours || []).join(', ').toLowerCase() || 'semaine'}` : D(v.date);
+      pv = { ...pvBase, hasPhoto: false, hasRoute: true, from: v.depart, to: v.arrivee, via: (v.etapes || []).length ? `via ${(v.etapes || []).join(', ')}` : `${km} km`, kicker: `${when} · ${(v.heure || '').replace(':', ' h ')}`, title: `${v.modele || 'Véhicule'} ${v.couleur ? '· ' + v.couleur.toLowerCase() : ''}`, big: v.prix ? F(v.prix) : '— F', bigNote: 'par place', meta: `${v.places} place${v.places > 1 ? 's' : ''} · ${v.bagages}${v.frequence === 'Aller-retour' ? ' · aller-retour' : ''}`, hasChips: (v.prefs || []).length > 0, chips: v.prefs || [], chipsLabel: '' };
+    } else {
+      pv = { ...pvBase, photoLabel: 'affiche', badge: v.categorie, badgeBg: '#FEFAF3', kicker: `${D(v.debut)}${v.fin && v.fin !== v.debut ? ' → ' + D(v.fin) : ''} · ${(v.heureDebut || '').replace(':', ' h ')}`, big: v.acces === 'Payante' ? F(v.prix) : v.acces === 'Gratuite' ? 'Entrée libre' : 'Sur inscription', meta: [v.lieu, v.commune].filter(Boolean).join(' · '), hasChips: Boolean(v.famille), chips: v.famille ? ['En famille'] : [], chipsLabel: '' };
+    }
+
+    // publication
+    const recap = [];
+    def.steps.forEach((st, si) => {
+      visible(st).forEach((f) => {
+        if (['info', 'toggle'].includes(f.kind) || recap.length >= 8) return;
+        let x = v[f.id];
+        if (f.kind === 'photos') x = x ? `${x} photo${x > 1 ? 's' : ''}` : '';
+        else if (Array.isArray(x)) x = x.join(', ');
+        else if (f.kind === 'money') x = x ? F(x) : '';
+        else if (f.kind === 'range') x = f.id === 'pct' ? `−${x} %` : x ? F(x) : 'Aucun';
+        else if (f.inputType === 'date') x = D(x);
+        if (x === '' || x === undefined || x === null || x === 0) return;
+        recap.push({ label: f.label, value: String(x), edit: () => go(si + 1) });
+      });
+    });
+    const boostDefs = {
+      vente: [{ id: 'up', label: 'Remonter en tête', price: 500, desc: 'Votre annonce repasse en tête des résultats chaque jour pendant 7 jours.' }, { id: 'une', label: 'À la une', price: 1500, desc: 'Bandeau orange et place réservée en haut de la catégorie pendant 14 jours.' }],
+      troc: [{ id: 'up', label: 'Remonter en tête', price: 500, desc: 'Votre annonce repasse en tête du troc chaque jour pendant 7 jours.' }, { id: 'compat', label: 'Proposer aux compatibles', price: 800, desc: 'Les membres qui ont un objet dans vos catégories recherchées reçoivent une alerte.' }],
+      bonplan: [{ id: 'home', label: 'Page d\u2019accueil', price: 2000, desc: 'Votre offre dans le carrousel « Bons plans du moment » pendant toute sa durée.' }, { id: 'push', label: 'Alerte aux abonnés', price: 1000, desc: 'Notification envoyée aux membres de votre commune qui suivent la catégorie.' }],
+      event: [{ id: 'agenda', label: 'À la une de l\u2019agenda', price: 1500, desc: 'En tête de l\u2019agenda de la commune jusqu\u2019au jour de l\u2019événement.' }, { id: 'week', label: 'Sélection du week-end', price: 1000, desc: 'Sur la page d\u2019accueil le week-end précédant l\u2019événement.' }],
+      covoit: [],
+    }[type];
+    const bsel = s.boosts[type] || [];
+    const total = boostDefs.filter((b) => bsel.includes(b.id)).reduce((a, b) => a + b.price, 0);
+    const box = (on) => ({ boxBg: on ? '#123A44' : '#FEFAF3', boxBorder: on ? '#123A44' : '#D5C4AC', check: on ? '1' : '0' });
+
+    const isPublish = step.id === 'publish';
+    const valid = step.id === 'type' ? true : isPublish ? s.rules : stepValid(step);
+    const verb = { vente: 'Publier mon annonce', troc: 'Publier mon troc', bonplan: 'Envoyer en vérification', covoit: 'Publier mon trajet', event: 'Publier l\u2019événement' }[type];
+    const ctaLabel = isPublish ? (total ? `${verb} · ${F(total)}` : verb) : 'Continuer';
+    const missing = visible(step).filter((f) => f.req && empty(f)).map((f) => f.label.toLowerCase());
+
+    const doneCopy = {
+      vente: ['En ligne', 'Votre annonce est en ligne.', 'Elle apparaît dès maintenant dans les résultats et dans les alertes des membres qui cherchent un objet similaire.', 'Voir mon annonce', 'Annonce v2.dc.html'],
+      troc: ['En ligne', 'Votre troc est en ligne.', 'Il apparaît comme compatible dans le trocomètre des membres qui ont un objet dans vos catégories recherchées.', 'Voir dans le troc', 'Troc v2.dc.html'],
+      bonplan: ['En vérification', 'Votre bon plan est en cours de vérification.', 'Un modérateur vérifie l\u2019offre sous deux heures ouvrées. Vous recevez un e-mail dès sa publication.', 'Voir les bons plans', 'Bons plans v2.dc.html'],
+      covoit: ['En ligne', 'Votre trajet est publié.', 'Les passagers peuvent réserver dès maintenant. Vous recevez une notification à chaque demande.', 'Voir mon trajet', 'Covoiturage v2.dc.html'],
+      event: ['En ligne', 'Votre événement est dans l\u2019agenda.', 'Il apparaît dans l\u2019agenda de la commune et sur la page Bons plans jusqu\u2019au jour J.', 'Voir l\u2019agenda', 'Bons plans v2.dc.html'],
+    }[type];
+    const doneNext = {
+      vente: ['Répondez vite : les acheteurs contactent souvent plusieurs vendeurs.', 'Baissez le prix depuis Mon compte si l\u2019annonce ne reçoit rien en une semaine.', 'Marquez-la comme vendue pour qu\u2019elle disparaisse des résultats.'],
+      troc: ['Vous recevez les propositions avec leur balance du trocomètre.', 'Acceptez, refusez ou faites une contre-proposition depuis la messagerie.', 'Marquez l\u2019annonce comme troquée après l\u2019échange.'],
+      bonplan: ['Suivez les vues et les coupons utilisés depuis votre espace Pro.', 'Prolongez l\u2019offre avant sa date de fin si elle fonctionne.', 'Répondez aux questions des clients dans la messagerie.'],
+      covoit: ['Acceptez ou refusez les demandes si la réservation instantanée est désactivée.', 'Le numéro des passagers s\u2019affiche 24 h avant le départ.', 'Laissez un avis après le trajet.'],
+      event: ['Partagez le lien de l\u2019événement sur vos réseaux.', 'Modifiez les horaires à tout moment : les intéressés sont prévenus.', 'Les membres qui cliquent « J\u2019y vais » reçoivent un rappel la veille.'],
+    }[type].map((t, i) => ({ n: String(i + 1), t }));
+
+    return {
+      typeLabel: def.label, typeIcon: ICONS[type],
+      rail: all.map((st, i) => {
+        const active = i === idx && !done, past = i < idx || done;
+        const reach = past || active || (i === idx + 1 && valid);
+        return {
+          n: past ? '✓' : String(i + 1), label: st.label,
+          bg: active ? '#F3E9D8' : 'transparent', weight: active ? '600' : '500', color: past || active ? '#123A44' : 'rgba(18,58,68,0.62)',
+          dotBg: active ? '#123A44' : past ? 'rgba(110,154,106,0.16)' : '#FEFAF3', dotBorder: active ? '#123A44' : past ? 'rgba(110,154,106,0.4)' : '#E4D7C3', dotColor: active ? '#FEFAF3' : past ? '#3F6B3C' : 'rgba(18,58,68,0.62)',
+          cursor: reach ? 'pointer' : 'default', select: () => { if (reach) go(i); },
+        };
+      }),
+      progress: `${Math.round(((done ? all.length : idx) / all.length) * 100)}%`,
+      progressLabel: done ? 'Publiée' : `${Math.round((idx / all.length) * 100)} % complété · environ ${Math.max(1, all.length - idx)} min restantes`,
+
+      notDone: !done, isDone: done,
+      eyebrow: `Étape ${idx + 1} sur ${all.length} · ${def.label}`, stepTitle: step.title, stepSub: step.sub,
+      isTypeStep: step.id === 'type',
+      typeCards: ORDER.map((k) => {
+        const on = k === type, t = TYPES[k];
+        return {
+          label: t.label, desc: t.desc, info: `${t.info} · ${t.steps.length + 1} étapes`, icon: ICONS[k],
+          bg: on ? '#0E2A31' : '#FEFAF3', border: on ? '#0E2A31' : '#E4D7C3', ink: on ? '#FBF6EC' : '#123A44', muted: on ? 'rgba(251,246,236,0.72)' : 'rgba(18,58,68,0.68)', meta: on ? '#E8832A' : '#9E4E06',
+          iconBg: on ? 'rgba(232,131,42,0.2)' : '#F3E9D8', iconColor: on ? '#E8832A' : '#123A44',
+          select: () => this.setState({ type: k, step: 0, done: false }),
+        };
+      }),
+      hasFields: fields.length > 0, fields,
+
+      isPublish, recap,
+      hasBoosts: isPublish && boostDefs.length > 0, noBoosts: isPublish && boostDefs.length === 0,
+      noBoostText: 'Le covoiturage est gratuit et sans commission. Votre trajet est visible par tous les membres dès la publication.',
+      boosts: boostDefs.map((b) => {
+        const on = bsel.includes(b.id);
+        return { ...b, price: F(b.price), ...box(on), bg: on ? '#FEFAF3' : '#FBF6EC', border: on ? '#123A44' : '#E4D7C3', toggle: () => this.setState((st) => ({ boosts: { ...st.boosts, [type]: on ? bsel.filter((x) => x !== b.id) : [...bsel, b.id] } })) };
+      }),
+      ...Object.fromEntries(Object.entries(box(s.rules)).map(([k, x]) => ['rules' + k.slice(3), x])),
+      rulesText: type === 'covoit' ? 'Je certifie avoir le permis, une assurance valide et ne pas faire de bénéfice sur ce trajet.' : 'Je certifie que cette annonce respecte les règles de publication de Kalico et que les informations sont exactes.',
+      toggleRules: () => this.setState((st) => ({ rules: !st.rules })),
+
+      canBack: idx > 0, back: () => go(idx - 1),
+      next: () => { if (!valid) return; if (isPublish) this.setState({ done: true, type, step: idx }); else go(idx + 1); },
+      ctaLabel,
+      ctaBg: valid ? '#A94F0A' : '#F3E9D8', ctaBorder: valid ? '#A94F0A' : '#E4D7C3', ctaColor: valid ? '#FEFAF3' : 'rgba(18,58,68,0.55)',
+      ctaShadow: valid ? '0 2px 12px rgba(169,79,10,0.22)' : 'none', ctaCursor: valid ? 'pointer' : 'not-allowed',
+      ctaHint: !valid ? (isPublish ? 'Cochez la certification pour publier.' : `À compléter : ${missing.join(', ')}.`) : isPublish ? (total ? 'Paiement par carte à l\u2019étape suivante.' : 'Publication gratuite.') : 'Brouillon enregistré à chaque étape.',
+      hintColor: valid ? 'rgba(18,58,68,0.62)' : '#B0431C',
+
+      doneBadge: doneCopy[0], doneBadgeBg: type === 'bonplan' ? 'rgba(232,131,42,0.14)' : 'rgba(110,154,106,0.14)', doneBadgeColor: type === 'bonplan' ? '#9E4E06' : '#3F6B3C',
+      doneTitle: doneCopy[1], doneBody: doneCopy[2], doneCta: doneCopy[3], doneHref: doneCopy[4], doneNext,
+      restart: () => this.setState({ step: 0, done: false }),
+
+      pv, hasTip: !done, tip: TIPS[step.id] || '',
+    };
+  }
+}
+
+</script>
+</body>
+</html>
