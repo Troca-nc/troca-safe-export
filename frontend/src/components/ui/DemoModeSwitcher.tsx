@@ -22,8 +22,8 @@ const PROFILE_TONE: Record<Exclude<DemoProfileKey, 'visitor'> | 'visitor', {
   chip: string
 }> = {
   visitor: { pill: 'bg-night/5 text-night/60', chip: 'bg-night/5 text-night/70' },
-  particulier: { pill: 'bg-kalico-blue/10 text-kalico-blue', chip: 'bg-kalico-blue text-white' },
-  pro: { pill: 'bg-ocean/10 text-ocean', chip: 'bg-ocean text-white' },
+  particulier: { pill: 'bg-kalico-blue/10 text-kalico-blue', chip: 'bg-kalico-blue text-cream-surface' },
+  pro: { pill: 'bg-ocean/10 text-ocean', chip: 'bg-ocean text-cream-surface' },
   bon_plan: { pill: 'bg-lagoon/15 text-night', chip: 'bg-lagoon text-night' },
 }
 
@@ -52,7 +52,7 @@ export default function DemoModeSwitcher() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={`flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left shadow-sm transition hover:shadow-md ${
-          demoProfile ? 'border-kalico-blue/20 bg-white' : 'border-night/10 bg-white'
+          demoProfile ? 'border-kalico-blue/20 bg-cream-surface dark:bg-[var(--color-surface)]' : 'border-night/10 bg-cream-surface dark:bg-[var(--color-surface)]'
         }`}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -63,12 +63,12 @@ export default function DemoModeSwitcher() {
             <Sparkles className="h-4 w-4" />
           </span>
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">Mode démo</p>
+            <p className="text-caption font-semibold uppercase tracking-[0.2em] text-kalico-blue/80">Mode démo</p>
             <p className="text-sm font-semibold text-night">{currentLabel}</p>
             <p className="text-xs text-night/55">{currentDescription}</p>
           </div>
         </div>
-        <div className={`hidden rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] sm:inline-flex ${tone.chip}`}>
+        <div className={`hidden rounded-full px-3 py-1 text-caption font-semibold uppercase tracking-[0.18em] sm:inline-flex ${tone.chip}`}>
           {demoProfile || inferredProfile ? 'Profil actif' : 'Mode réel'}
         </div>
         <ChevronDown className={`h-4 w-4 text-night/45 transition-transform ${open ? 'rotate-180' : ''}`} />
@@ -85,9 +85,10 @@ export default function DemoModeSwitcher() {
           <div
             id="demo-mode-menu"
             role="menu"
+            tabIndex={-1}
             aria-label="Sélecteur de mode démo"
             onKeyDown={(e) => { if (e.key === 'Escape') setOpen(false) }}
-            className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-2xl border border-night/10 bg-white shadow-[0_18px_60px_rgba(8,32,50,0.14)]"
+            className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-2xl border border-night/10 bg-cream-surface dark:bg-[var(--color-surface)] shadow-[0_18px_60px_rgba(8,32,50,0.14)]"
           >
             <button
               type="button"
@@ -100,7 +101,7 @@ export default function DemoModeSwitcher() {
                 !demoProfile ? 'bg-kalico-blue/5' : 'hover:bg-sand'
               }`}
             >
-              <span className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-2xl ${!demoProfile ? 'bg-kalico-blue text-white' : 'bg-night/5 text-night/65'}`}>
+              <span className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-2xl ${!demoProfile ? 'bg-kalico-blue text-cream-surface' : 'bg-night/5 text-night/65'}`}>
                 <Sparkles className="h-4 w-4" />
               </span>
               <div className="min-w-0 flex-1">
@@ -124,7 +125,7 @@ export default function DemoModeSwitcher() {
                     active ? 'bg-kalico-blue/5' : 'hover:bg-sand'
                   }`}
                 >
-                  <span className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-2xl ${active ? 'bg-kalico-blue text-white' : 'bg-night/5 text-night/65'}`}>
+                  <span className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-2xl ${active ? 'bg-kalico-blue text-cream-surface' : 'bg-night/5 text-night/65'}`}>
                     <Icon className="h-4 w-4" />
                   </span>
                   <div className="min-w-0 flex-1">
@@ -132,7 +133,7 @@ export default function DemoModeSwitcher() {
                     <p className="text-xs text-night/55">{option.description}</p>
                   </div>
                   {active && (
-                    <span className="rounded-full bg-kalico-blue px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">
+                    <span className="rounded-full bg-kalico-blue px-2.5 py-1 text-caption font-semibold uppercase tracking-[0.16em] text-cream-surface">
                       Actif
                     </span>
                   )}

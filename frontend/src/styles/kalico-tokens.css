@@ -12,13 +12,13 @@
       --night, --nc-*) sont dépréciées : voir la table de migration en bas.
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap');
 
 :root {
   /* ---------- Typographie ---------- */
-  --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
-  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-display: var(--font-kalico-display, Georgia), Georgia, serif;
+  --font-body: var(--font-kalico-body, system-ui), system-ui, sans-serif;
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-kalico-mono, monospace), monospace;
 
   /* ---------- Marque & action ---------- */
   --color-accent: #e8832a;              /* aplats, pastilles, gros display — JAMAIS de texte crème dessus */
@@ -34,6 +34,7 @@
   --color-text-subtle: rgba(18, 58, 68, 0.55);
   --color-text-faint: rgba(18, 58, 68, 0.42);   /* placeholders uniquement */
   --color-deep: #0e2a31;
+  --color-modal-overlay: rgb(14 42 49 / 62%);
 
   /* ---------- Fonds ---------- */
   --color-bg: #fbf6ec;
@@ -83,6 +84,7 @@
   --space-24: 96px;
 
   /* ---------- Rayons (trois valeurs + pastille, aucune autre) ---------- */
+  --radius-checkbox: 6px;
   --radius-control: 10px;
   --radius-field: 11px;
   --radius-card: 16px;
@@ -94,6 +96,9 @@
   --shadow-raised: 0 6px 24px rgba(18, 58, 68, 0.09);
   --shadow-panel: 0 8px 30px rgba(18, 58, 68, 0.1);
   --shadow-modal: 0 30px 90px rgba(14, 42, 49, 0.4);
+  /* Alias conservés pour les pages non encore migrées. */
+  --shadow-card-v2: var(--shadow-card);
+  --shadow-modal-v2: var(--shadow-modal);
   --shadow-accent: 0 2px 12px rgba(169, 79, 10, 0.22);
 
   /* ---------- Animation ---------- */

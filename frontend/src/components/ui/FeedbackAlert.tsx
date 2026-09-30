@@ -14,18 +14,18 @@ type FeedbackAlertProps = {
 
 const STYLES: Record<FeedbackTone, { root: string; icon: string; Icon: LucideIcon }> = {
   success: {
-    root: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-    icon: 'text-emerald-600',
+    root: 'border-reef/30 bg-reef/15 text-reef-text',
+    icon: 'text-reef-text',
     Icon: CheckCircle2,
   },
   error: {
-    root: 'border-red-200 bg-red-50 text-red-700',
-    icon: 'text-red-600',
+    root: 'border-alert-error/30 bg-alert-error/15 text-alert-error',
+    icon: 'text-alert-error',
     Icon: AlertCircle,
   },
   info: {
-    root: 'border-[#0A7EA4]/15 bg-nc-lagonLight text-[#0A7EA4]',
-    icon: 'text-[#0A7EA4]',
+    root: 'border-lagoon-text/15 bg-lagoon/15 text-lagoon-text',
+    icon: 'text-lagoon-text',
     Icon: Info,
   },
 }
@@ -35,7 +35,7 @@ export default function FeedbackAlert({ tone = 'info', title, children, classNam
   const Icon = config.Icon
 
   return (
-    <div className={`rounded-2xl border px-4 py-3 text-sm ${config.root} ${className}`.trim()}>
+    <div role={tone === 'error' ? 'alert' : 'status'} className={`rounded-2xl border px-4 py-3 text-body-sm ${config.root} ${className}`.trim()}>
       <div className="flex items-start gap-3">
         <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${config.icon}`} />
         <div className="min-w-0">

@@ -11,6 +11,7 @@ import { ThemeProvider } from '@/components/ui/ThemeProvider'
 import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider'
 import PaymentFailureBanner from '@/components/PaymentFailureBanner'
 import AuthRequiredModal from '@/components/auth/AuthRequiredModal'
+import { DemoRibbon } from '@/components/demo/DemoRibbon'
 import DemoBanner from '@/components/DemoBanner'
 import ToastCenter from '@/components/ui/ToastCenter'
 import OnboardingChecklist from '@/components/onboarding/OnboardingChecklist'
@@ -46,21 +47,21 @@ const instrumentSerif = Instrument_Serif({
   subsets: ['latin'],
   weight: '400',
   style: ['normal', 'italic'],
-  variable: '--font-display',
+  variable: '--font-kalico-display',
   display: 'swap',
 })
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
-  variable: '--font-body',
+  variable: '--font-kalico-body',
   display: 'swap',
 })
 
 const ibmPlexMono = IBM_Plex_Mono({
   subsets: ['latin'],
   weight: '400',
-  variable: '--font-mono',
+  variable: '--font-kalico-mono',
   display: 'swap',
 })
 
@@ -88,6 +89,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <JsonLd data={buildWebSiteSchema()} />
             <AnalyticsTracker />
             <DemoBanner />
+            <DemoRibbon />
             <ToastCenter />
             <PaymentFailureBanner />
             <AuthRequiredModal />

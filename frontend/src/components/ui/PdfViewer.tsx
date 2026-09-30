@@ -50,10 +50,10 @@ export default function PdfViewer({ url, onClose, title = 'Catalogue PDF' }: Pdf
   }
 
   return (
-    <div className={`flex h-full min-h-[70vh] w-full flex-col overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-white shadow-sm ${isFullscreen ? 'rounded-none' : ''}`}>
+    <div className={`flex h-full min-h-[70vh] w-full flex-col overflow-hidden rounded-[2rem] border border-[var(--color-border)] bg-cream-surface dark:bg-[var(--color-surface)] shadow-sm ${isFullscreen ? 'rounded-none' : ''}`}>
       <div className="flex items-center justify-between gap-3 border-b border-[var(--color-border)] px-4 py-3">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-nc-emeraude">{title}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-reef-text">{title}</p>
           <p className="text-sm text-night/55">Page {currentPage} / {totalPages || 0}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -125,7 +125,7 @@ export default function PdfViewer({ url, onClose, title = 'Catalogue PDF' }: Pdf
       </div>
 
       <div
-        className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-[linear-gradient(180deg,_#f8fafc,_#ffffff)] p-4"
+        className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-cream-sunken p-4"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -136,7 +136,7 @@ export default function PdfViewer({ url, onClose, title = 'Catalogue PDF' }: Pdf
         ) : error ? (
           <div className="max-w-xl rounded-[1.5rem] border border-amber-200 bg-amber-50 p-5 text-center text-sm text-amber-800">
             <p className="font-semibold">Impossible de charger le PDF.</p>
-            <a href={url} target="_blank" rel="noreferrer" className="mt-3 inline-flex rounded-2xl bg-[#0A7EA4] px-4 py-2.5 font-semibold text-white">
+            <a href={url} target="_blank" rel="noreferrer" className="mt-3 inline-flex rounded-2xl bg-accent-strong px-4 py-2.5 font-semibold text-cream-surface">
               Tï¿½lï¿½charger le fichier
             </a>
           </div>
@@ -144,10 +144,10 @@ export default function PdfViewer({ url, onClose, title = 'Catalogue PDF' }: Pdf
           <img
             src={pageImage}
             alt={`Page ${currentPage} du PDF`}
-            className="max-h-full max-w-full rounded-[1.25rem] border border-[var(--color-border)] bg-white shadow-lg"
+            className="max-h-full max-w-full rounded-[1.25rem] border border-[var(--color-border)] bg-cream-surface dark:bg-[var(--color-surface)] shadow-lg"
           />
         ) : (
-          <div className="rounded-[1.5rem] border border-dashed border-[var(--color-border)] bg-white px-6 py-10 text-sm text-night/55">
+          <div className="rounded-[1.5rem] border border-dashed border-[var(--color-border)] bg-cream-surface dark:bg-[var(--color-surface)] px-6 py-10 text-sm text-night/55">
             Aucun aperï¿½u disponible.
           </div>
         )}
@@ -163,7 +163,7 @@ export default function PdfViewer({ url, onClose, title = 'Catalogue PDF' }: Pdf
                 key={page}
                 type="button"
                 onClick={() => goToPage(page)}
-                className={`h-3.5 rounded-full transition ${active ? 'w-8 bg-[#0A7EA4]' : 'w-3.5 bg-night/25 hover:bg-night/40'}`}
+                className={`h-3.5 rounded-full transition ${active ? 'w-8 bg-accent-strong' : 'w-3.5 bg-night/25 hover:bg-night/40'}`}
                 aria-label={`Page ${page}`}
               />
             )

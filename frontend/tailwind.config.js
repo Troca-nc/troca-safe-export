@@ -196,3 +196,25 @@ module.exports = {
   },
   plugins: [],
 }
+
+// Fondations v2 : conserver les anciennes clés pendant la migration des pages.
+const legacyTheme = module.exports.theme.extend
+const v2Theme = require('./docs/design/tailwind.kalico.js').theme.extend
+for (const [group, values] of Object.entries(v2Theme)) {
+  const previous = legacyTheme[group] || {}
+  legacyTheme[group] = { ...previous, ...values }
+  if (group === 'colors') {
+    for (const [name, value] of Object.entries(values)) {
+      if (typeof value === 'object') legacyTheme.colors[name] = { ...previous[name], ...value }
+    }
+  }
+}
+legacyTheme.fontFamily = {
+  ...legacyTheme.fontFamily,
+  display: ['var(--font-display)', 'Georgia', 'serif'],
+  body: ['var(--font-body)', 'system-ui', 'sans-serif'],
+  sans: ['var(--font-body)', 'system-ui', 'sans-serif'],
+  mono: ['var(--font-mono)', 'monospace'],
+}
+
+legacyTheme.borderRadius.checkbox = "var(--radius-checkbox)"

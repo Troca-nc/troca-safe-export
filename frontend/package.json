@@ -5,11 +5,13 @@
   "scripts": {
     "check:design": "node scripts/check-design.mjs --changed",
     "check:launch": "node scripts/check-design.mjs --launch",
+    "test:design": "node --test scripts/check-design.test.mjs",
     "dev": "next dev -p 3000",
     "build": "next build",
     "check:encoding": "node ../scripts/check-encoding.js",
     "test": "echo 'No test suite configured' && exit 0",
-    "start": "next start"
+    "start": "next start",
+    "lint": "eslint src/components/ui src/components/demo src/app/dev/ui src/lib/demo.ts src/content/placeholders.ts --max-warnings=0"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.2",
@@ -41,9 +43,13 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.4.17",
+    "eslint": "^9.39.5",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "postcss": "^8.5.10",
     "tailwindcss": "^3.4.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.71.0"
   },
   "overrides": {
     "ws": "8.21.0",

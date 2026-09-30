@@ -38,7 +38,6 @@ export default function NotificationBell() {
   const panelRef = useRef<HTMLDivElement>(null)
   const panelId = 'notification-panel'
 
-  if (!hasHydrated || demoProfile) return null
 
   const unread = notifs.filter((n) => !n.read).length
 
@@ -97,6 +96,8 @@ export default function NotificationBell() {
     } catch {}
   }
 
+  if (!hasHydrated || demoProfile) return null
+
   return (
     <div ref={panelRef} className="relative">
       <button
@@ -112,7 +113,7 @@ export default function NotificationBell() {
       >
         <Bell size={20} />
         {unread > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[17px] h-[17px] bg-kalico-blue text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
+          <span className="absolute -top-0.5 -right-0.5 min-w-[17px] h-[17px] bg-kalico-blue text-cream-surface text-caption font-bold rounded-full flex items-center justify-center px-0.5">
             {unread > 9 ? '9+' : unread}
           </span>
         )}
@@ -122,6 +123,7 @@ export default function NotificationBell() {
         <div
           id={panelId}
           role="menu"
+          tabIndex={-1}
           aria-label="Centre de notifications"
           onKeyDown={(e) => {
             if (e.key === 'Escape') setOpen(false)
@@ -132,7 +134,7 @@ export default function NotificationBell() {
             <span className="text-sm font-semibold text-night">Notifications</span>
             <div className="flex items-center gap-2">
               {unread > 0 && (
-                <button type="button" onClick={markAllRead} className="text-[11px] text-kalico-blue hover:underline">
+                <button type="button" onClick={markAllRead} className="text-caption text-kalico-blue hover:underline">
                   Tout marquer comme lu
                 </button>
               )}
@@ -195,7 +197,7 @@ export default function NotificationBell() {
                     {n.title}
                   </p>
                   <p className="text-xs text-night/45 mt-0.5 line-clamp-2">{n.body}</p>
-                  <p className="text-[10px] text-night/30 mt-1">
+                  <p className="text-caption text-night/30 mt-1">
                     {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: fr })}
                   </p>
                 </div>

@@ -60,6 +60,9 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher…', clas
   const [activeIdx,   setActiveIdx]   = useState(-1)
   const debounceRef   = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Le focus est demandé explicitement par le parent (ex. ouverture de recherche).
+  useEffect(() => { if (autoFocus) inputRef.current?.focus() }, [autoFocus])
+
   // Suggestions initiales (historique) quand on focus sans texte
   const showHistory = useCallback(() => {
     const hist = getHistory()
@@ -233,7 +236,6 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher…', clas
             ref={inputRef}
             type="search"
             value={q}
-            autoFocus={autoFocus}
             placeholder={placeholder}
             aria-label="Rechercher une annonce, une commune ou une catégorie"
             aria-autocomplete="list"
@@ -244,7 +246,7 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher…', clas
             onChange={e => setQ(e.target.value)}
             onFocus={() => { if (!q) showHistory(); else setOpen(true) }}
             onKeyDown={handleKeyDown}
-            className="w-full bg-white border border-night/12 rounded-2xl pl-10 pr-10 py-3 text-sm text-night placeholder:text-night/35 outline-none focus:border-kalico-blue/50 focus:ring-2 focus:ring-kalico-blue/10 transition-all shadow-sm"
+            className="w-full bg-cream-surface dark:bg-[var(--color-surface)] border border-night/12 rounded-2xl pl-10 pr-10 py-3 text-sm text-night placeholder:text-night/35 outline-none focus:border-kalico-blue/50 focus:ring-2 focus:ring-kalico-blue/10 transition-all shadow-sm"
             autoComplete="off"
           />
           {q && (
@@ -266,18 +268,18 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher…', clas
           id={listboxId}
           role="listbox"
           aria-label="Suggestions de recherche"
-          className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-night/10 rounded-2xl shadow-xl z-50 overflow-hidden"
+          className="absolute top-full left-0 right-0 mt-1.5 bg-cream-surface dark:bg-[var(--color-surface)] border border-night/10 rounded-2xl shadow-xl z-50 overflow-hidden"
         >
           {/* Header historique */}
           {!q && suggestions.length > 0 && (
             <div className="flex items-center justify-between px-4 py-2 border-b border-night/6">
-              <span className="text-[11px] text-night/40 font-medium uppercase tracking-wide">
+              <span className="text-caption text-night/40 font-medium uppercase tracking-wide">
                 Recherches récentes
               </span>
               <button
                 type="button"
                 onClick={() => { clearHistory(); setSuggestions([]); setOpen(false) }}
-                className="text-[11px] text-night/60 hover:text-kalico-blue transition-colors"
+                className="text-caption text-night/60 hover:text-kalico-blue transition-colors"
               >
                 Effacer
               </button>
@@ -316,7 +318,7 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher…', clas
                   }
                 </span>
                 {s.sub && (
-                  <span className="text-[11px] text-night/60">{s.sub}</span>
+                  <span className="text-caption text-night/60">{s.sub}</span>
                 )}
               </span>
             </button>
@@ -333,7 +335,7 @@ export default function SearchAutocomplete({ placeholder = 'Rechercher…', clas
           {q && !loading && (
             <button
               type="button"
-              onClick={handleSubmit as any}
+              onClick={handleSubmit}
               className="w-full flex items-center gap-2 px-4 py-3 text-sm text-kalico-blue font-medium border-t border-night/6 hover:bg-kalico-blue/5 transition-colors"
             >
               <Search size={14} />
