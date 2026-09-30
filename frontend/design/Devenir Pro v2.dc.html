@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#FBF6EC; -webkit-font-smoothing:antialiased; }
+  a { color:#2E7B84; text-decoration:none; }
+  a:hover { color:#123A44; }
+  input::placeholder, textarea::placeholder { color:rgba(18,58,68,0.42); }
+</style>
+</helmet>
+
+<div style="width:1440px;min-height:100vh;background:#FBF6EC;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#123A44">
+
+  <!-- ===== HEADER (connecté) ===== -->
+  <header style="position:sticky;top:0;z-index:40;height:88px;background:#FBF6EC;border-bottom:1px solid #E4D7C3">
+    <div style="display:flex;height:88px;align-items:center;gap:20px;padding:0 48px">
+      <a href="Accueil v2.dc.html" style="display:flex;flex-shrink:0;align-items:center;gap:10px">
+        <img src="assets/kalico1.svg" alt="Kalico" style="height:46px;width:auto;display:block" />
+        <span style="font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1;color:#123A44;letter-spacing:-0.01em">Kalico</span>
+      </a>
+      <nav style="display:flex;align-items:center;gap:2px;margin-left:auto">
+        <a href="Annonces v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44" style-hover="background:#F3E9D8">Annonces</a>
+        <a href="Bons plans v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44" style-hover="background:#F3E9D8">Bons plans</a>
+        <a href="Pros côté client v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44" style-hover="background:#F3E9D8">Pros</a>
+        <a href="Covoiturage v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44" style-hover="background:#F3E9D8">Covoiturage</a>
+      </nav>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;padding-left:14px;border-left:1px solid #E4D7C3">
+        <a href="Mon compte v2.dc.html" style="display:flex;align-items:center;gap:9px;height:44px;padding:0 12px 0 6px;border-radius:10px;border:1px solid #E4D7C3;background:#FEFAF3;color:#123A44" style-hover="border-color:#123A44">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9999px;background:rgba(85,173,179,0.14);color:#2E7B84;font-size:12px;font-weight:600">LG</span>
+          <span style="font-size:15px;font-weight:600">Loïc</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== EN-TÊTE ===== -->
+  <section style="position:relative;overflow:hidden;border-bottom:1px solid #E4D7C3">
+    <div style="position:absolute;inset:0;pointer-events:none;opacity:0.045;background-image:repeating-linear-gradient(45deg,#123A44 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#123A44 0 1px,transparent 1px 9px)"></div>
+    <div style="position:relative;padding:36px 48px 48px">
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(18,58,68,0.62)">
+        <a href="Mon compte v2.dc.html" style="color:rgba(18,58,68,0.62)">Mon compte</a>
+        <span>/</span>
+        <span style="color:#123A44;font-weight:600">Devenir Pro</span>
+      </div>
+      <div style="margin-top:28px;display:grid;grid-template-columns:1fr 420px;gap:64px;align-items:end">
+        <div>
+          <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">Kalico Pro · trois mois offerts</p>
+          <h1 style="margin:16px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:70px;line-height:0.99;letter-spacing:-0.015em;max-width:780px;text-wrap:balance">Passez votre compte en Pro.</h1>
+          <p style="margin:20px 0 0;font-size:19px;line-height:1.6;color:rgba(18,58,68,0.68);max-width:640px;text-wrap:pretty">Quatre informations, et votre vitrine apparaît dans l'annuaire des pros. Vous ne recréez rien : votre compte actuel devient votre compte Pro.</p>
+        </div>
+        <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;padding:20px 22px">
+          <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.55)">Conservé à l'identique</p>
+          <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px 16px">
+            <sc-for list="{{ kept }}" as="k" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:9px;font-size:15px;color:#123A44">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#6E9A6A" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px;flex-shrink:0"><path d="M20 6 9 17l-5-5"></path></svg>
+                {{ k }}
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CORPS ===== -->
+  <div style="display:grid;grid-template-columns:1fr 400px;gap:48px;padding:48px 48px 0;align-items:start">
+
+    <main style="display:flex;flex-direction:column;gap:20px;min-width:0">
+
+      <!-- 1. Entreprise -->
+      <section style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);padding:28px 30px">
+        <div style="display:flex;align-items:baseline;gap:14px">
+          <span style="font-family:'Instrument Serif',Georgia,serif;font-size:32px;line-height:1;color:#9E4E06">1</span>
+          <div>
+            <h2 style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:32px;line-height:1.08">Votre entreprise</h2>
+            <p style="margin:6px 0 0;font-size:15px;color:rgba(18,58,68,0.62)">Le RIDET est vérifié auprès du registre de l'ISEE. Les champs se remplissent tout seuls.</p>
+          </div>
+        </div>
+
+        <div style="margin-top:24px;display:grid;grid-template-columns:320px 1fr;gap:16px;align-items:start">
+          <label style="display:block">
+            <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Numéro RIDET</span>
+            <input value="{{ ridet }}" onChange="{{ onRidet }}" placeholder="1 234 567.001" style="margin-top:8px;width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid {{ ridetBorder }};background:#FBF6EC;padding:0 15px;font-family:'IBM Plex Mono',monospace;font-size:16px;color:#123A44;outline:none" />
+            <span style="display:block;margin-top:7px;font-size:13px;color:{{ ridetHelpColor }}">{{ ridetHelp }}</span>
+          </label>
+
+          <sc-if value="{{ ridetFound }}" hint-placeholder-val="{{ true }}">
+            <div style="margin-top:29px;border-radius:12px;background:rgba(110,154,106,0.14);border:1px solid rgba(110,154,106,0.30);padding:14px 16px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#3F6B3C" stroke-width="2.5" stroke-linecap="round" style="width:14px;height:14px"><path d="M20 6 9 17l-5-5"></path></svg>
+                <span style="font-size:13px;font-weight:600;color:#3F6B3C">Entreprise trouvée au registre</span>
+              </div>
+              <p style="margin:8px 0 0;font-size:17px;font-weight:600;color:#123A44">Menuiserie Cocotier</p>
+              <p style="margin:4px 0 0;font-size:13px;line-height:1.5;color:rgba(18,58,68,0.68)">EURL · 14 rue Jules Garnier, Mont-Dore · Activité 16.23Z, menuiserie bois</p>
+            </div>
+          </sc-if>
+          <sc-if value="{{ ridetMissing }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:29px;border-radius:12px;background:rgba(184,92,0,0.14);border-left:3px solid #B85C00;padding:14px 16px">
+              <p style="margin:0;font-size:15px;font-weight:600;color:#8F480A">RIDET introuvable pour l'instant</p>
+              <p style="margin:5px 0 0;font-size:13px;line-height:1.5;color:rgba(18,58,68,0.68)">Entreprise créée récemment ? Continuez : ajoutez votre avis de situation, un modérateur valide sous 24 h.</p>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <label style="display:block">
+            <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Secteur d'activité</span>
+            <select style="margin-top:8px;width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 13px;font-size:16px;font-family:inherit;color:#123A44;cursor:pointer;outline:none">
+              <sc-for list="{{ sectors }}" as="sec" hint-placeholder-count="6">
+                <option>{{ sec }}</option>
+              </sc-for>
+            </select>
+          </label>
+          <label style="display:block">
+            <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Téléphone professionnel</span>
+            <div style="margin-top:8px;display:flex;align-items:center;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC">
+              <span style="flex-shrink:0;border-right:1px solid #E4D7C3;padding:0 13px;font-family:'IBM Plex Mono',monospace;font-size:15px;color:rgba(18,58,68,0.62);line-height:50px">+687</span>
+              <input value="78 42 16" style="min-width:0;flex:1;box-sizing:border-box;height:50px;border:0;background:transparent;padding:0 14px;font-family:'IBM Plex Mono',monospace;font-size:16px;color:#123A44;outline:none" />
+            </div>
+          </label>
+        </div>
+
+        <div style="margin-top:20px">
+          <p style="margin:0;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Zone d'intervention</p>
+          <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px">
+            <sc-for list="{{ zones }}" as="z" hint-placeholder-count="8">
+              <button onClick="{{ z.toggle }}" style="display:inline-flex;align-items:center;gap:6px;height:40px;border-radius:9999px;border:1px solid {{ z.border }};background:{{ z.bg }};padding:0 16px;font-size:15px;font-weight:500;font-family:inherit;color:{{ z.color }};cursor:pointer">{{ z.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Vitrine -->
+      <section style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);padding:28px 30px">
+        <div style="display:flex;align-items:baseline;gap:14px">
+          <span style="font-family:'Instrument Serif',Georgia,serif;font-size:32px;line-height:1;color:#9E4E06">2</span>
+          <div>
+            <h2 style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:32px;line-height:1.08">Votre vitrine</h2>
+            <p style="margin:6px 0 0;font-size:15px;color:rgba(18,58,68,0.62)">Ce que vos clients verront dans l'annuaire. Modifiable à tout moment.</p>
+          </div>
+        </div>
+
+        <div style="margin-top:24px;display:grid;grid-template-columns:140px 1fr;gap:24px">
+          <div>
+            <div style="position:relative;width:140px;height:140px;border-radius:16px;border:1px dashed #D5C4AC;background:#F3E9D8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(18,58,68,0.55)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m17 8-5-5-5 5"></path><path d="M12 3v12"></path></svg>
+              <span style="font-size:13px;font-weight:600;color:rgba(18,58,68,0.62)">Ajouter un logo</span>
+            </div>
+            <p style="margin:8px 0 0;font-size:12px;line-height:1.4;color:rgba(18,58,68,0.55)">Carré, 400 px minimum</p>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+            <label style="display:block">
+              <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Nom affiché</span>
+              <input value="{{ shopName }}" onChange="{{ onShopName }}" style="margin-top:8px;width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 15px;font-size:16px;font-family:inherit;color:#123A44;outline:none" />
+              <span style="display:block;margin-top:7px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:rgba(18,58,68,0.62)">kalico.nc/pros/<span style="color:#123A44">{{ slug }}</span></span>
+            </label>
+            <label style="display:block">
+              <span style="display:flex;justify-content:space-between;gap:12px">
+                <span style="font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Présentation</span>
+                <span style="font-size:13px;color:rgba(18,58,68,0.55)">{{ bioCount }} / 400</span>
+              </span>
+              <textarea value="{{ bio }}" onChange="{{ onBio }}" rows="4" style="margin-top:8px;width:100%;box-sizing:border-box;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:13px 15px;font-size:16px;line-height:1.55;font-family:inherit;color:#123A44;outline:none;resize:vertical"></textarea>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Formule -->
+      <section style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);padding:28px 30px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px">
+          <div style="display:flex;align-items:baseline;gap:14px">
+            <span style="font-family:'Instrument Serif',Georgia,serif;font-size:32px;line-height:1;color:#9E4E06">3</span>
+            <div>
+              <h2 style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:32px;line-height:1.08">Votre formule</h2>
+              <p style="margin:6px 0 0;font-size:15px;color:rgba(18,58,68,0.62)">Changement ou résiliation à tout moment depuis Mon compte.</p>
+            </div>
+          </div>
+          <div style="display:flex;flex-shrink:0;gap:3px;border-radius:12px;border:1px solid #E4D7C3;background:#F3E9D8;padding:3px">
+            <sc-for list="{{ periods }}" as="p" hint-placeholder-count="2">
+              <button onClick="{{ p.select }}" style="height:40px;border:0;border-radius:9px;background:{{ p.bg }};padding:0 18px;font-size:15px;font-weight:{{ p.weight }};font-family:inherit;color:{{ p.color }};cursor:pointer;box-shadow:{{ p.shadow }}">{{ p.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="margin-top:24px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px">
+          <sc-for list="{{ plans }}" as="pl" hint-placeholder-count="3">
+            <button onClick="{{ pl.select }}" style="display:flex;flex-direction:column;border:1px solid {{ pl.border }};border-radius:16px;background:{{ pl.bg }};padding:22px;font-family:inherit;cursor:pointer;text-align:left;color:{{ pl.ink }}">
+              <span style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:8px">
+                <span style="font-size:17px;font-weight:600">{{ pl.name }}</span>
+                <span style="display:flex;height:22px;width:22px;flex-shrink:0;align-items:center;justify-content:center;border-radius:9999px;border:1.5px solid {{ pl.radioBorder }};background:{{ pl.radioBg }}">
+                  <span style="height:8px;width:8px;border-radius:9999px;background:#0E2A31;opacity:{{ pl.radioDot }}"></span>
+                </span>
+              </span>
+              <span style="display:flex;align-items:baseline;gap:6px;margin-top:16px">
+                <span style="font-family:'Instrument Serif',Georgia,serif;font-size:36px;line-height:1">{{ pl.price }}</span>
+                <span style="font-size:13px;color:{{ pl.muted }}">{{ pl.unit }}</span>
+              </span>
+              <span style="display:block;margin-top:6px;min-height:18px;font-size:13px;font-weight:600;color:{{ pl.noteColor }}">{{ pl.note }}</span>
+              <span style="display:flex;flex-direction:column;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid {{ pl.divider }}">
+                <sc-for list="{{ pl.features }}" as="f" hint-placeholder-count="4">
+                  <span style="display:flex;gap:8px;font-size:13px;line-height:1.45;color:{{ pl.muted }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="{{ pl.check }}" stroke-width="2.5" stroke-linecap="round" style="width:13px;height:13px;flex-shrink:0;margin-top:3px"><path d="M20 6 9 17l-5-5"></path></svg>
+                    {{ f }}
+                  </span>
+                </sc-for>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+
+      <!-- 4. Paiement -->
+      <sc-if value="{{ needsPayment }}" hint-placeholder-val="{{ true }}">
+        <section style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);padding:28px 30px">
+          <div style="display:flex;align-items:baseline;gap:14px">
+            <span style="font-family:'Instrument Serif',Georgia,serif;font-size:32px;line-height:1;color:#9E4E06">4</span>
+            <div>
+              <h2 style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:32px;line-height:1.08">Moyen de paiement</h2>
+              <p style="margin:6px 0 0;font-size:15px;color:rgba(18,58,68,0.62)">{{ paymentNote }}</p>
+            </div>
+          </div>
+
+          <div style="margin-top:24px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+            <sc-for list="{{ payMethods }}" as="pm" hint-placeholder-count="3">
+              <button onClick="{{ pm.select }}" style="display:flex;align-items:center;gap:12px;height:60px;border:1px solid {{ pm.border }};border-radius:12px;background:{{ pm.bg }};padding:0 16px;font-family:inherit;cursor:pointer;text-align:left">
+                <span style="display:flex;height:20px;width:20px;flex-shrink:0;align-items:center;justify-content:center;border-radius:9999px;border:1.5px solid {{ pm.radioBorder }}">
+                  <span style="height:9px;width:9px;border-radius:9999px;background:#123A44;opacity:{{ pm.radioDot }}"></span>
+                </span>
+                <span style="display:block;min-width:0">
+                  <span style="display:block;font-size:15px;font-weight:600;color:#123A44">{{ pm.label }}</span>
+                  <span style="display:block;margin-top:2px;font-size:12px;color:rgba(18,58,68,0.62)">{{ pm.helper }}</span>
+                </span>
+              </button>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ payCard }}" hint-placeholder-val="{{ true }}">
+            <div style="margin-top:18px;display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px">
+              <label style="display:block">
+                <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Numéro de carte</span>
+                <input placeholder="1234 5678 9012 3456" style="margin-top:8px;width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 15px;font-family:'IBM Plex Mono',monospace;font-size:16px;color:#123A44;outline:none" />
+              </label>
+              <label style="display:block">
+                <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Expiration</span>
+                <input placeholder="MM / AA" style="margin-top:8px;width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 15px;font-family:'IBM Plex Mono',monospace;font-size:16px;color:#123A44;outline:none" />
+              </label>
+              <label style="display:block">
+                <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Cryptogramme</span>
+                <input placeholder="123" style="margin-top:8px;width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 15px;font-family:'IBM Plex Mono',monospace;font-size:16px;color:#123A44;outline:none" />
+              </label>
+            </div>
+          </sc-if>
+          <sc-if value="{{ payDebit }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:18px;display:grid;grid-template-columns:2fr 1fr;gap:16px">
+              <label style="display:block">
+                <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">IBAN</span>
+                <input placeholder="FR76 1469 0000 0000 0000 0000 000" style="margin-top:8px;width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 15px;font-family:'IBM Plex Mono',monospace;font-size:16px;color:#123A44;outline:none" />
+              </label>
+              <label style="display:block">
+                <span style="display:block;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Titulaire du compte</span>
+                <input placeholder="Menuiserie Cocotier" style="margin-top:8px;width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 15px;font-size:16px;font-family:inherit;color:#123A44;outline:none" />
+              </label>
+            </div>
+          </sc-if>
+          <sc-if value="{{ payTransfer }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:18px;border-radius:12px;background:#F3E9D8;padding:16px 18px">
+              <p style="margin:0;font-size:15px;line-height:1.55;color:rgba(18,58,68,0.72)">Une facture avec nos coordonnées bancaires vous est envoyée par e-mail à chaque échéance. Paiement sous 15 jours.</p>
+            </div>
+          </sc-if>
+        </section>
+      </sc-if>
+    </main>
+
+    <!-- ===== RÉCAPITULATIF ===== -->
+    <aside style="position:sticky;top:112px;display:flex;flex-direction:column;gap:16px">
+      <div style="position:relative;overflow:hidden;border-radius:24px;background:#0E2A31;color:#FBF6EC">
+        <div style="position:absolute;inset:0;pointer-events:none;opacity:0.09;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+        <div style="position:relative;padding:28px">
+          <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#E8832A">Récapitulatif</p>
+          <p style="margin:14px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:32px;line-height:1.08">{{ sumPlan }}</p>
+          <p style="margin:6px 0 0;font-size:15px;color:rgba(251,246,236,0.72)">{{ sumShop }}</p>
+
+          <div style="margin-top:22px;display:flex;flex-direction:column;gap:10px;padding-top:18px;border-top:1px solid rgba(251,246,236,0.16)">
+            <sc-for list="{{ sumLines }}" as="l" hint-placeholder-count="3">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;font-size:15px">
+                <span style="color:rgba(251,246,236,0.72)">{{ l.label }}</span>
+                <span style="font-weight:600;color:{{ l.color }};white-space:nowrap">{{ l.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="margin-top:18px;padding-top:18px;border-top:1px solid rgba(251,246,236,0.16);display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+            <span style="font-size:15px;font-weight:600">À payer aujourd'hui</span>
+            <span style="font-family:'Instrument Serif',Georgia,serif;font-size:44px;line-height:1">{{ dueToday }}</span>
+          </div>
+          <p style="margin:8px 0 0;font-size:13px;line-height:1.5;color:rgba(251,246,236,0.72)">{{ dueNote }}</p>
+
+          <button onClick="{{ submit }}" style="margin-top:24px;display:flex;width:100%;height:52px;align-items:center;justify-content:center;gap:9px;border:0;border-radius:10px;background:{{ ctaBg }};color:{{ ctaColor }};font-size:16px;font-weight:600;font-family:inherit;cursor:{{ ctaCursor }}">
+            {{ ctaLabel }}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+          </button>
+          <p style="margin:12px 0 0;font-size:13px;line-height:1.5;color:rgba(251,246,236,0.72)">{{ ctaHint }}</p>
+        </div>
+      </div>
+
+      <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;padding:20px 22px">
+        <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.55)">Ensuite</p>
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:12px">
+          <sc-for list="{{ after }}" as="a" hint-placeholder-count="3">
+            <div style="display:flex;gap:12px">
+              <span style="font-family:'Instrument Serif',Georgia,serif;font-size:22px;line-height:1;color:#9E4E06;width:14px;flex-shrink:0">{{ a.n }}</span>
+              <p style="margin:0;font-size:15px;line-height:1.5;color:rgba(18,58,68,0.72)">{{ a.t }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <p style="margin:0;font-size:13px;line-height:1.55;color:rgba(18,58,68,0.62)">Une question avant de passer Pro ? <a href="#" style="font-weight:600;color:#9E4E06">Écrire à l'équipe</a>, réponse sous une journée ouvrée.</p>
+    </aside>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer style="margin-top:80px;background:#0E2A31;color:#FBF6EC;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;opacity:0.07;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+    <div style="position:relative;padding:40px 48px;display:flex;align-items:center;justify-content:space-between;gap:24px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <img src="assets/kalico1.svg" alt="Kalico" style="height:40px;width:auto" />
+        <span style="font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:22px;color:rgba(251,246,236,0.85)">Nouvelle-Calédonie dans l'âme, Kalico dans la poche.</span>
+      </div>
+      <div style="display:flex;gap:24px;font-size:13px">
+        <a href="#" style="color:rgba(251,246,236,0.72)">CGV Pro</a>
+        <a href="#" style="color:rgba(251,246,236,0.72)">Confidentialité</a>
+        <a href="#" style="color:rgba(251,246,236,0.72)">contact@kalico.nc</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;etatRidet&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Trouvé&quot;,&quot;options&quot;:[&quot;Trouvé&quot;,&quot;Introuvable&quot;,&quot;Vide&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Parcours&quot;},&quot;periodicite&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Mensuel&quot;,&quot;options&quot;:[&quot;Mensuel&quot;,&quot;Annuel&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Parcours&quot;}}">
+const SECTORS = ['Bâtiment & travaux', 'Automobile', 'Immobilier', 'Commerce', 'Restauration', 'Tourisme & loisirs', 'Services à la personne', 'Autre'];
+const ZONES = ['Grand Nouméa', 'Nouméa', 'Dumbéa', 'Mont-Dore', 'Païta', 'Province Sud', 'Province Nord', 'Îles Loyauté'];
+
+class Component extends DCLogic {
+  state = {
+    ridet: null, period: null, plan: 'pro', pay: 'card',
+    zones: ['Grand Nouméa', 'Mont-Dore'],
+    shopName: 'Menuiserie Cocotier',
+    bio: 'Menuiserie bois sur mesure au Mont-Dore depuis 2011 : terrasses, cuisines, escaliers. Devis gratuit sous 48 h.',
+  };
+
+  componentDidUpdate(prev) {
+    if (prev.etatRidet !== this.props.etatRidet) this.setState({ ridet: null });
+    if (prev.periodicite !== this.props.periodicite) this.setState({ period: null });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const etat = this.props.etatRidet ?? 'Trouvé';
+    const ridet = s.ridet ?? (etat === 'Trouvé' ? '1 234 567.001' : etat === 'Introuvable' ? '1 398 210.001' : '');
+    const period = s.period ?? ((this.props.periodicite ?? 'Mensuel') === 'Annuel' ? 'year' : 'month');
+    const year = period === 'year';
+    const formatOk = /^\d[\d ]{6,}\.\d{3}$/.test(ridet.trim());
+    const found = formatOk && ridet.trim() !== '1 398 210.001' && etat !== 'Introuvable';
+    const missing = formatOk && !found;
+
+    const planDefs = [
+      { id: 'free', name: 'Découverte', price: '0 F', unit: 'pour toujours', note: '', features: ['5 annonces actives', 'Fiche dans l\u2019annuaire', 'Messagerie'] },
+      { id: 'pro', name: 'Kalico Pro', price: year ? '49 000 F' : '4 900 F', unit: year ? '/ an' : '/ mois', note: year ? '2 mois gratuits · 3 mois offerts' : '3 mois offerts', features: ['Annonces illimitées', 'Vitrine et badge Pro vérifié', 'Devis en XPF avec TGC', 'Statistiques par annonce'] },
+      { id: 'plus', name: 'Pro+', price: year ? '99 000 F' : '9 900 F', unit: year ? '/ an' : '/ mois', note: year ? '2 mois gratuits' : '', features: ['Tout Kalico Pro', '4 mises en avant / mois', 'Réservations en ligne', 'Jusqu\u2019à 5 collaborateurs'] },
+    ];
+    const plans = planDefs.map((p) => {
+      const on = s.plan === p.id;
+      return {
+        ...p,
+        bg: on ? '#0E2A31' : '#FBF6EC', border: on ? '#0E2A31' : '#E4D7C3',
+        ink: on ? '#FBF6EC' : '#123A44', muted: on ? 'rgba(251,246,236,0.72)' : 'rgba(18,58,68,0.68)',
+        noteColor: on ? '#E8832A' : '#9E4E06', divider: on ? 'rgba(251,246,236,0.16)' : '#EFE3D0',
+        check: on ? '#9FC79B' : '#6E9A6A',
+        radioBorder: on ? '#E8832A' : '#D5C4AC', radioBg: on ? '#E8832A' : 'transparent', radioDot: on ? '1' : '0',
+        select: () => this.setState({ plan: p.id }),
+      };
+    });
+    const plan = planDefs.find((p) => p.id === s.plan);
+    const paid = s.plan !== 'free';
+    const trial = s.plan === 'pro';
+
+    const seg = (on) => ({
+      bg: on ? '#FEFAF3' : 'transparent', color: on ? '#123A44' : 'rgba(18,58,68,0.62)',
+      weight: on ? '600' : '500', shadow: on ? '0 2px 8px rgba(18,58,68,0.10)' : 'none',
+    });
+
+    const payMethods = [
+      { id: 'card', label: 'Carte bancaire', helper: 'Visa, Mastercard, CB' },
+      { id: 'debit', label: 'Prélèvement', helper: 'Compte OPT ou banque locale' },
+      { id: 'transfer', label: 'Virement', helper: 'Sur facture, annuel uniquement' },
+    ].filter((m) => year || m.id !== 'transfer').map((m) => {
+      const on = s.pay === m.id;
+      return { ...m, bg: on ? '#FEFAF3' : '#FBF6EC', border: on ? '#123A44' : '#E4D7C3', radioBorder: on ? '#123A44' : '#D5C4AC', radioDot: on ? '1' : '0', select: () => this.setState({ pay: m.id }) };
+    });
+    const pay = !year && s.pay === 'transfer' ? 'card' : s.pay;
+
+    const slug = (s.shopName || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'votre-entreprise';
+    const canSubmit = formatOk && s.zones.length > 0 && (s.shopName || '').trim().length > 1;
+
+    const first = trial ? '29 décembre 2026' : '29 septembre 2026';
+    const sumLines = [
+      { label: 'Formule', value: paid ? `${plan.price} ${plan.unit}` : 'Gratuite', color: '#FBF6EC' },
+      trial ? { label: 'Période offerte', value: '3 mois', color: '#9FC79B' } : null,
+      paid ? { label: 'TGC', value: 'Incluse', color: '#FBF6EC' } : null,
+      paid ? { label: 'Première échéance', value: first, color: '#FBF6EC' } : null,
+      { label: 'Badge Pro vérifié', value: found ? 'Immédiat' : 'Sous 24 h', color: found ? '#9FC79B' : '#FBF6EC' },
+    ].filter(Boolean);
+
+    return {
+      kept: ['Vos 3 annonces', 'Vos 7 avis', 'Vos messages', 'Vos alertes'],
+      ridet, onRidet: (e) => this.setState({ ridet: e.target.value }),
+      ridetFound: found, ridetMissing: missing,
+      ridetBorder: found ? 'rgba(110,154,106,0.5)' : '#E4D7C3',
+      ridetHelp: found ? 'Vérifié au registre RIDET.' : missing ? 'Format valide, entreprise non trouvée.' : 'Format : 7 chiffres, un point, 3 chiffres.',
+      ridetHelpColor: found ? '#3F6B3C' : 'rgba(18,58,68,0.62)',
+      sectors: SECTORS,
+      zones: ZONES.map((z) => {
+        const on = s.zones.includes(z);
+        return {
+          label: z, bg: on ? '#123A44' : '#FBF6EC', border: on ? '#123A44' : '#E4D7C3', color: on ? '#FEFAF3' : '#123A44',
+          toggle: () => this.setState((st) => ({ zones: on ? st.zones.filter((x) => x !== z) : [...st.zones, z] })),
+        };
+      }),
+      shopName: s.shopName, onShopName: (e) => this.setState({ shopName: e.target.value }), slug,
+      bio: s.bio, onBio: (e) => this.setState({ bio: e.target.value.slice(0, 400) }), bioCount: (s.bio || '').length,
+      periods: [
+        { id: 'month', label: 'Mensuel' },
+        { id: 'year', label: 'Annuel · −17 %' },
+      ].map((p) => ({ ...p, ...seg(period === p.id), select: () => this.setState({ period: p.id }) })),
+      plans,
+      needsPayment: paid, payMethods,
+      payCard: pay === 'card', payDebit: pay === 'debit', payTransfer: pay === 'transfer',
+      paymentNote: trial ? 'Rien n\u2019est débité avant la fin des trois mois offerts. Rappel par e-mail 7 jours avant.' : 'Premier prélèvement aujourd\u2019hui, puis à chaque échéance.',
+      sumPlan: plan.name + (paid ? (year ? ' · annuel' : ' · mensuel') : ''),
+      sumShop: `${s.shopName || 'Votre entreprise'} · ${s.zones.length ? s.zones.join(', ') : 'aucune zone'}`,
+      sumLines,
+      dueToday: paid && !trial ? plan.price : '0 F',
+      dueNote: trial ? `Puis ${plan.price} ${plan.unit} à partir du ${first}. Résiliable avant sans frais.` : paid ? 'Renouvellement automatique, résiliable à tout moment.' : 'Vous pourrez passer à Kalico Pro plus tard.',
+      ctaLabel: paid ? (trial ? 'Activer mes 3 mois offerts' : `Payer ${plan.price}`) : 'Créer ma vitrine gratuite',
+      ctaBg: canSubmit ? '#E8832A' : 'rgba(251,246,236,0.16)',
+      ctaColor: canSubmit ? '#0E2A31' : 'rgba(251,246,236,0.72)',
+      ctaCursor: canSubmit ? 'pointer' : 'not-allowed',
+      ctaHint: canSubmit ? 'En continuant, vous acceptez les conditions générales de vente Pro.' : 'Renseignez un RIDET valide, un nom affiché et au moins une zone.',
+      submit: () => {},
+      after: [
+        { n: '1', t: 'Votre vitrine apparaît dans l\u2019annuaire des pros.' },
+        { n: '2', t: found ? 'Le badge Pro vérifié s\u2019affiche sur vos annonces.' : 'Un modérateur valide votre RIDET, puis le badge s\u2019affiche.' },
+        { n: '3', t: 'Vous paramétrez vos devis depuis Mon compte, onglet Abonnement.' },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

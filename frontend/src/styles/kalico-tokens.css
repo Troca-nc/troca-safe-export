@@ -1,55 +1,115 @@
+/* ==========================================================================
+   Kalico NC — tokens de design (v2.0)
+   Source de vérité : DESIGN.md. Toute valeur absente de ce fichier ne doit
+   pas apparaître dans le code des composants.
+
+   Installation :
+   1. Copier ce fichier dans frontend/src/styles/kalico-tokens.css
+   2. Dans frontend/src/app/globals.css, juste après les @tailwind :
+        @import '../styles/kalico-tokens.css';
+      (ou coller le bloc :root ci-dessous en remplacement du :root existant)
+   3. Les anciennes variables (--coral, --ocean, --lagoon, --sand, --jungle,
+      --night, --nc-*) sont dépréciées : voir la table de migration en bas.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap');
+
 :root {
-  --color-accent: #e8832a;
-  --color-accent-strong: #a94f0a;
+  /* ---------- Typographie ---------- */
+  --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* ---------- Marque & action ---------- */
+  --color-accent: #e8832a;              /* aplats, pastilles, gros display — JAMAIS de texte crème dessus */
+  --color-accent-strong: #a94f0a;       /* fond de bouton plein + texte crème (5,5:1) */
   --color-accent-strong-hover: #8f420a;
-  --color-accent-text: #9e4e06;
+  --color-accent-text: #9e4e06;         /* texte orange sur crème : chapeaux, liens, prix promo (5,5:1) */
   --color-accent-soft: rgba(232, 131, 42, 0.14);
   --color-accent-border: rgba(232, 131, 42, 0.34);
+
+  /* ---------- Texte & structure ---------- */
   --color-text: #123a44;
   --color-text-muted: rgba(18, 58, 68, 0.68);
   --color-text-subtle: rgba(18, 58, 68, 0.55);
-  --color-text-faint: rgba(18, 58, 68, 0.42);
+  --color-text-faint: rgba(18, 58, 68, 0.42);   /* placeholders uniquement */
   --color-deep: #0e2a31;
+
+  /* ---------- Fonds ---------- */
   --color-bg: #fbf6ec;
+  --color-surface: #fefaf3;
   --color-surface-sunken: #f3e9d8;
+  --color-border: #e4d7c3;
   --color-border-inner: #efe3d0;
+  --color-border-strong: #123a44;
+
+  /* ---------- Information (lagon) ---------- */
+  --color-info: #55adb3;                /* décoratif uniquement */
   --color-info-text: #2e7b84;
   --color-info-soft: rgba(85, 173, 179, 0.14);
   --color-info-border: rgba(85, 173, 179, 0.32);
+
+  /* ---------- Confiance / succès ---------- */
+  --color-success: #6e9a6a;             /* décoratif / bordure */
   --color-success-text: #3f6b3c;
   --color-success-soft: rgba(110, 154, 106, 0.14);
   --color-success-border: rgba(110, 154, 106, 0.3);
+
+  /* ---------- Alerte ---------- */
+  --color-warning: #b85c00;             /* ≥16px/600 uniquement — sinon --color-accent-text */
   --color-warning-soft: rgba(184, 92, 0, 0.14);
   --color-error: #b0431c;
   --color-error-soft: rgba(176, 67, 28, 0.14);
+
+  /* ---------- Sur fond sombre ---------- */
   --color-on-deep: #fbf6ec;
   --color-on-deep-muted: rgba(251, 246, 236, 0.72);
   --color-on-deep-subtle: rgba(251, 246, 236, 0.45);
   --color-on-deep-border: rgba(251, 246, 236, 0.16);
   --color-success-on-deep: #9fc79b;
+
+  /* ---------- Espacement ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ---------- Rayons (trois valeurs + pastille, aucune autre) ---------- */
   --radius-control: 10px;
   --radius-field: 11px;
   --radius-card: 16px;
   --radius-block: 24px;
   --radius-pill: 9999px;
-  --shadow-card-v2: 0 3px 14px rgba(18, 58, 68, 0.06);
+
+  /* ---------- Ombres (toujours teintées pétrole, jamais bleues) ---------- */
+  --shadow-card: 0 3px 14px rgba(18, 58, 68, 0.06);
   --shadow-raised: 0 6px 24px rgba(18, 58, 68, 0.09);
   --shadow-panel: 0 8px 30px rgba(18, 58, 68, 0.1);
-  --shadow-modal-v2: 0 30px 90px rgba(14, 42, 49, 0.4);
+  --shadow-modal: 0 30px 90px rgba(14, 42, 49, 0.4);
   --shadow-accent: 0 2px 12px rgba(169, 79, 10, 0.22);
+
+  /* ---------- Animation ---------- */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ---------- Motif de tressage (fond de bandeau) ---------- */
   --motif-opacity: 0.045;
+
+  color-scheme: light;
 }
 
-.dark {
-  --color-text: var(--color-text-primary);
-  --color-text-muted: var(--color-text-secondary);
-  --color-text-subtle: var(--color-text-tertiary);
-  --color-text-faint: var(--color-text-tertiary);
-  --color-bg: var(--color-bg-page);
-  --color-surface-sunken: var(--color-surface-raised);
-  --color-border-inner: var(--color-border);
-}
-
+/* Bandeau / footer sombre : bascule les tokens de texte plutôt que de
+   surcharger chaque élément. */
 .on-deep {
   --color-text: var(--color-on-deep);
   --color-text-muted: var(--color-on-deep-muted);
@@ -62,19 +122,35 @@
   color: var(--color-on-deep);
 }
 
-.motif-tressage {
-  position: relative;
-  isolation: isolate;
-}
-
+/* Tressage kanak — texture de fond des bandeaux de tête et blocs sombres.
+   À poser sur un pseudo-élément en position absolute, inset 0. */
 .motif-tressage::before {
   content: '';
   position: absolute;
   inset: 0;
-  z-index: -1;
   pointer-events: none;
   opacity: var(--motif-opacity);
   background-image:
     repeating-linear-gradient(45deg, currentColor 0 1px, transparent 1px 9px),
     repeating-linear-gradient(-45deg, currentColor 0 1px, transparent 1px 9px);
 }
+
+/* ==========================================================================
+   Migration des anciennes variables → nouvelles
+   (à supprimer de globals.css une fois tous les composants migrés)
+
+   --coral            #e8832a  →  --color-accent
+   --ocean            #b85c00  →  --color-accent-strong (fond) / --color-accent-text (texte)
+   --lagoon           #48cae4  →  --color-info
+   --sand             #f4f8f7  →  --color-surface-sunken (#f3e9d8)
+   --jungle           #2d6a4f  →  --color-success-text (#3f6b3c)
+   --night            #082032  →  --color-deep (#0e2a31)
+   --color-warning    #d97706  →  --color-warning (#b85c00)
+   --color-danger     #d7263d  →  --color-error (#b0431c)
+   --color-info       #0a7ea4  →  --color-info-text (#2e7b84)
+   --nc-lagon         #1e90ff  →  --color-info-text
+   --nc-emeraude      #2e8b57  →  --color-success-text
+   --nc-corail        #ff6b6b  →  --color-error
+   --nc-sable         #f5a623  →  --color-accent
+   Blanc pur #fff / #fbfcfc    →  --color-surface (#fefaf3)
+   ========================================================================== */

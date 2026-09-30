@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#FBF6EC; -webkit-font-smoothing:antialiased; }
+  a { color:#2E7B84; text-decoration:none; }
+  a:hover { color:#123A44; }
+  input::placeholder, textarea::placeholder { color:rgba(18,58,68,0.42); }
+  input[type=range] { accent-color:#A94F0A; }
+</style>
+</helmet>
+
+<div style="width:1440px;min-height:100vh;background:#FBF6EC;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#123A44">
+
+  <!-- ===== HEADER ===== -->
+  <header style="position:sticky;top:0;z-index:40;height:88px;background:#FBF6EC;border-bottom:1px solid #E4D7C3">
+    <div style="display:flex;height:88px;align-items:center;gap:20px;padding:0 48px">
+      <a href="Accueil v2.dc.html" style="display:flex;flex-shrink:0;align-items:center;gap:10px">
+        <img src="assets/kalico1.svg" alt="Kalico" style="height:46px;width:auto;display:block" />
+        <span style="font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1;color:#123A44;letter-spacing:-0.01em">Kalico</span>
+      </a>
+      <nav style="display:flex;align-items:center;gap:2px;margin-left:auto">
+        <a href="Annonces v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44" style-hover="background:#F3E9D8">Annonces</a>
+        <a href="Bons plans v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44" style-hover="background:#F3E9D8">Bons plans</a>
+        <a href="#" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:600;color:#123A44;background:#F3E9D8">Services</a>
+        <a href="Covoiturage v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44" style-hover="background:#F3E9D8">Covoiturage</a>
+        <a href="Troc v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44" style-hover="background:#F3E9D8">Troc</a>
+      </nav>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;padding-left:14px;border-left:1px solid #E4D7C3">
+        <a href="Mon compte v2.dc.html" style="display:flex;align-items:center;gap:9px;height:44px;padding:0 12px 0 6px;border-radius:10px;border:1px solid #E4D7C3;background:#FEFAF3;color:#123A44" style-hover="border-color:#123A44">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9999px;background:rgba(85,173,179,0.14);color:#2E7B84;font-size:12px;font-weight:600">LG</span>
+          <span style="font-size:15px;font-weight:600">Loïc</span>
+        </a>
+        <a href="Déposer une annonce v2.dc.html" style="display:inline-flex;align-items:center;gap:7px;border-radius:10px;background:#A94F0A;color:#FEFAF3;padding:0 20px;height:44px;font-size:15px;font-weight:600;box-shadow:0 2px 12px rgba(169,79,10,0.22)" style-hover="background:#8F420A">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+          Déposer
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== EN-TÊTE + ONGLETS ===== -->
+  <section style="position:relative;overflow:hidden;border-bottom:1px solid #E4D7C3">
+    <div style="position:absolute;inset:0;pointer-events:none;opacity:0.045;background-image:repeating-linear-gradient(45deg,#123A44 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#123A44 0 1px,transparent 1px 9px)"></div>
+    <div style="position:relative;padding:48px 48px 0">
+      <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">Services · {{ heroEyebrow }}</p>
+      <h1 style="margin:16px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:70px;line-height:0.99;letter-spacing:-0.015em;max-width:860px;text-wrap:balance">{{ heroTitle }}</h1>
+      <p style="margin:18px 0 0;font-size:19px;line-height:1.6;color:rgba(18,58,68,0.68);max-width:640px;text-wrap:pretty">{{ heroSub }}</p>
+      <nav style="display:flex;gap:4px;margin-top:36px">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+          <button onClick="{{ t.select }}" style="display:flex;align-items:center;gap:10px;border:0;border-bottom:2px solid {{ t.bar }};background:transparent;padding:14px 18px;font-size:16px;font-weight:{{ t.weight }};font-family:inherit;color:{{ t.color }};cursor:pointer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="{{ t.icon }}"></path></svg>
+            {{ t.label }}
+          </button>
+        </sc-for>
+      </nav>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ONGLET 1 · FAIRE UN DEVIS
+       ============================================================ -->
+  <sc-if value="{{ isDevis }}" hint-placeholder-val="{{ true }}">
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:40px;padding:40px 48px 0;align-items:start">
+      <main style="display:flex;flex-direction:column;gap:20px;min-width:0">
+        <section style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);padding:28px 30px">
+          <div style="display:flex;align-items:baseline;gap:14px">
+            <span style="font-family:'Instrument Serif',Georgia,serif;font-size:32px;line-height:1;color:#9E4E06">1</span>
+            <h2 style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:32px;line-height:1.08">De quoi avez-vous besoin ?</h2>
+          </div>
+          <div style="margin-top:22px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px">
+            <sc-for list="{{ trades }}" as="tr" hint-placeholder-count="8">
+              <button onClick="{{ tr.select }}" style="display:flex;flex-direction:column;align-items:flex-start;gap:10px;border:1px solid {{ tr.border }};border-radius:12px;background:{{ tr.bg }};padding:14px;font-family:inherit;text-align:left;cursor:pointer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="{{ tr.iconColor }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><path d="{{ tr.icon }}"></path></svg>
+                <span style="font-size:15px;font-weight:600;color:{{ tr.ink }}">{{ tr.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <label style="display:block;margin-top:20px">
+            <span style="display:flex;justify-content:space-between;gap:12px;margin-bottom:8px">
+              <span style="font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Décrivez votre projet</span>
+              <span style="font-size:13px;color:rgba(18,58,68,0.55)">{{ descCount }} / 1000</span>
+            </span>
+            <textarea value="{{ desc }}" onChange="{{ onDesc }}" rows="4" style="width:100%;box-sizing:border-box;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:13px 15px;font-size:16px;line-height:1.55;font-family:inherit;color:#123A44;outline:none;resize:vertical"></textarea>
+          </label>
+          <div style="margin-top:14px;display:flex;align-items:center;gap:12px">
+            <sc-for list="{{ devisPhotos }}" as="p" hint-placeholder-count="3">
+              <span style="display:flex;align-items:center;justify-content:center;width:72px;height:72px;border-radius:12px;background:{{ p.bg }};border:{{ p.border }};font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(18,58,68,0.55)">{{ p.label }}</span>
+            </sc-for>
+            <p style="margin:0;font-size:13px;line-height:1.5;color:rgba(18,58,68,0.62);max-width:280px">Des photos du lieu aident les pros à chiffrer sans se déplacer.</p>
+          </div>
+        </section>
+
+        <section style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);padding:28px 30px">
+          <div style="display:flex;align-items:baseline;gap:14px">
+            <span style="font-family:'Instrument Serif',Georgia,serif;font-size:32px;line-height:1;color:#9E4E06">2</span>
+            <h2 style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:32px;line-height:1.08">Où et quand ?</h2>
+          </div>
+          <div style="margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:20px 16px">
+            <label style="display:block">
+              <span style="display:block;margin-bottom:8px;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Commune</span>
+              <select value="{{ devisCommune }}" onChange="{{ onDevisCommune }}" style="width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 13px;font-size:16px;font-family:inherit;color:#123A44;cursor:pointer;outline:none">
+                <sc-for list="{{ communes }}" as="c" hint-placeholder-count="8"><option value="{{ c }}">{{ c }}</option></sc-for>
+              </select>
+            </label>
+            <div>
+              <span style="display:block;margin-bottom:8px;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Nombre de devis souhaités</span>
+              <div style="display:inline-flex;align-items:center;border:1px solid #E4D7C3;border-radius:11px;background:#FBF6EC">
+                <button onClick="{{ quotesDec }}" style="width:50px;height:50px;border:0;background:transparent;font-size:22px;font-family:inherit;color:#123A44;cursor:pointer">−</button>
+                <span style="min-width:56px;text-align:center;font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:50px;border-left:1px solid #E4D7C3;border-right:1px solid #E4D7C3">{{ quotes }}</span>
+                <button onClick="{{ quotesInc }}" style="width:50px;height:50px;border:0;background:transparent;font-size:22px;font-family:inherit;color:#123A44;cursor:pointer">+</button>
+              </div>
+            </div>
+            <div style="grid-column:span 2">
+              <span style="display:block;margin-bottom:8px;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Délai</span>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <sc-for list="{{ delays }}" as="d" hint-placeholder-count="4">
+                  <button onClick="{{ d.select }}" style="height:42px;border-radius:10px;border:1px solid {{ d.border }};background:{{ d.bg }};padding:0 16px;font-size:15px;font-weight:500;font-family:inherit;color:{{ d.color }};cursor:pointer">{{ d.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+            <div style="grid-column:span 2;border:1px solid #E4D7C3;border-radius:12px;background:#FBF6EC;padding:14px 16px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+                <span style="font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Budget indicatif · facultatif</span>
+                <span style="font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1">{{ budgetLabel }}</span>
+              </div>
+              <input type="range" min="0" max="1000000" step="10000" value="{{ budget }}" onChange="{{ onBudget }}" style="margin-top:10px;width:100%;height:24px;cursor:pointer" />
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(18,58,68,0.62)"><span>Non précisé</span><span>1 000 000 F et plus</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- devis reçus -->
+        <section style="margin-top:12px">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+            <div>
+              <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">Mes demandes</p>
+              <h2 style="margin:10px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:32px;line-height:1.08">Climatisation · pose de deux splits</h2>
+              <p style="margin:6px 0 0;font-size:15px;color:rgba(18,58,68,0.62)">Mont-Dore · envoyée le 22 septembre · 3 devis reçus sur 3</p>
+            </div>
+            <a href="#" style="font-size:15px;font-weight:600;color:#9E4E06;white-space:nowrap">Toutes mes demandes →</a>
+          </div>
+          <div style="margin-top:18px;border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);overflow:hidden">
+            <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 180px;gap:16px;padding:12px 22px;background:#F3E9D8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.62)">
+              <span>Professionnel</span><span>Prix TTC</span><span>Intervention</span><span>Avis</span><span></span>
+            </div>
+            <sc-for list="{{ received }}" as="q" hint-placeholder-count="3">
+              <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 180px;gap:16px;align-items:center;padding:18px 22px;border-top:1px solid #EFE3D0">
+                <div style="display:flex;align-items:center;gap:12px;min-width:0">
+                  <span style="display:flex;width:44px;height:44px;flex-shrink:0;align-items:center;justify-content:center;border-radius:12px;background:#F3E9D8;font-family:'Instrument Serif',Georgia,serif;font-size:20px">{{ q.initial }}</span>
+                  <div style="min-width:0">
+                    <p style="margin:0;font-size:15px;font-weight:600">{{ q.name }}</p>
+                    <p style="margin:3px 0 0;font-size:13px;color:#3F6B3C">Pro vérifié · répond en {{ q.reply }}</p>
+                  </div>
+                </div>
+                <div>
+                  <p style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-size:26px;line-height:1">{{ q.price }}</p>
+                  <sc-if value="{{ q.cheapest }}" hint-placeholder-val="{{ false }}"><p style="margin:5px 0 0;font-size:12px;font-weight:600;color:#3F6B3C">Le moins cher</p></sc-if>
+                </div>
+                <div>
+                  <p style="margin:0;font-size:15px;font-weight:500">{{ q.delay }}</p>
+                  <sc-if value="{{ q.fastest }}" hint-placeholder-val="{{ false }}"><p style="margin:5px 0 0;font-size:12px;font-weight:600;color:#3F6B3C">Le plus rapide</p></sc-if>
+                </div>
+                <p style="margin:0;font-size:15px"><span style="font-weight:600">{{ q.rating }} ★</span> <span style="color:rgba(18,58,68,0.62)">· {{ q.reviews }} avis</span></p>
+                <div style="display:flex;gap:8px;justify-content:flex-end">
+                  <a href="#" style="display:inline-flex;align-items:center;height:40px;padding:0 14px;border-radius:10px;border:1px solid #123A44;font-size:15px;font-weight:600;color:#123A44">Voir</a>
+                  <a href="#" style="display:inline-flex;align-items:center;height:40px;padding:0 14px;border-radius:10px;background:#A94F0A;font-size:15px;font-weight:600;color:#FEFAF3">Accepter</a>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </main>
+
+      <aside style="position:sticky;top:112px;display:flex;flex-direction:column;gap:16px">
+        <div style="position:relative;overflow:hidden;border-radius:24px;background:#0E2A31;color:#FBF6EC">
+          <div style="position:absolute;inset:0;pointer-events:none;opacity:0.09;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+          <div style="position:relative;padding:28px">
+            <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#E8832A">Votre demande</p>
+            <p style="margin:14px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:56px;line-height:1">{{ matchCount }}</p>
+            <p style="margin:8px 0 0;font-size:17px;line-height:1.5;color:rgba(251,246,236,0.86)">{{ matchText }}</p>
+            <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;padding-top:18px;border-top:1px solid rgba(251,246,236,0.16)">
+              <sc-for list="{{ devisSummary }}" as="l" hint-placeholder-count="4">
+                <div style="display:flex;justify-content:space-between;gap:12px;font-size:15px">
+                  <span style="color:rgba(251,246,236,0.72)">{{ l.label }}</span>
+                  <span style="font-weight:600;text-align:right">{{ l.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <a href="#" style="margin-top:24px;display:flex;height:52px;align-items:center;justify-content:center;border-radius:10px;background:#E8832A;color:#0E2A31;font-size:16px;font-weight:600">Envoyer ma demande</a>
+            <p style="margin:12px 0 0;font-size:13px;line-height:1.5;color:rgba(251,246,236,0.72)">Gratuit et sans engagement. Vos coordonnées ne sont transmises qu'aux pros que vous choisissez.</p>
+          </div>
+        </div>
+        <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;padding:20px 22px">
+          <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.55)">Comment ça marche</p>
+          <div style="margin-top:14px;display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ howDevis }}" as="h" hint-placeholder-count="3">
+              <div style="display:flex;gap:12px">
+                <span style="font-family:'Instrument Serif',Georgia,serif;font-size:22px;line-height:1;color:#9E4E06;width:14px;flex-shrink:0">{{ h.n }}</span>
+                <p style="margin:0;font-size:15px;line-height:1.5;color:rgba(18,58,68,0.72)">{{ h.t }}</p>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </sc-if>
+
+  <!-- ============================================================
+       ONGLET 2 · PROFESSIONNELS
+       ============================================================ -->
+  <sc-if value="{{ isPros }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:32px 48px 0">
+      <div style="display:grid;grid-template-columns:1fr 280px auto;gap:12px;border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);padding:12px">
+        <div style="position:relative">
+          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(18,58,68,0.55)" stroke-width="2" stroke-linecap="round" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);width:18px;height:18px"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+          <input value="{{ proQuery }}" onChange="{{ onProQuery }}" placeholder="Métier, nom d'entreprise…" style="width:100%;box-sizing:border-box;height:52px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 16px 0 44px;font-size:16px;font-family:inherit;color:#123A44;outline:none" />
+        </div>
+        <select value="{{ proCommune }}" onChange="{{ onProCommune }}" style="height:52px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 13px;font-size:16px;font-family:inherit;color:#123A44;cursor:pointer;outline:none">
+          <sc-for list="{{ communesAll }}" as="c" hint-placeholder-count="8"><option value="{{ c }}">{{ c }}</option></sc-for>
+        </select>
+        <button style="height:52px;border:0;border-radius:10px;background:#A94F0A;padding:0 26px;font-size:16px;font-weight:600;font-family:inherit;color:#FEFAF3;cursor:pointer">Rechercher</button>
+      </div>
+
+      <div style="margin-top:28px;display:grid;grid-template-columns:260px minmax(0,1fr);gap:40px;align-items:start">
+        <aside style="position:sticky;top:112px;display:flex;flex-direction:column;gap:24px">
+          <div>
+            <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.55)">Métier</p>
+            <div style="margin-top:10px;display:flex;flex-direction:column;gap:2px">
+              <sc-for list="{{ tradeFilters }}" as="tf" hint-placeholder-count="9">
+                <button onClick="{{ tf.select }}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;border-radius:10px;background:{{ tf.bg }};padding:10px 12px;margin-left:-12px;font-size:15px;font-weight:{{ tf.weight }};font-family:inherit;color:#123A44;text-align:left;cursor:pointer">
+                  <span>{{ tf.label }}</span>
+                  <span style="font-size:13px;color:rgba(18,58,68,0.62)">{{ tf.count }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding-top:20px;border-top:1px solid #E4D7C3;display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ proToggles }}" as="pt" hint-placeholder-count="3">
+              <button onClick="{{ pt.toggle }}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;background:transparent;padding:0;font-size:15px;font-family:inherit;color:#123A44;text-align:left;cursor:pointer">
+                {{ pt.label }}
+                <span style="position:relative;flex-shrink:0;width:38px;height:22px;border-radius:9999px;background:{{ pt.track }};transition:background 150ms">
+                  <span style="position:absolute;top:3px;left:{{ pt.knob }};width:16px;height:16px;border-radius:9999px;background:#FEFAF3;transition:left 150ms"></span>
+                </span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="border-radius:16px;background:#F3E9D8;padding:18px 20px">
+            <p style="margin:0;font-size:15px;font-weight:600">Vous êtes professionnel ?</p>
+            <p style="margin:6px 0 0;font-size:13px;line-height:1.5;color:rgba(18,58,68,0.68)">Recevez les demandes de devis de votre zone. Trois mois offerts.</p>
+            <a href="Devenir Pro v2.dc.html" style="display:inline-block;margin-top:12px;font-size:15px;font-weight:600;color:#9E4E06">Devenir Pro →</a>
+          </div>
+        </aside>
+
+        <main style="min-width:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+            <p style="margin:0;font-size:15px;color:rgba(18,58,68,0.68)"><span style="font-weight:600;color:#123A44">{{ proCount }}</span> professionnels · {{ proCommuneLabel }}</p>
+            <div style="display:flex;gap:3px;border-radius:12px;border:1px solid #E4D7C3;background:#F3E9D8;padding:3px">
+              <sc-for list="{{ sorts }}" as="so" hint-placeholder-count="3">
+                <button onClick="{{ so.select }}" style="height:36px;border:0;border-radius:9px;background:{{ so.bg }};padding:0 14px;font-size:13px;font-weight:{{ so.weight }};font-family:inherit;color:{{ so.color }};cursor:pointer;box-shadow:{{ so.shadow }}">{{ so.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="margin-top:18px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+            <sc-for list="{{ pros }}" as="p" hint-placeholder-count="6">
+              <article style="display:flex;flex-direction:column;border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);padding:22px">
+                <div style="display:flex;align-items:flex-start;gap:14px">
+                  <span style="display:flex;width:56px;height:56px;flex-shrink:0;align-items:center;justify-content:center;border-radius:14px;background:{{ p.logoBg }};color:{{ p.logoInk }};font-family:'Instrument Serif',Georgia,serif;font-size:26px">{{ p.initial }}</span>
+                  <div style="flex:1;min-width:0">
+                    <p style="margin:0;font-size:17px;font-weight:600;line-height:1.3">{{ p.name }}</p>
+                    <p style="margin:4px 0 0;font-size:13px;color:rgba(18,58,68,0.62)">{{ p.trade }} · {{ p.commune }}</p>
+                  </div>
+                  <sc-if value="{{ p.verified }}" hint-placeholder-val="{{ true }}">
+                    <span style="display:inline-flex;align-items:center;gap:5px;border-radius:9999px;padding:4px 10px;font-size:12px;font-weight:600;background:rgba(110,154,106,0.14);color:#3F6B3C;border:1px solid rgba(110,154,106,0.30);white-space:nowrap">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:11px;height:11px"><path d="M20 6 9 17l-5-5"></path></svg>
+                      Vérifié
+                    </span>
+                  </sc-if>
+                </div>
+                <p style="margin:16px 0 0;font-size:15px;line-height:1.55;color:rgba(18,58,68,0.72);text-wrap:pretty">{{ p.pitch }}</p>
+                <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:rgba(18,58,68,0.68)">
+                  <span><span style="font-weight:600;color:#123A44">{{ p.rating }} ★</span> · {{ p.reviews }} avis</span>
+                  <span>Répond en {{ p.reply }}</span>
+                  <span>{{ p.zone }}</span>
+                </div>
+                <div style="margin-top:18px;padding-top:16px;border-top:1px solid #EFE3D0;display:flex;align-items:center;justify-content:space-between;gap:12px">
+                  <p style="margin:0;font-size:13px;color:rgba(18,58,68,0.62)">{{ p.priceNote }}</p>
+                  <div style="display:flex;gap:8px">
+                    <a href="Pros côté client v2.dc.html" style="display:inline-flex;align-items:center;height:40px;padding:0 14px;border-radius:10px;border:1px solid #123A44;font-size:15px;font-weight:600;color:#123A44">Vitrine</a>
+                    <button onClick="{{ p.askQuote }}" style="height:40px;border:0;border-radius:10px;background:#A94F0A;padding:0 14px;font-size:15px;font-weight:600;font-family:inherit;color:#FEFAF3;cursor:pointer">Demander un devis</button>
+                  </div>
+                </div>
+              </article>
+            </sc-for>
+          </div>
+          <sc-if value="{{ noPros }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:18px;border:1px dashed #D5C4AC;border-radius:16px;padding:40px;text-align:center">
+              <p style="margin:0;font-size:17px;font-weight:600">Aucun professionnel ne correspond.</p>
+              <p style="margin:8px 0 0;font-size:15px;color:rgba(18,58,68,0.62)">Élargissez la zone, ou envoyez une demande de devis : elle sera transmise aux pros des communes voisines.</p>
+            </div>
+          </sc-if>
+        </main>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============================================================
+       ONGLET 3 · ENVOI ET LIVRAISON
+       ============================================================ -->
+  <sc-if value="{{ isShip }}" hint-placeholder-val="{{ false }}">
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:40px;padding:40px 48px 0;align-items:start">
+      <main style="display:flex;flex-direction:column;gap:24px;min-width:0">
+        <section style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06);padding:28px 30px">
+          <h2 style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:32px;line-height:1.08">Estimer un envoi</h2>
+          <div style="margin-top:22px;display:grid;grid-template-columns:1fr 50px 1fr;gap:12px;align-items:end">
+            <label style="display:block">
+              <span style="display:block;margin-bottom:8px;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Départ</span>
+              <select value="{{ shipFrom }}" onChange="{{ onShipFrom }}" style="width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 13px;font-size:16px;font-family:inherit;color:#123A44;cursor:pointer;outline:none">
+                <sc-for list="{{ communes }}" as="c" hint-placeholder-count="8"><option value="{{ c }}">{{ c }}</option></sc-for>
+              </select>
+            </label>
+            <button onClick="{{ swap }}" title="Inverser" style="display:flex;width:50px;height:50px;align-items:center;justify-content:center;border:1px solid #E4D7C3;border-radius:10px;background:#FBF6EC;cursor:pointer;color:#123A44">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M16 3l4 4-4 4"></path><path d="M20 7H4"></path><path d="M8 21l-4-4 4-4"></path><path d="M4 17h16"></path></svg>
+            </button>
+            <label style="display:block">
+              <span style="display:block;margin-bottom:8px;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Destination</span>
+              <select value="{{ shipTo }}" onChange="{{ onShipTo }}" style="width:100%;box-sizing:border-box;height:50px;border-radius:11px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 13px;font-size:16px;font-family:inherit;color:#123A44;cursor:pointer;outline:none">
+                <sc-for list="{{ communes }}" as="c" hint-placeholder-count="8"><option value="{{ c }}">{{ c }}</option></sc-for>
+              </select>
+            </label>
+          </div>
+          <p style="margin:20px 0 8px;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Taille du colis</p>
+          <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px">
+            <sc-for list="{{ sizes }}" as="sz" hint-placeholder-count="5">
+              <button onClick="{{ sz.select }}" style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:1px solid {{ sz.border }};border-radius:12px;background:{{ sz.bg }};padding:14px;font-family:inherit;text-align:left;cursor:pointer">
+                <span style="display:block;width:{{ sz.box }};height:{{ sz.box }};border-radius:4px;border:1.5px solid {{ sz.boxColor }};margin-bottom:8px"></span>
+                <span style="font-size:15px;font-weight:600;color:{{ sz.ink }}">{{ sz.label }}</span>
+                <span style="font-size:12px;color:{{ sz.muted }}">{{ sz.hint }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </section>
+
+        <section>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px">
+            <h2 style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:32px;line-height:1.08">{{ shipTitle }}</h2>
+            <span style="font-size:13px;color:rgba(18,58,68,0.62)">{{ shipMeta }}</span>
+          </div>
+          <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ shipOptions }}" as="o" hint-placeholder-count="3">
+              <button onClick="{{ o.select }}" style="display:grid;grid-template-columns:22px 48px 1fr auto;gap:16px;align-items:center;border:1px solid {{ o.border }};border-radius:16px;background:#FEFAF3;box-shadow:{{ o.shadow }};padding:18px 22px;font-family:inherit;text-align:left;cursor:pointer;color:#123A44">
+                <span style="display:flex;height:22px;width:22px;align-items:center;justify-content:center;border-radius:9999px;border:1.5px solid {{ o.radioBorder }}">
+                  <span style="height:10px;width:10px;border-radius:9999px;background:#123A44;opacity:{{ o.radioDot }}"></span>
+                </span>
+                <span style="display:flex;width:48px;height:48px;align-items:center;justify-content:center;border-radius:12px;background:{{ o.iconBg }}">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="{{ o.iconColor }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:21px;height:21px"><path d="{{ o.icon }}"></path></svg>
+                </span>
+                <span style="display:block;min-width:0">
+                  <span style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+                    <span style="font-size:17px;font-weight:600">{{ o.name }}</span>
+                    <sc-for list="{{ o.tags }}" as="tg" hint-placeholder-count="1">
+                      <span style="border-radius:9999px;padding:3px 10px;font-size:11px;font-weight:600;background:rgba(110,154,106,0.14);color:#3F6B3C">{{ tg }}</span>
+                    </sc-for>
+                  </span>
+                  <span style="display:block;margin-top:5px;font-size:15px;line-height:1.5;color:rgba(18,58,68,0.68)">{{ o.detail }}</span>
+                </span>
+                <span style="display:block;text-align:right">
+                  <span style="display:block;font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1;white-space:nowrap">{{ o.priceLabel }}</span>
+                  <span style="display:block;margin-top:6px;font-size:13px;color:rgba(18,58,68,0.62);white-space:nowrap">{{ o.delay }}</span>
+                </span>
+              </button>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- membres qui font le trajet -->
+        <sc-if value="{{ hasCarriers }}" hint-placeholder-val="{{ true }}">
+          <section style="border:1px solid #E4D7C3;border-radius:16px;background:#F3E9D8;padding:24px 26px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px">
+              <p style="margin:0;font-size:17px;font-weight:600">Membres qui font le trajet et acceptent un colis</p>
+              <a href="Covoiturage v2.dc.html" style="font-size:13px;font-weight:600;color:#9E4E06">Tous les trajets →</a>
+            </div>
+            <div style="margin-top:14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+              <sc-for list="{{ carriers }}" as="cr" hint-placeholder-count="3">
+                <div style="border-radius:12px;background:#FEFAF3;border:1px solid #E4D7C3;padding:14px 16px">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <span style="display:flex;width:36px;height:36px;align-items:center;justify-content:center;border-radius:9999px;background:rgba(85,173,179,0.14);color:#2E7B84;font-size:13px;font-weight:600">{{ cr.initials }}</span>
+                    <div>
+                      <p style="margin:0;font-size:15px;font-weight:600">{{ cr.name }}</p>
+                      <p style="margin:2px 0 0;font-size:12px;color:rgba(18,58,68,0.62)">{{ cr.rating }} ★ · {{ cr.trips }} trajets</p>
+                    </div>
+                  </div>
+                  <p style="margin:12px 0 0;font-size:15px;font-weight:500">{{ cr.when }}</p>
+                  <p style="margin:3px 0 0;font-size:13px;color:rgba(18,58,68,0.62)">{{ cr.room }}</p>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </sc-if>
+      </main>
+
+      <aside style="position:sticky;top:112px;display:flex;flex-direction:column;gap:16px">
+        <div style="position:relative;overflow:hidden;border-radius:24px;background:#0E2A31;color:#FBF6EC">
+          <div style="position:absolute;inset:0;pointer-events:none;opacity:0.09;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+          <div style="position:relative;padding:28px">
+            <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#E8832A">Votre envoi</p>
+            <div style="margin-top:16px;display:grid;grid-template-columns:14px 1fr;gap:4px 12px;align-items:center">
+              <span style="width:10px;height:10px;border-radius:9999px;border:2px solid #E8832A;box-sizing:border-box"></span>
+              <span style="font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1.1">{{ shipFrom }}</span>
+              <span style="justify-self:center;width:2px;height:20px;background:rgba(251,246,236,0.3)"></span>
+              <span style="font-size:13px;color:rgba(251,246,236,0.72)">{{ shipVia }}</span>
+              <span style="width:10px;height:10px;border-radius:9999px;background:#E8832A"></span>
+              <span style="font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1.1">{{ shipTo }}</span>
+            </div>
+            <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;padding-top:18px;border-top:1px solid rgba(251,246,236,0.16)">
+              <sc-for list="{{ shipSummary }}" as="l" hint-placeholder-count="4">
+                <div style="display:flex;justify-content:space-between;gap:12px;font-size:15px">
+                  <span style="color:rgba(251,246,236,0.72)">{{ l.label }}</span>
+                  <span style="font-weight:600;text-align:right">{{ l.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="margin-top:18px;padding-top:18px;border-top:1px solid rgba(251,246,236,0.16);display:flex;align-items:baseline;justify-content:space-between">
+              <span style="font-size:15px;font-weight:600">Total</span>
+              <span style="font-family:'Instrument Serif',Georgia,serif;font-size:44px;line-height:1">{{ shipTotal }}</span>
+            </div>
+            <a href="#" style="margin-top:22px;display:flex;height:52px;align-items:center;justify-content:center;border-radius:10px;background:#E8832A;color:#0E2A31;font-size:16px;font-weight:600">{{ shipCta }}</a>
+          </div>
+        </div>
+        <div style="border:1px solid #E4D7C3;border-radius:16px;background:#FEFAF3;padding:20px 22px">
+          <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.55)">Suivre un colis</p>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <input placeholder="KAL-4821-NC" style="min-width:0;flex:1;box-sizing:border-box;height:46px;border-radius:10px;border:1px solid #E4D7C3;background:#FBF6EC;padding:0 14px;font-family:'IBM Plex Mono',monospace;font-size:16px;color:#123A44;outline:none" />
+            <button style="height:46px;border:1px solid #123A44;border-radius:10px;background:transparent;padding:0 16px;font-size:15px;font-weight:600;font-family:inherit;color:#123A44;cursor:pointer">Suivre</button>
+          </div>
+          <div style="margin-top:16px;display:flex;flex-direction:column;gap:0">
+            <sc-for list="{{ tracking }}" as="tk" hint-placeholder-count="3">
+              <div style="display:grid;grid-template-columns:14px 1fr auto;gap:12px;align-items:start;padding:8px 0">
+                <span style="width:10px;height:10px;margin-top:5px;border-radius:9999px;background:{{ tk.dot }}"></span>
+                <span style="font-size:15px;color:{{ tk.ink }}">{{ tk.label }}</span>
+                <span style="font-size:13px;color:rgba(18,58,68,0.62)">{{ tk.time }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </sc-if>
+
+  <!-- ===== FOOTER ===== -->
+  <footer style="margin-top:80px;background:#0E2A31;color:#FBF6EC;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;opacity:0.07;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+    <div style="position:relative;padding:40px 48px;display:flex;align-items:center;justify-content:space-between;gap:24px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <img src="assets/kalico1.svg" alt="Kalico" style="height:40px;width:auto" />
+        <span style="font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:22px;color:rgba(251,246,236,0.85)">Nouvelle-Calédonie dans l'âme, Kalico dans la poche.</span>
+      </div>
+      <div style="display:flex;gap:24px;font-size:13px">
+        <a href="#" style="color:rgba(251,246,236,0.72)">Garantie devis</a>
+        <a href="#" style="color:rgba(251,246,236,0.72)">Conditions d'envoi</a>
+        <a href="#" style="color:rgba(251,246,236,0.72)">contact@kalico.nc</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;onglet&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Faire un devis&quot;,&quot;options&quot;:[&quot;Faire un devis&quot;,&quot;Professionnels&quot;,&quot;Envoi et livraison&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Page&quot;}}">
+const COMMUNES = ['Nouméa', 'Dumbéa', 'Mont-Dore', 'Païta', 'Bouloupari', 'La Foa', 'Bourail', 'Koné', 'Voh', 'Koumac', 'Poindimié', 'Houaïlou', 'Canala', 'Thio', 'Yaté', 'Hienghène', 'Île des Pins', 'Lifou', 'Maré', 'Ouvéa'];
+const ILES = ['Île des Pins', 'Lifou', 'Maré', 'Ouvéa'];
+const KM = { 'Nouméa': 0, 'Dumbéa': 18, 'Mont-Dore': 20, 'Païta': 30, 'Bouloupari': 75, 'La Foa': 110, 'Bourail': 165, 'Koné': 270, 'Voh': 290, 'Koumac': 365, 'Poindimié': 320, 'Houaïlou': 230, 'Canala': 170, 'Thio': 115, 'Yaté': 80, 'Hienghène': 380 };
+const F = (n) => (Number(n) || 0).toLocaleString('fr-FR').replace(/\u202f|\u00a0/g, ' ') + ' F';
+const r100 = (n) => Math.round(n / 100) * 100;
+
+const IC = {
+  devis: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z M14 2v6h6 M8 13h8 M8 17h5',
+  pros: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M22 21v-2a4 4 0 0 0-3-3.9 M16 3.1a4 4 0 0 1 0 7.8',
+  ship: 'M21 8 12 3 3 8v8l9 5 9-5Z M3 8l9 5 9-5 M12 13v8',
+  build: 'M2 20h20 M4 20V10l8-6 8 6v10 M10 20v-6h4v6',
+  plumb: 'M12 2.7c3 3.6 6 6.9 6 10.3a6 6 0 0 1-12 0c0-3.4 3-6.7 6-10.3Z',
+  elec: 'M13 2 3 14h9l-1 8 10-12h-9Z',
+  garden: 'M12 22V12 M12 12c0-4 3-7 8-7 0 5-3 7-8 7Z M12 14c0-3-2.5-5.5-7-5.5 0 4 2.5 5.5 7 5.5Z',
+  move: 'M1 3h15v13H1z M16 8h4l3 3v5h-7 M5.5 18.5a2 2 0 1 0 0 .01 M18.5 18.5a2 2 0 1 0 0 .01',
+  clim: 'M12 2v20 M4.9 4.9l14.2 14.2 M2 12h20 M4.9 19.1 19.1 4.9',
+  clean: 'M3 21h18 M5 21v-6l7-12 7 12v6 M9 15h6',
+  it: 'M2 4h20v12H2z M8 20h8 M12 16v4',
+  wood: 'M3 7h18v4H3z M5 11v9 M19 11v9 M9 11v5 M15 11v5',
+  car: 'M3 17v-5l2.2-5.2A2 2 0 0 1 7 5.5h10a2 2 0 0 1 1.8 1.3L21 12v5 M3 12h18 M7 17a2 2 0 1 0 0 .01 M17 17a2 2 0 1 0 0 .01',
+  truck: 'M1 3h15v13H1z M16 8h4l3 3v5h-7 M5.5 18.5a2 2 0 1 0 0 .01 M18.5 18.5a2 2 0 1 0 0 .01',
+  boat: 'M2 20c2 1 4 1 6 0s4-1 6 0 4 1 6 0 M4 16l-1-5h18l-1 5 M12 3v8 M12 3l5 5h-5',
+  plane: 'M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2Z',
+  relay: 'M3 9l1-5h16l1 5 M3 9v11h18V9 M3 9h18 M9 20v-6h6v6',
+};
+
+const TRADES = [
+  { id: 'Bâtiment', icon: IC.build, pros: 24 }, { id: 'Plomberie', icon: IC.plumb, pros: 15 }, { id: 'Électricité', icon: IC.elec, pros: 18 }, { id: 'Climatisation', icon: IC.clim, pros: 12 },
+  { id: 'Jardin', icon: IC.garden, pros: 21 }, { id: 'Menuiserie', icon: IC.wood, pros: 9 }, { id: 'Déménagement', icon: IC.move, pros: 7 }, { id: 'Ménage', icon: IC.clean, pros: 14 },
+];
+const PROS = [
+  { name: 'Froid Pacifique', trade: 'Climatisation', commune: 'Nouméa', rating: 4.9, reviews: 38, reply: '2 h', zone: 'Grand Nouméa', verified: true, pitch: 'Pose, entretien et dépannage de climatiseurs. Techniciens certifiés fluides frigorigènes.', priceNote: 'Déplacement offert · devis sous 48 h', color: 'lagoon' },
+  { name: 'Menuiserie Cocotier', trade: 'Menuiserie', commune: 'Mont-Dore', rating: 4.9, reviews: 41, reply: '3 h', zone: 'Grand Nouméa', verified: true, pitch: 'Terrasses, cuisines et escaliers sur mesure en bois local. Atelier à Boulari depuis 2011.', priceNote: 'Devis gratuit', color: 'accent' },
+  { name: 'Jardins de Tina', trade: 'Jardin', commune: 'Dumbéa', rating: 4.8, reviews: 26, reply: '5 h', zone: 'Dumbéa, Païta, Nouméa', verified: true, pitch: 'Entretien de jardins, élagage de cocotiers et aménagement paysager avec des essences endémiques.', priceNote: 'Dès 4 500 F / heure', color: 'reef' },
+  { name: 'Élec Services Païta', trade: 'Électricité', commune: 'Païta', rating: 4.7, reviews: 19, reply: '1 h', zone: 'Province Sud', verified: true, pitch: 'Mise aux normes, tableaux électriques, dépannage 7 j / 7. Attestation de conformité fournie.', priceNote: 'Urgences sous 4 h', color: 'lagoon' },
+  { name: 'Plomberie du Lagon', trade: 'Plomberie', commune: 'Nouméa', rating: 4.6, reviews: 33, reply: '2 h', zone: 'Grand Nouméa', verified: false, pitch: 'Fuites, chauffe-eau solaires, salles de bains complètes. Intervention le jour même en semaine.', priceNote: 'Déplacement 3 000 F', color: 'reef' },
+  { name: 'Déménagements du Nord', trade: 'Déménagement', commune: 'Koné', rating: 4.8, reviews: 17, reply: '6 h', zone: 'Toute la Grande Terre', verified: true, pitch: 'Déménagements Nord ↔ Sud, garde-meubles à Koné et Nouméa, emballage sur demande.', priceNote: 'Devis sur visite ou photos', color: 'accent' },
+  { name: 'Bâti Caillou', trade: 'Bâtiment', commune: 'Bourail', rating: 4.5, reviews: 12, reply: '1 j', zone: 'Bourail, La Foa, Poya', verified: true, pitch: 'Maçonnerie, dalles, extensions et rénovation de maisons coloniales.', priceNote: 'Devis gratuit', color: 'lagoon' },
+  { name: 'Ménage Plus NC', trade: 'Ménage', commune: 'Nouméa', rating: 4.7, reviews: 52, reply: '1 h', zone: 'Grand Nouméa', verified: false, pitch: 'Ménage régulier, fin de bail et locations saisonnières. Produits écologiques fournis.', priceNote: 'Dès 3 200 F / heure', color: 'reef' },
+];
+const LOGO = { lagoon: ['rgba(85,173,179,0.14)', '#2E7B84'], accent: ['rgba(232,131,42,0.14)', '#9E4E06'], reef: ['rgba(110,154,106,0.14)', '#3F6B3C'] };
+const SIZES = [
+  { id: 'env', label: 'Enveloppe', hint: 'Documents, < 500 g', f: 0.4, box: '14px' },
+  { id: 's', label: 'Petit', hint: 'Boîte à chaussures', f: 1, box: '18px' },
+  { id: 'm', label: 'Moyen', hint: 'Carton 40 cm, < 10 kg', f: 1.8, box: '24px' },
+  { id: 'l', label: 'Volumineux', hint: 'Meuble, vélo, < 30 kg', f: 3.2, box: '30px' },
+  { id: 'xl', label: 'Palette', hint: 'Électroménager, lot', f: 8, box: '36px' },
+];
+
+class Component extends DCLogic {
+  state = {
+    tab: null, trade: 'Climatisation', desc: 'Pose de deux climatiseurs splits (salon et chambre) dans une villa. Tableau électrique récent, murs en béton.', devisCommune: 'Mont-Dore', quotes: 3, delay: 'Sous 2 semaines', budget: 200000,
+    proQuery: '', proCommune: 'Toutes les communes', proTrade: 'Tous', sort: 'Pertinence', onlyVerified: false, fastReply: false,
+    shipFrom: 'Nouméa', shipTo: 'Koné', size: 'm', opt: null,
+  };
+
+  componentDidUpdate(prev) { if (prev.onglet !== this.props.onglet) this.setState({ tab: null }); }
+
+  renderVals() {
+    const s = this.state;
+    const tab = s.tab ?? ({ 'Faire un devis': 'devis', 'Professionnels': 'pros', 'Envoi et livraison': 'ship' }[this.props.onglet ?? 'Faire un devis'] || 'devis');
+    const seg = (on) => ({ bg: on ? '#123A44' : '#FBF6EC', border: on ? '#123A44' : '#E4D7C3', color: on ? '#FEFAF3' : '#123A44' });
+    const pill = (on) => ({ bg: on ? '#FEFAF3' : 'transparent', color: on ? '#123A44' : 'rgba(18,58,68,0.62)', weight: on ? '600' : '500', shadow: on ? '0 2px 8px rgba(18,58,68,0.10)' : 'none' });
+    const tog = (on) => ({ track: on ? '#123A44' : '#D5C4AC', knob: on ? '19px' : '3px' });
+
+    const hero = {
+      devis: ['Faire un devis', 'Décrivez votre besoin, recevez jusqu\u2019à cinq devis.', 'Les pros vérifiés de votre commune vous répondent avec un prix TTC en XPF, TGC incluse. Vous comparez, vous choisissez.'],
+      pros: ['Professionnels', 'Des pros vérifiés, près de chez vous.', 'Artisans et entreprises inscrits au RIDET, notés par les membres après chaque intervention.'],
+      ship: ['Envoi et livraison', 'Envoyez partout, de la Grande Terre aux Îles.', 'Comparez les solutions pour faire voyager un colis : un membre qui fait la route, un transporteur, le fret maritime ou aérien.'],
+    }[tab];
+
+    // devis
+    const trade = TRADES.find((t) => t.id === s.trade);
+    const nearby = Math.max(3, Math.round(trade.pros * (s.devisCommune === 'Nouméa' ? 1 : KM[s.devisCommune] > 150 || ILES.includes(s.devisCommune) ? 0.3 : 0.6)));
+
+    // pros
+    let pros = PROS.filter((p) => (s.proTrade === 'Tous' || p.trade === s.proTrade)
+      && (s.proCommune === 'Toutes les communes' || p.commune === s.proCommune || p.zone.includes(s.proCommune) || (p.zone === 'Grand Nouméa' && ['Nouméa', 'Dumbéa', 'Mont-Dore', 'Païta'].includes(s.proCommune)) || p.zone.startsWith('Toute') || p.zone === 'Province Sud')
+      && (!s.onlyVerified || p.verified) && (!s.fastReply || /h$/.test(p.reply) && parseInt(p.reply) <= 2)
+      && (!s.proQuery || (p.name + p.trade).toLowerCase().includes(s.proQuery.toLowerCase())));
+    if (s.sort === 'Mieux notés') pros = [...pros].sort((a, b) => b.rating - a.rating);
+    if (s.sort === 'Plus d\u2019avis') pros = [...pros].sort((a, b) => b.reviews - a.reviews);
+
+    // envoi
+    const size = SIZES.find((z) => z.id === s.size);
+    const iles = ILES.includes(s.shipFrom) || ILES.includes(s.shipTo);
+    const same = s.shipFrom === s.shipTo;
+    const km = iles ? 0 : Math.abs((KM[s.shipFrom] ?? 0) - (KM[s.shipTo] ?? 0)) || 10;
+    let opts = [];
+    if (!iles && size.id !== 'xl') opts.push({ id: 'member', name: 'Un membre fait le trajet', icon: IC.car, price: Math.max(500, r100(km * 3 * size.f)), delay: 'Ven. 9 oct.', detail: 'Remise en main propre via le covoiturage Kalico. Paiement sécurisé, libéré à la livraison.' });
+    if (!iles) opts.push({ id: 'road', name: 'Transporteur routier', icon: IC.truck, price: r100(1200 + km * 8 * size.f), delay: '24 à 48 h', detail: 'Enlèvement à domicile, livraison à l\u2019adresse. Assurance jusqu\u2019à 100 000 F incluse.' });
+    if (iles) opts.push({ id: 'sea', name: 'Fret maritime', icon: IC.boat, price: r100(1500 + size.f * 1800), delay: '3 à 5 jours', detail: 'Dépôt au quai des caboteurs à Nouméa, retrait au wharf d\u2019arrivée.' });
+    if (iles && size.id !== 'xl') opts.push({ id: 'air', name: 'Fret aérien', icon: IC.plane, price: r100(2500 + size.f * 3500), delay: '24 h', detail: 'Dépôt à l\u2019aérodrome de Magenta, retrait à l\u2019aérodrome de destination.' });
+    if (size.id !== 'xl') opts.push({ id: 'relay', name: 'Point relais', icon: IC.relay, price: r100(900 * size.f + (iles ? 1200 : 0)), delay: iles ? '4 à 7 jours' : '2 à 4 jours', detail: 'Dépôt et retrait dans un commerce partenaire Kalico, aux horaires d\u2019ouverture.' });
+    const minP = Math.min(...opts.map((o) => o.price));
+    const fast = { member: 3, road: 1.5, sea: 4, air: 1, relay: 3 };
+    const minD = Math.min(...opts.map((o) => fast[o.id]));
+    const selOpt = opts.find((o) => o.id === s.opt) || opts[0];
+    const insurance = selOpt.id === 'road' ? 0 : r100(selOpt.price * 0.08);
+
+    return {
+      heroEyebrow: hero[0], heroTitle: hero[1], heroSub: hero[2],
+      tabs: [['devis', 'Faire un devis', IC.devis], ['pros', 'Professionnels', IC.pros], ['ship', 'Envoi et livraison', IC.ship]].map(([id, label, icon]) => {
+        const on = tab === id;
+        return { label, icon, bar: on ? '#A94F0A' : 'transparent', weight: on ? '600' : '500', color: on ? '#123A44' : 'rgba(18,58,68,0.62)', select: () => this.setState({ tab: id }) };
+      }),
+      isDevis: tab === 'devis', isPros: tab === 'pros', isShip: tab === 'ship',
+      communes: COMMUNES, communesAll: ['Toutes les communes', ...COMMUNES],
+
+      trades: TRADES.map((t) => {
+        const on = t.id === s.trade;
+        return { label: t.id, icon: t.icon, bg: on ? '#0E2A31' : '#FBF6EC', border: on ? '#0E2A31' : '#E4D7C3', ink: on ? '#FBF6EC' : '#123A44', iconColor: on ? '#E8832A' : '#123A44', select: () => this.setState({ trade: t.id }) };
+      }),
+      desc: s.desc, onDesc: (e) => this.setState({ desc: e.target.value.slice(0, 1000) }), descCount: s.desc.length,
+      devisPhotos: [
+        { label: 'salon', bg: '#F3E9D8', border: '1px solid #E4D7C3' },
+        { label: 'chambre', bg: '#F3E9D8', border: '1px solid #E4D7C3' },
+        { label: '+', bg: '#FEFAF3', border: '1.5px dashed #D5C4AC' },
+      ],
+      devisCommune: s.devisCommune, onDevisCommune: (e) => this.setState({ devisCommune: e.target.value }),
+      quotes: String(s.quotes), quotesDec: () => this.setState({ quotes: Math.max(1, s.quotes - 1) }), quotesInc: () => this.setState({ quotes: Math.min(5, s.quotes + 1) }),
+      delays: ['Urgent, sous 48 h', 'Sous 2 semaines', 'Dans le mois', 'Flexible'].map((d) => ({ label: d, ...seg(s.delay === d || (d.startsWith('Sous') && s.delay === 'Sous 2 semaines')), select: () => this.setState({ delay: d.startsWith('Sous') ? 'Sous 2 semaines' : d }) })),
+      budget: s.budget, onBudget: (e) => this.setState({ budget: Number(e.target.value) }), budgetLabel: s.budget ? (s.budget >= 1000000 ? '1 000 000 F +' : `≈ ${F(s.budget)}`) : 'Non précisé',
+      matchCount: String(nearby), matchText: `pros « ${trade.id.toLowerCase()} » vérifiés interviennent à ${s.devisCommune}. Les ${s.quotes} premiers à répondre vous envoient un devis.`,
+      devisSummary: [
+        { label: 'Service', value: trade.id }, { label: 'Commune', value: s.devisCommune },
+        { label: 'Délai', value: s.delay }, { label: 'Budget', value: s.budget ? F(s.budget) : 'Non précisé' },
+      ],
+      howDevis: [
+        { n: '1', t: 'Votre demande part aux pros vérifiés de votre zone, sans vos coordonnées.' },
+        { n: '2', t: 'Vous recevez les devis sous 48 h en moyenne, avec prix TTC et date d\u2019intervention.' },
+        { n: '3', t: 'Vous acceptez celui qui vous convient. Les autres sont prévenus automatiquement.' },
+      ],
+      received: [
+        { initial: 'F', name: 'Froid Pacifique', reply: '2 h', price: '185 000 F', delay: 'Sous 5 jours', rating: '4,9', reviews: 38, cheapest: false, fastest: false },
+        { initial: 'C', name: 'Clim\u2019Sud', reply: '4 h', price: '172 000 F', delay: 'Sous 12 jours', rating: '4,6', reviews: 21, cheapest: true, fastest: false },
+        { initial: 'A', name: 'Allo Clim NC', reply: '1 h', price: '198 000 F', delay: 'Sous 3 jours', rating: '4,8', reviews: 54, cheapest: false, fastest: true },
+      ],
+
+      proQuery: s.proQuery, onProQuery: (e) => this.setState({ proQuery: e.target.value }),
+      proCommune: s.proCommune, onProCommune: (e) => this.setState({ proCommune: e.target.value }),
+      proCommuneLabel: s.proCommune === 'Toutes les communes' ? 'toute la Nouvelle-Calédonie' : `interviennent à ${s.proCommune}`,
+      tradeFilters: [{ id: 'Tous', pros: PROS.length }, ...TRADES].map((t) => {
+        const on = s.proTrade === t.id;
+        return { label: t.id, count: String(t.id === 'Tous' ? 214 : t.pros), bg: on ? '#F3E9D8' : 'transparent', weight: on ? '600' : '500', select: () => this.setState({ proTrade: t.id }) };
+      }),
+      proToggles: [
+        { label: 'Pro vérifié uniquement', ...tog(s.onlyVerified), toggle: () => this.setState({ onlyVerified: !s.onlyVerified }) },
+        { label: 'Répond en moins de 2 h', ...tog(s.fastReply), toggle: () => this.setState({ fastReply: !s.fastReply }) },
+      ],
+      sorts: ['Pertinence', 'Mieux notés', 'Plus d\u2019avis'].map((so) => ({ label: so, ...pill(s.sort === so), select: () => this.setState({ sort: so }) })),
+      pros: pros.map((p) => ({ ...p, initial: p.name[0], rating: String(p.rating).replace('.', ','), logoBg: LOGO[p.color][0], logoInk: LOGO[p.color][1], askQuote: () => this.setState({ tab: 'devis', trade: TRADES.some((t) => t.id === p.trade) ? p.trade : s.trade }) })),
+      proCount: String(pros.length), noPros: pros.length === 0,
+
+      shipFrom: s.shipFrom, shipTo: s.shipTo,
+      onShipFrom: (e) => this.setState({ shipFrom: e.target.value, opt: null }), onShipTo: (e) => this.setState({ shipTo: e.target.value, opt: null }),
+      swap: () => this.setState({ shipFrom: s.shipTo, shipTo: s.shipFrom }),
+      sizes: SIZES.map((z) => {
+        const on = z.id === s.size;
+        return { ...z, bg: on ? '#0E2A31' : '#FBF6EC', border: on ? '#0E2A31' : '#E4D7C3', ink: on ? '#FBF6EC' : '#123A44', muted: on ? 'rgba(251,246,236,0.72)' : 'rgba(18,58,68,0.62)', boxColor: on ? '#E8832A' : 'rgba(18,58,68,0.45)', select: () => this.setState({ size: z.id, opt: null }) };
+      }),
+      shipTitle: same ? 'Même commune : remise en main propre' : `${opts.length} solution${opts.length > 1 ? 's' : ''} pour ${s.shipTo}`,
+      shipMeta: iles ? 'Liaison Grande Terre ↔ Îles' : `${km} km par la route`,
+      shipOptions: opts.map((o) => {
+        const on = o.id === selOpt.id;
+        const tags = [o.price === minP && opts.length > 1 ? 'Le moins cher' : null, fast[o.id] === minD && opts.length > 1 ? 'Le plus rapide' : null].filter(Boolean);
+        return { ...o, tags, priceLabel: F(o.price), border: on ? '#123A44' : '#E4D7C3', shadow: on ? '0 6px 24px rgba(18,58,68,0.09)' : '0 3px 14px rgba(18,58,68,0.06)', radioBorder: on ? '#123A44' : '#D5C4AC', radioDot: on ? '1' : '0', iconBg: on ? 'rgba(232,131,42,0.14)' : '#F3E9D8', iconColor: on ? '#9E4E06' : '#123A44', select: () => this.setState({ opt: o.id }) };
+      }),
+      hasCarriers: !iles && size.id !== 'xl',
+      carriers: [
+        { initials: 'TR', name: 'Tehani R.', rating: '4,9', trips: 42, when: 'Ven. 9 oct. · 7 h 30', room: 'Pick-up, colis jusqu\u2019à 30 kg' },
+        { initials: 'MW', name: 'Michel W.', rating: '4,8', trips: 118, when: 'Chaque lundi · 6 h 00', room: 'Coffre, colis moyens' },
+        { initials: 'SK', name: 'Sarah K.', rating: '5,0', trips: 16, when: 'Dim. 11 oct. · 15 h 00', room: 'Petits colis uniquement' },
+      ],
+      shipVia: `${size.label} · ${selOpt.name.toLowerCase()}`,
+      shipSummary: [
+        { label: 'Solution', value: selOpt.name }, { label: 'Délai', value: selOpt.delay },
+        { label: 'Transport', value: F(selOpt.price) }, { label: 'Assurance', value: insurance ? F(insurance) : 'Incluse' },
+      ],
+      shipTotal: F(selOpt.price + insurance),
+      shipCta: selOpt.id === 'member' ? 'Réserver auprès du membre' : 'Préparer mon envoi',
+      tracking: [
+        { label: 'Déposé au point relais Magenta', time: 'lun. 9 h 12', dot: '#6E9A6A', ink: '#123A44' },
+        { label: 'En route vers Koné', time: 'lun. 14 h 40', dot: '#E8832A', ink: '#123A44' },
+        { label: 'Disponible au retrait', time: 'prévu mer.', dot: '#D5C4AC', ink: 'rgba(18,58,68,0.62)' },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

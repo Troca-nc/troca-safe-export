@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#FBF6EC; -webkit-font-smoothing:antialiased; }
+  a { color:#2E7B84; text-decoration:none; }
+  a:hover { color:#123A44; }
+  input[type=range] { accent-color:#A94F0A; }
+</style>
+</helmet>
+
+<div style="width:1440px;min-height:100vh;background:#FBF6EC;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#123A44">
+
+  <!-- ===== HEADER (connecté) ===== -->
+  <header style="position:sticky;top:0;z-index:40;height:88px;background:#FBF6EC;border-bottom:1px solid #E4D7C3">
+    <div style="display:flex;height:88px;align-items:center;gap:20px;padding:0 48px">
+      <a href="Accueil v2.dc.html" style="display:flex;flex-shrink:0;align-items:center;gap:10px">
+        <img src="assets/kalico1.svg" alt="Kalico" style="height:46px;width:auto;display:block" />
+        <span style="font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1;color:#123A44;letter-spacing:-0.01em">Kalico</span>
+      </a>
+      <nav style="display:flex;align-items:center;gap:2px;margin-left:auto">
+        <a href="Annonces v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44" style-hover="background:#F3E9D8">Annonces</a>
+        <a href="Bons plans v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44" style-hover="background:#F3E9D8">Bons plans</a>
+        <a href="Pros côté client v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44" style-hover="background:#F3E9D8">Pros</a>
+        <a href="Covoiturage v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44" style-hover="background:#F3E9D8">Covoiturage</a>
+        <a href="#" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:600;color:#123A44;background:#F3E9D8">Troc</a>
+      </nav>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;padding-left:14px;border-left:1px solid #E4D7C3">
+        <a href="Mon compte v2.dc.html" style="display:flex;align-items:center;gap:9px;height:44px;padding:0 12px 0 6px;border-radius:10px;border:1px solid #E4D7C3;background:#FEFAF3;color:#123A44" style-hover="border-color:#123A44">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9999px;background:rgba(85,173,179,0.14);color:#2E7B84;font-size:12px;font-weight:600">LG</span>
+          <span style="font-size:15px;font-weight:600">Loïc</span>
+        </a>
+        <a href="#" style="display:inline-flex;align-items:center;gap:7px;border-radius:10px;background:#A94F0A;color:#FEFAF3;padding:0 20px;height:44px;font-size:15px;font-weight:600;box-shadow:0 2px 12px rgba(169,79,10,0.22)" style-hover="background:#8F420A">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+          Proposer un troc
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== EN-TÊTE ===== -->
+  <section style="position:relative;overflow:hidden;border-bottom:1px solid #E4D7C3">
+    <div style="position:absolute;inset:0;pointer-events:none;opacity:0.045;background-image:repeating-linear-gradient(45deg,#123A44 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#123A44 0 1px,transparent 1px 9px)"></div>
+    <div style="position:relative;padding:48px 48px 32px;display:flex;align-items:flex-end;justify-content:space-between;gap:48px">
+      <div>
+        <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">Troc · 214 annonces</p>
+        <h1 style="margin:16px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:70px;line-height:0.99;letter-spacing:-0.015em;max-width:760px">Échangez ce qui dort chez vous.</h1>
+        <p style="margin:18px 0 0;font-size:19px;line-height:1.6;color:rgba(18,58,68,0.68);max-width:620px;text-wrap:pretty">Choisissez une annonce : le trocomètre la pèse face aux vôtres et calcule le complément qui rend l'échange juste.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-end">
+        <div style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px">
+          <sc-for list="{{ cats }}" as="c" hint-placeholder-count="6">
+            <button onClick="{{ c.select }}" style="height:40px;border-radius:9999px;border:1px solid {{ c.border }};background:{{ c.bg }};padding:0 16px;font-size:15px;font-weight:500;font-family:inherit;color:{{ c.color }};cursor:pointer">{{ c.label }}</button>
+          </sc-for>
+        </div>
+        <sc-if value="{{ hasMine }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ toggleCompat }}" style="display:inline-flex;align-items:center;gap:10px;height:40px;border:0;background:transparent;padding:0;font-size:15px;font-family:inherit;color:#123A44;cursor:pointer">
+            <span style="position:relative;width:38px;height:22px;border-radius:9999px;background:{{ compatTrack }};transition:background 150ms">
+              <span style="position:absolute;top:3px;left:{{ compatKnob }};width:16px;height:16px;border-radius:9999px;background:#FEFAF3;transition:left 150ms"></span>
+            </span>
+            Seulement celles compatibles avec mes annonces
+          </button>
+        </sc-if>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CORPS ===== -->
+  <div style="display:grid;grid-template-columns:1fr 600px;gap:32px;padding:32px 48px 0;align-items:start">
+
+    <!-- ——— Liste ——— -->
+    <main style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;min-width:0">
+      <sc-for list="{{ listings }}" as="l" hint-placeholder-count="6">
+        <button onClick="{{ l.select }}" style="display:flex;flex-direction:column;border:1px solid {{ l.border }};border-radius:16px;background:#FEFAF3;box-shadow:{{ l.shadow }};padding:0;overflow:hidden;font-family:inherit;text-align:left;cursor:pointer;color:#123A44" style-hover="border-color:#123A44">
+          <span style="position:relative;display:flex;align-items:center;justify-content:center;height:150px;background:#F3E9D8">
+            <span style="position:absolute;inset:0;opacity:0.07;background-image:repeating-linear-gradient(45deg,#123A44 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#123A44 0 1px,transparent 1px 9px)"></span>
+            <span style="position:relative;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.06em;color:rgba(18,58,68,0.55)">{{ l.photo }}</span>
+            <sc-if value="{{ l.hasMatch }}" hint-placeholder-val="{{ false }}">
+              <span style="position:absolute;top:12px;left:12px;display:inline-flex;align-items:center;gap:6px;border-radius:9999px;padding:5px 11px;font-size:12px;font-weight:600;background:#FEFAF3;color:#3F6B3C;border:1px solid rgba(110,154,106,0.30)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:12px;height:12px"><path d="M20 6 9 17l-5-5"></path></svg>
+                {{ l.matchLabel }}
+              </span>
+            </sc-if>
+          </span>
+          <span style="display:block;padding:16px 18px 18px">
+            <span style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+              <span style="font-size:17px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.title }}</span>
+              <span style="flex-shrink:0;font-family:'Instrument Serif',Georgia,serif;font-size:24px;line-height:1">{{ l.valueLabel }}</span>
+            </span>
+            <span style="display:block;margin-top:6px;font-size:13px;color:rgba(18,58,68,0.62)">{{ l.seller }} · {{ l.commune }}</span>
+            <span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid #EFE3D0">
+              <span style="font-size:12px;font-weight:600;color:rgba(18,58,68,0.62)">Cherche</span>
+              <sc-for list="{{ l.wants }}" as="w" hint-placeholder-count="2">
+                <span style="border-radius:9999px;padding:3px 10px;font-size:12px;font-weight:500;background:#F3E9D8;color:#123A44;border:1px solid #E4D7C3">{{ w }}</span>
+              </sc-for>
+            </span>
+          </span>
+        </button>
+      </sc-for>
+      <sc-if value="{{ emptyList }}" hint-placeholder-val="{{ false }}">
+        <div style="grid-column:span 2;border:1px dashed #D5C4AC;border-radius:16px;padding:40px;text-align:center">
+          <p style="margin:0;font-size:17px;font-weight:600">Aucune annonce compatible dans cette catégorie.</p>
+          <p style="margin:8px 0 0;font-size:15px;color:rgba(18,58,68,0.62)">Désactivez le filtre de compatibilité pour tout voir.</p>
+        </div>
+      </sc-if>
+    </main>
+
+    <!-- ——— TROCOMÈTRE ——— -->
+    <aside style="position:sticky;top:112px;border:1px solid #E4D7C3;border-radius:24px;background:#FEFAF3;box-shadow:0 8px 30px rgba(18,58,68,0.10);overflow:hidden">
+      <div style="padding:24px 28px 0">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+          <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">Trocomètre</p>
+          <span style="font-size:13px;color:rgba(18,58,68,0.62)">Valeurs déclarées par les vendeurs</span>
+        </div>
+        <h2 style="margin:10px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:32px;line-height:1.08;text-wrap:balance">{{ sel.title }}</h2>
+        <p style="margin:6px 0 0;font-size:15px;color:rgba(18,58,68,0.62)">{{ sel.seller }} · {{ sel.commune }} · {{ sel.condition }}</p>
+      </div>
+
+      <!-- balance -->
+      <div style="position:relative;margin:8px auto 0;width:520px;height:340px">
+        <svg viewBox="0 0 520 340" style="position:absolute;inset:0;width:520px;height:340px">
+          <path d="M 206 60 A 54 54 0 0 1 314 60" fill="none" stroke="#E4D7C3" stroke-width="2"></path>
+          <path d="M 243 9 A 54 54 0 0 1 277 9" fill="none" stroke="#6E9A6A" stroke-width="5" stroke-linecap="round"></path>
+          <line x1="260" y1="2" x2="260" y2="12" stroke="#123A44" stroke-width="2"></line>
+          <text x="198" y="30" font-size="12" font-family="IBM Plex Mono" fill="rgba(18,58,68,0.55)">−</text>
+          <text x="315" y="30" font-size="12" font-family="IBM Plex Mono" fill="rgba(18,58,68,0.55)">+</text>
+          <rect x="255" y="60" width="10" height="252" rx="3" fill="#123A44"></rect>
+          <path d="M 196 330 L 214 310 L 306 310 L 324 330 Z" fill="#123A44"></path>
+          <rect x="176" y="328" width="168" height="8" rx="4" fill="#0E2A31"></rect>
+        </svg>
+
+        <!-- fléau + aiguille -->
+        <div style="position:absolute;left:85px;top:57px;width:350px;height:6px;border-radius:3px;background:#123A44;transform:rotate({{ beamDeg }}deg);transform-origin:50% 50%;transition:transform 700ms cubic-bezier(.34,1.35,.5,1)">
+          <span style="position:absolute;left:173px;bottom:3px;width:4px;height:46px;border-radius:2px;background:#A94F0A"></span>
+          <span style="position:absolute;left:-6px;top:-3px;width:12px;height:12px;border-radius:9999px;background:#123A44"></span>
+          <span style="position:absolute;right:-6px;top:-3px;width:12px;height:12px;border-radius:9999px;background:#123A44"></span>
+        </div>
+        <span style="position:absolute;left:250px;top:50px;width:20px;height:20px;border-radius:9999px;background:#E8832A;border:3px solid #123A44;box-sizing:border-box"></span>
+
+        <!-- plateau gauche : ma proposition -->
+        <div style="position:absolute;left:{{ leftX }}px;top:{{ leftY }}px;width:170px;height:200px;transition:top 700ms cubic-bezier(.34,1.35,.5,1),left 700ms cubic-bezier(.34,1.35,.5,1)">
+          <svg viewBox="0 0 170 200" style="position:absolute;inset:0;width:170px;height:200px"><path d="M85 0 L4 188 M85 0 L166 188" stroke="rgba(18,58,68,0.35)" stroke-width="1.5" fill="none"></path></svg>
+          <div style="position:absolute;left:0;right:0;bottom:0;height:14px;border-radius:0 0 85px 85px / 0 0 14px 14px;background:#123A44"></div>
+          <sc-if value="{{ hasMine }}" hint-placeholder-val="{{ true }}">
+            <div style="position:absolute;left:17px;right:17px;bottom:14px;border-radius:12px;background:#FEFAF3;border:1px solid #E4D7C3;box-shadow:0 3px 14px rgba(18,58,68,0.06);overflow:hidden">
+              <div style="height:52px;background:#F3E9D8;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(18,58,68,0.55)">{{ mine.photo }}</div>
+              <div style="padding:8px 10px 10px">
+                <p style="margin:0;font-size:13px;font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ mine.title }}</p>
+                <p style="margin:4px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:22px;line-height:1">{{ mine.valueLabel }}</p>
+              </div>
+            </div>
+            <sc-if value="{{ iPay }}" hint-placeholder-val="{{ false }}">
+              <span style="position:absolute;left:50%;transform:translateX(-50%);bottom:136px;white-space:nowrap;border-radius:9999px;padding:5px 12px;font-size:13px;font-weight:600;background:#E8832A;color:#0E2A31">+ {{ soulteLabel }}</span>
+            </sc-if>
+          </sc-if>
+          <sc-if value="{{ noMine }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;left:17px;right:17px;bottom:14px;height:108px;border-radius:12px;border:1.5px dashed #D5C4AC;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 12px;font-size:13px;line-height:1.4;color:rgba(18,58,68,0.62)">Votre annonce ici</div>
+          </sc-if>
+        </div>
+
+        <!-- plateau droit : l'annonce convoitée -->
+        <div style="position:absolute;left:{{ rightX }}px;top:{{ rightY }}px;width:170px;height:200px;transition:top 700ms cubic-bezier(.34,1.35,.5,1),left 700ms cubic-bezier(.34,1.35,.5,1)">
+          <svg viewBox="0 0 170 200" style="position:absolute;inset:0;width:170px;height:200px"><path d="M85 0 L4 188 M85 0 L166 188" stroke="rgba(18,58,68,0.35)" stroke-width="1.5" fill="none"></path></svg>
+          <div style="position:absolute;left:0;right:0;bottom:0;height:14px;border-radius:0 0 85px 85px / 0 0 14px 14px;background:#123A44"></div>
+          <div style="position:absolute;left:17px;right:17px;bottom:14px;border-radius:12px;background:#FEFAF3;border:1px solid #123A44;box-shadow:0 3px 14px rgba(18,58,68,0.06);overflow:hidden">
+            <div style="height:52px;background:#F3E9D8;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(18,58,68,0.55)">{{ sel.photo }}</div>
+            <div style="padding:8px 10px 10px">
+              <p style="margin:0;font-size:13px;font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ sel.title }}</p>
+              <p style="margin:4px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:22px;line-height:1">{{ sel.valueLabel }}</p>
+            </div>
+          </div>
+          <sc-if value="{{ theyPay }}" hint-placeholder-val="{{ false }}">
+            <span style="position:absolute;left:50%;transform:translateX(-50%);bottom:136px;white-space:nowrap;border-radius:9999px;padding:5px 12px;font-size:13px;font-weight:600;background:#E8832A;color:#0E2A31">+ {{ soulteLabel }}</span>
+          </sc-if>
+        </div>
+
+        <span style="position:absolute;left:0;top:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.55)">Vous donnez</span>
+        <span style="position:absolute;right:0;top:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.55)">Vous recevez</span>
+      </div>
+
+      <!-- verdict -->
+      <div style="margin:4px 28px 0;display:flex;align-items:flex-start;gap:14px;border-radius:16px;padding:16px 18px;background:{{ verdictBg }};border-left:3px solid {{ verdictBar }}">
+        <div style="flex:1;min-width:0">
+          <p style="margin:0;font-size:17px;font-weight:600;color:{{ verdictColor }}">{{ verdictTitle }}</p>
+          <p style="margin:5px 0 0;font-size:15px;line-height:1.55;color:rgba(18,58,68,0.72);text-wrap:pretty">{{ verdictBody }}</p>
+        </div>
+        <sc-if value="{{ canBalance }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ balance }}" style="flex-shrink:0;height:40px;border-radius:10px;border:1px solid #123A44;background:transparent;padding:0 14px;font-size:15px;font-weight:600;font-family:inherit;color:#123A44;cursor:pointer">Équilibrer</button>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ hasMine }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:22px 28px 0">
+          <!-- complément -->
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+            <p style="margin:0;font-size:13px;font-weight:600;color:rgba(18,58,68,0.72)">Complément en argent</p>
+            <p style="margin:0;font-size:15px;font-weight:600;color:#123A44">{{ soulteText }}</p>
+          </div>
+          <input type="range" min="{{ sliderMin }}" max="{{ sliderMax }}" step="500" value="{{ soulte }}" onChange="{{ onSoulte }}" style="margin-top:10px;width:100%;height:24px;cursor:pointer" />
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(18,58,68,0.62)">
+            <span>{{ sel.sellerFirst }} vous ajoute</span>
+            <span>Aucun</span>
+            <span>Vous ajoutez</span>
+          </div>
+
+          <!-- mes annonces -->
+          <p style="margin:22px 0 0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.55)">Mettre dans la balance</p>
+          <div style="margin-top:10px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+            <sc-for list="{{ myListings }}" as="m" hint-placeholder-count="3">
+              <button onClick="{{ m.select }}" style="display:flex;flex-direction:column;border:1px solid {{ m.border }};border-radius:12px;background:{{ m.bg }};padding:10px 12px;font-family:inherit;text-align:left;cursor:pointer;color:#123A44">
+                <span style="font-size:13px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%">{{ m.title }}</span>
+                <span style="margin-top:4px;font-size:13px;color:rgba(18,58,68,0.62)">{{ m.valueLabel }}</span>
+                <span style="margin-top:6px;font-size:12px;font-weight:600;color:{{ m.matchColor }}">{{ m.matchText }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- envies du vendeur -->
+      <div style="margin:22px 28px 0;border-radius:16px;background:#F3E9D8;padding:18px 20px">
+        <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.62)">Ce que {{ sel.sellerFirst }} aimerait en échange</p>
+        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">
+          <sc-for list="{{ selWants }}" as="w" hint-placeholder-count="2">
+            <span style="display:inline-flex;align-items:center;gap:6px;border-radius:9999px;padding:6px 13px;font-size:13px;font-weight:600;background:{{ w.bg }};color:{{ w.color }};border:1px solid {{ w.border }}">{{ w.label }}</span>
+          </sc-for>
+        </div>
+        <p style="margin:12px 0 0;font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:22px;line-height:1.3;color:#123A44">« {{ sel.wish }} »</p>
+        <p style="margin:10px 0 0;font-size:13px;color:rgba(18,58,68,0.68)">{{ sel.cashLabel }}</p>
+      </div>
+
+      <!-- actions -->
+      <div style="padding:22px 28px 28px">
+        <sc-if value="{{ hasMine }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:10px">
+            <a href="#" style="flex:1;display:flex;align-items:center;justify-content:center;height:52px;border-radius:10px;background:#A94F0A;color:#FEFAF3;font-size:16px;font-weight:600;box-shadow:0 2px 12px rgba(169,79,10,0.22)" style-hover="background:#8F420A">{{ proposeLabel }}</a>
+            <a href="#" style="display:flex;align-items:center;justify-content:center;height:52px;padding:0 20px;border-radius:10px;border:1px solid #123A44;color:#123A44;font-size:16px;font-weight:600" style-hover="background:#F3E9D8">Écrire</a>
+          </div>
+          <p style="margin:10px 0 0;font-size:13px;line-height:1.5;color:rgba(18,58,68,0.62)">{{ sel.sellerFirst }} reçoit la proposition avec la balance. Rien n'est engagé avant votre rencontre.</p>
+        </sc-if>
+        <sc-if value="{{ noMine }}" hint-placeholder-val="{{ false }}">
+          <p style="margin:0;font-size:15px;line-height:1.55;color:rgba(18,58,68,0.72)">Vous n'avez pas encore d'annonce en ligne à mettre en face. Déposez un objet dans une des catégories recherchées, ou proposez autre chose directement.</p>
+          <div style="margin-top:14px;display:flex;gap:10px">
+            <a href="#" style="flex:1;display:flex;align-items:center;justify-content:center;height:52px;border-radius:10px;background:#A94F0A;color:#FEFAF3;font-size:16px;font-weight:600;box-shadow:0 2px 12px rgba(169,79,10,0.22)" style-hover="background:#8F420A">Déposer un objet « {{ firstWant }} »</a>
+            <a href="#" style="display:flex;align-items:center;justify-content:center;height:52px;padding:0 20px;border-radius:10px;border:1px solid #123A44;color:#123A44;font-size:16px;font-weight:600" style-hover="background:#F3E9D8">Proposer autre chose</a>
+          </div>
+        </sc-if>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer style="margin-top:80px;background:#0E2A31;color:#FBF6EC;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;opacity:0.07;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+    <div style="position:relative;padding:40px 48px;display:flex;align-items:center;justify-content:space-between;gap:24px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <img src="assets/kalico1.svg" alt="Kalico" style="height:40px;width:auto" />
+        <span style="font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:22px;color:rgba(251,246,236,0.85)">Nouvelle-Calédonie dans l'âme, Kalico dans la poche.</span>
+      </div>
+      <div style="display:flex;gap:24px;font-size:13px">
+        <a href="#" style="color:rgba(251,246,236,0.72)">Troquer en sécurité</a>
+        <a href="#" style="color:rgba(251,246,236,0.72)">CGU</a>
+        <a href="#" style="color:rgba(251,246,236,0.72)">contact@kalico.nc</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;mesAnnonces&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;En ligne&quot;,&quot;options&quot;:[&quot;En ligne&quot;,&quot;Aucune&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Trocomètre&quot;},&quot;tolerance&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:10,&quot;min&quot;:5,&quot;max&quot;:20,&quot;step&quot;:1,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Trocomètre&quot;}}">
+const TROCS = [
+  { id: 'surf', title: 'Planche de surf 7\u20192 mini-malibu', photo: 'mini-malibu 7\u20192', seller: 'Tehani R.', commune: 'Nouméa', value: 45000, cat: 'Nautisme', condition: 'Très bon état', wants: ['Nautisme', 'Vélos'], wish: 'Idéalement un kayak ou un paddle pour sortir en famille.', cashMax: 10000 },
+  { id: 'debrou', title: 'Débroussailleuse Stihl FS 131', photo: 'débroussailleuse', seller: 'Marc D.', commune: 'Païta', value: 60000, cat: 'Outillage', condition: 'Bon état', wants: ['Électroménager', 'Outillage'], wish: 'Un frigo ou un congélateur pour la maison du bord de mer.', cashMax: 30000 },
+  { id: 'guitare', title: 'Guitare folk Yamaha FG800', photo: 'guitare folk', seller: 'Aurélie T.', commune: 'Dumbéa', value: 25000, cat: 'Musique', condition: 'Comme neuf', wants: ['Jeux vidéo', 'Musique'], wish: 'Une console pour mon fils, ou un ukulélé.', cashMax: 5000 },
+  { id: 'paddle', title: 'Paddle gonflable 10\u20196', photo: 'paddle gonflable', seller: 'Kevin L.', commune: 'Mont-Dore', value: 40000, cat: 'Nautisme', condition: 'Bon état', wants: ['Nautisme', 'Camping'], wish: 'Un kayak deux places, ou du matériel de camping.', cashMax: 0 },
+  { id: 'groupe', title: 'Groupe électrogène 3 kVA', photo: 'groupe électrogène', seller: 'Jean-Pierre W.', commune: 'Bourail', value: 75000, cat: 'Outillage', condition: 'Révisé', wants: ['Électroménager', 'Outillage'], wish: 'Un réfrigérateur grande capacité pour la station.', cashMax: 20000 },
+  { id: 'canape', title: 'Canapé trois places en teck', photo: 'canapé teck', seller: 'Sylvie M.', commune: 'Koné', value: 30000, cat: 'Maison', condition: 'Bon état', wants: ['Maison', 'Décoration'], wish: 'Une table de salon ou des chaises en bois.', cashMax: 0 },
+];
+const MINE = [
+  { id: 'kayak', title: 'Kayak deux places', photo: 'kayak 2 places', value: 38000, cat: 'Nautisme' },
+  { id: 'frigo', title: 'Réfrigérateur Samsung', photo: 'frigo américain', value: 85000, cat: 'Électroménager' },
+  { id: 'ps4', title: 'Console PS4 + 2 manettes', photo: 'console PS4', value: 22000, cat: 'Jeux vidéo' },
+];
+const CATS = ['Tout', 'Nautisme', 'Outillage', 'Musique', 'Maison', 'Électroménager'];
+const F = (n) => n.toLocaleString('fr-FR').replace(/\u202f|\u00a0/g, ' ') + ' F';
+const round = (n) => Math.round(n / 500) * 500;
+
+class Component extends DCLogic {
+  state = { sel: 'surf', mine: null, soulte: 0, cat: 'Tout', compat: false };
+
+  renderVals() {
+    const s = this.state;
+    const hasMine = (this.props.mesAnnonces ?? 'En ligne') === 'En ligne';
+    const tol = (this.props.tolerance ?? 10) / 100;
+    const sel = TROCS.find((t) => t.id === s.sel);
+    const mineList = hasMine ? MINE : [];
+    const matchFor = (t) => mineList.find((m) => t.wants.includes(m.cat));
+    const autoMine = matchFor(sel) || mineList[0];
+    const mine = mineList.find((m) => m.id === s.mine) || autoMine;
+
+    const soulte = hasMine ? s.soulte : 0;
+    const left = (mine ? mine.value : 0) + Math.max(soulte, 0);
+    const right = sel.value + Math.max(-soulte, 0);
+    const ratio = (right - left) / Math.max(left, right, 1);
+    const deg = Math.max(-14, Math.min(14, ratio * 26));
+    const rad = (deg * Math.PI) / 180;
+    const L = 175;
+    const dx = L * Math.cos(rad), dy = L * Math.sin(rad);
+
+    const gap = mine ? sel.value - mine.value - soulte : 0;
+    const balanced = hasMine && Math.abs(right - left) / Math.max(left, right) <= tol;
+    const need = mine ? round(sel.value - mine.value) : 0;
+    let vTitle, vBody, vTone;
+    if (!hasMine) {
+      vTone = 'info'; vTitle = 'Le plateau de gauche est vide';
+      vBody = `${sel.seller.split(' ')[0]} indique ce qui l\u2019intéresse ci-dessous. Une annonce dans ces catégories fera pencher la balance.`;
+    } else if (balanced) {
+      vTone = 'ok'; vTitle = 'Échange équilibré';
+      vBody = soulte === 0 ? `Vos deux annonces se valent à ${Math.round(tol * 100)} % près. Vous pouvez proposer l\u2019échange tel quel.` : `Avec ${F(Math.abs(soulte))} ${soulte > 0 ? 'de votre part' : 'de la part de ' + sel.seller.split(' ')[0]}, la balance est à l\u2019équilibre.`;
+    } else if (gap > 0) {
+      vTone = 'warn'; vTitle = `Il manque environ ${F(round(gap))} de votre côté`;
+      vBody = sel.cashMax === 0 && soulte === 0 ? `${sel.seller.split(' ')[0]} préfère un échange sans argent : essayez une autre de vos annonces.` : 'Ajoutez un complément, ou choisissez une autre de vos annonces.';
+    } else {
+      vTone = 'warn'; vTitle = `Votre annonce vaut ${F(round(-gap))} de plus`;
+      vBody = `Vous pouvez demander un complément à ${sel.seller.split(' ')[0]}${sel.cashMax ? `, qui accepte jusqu\u2019à ${F(sel.cashMax)}` : ''}.`;
+    }
+    const tones = {
+      ok: ['rgba(110,154,106,0.14)', '#6E9A6A', '#3F6B3C'],
+      warn: ['rgba(232,131,42,0.14)', '#E8832A', '#123A44'],
+      info: ['rgba(85,173,179,0.14)', '#55ADB3', '#2E7B84'],
+    }[vTone];
+
+    const range = round(Math.max(sel.value, mine ? mine.value : 0));
+    const pickTroc = (id) => this.setState({ sel: id, mine: null, soulte: 0 });
+
+    let list = TROCS.filter((t) => s.cat === 'Tout' || t.cat === s.cat);
+    if (s.compat && hasMine) list = list.filter((t) => matchFor(t));
+
+    return {
+      hasMine, noMine: !hasMine,
+      cats: CATS.map((c) => {
+        const on = s.cat === c;
+        return { label: c, bg: on ? '#123A44' : '#FEFAF3', border: on ? '#123A44' : '#E4D7C3', color: on ? '#FEFAF3' : '#123A44', select: () => this.setState({ cat: c }) };
+      }),
+      toggleCompat: () => this.setState((st) => ({ compat: !st.compat })),
+      compatTrack: s.compat ? '#123A44' : '#D5C4AC', compatKnob: s.compat ? '19px' : '3px',
+      listings: list.map((t) => {
+        const m = matchFor(t);
+        const on = t.id === s.sel;
+        return {
+          ...t, valueLabel: F(t.value), hasMatch: Boolean(m), matchLabel: m ? `Contre votre ${m.title.split(' ')[0].toLowerCase()}` : '',
+          border: on ? '#123A44' : '#E4D7C3', shadow: on ? '0 6px 24px rgba(18,58,68,0.09)' : '0 3px 14px rgba(18,58,68,0.06)',
+          select: () => pickTroc(t.id),
+        };
+      }),
+      emptyList: list.length === 0,
+
+      sel: { ...sel, valueLabel: F(sel.value), sellerFirst: sel.seller.split(' ')[0], cashLabel: sel.cashMax ? `Accepte un complément en argent jusqu\u2019à ${F(sel.cashMax)}.` : 'Préfère un échange sans complément en argent.' },
+      mine: mine ? { ...mine, valueLabel: F(mine.value) } : { title: '', photo: '', valueLabel: '' },
+      selWants: sel.wants.map((w) => {
+        const ok = mineList.some((m) => m.cat === w);
+        return { label: ok ? `${w} · vous en avez` : w, bg: ok ? 'rgba(110,154,106,0.14)' : '#FEFAF3', color: ok ? '#3F6B3C' : '#123A44', border: ok ? 'rgba(110,154,106,0.30)' : '#E4D7C3' };
+      }),
+      firstWant: sel.wants[0],
+
+      beamDeg: deg.toFixed(2),
+      leftX: (260 - dx - 85).toFixed(1), leftY: (60 - dy).toFixed(1),
+      rightX: (260 + dx - 85).toFixed(1), rightY: (60 + dy).toFixed(1),
+
+      soulte, sliderMin: -range, sliderMax: range,
+      onSoulte: (e) => this.setState({ soulte: Number(e.target.value) }),
+      iPay: soulte > 0, theyPay: soulte < 0, soulteLabel: F(Math.abs(soulte)),
+      soulteText: soulte === 0 ? 'Aucun' : soulte > 0 ? `Vous ajoutez ${F(soulte)}` : `${sel.seller.split(' ')[0]} ajoute ${F(-soulte)}`,
+      canBalance: hasMine && !balanced && !(need < 0 && sel.cashMax === 0),
+      balance: () => this.setState({ soulte: need < 0 ? -Math.min(-need, sel.cashMax || -need) : need }),
+
+      verdictTitle: vTitle, verdictBody: vBody, verdictBg: tones[0], verdictBar: tones[1], verdictColor: tones[2],
+
+      myListings: mineList.map((m) => {
+        const on = mine && m.id === mine.id;
+        const ok = sel.wants.includes(m.cat);
+        return {
+          ...m, valueLabel: F(m.value),
+          bg: on ? '#FEFAF3' : '#FBF6EC', border: on ? '#123A44' : '#E4D7C3',
+          matchText: ok ? 'Dans ses envies' : 'Hors de ses envies', matchColor: ok ? '#3F6B3C' : 'rgba(18,58,68,0.62)',
+          select: () => this.setState({ mine: m.id, soulte: 0 }),
+        };
+      }),
+      proposeLabel: soulte === 0 ? 'Proposer cet échange' : soulte > 0 ? `Proposer l\u2019échange + ${F(soulte)}` : `Proposer l\u2019échange, ${F(-soulte)} en retour`,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

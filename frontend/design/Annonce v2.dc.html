@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#FBF6EC; -webkit-font-smoothing:antialiased; }
+  a { color:#2E7B84; text-decoration:none; }
+  a:hover { color:#123A44; }
+  input::placeholder, textarea::placeholder { color:rgba(18,58,68,0.42); }
+</style>
+</helmet>
+
+<div style="width:1440px;min-height:100vh;background:#FBF6EC;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#123A44">
+
+  <!-- ===== HEADER ===== -->
+  <header style="position:sticky;top:0;z-index:40;height:88px;background:#FBF6EC;border-bottom:1px solid #E4D7C3">
+    <div style="display:flex;height:88px;align-items:center;gap:20px;padding:0 48px">
+      <a href="Accueil v2.dc.html" style="display:flex;flex-shrink:0;align-items:center;gap:10px">
+        <img src="assets/kalico1.svg" alt="Kalico" style="height:46px;width:auto;display:block" />
+        <span style="font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1;color:#123A44;letter-spacing:-0.01em">Kalico</span>
+      </a>
+      <form style="flex:1;max-width:440px;margin-left:8px">
+        <div style="position:relative">
+          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(18,58,68,0.45)" stroke-width="2" stroke-linecap="round" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);width:17px;height:17px"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+          <input type="text" placeholder="Rechercher une annonce" style="width:100%;height:46px;border-radius:10px;border:1px solid #E4D7C3;background:#FEFAF3;color:#123A44;padding:0 16px 0 40px;font-size:15px;font-family:inherit;outline:none" />
+        </div>
+      </form>
+      <nav style="display:flex;align-items:center;gap:2px;margin-left:auto">
+        <a href="#" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44;white-space:nowrap" style-hover="background:#F3E9D8">Annonces</a>
+        <a href="#" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44;white-space:nowrap" style-hover="background:#F3E9D8">Bons plans</a>
+        <a href="#" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44;white-space:nowrap" style-hover="background:#F3E9D8">Pros</a>
+        <a href="#" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44;white-space:nowrap" style-hover="background:#F3E9D8">Covoiturage</a>
+        <a href="#" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44;white-space:nowrap" style-hover="background:#F3E9D8">Troc</a>
+      </nav>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;padding-left:12px;border-left:1px solid #E4D7C3">
+        <a href="#" style="border-radius:10px;padding:10px 14px;font-size:15px;font-weight:600;color:#9E4E06">Se connecter</a>
+        <a href="#" style="display:inline-flex;align-items:center;gap:7px;border-radius:10px;background:#A94F0A;color:#FEFAF3;padding:11px 20px;font-size:15px;font-weight:600;box-shadow:0 2px 10px rgba(18,58,68,0.14)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+          Déposer
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== FIL D'ARIANE ===== -->
+  <div style="padding:22px 48px 0;display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(18,58,68,0.55)">
+    <a href="Accueil v2.dc.html" style="color:rgba(18,58,68,0.55)">Accueil</a>
+    <span style="color:rgba(18,58,68,0.3)">/</span>
+    <a href="#" style="color:rgba(18,58,68,0.55)">{{ category }}</a>
+    <span style="color:rgba(18,58,68,0.3)">/</span>
+    <a href="#" style="color:rgba(18,58,68,0.55)">{{ commune }}</a>
+    <span style="color:rgba(18,58,68,0.3)">/</span>
+    <span style="color:#123A44">{{ title }}</span>
+  </div>
+
+  <!-- ===== CORPS ===== -->
+  <div style="display:grid;grid-template-columns:1fr 396px;gap:32px;align-items:start;padding:24px 48px 0">
+
+    <!-- ---------- COLONNE GAUCHE ---------- -->
+    <main style="min-width:0;display:flex;flex-direction:column;gap:20px">
+
+      <!-- Galerie -->
+      <section>
+        <div style="position:relative;aspect-ratio:16/10;overflow:hidden;border-radius:20px;border:1px solid #E4D7C3;background:#F3E9D8;display:flex;align-items:center;justify-content:center">
+          <div style="position:absolute;inset:0;opacity:0.07;background-image:repeating-linear-gradient(45deg,#123A44 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#123A44 0 1px,transparent 1px 9px)"></div>
+          <span style="position:relative;font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:0.06em;color:rgba(18,58,68,0.42)">{{ activeSlot }}</span>
+
+          <div style="position:absolute;left:16px;top:16px;display:flex;gap:8px">
+            <sc-if value="{{ isFeatured }}" hint-placeholder-val="{{ true }}">
+              <span style="border-radius:9999px;background:#E8832A;padding:6px 13px;font-size:12px;font-weight:600;color:#123A44">À la une</span>
+            </sc-if>
+            <span style="border-radius:9999px;background:rgba(14,42,49,0.82);padding:6px 13px;font-size:12px;font-weight:600;color:#FBF6EC">{{ category }}</span>
+            <sc-if value="{{ hasTroc }}" hint-placeholder-val="{{ true }}">
+              <span style="display:inline-flex;align-items:center;gap:6px;border-radius:9999px;background:rgba(110,154,106,0.9);padding:6px 13px;font-size:12px;font-weight:600;color:#0E2A31">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:13px;height:13px"><path d="M8 3 4 7l4 4"></path><path d="M4 7h16"></path><path d="m16 21 4-4-4-4"></path><path d="M20 17H4"></path></svg>
+                Troc possible
+              </span>
+            </sc-if>
+          </div>
+
+          <div style="position:absolute;bottom:16px;right:16px;display:flex;gap:8px">
+            <button style="display:inline-flex;align-items:center;gap:7px;border:1px solid #E4D7C3;border-radius:10px;background:rgba(254,250,243,0.94);padding:9px 14px;font-size:14px;font-weight:500;font-family:inherit;color:#123A44;cursor:pointer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
+              Sauvegarder
+            </button>
+            <button style="display:inline-flex;align-items:center;gap:7px;border:1px solid #E4D7C3;border-radius:10px;background:rgba(254,250,243,0.94);padding:9px 14px;font-size:14px;font-weight:500;font-family:inherit;color:#123A44;cursor:pointer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.6 13.5 6.8 4"></path><path d="m15.4 6.5-6.8 4"></path></svg>
+              Partager
+            </button>
+          </div>
+
+          <span style="position:absolute;bottom:16px;left:16px;border-radius:9999px;background:rgba(14,42,49,0.82);padding:6px 12px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#FBF6EC">1 / {{ photoCount }}</span>
+        </div>
+
+        <div style="margin-top:10px;display:flex;gap:10px">
+          <sc-for list="{{ thumbs }}" as="t" hint-placeholder-count="5">
+            <div style="position:relative;height:82px;width:104px;flex-shrink:0;overflow:hidden;border-radius:12px;border:{{ t.border }};background:#F3E9D8;display:flex;align-items:center;justify-content:center;cursor:pointer">
+              <div style="position:absolute;inset:0;opacity:0.07;background-image:repeating-linear-gradient(45deg,#123A44 0 1px,transparent 1px 9px)"></div>
+              <span style="position:relative;font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(18,58,68,0.4)">{{ t.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <!-- Titre + prix -->
+      <section style="border-radius:20px;border:1px solid #E4D7C3;background:#FEFAF3;padding:32px 34px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:40px">
+          <div style="min-width:0">
+            <h1 style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:46px;line-height:1.06;letter-spacing:-0.01em">{{ title }}</h1>
+            <div style="margin-top:18px;display:flex;flex-wrap:wrap;align-items:center;gap:18px;font-size:14px;color:rgba(18,58,68,0.6)">
+              <span style="display:inline-flex;align-items:center;gap:7px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#55ADB3" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                {{ location }}
+              </span>
+              <span style="display:inline-flex;align-items:center;gap:7px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="rgba(18,58,68,0.45)" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                {{ publishedAt }}
+              </span>
+              <span style="display:inline-flex;align-items:center;gap:7px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="rgba(18,58,68,0.45)" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                {{ views }} vues
+              </span>
+              <span style="display:inline-flex;align-items:center;gap:7px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="rgba(18,58,68,0.45)" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
+                {{ favorites }} favoris
+              </span>
+            </div>
+          </div>
+          <div style="flex-shrink:0;text-align:right">
+            <p style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-size:56px;line-height:1;color:#123A44">{{ price }} <span style="font-size:26px;color:rgba(18,58,68,0.5)">{{ currency }}</span></p>
+            <sc-if value="{{ negotiable }}" hint-placeholder-val="{{ true }}">
+              <p style="margin:10px 0 0;display:inline-flex;align-items:center;gap:6px;border-radius:9999px;background:rgba(232,131,42,0.15);border:1px solid rgba(232,131,42,0.34);padding:5px 12px;font-size:13px;font-weight:600;color:#9E4E06">Prix négociable</p>
+            </sc-if>
+          </div>
+        </div>
+
+        <div style="margin-top:28px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px">
+          <sc-for list="{{ specs }}" as="s" hint-placeholder-count="4">
+            <div style="border-radius:14px;background:#F3E9D8;padding:16px 18px">
+              <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.5)">{{ s.label }}</p>
+              <p style="margin:8px 0 0;font-size:16px;font-weight:600;color:#123A44">{{ s.value }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <!-- Description -->
+      <section style="border-radius:20px;border:1px solid #E4D7C3;background:#FEFAF3;padding:32px 34px">
+        <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">Description</p>
+        <p style="margin:20px 0 0;font-size:17px;line-height:1.75;color:rgba(18,58,68,0.82);max-width:760px;white-space:pre-line;text-wrap:pretty">{{ description }}</p>
+
+        <sc-if value="{{ hasTroc }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-top:28px;border-radius:16px;border:1px dashed rgba(110,154,106,0.55);background:rgba(110,154,106,0.09);padding:22px 24px">
+            <p style="margin:0;display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:#3F6B3C">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px"><path d="M8 3 4 7l4 4"></path><path d="M4 7h16"></path><path d="m16 21 4-4-4-4"></path><path d="M20 17H4"></path></svg>
+              Échange possible contre
+            </p>
+            <p style="margin:12px 0 0;font-size:16px;line-height:1.6;color:#123A44">{{ trocAgainst }}</p>
+          </div>
+        </sc-if>
+      </section>
+
+      <!-- Carte / localisation -->
+      <section style="border-radius:20px;border:1px solid #E4D7C3;background:#FEFAF3;overflow:hidden">
+        <div style="padding:28px 34px 22px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+          <div>
+            <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">Localisation</p>
+            <p style="margin:14px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1.1">{{ location }}</p>
+            <p style="margin:8px 0 0;font-size:14px;color:rgba(18,58,68,0.6)">{{ distanceNote }}</p>
+          </div>
+          <a href="#" style="display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:#123A44">Voir les annonces de la commune
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+          </a>
+        </div>
+        <div style="position:relative;height:200px;background:#F3E9D8;border-top:1px solid #E4D7C3;display:flex;align-items:center;justify-content:center">
+          <div style="position:absolute;inset:0;opacity:0.07;background-image:repeating-linear-gradient(45deg,#123A44 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#123A44 0 1px,transparent 1px 9px)"></div>
+          <span style="position:relative;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.06em;color:rgba(18,58,68,0.42)">carte de la commune — zone approximative</span>
+        </div>
+      </section>
+
+      <!-- Avis vendeur -->
+      <section style="border-radius:20px;border:1px solid #E4D7C3;background:#FEFAF3;padding:32px 34px">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+          <div>
+            <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">Avis sur le vendeur</p>
+            <p style="margin:14px 0 0;display:flex;align-items:baseline;gap:12px">
+              <span style="font-family:'Instrument Serif',Georgia,serif;font-size:44px;line-height:1">{{ sellerRating }}</span>
+              <span style="font-size:16px;color:rgba(18,58,68,0.6)">sur 5 · {{ sellerReviewCount }} avis</span>
+            </p>
+          </div>
+          <a href="#" style="display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:#123A44;padding-bottom:6px">Tous les avis
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+          </a>
+        </div>
+
+        <div style="margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <sc-for list="{{ reviews }}" as="r" hint-placeholder-count="4">
+            <div style="border-radius:16px;background:#F3E9D8;padding:20px 22px">
+              <div style="display:flex;align-items:center;gap:12px">
+                <span style="display:flex;height:34px;width:34px;flex-shrink:0;align-items:center;justify-content:center;border-radius:9999px;background:rgba(85,173,179,0.2);font-size:12px;font-weight:600;color:#2E7B84">{{ r.initials }}</span>
+                <div style="min-width:0;flex:1">
+                  <p style="margin:0;font-size:15px;font-weight:600;color:#123A44">{{ r.author }}</p>
+                  <p style="margin:1px 0 0;font-size:12px;color:rgba(18,58,68,0.5)">{{ r.date }}</p>
+                </div>
+                <span style="flex-shrink:0;font-size:14px;font-weight:600;color:#9E4E06">{{ r.stars }}</span>
+              </div>
+              <p style="margin:14px 0 0;font-size:15px;line-height:1.6;color:rgba(18,58,68,0.78);text-wrap:pretty">{{ r.body }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <!-- Autres annonces du vendeur -->
+      <section style="padding-top:12px">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+          <div>
+            <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">Du même vendeur</p>
+            <h2 style="margin:12px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:38px;line-height:1.05">{{ sellerName }} vend aussi</h2>
+          </div>
+          <a href="#" style="display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:#123A44;padding-bottom:6px">Voir le profil
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+          </a>
+        </div>
+        <div style="margin-top:24px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+          <sc-for list="{{ sellerListings }}" as="s" hint-placeholder-count="3">
+            <a href="#" style="display:flex;flex-direction:column;overflow:hidden;border-radius:16px;border:1px solid #E4D7C3;background:#FEFAF3" style-hover="border-color:#123A44">
+              <div style="position:relative;aspect-ratio:4/3;background:#F3E9D8;display:flex;align-items:center;justify-content:center">
+                <div style="position:absolute;inset:0;opacity:0.07;background-image:repeating-linear-gradient(45deg,#123A44 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#123A44 0 1px,transparent 1px 9px)"></div>
+                <span style="position:relative;font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(18,58,68,0.42)">{{ s.slot }}</span>
+              </div>
+              <div style="padding:18px 20px 20px">
+                <h3 style="margin:0;font-size:16px;font-weight:500;line-height:1.35;color:#123A44">{{ s.title }}</h3>
+                <p style="margin:10px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:26px;line-height:1;color:#123A44">{{ s.price }} <span style="font-size:14px;color:rgba(18,58,68,0.5)">XPF</span></p>
+                <p style="margin:10px 0 0;font-size:13px;color:rgba(18,58,68,0.6)">{{ s.place }}</p>
+              </div>
+            </a>
+          </sc-for>
+        </div>
+      </section>
+
+      <!-- Recherches associées -->
+      <section style="padding-top:24px">
+        <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">Recherches associées</p>
+        <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:8px">
+          <sc-for list="{{ relatedSearches }}" as="q" hint-placeholder-count="7">
+            <a href="#" style="display:inline-flex;align-items:center;border-radius:9999px;border:1px solid #E4D7C3;background:#FEFAF3;padding:8px 16px;font-size:14px;font-weight:500;color:#123A44" style-hover="border-color:#123A44">{{ q }}</a>
+          </sc-for>
+        </div>
+      </section>
+    </main>
+
+    <!-- ---------- COLONNE DROITE ---------- -->
+    <aside style="position:sticky;top:112px;display:flex;flex-direction:column;gap:16px">
+
+      <!-- Vendeur -->
+      <div style="border-radius:20px;border:1px solid #E4D7C3;background:#FEFAF3;padding:28px 26px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="display:flex;height:56px;width:56px;flex-shrink:0;align-items:center;justify-content:center;border-radius:16px;background:rgba(85,173,179,0.18);font-family:'Instrument Serif',Georgia,serif;font-size:24px;color:#2E7B84">{{ sellerInitials }}</span>
+          <div style="min-width:0;flex:1">
+            <p style="margin:0;font-size:19px;font-weight:600;color:#123A44">{{ sellerName }}</p>
+            <p style="margin:3px 0 0;font-size:14px;color:rgba(18,58,68,0.6)">★ {{ sellerRating }} · {{ sellerReviewCount }} avis · {{ sellerListingCount }} annonces</p>
+          </div>
+        </div>
+
+        <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:7px">
+          <sc-for list="{{ sellerBadges }}" as="b" hint-placeholder-count="4">
+            <span style="display:inline-flex;align-items:center;gap:6px;border-radius:9999px;background:{{ b.bg }};border:1px solid {{ b.border }};padding:5px 11px;font-size:12px;font-weight:600;color:{{ b.color }}">{{ b.label }}</span>
+          </sc-for>
+        </div>
+
+        <p style="margin:18px 0 0;font-size:14px;line-height:1.55;color:rgba(18,58,68,0.62)">{{ sellerNote }}</p>
+
+        <div style="margin-top:22px;display:flex;flex-direction:column;gap:10px">
+          <button style="display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;background:#A94F0A;color:#FEFAF3;padding:15px 20px;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer;box-shadow:0 2px 10px rgba(169,79,10,0.22)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:17px;height:17px"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z"></path></svg>
+            Envoyer un message
+          </button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <button style="display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid #123A44;border-radius:10px;background:transparent;color:#123A44;padding:12px 14px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer">Faire une offre</button>
+            <button style="display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid rgba(110,154,106,0.5);border-radius:10px;background:rgba(110,154,106,0.1);color:#3F6B3C;padding:12px 14px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer">Proposer un troc</button>
+          </div>
+          <button style="display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #E4D7C3;border-radius:10px;background:#F3E9D8;color:rgba(18,58,68,0.55);padding:12px 14px;font-size:15px;font-weight:500;font-family:inherit;cursor:not-allowed">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"></path></svg>
+            Téléphone non vérifié
+          </button>
+        </div>
+
+        <a href="#" style="margin-top:16px;display:block;text-align:center;font-size:14px;font-weight:600;color:#123A44">Voir le profil vendeur</a>
+      </div>
+
+      <!-- Sécurité -->
+      <div style="border-radius:20px;background:#0E2A31;position:relative;overflow:hidden;padding:26px;color:#FBF6EC">
+        <div style="position:absolute;inset:0;opacity:0.1;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+        <div style="position:relative">
+          <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#E8832A">Avant la transaction</p>
+          <div style="margin-top:20px;display:flex;flex-direction:column;gap:16px">
+            <sc-for list="{{ safetyTips }}" as="tip" hint-placeholder-count="4">
+              <div style="display:flex;gap:12px">
+                <span style="flex-shrink:0;font-family:'Instrument Serif',Georgia,serif;font-size:20px;line-height:1.2;color:rgba(232,131,42,0.9)">{{ tip.n }}</span>
+                <p style="margin:0;font-size:14px;line-height:1.55;color:rgba(251,246,236,0.78);text-wrap:pretty">{{ tip.body }}</p>
+              </div>
+            </sc-for>
+          </div>
+          <a href="#" style="margin-top:22px;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:#E8832A">Nos conseils de sécurité
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Alerte -->
+      <div style="border-radius:20px;border:1px solid #E4D7C3;background:#F3E9D8;padding:24px 26px">
+        <p style="margin:0;font-size:16px;font-weight:600;color:#123A44">Vous cherchez ce type d'annonce ?</p>
+        <p style="margin:8px 0 0;font-size:14px;line-height:1.55;color:rgba(18,58,68,0.65);text-wrap:pretty">Créez une alerte « {{ category }} · {{ commune }} » et recevez les prochaines avant qu'elles ne remontent.</p>
+        <button style="margin-top:16px;width:100%;border:1px solid #123A44;border-radius:10px;background:transparent;color:#123A44;padding:12px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer">Créer l'alerte</button>
+      </div>
+
+      <button style="display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;background:transparent;color:rgba(18,58,68,0.5);padding:10px;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+        Signaler cette annonce
+      </button>
+    </aside>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer style="margin-top:80px;background:#0E2A31;color:#FBF6EC;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;opacity:0.07;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+    <div style="position:relative;padding:56px 48px 40px">
+      <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:48px">
+        <div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <img src="assets/kalico1.svg" alt="Kalico" style="height:48px;width:auto" />
+            <span style="font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1">Kalico</span>
+          </div>
+          <p style="margin:20px 0 0;font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:24px;line-height:1.25;color:rgba(251,246,236,0.85);max-width:400px">Nouvelle-Calédonie dans l'âme, Kalico dans la poche.</p>
+        </div>
+        <sc-for list="{{ footerCols }}" as="col" hint-placeholder-count="3">
+          <div>
+            <p style="margin:0 0 16px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:rgba(251,246,236,0.45)">{{ col.title }}</p>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ col.links }}" as="lk" hint-placeholder-count="5">
+                <a href="#" style="font-size:15px;color:rgba(251,246,236,0.78)" style-hover="color:#E8832A">{{ lk }}</a>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="margin-top:48px;padding-top:22px;border-top:1px solid rgba(251,246,236,0.16);display:flex;align-items:center;justify-content:space-between;font-size:13px;color:rgba(251,246,236,0.45)">
+        <p style="margin:0">© 2026 Kalico · Nouvelle-Calédonie</p>
+        <p style="margin:0">contact@kalico.nc</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440},&quot;troc&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Annonce&quot;},&quot;negotiable&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Annonce&quot;},&quot;featured&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Annonce&quot;},&quot;sellerPro&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Vendeur&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const troc = this.props.troc ?? true;
+    const pro = this.props.sellerPro ?? true;
+
+    const badge = (label, kind) => {
+      const map = {
+        green: { bg: 'rgba(110,154,106,0.14)', border: 'rgba(110,154,106,0.3)', color: '#3F6B3C' },
+        lagoon: { bg: 'rgba(85,173,179,0.14)', border: 'rgba(85,173,179,0.32)', color: '#2E7B84' },
+        sand: { bg: '#F3E9D8', border: '#E4D7C3', color: 'rgba(18,58,68,0.62)' },
+      };
+      return Object.assign({ label }, map[kind]);
+    };
+
+    const badges = [
+      badge('✓ Email vérifié', 'green'),
+      badge('✓ Téléphone vérifié', 'green'),
+      badge('● En ligne', 'green'),
+      badge('Répond en 2 h', 'lagoon'),
+      badge('Membre depuis 2023', 'sand'),
+    ];
+    if (pro) badges.splice(2, 0, badge('Pro vérifié', 'green'));
+
+    const thumb = (label, active) => ({
+      label,
+      border: active ? '2px solid #123A44' : '1px solid #E4D7C3',
+    });
+
+    return {
+      title: this.props.title ?? "Planche de surf 6'2 avec housse",
+      category: 'Loisirs',
+      commune: 'Nouméa',
+      location: 'Nouméa · Anse Vata',
+      distanceNote: 'À environ 4 km de votre position. Remise en main propre proposée par le vendeur.',
+      price: '48 000',
+      currency: 'XPF',
+      negotiable: this.props.negotiable ?? true,
+      isFeatured: this.props.featured ?? true,
+      hasTroc: troc,
+      trocAgainst: 'Un stand-up paddle gonflable, ou du matériel de plongée (détendeur, gilet stabilisateur).',
+      publishedAt: 'il y a 5 heures',
+      views: '213',
+      favorites: '18',
+      photoCount: '6',
+      activeSlot: 'photo principale de la planche',
+      thumbs: [
+        thumb('profil', true), thumb('dérives', false), thumb('pont', false),
+        thumb('housse', false), thumb('détail nose', false),
+      ],
+
+      specs: [
+        { label: 'État', value: 'Comme neuf' },
+        { label: 'Type', value: 'Shortboard 6\u20192' },
+        { label: 'Paiement', value: 'Négociable' },
+        { label: 'Remise', value: 'Main propre' },
+      ],
+
+      description: "Planche de surf 6'2 achetée l'an dernier chez un shaper de Nouméa, très peu servie — une dizaine de sessions à Ouano et à la Roche Percée.\n\nAucun impact, aucune réparation. Le pont a une légère marque de wax jaunie près du nose, purement esthétique. Livrée avec sa housse matelassée, un jeu de trois dérives FCS et un leash neuf jamais utilisé.\n\nJe vends parce que je passe sur un format plus long. Visible sur Nouméa en semaine après 17 h, le week-end à l'Anse Vata. Je peux la descendre jusqu'à Dumbéa si besoin.",
+
+      sellerName: 'Jean-Luc',
+      sellerInitials: 'JL',
+      sellerRating: '4,9',
+      sellerReviewCount: '31',
+      sellerListingCount: '7',
+      sellerBadges: badges,
+      sellerNote: pro
+        ? 'Vendeur professionnel · Glisse Sud, Anse Vata. Pièce justificative vérifiée par Kalico.'
+        : 'Particulier · Nouméa. Identité vérifiée par Kalico.',
+
+      reviews: [
+        { initials: 'MT', author: 'Marie', date: 'il y a 3 semaines', stars: '★★★★★', body: "Transaction impeccable. Jean-Luc a décrit la planche exactement telle qu'elle était, et il s'est déplacé jusqu'à Dumbéa." },
+        { initials: 'TW', author: 'Teva', date: 'il y a 2 mois', stars: '★★★★★', body: "Très bon contact, réponse en moins d'une heure. Le matériel était prêt et propre au rendez-vous." },
+        { initials: 'HM', author: 'Hélène', date: 'il y a 3 mois', stars: '★★★★☆', body: "Vendeur sérieux. Un léger retard au rendez-vous mais prévenu à l'avance, rien à redire sur le produit." },
+        { initials: 'SK', author: 'Sophie', date: 'il y a 5 mois', stars: '★★★★★', body: "J'ai acheté un leash et une housse. Prix honnête, aucun souci." },
+      ],
+
+      sellerListings: [
+        { slot: 'photo du leash', title: 'Leash 6 pieds, jamais utilisé', price: '4 500', place: 'Anse Vata' },
+        { slot: 'photo des dérives', title: 'Jeu de dérives FCS II thruster', price: '9 000', place: 'Anse Vata' },
+        { slot: 'photo de la combinaison', title: 'Combinaison shorty 2 mm, taille M', price: '12 000', place: 'Anse Vata' },
+      ],
+
+      relatedSearches: [
+        'Loisirs', 'Nouméa', 'planche', 'surf', 'housse',
+        '36 000 – 60 000 XPF', 'Matériel de glisse Anse Vata',
+      ],
+
+      safetyTips: [
+        { n: '1', body: 'Rencontrez le vendeur dans un lieu public et en journée. Les parkings de centre commercial marchent bien.' },
+        { n: '2', body: 'Examinez le matériel avant de payer. Pour une planche : pont, dérives, rails, traces de réparation.' },
+        { n: '3', body: 'Ne versez jamais d\u2019acompte par virement ou mandat avant d\u2019avoir vu l\u2019objet.' },
+        { n: '4', body: 'Gardez la conversation dans la messagerie Kalico : elle sert de preuve en cas de litige.' },
+      ],
+
+      footerCols: [
+        { title: 'Acheter & vendre', links: ['Annonces', 'Troc', 'Dons', 'Immobilier', 'Véhicules'] },
+        { title: 'Services', links: ['Annuaire des pros', 'Devenir Pro', 'Appels d\u2019offres', 'Covoiturage', 'Envoi & livraison'] },
+        { title: 'Kalico', links: ['Sécurité', 'Contact', 'CGU', 'Confidentialité', 'Cookies'] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

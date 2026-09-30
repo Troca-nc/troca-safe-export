@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#FBF6EC; -webkit-font-smoothing:antialiased; }
+  a { color:#2E7B84; text-decoration:none; }
+  a:hover { color:#123A44; }
+</style>
+</helmet>
+
+<div style="width:1440px;min-height:100vh;background:#FBF6EC;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#123A44">
+
+  <!-- ===== HEADER ===== -->
+  <header style="position:sticky;top:0;z-index:60;height:88px;background:#FBF6EC;border-bottom:1px solid #E4D7C3">
+    <div style="display:flex;height:88px;align-items:center;gap:20px;padding:0 48px">
+      <a href="Accueil v2.dc.html" style="display:flex;flex-shrink:0;align-items:center;gap:10px">
+        <img src="assets/kalico1.svg" alt="Kalico" style="height:46px;width:auto;display:block" />
+        <span style="font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1;color:#123A44;letter-spacing:-0.01em">Kalico</span>
+        <span style="margin-left:2px;border-radius:7px;background:#123A44;padding:4px 9px;font-size:11px;font-weight:600;letter-spacing:0.1em;color:#FEFAF3">PRO</span>
+      </a>
+      <nav style="display:flex;align-items:center;gap:2px;margin-left:auto">
+        <a href="Annonces v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44;white-space:nowrap" style-hover="background:#F3E9D8">Annonces</a>
+        <a href="Bons plans v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44;white-space:nowrap" style-hover="background:#F3E9D8">Bons plans</a>
+        <a href="#" style="border-radius:8px;background:#F3E9D8;padding:9px 13px;font-size:15px;font-weight:600;color:#123A44;white-space:nowrap">Pros</a>
+        <a href="#" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44;white-space:nowrap" style-hover="background:#F3E9D8">Covoiturage</a>
+        <a href="#" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44;white-space:nowrap" style-hover="background:#F3E9D8">Troc</a>
+      </nav>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;padding-left:12px;border-left:1px solid #E4D7C3">
+        <a href="#" style="border-radius:10px;padding:10px 14px;font-size:15px;font-weight:600;color:#9E4E06">Se connecter</a>
+        <a href="#" style="display:inline-flex;align-items:center;gap:7px;border-radius:10px;background:#A94F0A;color:#FEFAF3;padding:11px 20px;font-size:15px;font-weight:600;box-shadow:0 2px 10px rgba(18,58,68,0.14)">Créer mon espace Pro</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section style="position:relative;overflow:hidden;background:#0E2A31;color:#FBF6EC;padding:80px 48px 72px">
+    <div style="position:absolute;inset:0;opacity:0.09;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+    <div style="position:relative;display:grid;grid-template-columns:1fr 500px;gap:64px;align-items:center">
+      <div>
+        <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#E8832A">Espace professionnel</p>
+        <h1 style="margin:22px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:78px;line-height:0.98;letter-spacing:-0.015em;max-width:720px">Votre activité, vos clients, au même endroit.</h1>
+        <p style="margin:24px 0 0;font-size:19px;line-height:1.6;color:rgba(251,246,236,0.74);max-width:580px;text-wrap:pretty">Vitrine publique, devis en XPF avec TGC, réservations, transport et livraison. Tout ce qu'il faut pour travailler proprement en Nouvelle-Calédonie.</p>
+
+        <div style="margin-top:34px;display:flex;gap:12px">
+          <a href="#" style="display:inline-flex;align-items:center;gap:8px;border-radius:10px;background:#E8832A;color:#0E2A31;padding:15px 28px;font-size:16px;font-weight:600">
+            Créer mon espace Pro
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+          </a>
+          <a href="#" style="display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(251,246,236,0.3);border-radius:10px;padding:15px 26px;font-size:16px;font-weight:600;color:#FBF6EC">Voir une vitrine exemple</a>
+        </div>
+        <p style="margin:16px 0 0;font-size:15px;font-weight:600;color:#E8832A">Trois mois offerts pour les vingt premiers inscrits.</p>
+
+        <div style="margin-top:34px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px">
+          <sc-for list="{{ heroStats }}" as="s" hint-placeholder-count="4">
+            <div style="border-top:2px solid rgba(232,131,42,0.6);padding-top:14px">
+              <p style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-size:32px;line-height:1">{{ s.value }}</p>
+              <p style="margin:8px 0 0;font-size:13px;line-height:1.4;color:rgba(251,246,236,0.62)">{{ s.label }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- maquette tableau de bord -->
+      <div style="border-radius:20px;border:1px solid rgba(251,246,236,0.18);background:rgba(251,246,236,0.05);padding:22px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+          <div>
+            <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(251,246,236,0.45)">Tableau de bord</p>
+            <p style="margin:6px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:26px;line-height:1">Atelier Cocotier</p>
+          </div>
+          <span style="display:inline-flex;flex-shrink:0;align-items:center;gap:6px;border-radius:9999px;background:rgba(110,154,106,0.2);border:1px solid rgba(110,154,106,0.45);padding:5px 12px;font-size:12px;font-weight:600;color:#9FC79B">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:12px;height:12px"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m9 12 2 2 4-4"></path></svg>
+            Pro vérifié
+          </span>
+        </div>
+
+        <div style="margin-top:20px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+          <sc-for list="{{ dashStats }}" as="d" hint-placeholder-count="3">
+            <div style="border-radius:14px;background:rgba(251,246,236,0.07);padding:14px 16px">
+              <p style="margin:0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.14em;color:rgba(251,246,236,0.45)">{{ d.label }}</p>
+              <p style="margin:9px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1">{{ d.value }}</p>
+              <p style="margin:6px 0 0;font-size:11px;color:{{ d.deltaColor }}">{{ d.delta }}</p>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="margin-top:12px;border-radius:14px;background:rgba(251,246,236,0.07);padding:18px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between">
+            <p style="margin:0;font-size:13px;font-weight:600">Vues et contacts</p>
+            <p style="margin:0;font-size:11px;color:rgba(251,246,236,0.5)">30 derniers jours</p>
+          </div>
+          <div style="margin-top:16px;display:flex;align-items:flex-end;gap:5px;height:78px">
+            <sc-for list="{{ chart }}" as="c" hint-placeholder-count="14">
+              <div style="flex:1;border-radius:3px 3px 0 0;background:{{ c.color }};height:{{ c.height }}"></div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ dashRows }}" as="r" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:12px;border-radius:12px;background:rgba(251,246,236,0.07);padding:12px 14px">
+              <span style="display:flex;height:32px;width:32px;flex-shrink:0;align-items:center;justify-content:center;border-radius:9px;background:rgba(232,131,42,0.2);font-size:12px;font-weight:600;color:#E8832A">{{ r.initials }}</span>
+              <div style="min-width:0;flex:1">
+                <p style="margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:500">{{ r.title }}</p>
+                <p style="margin:2px 0 0;font-size:11px;color:rgba(251,246,236,0.52)">{{ r.meta }}</p>
+              </div>
+              <span style="flex-shrink:0;border-radius:9999px;background:{{ r.tagBg }};padding:3px 10px;font-size:11px;font-weight:600;color:{{ r.tagColor }}">{{ r.tag }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MODULES ===== -->
+  <section style="padding:80px 48px 0">
+    <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">Fonctionnalités</p>
+    <div style="margin-top:12px;display:flex;align-items:flex-end;justify-content:space-between;gap:48px">
+      <h2 style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:52px;line-height:1.03;max-width:640px">Ce que Kalico Pro rassemble</h2>
+      <p style="margin:0 0 8px;font-size:17px;line-height:1.6;color:rgba(18,58,68,0.68);max-width:420px;text-wrap:pretty">Six modules, un seul compte. Choisissez ceux qui correspondent à votre métier.</p>
+    </div>
+
+    <div style="margin-top:32px;display:flex;flex-wrap:wrap;gap:6px;border-radius:14px;border:1px solid #E4D7C3;background:#F3E9D8;padding:4px;width:fit-content">
+      <sc-for list="{{ moduleTabs }}" as="m" hint-placeholder-count="6">
+        <button onClick="{{ m.select }}" style="border:0;border-radius:10px;background:{{ m.bg }};padding:11px 20px;font-size:15px;font-weight:{{ m.weight }};font-family:inherit;color:{{ m.color }};cursor:pointer;box-shadow:{{ m.shadow }}">{{ m.label }}</button>
+      </sc-for>
+    </div>
+
+    <div style="margin-top:20px;display:grid;grid-template-columns:1fr 520px;gap:48px;align-items:start">
+      <div style="padding-top:12px">
+        <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">{{ activeModule.eyebrow }}</p>
+        <h3 style="margin:16px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:44px;line-height:1.06;max-width:520px">{{ activeModule.title }}</h3>
+        <p style="margin:18px 0 0;font-size:18px;line-height:1.6;color:rgba(18,58,68,0.7);max-width:520px;text-wrap:pretty">{{ activeModule.description }}</p>
+        <div style="margin-top:28px;display:flex;flex-direction:column;gap:14px;max-width:520px">
+          <sc-for list="{{ activeModule.bullets }}" as="b" hint-placeholder-count="4">
+            <div style="display:flex;gap:14px;border-top:1px solid #EFE3D0;padding-top:14px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#6E9A6A" stroke-width="2" stroke-linecap="round" style="width:18px;height:18px;flex-shrink:0;margin-top:2px"><path d="M20 6 9 17l-5-5"></path></svg>
+              <p style="margin:0;font-size:16px;line-height:1.55;color:rgba(18,58,68,0.82)">{{ b }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- maquette module -->
+      <div style="border-radius:20px;border:1px solid #E4D7C3;background:#FEFAF3;padding:26px 28px;box-shadow:0 6px 26px rgba(18,58,68,0.07)">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+          <div>
+            <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.5)">{{ activeModule.mockLabel }}</p>
+            <p style="margin:10px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1.05">{{ activeModule.mockTitle }}</p>
+          </div>
+          <span style="flex-shrink:0;border-radius:9999px;background:#F3E9D8;border:1px solid #E4D7C3;padding:5px 12px;font-size:12px;font-weight:600;color:rgba(18,58,68,0.65)">{{ activeModule.mockTag }}</span>
+        </div>
+
+        <div style="margin-top:22px;display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ activeModule.mockRows }}" as="row" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;border-radius:12px;background:#F3E9D8;padding:14px 16px">
+              <div style="min-width:0">
+                <p style="margin:0;font-size:15px;font-weight:500;color:#123A44">{{ row.label }}</p>
+                <sc-if value="{{ row.hasSub }}" hint-placeholder-val="{{ false }}">
+                  <p style="margin:3px 0 0;font-size:13px;color:rgba(18,58,68,0.55)">{{ row.sub }}</p>
+                </sc-if>
+              </div>
+              <p style="margin:0;flex-shrink:0;font-size:15px;font-weight:600;color:{{ row.valueColor }}">{{ row.value }}</p>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-radius:12px;border:1px solid rgba(110,154,106,0.35);background:rgba(110,154,106,0.1);padding:15px 17px">
+          <p style="margin:0;font-size:15px;font-weight:600;color:#3F6B3C">{{ activeModule.mockFooter }}</p>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#3F6B3C" stroke-width="2" stroke-linecap="round" style="width:17px;height:17px;flex-shrink:0"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTEURS ===== -->
+  <section style="padding:80px 48px 0">
+    <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">Métiers</p>
+    <h2 style="margin:12px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:52px;line-height:1.03">Fait pour votre secteur</h2>
+    <div style="margin-top:32px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px">
+      <sc-for list="{{ sectors }}" as="sec" hint-placeholder-count="8">
+        <a href="#" style="display:block;border-radius:16px;border:1px solid #E4D7C3;background:#FEFAF3;padding:24px" style-hover="border-color:#123A44">
+          <span style="display:flex;height:44px;width:44px;align-items:center;justify-content:center;border-radius:12px;background:rgba(232,131,42,0.14);font-family:'Instrument Serif',Georgia,serif;font-size:20px;color:#9E4E06">{{ sec.initial }}</span>
+          <p style="margin:18px 0 0;font-size:17px;font-weight:600;color:#123A44">{{ sec.title }}</p>
+          <p style="margin:8px 0 0;font-size:14px;line-height:1.55;color:rgba(18,58,68,0.65);text-wrap:pretty">{{ sec.description }}</p>
+        </a>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- ===== TARIFS ===== -->
+  <section style="padding:80px 48px 0">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:48px">
+      <div>
+        <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">Tarifs</p>
+        <h2 style="margin:12px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:52px;line-height:1.03">Gratuit pour commencer</h2>
+      </div>
+      <div style="display:flex;gap:3px;border-radius:12px;border:1px solid #E4D7C3;background:#F3E9D8;padding:3px">
+        <sc-for list="{{ billingTabs }}" as="b" hint-placeholder-count="2">
+          <button onClick="{{ b.select }}" style="display:inline-flex;align-items:center;gap:9px;border:0;border-radius:9px;background:{{ b.bg }};padding:11px 20px;font-size:15px;font-weight:{{ b.weight }};font-family:inherit;color:{{ b.color }};cursor:pointer;box-shadow:{{ b.shadow }}">
+            {{ b.label }}<sc-if value="{{ b.hasNote }}" hint-placeholder-val="{{ true }}"><span style="font-size:12px;color:#9E4E06">{{ b.note }}</span></sc-if>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="margin-top:32px;display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:16px;align-items:start">
+      <!-- gratuit -->
+      <div style="border-radius:20px;border:1px solid #E4D7C3;background:#FEFAF3;padding:32px 30px">
+        <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.5)">Particulier</p>
+        <p style="margin:16px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:48px;line-height:1">Gratuit</p>
+        <p style="margin:10px 0 0;font-size:15px;color:rgba(18,58,68,0.6)">Sans carte bancaire, sans limite de durée.</p>
+        <div style="margin-top:26px;display:flex;flex-direction:column;gap:11px">
+          <sc-for list="{{ freeFeatures }}" as="f" hint-placeholder-count="5">
+            <div style="display:flex;gap:11px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#6E9A6A" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px;flex-shrink:0;margin-top:3px"><path d="M20 6 9 17l-5-5"></path></svg>
+              <p style="margin:0;font-size:15px;line-height:1.5;color:rgba(18,58,68,0.78)">{{ f }}</p>
+            </div>
+          </sc-for>
+        </div>
+        <a href="#" style="margin-top:28px;display:flex;box-sizing:border-box;width:100%;align-items:center;justify-content:center;border:1px solid #123A44;border-radius:10px;padding:13px;font-size:16px;font-weight:600;color:#123A44">Créer un compte</a>
+      </div>
+
+      <!-- pro -->
+      <div style="position:relative;overflow:hidden;border-radius:20px;background:#0E2A31;color:#FBF6EC;padding:36px 34px">
+        <div style="position:absolute;inset:0;opacity:0.1;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+        <div style="position:relative">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+            <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:#E8832A">Kalico Pro</p>
+            <span style="border-radius:9999px;background:rgba(232,131,42,0.2);border:1px solid rgba(232,131,42,0.45);padding:5px 12px;font-size:12px;font-weight:600;color:#E8832A">{{ proBadge }}</span>
+          </div>
+          <p style="margin:18px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:56px;line-height:1">{{ proPrice }} <span style="font-size:22px;color:rgba(251,246,236,0.55)">XPF {{ proPeriod }}</span></p>
+          <p style="margin:12px 0 0;font-size:15px;color:rgba(251,246,236,0.65)">{{ proNote }}</p>
+
+          <div style="margin-top:28px;display:grid;grid-template-columns:1fr 1fr;gap:11px">
+            <sc-for list="{{ proFeatures }}" as="f" hint-placeholder-count="12">
+              <div style="display:flex;gap:10px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#9FC79B" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px;flex-shrink:0;margin-top:3px"><path d="M20 6 9 17l-5-5"></path></svg>
+                <p style="margin:0;font-size:14px;line-height:1.5;color:rgba(251,246,236,0.86)">{{ f }}</p>
+              </div>
+            </sc-for>
+          </div>
+
+          <a href="#" style="margin-top:30px;display:flex;box-sizing:border-box;width:100%;align-items:center;justify-content:center;gap:8px;border-radius:10px;background:#E8832A;color:#0E2A31;padding:15px;font-size:16px;font-weight:600">
+            Créer mon espace Pro
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+          </a>
+          <p style="margin:14px 0 0;text-align:center;font-size:13px;color:rgba(251,246,236,0.5)">Sans engagement, résiliable à tout moment.</p>
+        </div>
+      </div>
+
+      <!-- boosts -->
+      <div style="border-radius:20px;border:1px solid #E4D7C3;background:#FEFAF3;padding:32px 30px">
+        <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.5)">Boosts à l'acte</p>
+        <p style="margin:16px 0 0;font-size:15px;line-height:1.55;color:rgba(18,58,68,0.68);text-wrap:pretty">Disponibles pour tous, sans abonnement. Les Pro bénéficient de -20 %.</p>
+        <div style="margin-top:24px;display:flex;flex-direction:column;gap:2px">
+          <sc-for list="{{ boosts }}" as="b" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #EFE3D0;padding:12px 0">
+              <p style="margin:0;font-size:15px;color:rgba(18,58,68,0.8)">{{ b.label }}</p>
+              <p style="margin:0;text-align:right;flex-shrink:0">
+                <span style="display:block;font-size:15px;font-weight:600;color:#123A44">{{ b.price }}</span>
+                <span style="display:block;margin-top:2px;font-size:12px;color:#9E4E06">{{ b.pro }}</span>
+              </p>
+            </div>
+          </sc-for>
+        </div>
+        <a href="#" style="margin-top:24px;display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:#123A44">Détail des boosts
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== COMPARATIF ===== -->
+  <section style="padding:80px 48px 0">
+    <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">Comparatif</p>
+    <h2 style="margin:12px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:52px;line-height:1.03">Ce que le Pro change</h2>
+
+    <div style="margin-top:32px;overflow:hidden;border-radius:20px;border:1px solid #E4D7C3;background:#FEFAF3">
+      <div style="display:grid;grid-template-columns:1fr 180px 180px;gap:0;background:#F3E9D8;border-bottom:1px solid #E4D7C3">
+        <p style="margin:0;padding:18px 28px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.55)">Fonctionnalité</p>
+        <p style="margin:0;padding:18px;text-align:center;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:rgba(18,58,68,0.55)">Gratuit</p>
+        <p style="margin:0;padding:18px;text-align:center;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:#9E4E06">Pro</p>
+      </div>
+      <sc-for list="{{ comparison }}" as="row" hint-placeholder-count="10">
+        <div style="display:grid;grid-template-columns:1fr 180px 180px;gap:0;border-bottom:1px solid #EFE3D0">
+          <p style="margin:0;padding:16px 28px;font-size:16px;color:#123A44">{{ row.label }}</p>
+          <div style="display:flex;align-items:center;justify-content:center;padding:16px">
+            <sc-if value="{{ row.free }}" hint-placeholder-val="{{ true }}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#6E9A6A" stroke-width="2.5" stroke-linecap="round" style="width:18px;height:18px"><path d="M20 6 9 17l-5-5"></path></svg>
+            </sc-if>
+            <sc-if value="{{ row.freeAbsent }}" hint-placeholder-val="{{ false }}">
+              <span style="height:2px;width:14px;border-radius:1px;background:rgba(18,58,68,0.22)"></span>
+            </sc-if>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(232,131,42,0.05)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#A94F0A" stroke-width="2.5" stroke-linecap="round" style="width:18px;height:18px"><path d="M20 6 9 17l-5-5"></path></svg>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- ===== CTA FINAL ===== -->
+  <section style="padding:80px 48px 0">
+    <div style="position:relative;overflow:hidden;border-radius:24px;background:#0E2A31;color:#FBF6EC;padding:64px 60px">
+      <div style="position:absolute;inset:0;opacity:0.09;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+      <div style="position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:64px">
+        <div style="max-width:640px">
+          <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#E8832A">Dernière étape</p>
+          <h2 style="margin:18px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:52px;line-height:1.05">Votre espace Pro est prêt en cinq minutes.</h2>
+          <p style="margin:20px 0 0;font-size:18px;line-height:1.6;color:rgba(251,246,236,0.72);text-wrap:pretty">Commencez gratuitement, passez Pro quand votre activité le demande. Vos annonces et vos contacts vous suivent.</p>
+        </div>
+        <div style="display:flex;flex-shrink:0;flex-direction:column;gap:12px;width:280px">
+          <a href="#" style="display:flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;background:#E8832A;color:#0E2A31;padding:15px;font-size:16px;font-weight:600">Créer mon espace Pro</a>
+          <a href="#" style="display:flex;align-items:center;justify-content:center;border:1px solid rgba(251,246,236,0.3);border-radius:10px;padding:14px;font-size:16px;font-weight:600;color:#FBF6EC">Voir une vitrine exemple</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer style="margin-top:80px;background:#0E2A31;color:#FBF6EC;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;opacity:0.07;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+    <div style="position:relative;padding:56px 48px 40px">
+      <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:48px">
+        <div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <img src="assets/kalico1.svg" alt="Kalico" style="height:48px;width:auto" />
+            <span style="font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1">Kalico</span>
+          </div>
+          <p style="margin:20px 0 0;font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:24px;line-height:1.25;color:rgba(251,246,236,0.85);max-width:400px">Nouvelle-Calédonie dans l'âme, Kalico dans la poche.</p>
+        </div>
+        <sc-for list="{{ footerCols }}" as="col" hint-placeholder-count="3">
+          <div>
+            <p style="margin:0 0 16px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:rgba(251,246,236,0.45)">{{ col.title }}</p>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ col.links }}" as="lk" hint-placeholder-count="5">
+                <a href="#" style="font-size:15px;color:rgba(251,246,236,0.78)" style-hover="color:#E8832A">{{ lk }}</a>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="margin-top:48px;padding-top:22px;border-top:1px solid rgba(251,246,236,0.16);display:flex;align-items:center;justify-content:space-between;font-size:13px;color:rgba(251,246,236,0.45)">
+        <p style="margin:0">© 2026 Kalico · Nouvelle-Calédonie</p>
+        <p style="margin:0">pro@kalico.nc</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440}}">
+const row = (label, value, sub, tone) => ({
+  label, value, sub, hasSub: !!sub,
+  valueColor: tone === 'green' ? '#3F6B3C' : (tone === 'orange' ? '#9E4E06' : '#123A44'),
+});
+
+const MODULES = [
+  {
+    key: 'vitrine', tab: 'Vitrine', eyebrow: 'Vitrine & catalogue',
+    title: 'Une page publique qui travaille pour vous',
+    description: "Logo, description, horaires, coordonnées et catalogue. Vos clients trouvent l'information avant de vous appeler.",
+    bullets: [
+      'Profil public avec logo, description, horaires et coordonnées',
+      'Catalogue produits et services avec photos',
+      'Avis clients vérifiés affichés sur la fiche',
+      'Prise de rendez-vous intégrée à la vitrine',
+    ],
+    mockLabel: 'Fiche publique', mockTitle: 'Atelier Cocotier', mockTag: '★ 4,9',
+    mockRows: [
+      row('Horaires', 'Lun – Sam'),
+      row('Catalogue', '18 produits'),
+      row('Avis vérifiés', '64 avis', 'Note moyenne 4,9 sur 5'),
+      row('Rendez-vous', 'En ligne', '', 'green'),
+    ],
+    mockFooter: 'Vitrine visible dans l\u2019annuaire des pros',
+  },
+  {
+    key: 'devis', tab: 'Devis', eyebrow: 'Devis & facturation',
+    title: 'Des devis en XPF, TGC comprise',
+    description: "Créez un devis propre, envoyez-le par messagerie ou par mail, suivez son statut sans relancer à l'aveugle.",
+    bullets: [
+      'Création de devis en XPF avec TGC 11 % calculée automatiquement',
+      'Envoi par e-mail ou par la messagerie Kalico',
+      'Suivi des statuts envoyé, accepté, refusé',
+      'Export PDF en un clic, signature en ligne',
+    ],
+    mockLabel: 'Nouveau devis', mockTitle: 'Menuiserie intérieure', mockTag: 'Brouillon',
+    mockRows: [
+      row('Main d\u2019œuvre', '48 000 XPF'),
+      row('Matériel', '76 500 XPF'),
+      row('TGC 11 %', '13 695 XPF'),
+      row('Total TTC', '138 195 XPF', '', 'orange'),
+    ],
+    mockFooter: 'PDF prêt à envoyer',
+  },
+  {
+    key: 'rdv', tab: 'Réservations', eyebrow: 'Réservations & rendez-vous',
+    title: 'Un planning qui remplit vos créneaux',
+    description: "Vos clients réservent directement depuis la vitrine. Vous confirmez, décalez ou proposez un autre horaire.",
+    bullets: [
+      'Calendrier de disponibilités par jour et par créneau',
+      'Réservation en ligne sans compte pour le client',
+      'Notifications automatiques à chaque demande',
+      'Historique complet des rendez-vous passés',
+    ],
+    mockLabel: 'Planning', mockTitle: 'Semaine du 24 août', mockTag: '3 confirmés',
+    mockRows: [
+      row('Lundi 24 · 08 h 00', 'Confirmé', 'Pose de cuisine, Dumbéa', 'green'),
+      row('Mardi 25 · 14 h 30', 'Confirmé', 'Devis terrasse, Païta', 'green'),
+      row('Jeudi 27 · 09 h 00', 'En attente', 'Réfection clôture, Nouméa', 'orange'),
+      row('Vendredi 28', 'Libre', 'Aucun créneau réservé'),
+    ],
+    mockFooter: 'Trois réservations confirmées cette semaine',
+  },
+  {
+    key: 'transport', tab: 'Transport', eyebrow: 'Transport pro',
+    title: 'Vos courses et vos passagers, organisés',
+    description: "Pour les transporteurs et conducteurs qui veulent tenir leur planning sans carnet papier.",
+    bullets: [
+      'Inscription transporteur professionnel avec pièces vérifiées',
+      'Gestion des courses et des réservations passagers',
+      'Profil conducteur vérifié visible sur le covoiturage',
+      'Statistiques de courses et de revenus par mois',
+    ],
+    mockLabel: 'Transport pro', mockTitle: 'Courses du jour', mockTag: '3 courses',
+    mockRows: [
+      row('Nouméa → Bourail', '07 h 30', '4 passagers'),
+      row('Dumbéa → Païta', '10 h 15', 'Confirmé', 'green'),
+      row('Lifou → Nouméa', '18 h 00', 'Retour prévu'),
+      row('Satisfaction', '96 %', '128 courses ce mois-ci', 'green'),
+    ],
+    mockFooter: 'Connecté au covoiturage Kalico',
+  },
+  {
+    key: 'fret', tab: 'Envoi & livraison', eyebrow: 'Envoi & livraison',
+    title: 'Colis, stock et matériel entre communes',
+    description: "Recevez les demandes d'expédition, estimez le volume, répondez avec votre tarif.",
+    bullets: [
+      'Annonces de transport de marchandises entre communes et vers les îles',
+      'Estimation volume, poids et niveau d\u2019urgence',
+      'Mise en relation directe avec les expéditeurs',
+      'Suivi des demandes jusqu\u2019à la remise',
+    ],
+    mockLabel: 'Demande de fret', mockTitle: 'Nouméa → Koné', mockTag: 'Express',
+    mockRows: [
+      row('Volume', '2,5 m³'),
+      row('Poids', '380 kg'),
+      row('Capacité recommandée', 'Fourgon', 'Ou utilitaire léger'),
+      row('Délai de réponse', '24 h', '', 'green'),
+    ],
+    mockFooter: 'Devis en XPF, réponse sous 24 h',
+  },
+  {
+    key: 'visibilite', tab: 'Visibilité', eyebrow: 'Visibilité & boosts',
+    title: 'Visible au moment où l\u2019on vous cherche',
+    description: "Remontez dans les résultats quand vous en avez besoin, et mesurez ce que ça rapporte.",
+    bullets: [
+      'Annonces prioritaires dans les résultats de recherche',
+      'Badge Pro vérifié affiché partout sur la plateforme',
+      'Statistiques de vues et de contacts par annonce',
+      'Boosts ponctuels à -20 % pour les abonnés Pro',
+    ],
+    mockLabel: 'Visibilité', mockTitle: 'Boosts en cours', mockTag: '4 actifs',
+    mockRows: [
+      row('Vues cette semaine', '+28 %', '', 'green'),
+      row('Réfection terrasse', 'À la une', "Jusqu'à demain", 'orange'),
+      row('Pose de cuisine', '12 vues', "Aujourd'hui"),
+      row('Contacts reçus', '268', 'Messages et appels'),
+    ],
+    mockFooter: 'Badge Pro vérifié actif sur toutes vos annonces',
+  },
+];
+
+class Component extends DCLogic {
+  state = { module: 'vitrine', billing: 'monthly' };
+  set = (patch) => this.setState(patch);
+
+  renderVals() {
+    const s = this.state;
+    const yearly = s.billing === 'yearly';
+
+    const moduleTabs = MODULES.map((m) => {
+      const on = s.module === m.key;
+      return {
+        label: m.tab,
+        bg: on ? '#FEFAF3' : 'transparent',
+        color: on ? '#123A44' : 'rgba(18,58,68,0.62)',
+        weight: on ? '600' : '500',
+        shadow: on ? '0 2px 8px rgba(18,58,68,0.1)' : 'none',
+        select: () => this.set({ module: m.key }),
+      };
+    });
+
+    const billingTabs = [
+      { id: 'monthly', label: 'Mensuel', note: '', hasNote: false },
+      { id: 'yearly', label: 'Annuel', note: '13 900 XPF économisés', hasNote: true },
+    ].map((b) => {
+      const on = s.billing === b.id;
+      return {
+        label: b.label, note: b.note, hasNote: b.hasNote,
+        bg: on ? '#FEFAF3' : 'transparent',
+        color: on ? '#123A44' : 'rgba(18,58,68,0.62)',
+        weight: on ? '600' : '500',
+        shadow: on ? '0 2px 8px rgba(18,58,68,0.1)' : 'none',
+        select: () => this.set({ billing: b.id }),
+      };
+    });
+
+    const comparison = [
+      ['Publier des annonces', true],
+      ['Messagerie intégrée', true],
+      ['Vitrine publique et catalogue', false],
+      ['Devis et factures en XPF', false],
+      ['Réservations et rendez-vous', false],
+      ['Transport pro et livraison', false],
+      ['Badge Pro vérifié', false],
+      ['Boosts prioritaires à -20 %', false],
+      ['Statistiques détaillées', false],
+      ['Support prioritaire', false],
+    ].map((r) => ({ label: r[0], free: r[1], freeAbsent: !r[1] }));
+
+    return {
+      heroStats: [
+        { value: '33', label: 'communes couvertes' },
+        { value: '11 %', label: 'TGC intégrée aux devis' },
+        { value: 'XPF', label: 'paiement local' },
+        { value: '1', label: 'compte, tous les modules' },
+      ],
+      dashStats: [
+        { label: 'Vues', value: '18 420', delta: '+14 % cette semaine', deltaColor: '#9FC79B' },
+        { label: 'Contacts', value: '268', delta: 'Messages et appels', deltaColor: 'rgba(251,246,236,0.52)' },
+        { label: 'Boosts', value: '4', delta: 'En cours', deltaColor: '#E8832A' },
+      ],
+      chart: [32, 44, 38, 58, 48, 64, 52, 74, 68, 86, 72, 81, 66, 92].map((h, i) => ({
+        height: h + '%',
+        color: i >= 10 ? '#E8832A' : 'rgba(159,199,155,0.75)',
+      })),
+      dashRows: [
+        { initials: 'RT', title: 'Réfection terrasse', meta: "Boost actif jusqu'à demain", tag: 'À la une', tagBg: 'rgba(232,131,42,0.2)', tagColor: '#E8832A' },
+        { initials: 'PC', title: 'Pose de cuisine', meta: "12 vues aujourd'hui", tag: 'Active', tagBg: 'rgba(110,154,106,0.2)', tagColor: '#9FC79B' },
+        { initials: 'DC', title: 'Devis clôture', meta: '2 réponses en attente', tag: 'À traiter', tagBg: 'rgba(251,246,236,0.12)', tagColor: 'rgba(251,246,236,0.7)' },
+      ],
+
+      moduleTabs,
+      activeModule: MODULES.find((m) => m.key === s.module) || MODULES[0],
+
+      sectors: [
+        { initial: 'I', title: 'Immobilier', description: 'Vitrines, visites et mandats en ligne.' },
+        { initial: 'A', title: 'Auto & moto', description: 'Annonces véhicules et devis réparation.' },
+        { initial: 'B', title: 'Artisanat & BTP', description: 'Devis chantier et agenda travaux.' },
+        { initial: 'R', title: 'Restauration', description: 'Menu, réservations et bons plans.' },
+        { initial: 'T', title: 'Transport de personnes', description: 'Courses, covoiturage et planning.' },
+        { initial: 'E', title: 'Envoi & livraison', description: "Demandes, offres et suivi d'expéditions." },
+        { initial: 'S', title: 'Services à domicile', description: 'Rendez-vous, catalogue et avis clients.' },
+        { initial: 'C', title: 'Commerce & retail', description: 'Catalogue, stock et promotions.' },
+      ],
+
+      billingTabs,
+      proPrice: yearly ? '44 900' : '4 900',
+      proPeriod: yearly ? '/ an' : '/ mois',
+      proNote: yearly
+        ? "Soit 3 742 XPF par mois, contre 58 800 XPF en mensuel sur l'année."
+        : "Passez à l'annuel et économisez 13 900 XPF sur douze mois.",
+      proBadge: 'Lancement : 3 mois offerts',
+      freeFeatures: [
+        '5 annonces actives',
+        '6 photos par annonce',
+        'Messagerie intégrée',
+        'Boosts à l\u2019acte au tarif standard',
+        'Vérification du téléphone',
+      ],
+      proFeatures: [
+        'Annonces illimitées', '12 photos par annonce',
+        'Vitrine et catalogue', 'Devis PDF en XPF',
+        'Réservations et RDV', 'Fret et livraison',
+        'Billetterie événements', 'Campagnes et bons plans',
+        'Statistiques détaillées', 'Boosts à -20 %',
+        'Réponse automatique', 'Badge Pro vérifié',
+      ],
+      boosts: [
+        { label: 'Remettre en avant · 3 jours', price: '400 XPF', pro: '320 XPF en Pro' },
+        { label: 'Badge urgent · 7 jours', price: '500 XPF', pro: '400 XPF en Pro' },
+        { label: 'À la une · 7 jours', price: '1 200 XPF', pro: '960 XPF en Pro' },
+        { label: 'À la une · 14 jours', price: '2 000 XPF', pro: '1 600 XPF en Pro' },
+      ],
+      comparison,
+
+      footerCols: [
+        { title: 'Acheter & vendre', links: ['Annonces', 'Troc', 'Dons', 'Immobilier', 'Véhicules'] },
+        { title: 'Professionnels', links: ['Devenir Pro', 'Annuaire des pros', 'Appels d\u2019offres', 'Transport pro', 'Tarifs'] },
+        { title: 'Kalico', links: ['Sécurité', 'Contact', 'CGU', 'Confidentialité', 'Cookies'] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

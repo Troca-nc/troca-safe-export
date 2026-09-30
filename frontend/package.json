@@ -3,6 +3,8 @@
   "version": "1.0.0-rc1",
   "private": true,
   "scripts": {
+    "check:design": "node scripts/check-design.mjs --changed",
+    "check:launch": "node scripts/check-design.mjs --launch",
     "dev": "next dev -p 3000",
     "build": "next build",
     "check:encoding": "node ../scripts/check-encoding.js",

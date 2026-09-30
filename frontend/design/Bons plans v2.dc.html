@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#FBF6EC; -webkit-font-smoothing:antialiased; }
+  a { color:#2E7B84; text-decoration:none; }
+  a:hover { color:#123A44; }
+  input::placeholder { color:rgba(18,58,68,0.42); }
+</style>
+</helmet>
+
+<div style="width:1440px;min-height:100vh;background:#FBF6EC;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#123A44">
+
+  <!-- ===== HEADER ===== -->
+  <header style="position:sticky;top:0;z-index:60;height:88px;background:#FBF6EC;border-bottom:1px solid #E4D7C3">
+    <div style="display:flex;height:88px;align-items:center;gap:20px;padding:0 48px">
+      <a href="Accueil v2.dc.html" style="display:flex;flex-shrink:0;align-items:center;gap:10px">
+        <img src="assets/kalico1.svg" alt="Kalico" style="height:46px;width:auto;display:block" />
+        <span style="font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1;color:#123A44;letter-spacing:-0.01em">Kalico</span>
+      </a>
+      <nav style="display:flex;align-items:center;gap:2px;margin-left:auto">
+        <a href="Annonces v2.dc.html" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44;white-space:nowrap" style-hover="background:#F3E9D8">Annonces</a>
+        <a href="#" style="border-radius:8px;background:#F3E9D8;padding:9px 13px;font-size:15px;font-weight:600;color:#123A44;white-space:nowrap">Bons plans</a>
+        <a href="#" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44;white-space:nowrap" style-hover="background:#F3E9D8">Pros</a>
+        <a href="#" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44;white-space:nowrap" style-hover="background:#F3E9D8">Covoiturage</a>
+        <a href="#" style="border-radius:8px;padding:9px 13px;font-size:15px;font-weight:500;color:#123A44;white-space:nowrap" style-hover="background:#F3E9D8">Troc</a>
+      </nav>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;padding-left:12px;border-left:1px solid #E4D7C3">
+        <a href="#" style="border-radius:10px;padding:10px 14px;font-size:15px;font-weight:600;color:#9E4E06">Se connecter</a>
+        <a href="#" style="display:inline-flex;align-items:center;gap:7px;border-radius:10px;background:#A94F0A;color:#FEFAF3;padding:11px 20px;font-size:15px;font-weight:600;box-shadow:0 2px 10px rgba(18,58,68,0.14)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+          Déposer
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section style="position:relative;overflow:hidden;background:#FBF6EC;padding:64px 48px 44px;border-bottom:1px solid #E4D7C3">
+    <div style="position:absolute;inset:0;opacity:0.045;background-image:repeating-linear-gradient(45deg,#123A44 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#123A44 0 1px,transparent 1px 9px)"></div>
+    <div style="position:relative;display:grid;grid-template-columns:1fr 372px;gap:64px;align-items:end">
+      <div>
+        <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:#9E4E06">Bons plans &amp; événements</p>
+        <h1 style="margin:20px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:72px;line-height:0.98;letter-spacing:-0.015em;max-width:860px">Les promos du moment et l'agenda du territoire.</h1>
+        <p style="margin:22px 0 0;font-size:19px;line-height:1.6;color:rgba(18,58,68,0.74);max-width:600px;text-wrap:pretty">Réductions des enseignes calédoniennes, concerts, marchés, expos et séances de cinéma. Une seule page, deux onglets.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <sc-for list="{{ heroStats }}" as="s" hint-placeholder-count="3">
+          <div style="display:flex;align-items:baseline;gap:14px;border-top:2px solid rgba(232,131,42,0.6);padding-top:14px">
+            <span style="font-family:'Instrument Serif',Georgia,serif;font-size:34px;line-height:1;min-width:84px">{{ s.value }}</span>
+            <span style="font-size:14px;line-height:1.4;color:rgba(18,58,68,0.65)">{{ s.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ONGLETS + RECHERCHE ===== -->
+  <div style="position:sticky;top:88px;z-index:50;background:#FBF6EC;border-bottom:1px solid #E4D7C3;padding:20px 48px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="display:flex;gap:3px;border-radius:12px;border:1px solid #E4D7C3;background:#F3E9D8;padding:3px;flex-shrink:0">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2">
+          <button onClick="{{ t.select }}" style="display:inline-flex;align-items:center;gap:9px;border:0;border-radius:9px;background:{{ t.bg }};padding:11px 20px;font-size:16px;font-weight:{{ t.weight }};font-family:inherit;color:{{ t.color }};cursor:pointer;box-shadow:{{ t.shadow }}">
+            {{ t.label }}<span style="font-size:13px;opacity:0.55">{{ t.count }}</span>
+          </button>
+        </sc-for>
+      </div>
+
+      <div style="flex:1;min-width:0;display:flex;align-items:center;border-radius:12px;border:1px solid #123A44;background:#FEFAF3;padding:5px;box-shadow:0 4px 18px rgba(18,58,68,0.07)">
+        <div style="position:relative;flex:1;min-width:0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(18,58,68,0.5)" stroke-width="2" stroke-linecap="round" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+          <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="{{ searchPlaceholder }}" style="width:100%;box-sizing:border-box;height:44px;border:0;background:transparent;padding:0 12px 0 42px;font-size:16px;font-family:inherit;color:#123A44;outline:none" />
+        </div>
+        <div style="width:1px;height:28px;background:#E4D7C3;flex-shrink:0"></div>
+        <button style="display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;padding:0 16px;height:44px;font-size:15px;font-weight:500;font-family:inherit;color:#2E7B84;cursor:pointer;white-space:nowrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          Grand Nouméa
+        </button>
+        <button style="border:0;border-radius:9px;background:#A94F0A;color:#FEFAF3;height:44px;padding:0 26px;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer;flex-shrink:0">Rechercher</button>
+      </div>
+
+      <a href="#" style="display:inline-flex;flex-shrink:0;align-items:center;gap:8px;height:54px;border:1px solid #123A44;border-radius:12px;padding:0 18px;font-size:15px;font-weight:600;color:#123A44">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+        {{ publishLabel }}
+      </a>
+    </div>
+
+    <!-- filtres contextuels -->
+    <div style="margin-top:14px;display:flex;align-items:center;gap:10px">
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <sc-for list="{{ filterChips }}" as="f" hint-placeholder-count="8">
+          <button onClick="{{ f.select }}" style="border:1px solid {{ f.border }};border-radius:9999px;background:{{ f.bg }};padding:7px 15px;font-size:14px;font-weight:{{ f.weight }};font-family:inherit;color:{{ f.color }};cursor:pointer">{{ f.label }}</button>
+        </sc-for>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-shrink:0">
+        <sc-if value="{{ isEvents }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;gap:3px;border-radius:10px;border:1px solid #E4D7C3;background:#F3E9D8;padding:3px">
+            <button onClick="{{ showAgenda }}" style="display:inline-flex;align-items:center;gap:7px;border:0;border-radius:7px;background:{{ agendaBg }};padding:8px 14px;font-size:14px;font-weight:600;font-family:inherit;color:{{ agendaColor }};cursor:pointer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>
+              Agenda
+            </button>
+            <button onClick="{{ showCalendar }}" style="display:inline-flex;align-items:center;gap:7px;border:0;border-radius:7px;background:{{ calBg }};padding:8px 14px;font-size:14px;font-weight:600;font-family:inherit;color:{{ calColor }};cursor:pointer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg>
+              Calendrier
+            </button>
+          </div>
+        </sc-if>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:14px;color:rgba(18,58,68,0.55)">Trier</span>
+          <select value="{{ sort }}" onChange="{{ onSort }}" style="height:40px;border-radius:9px;border:1px solid #E4D7C3;background:#FEFAF3;padding:0 12px;font-size:14px;font-weight:500;font-family:inherit;color:#123A44;cursor:pointer;outline:none">
+            <option value="date">{{ sortDateLabel }}</option>
+            <option value="discount">Meilleure remise</option>
+            <option value="price">Prix croissant</option>
+            <option value="popular">Les plus vus</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PROMOS ===== -->
+  <sc-if value="{{ isPromos }}" hint-placeholder-val="{{ true }}">
+    <div style="display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start;padding:32px 48px 0">
+      <main style="min-width:0">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+          <div>
+            <h2 style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:44px;line-height:1.05">{{ promoHeading }}</h2>
+            <p style="margin:12px 0 0;font-size:16px;color:rgba(18,58,68,0.65)">{{ promoCount }} offres actives · {{ promoScope }}</p>
+          </div>
+        </div>
+
+        <!-- à la une -->
+        <a href="#" style="margin-top:26px;display:grid;grid-template-columns:1fr 1fr;gap:0;overflow:hidden;border-radius:20px;border:1px solid #123A44;background:#FEFAF3;box-shadow:0 8px 30px rgba(18,58,68,0.1)">
+          <div style="position:relative;min-height:300px;background:#F3E9D8;display:flex;align-items:center;justify-content:center">
+            <div style="position:absolute;inset:0;opacity:0.07;background-image:repeating-linear-gradient(45deg,#123A44 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#123A44 0 1px,transparent 1px 9px)"></div>
+            <span style="position:relative;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.06em;color:rgba(18,58,68,0.42)">visuel de l'offre à la une</span>
+            <span style="position:absolute;left:16px;top:16px;border-radius:9999px;background:#E8832A;padding:6px 14px;font-size:12px;font-weight:600;color:#123A44">Offre à la une</span>
+          </div>
+          <div style="padding:36px 38px;display:flex;flex-direction:column">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="display:flex;height:44px;width:44px;flex-shrink:0;align-items:center;justify-content:center;border-radius:12px;background:#F3E9D8;font-family:'Instrument Serif',Georgia,serif;font-size:18px;color:#123A44">{{ featured.initials }}</span>
+              <div style="min-width:0">
+                <p style="margin:0;font-size:16px;font-weight:600">{{ featured.business }}</p>
+                <p style="margin:2px 0 0;font-size:13px;color:rgba(18,58,68,0.55)">{{ featured.meta }}</p>
+              </div>
+              <span style="margin-left:auto;display:inline-flex;flex-shrink:0;align-items:center;gap:5px;border-radius:9999px;background:rgba(110,154,106,0.14);border:1px solid rgba(110,154,106,0.3);padding:5px 11px;font-size:12px;font-weight:600;color:#3F6B3C">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:12px;height:12px"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                Vérifié Kalico
+              </span>
+            </div>
+            <h3 style="margin:22px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:38px;line-height:1.08">{{ featured.title }}</h3>
+            <p style="margin:14px 0 0;font-size:16px;line-height:1.6;color:rgba(18,58,68,0.72);text-wrap:pretty">{{ featured.description }}</p>
+            <div style="margin-top:22px;display:flex;align-items:baseline;gap:14px">
+              <span style="font-family:'Instrument Serif',Georgia,serif;font-size:44px;line-height:1;color:#123A44">{{ featured.price }} <span style="font-size:20px;color:rgba(18,58,68,0.5)">XPF</span></span>
+              <span style="font-size:18px;color:rgba(18,58,68,0.45);text-decoration:line-through">{{ featured.was }}</span>
+              <span style="border-radius:9999px;background:rgba(232,131,42,0.18);border:1px solid rgba(232,131,42,0.4);padding:5px 12px;font-size:14px;font-weight:600;color:#9E4E06">{{ featured.discount }}</span>
+            </div>
+            <div style="margin-top:auto;padding-top:26px;display:flex;align-items:center;gap:12px">
+              <span style="display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#A94F0A;color:#FEFAF3;padding:13px 26px;font-size:16px;font-weight:600">En profiter</span>
+              <span style="font-size:14px;color:rgba(18,58,68,0.6)">{{ featured.expiry }}</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- grille promos -->
+        <div style="margin-top:16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+          <sc-for list="{{ promos }}" as="p" hint-placeholder-count="9">
+            <a href="#" style="display:flex;flex-direction:column;overflow:hidden;border-radius:16px;border:1px solid #E4D7C3;background:#FEFAF3;box-shadow:0 3px 14px rgba(18,58,68,0.06)" style-hover="border-color:#123A44">
+              <div style="position:relative;aspect-ratio:16/10;background:#F3E9D8;display:flex;align-items:center;justify-content:center">
+                <div style="position:absolute;inset:0;opacity:0.07;background-image:repeating-linear-gradient(45deg,#123A44 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#123A44 0 1px,transparent 1px 9px)"></div>
+                <span style="position:relative;font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(18,58,68,0.42)">{{ p.slot }}</span>
+                <div style="position:absolute;left:12px;top:12px;display:flex;gap:6px">
+                  <span style="border-radius:9999px;background:rgba(169,79,10,0.92);padding:5px 11px;font-size:11px;font-weight:600;color:#FEFAF3">{{ p.discount }}</span>
+                  <sc-if value="{{ p.hasCatalog }}" hint-placeholder-val="{{ false }}">
+                    <span style="border-radius:9999px;background:rgba(14,42,49,0.82);padding:5px 11px;font-size:11px;font-weight:600;color:#FBF6EC">Catalogue PDF</span>
+                  </sc-if>
+                </div>
+                <span style="position:absolute;bottom:12px;left:12px;border-radius:9999px;background:rgba(254,250,243,0.94);border:1px solid #E4D7C3;padding:5px 11px;font-size:11px;font-weight:600;color:rgba(18,58,68,0.7)">{{ p.category }}</span>
+                <button style="position:absolute;bottom:12px;right:12px;display:flex;height:34px;width:34px;align-items:center;justify-content:center;border:0;border-radius:9999px;background:rgba(254,250,243,0.92);color:rgba(18,58,68,0.5);cursor:pointer">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
+                </button>
+              </div>
+              <div style="display:flex;flex:1;flex-direction:column;gap:12px;padding:18px 20px 20px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span style="display:flex;height:30px;width:30px;flex-shrink:0;align-items:center;justify-content:center;border-radius:9px;background:#F3E9D8;font-size:12px;font-weight:600;color:#123A44">{{ p.initials }}</span>
+                  <p style="margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:600;color:#123A44">{{ p.business }}</p>
+                  <sc-if value="{{ p.verified }}" hint-placeholder-val="{{ true }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#6E9A6A" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px;flex-shrink:0;margin-left:auto"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                  </sc-if>
+                </div>
+                <h3 style="margin:0;font-size:16px;font-weight:500;line-height:1.35;color:#123A44">{{ p.title }}</h3>
+                <div style="display:flex;align-items:baseline;gap:10px">
+                  <span style="font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1;color:#123A44">{{ p.price }}</span>
+                  <span style="font-size:14px;color:rgba(18,58,68,0.45);text-decoration:line-through">{{ p.was }}</span>
+                </div>
+                <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #EFE3D0;padding-top:13px;font-size:13px;color:rgba(18,58,68,0.6)">
+                  <span style="display:inline-flex;align-items:center;gap:6px;min-width:0">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#55ADB3" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px;flex-shrink:0"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.commune }}</span>
+                  </span>
+                  <span style="flex-shrink:0;font-weight:600;color:{{ p.expiryColor }}">{{ p.expiry }}</span>
+                </div>
+              </div>
+            </a>
+          </sc-for>
+        </div>
+
+        <div style="margin-top:32px;display:flex;justify-content:center">
+          <button style="border:1px solid #123A44;border-radius:10px;background:transparent;padding:13px 30px;font-size:16px;font-weight:600;font-family:inherit;color:#123A44;cursor:pointer">Charger plus d'offres</button>
+        </div>
+      </main>
+
+      <!-- colonne enseignes -->
+      <aside style="position:sticky;top:212px;display:flex;flex-direction:column;gap:16px">
+        <div style="border-radius:18px;border:1px solid #E4D7C3;background:#FEFAF3;padding:24px">
+          <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:#9E4E06">Enseignes suivies</p>
+          <p style="margin:12px 0 0;font-size:14px;line-height:1.55;color:rgba(18,58,68,0.65)">Suivez une enseigne pour être notifié dès qu'elle publie une offre.</p>
+          <div style="margin-top:18px;display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ businesses }}" as="b" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;gap:11px">
+                <span style="display:flex;height:36px;width:36px;flex-shrink:0;align-items:center;justify-content:center;border-radius:10px;background:#F3E9D8;font-size:12px;font-weight:600;color:#123A44">{{ b.initials }}</span>
+                <div style="min-width:0;flex:1">
+                  <p style="margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:500;color:#123A44">{{ b.name }}</p>
+                  <p style="margin:1px 0 0;font-size:12px;color:rgba(18,58,68,0.55)">{{ b.meta }}</p>
+                </div>
+                <button onClick="{{ b.toggle }}" style="flex-shrink:0;border:1px solid {{ b.border }};border-radius:9999px;background:{{ b.bg }};padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;color:{{ b.color }};cursor:pointer">{{ b.label }}</button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="border-radius:18px;background:#0E2A31;position:relative;overflow:hidden;padding:26px;color:#FBF6EC">
+          <div style="position:absolute;inset:0;opacity:0.1;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+          <div style="position:relative">
+            <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:#E8832A">Commerçants</p>
+            <p style="margin:16px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1.1">Publiez votre offre sur Kalico.</p>
+            <p style="margin:14px 0 0;font-size:14px;line-height:1.6;color:rgba(251,246,236,0.72)">Visible sur la page d'accueil, dans la section Bons plans et dans les notifications de vos abonnés.</p>
+            <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ pricing }}" as="pr" hint-placeholder-count="2">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-top:1px solid rgba(251,246,236,0.16);padding-top:12px">
+                  <span style="font-size:14px;color:rgba(251,246,236,0.72)">{{ pr.duration }}</span>
+                  <span style="text-align:right">
+                    <span style="display:block;font-family:'Instrument Serif',Georgia,serif;font-size:24px;line-height:1">{{ pr.price }}</span>
+                    <span style="display:block;margin-top:3px;font-size:12px;color:rgba(232,131,42,0.9)">{{ pr.pro }}</span>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
+            <a href="#" style="margin-top:22px;display:flex;box-sizing:border-box;width:100%;align-items:center;justify-content:center;gap:8px;border-radius:10px;background:#E8832A;color:#0E2A31;padding:13px;font-size:16px;font-weight:600">Publier une promo</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </sc-if>
+
+  <!-- ===== ÉVÉNEMENTS ===== -->
+  <sc-if value="{{ isEvents }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:32px 48px 0">
+
+      <!-- vue calendrier -->
+      <sc-if value="{{ isCalendarView }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:1fr 372px;gap:24px;align-items:start">
+          <div style="border-radius:20px;border:1px solid #E4D7C3;background:#FEFAF3;padding:28px 30px">
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+              <div>
+                <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:#9E4E06">Calendrier</p>
+                <h2 style="margin:12px 0 0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:40px;line-height:1.05">{{ monthLabel }}</h2>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button onClick="{{ prevMonth }}" style="display:flex;height:42px;width:42px;align-items:center;justify-content:center;border:1px solid #E4D7C3;border-radius:10px;background:#FBF6EC;font-family:inherit;color:#123A44;cursor:pointer">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="m15 18-6-6 6-6"></path></svg>
+                </button>
+                <button onClick="{{ thisMonth }}" style="border:1px solid #E4D7C3;border-radius:10px;background:#FBF6EC;padding:0 16px;height:42px;font-size:15px;font-weight:600;font-family:inherit;color:#123A44;cursor:pointer">Aujourd'hui</button>
+                <button onClick="{{ nextMonth }}" style="display:flex;height:42px;width:42px;align-items:center;justify-content:center;border:1px solid #E4D7C3;border-radius:10px;background:#FBF6EC;font-family:inherit;color:#123A44;cursor:pointer">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="m9 18 6-6-6-6"></path></svg>
+                </button>
+              </div>
+            </div>
+
+            <div style="margin-top:24px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px">
+              <sc-for list="{{ weekdays }}" as="w" hint-placeholder-count="7">
+                <p style="margin:0;padding-bottom:8px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.14em;color:rgba(18,58,68,0.45)">{{ w }}</p>
+              </sc-for>
+              <sc-for list="{{ calendarCells }}" as="c" hint-placeholder-count="35">
+                <div style="min-height:104px;border-radius:12px;border:1px solid {{ c.border }};background:{{ c.bg }};padding:10px">
+                  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
+                    <span style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:{{ c.dayWeight }};color:{{ c.dayColor }}">
+                      {{ c.day }}
+                      <sc-if value="{{ c.isToday }}" hint-placeholder-val="{{ false }}">
+                        <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:#9E4E06">Auj.</span>
+                      </sc-if>
+                    </span>
+                    <sc-if value="{{ c.hasEvents }}" hint-placeholder-val="{{ false }}">
+                      <span style="border-radius:9999px;background:rgba(232,131,42,0.2);padding:1px 7px;font-size:10px;font-weight:600;color:#9E4E06">{{ c.count }}</span>
+                    </sc-if>
+                  </div>
+                  <div style="margin-top:8px;display:flex;flex-direction:column;gap:4px">
+                    <sc-for list="{{ c.events }}" as="e" hint-placeholder-count="2">
+                      <div style="border-radius:7px;border-left:2px solid {{ e.tone }};background:#FBF6EC;padding:5px 7px">
+                        <p style="margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:600;color:#123A44">{{ e.title }}</p>
+                        <p style="margin:1px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:rgba(18,58,68,0.55)">{{ e.place }}</p>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="margin-top:20px;display:flex;gap:16px;border-top:1px solid #EFE3D0;padding-top:16px">
+              <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:rgba(18,58,68,0.65)"><span style="height:10px;width:10px;border-radius:2px;background:#A94F0A"></span>Concert &amp; spectacle</span>
+              <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:rgba(18,58,68,0.65)"><span style="height:10px;width:10px;border-radius:2px;background:#2E7B84"></span>Marché &amp; expo</span>
+              <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:rgba(18,58,68,0.65)"><span style="height:10px;width:10px;border-radius:2px;background:#6E9A6A"></span>Gratuit</span>
+              <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:rgba(18,58,68,0.65)"><span style="height:10px;width:10px;border-radius:2px;background:#123A44"></span>Cinéma</span>
+            </div>
+          </div>
+
+          <aside style="display:flex;flex-direction:column;gap:16px">
+            <div style="border-radius:18px;border:1px solid #E4D7C3;background:#FEFAF3;padding:24px">
+              <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:#9E4E06">Ce week-end</p>
+              <div style="margin-top:18px;display:flex;flex-direction:column;gap:12px">
+                <sc-for list="{{ weekendEvents }}" as="e" hint-placeholder-count="3">
+                  <a href="#" style="display:block;border-radius:14px;background:#F3E9D8;padding:16px 18px" style-hover="background:#EFE3D0">
+                    <p style="margin:0;font-size:12px;font-weight:600;color:{{ e.tone }}">{{ e.date }}</p>
+                    <p style="margin:8px 0 0;font-size:16px;font-weight:600;line-height:1.3;color:#123A44">{{ e.title }}</p>
+                    <p style="margin:8px 0 0;font-size:13px;color:rgba(18,58,68,0.6)">{{ e.place }} · {{ e.price }}</p>
+                  </a>
+                </sc-for>
+              </div>
+            </div>
+            <div style="border-radius:18px;border:1px solid #E4D7C3;background:#F3E9D8;padding:24px">
+              <p style="margin:0;font-size:16px;font-weight:600">Vous organisez un événement ?</p>
+              <p style="margin:8px 0 0;font-size:14px;line-height:1.55;color:rgba(18,58,68,0.65)">Concert, marché, expo, conférence : publiez-le dans l'agenda et vendez vos billets sur Kalico.</p>
+              <a href="#" style="margin-top:16px;display:flex;box-sizing:border-box;width:100%;align-items:center;justify-content:center;border:1px solid #123A44;border-radius:10px;padding:12px;font-size:15px;font-weight:600;color:#123A44">Publier un événement</a>
+            </div>
+          </aside>
+        </div>
+      </sc-if>
+
+      <!-- vue agenda -->
+      <sc-if value="{{ isAgendaView }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start">
+          <main style="min-width:0">
+            <div>
+              <h2 style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:44px;line-height:1.05">{{ eventsHeading }}</h2>
+              <p style="margin:12px 0 0;font-size:16px;color:rgba(18,58,68,0.65)">{{ eventsCount }} événements · {{ monthLabel }}</p>
+            </div>
+
+            <div style="margin-top:28px;display:flex;flex-direction:column;gap:28px">
+              <sc-for list="{{ eventGroups }}" as="g" hint-placeholder-count="3">
+                <div>
+                  <div style="display:flex;align-items:center;gap:16px">
+                    <p style="margin:0;flex-shrink:0;font-family:'Instrument Serif',Georgia,serif;font-size:26px;line-height:1;color:#123A44">{{ g.label }}</p>
+                    <div style="height:1px;flex:1;background:#E4D7C3"></div>
+                    <p style="margin:0;flex-shrink:0;font-size:13px;color:rgba(18,58,68,0.5)">{{ g.count }}</p>
+                  </div>
+                  <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
+                    <sc-for list="{{ g.events }}" as="e" hint-placeholder-count="3">
+                      <a href="#" style="display:grid;grid-template-columns:96px 1fr 200px;gap:24px;align-items:center;border-radius:16px;border:1px solid #E4D7C3;border-left:3px solid {{ e.tone }};background:#FEFAF3;padding:20px 24px" style-hover="border-color:#123A44">
+                        <div style="text-align:center">
+                          <p style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-size:38px;line-height:1;color:#123A44">{{ e.day }}</p>
+                          <p style="margin:4px 0 0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.14em;color:rgba(18,58,68,0.5)">{{ e.month }}</p>
+                          <p style="margin:6px 0 0;font-size:13px;color:rgba(18,58,68,0.6)">{{ e.time }}</p>
+                        </div>
+                        <div style="min-width:0">
+                          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:7px">
+                            <span style="border-radius:9999px;background:{{ e.badgeBg }};padding:4px 11px;font-size:11px;font-weight:600;color:{{ e.badgeColor }}">{{ e.category }}</span>
+                            <sc-if value="{{ e.verified }}" hint-placeholder-val="{{ true }}">
+                              <span style="display:inline-flex;align-items:center;gap:5px;border-radius:9999px;background:rgba(110,154,106,0.14);border:1px solid rgba(110,154,106,0.3);padding:4px 10px;font-size:11px;font-weight:600;color:#3F6B3C">Organisateur vérifié</span>
+                            </sc-if>
+                            <sc-for list="{{ e.tags }}" as="tag" hint-placeholder-count="2">
+                              <span style="border-radius:9999px;background:#F3E9D8;border:1px solid #E4D7C3;padding:4px 10px;font-size:11px;font-weight:600;color:rgba(18,58,68,0.62)">{{ tag }}</span>
+                            </sc-for>
+                          </div>
+                          <h3 style="margin:12px 0 0;font-size:20px;font-weight:600;line-height:1.3;color:#123A44">{{ e.title }}</h3>
+                          <p style="margin:8px 0 0;font-size:15px;line-height:1.55;color:rgba(18,58,68,0.68);text-wrap:pretty">{{ e.description }}</p>
+                          <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:rgba(18,58,68,0.6)">
+                            <span style="display:inline-flex;align-items:center;gap:6px">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="#55ADB3" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                              {{ e.place }}
+                            </span>
+                            <span style="display:inline-flex;align-items:center;gap:6px">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(18,58,68,0.45)" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px"><path d="M18 21a8 8 0 0 0-16 0"></path><circle cx="10" cy="8" r="5"></circle><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"></path></svg>
+                              {{ e.organiser }}
+                            </span>
+                          </div>
+                        </div>
+                        <div style="text-align:right">
+                          <p style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1;color:#123A44">{{ e.price }}</p>
+                          <sc-if value="{{ e.hasReduced }}" hint-placeholder-val="{{ false }}">
+                            <p style="margin:6px 0 0;font-size:13px;color:rgba(18,58,68,0.55)">{{ e.reduced }}</p>
+                          </sc-if>
+                          <span style="margin-top:14px;display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:10px;background:{{ e.ctaBg }};color:{{ e.ctaColor }};border:1px solid {{ e.ctaBorder }};padding:11px 20px;font-size:15px;font-weight:600">{{ e.cta }}</span>
+                          <sc-if value="{{ e.hasSeats }}" hint-placeholder-val="{{ false }}">
+                            <p style="margin:10px 0 0;font-size:12px;color:{{ e.seatsColor }}">{{ e.seats }}</p>
+                          </sc-if>
+                        </div>
+                      </a>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="margin-top:32px;display:flex;justify-content:center">
+              <button style="border:1px solid #123A44;border-radius:10px;background:transparent;padding:13px 30px;font-size:16px;font-weight:600;font-family:inherit;color:#123A44;cursor:pointer">Voir le mois suivant</button>
+            </div>
+          </main>
+
+          <aside style="position:sticky;top:212px;display:flex;flex-direction:column;gap:16px">
+            <div style="border-radius:18px;border:1px solid #E4D7C3;background:#FEFAF3;padding:24px">
+              <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:#9E4E06">Séances de cinéma</p>
+              <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ cinema }}" as="c" hint-placeholder-count="4">
+                  <a href="#" style="display:block;border-radius:14px;background:#F3E9D8;padding:15px 17px" style-hover="background:#EFE3D0">
+                    <p style="margin:0;font-size:15px;font-weight:600;line-height:1.3;color:#123A44">{{ c.title }}</p>
+                    <div style="margin-top:9px;display:flex;flex-wrap:wrap;gap:6px">
+                      <sc-for list="{{ c.tags }}" as="tag" hint-placeholder-count="3">
+                        <span style="border-radius:9999px;background:#FEFAF3;border:1px solid #E4D7C3;padding:3px 9px;font-size:11px;font-weight:600;color:rgba(18,58,68,0.65)">{{ tag }}</span>
+                      </sc-for>
+                    </div>
+                    <p style="margin:10px 0 0;font-size:13px;color:rgba(18,58,68,0.6)">{{ c.times }}</p>
+                  </a>
+                </sc-for>
+              </div>
+              <a href="#" style="margin-top:16px;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:#123A44">Toutes les séances
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:15px;height:15px"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+              </a>
+            </div>
+
+            <div style="border-radius:18px;background:#0E2A31;position:relative;overflow:hidden;padding:26px;color:#FBF6EC">
+              <div style="position:absolute;inset:0;opacity:0.1;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+              <div style="position:relative">
+                <p style="margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:#E8832A">Billetterie</p>
+                <p style="margin:16px 0 0;font-family:'Instrument Serif',Georgia,serif;font-size:28px;line-height:1.12">Vendez vos billets sans quitter Kalico.</p>
+                <p style="margin:14px 0 0;font-size:14px;line-height:1.6;color:rgba(251,246,236,0.72)">Créez vos catégories de places, suivez les ventes, et scannez les billets à l'entrée depuis votre téléphone.</p>
+                <a href="#" style="margin-top:20px;display:flex;box-sizing:border-box;width:100%;align-items:center;justify-content:center;gap:8px;border-radius:10px;background:#E8832A;color:#0E2A31;padding:13px;font-size:16px;font-weight:600">Publier un événement</a>
+                <a href="#" style="margin-top:10px;display:flex;box-sizing:border-box;width:100%;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(251,246,236,0.28);border-radius:10px;padding:12px;font-size:15px;font-weight:600;color:#FBF6EC">Scanner un billet</a>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- ===== FOOTER ===== -->
+  <footer style="margin-top:80px;background:#0E2A31;color:#FBF6EC;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;opacity:0.07;background-image:repeating-linear-gradient(45deg,#FBF6EC 0 1px,transparent 1px 9px),repeating-linear-gradient(-45deg,#FBF6EC 0 1px,transparent 1px 9px)"></div>
+    <div style="position:relative;padding:56px 48px 40px">
+      <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:48px">
+        <div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <img src="assets/kalico1.svg" alt="Kalico" style="height:48px;width:auto" />
+            <span style="font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1">Kalico</span>
+          </div>
+          <p style="margin:20px 0 0;font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:24px;line-height:1.25;color:rgba(251,246,236,0.85);max-width:400px">Nouvelle-Calédonie dans l'âme, Kalico dans la poche.</p>
+        </div>
+        <sc-for list="{{ footerCols }}" as="col" hint-placeholder-count="3">
+          <div>
+            <p style="margin:0 0 16px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:rgba(251,246,236,0.45)">{{ col.title }}</p>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ col.links }}" as="lk" hint-placeholder-count="5">
+                <a href="#" style="font-size:15px;color:rgba(251,246,236,0.78)" style-hover="color:#E8832A">{{ lk }}</a>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="margin-top:48px;padding-top:22px;border-top:1px solid rgba(251,246,236,0.16);display:flex;align-items:center;justify-content:space-between;font-size:13px;color:rgba(251,246,236,0.45)">
+        <p style="margin:0">© 2026 Kalico · Nouvelle-Calédonie</p>
+        <p style="margin:0">contact@kalico.nc</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440}}">
+const PROMO_CATS = ['Tout', 'Alimentation', 'Restauration', 'Mode', 'Beauté', 'High-Tech', 'Auto / Moto', 'Maison', 'Services', 'Sport', 'Voyages'];
+const EVENT_CATS = ['Tout', 'À venir', 'Ce week-end', 'Gratuits', 'Concerts', 'Marchés', 'Expos', 'Cinéma', 'Sport', 'Passés'];
+
+const TONES = {
+  concert: '#A94F0A',
+  marche: '#2E7B84',
+  gratuit: '#6E9A6A',
+  cinema: '#123A44',
+};
+
+const BADGES = {
+  '#A94F0A': { bg: 'rgba(169,79,10,0.92)', color: '#FEFAF3' },
+  '#2E7B84': { bg: 'rgba(46,123,132,0.92)', color: '#FEFAF3' },
+  '#6E9A6A': { bg: 'rgba(110,154,106,0.92)', color: '#0E2A31' },
+  '#123A44': { bg: 'rgba(18,58,68,0.9)', color: '#FEFAF3' },
+};
+
+const EVENTS = [
+  { day: 28, month: 'août', time: '19 h 30', category: 'Concert', tone: TONES.concert, title: 'Nyx + première partie locale', description: "Scène ouverte du Chapiteau, deux sets et une programmation calédonienne en ouverture.", place: 'Chapiteau, Nouméa', organiser: 'Chapiteau Nouméa', price: '3 500 XPF', reduced: 'Tarif réduit 2 500 XPF', hasReduced: true, verified: true, tags: ['Billetterie', 'Places numérotées'], cta: 'Réserver', seats: '38 places restantes', hasSeats: true, seatsWarn: true },
+  { day: 29, month: 'août', time: '06 h 00', category: 'Marché', tone: TONES.marche, title: 'Marché de Port Moselle', description: "Producteurs maraîchers, poissonniers et artisans. Ambiance du samedi matin dès l'ouverture.", place: 'Port Moselle, Nouméa', organiser: 'Ville de Nouméa', price: 'Gratuit', reduced: '', hasReduced: false, verified: true, tags: ['Hebdomadaire'], cta: 'Voir la fiche', seats: '', hasSeats: false },
+  { day: 29, month: 'août', time: '18 h 00', category: 'Cinéma', tone: TONES.cinema, title: 'Séance plein air — Le Récif', description: "Projection en plein air sur la pelouse du Ouen Toro, documentaire calédonien suivi d'un échange.", place: 'Ouen Toro, Nouméa', organiser: 'Ciné Kalico', price: '1 200 XPF', reduced: 'Moins de 12 ans : gratuit', hasReduced: true, verified: false, tags: ['VF', 'Plein air'], cta: 'Réserver', seats: '', hasSeats: false },
+  { day: 30, month: 'août', time: '09 h 00', category: 'Sport', tone: TONES.gratuit, title: 'Trail de la Dumbéa — 12 km', description: "Trois parcours au départ du parc de la Dumbéa. Inscriptions sur place jusqu'à 8 h 30.", place: 'Dumbéa', organiser: 'Asso Trail NC', price: 'Gratuit', reduced: '', hasReduced: false, verified: true, tags: ['Inscription libre'], cta: "S'inscrire", seats: '', hasSeats: false },
+  { day: 4, month: 'sept.', time: '18 h 30', category: 'Expo', tone: TONES.marche, title: 'Vernissage — Tressages contemporains', description: "Douze artistes de la Grande Terre et des Loyauté revisitent la vannerie traditionnelle.", place: 'Centre culturel Tjibaou', organiser: 'ADCK', price: 'Gratuit', reduced: '', hasReduced: false, verified: true, tags: ['Vernissage'], cta: 'Voir la fiche', seats: '', hasSeats: false },
+  { day: 6, month: 'sept.', time: '20 h 00', category: 'Concert', tone: TONES.concert, title: 'Kaneka Session #14', description: "Quatre groupes kaneka sur la scène du Mont-Dore, buvette et restauration sur place.", place: 'Boulari, Mont-Dore', organiser: 'Collectif Kaneka', price: '2 000 XPF', reduced: '', hasReduced: false, verified: false, tags: ['Billetterie'], cta: 'Réserver', seats: 'Complet à 80 %', hasSeats: true, seatsWarn: false },
+  { day: 12, month: 'sept.', time: '10 h 00', category: 'Marché', tone: TONES.marche, title: 'Foire agricole de Bourail', description: "Élevage, produits du terroir, concours bovins et animations pour les familles sur trois jours.", place: 'Bourail', organiser: 'Chambre d\u2019agriculture', price: '800 XPF', reduced: 'Pass 3 jours 1 800 XPF', hasReduced: true, verified: true, tags: ['3 jours', 'Familles'], cta: 'Réserver', seats: '', hasSeats: false },
+];
+
+class Component extends DCLogic {
+  state = {
+    tab: 'promos',
+    promoCat: 'Tout',
+    eventCat: 'Tout',
+    eventView: 'agenda',
+    monthOffset: 0,
+    sort: 'date',
+    query: '',
+    followed: { 'Glisse Sud': true, 'Boulangerie Koutio': true },
+  };
+
+  set = (patch) => this.setState(patch);
+
+  renderVals() {
+    const s = this.state;
+    const promos = s.tab === 'promos';
+
+    const tabDefs = [
+      { id: 'promos', label: 'Promotions', count: '184' },
+      { id: 'evenements', label: 'Événements', count: '62' },
+    ];
+    const tabs = tabDefs.map((t) => {
+      const on = s.tab === t.id;
+      return {
+        label: t.label, count: t.count,
+        bg: on ? '#FEFAF3' : 'transparent',
+        color: on ? '#123A44' : 'rgba(18,58,68,0.62)',
+        weight: on ? '600' : '500',
+        shadow: on ? '0 2px 8px rgba(18,58,68,0.1)' : 'none',
+        select: () => this.set({ tab: t.id }),
+      };
+    });
+
+    const activeCat = promos ? s.promoCat : s.eventCat;
+    const filterChips = (promos ? PROMO_CATS : EVENT_CATS).map((label) => {
+      const on = activeCat === label;
+      return {
+        label,
+        bg: on ? '#123A44' : '#FEFAF3',
+        border: on ? '#123A44' : '#E4D7C3',
+        color: on ? '#FEFAF3' : 'rgba(18,58,68,0.75)',
+        weight: on ? '600' : '500',
+        select: () => this.set(promos ? { promoCat: label } : { eventCat: label }),
+      };
+    });
+
+    const P = (business, initials, title, price, was, discount, category, commune, expiry, daysLeft, verified, hasCatalog, slot) => ({
+      business, initials, title, price, was, discount, category, commune, expiry, verified, hasCatalog, slot,
+      expiryColor: daysLeft <= 2 ? '#B0431C' : 'rgba(18,58,68,0.6)',
+    });
+
+    const promoList = [
+      P('Boulangerie Koutio', 'BK', 'Le lot de 5 baguettes tradition', '450 XPF', '600 XPF', '-25 %', 'Alimentation', 'Dumbéa', 'Plus que 2 jours', 2, true, false, 'visuel des baguettes'),
+      P('Glisse Sud', 'GS', 'Combinaisons shorty 2 mm, toutes tailles', '11 900 XPF', '18 500 XPF', '-36 %', 'Sport', 'Nouméa · Anse Vata', 'Plus que 9 jours', 9, true, true, 'visuel des combinaisons'),
+      P('Pacific Tech', 'PT', 'Casques audio sans fil, série limitée', '14 500 XPF', '22 000 XPF', '-34 %', 'High-Tech', 'Nouméa · Ducos', 'Plus que 6 jours', 6, true, false, 'visuel des casques'),
+      P('Chez Malia', 'CM', 'Formule midi entrée + plat + café', '1 800 XPF', '2 600 XPF', '-30 %', 'Restauration', 'Nouméa · Centre', "Se termine demain", 1, false, false, 'visuel du plat'),
+      P('Jardinerie du Sud', 'JS', 'Terreau 40 L, les trois sacs', '3 900 XPF', '5 400 XPF', '-27 %', 'Maison', 'Païta', 'Plus que 12 jours', 12, true, true, 'visuel des sacs'),
+      P('Auto Pacifique', 'AP', 'Révision complète toutes marques', '12 000 XPF', '17 500 XPF', '-31 %', 'Auto / Moto', 'Mont-Dore', 'Plus que 15 jours', 15, true, false, 'visuel de l\u2019atelier'),
+      P('Institut Corail', 'IC', 'Soin visage 1 h + massage cuir chevelu', '5 500 XPF', '8 000 XPF', '-31 %', 'Beauté', 'Nouméa · Magenta', 'Plus que 8 jours', 8, false, false, 'visuel de l\u2019institut'),
+      P('Air Loyauté Séjours', 'AL', 'Week-end Lifou, vol + deux nuits', '48 000 XPF', '64 000 XPF', '-25 %', 'Voyages', 'Toute la NC', 'Plus que 21 jours', 21, true, true, 'visuel du lagon'),
+      P('Mode Baie', 'MB', 'Robes et chemises été, deuxième article', '-50 %', 'prix normal', '2e à -50 %', 'Mode', 'Nouméa · Centre', 'Plus que 4 jours', 4, false, false, 'visuel de la boutique'),
+    ];
+
+    const businessDefs = [
+      { name: 'Glisse Sud', initials: 'GS', meta: 'Sport · 4 offres' },
+      { name: 'Boulangerie Koutio', initials: 'BK', meta: 'Alimentation · 2 offres' },
+      { name: 'Pacific Tech', initials: 'PT', meta: 'High-Tech · 6 offres' },
+      { name: 'Chez Malia', initials: 'CM', meta: 'Restauration · 1 offre' },
+      { name: 'Jardinerie du Sud', initials: 'JS', meta: 'Maison · 3 offres' },
+      { name: 'Institut Corail', initials: 'IC', meta: 'Beauté · 2 offres' },
+    ];
+    const businesses = businessDefs.map((b) => {
+      const on = !!s.followed[b.name];
+      return {
+        name: b.name, initials: b.initials, meta: b.meta,
+        label: on ? 'Suivi' : 'Suivre',
+        bg: on ? '#123A44' : 'transparent',
+        border: on ? '#123A44' : '#E4D7C3',
+        color: on ? '#FEFAF3' : '#123A44',
+        toggle: (e) => {
+          e.preventDefault();
+          this.setState((st) => ({ followed: Object.assign({}, st.followed, { [b.name]: !st.followed[b.name] }) }));
+        },
+      };
+    });
+
+    // calendrier
+    const base = new Date(2026, 7, 1);
+    base.setMonth(base.getMonth() + s.monthOffset);
+    const monthLabel = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(base);
+    const first = new Date(base.getFullYear(), base.getMonth(), 1);
+    const offset = (first.getDay() + 6) % 7;
+    const start = new Date(first);
+    start.setDate(first.getDate() - offset);
+
+    const byDay = {};
+    EVENTS.forEach((e) => {
+      const key = e.month + '-' + e.day;
+      (byDay[key] = byDay[key] || []).push(e);
+    });
+    const monthShort = (d) => new Intl.DateTimeFormat('fr-FR', { month: 'short' }).format(d).replace('.', '') === 'août' ? 'août' : new Intl.DateTimeFormat('fr-FR', { month: 'short' }).format(d);
+
+    const today = new Date(2026, 7, 26);
+    const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+    const calendarCells = Array.from({ length: 42 }, (_, i) => {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      const inMonth = d.getMonth() === base.getMonth();
+      const isToday = sameDay(d, today);
+      const key = monthShort(d) + '-' + d.getDate();
+      const evs = inMonth ? (byDay[key] || []) : [];
+      return {
+        day: d.getDate(),
+        bg: isToday ? '#F3E9D8' : (inMonth ? '#FBF6EC' : 'rgba(243,233,216,0.4)'),
+        border: isToday ? '#123A44' : (inMonth ? '#E4D7C3' : 'transparent'),
+        dayColor: inMonth ? '#123A44' : 'rgba(18,58,68,0.3)',
+        dayWeight: (evs.length || isToday) ? '600' : '400',
+        isToday,
+        hasEvents: evs.length > 0,
+        count: String(evs.length),
+        events: evs.slice(0, 2).map((e) => ({ title: e.title, place: e.place.split(',')[0], tone: e.tone })),
+      };
+    });
+
+    const groupLabel = (e) => e.month === 'août' ? (e.day >= 28 ? 'Ce week-end' : 'Cette semaine') : 'Septembre';
+    const groupOrder = ['Ce week-end', 'Cette semaine', 'Septembre'];
+    const eventGroups = groupOrder.map((label) => {
+      const list = EVENTS.filter((e) => groupLabel(e) === label);
+      return {
+        label,
+        count: list.length + (list.length > 1 ? ' événements' : ' événement'),
+        events: list.map((e) => {
+          const badge = BADGES[e.tone];
+          const free = e.price === 'Gratuit';
+          return Object.assign({}, e, {
+            badgeBg: badge.bg, badgeColor: badge.color,
+            ctaBg: free ? 'transparent' : '#A94F0A',
+            ctaColor: free ? '#123A44' : '#FEFAF3',
+            ctaBorder: free ? '#123A44' : '#A94F0A',
+            seatsColor: e.seatsWarn ? '#B0431C' : 'rgba(18,58,68,0.55)',
+          });
+        }),
+      };
+    }).filter((g) => g.events.length > 0);
+
+    const weekendEvents = EVENTS.filter((e) => e.day === 29 || e.day === 30).map((e) => ({
+      date: (e.day === 29 ? 'Samedi 29' : 'Dimanche 30') + ' · ' + e.time,
+      title: e.title, place: e.place.split(',')[0], price: e.price, tone: e.tone,
+    }));
+
+    const cinema = [
+      { title: 'Le Récif', tags: ['VF', 'Documentaire', 'Salle 2'], times: '18 h 00 · 20 h 30' },
+      { title: 'Vents du Sud', tags: ['VOSTFR', '3D', 'Salle 1'], times: '17 h 15 · 19 h 45 · 22 h 00' },
+      { title: 'Les Tresseuses', tags: ['VF', 'Salle 3'], times: '14 h 00 · 16 h 30' },
+      { title: 'Nouméa Blues', tags: ['VF', 'Avant-première', 'Salle 1'], times: 'Vendredi 20 h 00' },
+    ];
+
+    return {
+      tabs,
+      isPromos: promos,
+      isEvents: !promos,
+      query: s.query,
+      onQuery: (e) => this.set({ query: e.target.value }),
+      searchPlaceholder: promos ? 'Rechercher une promo, une enseigne…' : 'Rechercher un événement, une salle, un artiste…',
+      publishLabel: promos ? 'Publier une promo' : 'Publier un événement',
+      sort: s.sort,
+      onSort: (e) => this.set({ sort: e.target.value }),
+      sortDateLabel: promos ? 'Plus récentes' : 'Date la plus proche',
+      filterChips,
+
+      heroStats: [
+        { value: '184', label: 'offres actives cette semaine' },
+        { value: '62', label: 'événements à l\u2019agenda ce mois-ci' },
+        { value: '96', label: 'enseignes calédoniennes partenaires' },
+      ],
+
+      promoHeading: s.promoCat === 'Tout' ? 'Les offres du moment' : s.promoCat,
+      promoCount: '184',
+      promoScope: 'Grand Nouméa',
+      featured: {
+        business: 'Glisse Sud',
+        initials: 'GS',
+        meta: 'Anse Vata, Nouméa · ★ 4,8 · 64 avis',
+        title: 'Tout le rayon combinaison à -36 %',
+        description: "Shorty et intégrales 2 mm, toutes tailles adultes et juniors. Opération de fin de saison, dans la limite du stock disponible en boutique.",
+        price: '11 900',
+        was: '18 500 XPF',
+        discount: '-36 %',
+        expiry: "Se termine le 6 septembre",
+      },
+      promos: promoList,
+      businesses,
+      pricing: [
+        { duration: 'Visibilité 7 jours', price: '2 900 XPF', pro: '2 320 XPF pour les Pro' },
+        { duration: 'Visibilité 30 jours', price: '7 900 XPF', pro: '6 320 XPF pour les Pro' },
+      ],
+
+      eventView: s.eventView,
+      isAgendaView: s.eventView === 'agenda',
+      isCalendarView: s.eventView === 'calendar',
+      showAgenda: () => this.set({ eventView: 'agenda' }),
+      showCalendar: () => this.set({ eventView: 'calendar' }),
+      agendaBg: s.eventView === 'agenda' ? '#FEFAF3' : 'transparent',
+      agendaColor: s.eventView === 'agenda' ? '#123A44' : 'rgba(18,58,68,0.6)',
+      calBg: s.eventView === 'calendar' ? '#FEFAF3' : 'transparent',
+      calColor: s.eventView === 'calendar' ? '#123A44' : 'rgba(18,58,68,0.6)',
+
+      eventsHeading: s.eventCat === 'Tout' ? 'Les rendez-vous à venir' : s.eventCat,
+      eventsCount: String(EVENTS.length),
+      monthLabel: monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1),
+      prevMonth: () => this.setState((st) => ({ monthOffset: st.monthOffset - 1 })),
+      nextMonth: () => this.setState((st) => ({ monthOffset: st.monthOffset + 1 })),
+      thisMonth: () => this.set({ monthOffset: 0 }),
+      weekdays: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+      calendarCells,
+      eventGroups,
+      weekendEvents,
+      cinema,
+
+      footerCols: [
+        { title: 'Acheter & vendre', links: ['Annonces', 'Troc', 'Dons', 'Immobilier', 'Véhicules'] },
+        { title: 'Services', links: ['Annuaire des pros', 'Devenir Pro', 'Bons plans', 'Événements', 'Covoiturage'] },
+        { title: 'Kalico', links: ['Sécurité', 'Contact', 'CGU', 'Confidentialité', 'Cookies'] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
