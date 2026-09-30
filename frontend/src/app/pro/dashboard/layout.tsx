@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 
 import { useAuthStore } from '@/store/authStore'
+import Header from '@/components/layout/Header'
 
 const NAV_ITEMS = [
   { href: '/pro/dashboard', label: "Vue d'ensemble", icon: BarChart3 },
@@ -83,7 +84,9 @@ export default function ProDashboardLayout({ children }: { children: ReactNode }
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl gap-0 px-0 md:px-4 md:py-6">
+    <>
+      <Header variant="pro" />
+      <div className="mx-auto flex w-full max-w-7xl gap-0 px-0 md:px-4 md:py-6">
       <aside className="hidden w-56 shrink-0 md:block">
         <div className="sticky top-20 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-sm">
           <div className="mb-4 rounded-2xl bg-nc-lagonLight px-4 py-3">
@@ -167,6 +170,7 @@ export default function ProDashboardLayout({ children }: { children: ReactNode }
 
         <main className="min-w-0 px-4 pb-8 md:px-0">{children}</main>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

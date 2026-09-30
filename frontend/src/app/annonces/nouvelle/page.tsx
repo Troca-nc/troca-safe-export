@@ -15,6 +15,7 @@ import { useAuthActionStore } from '@/store/authActionStore'
 export default function NewListingPage() {
   const [mode, setMode] = useState<'wizard' | 'simple' | null>(null)
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const userId = useAuthStore((state) => state.user?.id ?? 'guest')
   const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
 
   useEffect(() => {
@@ -67,7 +68,17 @@ export default function NewListingPage() {
   }
 
   if (mode !== 'simple') {
-    return <PublishWizard />
+    return (
+      <>
+        <Header
+          variant="reduced"
+          title="Déposer une annonce"
+          draftStorageKey={`draft_listing_${userId}`}
+          exitHref="/profil"
+        />
+        <PublishWizard />
+      </>
+    )
   }
 
   return <SimpleBonPlanPage />
@@ -279,7 +290,12 @@ function SimpleBonPlanPage() {
 
   return (
     <div className="min-h-screen bg-sand-light">
-      <Header />
+      <Header
+        variant="reduced"
+        title="Déposer une annonce"
+        draftStorageKey={`draft_bon_plan_${userId}`}
+        exitHref="/profil"
+      />
       <main className="mx-auto max-w-[1440px] px-4 py-8 sm:px-6 lg:px-12 md:py-12">
         <div className="mb-6 flex items-center justify-between gap-4">
           <div>
