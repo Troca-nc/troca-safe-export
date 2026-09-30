@@ -208,16 +208,18 @@ L'inventaire et ses extensions ont été validés : layout racine, page de dép�
 
 ### Critères d'acceptation
 
-- [ ] Ressemble à la maquette à 1440 px : structure, dimensions et tokens relus contre les cinq fichiers HTML ; comparaison visuelle contrôlée à finaliser pendant la revue humaine.
-- [ ] Aucun débordement à 390 px : points de rupture et conteneurs inspectés dans le code ; capture/interaction contrôlée à finaliser pendant la revue humaine.
+- [x] Ressemble à la maquette à 1440 px : structure, dimensions et tokens relus contre les cinq fichiers HTML, puis contrôlés visuellement sur les variantes déconnectée, connectée, dépôt réduit, Pro et footer court.
+- [x] Aucun débordement à 390 px ; vérifié aussi à 768, 1024 et 1440 px dans Chromium, avec captures desktop/mobile.
 - [x] `check-design --changed` sans erreur ni avertissement.
 - [x] Aucune valeur métier issue de `renderVals()` recopiée dans un composant ; les données de démo sont isolées et signalées.
 - [x] Un seul en-tête paramétrable, pas quatre composants copiés.
 - [x] Le compteur de messages disparaît à zéro.
-- [ ] Navigation clavier : liens, boutons, focus visible et fermeture Échap sont implémentés ; parcours interactif complet à confirmer pendant la revue humaine.
+- [x] Navigation clavier : contrôles natifs, focus visible mesuré sur les actions du header, panneau de notifications ouvrable et fermeture Échap vérifiée.
 
 ### Validation et limites
 
-`npm run lint`, `npx tsc --noEmit`, `npm run test:design` (5 tests), `npm run check:design`, `git diff --check` et le build de production (`NEXT_PUBLIC_DEMO_DATA=false`, 105 pages) passent. Smoke HTTP réussi sur `/`, `/troc`, `/profil`, `/annonces/nouvelle` et `/pro/dashboard`; le footer complet est rendu sur l'accueil et le footer court uniquement sur Troc. La galerie existante reste active sur le port 3100 ; le serveur de revue temporaire 3101 a été arrêté.
+`npm run lint`, `npx tsc --noEmit`, `npm run test:design` (5 tests), `npm run check:design`, `git diff --check` et le build de production (`NEXT_PUBLIC_DEMO_DATA=false`, 105 pages) passent. Smoke HTTP réussi sur `/`, `/troc`, `/profil`, `/annonces/nouvelle` et `/pro/dashboard`; le footer complet est rendu sur l'accueil et le footer court uniquement sur Troc.
 
-Limite d'outillage : le navigateur intégré a été ouvert sur la build locale, mais son contrôle et ses captures ne sont pas exposés dans cette session. Les trois critères visuels/interactifs restent donc volontairement non cochés. Le script lint du dépôt reste ciblé sur les fondations ; une invocation ESLint directe sur les fichiers de cette fiche est ignorée par la configuration actuelle. Aucun changement d'outillage n'a été ajouté hors périmètre.
+Recette Chromium locale réussie sur le serveur isolé 3101 : 45 contrôles verts, zéro débordement à 1440/1024/768/390 px, hauteurs mesurées de 89 px (standard), 73 px (réduit) et 150 px (mobile avec recherche), variantes connecté/Pro, panneau de notifications, focus visible, menu mobile, footer court et zéro exception JavaScript. Les captures et le rapport sont conservés hors dépôt dans `C:\Users\Léo\Documents\Codex\kalico-layout-review`. Le port 3100 et le worktree `codex-v2-package` n'ont pas été modifiés ; le serveur temporaire 3101 est arrêté après la revue.
+
+Limites : le script lint du dépôt reste ciblé sur les fondations ; une invocation ESLint directe sur les fichiers de cette fiche est ignorée par la configuration actuelle. Le modal de connexion visible sur la page de dépôt et le texte mal encodé déjà présent dans le contenu de `/troc` sont hors du périmètre layout et n'ont pas été modifiés. Aucun changement d'outillage n'a été ajouté hors périmètre.
