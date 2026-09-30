@@ -20,6 +20,7 @@ import { inferDemoAccount } from '@/lib/demoApi'
 import { useAuthSessionSync } from '@/hooks/useAuthSessionSync'
 import ProfileDemoPreview from '@/components/ui/ProfileDemoPreview'
 import Link from 'next/link'
+import AccountTabs from '@/components/layout/AccountTabs'
 
 const TABS = [
   { id: 'listings', label: 'Annonces',     icon: <Package   className="w-4 h-4" /> },
@@ -601,24 +602,17 @@ function ProfilePageContent() {
         </div>
 
         {/* ── Onglets ──────────────────────────────────────────── */}
-        <div className="flex w-full gap-1 overflow-x-auto rounded-2xl border border-night/10 bg-[var(--color-background-secondary)] p-1">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`flex flex-shrink-0 items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                tab === t.id ? 'bg-white text-kalico-blue shadow-sm ring-1 ring-black/5' : 'text-night/75 hover:bg-white hover:text-night'
-              }`}
-            >
-              {t.icon} {t.label}
-            </button>
-          ))}
-          {isOwn && (
-            <Link href="/favoris" className="flex flex-shrink-0 items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-night/50 hover:text-night transition-all">
-              <Heart className="w-4 h-4" /> Favoris
-            </Link>
-          )}
-        </div>
+        <AccountTabs
+          activeId={tab}
+          onSelect={setTab}
+          items={[
+            ...TABS.map((item) => ({
+              ...item,
+              count: item.id === 'listings' ? listings.length : reviews.length,
+            })),
+            ...(isOwn ? [{ id: 'favorites', label: 'Favoris', href: '/favoris', icon: <Heart className="h-4 w-4" /> }] : []),
+          ]}
+        />
 
         {/* ── Contenu onglets ────────────────────────────────── */}
         {tab === 'listings' && (

@@ -5,8 +5,8 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 
 | Fiche | Page | Route | Statut | PR |
 | --- | --- | --- | --- | --- |
-| [00](specs/00-fondations.md) | Fondations : tokens et composants de base | /dev/ui (galerie) | À relire | [#215](https://github.com/Troca-nc/troca-safe-export/pull/215) |
-| [01](specs/01-layout.md) | En-tête, pied de page, onglets de compte | toutes | À faire | — |
+| [00](specs/00-fondations.md) | Fondations : tokens et composants de base | /dev/ui (galerie) | Fait (fusionnée) | [#215](https://github.com/Troca-nc/troca-safe-export/pull/215) |
+| [01](specs/01-layout.md) | En-tête, pied de page, onglets de compte | toutes | À relire | [#216](https://github.com/Troca-nc/troca-safe-export/pull/216) |
 | [02](specs/02-accueil.md) | Accueil | / | À faire | — |
 | [03](specs/03-annonces.md) | Liste des annonces | /annonces | À faire | — |
 | [04](specs/04-annonce.md) | Fiche annonce | /annonces/[id] | À faire | — |
@@ -127,3 +127,99 @@ Le navigateur confirme boutons 48 px, compacts 44 px, champs 50 px bordure compr
 Choix conformes à la priorité des règles : interrupteur 42 × 24 selon la fiche 00 plutôt que 54 × 30 dans DESIGN.md ; modale rounded-block (24 px) et fermeture cliquable 44 px selon fiche/AGENTS. Les primitives de champs et de sélection sont regroupées dans Field.tsx et Controls.tsx plutôt que réparties en un fichier par export.
 
 Limites : le lint est ciblé sur les fondations, pas encore sur toutes les pages métier. Next.js signale plusieurs lockfiles et l'absence de son plugin ESLint spécifique ; cela n'empêche pas le build. L'en-tête, le pied de page et les pages métier restent à traiter dans leurs fiches. Les anciennes clés de thème sont conservées pour la migration progressive. Aucune question de périmètre restante.
+
+## 01 — Inventaire (étape 1, sans code)
+
+### Base et références
+
+Branche `design/01-layout`, créée depuis `origin/main` au commit `504bc7aaecb86b3e09ead45d152ddf9ac26cf0a1`. La fiche 00 est fusionnée par la PR #215 ; son paquet préalable est fusionné par la PR #214. Le worktree `codex-v2-package`, utilisé par la galerie de revue, n'a pas été modifié.
+
+Références lues : `frontend/DESIGN.md` §5 « Patterns de page » et les cinq maquettes citées par la fiche (`Accueil v2`, `Mon compte v2`, `Déposer une annonce v2`, `Compte Pro v2`, `Troc v2`). Les valeurs issues de `renderVals()` restent des exemples et ne seront pas copiées dans les composants.
+
+### Fichiers existants trouvés
+
+- `src/components/layout/Header.tsx` : en-tête unique existant, états connecté/déconnecté, recherche, navigation desktop, tiroir/menu mobile, favoris, messages, menu compte et CTA Déposer. Il contient encore des classes historiques interdites par la refonte et une hauteur fixe de 88 px. Son compteur de messages appelle actuellement `proApi.getDashboard()` et reste donc à zéro pour un compte particulier.
+- `src/components/layout/Footer.tsx` : pied de page global rendu par `src/app/layout.tsx`, aujourd'hui en deux colonnes avec newsletter ; aucune variante courte.
+- `src/components/ui/NotificationBell.tsx` : liste et actions de notifications existantes ; appelle l'API réelle mais calcule le nombre non lu sur les 20 éléments chargés au lieu d'utiliser le total `unread` renvoyé par le serveur.
+- `src/store/authStore.ts` : session existante, hydratation, utilisateur, états connecté/déconnecté et profils de démonstration. Le contrat accepte `prenom`/`nom` et `first_name`/`last_name`; le serveur réel `/api/auth/me` renvoie `prenom`/`nom`. Le rendu devra normaliser ces deux formes sans inventer de nom.
+- `src/lib/api.ts` : clients existants `messagesApi`, `notificationsApi` et `proApi`. Il n'existe encore ni `src/lib/data/` ni `src/demo/fixtures/`.
+- `src/app/annonces/nouvelle/page.tsx` et `src/hooks/useAutosave.ts` : le dépôt utilise déjà l'autosauvegarde locale et connaît `isDirty`, le brouillon enregistré et son horodatage ; le `Header` y est rendu sans variante ni statut.
+- `src/app/pro/dashboard/layout.tsx` : navigation Pro existante, mais aucun `Header` n'est rendu dans ce layout.
+- `src/app/profil/page.tsx` : deux onglets locaux (« Annonces », « Avis reçus ») et des liens séparés ; aucun composant partagé `AccountTabs`.
+- `src/app/layout.tsx` : rend le footer sur toutes les routes et applique un `padding-top` global de 88 px pour l'en-tête fixe. Ce padding ne peut pas représenter la variante réduite de 72 px.
+
+### Composants par section
+
+| Section | Réutilisation | Intervention prévue après validation |
+| --- | --- | --- |
+| 1. En-tête déconnecté | Réutiliser `Header.tsx`, le logo, la recherche, les liens et l'ouverture du parcours de connexion existants. | Recomposer la barre selon `Accueil v2`, garder un seul composant paramétrable, utiliser uniquement les tokens v2 et prévoir la recherche pleine largeur sous la barre sur mobile. |
+| 2. En-tête connecté | Réutiliser `Header.tsx`, `useAuthStore`, favoris, menu compte et les routes existantes. | Normaliser prénom/initiales, afficher le compteur messages seulement s'il est supérieur à zéro, afficher le point notifications si le total est non nul, et fournir squelettes puis erreur avec Réessayer. |
+| 3. Variante dépôt réduite | Réutiliser le même `Header.tsx` et l'état réel de `useAutosave`. | Ajouter une variante 72 px : logo, titre, statut de sauvegarde réel et Quitter. Aucun libellé « Brouillon enregistré » ne sera affiché sans preuve de sauvegarde. |
+| 4. Variante Pro | Réutiliser le même `Header.tsx`, la session et `proApi.getById(user.id)`. | Ajouter la pastille « Espace Pro », le nom réel de l'entreprise (avec repli sur prénom/nom) et la navigation prévue par la maquette. Le dashboard doit encore intégrer ce header. |
+| 5. Footer complet/court | Modifier `Footer.tsx`; réutiliser logo, liens légaux et ouverture des cookies. | Remplacer le footer actuel par la variante complète à quatre colonnes et une variante courte paramétrable ou déterminée par route. Les libellés métier restent statiques ; aucune statistique de maquette. |
+| 6. Onglets de compte | Aucun composant générique ; seulement des implémentations locales dans le profil et le dashboard Pro. | Créer `AccountTabs.tsx`, piloté par props (libellé, href/action, actif, compteur optionnel), soulignement `accent-strong`, défilement horizontal mobile et navigation clavier native. |
+
+Les primitives de la fiche 00 (`Skeleton`, `LoadingState`, `ErrorState`, boutons et badges) peuvent être réutilisées pour les états sans créer de nouvelle primitive UI.
+
+### Données et API vérifiées
+
+| Besoin | Source actuelle vérifiée | Décision d'inventaire |
+| --- | --- | --- |
+| Session, prénom, initiales, type de compte | `useAuthStore`; `/api/auth/me`; champs réels `prenom`, `nom`, `is_pro`, `account_type`. | Réutiliser la session et normaliser les deux conventions de noms déjà présentes côté frontend. Aucune API à créer. |
+| Nom d'entreprise Pro | `GET /api/pros/:id` via `proApi.getById`; réponse avec `pro_company_name` et `display_name`. `/api/auth/me` ne contient pas `pro_company_name`. | Utiliser l'API Pro existante dans la couche données, avec repli réel sur prénom/nom. Aucun changement serveur. |
+| Messages non lus | `GET /api/messages/conversations` via `messagesApi.getConversations`; chaque conversation porte `unread_count`, calculé côté serveur sur les messages reçus non lus. | Additionner les `unread_count` dans la couche données pour particuliers et Pros. Ne plus utiliser le dashboard Pro comme source générale. Aucune API à créer. |
+| Notifications non lues | `GET /api/users/notifications` via `notificationsApi.getNotifications`; la réponse contient `data` et le total global `unread`, plus les actions de lecture existantes. | Utiliser `response.data.unread` pour le point d'en-tête ; ne pas déduire le total de la page limitée à 20 éléments. Aucune API à créer. |
+| État du brouillon | `useAutosave` dans la page de dépôt (`isDirty`, `pendingDraft`, horodatage et `saveNow`). | Passer explicitement le statut au header réduit ; ne pas fabriquer un état sauvegardé. |
+
+Fichiers nouveaux prévus par les règles de données : `src/lib/data/layout.ts`, `src/demo/fixtures/layout.ts` et, si les types ne restent pas locaux au module, `src/types/layout.ts`. Les fixtures utiliseront des identifiants `demo-*`, des noms marqués « (démo) » et des compteurs de démonstration clairement isolés. Aucun composant n'importera directement les fixtures.
+
+### QUESTIONS de périmètre avant code
+
+1. Valider l'ajout de `src/app/layout.tsx` : nécessaire pour remplacer le décalage global fixe de 88 px par une structure compatible avec l'en-tête standard et la variante réduite de 72 px.
+2. Valider l'ajout de `src/app/annonces/nouvelle/page.tsx` : nécessaire pour transmettre au header réduit le vrai statut de `useAutosave` et l'action Quitter, au lieu d'afficher un faux « Brouillon enregistré ».
+3. Valider l'ajout de `src/app/pro/dashboard/layout.tsx` : nécessaire car le dashboard Pro ne rend actuellement aucun header ; cette intégration permettra la pastille et le nom d'entreprise réels.
+4. Décider si `AccountTabs` doit être seulement créé dans cette fiche puis intégré par les fiches 07/17, ou si l'on étend dès maintenant le périmètre à `src/app/profil/page.tsx` et au layout Pro pour remplacer leurs navigations locales.
+5. Valider l'ajout de `src/components/ui/NotificationBell.tsx` si son panneau déroulant doit être conservé : il faut alors le brancher sur la couche données et sur le total serveur. Sinon, `Header.tsx` peut rendre un simple lien avec point, strictement conforme à la maquette, et laisser le panneau existant hors périmètre.
+
+Étape 1 uniquement : aucun code applicatif, aucune fixture et aucune API n'ont été créés ; aucun build n'a été lancé. Les étapes 2 à 7 attendent la validation humaine de cet inventaire et de ces extensions.
+
+## 01 — Livraison des étapes 2 à 7 (2026-09-30)
+
+L'inventaire et ses extensions ont été validés : layout racine, page de dépôt, layout Pro, profil, panneau de notifications et nouveaux fichiers de données/fixtures.
+
+### Résultat
+
+- Données : `src/lib/data/layout.ts` normalise la session réelle, additionne les `unread_count` des conversations, utilise le total `unread` des notifications et charge le nom d'entreprise depuis l'API Pro existante. Aucun endpoint serveur ajouté.
+- Démo : fixtures isolées dans `src/demo/fixtures/layout.ts`, identifiants `demo-*` pour les notifications, noms marqués « (démo) » et import dynamique uniquement depuis la couche données.
+- En-tête : une seule implémentation paramétrable pour les états standard, dépôt réduit et Pro. Recherche desktop/mobile, tiroir mobile, favoris, compteur messages masqué à zéro, point notifications, compte, déconnexion et CTA Déposer utilisent les routes existantes.
+- Dépôt : barre 72 px reliée aux clés réelles de `useAutosave`; « Brouillon enregistré » n'apparaît qu'après lecture d'une enveloppe locale horodatée. Les parcours wizard et bon plan sont couverts.
+- Pro : le dashboard rend désormais la variante Pro ; le nom d'entreprise vient de `GET /api/pros/:id`, avec repli sur le prénom de session si le profil public n'est pas disponible.
+- Notifications : panneau déroulant conservé, total serveur, chargement, vide, erreur avec Réessayer, marquage unitaire/global et mode démo sans appel serveur.
+- Footer : quatre colonnes sur les routes standard, variante courte automatique sur `/troc`, liens légaux et gestion des cookies conservés.
+- Compte : `AccountTabs` partagé, actif souligné avec `accent-strong`, compteurs optionnels, défilement horizontal et contrôles natifs. Le profil l'utilise immédiatement.
+- Layout global : retrait du décalage fixe de 88 px ; les headers sticky occupent désormais leur hauteur réelle, y compris la variante 72 px.
+
+### Fichiers touchés
+
+- Layout partagé : `src/components/layout/Header.tsx`, `HeaderV2.tsx`, `HeaderNotifications.tsx`, `Footer.tsx`, `FooterV2.tsx`, `AccountTabs.tsx`.
+- Données : `src/lib/data/layout.ts`, `src/demo/fixtures/layout.ts`, `src/types/layout.ts`.
+- Intégrations : `src/app/layout.tsx`, `src/app/annonces/nouvelle/page.tsx`, `src/app/pro/dashboard/layout.tsx`, `src/app/profil/page.tsx`.
+- Suivi : `docs/design/PROGRESS.md`.
+
+### Critères d'acceptation
+
+- [x] Ressemble à la maquette à 1440 px : structure, dimensions et tokens relus contre les cinq fichiers HTML, puis contrôlés visuellement sur les variantes déconnectée, connectée, dépôt réduit, Pro et footer court.
+- [x] Aucun débordement à 390 px ; vérifié aussi à 768, 1024 et 1440 px dans Chromium, avec captures desktop/mobile.
+- [x] `check-design --changed` sans erreur ni avertissement.
+- [x] Aucune valeur métier issue de `renderVals()` recopiée dans un composant ; les données de démo sont isolées et signalées.
+- [x] Un seul en-tête paramétrable, pas quatre composants copiés.
+- [x] Le compteur de messages disparaît à zéro.
+- [x] Navigation clavier : contrôles natifs, focus visible mesuré sur les actions du header, panneau de notifications ouvrable et fermeture Échap vérifiée.
+
+### Validation et limites
+
+`npm run lint`, `npx tsc --noEmit`, `npm run test:design` (5 tests), `npm run check:design`, `git diff --check` et le build de production (`NEXT_PUBLIC_DEMO_DATA=false`, 105 pages) passent. Smoke HTTP réussi sur `/`, `/troc`, `/profil`, `/annonces/nouvelle` et `/pro/dashboard`; le footer complet est rendu sur l'accueil et le footer court uniquement sur Troc.
+
+Recette Chromium locale réussie sur le serveur isolé 3101 : 45 contrôles verts, zéro débordement à 1440/1024/768/390 px, hauteurs mesurées de 89 px (standard), 73 px (réduit) et 150 px (mobile avec recherche), variantes connecté/Pro, panneau de notifications, focus visible, menu mobile, footer court et zéro exception JavaScript. Les captures et le rapport sont conservés hors dépôt dans `C:\Users\Léo\Documents\Codex\kalico-layout-review`. Le port 3100 et le worktree `codex-v2-package` n'ont pas été modifiés ; le serveur temporaire 3101 est arrêté après la revue.
+
+Limites : le script lint du dépôt reste ciblé sur les fondations ; une invocation ESLint directe sur les fichiers de cette fiche est ignorée par la configuration actuelle. Le modal de connexion visible sur la page de dépôt et le texte mal encodé déjà présent dans le contenu de `/troc` sont hors du périmètre layout et n'ont pas été modifiés. Aucun changement d'outillage n'a été ajouté hors périmètre.
