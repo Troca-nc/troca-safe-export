@@ -6,8 +6,8 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | Fiche | Page | Route | Statut | PR |
 | --- | --- | --- | --- | --- |
 | [00](specs/00-fondations.md) | Fondations : tokens et composants de base | /dev/ui (galerie) | Fait (fusionnée) | [#215](https://github.com/Troca-nc/troca-safe-export/pull/215) |
-| [01](specs/01-layout.md) | En-tête, pied de page, onglets de compte | toutes | À relire | [#216](https://github.com/Troca-nc/troca-safe-export/pull/216) |
-| [02](specs/02-accueil.md) | Accueil | / | À faire | — |
+| [01](specs/01-layout.md) | En-tête, pied de page, onglets de compte | toutes | Fait (fusionnée) | [#216](https://github.com/Troca-nc/troca-safe-export/pull/216) |
+| [02](specs/02-accueil.md) | Accueil | / | À relire | — |
 | [03](specs/03-annonces.md) | Liste des annonces | /annonces | À faire | — |
 | [04](specs/04-annonce.md) | Fiche annonce | /annonces/[id] | À faire | — |
 | [05](specs/05-connexion.md) | Connexion | /connexion, | À faire | — |
@@ -223,3 +223,102 @@ L'inventaire et ses extensions ont été validés : layout racine, page de dép�
 Recette Chromium locale réussie sur le serveur isolé 3101 : 45 contrôles verts, zéro débordement à 1440/1024/768/390 px, hauteurs mesurées de 89 px (standard), 73 px (réduit) et 150 px (mobile avec recherche), variantes connecté/Pro, panneau de notifications, focus visible, menu mobile, footer court et zéro exception JavaScript. Les captures et le rapport sont conservés hors dépôt dans `C:\Users\Léo\Documents\Codex\kalico-layout-review`. Le port 3100 et le worktree `codex-v2-package` n'ont pas été modifiés ; le serveur temporaire 3101 est arrêté après la revue.
 
 Limites : le script lint du dépôt reste ciblé sur les fondations ; une invocation ESLint directe sur les fichiers de cette fiche est ignorée par la configuration actuelle. Le modal de connexion visible sur la page de dépôt et le texte mal encodé déjà présent dans le contenu de `/troc` sont hors du périmètre layout et n'ont pas été modifiés. Aucun changement d'outillage n'a été ajouté hors périmètre.
+
+## 02 — Inventaire (étape 1, sans code)
+
+### Base et références
+
+Branche `design/02-accueil`, créée depuis `origin/main` au commit de fusion de la fiche 01 `9635bb0d0db4edbf2c6561fca4825e27ad54bab4`. Le worktree isolé est `D:\Codex\kalico-worktrees\02-accueil`. La PR #205 avait déjà appliqué une première direction visuelle à l'accueil ; la fiche 02 repart de ce code fusionné au lieu de dupliquer cette refonte.
+
+Références lues : fiche `02-accueil.md`, `DESIGN.md` §5.1, `DONNEES-DEMO.md` et `Accueil v2.dc.html`. Le contrôle direct du navigateur n'est pas exposé dans cette session ; la structure, les styles et `renderVals()` ont été inspectés dans le HTML. La comparaison visuelle rendue reste obligatoire aux étapes 3, 5 et 6.
+
+### Fichiers existants trouvés
+
+- `src/app/page.tsx` ne fait qu'exposer les métadonnées et rendre `HomePage` ; il peut rester un composant serveur.
+- `src/components/home/HomePage.tsx` orchestre les sections, mais charge directement `/api/listings` avec `fetch`, utilise des `any`, transforme silencieusement les erreurs en tableau vide et ne distingue pas chargement, vide et erreur.
+- `src/components/home/HomeSections.tsx` contient le héros, les communes et les blocs de fin, mais aussi plusieurs anciennes sections non rendues. Le héros remplace la colonne sombre par deux cartes d'annonce dès que l'API répond. Des valeurs de `renderVals()` y sont encore copiées : recherches rapides, pros, exemples d'alertes et textes chiffrés. Il contient aussi des couleurs littérales et des motifs via `style` statique interdits par les règles v2.
+- `src/components/home/CategoryGridSection.tsx` reproduit huit catégories de la maquette dans une constante locale au lieu d'utiliser le catalogue existant.
+- `src/components/PlatformStats.tsx` appelle l'API `/stats/platform`, utilise encore des classes historiques `nc-*`, masque totalement l'erreur et ne rend pas les compteurs provisoires demandés avec `<Placeholder>`.
+- `src/components/listings/ListingCard.tsx` est le composant partagé exigé. Il accepte déjà les champs renvoyés par la recherche publique et exporte ses squelettes ; aucune copie de carte ni modification de ce fichier n'est prévue.
+- `src/components/layout/HeaderV2.tsx` et `FooterV2.tsx`, fusionnés par la fiche 01, couvrent déjà l'en-tête et le pied de page cibles. Le footer global est rendu par `src/app/layout.tsx` ; aucune nouvelle implémentation locale n'est nécessaire.
+- `src/lib/api.ts` expose déjà `listingsApi.search`, `proApi.list`, `metaApi` et `statsApi`. `src/lib/categoryCatalog.ts` fournit `FALLBACK_CATEGORIES`; `src/shared-copy/geoData.js` contient la liste statique complète des communes.
+- `src/content/placeholders.ts` contient déjà `membres` et `annoncesEnLigne`; `src/components/demo/Placeholder.tsx` fournit le signalement provisoire. Il n'existe encore aucun domaine `home` dans `src/lib/data`, `src/demo/fixtures` ou `src/types`.
+
+### Composants par section
+
+| Section | Réutilisation | Intervention prévue après validation |
+| --- | --- | --- |
+| 1. Héros | `Header`, boutons v2, catalogue de catégories et `<Placeholder>`. | Conserver le texte d'interface et la recherche ; alimenter les raccourcis depuis les catégories réelles. Rendre la colonne sombre de la maquette en permanence et y afficher uniquement `membres`/`annoncesEnLigne` via `<Placeholder>`, sans statistiques de `renderVals()`. Supprimer les couleurs/style statiques. |
+| 2. Communes | Catalogue statique `GEO_DATA`. | Fournir les communes via la couche `home`; aucun compteur fictif. Liens vers la recherche existante. |
+| 3. Catégories | `FALLBACK_CATEGORIES` et présentation existante. | Rendre huit racines depuis les données ; initiale, libellé et aide dérivée des sous-catégories, pas de constante copiée de la maquette. |
+| 4. Dernières annonces | `listingsApi.search`, `ListingCard`, `ListingGridSkeleton`, `ErrorState`. | Remplacer le bloc boost vide par huit annonces récentes, huit squelettes, le vide exact « Aucune annonce pour l'instant » et une erreur avec Réessayer. |
+| 5. Confiance | `DeepPanel`/tokens et motif v2. | Transformer les trois cartes claires actuelles en un seul bloc sombre conforme à la maquette. Le contenu reste du texte d'interface, sans compteur ni donnée utilisateur. |
+| 6. Pros mis en avant | `proApi.list`, badges et états v2. | Supprimer `LOCAL_PROS`; afficher jusqu'à quatre pros réels/démo, tous vérifiés par le contrat public, avec chargement, vide et erreur. |
+| 7. Alertes | Boutons et surfaces v2. | Conserver le CTA et la structure deux colonnes, mais remplacer `HOME_ALERTS` par un aperçu fonctionnel non personnalisé (recherche → correspondance → notification), sans fausses alertes utilisateur. |
+| 8. Pied de page | `FooterV2` global de la fiche 01. | Aucune modification ; seulement vérifier l'enchaînement et l'espacement avec la dernière section. |
+
+Les anciens exports inutilisés de `HomeSections.tsx` seront retirés seulement s'ils ne sont référencés nulle part, afin de réduire les chemins morts sans élargir le périmètre.
+
+### Données, types et API vérifiés
+
+| Besoin | Source actuelle vérifiée | Décision d'inventaire |
+| --- | --- | --- |
+| Annonces récentes | `GET /api/listings` via `listingsApi.search({ limit: 8, sort: 'date' })`; réponse `{ data, nextCursor, pagination }` compatible avec `ListingCard`. | Créer une fonction typée dans `src/lib/data/home.ts`; fixture `demo-*` conforme au type API dans `src/demo/fixtures/home.ts`. |
+| Pros mis en avant | `GET /api/pros?limit=4`; la route ne renvoie que les comptes Pro vérifiés, actifs, triés par note, nombre d'annonces puis nom. | Utiliser `proApi.list` dans la même couche ; fixture d'entreprises suffixées « (démo) ». Aucun endpoint à créer. |
+| Catégories rapides et grille | `FALLBACK_CATEGORIES`, construit depuis la taxonomie partagée. | Exposer une projection accueil typée depuis `home.ts`; aucune valeur issue de `renderVals()`. |
+| Communes | `GEO_DATA` dans `src/shared-copy/geoData.js`. | Aplatir la liste statique dans `home.ts` et en afficher un sous-ensemble stable ; aucun compteur inventé. |
+| Compteurs vitrine | `placeholders.membres` et `placeholders.annoncesEnLigne`. | Les rendre exclusivement avec `<Placeholder>` ; ne pas appeler l'API stats pour ces valeurs dans l'accueil. |
+
+Nouveaux fichiers prévus : `src/types/home.ts`, `src/lib/data/home.ts` et `src/demo/fixtures/home.ts`. Aucun composant n'importera directement une fixture. Aucun changement serveur, route, signature d'API ou schéma n'est nécessaire.
+
+### États et responsive à vérifier
+
+- Annonces : huit squelettes aux dimensions de `ListingCard`, vide exact de la fiche, erreur avec Réessayer.
+- Pros : quatre squelettes, vide et erreur avec Réessayer ; les autres sections statiques restent toujours rendues.
+- Largeurs obligatoires : 1440, 1024, 768 et 390 px. La grille annonces passe de 4 à 2 puis 1 colonne ; les blocs héros/alertes passent en une colonne ; communes et raccourcis restent défilables ou se replient sans texte coupé.
+- Comparaison finale section par section avec la maquette, avec contrôle du header/footer partagés et absence de débordement horizontal.
+
+### QUESTIONS avant code
+
+1. Valider l'ajout des trois nouveaux fichiers de domaine `home` (`types`, `lib/data`, `demo/fixtures`) nécessaires aux règles de données de la fiche.
+2. Valider le remplacement des trois fausses alertes issues de `renderVals()` par un aperçu purement fonctionnel et non personnalisé en trois étapes, puisque la fiche ne demande aucune API d'alertes sur l'accueil.
+3. Valider les libellés d'état manquants dans la fiche pour les pros : vide « Aucun professionnel mis en avant pour l'instant » et erreur « Impossible de charger les professionnels. » ; les annonces gardent le texte vide imposé.
+
+Étape 1 uniquement : aucun code applicatif, type, appel de données ni fixture n'a été créé. Les étapes 2 à 7 attendent la validation humaine de cet inventaire et de ces trois décisions.
+
+## 02 — Livraison des étapes 2 à 7 (2026-10-01)
+
+L'inventaire et ses trois décisions ont été validés : domaine `home` typé, aperçu fonctionnel des alertes et libellés d'états des professionnels. La branche `design/02-accueil` reste dédiée à cette seule fiche ; aucune fiche suivante ni fusion n'a été engagée.
+
+### Résultat
+
+- Données : `src/lib/data/home.ts` projette le catalogue partagé et les communes statiques, puis charge les huit annonces récentes et quatre professionnels depuis les API existantes. Aucun endpoint serveur ajouté.
+- Démo : fixtures isolées dans `src/demo/fixtures/home.ts`, identifiants `demo-*`, personnes et entreprises signalées « (démo) », sans coordonnées ni photographies réelles. Les composants n'importent jamais les fixtures directement.
+- Héros : composition deux colonnes conforme à la direction v2, recherche et raccourcis alimentés par le catalogue, panneau sombre permanent et compteurs provisoires rendus exclusivement avec `<Placeholder>`.
+- Communes et catégories : données partagées, liens vers la recherche existante, aucun compteur ni exemple de `renderVals()` recopié.
+- Annonces : huit `ListingCard` partagées, huit squelettes, vide exact « Aucune annonce pour l'instant » et erreur avec Réessayer.
+- Confiance et pros : panneau sombre unique ; professionnels vérifiés issus de l'API/démo, quatre squelettes, vide et erreur avec Réessayer.
+- Alertes : CTA conservé et exemples de fausses alertes remplacés par un aperçu non personnalisé en trois étapes.
+- Nettoyage : les anciens `HomeSections.tsx` et `PlatformStats.tsx`, sans import restant et porteurs de données copiées/styles historiques, ont été retirés. Le footer partagé de la fiche 01 reste inchangé.
+
+### Fichiers touchés
+
+- Accueil : `src/components/home/HomePage.tsx`, `CategoryGridSection.tsx`, nouveaux `HomeSectionsV2.tsx` et `HomePlatformStats.tsx` ; retrait de `HomeSections.tsx` et `src/components/PlatformStats.tsx`.
+- Données : nouveaux `src/lib/data/home.ts`, `src/demo/fixtures/home.ts` et `src/types/home.ts`.
+- Suivi : `docs/design/PROGRESS.md`.
+
+### Critères d'acceptation
+
+- [x] Composition comparée à la maquette à 1440 px : héros, bande des communes, catégories, annonces, confiance, pros, alertes et footer.
+- [x] Aucun débordement horizontal à 390 px ; vérifié aussi à 768, 1024 et 1440 px dans Chromium.
+- [x] `check-design --changed` sans erreur ni avertissement.
+- [x] Aucune donnée métier issue de `renderVals()` dans les composants ; fixtures isolées et signalées.
+- [x] `ListingCard` partagé utilisé pour les huit annonces ; aucune carte d'annonce recopiée.
+- [x] Les deux compteurs provisoires sont rendus par `<Placeholder>` et repérés visuellement comme données de démonstration.
+- [x] Recherche accessible au clavier avec focus visible ; liens et actions utilisent des contrôles natifs.
+
+### Validation et limites
+
+`npm run lint`, `npx tsc --noEmit`, `npm run test:design` (5 tests), `npm run check:design`, `git diff --check` et le build de production (`NEXT_PUBLIC_DEMO_DATA=false`, 105 pages) passent. Le lint reste volontairement ciblé par la configuration existante sur les fondations/UI ; Next.js signale toujours plusieurs lockfiles et l'absence de son plugin ESLint spécifique.
+
+Recette Chromium locale sur le serveur isolé 3102 : HTTP 200, sections présentes, 8 annonces, 4 pros, 2 compteurs provisoires, aucune valeur `undefined`/`null`, focus visible et zéro débordement aux quatre largeurs. Les captures et le rapport sont conservés hors dépôt dans `C:\Users\Léo\Documents\Codex\kalico-home-review`. La seule erreur console est la requête globale `/favicon.ico` en 404, fichier déjà absent du projet et hors périmètre de cette fiche ; aucune exception JavaScript n'est relevée.
