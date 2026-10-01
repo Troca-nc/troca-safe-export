@@ -88,3 +88,71 @@ export type ListingsMetadata = {
   categories: CategoryNode[]
   provinces: ListingProvince[]
 }
+
+export type ListingDetailImage = {
+  id: string
+  url: string
+  thumbnail_url?: string | null
+  medium_url?: string | null
+}
+
+export type ListingSeller = {
+  id: string
+  first_name: string
+  last_name: string
+  avatar_url?: string | null
+  is_pro: boolean
+  pro_verified: boolean
+  rating?: number | null
+  reviews_count?: number | null
+  listings_count?: number | null
+  member_since?: string | null
+  commune_name?: string | null
+  province_name?: string | null
+  email_verified: boolean
+  phone_verified: boolean
+  trust_score?: number | null
+  is_online: boolean
+  last_seen_label?: string | null
+  response_time_label?: string | null
+}
+
+export type ListingReview = {
+  id: string
+  rating: number
+  comment?: string | null
+  created_at?: string
+  author_name: string
+  author_avatar?: string | null
+}
+
+export type ListingDetail = {
+  id: string
+  title: string
+  price: number | null
+  price_negotiable: boolean
+  is_free: boolean
+  description: string
+  condition: string
+  status: string
+  is_featured: boolean
+  is_urgent: boolean
+  views_count: number
+  favorites_count: number
+  commune_id?: string | null
+  commune_name?: string | null
+  commune_slug?: string | null
+  category_id?: string | null
+  category_name?: string | null
+  category_slug?: string | null
+  category_icon?: string | null
+  published_at?: string
+  created_at?: string
+  updated_at?: string
+  contre_quoi?: string | null
+  is_troc: boolean
+  metadata: Record<string, unknown>
+  images: ListingDetailImage[]
+  seller: ListingSeller
+  is_favorited: boolean
+}
