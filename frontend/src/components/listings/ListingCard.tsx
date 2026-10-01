@@ -11,54 +11,12 @@ import { useFavorite } from '@/hooks/useFavorite'
 import ListingImage from '@/components/ListingImage'
 import { consumePendingAuthAction, peekPendingAuthAction } from '@/lib/authAction'
 import { useAuthActionStore } from '@/store/authActionStore'
+import type { ListingSearchItem } from '@/types/listings'
 
 export { ListingSkeleton as ListingCardSkeleton, ListingSkeletonGrid as ListingGridSkeleton } from '@/components/ListingSkeleton'
 
-interface Listing {
-  id: string
-  type?: string
-  title: string
-  price: number | null
-  price_negotiable: boolean
-  is_free: boolean
-  condition?: string
-  is_featured: boolean
-  is_urgent: boolean
-  published_at?: string
-  created_at?: string
-  boosted_until?: string | null
-  contre_quoi?: string | null
-  is_troc?: boolean
-  commune_name?: string
-  category_name?: string
-  category_slug?: string
-  category_icon?: string
-  cover_image?: string
-  distance_km?: number | null
-  metadata?: Record<string, unknown>
-  user_rating?: number
-  seller_trust_score?: number
-  seller_email_verified?: boolean
-  seller_phone_verified?: boolean
-  is_pro?: boolean
-  seller_is_pro?: boolean
-  seller_pro_verified?: boolean
-  seller_prenom?: string | null
-  seller_nom?: string | null
-  seller_avatar?: string | null
-  author?: {
-    is_pro?: boolean
-    pro_verified?: boolean
-  } | null
-  seller_is_online?: boolean
-  seller_last_seen_label?: string | null
-  seller_avg_response_time_label?: string | null
-  seller_note_moyenne?: number | null
-  seller_nb_avis?: number | null
-}
-
 interface Props {
-  listing: Listing
+  listing: ListingSearchItem
   className?: string
   boosted?: boolean
   featured?: boolean
@@ -79,46 +37,30 @@ function toNumber(value: unknown, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback
 }
 
-function getListingCategoryLabel(listing: Listing) {
+function getListingCategoryLabel(listing: ListingSearchItem) {
   if (listing.category_name) return listing.category_name
   const slug = String(listing.category_slug ?? '').replaceAll('_', ' ')
   if (!slug) return 'Annonce'
   return slug.charAt(0).toUpperCase() + slug.slice(1)
 }
-function getListingCategoryInitial(listing: Listing) {
+function getListingCategoryInitial(listing: ListingSearchItem) {
   const label = getListingCategoryLabel(listing)
   return label.trim().charAt(0).toUpperCase() || 'A'
 }
 
-function getListingBadgeClass(listing: Listing) {
-  const kind = String(listing.type || '').trim().toLowerCase()
-  if (kind === 'bon_plan') return 'badge-emeraude'
-  if (kind === 'covoiturage') return 'badge-corail'
-  if (kind === 'evenement') return 'badge-sable'
-  return 'badge-lagon'
-}
-
-function getListingFrameClass(listing: Listing) {
-  const kind = String(listing.type || '').trim().toLowerCase()
-  if (kind === 'bon_plan') return 'border-l-nc-emeraude'
-  if (kind === 'covoiturage') return 'border-l-nc-corail'
-  if (kind === 'evenement') return 'border-l-nc-sable'
-  return 'border-l-nc-lagon'
-}
-
-function buildInitials(listing: Listing) {
+function buildInitials(listing: ListingSearchItem) {
   const first = (listing.seller_prenom ?? '').trim().charAt(0)
   const last = (listing.seller_nom ?? '').trim().charAt(0)
   const fallback = (listing.title ?? '').trim().charAt(0)
   return `${first}${last}`.trim() || fallback || 'T'
 }
 
-function SellerAvatar({ listing }: { listing: Listing }) {
+function SellerAvatar({ listing }: { listing: ListingSearchItem }) {
   const initials = buildInitials(listing).toUpperCase()
 
   if (listing.seller_avatar) {
     return (
-      <span className="relative flex h-[34px] w-[34px] shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface-sunken)]">
+      <span className="relative flex h-[34px] w-[34px] shrink-0 overflow-hidden rounded-full border border-warm-border bg-cream-sunken">
         <Image
           src={listing.seller_avatar}
           alt=""
@@ -132,7 +74,7 @@ function SellerAvatar({ listing }: { listing: Listing }) {
   }
 
   return (
-    <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border border-[var(--color-info-border)] bg-[var(--color-info-soft)] text-xs font-semibold text-[var(--color-info-text)]">
+    <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border border-info-border bg-info-soft text-xs font-semibold text-info-text">
       {initials}
     </span>
   )
@@ -147,7 +89,7 @@ function ListingImageFrame({
   onFavorite,
   featuredCard,
 }: {
-  listing: Listing
+  listing: ListingSearchItem
   loaded: boolean
   setLoaded: (value: boolean) => void
   saved: boolean
@@ -173,7 +115,7 @@ function ListingImageFrame({
   }, [hasCoverImage, listing.id])
 
   return (
-    <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-surface-sunken)]">
+    <div className="relative aspect-[4/3] overflow-hidden bg-cream-sunken">
       {hasCoverImage ? (
         <ListingImage
           src={listing.cover_image}
@@ -186,8 +128,8 @@ function ListingImageFrame({
           imgClassName={`h-full w-full object-cover transition-opacity duration-150 ${loaded ? 'opacity-100' : 'opacity-0'}`}
         />
       ) : (
-        <div className="motif-tressage flex h-full w-full items-center justify-center bg-[var(--color-surface-sunken)]">
-          <span className="font-display text-6xl font-normal text-[var(--color-text-faint)]">{categoryInitial}</span>
+        <div className="motif-tressage flex h-full w-full items-center justify-center bg-cream-sunken">
+          <span className="font-display text-6xl font-normal text-ink/30">{categoryInitial}</span>
         </div>
       )}
 
@@ -195,9 +137,9 @@ function ListingImageFrame({
 
       {featuredCard ? (
         <>
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent,rgba(14,42,49,0.72))]" />
-          <div className="absolute bottom-3 left-3 z-10 font-display text-2xl font-normal text-[var(--color-on-deep)]">{priceLabel}</div>
-          <div className="absolute left-3 top-3 z-10 rounded-full bg-[var(--color-accent)] px-3 py-1 text-xs font-semibold text-[var(--color-deep)]">
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-deep/80 to-transparent" />
+          <div className="absolute bottom-3 left-3 z-10 font-display text-2xl font-normal text-cream">{priceLabel}</div>
+          <div className="absolute left-3 top-3 z-10 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-ink-deep">
             À la une
           </div>
         </>
@@ -208,11 +150,11 @@ function ListingImageFrame({
         onClick={onFavorite}
         disabled={isLoading}
         aria-label={saved ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-        className={`absolute bottom-3 right-3 z-10 flex h-[34px] w-[34px] items-center justify-center rounded-full bg-[rgba(254,250,243,0.92)] text-[var(--color-text-muted)] shadow-[var(--shadow-card)] transition-colors hover:text-[var(--color-accent-text)] ${
+        className={`absolute bottom-3 right-3 z-10 flex h-[34px] w-[34px] items-center justify-center rounded-full bg-cream-surface/90 text-ink/55 shadow-card transition-colors hover:text-accent-text ${
           isLoading ? 'cursor-wait opacity-50' : ''
         }`}
       >
-        <Heart className={`h-4 w-4 ${saved ? 'fill-[var(--color-accent)] text-[var(--color-accent-text)]' : ''}`} />
+        <Heart className={`h-4 w-4 ${saved ? 'fill-accent text-accent-text' : ''}`} />
       </button>
     </div>
   )
@@ -290,17 +232,17 @@ export default function ListingCard({ listing, className = '', boosted, featured
     : listing.price
       ? `${listing.price.toLocaleString('fr-FR')} XPF`
       : 'Prix à débattre'
-  const priceClassName = listing.is_free ? 'text-[var(--color-success-text)]' : 'text-[var(--color-text-primary)]'
+  const priceClassName = listing.is_free ? 'text-success-text' : 'text-ink'
 
-  const publishedAt = listing.published_at ?? listing.created_at ?? new Date().toISOString()
-  const timeAgo = formatDistanceToNow(new Date(publishedAt), {
+  const publishedAt = listing.published_at ?? listing.created_at
+  const timeAgo = publishedAt ? formatDistanceToNow(new Date(publishedAt), {
     addSuffix: true,
     locale: fr,
-  })
+  }) : ''
 
   const sellerName =
     [listing.seller_prenom, listing.seller_nom].filter(Boolean).join(' ').trim() ||
-    'Vendeur Kalico'
+    'Profil non renseigné'
 
   const isConditionVisible = Boolean(listing.condition && CONDITION_LABELS[listing.condition])
   const locationZone = typeof listing.metadata?.quartier_zone === 'string' ? String(listing.metadata.quartier_zone).trim() : ''
@@ -318,8 +260,8 @@ export default function ListingCard({ listing, className = '', boosted, featured
   return (
     <Link
       href={`/annonces/${listing.id}`}
-      className={`group block overflow-hidden rounded-[var(--radius-card)] border bg-[var(--color-surface)] shadow-[var(--shadow-card)] transition-colors hover:border-[var(--color-border-strong)] ${
-        level2 ? 'border-l-[3px] border-l-[var(--color-accent)]' : 'border-[var(--color-border)]'
+      className={`group block overflow-hidden rounded-card border bg-cream-surface shadow-card transition-colors hover:border-ink/30 ${
+        level2 ? 'border-warm-border border-l-[3px] border-l-accent' : 'border-warm-border'
       } ${className}`}
     >
       <ListingImageFrame
@@ -334,56 +276,56 @@ export default function ListingCard({ listing, className = '', boosted, featured
 
       <div className="space-y-3 p-4">
         <div className="space-y-1.5">
-          <h3 className="line-clamp-2 text-[15px] font-medium leading-[1.55] text-[var(--color-text-primary)]">
+          <h3 className="line-clamp-2 text-body-sm font-medium text-ink">
             {listing.title}
           </h3>
           {level2 ? null : (
-            <div className={`font-display text-[30px] font-normal leading-none ${priceClassName}`}>
+            <div className={`font-display text-price font-normal ${priceClassName}`}>
               {priceText}
             </div>
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-3 text-[13px] text-[var(--color-text-muted)]">
+        <div className="flex items-center justify-between gap-3 text-meta text-ink/60">
           <span className="flex min-w-0 items-center gap-1 truncate">
-            <MapPin className="h-3.5 w-3.5 shrink-0 text-[var(--color-info-text)]" />
+            <MapPin className="h-3.5 w-3.5 shrink-0 text-info-text" />
             <span className="truncate">{locationText}</span>
           </span>
-          <span className="flex shrink-0 items-center gap-1">
+          {timeAgo ? <span className="flex shrink-0 items-center gap-1">
             <Clock className="h-3.5 w-3.5" />
             {timeAgo}
-          </span>
+          </span> : null}
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t border-[var(--color-border-inner)] pt-3">
+        <div className="flex items-center justify-between gap-3 border-t border-warm-border pt-3">
           <div className="flex min-w-0 items-center gap-2">
             <SellerAvatar listing={listing} />
             <div className="min-w-0">
               <div className="flex min-w-0 items-center gap-2">
-                <p className="truncate text-sm font-semibold text-[var(--color-text-primary)]">{sellerName}</p>
+                <p className="truncate text-sm font-semibold text-ink">{sellerName}</p>
                 {isProVerified ? (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-success-border)] bg-[var(--color-success-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-success-text)]">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-success-border bg-success-soft px-2 py-0.5 text-caption font-semibold text-success-text">
                     <BadgeCheck className="h-3 w-3" />
                     Pro
                   </span>
                 ) : null}
               </div>
-              <div className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--color-text-subtle)]">
+              <div className="flex flex-wrap items-center gap-2 text-caption text-ink/50">
                 {isConditionVisible ? (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-sunken)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-text-muted)]">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-warm-border bg-cream-sunken px-2 py-0.5 text-caption font-semibold text-ink/65">
                     {CONDITION_LABELS[listing.condition!]}
                   </span>
                 ) : null}
               </div>
-              <div className="mt-2 flex flex-wrap gap-1.5 text-[10px]">
+              <div className="mt-2 flex flex-wrap gap-1.5 text-caption">
                 {listing.seller_avg_response_time_label && (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-info-border)] bg-[var(--color-info-soft)] px-2 py-0.5 font-medium text-[var(--color-info-text)]">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-info-border bg-info-soft px-2 py-0.5 font-medium text-info-text">
                     <Clock className="h-3 w-3" />
                     {listing.seller_avg_response_time_label}
                   </span>
                 )}
                 {!isProVerified && typeof listing.seller_note_moyenne === 'number' && (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent-border)] bg-[var(--color-accent-soft)] px-2 py-0.5 font-medium text-[var(--color-accent-text)]">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-accent-border bg-accent-soft px-2 py-0.5 font-medium text-accent-text">
                     <BadgeCheck className="h-3 w-3" />
                     {listing.seller_note_moyenne.toFixed(1)}/5
                     <span className="text-current/70">({listing.seller_nb_avis ?? 0})</span>

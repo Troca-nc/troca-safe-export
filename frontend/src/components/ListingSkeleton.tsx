@@ -1,7 +1,5 @@
 'use client'
 
-import type { CSSProperties } from 'react'
-
 type ListingSkeletonProps = {
   className?: string
 }
@@ -11,20 +9,14 @@ type ListingSkeletonListProps = {
   className?: string
 }
 
-function SkeletonLine({
-  className = '',
-  style,
-}: {
-  className?: string
-  style?: CSSProperties
-}) {
-  return <div className={`skeleton ${className}`} style={style} aria-hidden="true" />
+function SkeletonLine({ className = '' }: { className?: string }) {
+  return <div className={`skeleton ${className}`} aria-hidden="true" />
 }
 
 export function ListingSkeleton({ className = '' }: ListingSkeletonProps) {
   return (
     <article className={`card overflow-hidden ${className}`}>
-      <div className="relative aspect-[16/9] overflow-hidden">
+      <div className="relative aspect-[4/3] overflow-hidden">
         <SkeletonLine className="absolute inset-0 rounded-none" />
       </div>
 
@@ -48,7 +40,7 @@ export function ListingSkeleton({ className = '' }: ListingSkeletonProps) {
 
 export function ListingSkeletonList({ count = 6, className = '' }: ListingSkeletonListProps) {
   return (
-    <div className={`grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 ${className}`}>
+    <div className={`grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3 ${className}`}>
       {Array.from({ length: count }).map((_, index) => (
         <ListingSkeleton key={index} />
       ))}
