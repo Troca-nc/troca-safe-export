@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 
 import Header from '@/components/layout/Header'
 import WelcomeToast from '@/components/onboarding/WelcomeToast'
@@ -11,69 +11,60 @@ import {
   CommunesBarSection,
   HomeHeroSection,
   LocalProsSection,
-  BoostedListingsSection,
+  RecentListingsSection,
   TrustSection,
-} from '@/components/home/HomeSections'
+} from '@/components/home/HomeSectionsV2'
 import CategoryGridSection from '@/components/home/CategoryGridSection'
-import { API_ORIGIN } from '@/lib/api'
 import { trackEvent } from '@/lib/analytics'
+import { getHomeListings, getHomeNavigation, getHomePros } from '@/lib/data/home'
+import type { HomeListing, HomePro } from '@/types/home'
 
-function cleanText(value: unknown, fallback = '') {
-  const text = String(value ?? '')
-    .replace(/\bundefined\b/gi, '')
-    .replace(/\bnull\b/gi, '')
-    .replace(/\s{2,}/g, ' ')
-    .replace(/\s+\s*$/, '')
-    .trim()
-  return text.length > 0 ? text : fallback
-}
-
-function sanitizeValue(value: unknown): unknown {
-  if (Array.isArray(value)) {
-    return value.map((entry) => sanitizeValue(entry))
-  }
-  if (value && typeof value === 'object') {
-    return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>).map(([key, entry]) => {
-        if (typeof entry === 'string') {
-          return [key, cleanText(entry, '')]
-        }
-        return [key, sanitizeValue(entry)]
-      })
-    )
-  }
-  return value
-}
+const navigation = getHomeNavigation()
 
 export default function HomePage() {
   const router = useRouter()
   const [q, setQ] = useState('')
-  const [listings, setListings] = useState<any[]>([])
+  const [listings, setListings] = useState<HomeListing[]>([])
+  const [listingsLoading, setListingsLoading] = useState(true)
+  const [listingsError, setListingsError] = useState(false)
+  const [pros, setPros] = useState<HomePro[]>([])
+  const [prosLoading, setProsLoading] = useState(true)
+  const [prosError, setProsError] = useState(false)
 
-  const featuredListings = useMemo(() => listings.slice(0, 8), [listings])
+  const quickCategories = useMemo(() => navigation.categories.slice(0, 5), [])
 
-  useEffect(() => {
-    let alive = true
-    const run = async () => {
-      try {
-        const baseUrl = API_ORIGIN
-        const response = await fetch(`${baseUrl}/api/listings?limit=8&sort=date`, { credentials: 'include' })
-        const json = await response.json()
-        if (!alive) return
-        setListings(Array.isArray(json?.data) ? json.data.map((item: any) => sanitizeValue(item)) : [])
-      } catch {
-        if (!alive) return
-        setListings([])
-      }
-    }
-
-    void run()
-    return () => {
-      alive = false
+  const loadListings = useCallback(async () => {
+    setListingsLoading(true)
+    setListingsError(false)
+    try {
+      setListings(await getHomeListings())
+    } catch {
+      setListings([])
+      setListingsError(true)
+    } finally {
+      setListingsLoading(false)
     }
   }, [])
 
-  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
+  const loadPros = useCallback(async () => {
+    setProsLoading(true)
+    setProsError(false)
+    try {
+      setPros(await getHomePros())
+    } catch {
+      setPros([])
+      setProsError(true)
+    } finally {
+      setProsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    void loadListings()
+    void loadPros()
+  }, [loadListings, loadPros])
+
+  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const term = q.trim()
     if (term) {
@@ -92,17 +83,27 @@ export default function HomePage() {
       <WelcomeToast />
       <OnboardingToast />
 
-      <HomeHeroSection q={q} onQueryChange={setQ} onSubmit={handleSearch} listings={featuredListings} />
+      <HomeHeroSection q={q} onQueryChange={setQ} onSubmit={handleSearch} quickCategories={quickCategories} />
 
-      <CommunesBarSection />
+      <CommunesBarSection communes={navigation.communes} />
 
-      <CategoryGridSection />
+      <CategoryGridSection categories={navigation.categories} />
 
-      <BoostedListingsSection />
+      <RecentListingsSection
+        listings={listings}
+        loading={listingsLoading}
+        error={listingsError}
+        onRetry={() => void loadListings()}
+      />
 
       <TrustSection />
 
-      <LocalProsSection />
+      <LocalProsSection
+        pros={pros}
+        loading={prosLoading}
+        error={prosError}
+        onRetry={() => void loadPros()}
+      />
 
       <AlertsCtaSection />
     </main>
