@@ -7,8 +7,8 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | --- | --- | --- | --- | --- |
 | [00](specs/00-fondations.md) | Fondations : tokens et composants de base | /dev/ui (galerie) | Fait (fusionnée) | [#215](https://github.com/Troca-nc/troca-safe-export/pull/215) |
 | [01](specs/01-layout.md) | En-tête, pied de page, onglets de compte | toutes | Fait (fusionnée) | [#216](https://github.com/Troca-nc/troca-safe-export/pull/216) |
-| [02](specs/02-accueil.md) | Accueil | / | À relire | [#217](https://github.com/Troca-nc/troca-safe-export/pull/217) |
-| [03](specs/03-annonces.md) | Liste des annonces | /annonces | À faire | — |
+| [02](specs/02-accueil.md) | Accueil | / | Fait (fusionnée) | [#217](https://github.com/Troca-nc/troca-safe-export/pull/217) |
+| [03](specs/03-annonces.md) | Liste des annonces | /annonces | À relire | [#218](https://github.com/Troca-nc/troca-safe-export/pull/218) |
 | [04](specs/04-annonce.md) | Fiche annonce | /annonces/[id] | À faire | — |
 | [05](specs/05-connexion.md) | Connexion | /connexion, | À faire | — |
 | [06](specs/06-inscription.md) | Inscription | /inscription | À faire | — |
@@ -322,3 +322,102 @@ L'inventaire et ses trois décisions ont été validés : domaine `home` typé, 
 `npm run lint`, `npx tsc --noEmit`, `npm run test:design` (5 tests), `npm run check:design`, `git diff --check` et le build de production (`NEXT_PUBLIC_DEMO_DATA=false`, 105 pages) passent. Le lint reste volontairement ciblé par la configuration existante sur les fondations/UI ; Next.js signale toujours plusieurs lockfiles et l'absence de son plugin ESLint spécifique.
 
 Recette Chromium locale sur le serveur isolé 3102 : HTTP 200, sections présentes, 8 annonces, 4 pros, 2 compteurs provisoires, aucune valeur `undefined`/`null`, focus visible et zéro débordement aux quatre largeurs. Les captures et le rapport sont conservés hors dépôt dans `C:\Users\Léo\Documents\Codex\kalico-home-review`. La seule erreur console est la requête globale `/favicon.ico` en 404, fichier déjà absent du projet et hors périmètre de cette fiche ; aucune exception JavaScript n'est relevée.
+
+## 03 — Inventaire (étape 1, sans code)
+
+### Base et références
+
+Branche `design/03-annonces`, créée depuis `origin/main` au commit de fusion de la fiche 02 `631021de55c3c3022ead4588e9c0a833305e4bfd`. Le worktree isolé est `D:\Codex\kalico-worktrees\03-annonces`. Aucune branche distante ni PR antérieure intitulée `design(03)` n'a été trouvée.
+
+Références lues : fiche `03-annonces.md`, `DESIGN.md` §3.2–3.4, §4.6 et §5.3 (la fiche cite §5.2, mais le pattern listing est numéroté §5.3), `DONNEES-DEMO.md` et `Annonces v2.dc.html`. Le contrôle intégré du navigateur n'est pas exposé dans cette session ; la structure et `renderVals()` ont été inspectés dans le HTML. La comparaison visuelle rendue reste obligatoire aux étapes 3, 5 et 6.
+
+### Fichiers existants trouvés
+
+- `src/app/annonces/page.tsx` est un composant client monolithique de 1 944 lignes. Il contient recherche, catégories, filtres, requêtes, histogramme, grille, carte, alerte et deux implémentations de sidebar dont `LegacyFilterSidebar`, inutilisée. Il cumule `useInfiniteListings` avec un second `fetch` direct de secours : une erreur peut donc être transformée en liste vide. Il utilise de nombreux `any`, des classes historiques/interdites et un tableau `FALLBACK_PROVINCES` avec des identifiants inventés.
+- `src/hooks/useListingFilters.ts` conserve déjà recherche, catégorie, localisation, prix, état, troc, rayon, tri et page dans l'URL. Il accepte les anciens paramètres explicites et sérialise les filtres de localisation dans `r`. Ce fichier est hors liste de la fiche et peut rester inchangé.
+- `src/hooks/useInfiniteListings.ts` gère correctement le curseur `nextCursor`, mais appelle `listingsApi` directement au lieu de la couche `src/lib/data/`. La nouvelle page cessera de l'utiliser ; aucune modification hors périmètre n'est nécessaire.
+- `src/components/listings/CategoryFeedPage.tsx` duplique 546 lignes de recherche/filtres/grille avec des styles historiques. Il alimente actuellement `/immobilier`, `/dons`, `/locations` et `/services`. Il doit devenir un adaptateur léger du nouveau listing partagé pour que ces quatre routes profitent de la même interface sans modifier leurs pages. `/troc` dispose d'un parcours spécialisé et ne réutilise pas cette liste ; il reste hors périmètre.
+- `src/components/listings/ListingCard.tsx` est la carte partagée à conserver. Son contrat est privé au fichier et plusieurs replis masquent des données absentes (`new Date()` et « Vendeur Kalico »). Il contient encore quelques couleurs arbitraires ; la fiche peut le typer avec le domaine listings et le remettre intégralement en tokens sans copier la carte de la maquette.
+- `src/components/ListingSkeleton.tsx` existe et est réexporté par `ListingCard`, mais son image est en 16/9 alors que la carte finale est en 4/3. Il sera aligné sur les dimensions réelles et réutilisé pour les chargements initial et suivant.
+- `src/components/annonces/AnnoncesMap.tsx` charge Leaflet et OpenStreetMap, mais l'API de liste ne renvoie ni latitude ni longitude des annonces. Les marqueurs actuels reçoivent donc des coordonnées absentes. Le composant contient aussi des styles/couleurs littérales, des ressources externes et une géolocalisation distincte de celle des filtres.
+- `src/components/SearchAlertModal.tsx` couvre déjà le bouton « Créer une alerte » et consomme le même type de filtres. Il sera réutilisé sans modification.
+- `src/lib/api.ts` expose `listingsApi.search`, `metaApi.getCategories`, `metaApi.getCommunes` et `metaApi.getZones`. Le serveur renvoie `{ data, nextCursor, pagination }` et accepte `q`, catégorie/id, commune/province, prix, état, troc, métadonnées métier, quartier, géolocalisation, rayon, tri, page, limite et curseur.
+
+### Composants par section
+
+| Section | Réutilisation | Intervention prévue après validation |
+| --- | --- | --- |
+| 1. Barre de recherche collante | `Header`, `useListingFilters`, catalogue des catégories, `SearchAlertModal`. | Créer une barre listing sous le header : menu catégories à deux niveaux sans compteurs fictifs, recherche soumise explicitement, localisation réelle, alerte et contrôles de tri/vue. Les filtres restent dans l'URL. |
+| 2. Colonne de filtres | Métadonnées catégories/communes/zones, géolocalisation existante, champs et contrôles v2. | Créer une sidebar 296 px, collante et défilable, avec sections persistées dans `localStorage` : localisation ouverte, prix et état repliés. Afficher les filtres actifs sous forme de puces supprimables. Sur mobile, réutiliser le même contenu dans un tiroir bas avec actions collantes. |
+| 3. Résultats | `ListingCard`, API annonces, total réel, `ErrorState`. | Afficher titre, total, périmètre, tri et grille 3/2/1 colonnes. Supprimer la bannière sponsorisée non demandée et le second fetch silencieux. La carte ne sera pas copiée ; la vue cartographique reste conditionnée à des coordonnées réelles. |
+| 4. Pagination | Curseur `nextCursor` déjà fourni par l'API. | Remplacer le chargement automatique par une progression et un bouton « Charger plus d'annonces » conformes à la maquette ; conserver les résultats déjà chargés et rendre des squelettes supplémentaires pendant la requête. |
+
+Le nouveau listing partagé sera créé sous `src/components/listings/` puis utilisé par `src/app/annonces/page.tsx` et l'adaptateur `CategoryFeedPage.tsx`. Les quatre routes secondaires conservent leurs fichiers et leurs libellés actuels. Header et footer de la fiche 01 restent inchangés.
+
+### Données, types et API vérifiés
+
+| Besoin | Source actuelle vérifiée | Décision d'inventaire |
+| --- | --- | --- |
+| Pages d'annonces | `GET /api/listings` via `listingsApi.search`; filtres et curseur gérés dans `backend/src/services/listingsQuery.js`. | Créer `src/lib/data/listings.ts` avec une fonction typée de page et import dynamique des fixtures en mode démo. Ne plus doubler la requête dans le composant. |
+| Catégories | `GET /api/categories`; repli statique `FALLBACK_CATEGORIES`; le filtre serveur accepte le slug et ses descendants. | Projeter le catalogue dans la couche listings. Aucun compteur par facette n'existe : ne pas recopier ceux de `renderVals()`. |
+| Provinces, communes, zones | `GET /api/communes` et `GET /api/communes/:slug/zones`. | Charger les identifiants réels en production ; fixtures `demo-*` conformes au contrat en mode démo. Retirer `FALLBACK_PROVINCES` inventé du composant. |
+| Tri et pagination | Tri `date`, `price_asc`, `price_desc`, `relevance` et curseur opaque `after`; total/pages dans `pagination`. | Conserver les tris supportés. « Plus proches » n'est pas proposé sans coordonnées utilisateur. Calculer la progression depuis le nombre chargé et le total réel. |
+| Types de transaction | `troc=true` est supporté ; `transaction` ne couvre que les métadonnées de certaines catégories. Don et locations sont des catégories dédiées. L'API ne sait pas exprimer un filtre générique « Vente seulement ». | Conserver les modes réellement fiables « Annonces » et « Troc » sur `/annonces`; Dons/Locations restent accessibles par catégories et routes dédiées. Aucun compteur de maquette. |
+| Carte | La réponse liste contient commune et distance éventuelle, mais aucune latitude/longitude. | Ne pas afficher une fausse carte ni inventer des positions. Aucun changement serveur autorisé par la fiche. |
+
+Nouveaux fichiers prévus : `src/types/listings.ts`, `src/lib/data/listings.ts`, `src/demo/fixtures/listings.ts` et des composants spécialisés sous `src/components/listings/`. Les fixtures porteront des identifiants `demo-*`, des noms « (démo) » et uniquement des visuels neutres. Aucun composant n'importera directement `src/demo/`.
+
+### États et responsive à vérifier
+
+- Chargement initial : neuf squelettes 4/3 aux dimensions finales à 1440 px ; chargement suivant sans masquer les cartes déjà présentes.
+- Vide proposé : « Aucune annonce ne correspond à vos critères. » puis « Essayez d'élargir votre recherche ou de retirer un filtre. », avec réinitialisation et dépôt d'annonce.
+- Erreur proposée : « Impossible de charger les annonces. » avec bouton Réessayer ; l'erreur ne doit plus être transformée en état vide.
+- Métadonnées indisponibles : catégories statiques possibles par slug, mais localisation désactivée avec message explicite plutôt que de faux identifiants.
+- Largeurs obligatoires : 1440, 1024, 768 et 390 px. Sidebar visible à partir de `md` selon `DESIGN.md` ; en dessous, tiroir bas plein écran avec focus géré, fermeture Échap et retour au déclencheur. Grille 3 colonnes desktop, 2 tablette, 1 mobile ; aucun débordement ni texte coupé.
+
+### QUESTIONS avant code
+
+1. Valider l'ajout du domaine `listings` (`types`, `lib/data`, `demo/fixtures`) et de composants spécialisés sous `src/components/listings/`, tous autorisés comme nouveaux fichiers par les règles de la fiche.
+2. Valider la fidélité aux capacités réelles : conserver seulement « Annonces » et « Troc » dans le sélecteur principal, omettre les filtres « Vendeur & options » et tous les compteurs de facettes, car l'API actuelle ne les fournit pas et la fiche interdit les changements serveur.
+3. Valider l'absence de vue carte dans cette fiche : elle est optionnelle dans la spécification et l'API liste ne fournit pas les coordonnées nécessaires. `AnnoncesMap.tsx` restera inchangé et non rendu par le nouveau listing.
+4. Valider les textes d'états proposés ci-dessus, absents mot pour mot de la fiche, ainsi que le bouton explicite « Charger plus d'annonces » à la place de l'infinite scroll automatique.
+
+Étape 1 uniquement : aucun code applicatif, type, appel de données ni fixture n'a été créé. Seul ce journal d'inventaire a été modifié. Les étapes 2 à 7 attendent la validation humaine de ces quatre décisions.
+
+## 03 — Livraison des étapes 2 à 7 (2026-10-01)
+
+Les quatre décisions d'inventaire ont été validées : domaine `listings` dédié, interface limitée aux capacités réelles de l'API, absence de fausse carte et états/pagination explicites. La branche `design/03-annonces` reste consacrée à cette seule fiche ; aucune fiche suivante ni fusion n'a été engagée.
+
+### Résultat
+
+- Vue partagée : `/annonces`, `/immobilier`, `/dons`, `/locations` et `/services` utilisent désormais `ListingsPageView`; `CategoryFeedPage` n'est plus qu'un adaptateur léger.
+- Données : `src/lib/data/listings.ts` normalise la recherche, les métadonnées de catégories/localisation, les zones et le curseur. Les composants n'appellent plus directement l'API et n'importent jamais les fixtures.
+- Démo : douze annonces neutres avec identifiants `demo-*`, noms « (démo) », catégories, provinces, communes et zones isolées dans `src/demo/fixtures/listings.ts`.
+- Recherche et navigation : recherche soumise explicitement, menu de catégories à deux niveaux, filtres conservés dans l'URL, modes fiables « Annonces »/« Troc », tri et création d'alerte existante.
+- Filtres : colonne collante 296 px sur tablette/bureau, sections persistées dans `localStorage`, localisation réelle, prix, état et puces supprimables. Le même contenu est réutilisé dans un tiroir mobile avec verrouillage du fond, fermeture Échap, boucle de focus et retour au déclencheur.
+- Résultats : grille 3/2/1 colonnes, `ListingCard` partagé remis en tokens et en contraste, repli temporel/vendeur non trompeur, squelettes 4/3, états vide et erreur distincts.
+- Pagination : résultats conservés pendant le chargement suivant, progression calculée sur le total réel et bouton explicite « Charger plus d'annonces ».
+- Carte : `AnnoncesMap.tsx` reste inchangé et n'est pas rendu, l'API de liste ne fournissant pas de coordonnées d'annonces.
+
+### Fichiers touchés
+
+- Page et vue : `src/app/annonces/page.tsx`, nouveaux `src/components/listings/ListingsPageView.tsx` et `ListingsFiltersPanel.tsx`, adaptateur `CategoryFeedPage.tsx`.
+- Cartes et chargement : `src/components/listings/ListingCard.tsx`, `src/components/ListingSkeleton.tsx`.
+- Domaine : nouveaux `src/types/listings.ts`, `src/lib/data/listings.ts` et `src/demo/fixtures/listings.ts`.
+- Suivi : `docs/design/PROGRESS.md`.
+
+### Critères d'acceptation
+
+- [x] Composition comparée à la maquette à 1440 px : barre listing, filtres 296 px, titre/total, grille trois colonnes et pagination.
+- [x] Aucun débordement horizontal à 390 px ; vérifié également à 768, 1024 et 1440 px avec émulation Chromium exacte.
+- [x] Grille 3/2/1 colonnes et sidebar remplacée par un tiroir sous 768 px.
+- [x] États chargement, vide et erreur distincts ; aucun échec réseau transformé en liste vide.
+- [x] Filtres dans l'URL, catégories/localisation issues des sources partagées, aucun compteur de facette ou identifiant de production inventé.
+- [x] Pagination par curseur explicite sans masquer les résultats déjà chargés.
+- [x] Tiroir mobile contrôlé au clavier : focus initial, boucle Tab, Échap, fond verrouillé et retour au déclencheur.
+
+### Validation et limites
+
+`eslint .`, `tsc --noEmit`, `git diff --check` et le build de production (105 pages) passent. `check-design --changed` passe avec zéro erreur et deux avertissements attendus : hauteur dynamique de l'histogramme de prix et largeur dynamique de progression.
+
+Recette locale en mode `NEXT_PUBLIC_DEMO_DATA=true` sur le serveur isolé 3103 : 12 annonces de démonstration, contrastes corrigés, aucun débordement aux quatre largeurs et tiroir mobile fonctionnel. Le contrôle intégré du navigateur n'étant pas exposé dans cette session, la revue a utilisé Chromium headless et son protocole d'émulation locale ; captures conservées hors dépôt dans `C:\Users\Léo\Documents\Codex\kalico-listings-review`. Les bandeaux globaux de consentement et de démonstration observés sont partagés et hors périmètre de cette fiche.
