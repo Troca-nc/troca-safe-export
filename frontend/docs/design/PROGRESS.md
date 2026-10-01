@@ -8,8 +8,8 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [00](specs/00-fondations.md) | Fondations : tokens et composants de base | /dev/ui (galerie) | Fait (fusionnée) | [#215](https://github.com/Troca-nc/troca-safe-export/pull/215) |
 | [01](specs/01-layout.md) | En-tête, pied de page, onglets de compte | toutes | Fait (fusionnée) | [#216](https://github.com/Troca-nc/troca-safe-export/pull/216) |
 | [02](specs/02-accueil.md) | Accueil | / | Fait (fusionnée) | [#217](https://github.com/Troca-nc/troca-safe-export/pull/217) |
-| [03](specs/03-annonces.md) | Liste des annonces | /annonces | À relire | [#218](https://github.com/Troca-nc/troca-safe-export/pull/218) |
-| [04](specs/04-annonce.md) | Fiche annonce | /annonces/[id] | À faire | — |
+| [03](specs/03-annonces.md) | Liste des annonces | /annonces | Fait (fusionnée) | [#218](https://github.com/Troca-nc/troca-safe-export/pull/218) |
+| [04](specs/04-annonce.md) | Fiche annonce | /annonces/[id] | Inventaire | — |
 | [05](specs/05-connexion.md) | Connexion | /connexion, | À faire | — |
 | [06](specs/06-inscription.md) | Inscription | /inscription | À faire | — |
 | [07](specs/07-mon-compte.md) | Mon compte : vue d’ensemble | /profil | À faire | — |
@@ -421,3 +421,83 @@ Les quatre décisions d'inventaire ont été validées : domaine `listings` déd
 `eslint .`, `tsc --noEmit`, `git diff --check` et le build de production (105 pages) passent. `check-design --changed` passe avec zéro erreur et deux avertissements attendus : hauteur dynamique de l'histogramme de prix et largeur dynamique de progression.
 
 Recette locale en mode `NEXT_PUBLIC_DEMO_DATA=true` sur le serveur isolé 3103 : 12 annonces de démonstration, contrastes corrigés, aucun débordement aux quatre largeurs et tiroir mobile fonctionnel. Le contrôle intégré du navigateur n'étant pas exposé dans cette session, la revue a utilisé Chromium headless et son protocole d'émulation locale ; captures conservées hors dépôt dans `C:\Users\Léo\Documents\Codex\kalico-listings-review`. Les bandeaux globaux de consentement et de démonstration observés sont partagés et hors périmètre de cette fiche.
+
+## 04 — Fait
+
+### Base et références
+
+Branche `design/04-annonce`, créée depuis `origin/main` au commit de fusion de la fiche 03 `ee40a3845872e2a907899dadb08bbc004d2f75b0`. Le worktree isolé est `D:\Codex\kalico-worktrees\04-annonce`. Aucune branche ou PR antérieure intitulée `design(04)` n'a été trouvée.
+
+Références lues : fiche `04-annonce.md`, `DONNEES-DEMO.md`, `Annonce v2.dc.html` et les patterns de `DESIGN.md`. La fiche cite « §5.3 Fiche », mais §5.3 décrit le listing ; le pattern détail est §5.4 et constitue la référence cohérente. Le contrôle intégré du navigateur n'est pas exposé dans cette session : le balisage et l'intégralité de `renderVals()` ont été inspectés, et la comparaison visuelle rendue restera obligatoire après validation.
+
+### Fichiers existants trouvés
+
+- `src/app/annonces/[id]/page.tsx` ne contient que le chargement serveur, les métadonnées/JSON-LD, le `Header` et l'appel à `AnnonceDetail`. Son `fetchAnnonce()` transforme actuellement toute erreur réseau en `null`, donc en 404, et appelle l'API une seconde fois pour les métadonnées. Il utilise encore plusieurs `any` et ne passe pas par `src/lib/data/`.
+- `src/components/annonces/AnnonceDetail.tsx` porte l'interface réelle sur 880 lignes, mais n'est pas listé dans la fiche. Il appelle directement les API annonce, messages, vendeur et avis ; gère favoris, message, offre, troc, avis, signalement et modales ; et mélange le rendu avec les mutations. Son état `loading || !listing` masque l'erreur derrière « Chargement… » et ne fournit aucun bouton Réessayer.
+- `src/components/annonces/AnnonceDetailSections.tsx`, également hors liste, contient la galerie, le bloc titre, le vendeur, les avis, le formulaire d'avis, la sécurité, les autres annonces du vendeur et les recherches associées. La structure 16/10 et la colonne 396 px sont proches de la cible, mais le fichier cumule classes historiques/interdites, tailles sous 15 px, `bg-white`, couleurs arbitraires et duplication des cartes/avis.
+- `src/components/annonces/AnnonceSimilaires.tsx` existe mais n'est pas rendu. Il appelle `listingsApi.search` directement et recopie une carte au lieu de réutiliser `ListingCard` ; il possède seulement un état de chargement, sans vide ni erreur.
+- `src/components/reviews/ReviewCard.tsx` et `ReviewSummary.tsx` sont autorisés par la fiche, mais non utilisés sur la page actuelle. Ils couvrent résumé, réponse, utile et signalement ; ils devront être remis en tokens/rôles typographiques s'ils sont réutilisés.
+- `src/components/share/ContentShareButton.tsx` et `ShareSheet.tsx` sont autorisés. `ContentShareButton` est un adaptateur léger réutilisable ; `ShareSheet` conserve des couleurs de marques sociales et des classes historiques. Il peut rester inchangé et être consommé sans créer un second mécanisme de partage.
+- `src/components/annonces/CategoryFields.tsx` exporte déjà `getCategoryFields(categorySlug)`, ce qui permet de traduire les métadonnées réelles de chaque catégorie en caractéristiques lisibles sans recopier les quatre exemples de la maquette.
+- Le footer partagé est déjà monté par `src/app/layout.tsx`; la page détail ne doit pas le recopier.
+
+### Composants par section
+
+| Section | Réutilisation | Intervention prévue après validation |
+| --- | --- | --- |
+| 1. Fil d'Ariane | `Header`, catalogue/slug de catégorie, commune de l'annonce. | Remplacer le simple lien « Retour » par Accueil / catégorie / commune / titre, avec dernier segment tronqué visuellement mais complet pour les lecteurs d'écran. |
+| 2. Galerie | `ListingImage`, tableau `images` réel, motif de repli. | Conserver le ratio 16/10, ajouter compteur, vignettes 104×82, navigation clavier et actions favori/partage secondaires. Aucun visuel de `renderVals()` ne sera copié. |
+| 3. Titre, prix, badges | Champs détail réels, états favori/troc/urgent/vedette. | Aligner titre et `price-lg`, badges issus de l'API, métadonnées de publication/localisation et quatre tuiles seulement quand une valeur existe. Le bouton de contact restera l'unique bouton primaire. |
+| 4. Description et caractéristiques | `getCategoryFields`, `metadata`, état, troc et commune. | Rendre la description en 17 px, les caractéristiques réelles et le souhait de troc. Ne pas afficher la fausse carte ni la distance de la maquette : l'API détail ne fournit pas de coordonnées d'annonce. |
+| 5. Colonne vendeur 396 px | Auth/favoris existants, profil public, messages/offres/troc, avis vendeur, sécurité et signalement. | Conserver la colonne collante, les badges vérifiés réellement fournis, le contact primaire et les actions secondaires. Afficher les avis via les composants `reviews/*`; retirer le formulaire d'avis de cette page, non demandé par la fiche. Désactiver toutes les actions de contact pour un statut non actif. |
+| 6. Annonces similaires | `getListingsPage`/API de liste et `ListingCard`. | Charger jusqu'à quatre annonces actives de la même catégorie, exclure l'annonce courante, utiliser la carte partagée et fournir chargement, vide et erreur. L'API n'a pas d'endpoint « similaires » dédié : la catégorie est le signal réel disponible. |
+
+La maquette ajoute une carte approximative, une alerte de recherche, les autres annonces du vendeur et des recherches associées. La fiche, prioritaire, demande à la place les annonces similaires et ne liste pas ces blocs. Le panneau sécurité et le lien Signaler restent cohérents avec `DESIGN.md` §5.4 ; les autres blocs supplémentaires seront omis.
+
+### Données et API vérifiées
+
+| Besoin | Source actuelle | Décision d'inventaire |
+| --- | --- | --- |
+| Annonce | `GET /api/listings/:id` via `listingsApi.getById`; réponse normalisée `{ data }` avec titre/prix doubles, images, métadonnées, commune, statut, troc et vendeur. | Étendre le domaine `listings` typé et centraliser lecture/normalisation dans `src/lib/data/listings.ts`; distinguer explicitement 404 et erreur réseau. |
+| Vendeur | Inclus dans la réponse détail (`user`/`author`) : identité, pro vérifié, avis, annonces, ancienneté, localisation, vérifications, confiance, présence et délai de réponse. | Aucun appel profil supplémentaire. Aucun téléphone réel n'est renvoyé par l'API publique ; ne pas inventer un bouton téléphone actif. |
+| Avis | `GET /api/users/:id/reviews`; la réponse contient note, commentaire, auteur/avatar et date. | Charger les avis réellement reçus et afficher résumé/cartes. L'endpoint backend transforme actuellement certaines erreurs DB en liste vide : sans changement serveur autorisé, ce cas est indiscernable d'un vrai vide. |
+| Similaires | `GET /api/listings` accepte catégorie, commune, tri, limite et curseur. Aucun endpoint de recommandation dédié. | Utiliser la même catégorie, exclure l'id courant côté données et limiter à quatre résultats. |
+| Contact/offre/troc/signalement | APIs existantes `messagesApi`, `listingsApi.report` et formulaire troc. | Conserver les mutations existantes derrière les règles d'authentification, via la couche de données lorsque la fiche est implémentée. |
+| Statuts | L'API détail publique ne retourne que les annonces `active`; `reserved`, `sold` ou `inactive` ne sont visibles que par le propriétaire ou un administrateur. Elle ne distingue pas explicitement `expired` dans la projection détail. | Rendre le bandeau et désactiver le contact lorsqu'un statut non actif est effectivement fourni (propriétaire/admin/démo). Pour le public, une annonce retirée reste une 404 conformément au contrat actuel ; aucun changement serveur. |
+
+Les fixtures de la fiche 03 ne contiennent que les cartes de recherche. Après validation, elles seront étendues avec un détail actif et un détail indisponible, identifiants `demo-*`, vendeur/avis « (démo) » et aucun média externe. Les images absentes utiliseront le motif neutre existant.
+
+### États et responsive à vérifier
+
+- Chargement : squelette final avec galerie 16/10, bloc titre et colonne vendeur 396 px ; pas de simple texte centré.
+- 404 proposée : « Cette annonce n'est plus disponible. » puis « Elle a peut-être été retirée ou le lien est incorrect. », avec retour vers les annonces.
+- Erreur proposée : « Impossible de charger cette annonce. » avec bouton « Réessayer ».
+- Vendue proposée : « Cette annonce a été vendue. Le contact avec le vendeur est désactivé pour cet article. »
+- Autre statut non actif proposé : « Cette annonce n'est plus active. Le contact avec le vendeur est désactivé. »
+- Similaires vide proposé : « Aucune annonce similaire disponible pour le moment. » ; erreur : « Impossible de charger les annonces similaires. » avec Réessayer.
+- Largeurs obligatoires : 1440, 1024, 768 et 390 px. Deux colonnes à partir de `lg`; en dessous la colonne vendeur repasse dans le flux. Galerie/vignettes défilables, titre/prix empilés sur mobile, caractéristiques 4/2/1 colonnes, aucune action fixe qui masque le consentement global.
+
+### Décisions validées avant code
+
+1. Ajout au périmètre des composants réellement porteurs de la page et des fichiers du domaine `listings`.
+2. Priorité à la fiche : sécurité/signalement et similaires conservés ; carte approximative, alerte, autres annonces du vendeur, recherches associées et formulaire d'avis omis.
+3. Bandeau et contact désactivé pour un statut non actif effectivement fourni ; maintien de la 404 publique imposée par le backend.
+4. Textes d'états validés et similaires définies par la même catégorie, annonce courante exclue.
+
+### Résultat
+
+- Route serveur reliée à `src/lib/data/listings.ts`, erreurs réseau laissées à la frontière `error.tsx` et 404 réservée à `ListingNotFoundError`.
+- Galerie 16/10 avec repli neutre, navigation et vignettes 104×82 ; bloc titre/prix/badges, quatre tuiles factuelles, description et caractéristiques issues des métadonnées.
+- Colonne vendeur 396 px collante sur bureau, contact unique action primaire, favoris/partage secondaires, sécurité et signalement. Le contact est désactivé pour les statuts non actifs.
+- Avis vendeur réels et jusqu'à quatre annonces similaires de la même catégorie via `ListingCard`, sans appel API direct depuis le nouveau composant de page.
+- Fixtures détail actives et vendue, avis et vendeurs `demo-*`/« (démo) » sans média externe.
+- États dédiés : squelette final, 404 explicite, erreur avec Réessayer, bandeau vendu/inactif et similaires vides.
+
+### Validation
+
+- `npm run lint` : réussi.
+- `tsc --noEmit` : réussi.
+- build Next.js de production : réussi, 105 routes générées.
+- `node scripts/check-design.mjs --changed` : 10 fichiers, zéro erreur, zéro avertissement.
+- `git diff --check` : réussi.
+- Recette HTTP locale en mode démo : annonce active 200 avec titre, annonce vendue 200 avec bandeau et identifiant inconnu avec copie 404 rendue. La route de démonstration a été ouverte dans le navigateur intégré sur le port 3104 ; le contrôle programmatique du navigateur n'étant pas exposé dans cette session, la comparaison visuelle aux quatre largeurs reste à confirmer dans la revue humaine avant fusion.

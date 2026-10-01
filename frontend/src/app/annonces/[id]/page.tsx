@@ -5,36 +5,23 @@
 // ============================================================
 
 import type { Metadata } from 'next'
+import { cache } from 'react'
 import { notFound }      from 'next/navigation'
 import Header            from '@/components/layout/Header'
 import AnnonceDetail     from '@/components/annonces/AnnonceDetail'
 import JsonLd            from '@/components/seo/JsonLd'
-import { normalizeApiBase } from '@/lib/apiBase'
 import { generateAnnonceMetadata } from '@/lib/seoHelpers'
 import { SITE_URL } from '@/types/seo.types'
+import { getListingDetail, getListingReviews, getSimilarListings, ListingNotFoundError } from '@/lib/data/listings'
 
-const API = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? 'https://kalico-nc.com/api')
-
-// ── Fetch serveur (shared between generateMetadata + page) ────
-async function fetchAnnonce(id: string) {
-  try {
-    const res = await fetch(`${API}/listings/${id}`, {
-      next: { revalidate: 60 }, // ISR : revalide toutes les 60 s
-    })
-    if (!res.ok) return null
-    const { data } = await res.json()
-    return data
-  } catch {
-    return null
-  }
-}
+const fetchAnnonce = cache(getListingDetail)
 
 // ── Open Graph dynamique ──────────────────────────────────────
 export async function generateMetadata(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<Metadata> {
   const { id } = await params
-  const annonce = await fetchAnnonce(id)
+  const annonce = await fetchAnnonce(id).catch(() => null)
   if (!annonce) {
     return {
       title: 'Annonce introuvable | Kalico',
@@ -44,13 +31,13 @@ export async function generateMetadata(
 
   return generateAnnonceMetadata({
     id:          annonce.id,
-    titre:       annonce.titre,
+    titre:       annonce.title,
     description: annonce.description,
-    prix:        annonce.prix,
+    prix:        annonce.price,
     commune:     annonce.commune_name ?? '',
     categorie:   annonce.category_name ?? '',
-    images:      annonce.images ?? [],
-    user:        { prenom: annonce.user?.prenom ?? '', verifie: !!annonce.user?.verifie },
+    images:      annonce.images,
+    user:        { prenom: annonce.seller.first_name, verifie: annonce.seller.email_verified || annonce.seller.phone_verified },
     created_at:  annonce.created_at ?? '',
     updated_at:  annonce.updated_at ?? '',
   })
@@ -61,27 +48,36 @@ export default async function ListingDetailPage(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const annonce = await fetchAnnonce(id)
-  if (!annonce) notFound()
+  let annonce
+  try {
+    annonce = await fetchAnnonce(id)
+  } catch (error) {
+    if (error instanceof ListingNotFoundError) notFound()
+    throw error
+  }
+  const [reviews, similarListings] = await Promise.all([
+    getListingReviews(annonce.seller.id).catch(() => []),
+    getSimilarListings(annonce).catch(() => []),
+  ])
 
   // JSON-LD schema.org Product pour le référencement Google Shopping
   const jsonLdData: Record<string, unknown>[] = [
     {
       '@context': 'https://schema.org',
       '@type':    'Product',
-      name:        annonce.titre,
+      name:        annonce.title,
       description: annonce.description?.slice(0, 300),
-      image:       annonce.images?.map((i: any) => i.url) ?? [],
+      image:       annonce.images.map((image) => image.url),
       url:         `${SITE_URL}/annonces/${annonce.id}`,
-      ...(annonce.prix && {
+      ...(annonce.price && {
         offers: {
           '@type':       'Offer',
-          price:          annonce.prix,
+          price:          annonce.price,
           priceCurrency: 'XPF',
           availability:  'https://schema.org/InStock',
           seller: {
             '@type': 'Person',
-            name:    annonce.user?.prenom ?? 'Vendeur',
+            name:    annonce.seller.first_name,
           },
         },
       }),
@@ -92,7 +88,7 @@ export default async function ListingDetailPage(
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Accueil',    item: SITE_URL },
         { '@type': 'ListItem', position: 2, name: 'Annonces',   item: `${SITE_URL}/annonces` },
-        { '@type': 'ListItem', position: 3, name: annonce.titre, item: `${SITE_URL}/annonces/${annonce.id}` },
+        { '@type': 'ListItem', position: 3, name: annonce.title, item: `${SITE_URL}/annonces/${annonce.id}` },
       ],
     },
   ]
@@ -101,8 +97,7 @@ export default async function ListingDetailPage(
     <>
       <JsonLd data={jsonLdData} />
       <Header />
-      {/* AnnonceDetail est un Client Component — il reçoit les données prefetchées */}
-      <AnnonceDetail initialData={annonce} id={id} />
+      <AnnonceDetail listing={annonce} reviews={reviews} similarListings={similarListings} />
     </>
   )
 }

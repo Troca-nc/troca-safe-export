@@ -1,5 +1,5 @@
 import { FALLBACK_CATEGORIES } from '@/lib/categoryCatalog'
-import type { ListingProvince, ListingSearchItem, ListingsMetadata } from '@/types/listings'
+import type { ListingDetail, ListingProvince, ListingReview, ListingSearchItem, ListingsMetadata } from '@/types/listings'
 
 const baseDate = '2026-09-30'
 
@@ -87,3 +87,63 @@ export const demoZonesByCommune: Record<string, string[]> = {
   dumbea: ['Dumbéa-sur-Mer', 'Koutio'],
   'mont-dore': ['Boulari', 'La Coulée'],
 }
+
+export const demoListingDetails: Record<string, ListingDetail> = Object.fromEntries(
+  demoListings.map((listing, index) => [listing.id, {
+    id: listing.id,
+    title: listing.title,
+    price: listing.price,
+    price_negotiable: listing.price_negotiable,
+    is_free: listing.is_free,
+    description: index === 0
+      ? 'Vélo urbain confortable et fiable, entièrement révisé avant la mise en ligne. Freins, pneus et transmission contrôlés. Idéal pour les trajets quotidiens à Nouméa.'
+      : `Cette annonce de démonstration présente ${listing.title.toLocaleLowerCase('fr-FR')}. Contactez le vendeur pour obtenir davantage de détails.`,
+    condition: listing.condition ?? 'good',
+    status: listing.id === 'demo-listing-troc-paddle' ? 'sold' : 'active',
+    is_featured: listing.is_featured,
+    is_urgent: listing.is_urgent,
+    views_count: 48 + index * 7,
+    favorites_count: 3 + index,
+    commune_id: listing.commune_id,
+    commune_name: listing.commune_name,
+    commune_slug: listing.commune_name?.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    category_name: listing.category_name,
+    category_slug: listing.category_slug,
+    category_icon: listing.category_icon,
+    published_at: listing.published_at,
+    created_at: listing.published_at,
+    updated_at: listing.published_at,
+    contre_quoi: listing.contre_quoi,
+    is_troc: Boolean(listing.is_troc),
+    metadata: index === 0 ? { marque: 'Riverside', modele: 'City 520', annee: 2023, quartier_zone: 'Magenta' } : listing.metadata ?? {},
+    images: [],
+    seller: {
+      id: `demo-seller-${index + 1}`,
+      first_name: listing.seller_prenom ?? 'Vendeur (démo)',
+      last_name: listing.seller_nom ?? '',
+      avatar_url: listing.seller_avatar,
+      is_pro: Boolean(listing.is_pro || listing.seller_is_pro),
+      pro_verified: Boolean(listing.seller_pro_verified),
+      rating: listing.seller_note_moyenne,
+      reviews_count: listing.seller_nb_avis,
+      listings_count: 2 + (index % 4),
+      member_since: '2023-04-15T00:00:00.000Z',
+      commune_name: listing.commune_name,
+      province_name: listing.province_id === 'demo-province-iles' ? 'Province des Îles' : listing.province_id === 'demo-province-nord' ? 'Province Nord' : 'Province Sud',
+      email_verified: true,
+      phone_verified: Boolean(listing.seller_phone_verified),
+      trust_score: 82,
+      is_online: index % 3 === 0,
+      last_seen_label: index % 3 === 0 ? null : 'Vu récemment',
+      response_time_label: 'Répond généralement dans la journée',
+    },
+    is_favorited: false,
+  } satisfies ListingDetail]),
+)
+
+export const demoListingReviews: Record<string, ListingReview[]> = Object.fromEntries(
+  Object.values(demoListingDetails).map((listing) => [listing.seller.id, [
+    { id: `${listing.seller.id}-review-1`, rating: 5, comment: 'Échange simple et agréable, article conforme à la description.', created_at: '2026-09-18T08:00:00.000Z', author_name: 'Camille (démo)' },
+    { id: `${listing.seller.id}-review-2`, rating: 4, comment: 'Vendeur réactif et rendez-vous ponctuel.', created_at: '2026-08-04T10:30:00.000Z', author_name: 'Jo (démo)' },
+  ]]),
+)

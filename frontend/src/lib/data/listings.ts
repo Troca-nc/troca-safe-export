@@ -1,4 +1,4 @@
-import { listingsApi, metaApi } from '@/lib/api'
+import { listingsApi, messagesApi, metaApi, usersApi } from '@/lib/api'
 import { FALLBACK_CATEGORIES, normalizeCategoryTree, type CategoryNode } from '@/lib/categoryCatalog'
 import { demoOr } from '@/lib/demo'
 import type {
@@ -8,7 +8,18 @@ import type {
   ListingSearchParams,
   ListingsMetadata,
   ListingsPageResult,
+  ListingDetail,
+  ListingDetailImage,
+  ListingReview,
+  ListingSeller,
 } from '@/types/listings'
+
+export class ListingNotFoundError extends Error {
+  constructor() {
+    super('Listing not found')
+    this.name = 'ListingNotFoundError'
+  }
+}
 
 type UnknownRecord = Record<string, unknown>
 
@@ -194,4 +205,135 @@ export async function getListingZones(communeSlug: string): Promise<string[]> {
       return Array.isArray(data.zones) ? data.zones.map(asText).filter(Boolean) : []
     },
   )
+}
+
+function normalizeImage(value: unknown, index: number): ListingDetailImage | null {
+  const image = asRecord(value)
+  const url = asText(image.url ?? image.medium_url ?? image.original_url)
+  if (!url) return null
+  return { id: asText(image.id) || String(index), url, thumbnail_url: asText(image.thumbnail_url) || null, medium_url: asText(image.medium_url) || null }
+}
+
+function normalizeSeller(value: unknown): ListingSeller {
+  const seller = asRecord(value)
+  return {
+    id: asText(seller.id) || String(seller.id ?? ''),
+    first_name: asText(seller.prenom ?? seller.first_name) || 'Vendeur',
+    last_name: asText(seller.nom ?? seller.last_name),
+    avatar_url: asText(seller.avatar_url ?? seller.avatar) || null,
+    is_pro: Boolean(seller.is_pro),
+    pro_verified: Boolean(seller.pro_verified ?? seller.is_pro_verified),
+    rating: asOptionalNumber(seller.note_moyenne ?? seller.rating),
+    reviews_count: asOptionalNumber(seller.nb_avis ?? seller.reviews_count),
+    listings_count: asOptionalNumber(seller.nb_annonces ?? seller.listings_count),
+    member_since: asText(seller.created_at ?? seller.member_since) || null,
+    commune_name: asText(seller.seller_commune_name ?? seller.commune_name) || null,
+    province_name: asText(seller.seller_province_name ?? seller.province_name) || null,
+    email_verified: Boolean(seller.email_verified),
+    phone_verified: Boolean(seller.telephone_verifie ?? seller.phone_verified),
+    trust_score: asOptionalNumber(seller.trust_score),
+    is_online: Boolean(seller.is_online),
+    last_seen_label: asText(seller.last_seen_label) || null,
+    response_time_label: asText(seller.avg_response_time_label ?? seller.response_time_label) || null,
+  }
+}
+
+function normalizeDetail(value: unknown): ListingDetail {
+  const item = asRecord(value)
+  const id = asText(item.id) || String(item.id ?? '')
+  const title = asText(item.title ?? item.titre)
+  if (!id || !title) throw new ListingNotFoundError()
+  const images = Array.isArray(item.images) ? item.images.map(normalizeImage).filter((image): image is ListingDetailImage => Boolean(image)) : []
+  return {
+    id, title,
+    price: asOptionalNumber(item.price ?? item.prix),
+    price_negotiable: Boolean(item.price_negotiable ?? item.is_negotiable),
+    is_free: Boolean(item.is_free),
+    description: asText(item.description),
+    condition: asText(item.condition),
+    status: asText(item.status) || 'active',
+    is_featured: Boolean(item.is_featured),
+    is_urgent: Boolean(item.is_urgent),
+    views_count: asNumber(item.nb_vues ?? item.views_count),
+    favorites_count: asNumber(item.nb_favoris ?? item.favorites_count),
+    commune_id: asText(item.commune_id) || null,
+    commune_name: asText(item.commune_name) || null,
+    commune_slug: asText(item.commune_slug) || null,
+    category_id: asText(item.category_id) || null,
+    category_name: asText(item.category_name) || null,
+    category_slug: asText(item.category_slug) || null,
+    category_icon: asText(item.category_icon) || null,
+    published_at: asText(item.published_at) || undefined,
+    created_at: asText(item.created_at) || undefined,
+    updated_at: asText(item.updated_at) || undefined,
+    contre_quoi: asText(item.contre_quoi) || null,
+    is_troc: Boolean(item.is_troc),
+    metadata: asRecord(item.metadata),
+    images,
+    seller: normalizeSeller(item.user ?? item.author ?? item.seller),
+    is_favorited: Boolean(item.is_favorited),
+  }
+}
+
+function responseStatus(error: unknown) {
+  return asNumber(asRecord(asRecord(error).response).status)
+}
+
+export async function getListingDetail(id: string): Promise<ListingDetail> {
+  return demoOr(
+    async () => {
+      const { demoListingDetails } = await import('@/demo/fixtures/listings')
+      const listing = demoListingDetails[id]
+      if (!listing) throw new ListingNotFoundError()
+      return listing
+    },
+    async () => {
+      try {
+        const response = await listingsApi.getById(id)
+        return normalizeDetail(asRecord(response.data).data)
+      } catch (error) {
+        if (responseStatus(error) === 404) throw new ListingNotFoundError()
+        throw error
+      }
+    },
+  )
+}
+
+export async function getListingReviews(sellerId: string): Promise<ListingReview[]> {
+  if (!sellerId) return []
+  return demoOr(
+    async () => (await import('@/demo/fixtures/listings')).demoListingReviews[sellerId] ?? [],
+    async () => {
+      const response = await usersApi.getReviews(sellerId)
+      const payload = asRecord(response.data)
+      const rows = Array.isArray(payload.data) ? payload.data : []
+      return rows.map((value, index) => {
+        const review = asRecord(value)
+        return {
+          id: asText(review.id) || String(index),
+          rating: asNumber(review.note ?? review.rating),
+          comment: asText(review.commentaire ?? review.comment) || null,
+          created_at: asText(review.created_at) || undefined,
+          author_name: asText(review.auteur_prenom ?? review.author_name) || 'Membre Kalico',
+          author_avatar: asText(review.auteur_avatar ?? review.author_avatar) || null,
+        }
+      })
+    },
+  )
+}
+
+export async function getSimilarListings(listing: ListingDetail): Promise<ListingSearchItem[]> {
+  const page = await getListingsPage({ category: listing.category_slug || undefined, limit: 8, sort: 'date' })
+  return page.data.filter((item) => item.id !== listing.id).slice(0, 4)
+}
+
+export async function contactListingSeller(listingId: string, message: string) {
+  const response = await messagesApi.startConversation({ annonce_id: Number(listingId), message })
+  const payload = asRecord(response.data)
+  const data = asRecord(payload.data)
+  return asText(data.conversation_id ?? data.conversationId ?? payload.conversation_id ?? payload.conversationId ?? payload.id)
+}
+
+export async function reportListing(listingId: string, reason: string, comment: string) {
+  await listingsApi.report(listingId, { reason, comment })
 }

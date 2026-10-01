@@ -21,10 +21,64 @@ import {
   Store,
   TrendingUp,
 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ShieldCheck, Star } from 'lucide-react'
+import { useState } from 'react'
+import type { ListingDetail as TypedListingDetail, ListingReview } from '@/types/listings'
+import ReviewSummary from '@/components/reviews/ReviewSummary'
 
 type TrustState = {
   label: string
   className: string
+}
+
+const DETAIL_CONDITIONS: Record<string, string> = { new: 'Neuf', like_new: 'Comme neuf', good: 'Bon état', fair: 'État correct', for_parts: 'Pour pièces' }
+
+export function DetailGallery({ listing }: { listing: TypedListingDetail }) {
+  const [active, setActive] = useState(0)
+  const images = listing.images
+  const move = (step: number) => setActive((current) => (current + step + images.length) % images.length)
+  return (
+    <section aria-label="Photos de l’annonce" className="space-y-3">
+      <div className="relative aspect-[16/10] overflow-hidden rounded-block border border-warm-border bg-cream-sunken">
+        {images.length ? <ListingImageComponent src={images[active]?.medium_url || images[active]?.url} alt={`${listing.title} — photo ${active + 1}`} priority sizes="(max-width: 1024px) 100vw, 65vw" /> : <div className="motif-tressage flex h-full items-center justify-center"><span className="font-display text-8xl text-ink/20">{listing.category_name?.charAt(0) || 'A'}</span></div>}
+        {images.length > 1 ? <><button type="button" onClick={() => move(-1)} aria-label="Photo précédente" className="absolute left-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-cream-surface/95 text-ink shadow-card"><ChevronLeft /></button><button type="button" onClick={() => move(1)} aria-label="Photo suivante" className="absolute right-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-cream-surface/95 text-ink shadow-card"><ChevronRight /></button></> : null}
+      </div>
+      {images.length > 1 ? <div className="flex gap-2 overflow-x-auto pb-1">{images.map((image, index) => <button key={image.id} type="button" onClick={() => setActive(index)} aria-label={`Afficher la photo ${index + 1}`} className={`relative h-[82px] w-[104px] shrink-0 overflow-hidden rounded-control border-2 ${active === index ? 'border-accent' : 'border-transparent'}`}><ListingImageComponent src={image.thumbnail_url || image.url} alt="" sizes="104px" /></button>)}</div> : null}
+    </section>
+  )
+}
+
+function metadataLabel(key: string) {
+  return key.replace(/^metadata\./, '').replaceAll('_', ' ').replace(/^./, (letter) => letter.toUpperCase())
+}
+
+function metadataValue(value: unknown) {
+  if (typeof value === 'boolean') return value ? 'Oui' : 'Non'
+  if (Array.isArray(value)) return value.join(', ')
+  return String(value)
+}
+
+export function DetailInformation({ listing }: { listing: TypedListingDetail }) {
+  const characteristics = Object.entries(listing.metadata).filter(([, value]) => value !== null && value !== undefined && value !== '').slice(0, 8)
+  const specs = [
+    ['État', DETAIL_CONDITIONS[listing.condition] || listing.condition || 'Non précisé'],
+    ['Localisation', listing.commune_name || 'Nouvelle-Calédonie'],
+    ['Catégorie', listing.category_name || 'Annonce'],
+    ['Échange', listing.is_troc ? listing.contre_quoi || 'Propositions bienvenues' : 'Non'],
+  ]
+  return <div className="space-y-8">
+    <div className="grid gap-3 sm:grid-cols-2">{specs.map(([label, value]) => <div key={label} className="rounded-card border border-warm-border bg-cream-surface p-4"><p className="text-caption uppercase tracking-wider text-ink/50">{label}</p><p className="mt-1 font-semibold text-ink">{value}</p></div>)}</div>
+    <section><h2 className="font-display text-h3 text-ink">Description</h2><p className="mt-4 whitespace-pre-line text-body text-ink/75">{listing.description || 'Le vendeur n’a pas ajouté de description.'}</p></section>
+    {characteristics.length ? <section><h2 className="font-display text-h3 text-ink">Caractéristiques</h2><dl className="mt-4 divide-y divide-warm-border rounded-card border border-warm-border bg-cream-surface px-5">{characteristics.map(([key, value]) => <div key={key} className="grid grid-cols-2 gap-4 py-3 text-body-sm"><dt className="text-ink/55">{metadataLabel(key)}</dt><dd className="text-right font-medium text-ink">{metadataValue(value)}</dd></div>)}</dl></section> : null}
+  </div>
+}
+
+export function DetailSecurity({ onReport }: { onReport: () => void }) {
+  return <section className="rounded-card border border-info/30 bg-info/10 p-5"><div className="flex gap-3"><ShieldCheck className="h-6 w-6 shrink-0 text-info-text" /><div><h3 className="font-semibold text-ink">Échangez en toute sécurité</h3><p className="mt-2 text-body-sm text-ink/65">Privilégiez un lieu public, vérifiez l’article avant de payer et restez dans la messagerie Kalico.</p><button type="button" onClick={onReport} className="mt-3 text-label-sm text-alert-error underline underline-offset-4">Signaler cette annonce</button></div></div></section>
+}
+
+export function DetailReviews({ reviews, rating, count }: { reviews: ListingReview[]; rating?: number | null; count?: number | null }) {
+  return <section className="space-y-4"><div className="flex items-end justify-between gap-4"><div><p className="text-eyebrow uppercase text-info-text">Confiance</p><h2 className="mt-1 font-display text-h3 text-ink">Avis sur le vendeur</h2></div><ReviewSummary rating={rating} count={count} /></div>{reviews.length ? <div className="grid gap-3 sm:grid-cols-2">{reviews.slice(0, 4).map((review) => <article key={review.id} className="rounded-card border border-warm-border bg-cream-surface p-5"><div className="flex justify-between gap-3"><p className="font-semibold text-ink">{review.author_name}</p><span className="flex gap-0.5">{Array.from({ length: 5 }).map((_, index) => <Star key={index} className={`h-4 w-4 ${index < review.rating ? 'fill-accent text-accent' : 'text-warm-border'}`} />)}</span></div>{review.comment ? <p className="mt-3 text-body-sm text-ink/70">{review.comment}</p> : null}</article>)}</div> : <p className="rounded-card border border-dashed border-warm-border p-6 text-body-sm text-ink/60">Ce vendeur n’a pas encore reçu d’avis.</p>}</section>
 }
 
 type ListingImageItem = {
