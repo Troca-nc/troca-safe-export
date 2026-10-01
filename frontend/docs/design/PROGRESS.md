@@ -8,7 +8,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [00](specs/00-fondations.md) | Fondations : tokens et composants de base | /dev/ui (galerie) | Fait (fusionnée) | [#215](https://github.com/Troca-nc/troca-safe-export/pull/215) |
 | [01](specs/01-layout.md) | En-tête, pied de page, onglets de compte | toutes | Fait (fusionnée) | [#216](https://github.com/Troca-nc/troca-safe-export/pull/216) |
 | [02](specs/02-accueil.md) | Accueil | / | Fait (fusionnée) | [#217](https://github.com/Troca-nc/troca-safe-export/pull/217) |
-| [03](specs/03-annonces.md) | Liste des annonces | /annonces | À relire | — |
+| [03](specs/03-annonces.md) | Liste des annonces | /annonces | À relire | [#218](https://github.com/Troca-nc/troca-safe-export/pull/218) |
 | [04](specs/04-annonce.md) | Fiche annonce | /annonces/[id] | À faire | — |
 | [05](specs/05-connexion.md) | Connexion | /connexion, | À faire | — |
 | [06](specs/06-inscription.md) | Inscription | /inscription | À faire | — |
