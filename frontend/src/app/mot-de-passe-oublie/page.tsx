@@ -1,143 +1,52 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ArrowLeft, Mail, Phone, CheckCircle2, AlertCircle } from 'lucide-react'
-import Header from '@/components/layout/Header'
+import { ArrowLeft, CheckCircle2, Send } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Field'
+import FeedbackAlert from '@/components/ui/FeedbackAlert'
+import { AuthPageShell } from '@/components/auth/AuthPageShell'
 import TurnstileChallenge from '@/components/auth/TurnstileChallenge'
-import { authApi } from '@/lib/api'
+import { describeAuthError, requestPasswordReset } from '@/lib/data/auth'
+import type { AuthErrorPresentation } from '@/types/auth'
 
-const schema = z.object({
-  identifier: z.string().trim().min(3, 'Entrez votre email ou numéro de téléphone'),
-})
-
+const schema = z.object({ identifier: z.string().trim().min(3, 'Saisissez votre e-mail ou votre numéro de téléphone.') })
 type FormData = z.infer<typeof schema>
 
 export default function ForgotPasswordPage() {
-  const [sent, setSent] = useState(false)
-  const [error, setError] = useState('')
+  const [sentTo, setSentTo] = useState('')
+  const [failure, setFailure] = useState<AuthErrorPresentation | null>(null)
+  const [lastIdentifier, setLastIdentifier] = useState('')
   const [turnstileToken, setTurnstileToken] = useState('')
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || ''
-  const turnstileEnabled = Boolean(turnstileSiteKey && !turnstileSiteKey.startsWith('CHANGEME'))
+  const turnstileEnabled = Boolean(turnstileSiteKey && !turnstileSiteKey.toLowerCase().includes('changeme'))
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({ resolver: zodResolver(schema) })
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    watch,
-    getValues,
-  } = useForm<FormData>({ resolver: zodResolver(schema) })
-  const identifierValue = watch('identifier') || ''
-  const looksLikePhone = /^(?:\+|0)?[\d\s().-]+$/.test(identifierValue.trim()) && !identifierValue.includes('@')
-  const LeadingIcon = looksLikePhone ? Phone : Mail
-
-  const onSubmit = async ({ identifier }: FormData) => {
-    setError('')
+  async function submit({ identifier }: FormData) {
+    setFailure(null)
+    setLastIdentifier(identifier)
+    if (turnstileEnabled && !turnstileToken) {
+      setFailure({ kind: 'unknown', message: 'Merci de compléter la vérification anti-bot.', retryable: false })
+      return
+    }
     try {
-      if (turnstileEnabled && !turnstileToken) {
-        setError('Veuillez compléter la vérification anti-bot.')
-        return
-      }
-
-      await authApi.forgotPassword(identifier, turnstileToken || undefined)
-      setSent(true)
-    } catch {
-      // On affiche toujours un message neutre pour éviter l'énumération de comptes.
-      setSent(true)
+      await requestPasswordReset(identifier, turnstileToken || undefined)
+      setSentTo(identifier)
+    } catch (error) {
+      setFailure(describeAuthError(error))
     }
   }
 
-  return (
-    <>
-      <Header />
-      <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md">
-          <Link href="/connexion" className="inline-flex items-center gap-1.5 text-sm text-night/50 hover:text-kalico-blue mb-6 transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Retour à la connexion
-          </Link>
-
-          {!sent ? (
-            <div className="card p-8">
-              <div className="w-12 h-12 bg-kalico-blue/10 rounded-2xl flex items-center justify-center mb-5">
-                <LeadingIcon className="w-6 h-6 text-kalico-blue" />
-              </div>
-              <h1 className="font-display font-bold text-2xl text-night mb-2">Mot de passe oublié ?</h1>
-              <p className="text-night/50 text-sm mb-6">
-                Entrez votre email ou votre numéro de téléphone. Si le numéro est vérifié, nous privilégierons le SMS ; sinon, nous enverrons un email de réinitialisation valable 1 heure.
-              </p>
-
-              {error && (
-                <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  {error}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-night mb-1.5">Email ou téléphone</label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                      {looksLikePhone ? (
-                        <Phone className="w-4 h-4 text-night/35" />
-                      ) : (
-                        <Mail className="w-4 h-4 text-night/35" />
-                      )}
-                    </div>
-                    <input
-                      {...register('identifier')}
-                      type="text"
-                      placeholder="vous@exemple.nc ou +687 12 34 56"
-                      autoComplete="off"
-                      inputMode="text"
-                      className={`input pl-10 ${errors.identifier ? 'border-red-400' : ''}`}
-                    />
-                  </div>
-                  {errors.identifier && <p className="text-red-500 text-xs mt-1">{errors.identifier.message}</p>}
-                </div>
-
-                <div className="rounded-2xl border border-night/10 bg-sand/40 p-4">
-                  <p className="text-sm font-semibold text-night">Vérification anti-bot</p>
-                  <p className="mt-1 text-xs text-night/55">
-                    Cette étape protège la réinitialisation sans gêner les utilisateurs réels.
-                  </p>
-                  <div className="mt-3">
-                    <TurnstileChallenge action="forgot_password" label="Réinitialisation" onTokenChange={setTurnstileToken} />
-                  </div>
-                </div>
-
-                <button type="submit" disabled={isSubmitting} className="btn-primary w-full py-3 justify-center">
-                  {isSubmitting ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Envoi...
-                    </span>
-                  ) : 'Envoyer le lien'}
-                </button>
-              </form>
-            </div>
-          ) : (
-            <div className="card p-8 text-center">
-              <div className="w-16 h-16 bg-jungle/10 rounded-full flex items-center justify-center mx-auto mb-5">
-                <CheckCircle2 className="w-8 h-8 text-jungle" />
-              </div>
-              <h2 className="font-display font-bold text-xl text-night mb-2">Message envoyé !</h2>
-              <p className="text-night/55 text-sm mb-6 leading-relaxed">
-                Si un compte Kalico est associé à <strong>{getValues('identifier')}</strong>, vous recevrez un lien de réinitialisation par SMS ou par email selon vos coordonnées vérifiées.
-              </p>
-              <p className="text-xs text-night/35 mb-6">
-                Vérifiez vos spams si vous ne recevez rien. Le lien expire dans 1 heure.
-              </p>
-              <Link href="/connexion" className="btn-primary justify-center py-2.5">
-                Retour à la connexion
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
-    </>
-  )
+  return <AuthPageShell>
+    {sentTo ? <div className="text-center"><span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-reef/15 text-reef-text"><CheckCircle2 className="h-8 w-8" /></span><p className="mt-6 text-eyebrow uppercase text-reef-text">Demande envoyée</p><h1 className="mt-3 font-display text-h1-form text-ink">Consultez vos messages.</h1><p className="mt-5 text-body text-ink/65">Si un compte Kalico est associé à <strong className="text-ink">{sentTo}</strong>, vous recevrez un lien par e-mail ou SMS selon vos coordonnées vérifiées.</p><p className="mt-3 text-body-sm text-ink/50">Le lien expire après une heure. Pensez à vérifier vos courriers indésirables.</p><Link href="/connexion" className="k-button k-button-primary mt-8 inline-grid"><ArrowLeft className="h-4 w-4" />Retour à la connexion</Link></div> : <>
+      <p className="text-eyebrow uppercase text-accent-text">Accès au compte</p><h1 className="mt-3 font-display text-h1-form text-ink">Mot de passe oublié ?</h1><p className="mt-4 text-body text-ink/65">Indiquez votre e-mail ou votre téléphone. Nous vous enverrons les instructions de réinitialisation si un compte correspondant existe.</p>
+      {failure ? <div className="mt-6"><FeedbackAlert tone="error" title="Envoi impossible"><p>{failure.message}</p>{failure.retryable && lastIdentifier ? <Button variant="secondary" compact className="mt-3" onClick={() => void submit({ identifier: lastIdentifier })}>Réessayer</Button> : null}</FeedbackAlert></div> : null}
+      <form onSubmit={handleSubmit(submit)} className="mt-8 space-y-5" noValidate><Input {...register('identifier')} label="E-mail ou téléphone" type="text" placeholder="vous@exemple.nc ou +687 00 00 00" autoComplete="username" error={errors.identifier?.message} hint="Nous ne confirmerons jamais publiquement si un compte existe." />{turnstileEnabled ? <TurnstileChallenge action="forgot_password" label="Vérification anti-bot" onTokenChange={setTurnstileToken} /> : null}<Button type="submit" loading={isSubmitting} loadingLabel="Envoi…" className="w-full"><Send className="h-4 w-4" />Envoyer les instructions</Button></form>
+      <Link href="/connexion" className="mt-6 inline-flex min-h-11 items-center gap-2 text-label text-accent-text hover:underline"><ArrowLeft className="h-4 w-4" />Retour à la connexion</Link>
+    </>}
+  </AuthPageShell>
 }

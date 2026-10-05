@@ -9,8 +9,8 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [01](specs/01-layout.md) | En-tête, pied de page, onglets de compte | toutes | Fait (fusionnée) | [#216](https://github.com/Troca-nc/troca-safe-export/pull/216) |
 | [02](specs/02-accueil.md) | Accueil | / | Fait (fusionnée) | [#217](https://github.com/Troca-nc/troca-safe-export/pull/217) |
 | [03](specs/03-annonces.md) | Liste des annonces | /annonces | Fait (fusionnée) | [#218](https://github.com/Troca-nc/troca-safe-export/pull/218) |
-| [04](specs/04-annonce.md) | Fiche annonce | /annonces/[id] | Inventaire | — |
-| [05](specs/05-connexion.md) | Connexion | /connexion, | À faire | — |
+| [04](specs/04-annonce.md) | Fiche annonce | /annonces/[id] | Fait (fusionnée) | [#219](https://github.com/Troca-nc/troca-safe-export/pull/219) |
+| [05](specs/05-connexion.md) | Connexion | /connexion, /mot-de-passe-oublie | À relire | — |
 | [06](specs/06-inscription.md) | Inscription | /inscription | À faire | — |
 | [07](specs/07-mon-compte.md) | Mon compte : vue d’ensemble | /profil | À faire | — |
 | [08](specs/08-compte-particulier.md) | Compte particulier : annonces, coups de cœur, alertes, offres | /profil/annonces, | À faire | — |
@@ -278,7 +278,7 @@ Nouveaux fichiers prévus : `src/types/home.ts`, `src/lib/data/home.ts` et `src/
 - Largeurs obligatoires : 1440, 1024, 768 et 390 px. La grille annonces passe de 4 à 2 puis 1 colonne ; les blocs héros/alertes passent en une colonne ; communes et raccourcis restent défilables ou se replient sans texte coupé.
 - Comparaison finale section par section avec la maquette, avec contrôle du header/footer partagés et absence de débordement horizontal.
 
-### QUESTIONS avant code
+### Décisions validées avant code
 
 1. Valider l'ajout des trois nouveaux fichiers de domaine `home` (`types`, `lib/data`, `demo/fixtures`) nécessaires aux règles de données de la fiche.
 2. Valider le remplacement des trois fausses alertes issues de `renderVals()` par un aperçu purement fonctionnel et non personnalisé en trois étapes, puisque la fiche ne demande aucune API d'alertes sur l'accueil.
@@ -501,3 +501,93 @@ Les fixtures de la fiche 03 ne contiennent que les cartes de recherche. Après v
 - `node scripts/check-design.mjs --changed` : 10 fichiers, zéro erreur, zéro avertissement.
 - `git diff --check` : réussi.
 - Recette HTTP locale en mode démo : annonce active 200 avec titre, annonce vendue 200 avec bandeau et identifiant inconnu avec copie 404 rendue. La route de démonstration a été ouverte dans le navigateur intégré sur le port 3104 ; le contrôle programmatique du navigateur n'étant pas exposé dans cette session, la comparaison visuelle aux quatre largeurs reste à confirmer dans la revue humaine avant fusion.
+
+## 05 — Inventaire (étape 1, sans code)
+
+### Base et références
+
+Branche `design/05-connexion`, créée depuis `origin/main` au commit de fusion de la fiche 04 `4d8ef7a896dfa05e8ef14fa08e58b7675e409bd6`. Aucun commit, branche distante ou PR `design(05)` n'a été trouvé. Références lues : fiche `05-connexion.md`, `DONNEES-DEMO.md`, `DESIGN.md` §4.1, §4.2 et §5.2, et l'onglet « Se connecter » de `Connexion v2.dc.html`.
+
+La cible est une page pleine hauteur en deux volets égaux : marque sombre à gauche, formulaire crème à droite. Sous `lg`, le volet marque disparaît et le formulaire occupe toute la largeur. Les valeurs produites par `renderVals()` dans la maquette ne seront pas copiées comme données.
+
+### Fichiers existants trouvés
+
+- `src/app/connexion/page.tsx` est un composant serveur de 26 lignes qui lit `next`, `redirect` ou `returnUrl`, puis délègue tout le rendu à `src/app/connexion/ConnexionClient.tsx`. Ce dernier fichier, non listé par la fiche, contient les 460 lignes de l'interface et du comportement réels.
+- `ConnexionClient.tsx` présente actuellement le formulaire à gauche et un panneau clair à droite dans une grille 45/55. Le formulaire est progressif (email, puis mot de passe) alors que la maquette montre les deux champs ensemble. Il n'a ni option « rester connecté » ni connexion SMS. Le lien « Mot de passe oublié ? » pointe vers `/reset-password`, route inexistante, au lieu de `/mot-de-passe-oublie`.
+- Le même composant appelle `useAuthStore.login`, importe directement les comptes de `src/lib/demoApi.ts`, interprète les erreurs avec des comparaisons de chaînes, gère Turnstile, Google si configuré, le retour après connexion et le compte démo. Il contient aussi des couleurs/rayons arbitraires, `bg-white`, plusieurs textes sous 15 px et des animations CSS locales.
+- `src/components/auth/AuthMapPanel.tsx` est un panneau de marque sombre existant, mais beaucoup plus dense que la maquette et encore fondé sur les anciens tokens/couleurs arbitraires. Il peut être simplifié et réutilisé comme volet gauche commun aux parcours connexion/inscription.
+- `src/components/auth/TurnstileChallenge.tsx` gère correctement le chargement, l'erreur, l'expiration et la suppression du widget, mais utilise encore des classes historiques et des textes 11/12 px. Il doit conserver strictement son contrat et son chargement externe.
+- `src/components/auth/SocialAuthButtons.tsx` porte les flux Google/Apple réels. La page n'affiche actuellement Google que lorsqu'il est configuré. Aucun changement de ce flux n'est requis par la fiche.
+- `src/components/auth/AuthRequiredModal.tsx` est partagé par les actions nécessitant une connexion et n'a pas à être modifié pour cette page.
+- `src/app/mot-de-passe-oublie/page.tsx`, route explicitement visée par la fiche mais fichier absent de sa liste, appelle directement `authApi.forgotPassword`. Il préserve déjà le message neutre anti-énumération, détecte email/téléphone et gère Turnstile, envoi et succès, mais utilise l'ancien design et n'offre pas de bouton Réessayer après une erreur de réseau.
+- `src/app/mot-de-passe-oublie/reset/page.tsx` est la destination du lien envoyé et reste hors périmètre : la fiche ne cite pas cette route.
+
+### Composants par section
+
+| Section | Réutilisation | Intervention prévue après validation |
+| --- | --- | --- |
+| 1. Volet marque sombre | `AuthMapPanel`, logo `/brand/kalico1.svg`, motif tressage et tokens `ink-deep`/`cream`. | Réduire le panneau à la structure §5.2 : marque, halo/logo, accroche, trois preuves sans chiffres et devise. Animations limitées au tangage/halo, désactivées avec `prefers-reduced-motion`. |
+| 2. Formulaire | `Button`, `Field`/`Input`, `Checkbox`, `TurnstileChallenge`, `useAuthStore.login`, redirection existante. | Afficher email et mot de passe ensemble, bouton Afficher/Masquer, Turnstile réel, action primaire unique et état Envoi. Corriger le lien vers `/mot-de-passe-oublie`. Conserver le flux, les jetons, la vérification email et les redirections tels quels. |
+| 3. Inscription | Route `/inscription` existante. | Le segmenteur de la maquette devient une navigation réelle : « Se connecter » actif et « Créer un compte » vers `/inscription`, sans fusionner les deux parcours ni changer leur état. |
+| 4. Réassurance | Icônes et textes d'interface factuels. | Ligne séparée en pied du volet droit, sans compteur ni valeur vitrine. Le texte restera de l'interface statique conformément à `DONNEES-DEMO.md`. |
+| Mot de passe oublié | Page existante, endpoint neutre, Turnstile. | Appliquer la même coque deux volets, déplacer l'appel via `src/lib/data/auth.ts`, conserver le message anti-énumération, ajouter chargement final et erreur réseau avec Réessayer. La page de définition du nouveau mot de passe reste inchangée. |
+
+### Données et flux vérifiés
+
+| Besoin | Source actuelle | Décision d'inventaire |
+| --- | --- | --- |
+| Connexion email/mot de passe | `useAuthStore.login` → `authApi.login` → `POST /api/auth/login`; Turnstile et redirection déjà intégrés. | Conserver cet enchaînement. La future couche `src/lib/data/auth.ts` centralisera seulement la présentation des erreurs et l'accès aux informations de démonstration, sans modifier jetons, cookies ou redirections. |
+| Identifiants incorrects | Le backend renvoie une erreur d'authentification ; le client la déduit actuellement du texte. | Normaliser côté données en état typé `invalid_credentials`, sans changer la requête. |
+| Compte bloqué | `authAccountService` renvoie HTTP 429, code `LOGIN_LOCKED`, message et `retryAfter`. | Afficher un retour dédié à partir du code réel. Aucun minuteur inventé si `retryAfter` n'est pas exposé au client. |
+| Vérification email | Code `EMAIL_NOT_VERIFIED`, redirection existante vers `/verification-email`. | Conserver exactement ce comportement. |
+| Mot de passe oublié | `POST /api/auth/forgot-password` accepte email ou téléphone et renvoie toujours un message neutre. | Ajouter un adaptateur dans `src/lib/data/auth.ts`; ne jamais révéler si le compte existe. |
+| Démonstration | `src/lib/demoApi.ts` et `authStore` possèdent des comptes opérationnels historiques `@demo.kalico.nc`. | Ne pas dupliquer ni renommer ces comptes, car cela casserait le parcours démo. Le composant ne les importera plus directement ; l'adaptateur de données les masquera. |
+| Session persistante | Le refresh token est toujours posé dans un cookie sécurisé avec `maxAge`; l'access token reste en `sessionStorage`. Aucun paramètre `remember` n'existe dans le store ou l'API. | Ne pas créer une case à cocher sans effet. Un vrai choix demanderait de modifier le contrat d'authentification, interdit par la fiche. |
+| Connexion SMS | Les routes `/phone/send` et `/phone/verify` exigent déjà un utilisateur authentifié et servent à vérifier son numéro. Aucun endpoint de connexion sans mot de passe n'existe. | Ne pas brancher le bouton de maquette sur ces routes : ce serait un faux flux et une régression de sécurité. |
+
+### États et responsive à vérifier
+
+- Hydratation initiale : squelette aux dimensions du titre, des deux champs et des actions, sans remplacer le volet marque.
+- Envoi : bouton primaire stable avec spinner et libellé « Connexion… » ; pas de saut de largeur.
+- Identifiants incorrects : alerte associée au formulaire, focus géré et champs conservés.
+- Compte bloqué : message dédié issu de `LOGIN_LOCKED`.
+- Erreur réseau : message « Connexion impossible. Vérifiez votre réseau. » et bouton « Réessayer » rejouant la dernière soumission explicite.
+- Mot de passe oublié : état formulaire, envoi, succès neutre, erreur réseau avec Réessayer.
+- Largeurs 1440, 1024, 768 et 390 px ; deux volets à partir de `lg`, formulaire seul en dessous, aucun débordement ni action sous 44 px.
+- Toutes les animations du volet marque et les transitions non essentielles sont neutralisées avec `prefers-reduced-motion`.
+
+### QUESTIONS avant code
+
+1. Périmètre étendu à `ConnexionClient.tsx` et `mot-de-passe-oublie/page.tsx`; nouveaux fichiers de données, types et coque auth autorisés.
+2. Bouton de connexion SMS omis faute de flux public existant et sans changement serveur.
+3. Case « Rester connecté » omise, car elle serait sans effet avec le contrat de session actuel.
+4. Segmenteur traité comme navigation réelle entre `/connexion` et `/inscription`.
+
+### Résultat
+
+- Coque auth partagée en deux volets égaux à partir de `lg`, avec volet marque sombre, motif, logo animé, trois preuves factuelles et réassurance en pied. Sous `lg`, seul le formulaire est rendu.
+- Formulaire connexion aligné sur la maquette : e-mail et mot de passe simultanés, Afficher/Masquer, lien corrigé vers `/mot-de-passe-oublie`, Turnstile réel, action primaire unique, Google seulement s'il est configuré et accès démo existant conservé.
+- Flux d'authentification inchangé : `useAuthStore.login`, jetons, cookie, redirection après connexion, vérification e-mail et profils démo restent les sources effectives.
+- Couche `src/lib/data/auth.ts` pour la présentation typée des erreurs, le masquage des comptes démo et l'adaptateur mot de passe oublié. Les erreurs distinguent identifiants, blocage `LOGIN_LOCKED`, réseau et inconnu.
+- Route mot de passe oublié remise dans la même composition, avec message de succès neutre anti-énumération et Réessayer sur erreur réseau.
+- Squelettes finaux pour les deux routes ; chargement des boutons sans changement de largeur ; animations neutralisées sous `prefers-reduced-motion`.
+
+### Fichiers touchés
+
+- Routes : `src/app/connexion/ConnexionClient.tsx`, nouveaux `src/app/connexion/loading.tsx`, `src/app/mot-de-passe-oublie/loading.tsx`, et `src/app/mot-de-passe-oublie/page.tsx`.
+- Auth partagée : `src/components/auth/AuthMapPanel.tsx` et nouveau `AuthPageShell.tsx`.
+- Données et types : nouveaux `src/lib/data/auth.ts` et `src/types/auth.ts`.
+- Suivi : `docs/design/PROGRESS.md`.
+
+### Critères d'acceptation
+
+- [ ] Comparaison visuelle exacte avec la maquette à 1440 px : composition et dimensions codées selon §5.2, mais contrôle programmatique du navigateur indisponible dans cette session ; revue humaine requise.
+- [ ] Aucun débordement à 390 px : grille mobile et largeurs fluides codées, mais émulation visuelle exacte non exposée ; revue humaine requise.
+- [x] `check-design --changed` : 8 fichiers inspectés, zéro erreur, zéro avertissement.
+- [x] Aucune valeur de données produite par `renderVals()` recopiée ; uniquement textes d'interface statiques et capacités existantes.
+- [x] Aucun changement du flux d'authentification, du store, des jetons, des cookies, de l'API ou du serveur.
+- [x] Animations du volet marque désactivées par `prefers-reduced-motion`; squelettes utilisent déjà `motion-reduce:animate-none`.
+
+### Validation et écarts
+
+`npm run lint`, `tsc --noEmit`, le build Next.js de production (105 routes), `node scripts/check-design.mjs --changed` et `git diff --check` passent. Recette locale en mode démo sur le port 3105 : `/connexion` et `/mot-de-passe-oublie` répondent en HTTP 200. La connexion SMS et la case de persistance sont volontairement absentes selon validation humaine, car les afficher créerait des contrôles sans contrat fonctionnel. Aucun changement serveur ni production.
