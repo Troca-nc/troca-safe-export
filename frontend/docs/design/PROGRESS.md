@@ -10,8 +10,8 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [02](specs/02-accueil.md) | Accueil | / | Fait (fusionnée) | [#217](https://github.com/Troca-nc/troca-safe-export/pull/217) |
 | [03](specs/03-annonces.md) | Liste des annonces | /annonces | Fait (fusionnée) | [#218](https://github.com/Troca-nc/troca-safe-export/pull/218) |
 | [04](specs/04-annonce.md) | Fiche annonce | /annonces/[id] | Fait (fusionnée) | [#219](https://github.com/Troca-nc/troca-safe-export/pull/219) |
-| [05](specs/05-connexion.md) | Connexion | /connexion, /mot-de-passe-oublie | À relire | — |
-| [06](specs/06-inscription.md) | Inscription | /inscription | À faire | — |
+| [05](specs/05-connexion.md) | Connexion | /connexion, /mot-de-passe-oublie | Fait (fusionnée) | [#220](https://github.com/Troca-nc/troca-safe-export/pull/220) |
+| [06](specs/06-inscription.md) | Inscription | /inscription | À relire | — |
 | [07](specs/07-mon-compte.md) | Mon compte : vue d’ensemble | /profil | À faire | — |
 | [08](specs/08-compte-particulier.md) | Compte particulier : annonces, coups de cœur, alertes, offres | /profil/annonces, | À faire | — |
 | [09](specs/09-deposer.md) | Déposer une annonce | /deposer | À faire | — |
@@ -591,3 +591,103 @@ La cible est une page pleine hauteur en deux volets égaux : marque sombre à ga
 ### Validation et écarts
 
 `npm run lint`, `tsc --noEmit`, le build Next.js de production (105 routes), `node scripts/check-design.mjs --changed` et `git diff --check` passent. Recette locale en mode démo sur le port 3105 : `/connexion` et `/mot-de-passe-oublie` répondent en HTTP 200. La connexion SMS et la case de persistance sont volontairement absentes selon validation humaine, car les afficher créerait des contrôles sans contrat fonctionnel. Aucun changement serveur ni production.
+
+## 06 — Inventaire (étape 1, sans code)
+
+### Base et références
+
+Branche `design/06-inscription`, créée depuis `origin/main` au commit de fusion de la fiche 05 `d1dbda7a7c7329a5cbdf1cd172fd5e09f872a550`. Aucune branche ou PR `design/06-inscription` existante n'a été trouvée. Références lues : fiche `06-inscription.md`, `DONNEES-DEMO.md`, `DESIGN.md` §4 « Inscription » et `Inscription v2.dc.html`.
+
+La cible est un parcours en quatre étapes pour un particulier et cinq pour un professionnel, suivi d'un écran de bienvenue. Le volet marque de 560 px adapte son contenu à l'étape. Les valeurs de `renderVals()` de la maquette, notamment identité, téléphone, e-mail, RIDET, tarifs et code OTP, restent des exemples et ne seront pas recopiées comme données.
+
+### Fichiers existants trouvés
+
+- `src/app/inscription/page.tsx` est un composant client de 886 lignes. Il gère aujourd'hui trois étapes dans un ordre différent : Identifiants, Profil, Offre Pro. Il mélange rendu, validation, appels directs à `metaApi`, plans codés en dur et présentation des erreurs. Il ne vérifie pas le téléphone, ne rend pas l'écran Bienvenue et ne restaure aucun état après rechargement.
+- Le formulaire existant appelle `useAuthStore.register`, qui crée réellement la session, envoie l'e-mail de vérification et conserve les jetons. Le backend accepte identité, commune, téléphone et type de compte, mais pas la raison sociale, le RIDET ni le secteur.
+- `src/components/profil/PhoneVerification.tsx` et `src/hooks/usePhoneVerification.ts` implémentent déjà saisie du numéro, code à six chiffres, renvoi, délai et erreurs. Les routes `/api/phone/*` exigent une session authentifiée : le compte doit donc être créé avant l'étape OTP. Le hook peut être réutilisé sans modification de contrat ; le composant visuel doit être adapté au parcours.
+- `src/components/auth/AuthMapPanel.tsx` et `AuthPageShell.tsx`, livrés avec la fiche 05, fournissent la composition sombre/crème et les animations à mouvement réduit. Le panneau doit accepter le texte et les preuves de l'étape courante ; la coque d'inscription doit accepter un contenu plus large que le formulaire de connexion.
+- `src/components/auth/TurnstileChallenge.tsx` et `SocialAuthButtons.tsx` sont fonctionnels. Turnstile reste attaché à la création du compte. Le flux social ne peut pas garantir les informations et vérifications exigées par le stepper ; il sera conservé comme voie distincte vers l'onboarding existant, sans simuler les étapes.
+- `src/lib/data/auth.ts` centralise déjà les erreurs de connexion et le mot de passe oublié, mais aucune couche de données d'inscription n'existe. `src/lib/api.ts` expose les API nécessaires : inscription, communes, téléphone, profil Pro et abonnements.
+
+### Composants par section
+
+| Section | Réutilisation | Intervention prévue après validation |
+| --- | --- | --- |
+| 1. Volet marque | `AuthMapPanel`, logo, motif et tokens de la fiche 05. | Rendre titre, texte et preuves paramétrables selon l'étape, largeur de référence 560 px, animations neutralisées avec `prefers-reduced-motion`. |
+| 2. Stepper | Primitives `Button`, `Card` et tokens existants. | Créer un stepper accessible : Type, Informations, Identifiants, Vérification, puis Offre seulement pour Pro. Les étapes terminées sont revisitable sans sauter une étape future. |
+| 3. Type de compte | Deux cartes déjà présentes dans la page. | Les déplacer en première étape, supprimer valeurs tarifaires codées et adapter immédiatement le nombre d'étapes au choix particulier/pro. |
+| 4. Informations | Champs actuels prénom, nom, commune et téléphone ; API communes réelle. | Préfixe +687, téléphone requis par la fiche ; ajouter raison sociale, RIDET et secteur pour Pro. Le RIDET est validé au format dix chiffres puis marqué en attente, sans prétendre interroger l'ISEE. |
+| 5. Identifiants | `useAuthStore.register`, Turnstile, jauge et règles existantes. | Créer le compte ici, conserver le flux réel d'e-mail et de session, lier explicitement CGU/confidentialité, désactiver Continuer avec motif visible et fournir Réessayer sur erreur réseau. |
+| 6. Vérification | `PhoneVerification` et `usePhoneVerification`, compte désormais authentifié. | Réutiliser l'envoi, la saisie OTP à six chiffres, le renvoi et les délais réels ; ne jamais afficher le code de démonstration de la maquette. |
+| 7. Offre Pro | `GET /api/subscriptions/plans`. | Construire les trois choix depuis les deux plans réels : gratuit, Pro mensuel et Pro annuel. Aucun tarif codé dans le composant. L'activation payante/essai reste différée tant que le RIDET n'est pas validé. |
+| 8. Bienvenue | Routes existantes `/deposer`, `/profil` et espaces Pro. | Afficher les statuts réellement atteints puis trois actions utiles selon le type de compte, sans statistiques ni promesse inventée. |
+
+### Données et contrats vérifiés
+
+| Besoin | Source actuelle | Décision d'inventaire |
+| --- | --- | --- |
+| Création du compte | `useAuthStore.register` → `POST /api/auth/register`; la réponse ouvre une session et déclenche l'e-mail de vérification. | Conserver strictement ce flux. La création a lieu à la fin de l'étape Identifiants afin que l'OTP authentifié fonctionne ensuite. |
+| Communes | `metaApi.getCommunes()` → `/api/communes`. | Accès via une nouvelle couche `src/lib/data/registration.ts`, avec chargement, erreur et Réessayer. |
+| Vérification téléphone | `phoneApi` et `usePhoneVerification`; `/api/phone/*` protégé par authentification. | Réutiliser le contrat réel après création du compte. Le téléphone reste non public par défaut. |
+| Informations Pro | `proApi.updateProfile()` → `PATCH /api/pro/me`, qui accepte raison sociale, secteur et RIDET sans imposer de description. | Enregistrer les champs après création du compte. `pro_verified` reste faux ; aucune validation automatique simulée. |
+| RIDET | Aucun endpoint ISEE ou registre public n'existe. Le service serveur sait uniquement lier un RIDET après validation d'un justificatif par l'administration. | Accepter un format de dix chiffres, afficher « En attente de validation » et conserver le processus administratif existant. Aucun appel externe ni changement serveur. |
+| Formules | `subscriptionsApi.getPlans()` → `GET /api/subscriptions/plans`, qui renvoie Gratuit et Pro avec prix mensuel/annuel et fonctionnalités. | Dériver les trois cartes sans recopier les montants de la maquette. Le démarrage d'essai exige déjà un RIDET validé ; l'inscription ne le contournera pas. |
+| Persistance | Aucun brouillon d'inscription actuel. Les jetons de session sont déjà persistés par l'auth store après création. | Stocker dans `sessionStorage` l'étape, le type et les champs non sensibles. Ne jamais stocker mot de passe, confirmation, Turnstile ni OTP. Après rechargement, revenir sur Identifiants si un secret doit être ressaisi, ou restaurer Vérification/Offre/Bienvenue si le compte a déjà été créé. |
+| Démonstration | Aucune fixture d'inscription. Les API auth mutent des données et ne doivent pas être simulées silencieusement. | Les données de référence (communes et plans) passent par la couche de données ; aucune identité, coordonnée ou RIDET de maquette n'est créé en fixture. |
+
+### États et responsive à vérifier
+
+- Chaque action Continuer est désactivée tant que l'étape est invalide, avec un motif textuel immédiatement dessous.
+- Communes, plans et soumission ont squelette, erreur et Réessayer aux dimensions finales ; OTP conserve ses états d'envoi, expiration, renvoi et erreur.
+- Erreur d'e-mail déjà utilisé : message utile et lien vers `/connexion`. Erreur réseau : valeurs conservées et nouvelle tentative explicite.
+- Largeurs 1440, 1024, 768 et 390 px ; volet marque visible à partir de `lg`, formulaire seul sous `lg`, stepper horizontal défilable ou compact sans débordement.
+- Corps de texte d'au moins 15 px, champs d'au moins 16 px et actions d'au moins 44 px. Tokens Kalico uniquement, aucun hex, `bg-white`, ancienne classe `kalico-blue` ou style dynamique non nécessaire.
+
+### QUESTIONS avant code
+
+1. Valider l'ajout de nouveaux fichiers `src/lib/data/registration.ts`, `src/types/registration.ts`, composants d'inscription et `loading.tsx`. Ils sont nécessaires pour respecter la séparation données/interface et les états demandés.
+2. Valider la création du compte à la fin de l'étape Identifiants, avant l'OTP : c'est la seule séquence compatible avec les routes téléphone authentifiées existantes.
+3. Valider le RIDET au format local uniquement et l'état « En attente de validation », sans appel ISEE inexistant, conformément à la rubrique Côté serveur de la fiche.
+4. Valider que les trois offres sont Gratuit, Pro mensuel et Pro annuel, toutes dérivées de `/subscriptions/plans`; aucune activation d'essai ou paiement n'est lancée avant validation du RIDET.
+5. Valider une persistance de brouillon sans secrets : étape et champs non sensibles uniquement. Mot de passe, Turnstile et OTP sont toujours ressaisis après rechargement.
+
+Aucun code applicatif modifié à cette étape. Les critères d'acceptation seront cochés après les étapes 2 à 6.
+
+### Résultat
+
+- Parcours complet en quatre étapes pour un particulier et cinq pour un professionnel, suivi d'un écran Bienvenue. Le stepper change immédiatement avec le type de compte et interdit de sauter une étape future.
+- Volet marque de 560 px sur bureau, contenu adapté à l'étape, composition mobile sans ce volet et animations de la fiche 05 neutralisées sous `prefers-reduced-motion`.
+- Informations de référence centralisées dans `src/lib/data/registration.ts` : communes, secteurs et offres. En mode démo, communes et catalogue utilisent des fixtures typées sans identité, téléphone, e-mail ou RIDET d'exemple.
+- Création réelle du compte à la fin de l'étape Identifiants via `useAuthStore.register`, avec Turnstile lorsqu'il est configuré, e-mail de confirmation, session existante et erreurs normalisées. Le flux social existant est conservé comme voie distincte lorsqu'il est configuré.
+- Téléphone vérifié après création du compte avec le vrai hook OTP : saisie à six chiffres, collage, renvoi, délai, changement de numéro et erreurs. Aucun code OTP de maquette n'est présent.
+- Profil Pro complété via `PATCH /api/pro/me` avec raison sociale, secteur, commune, téléphone et RIDET. Le RIDET est seulement vérifié au format dix chiffres et reste explicitement en attente de validation administrative.
+- Trois offres dérivées du catalogue réel : Gratuit, Pro mensuel et Pro annuel. La sélection n'active ni essai ni paiement avant validation du RIDET.
+- Brouillon conservé dans `sessionStorage` avec étape, type et champs non sensibles. Mot de passe, confirmation, Turnstile et OTP ne sont jamais persistés. Une session absente après rechargement renvoie vers Identifiants si le compte avait été marqué créé.
+- Chargements finaux pour la route, les communes et les offres ; erreurs avec Réessayer ; motifs textuels sous chaque action Continuer désactivée.
+
+### Fichiers touchés
+
+- Route : `src/app/inscription/page.tsx` et nouveau `src/app/inscription/loading.tsx`.
+- Parcours : nouveau `src/components/auth/RegistrationFlow.tsx` et `AuthMapPanel.tsx` rendu paramétrable.
+- Vérification : `src/components/profil/PhoneVerification.tsx` remis sur les primitives et tokens v2, sans changement du hook ou du contrat serveur.
+- Données : nouveaux `src/lib/data/registration.ts`, `src/types/registration.ts` et `src/demo/fixtures/registration.ts`.
+- Suivi : `docs/design/PROGRESS.md`.
+
+### Critères d'acceptation
+
+- [ ] Ressemble à la maquette à 1440 px, section par section : composition et dimensions codées, route ouverte dans le navigateur intégré, mais contrôle programmatique visuel indisponible dans cette session ; revue humaine requise.
+- [ ] Aucun débordement à 390 px : largeurs fluides, stepper défilable et grilles basculées sous `sm`/`lg`, mais émulation visuelle exacte indisponible ; revue humaine requise.
+- [x] `check-design --changed` : 8 fichiers inspectés, zéro erreur, zéro avertissement.
+- [x] Aucune valeur de `renderVals()` recopiée : identité, coordonnées, RIDET, OTP et tarifs de la maquette sont absents des composants. Les prix viennent de l'API ou de la fixture typée alignée sur le catalogue serveur actuel.
+- [x] L'étape et les champs non sensibles survivent à un rechargement via un brouillon versionné en session ; tous les secrets sont exclus.
+- [x] Le nombre d'étapes suit le type de compte : quatre pour Particulier, cinq pour Pro.
+
+### Validation et écarts
+
+- `npm run lint` : réussi. La configuration ESLint existante limite encore son périmètre aux fondations UI et ignore les dossiers auth ; le build Next.js a exécuté son contrôle de validité et TypeScript sur l'ensemble du projet.
+- `tsc --noEmit` : réussi.
+- build Next.js de production : réussi, 105 routes générées, dont `/inscription` à 11,1 kB.
+- `node scripts/check-design.mjs --changed` : réussi, 8 fichiers, zéro erreur et zéro avertissement.
+- `git diff --check` : réussi ; scan mojibake des fichiers TypeScript/TSX modifiés sans résultat.
+- Recette HTTP locale : `/inscription` répond en HTTP 200 sur le port 3106. En développement, les fontes Google ont utilisé leur repli local à cause de la chaîne de certificats ; le build avec certificats système a réussi.
+- Aucun changement serveur, schéma, secret, paiement, essai, déploiement ou configuration de production.
