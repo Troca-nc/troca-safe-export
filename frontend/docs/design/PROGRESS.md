@@ -11,8 +11,8 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [03](specs/03-annonces.md) | Liste des annonces | /annonces | Fait (fusionnée) | [#218](https://github.com/Troca-nc/troca-safe-export/pull/218) |
 | [04](specs/04-annonce.md) | Fiche annonce | /annonces/[id] | Fait (fusionnée) | [#219](https://github.com/Troca-nc/troca-safe-export/pull/219) |
 | [05](specs/05-connexion.md) | Connexion | /connexion, /mot-de-passe-oublie | Fait (fusionnée) | [#220](https://github.com/Troca-nc/troca-safe-export/pull/220) |
-| [06](specs/06-inscription.md) | Inscription | /inscription | À relire | — |
-| [07](specs/07-mon-compte.md) | Mon compte : vue d’ensemble | /profil | À faire | — |
+| [06](specs/06-inscription.md) | Inscription | /inscription | Fait (fusionnée) | [#221](https://github.com/Troca-nc/troca-safe-export/pull/221) |
+| [07](specs/07-mon-compte.md) | Mon compte : vue d’ensemble | /profil | À relire | — |
 | [08](specs/08-compte-particulier.md) | Compte particulier : annonces, coups de cœur, alertes, offres | /profil/annonces, | À faire | — |
 | [09](specs/09-deposer.md) | Déposer une annonce | /deposer | À faire | — |
 | [10](specs/10-troc.md) | Troc et trocomètre | /troc | À faire | — |
@@ -690,4 +690,87 @@ Aucun code applicatif modifié à cette étape. Les critères d'acceptation sero
 - `node scripts/check-design.mjs --changed` : réussi, 8 fichiers, zéro erreur et zéro avertissement.
 - `git diff --check` : réussi ; scan mojibake des fichiers TypeScript/TSX modifiés sans résultat.
 - Recette HTTP locale : `/inscription` répond en HTTP 200 sur le port 3106. En développement, les fontes Google ont utilisé leur repli local à cause de la chaîne de certificats ; le build avec certificats système a réussi.
+- Aucun changement serveur, schéma, secret, paiement, essai, déploiement ou configuration de production.
+
+## 07 — Inventaire (étape 1, sans code)
+
+### Base et références
+
+Branche `design/07-mon-compte`, créée depuis `origin/main` au commit de fusion de la fiche 06 `9b61005b586463f1f36ae4f13b46f74bdf9c428b`. Aucune branche distante ni PR `design/07-mon-compte` existante n'a été trouvée. Références lues : fiche `07-mon-compte.md`, maquette `Mon compte v2.dc.html`, contrats frontend de messagerie, rendez-vous et layout, ainsi que les routes serveur de profil, statistiques, notifications et abonnement.
+
+### Existant et intervention prévue
+
+| Section | Existant trouvé | Intervention prévue après validation |
+| --- | --- | --- |
+| En-tête de compte | `src/app/profil/page.tsx` est un monolithe d'édition de profil avec deux onglets locaux ; `AccountTabs.tsx`, livré par la fiche 01, couvre déjà la navigation partagée. | Recomposer `/profil` en vue d'ensemble et réutiliser `AccountTabs` sans le modifier. Les réglages détaillés restent accessibles par les routes dédiées. |
+| Identité et badges | La session et le profil public fournissent prénom, nom, avatar, bio, commune, type de compte et vérifications email/téléphone. `PlanBadge.tsx` contient encore des styles historiques et un caractère corrompu. | Normaliser les champs réels dans la couche données, afficher les badges justifiables et remettre `PlanBadge` aux tokens v2. |
+| Alerte contextuelle | `PaymentFailureBanner.tsx` est monté globalement et la page profil contient aussi sa propre logique d'abonnement, ce qui permet deux alertes simultanées. | Centraliser la priorité `paiement échoué ou expiré` > `expiration proche` > `profil incomplet`, n'afficher qu'une alerte dans `/profil` et masquer le bandeau global sur cette route. |
+| Indicateurs et annonces | Le profil public, `statsApi.getSeller()` et `usersApi.getUserListings()` exposent les annonces actives, vues, favoris et annonces récentes. | Construire quatre indicateurs uniquement avec ces valeurs réelles et présenter les quatre annonces les plus récentes, avec états vide et erreur. |
+| Conversations et rendez-vous | `messagesApi.getConversations()` fournit dernier message et non-lus ; `proBookingsApi.getMine()` fournit les rendez-vous reçus et demandés avec statut et date. | Afficher les éléments récents, triés par date, avec liens vers `/messages` et `/mes-rdv`. Aucun faux interlocuteur ni faux créneau. |
+| Sécurité | Les seules preuves disponibles sont `email_verified` et `phone_verified`. Aucune donnée utilisateur fiable n'expose la double authentification ou la dernière connexion. | Limiter le bloc sécurité aux deux vérifications réelles et aux actions existantes ; ne pas recopier les états 2FA ou dernière connexion de la maquette. |
+| Colonne latérale | Les données disponibles permettent le taux de complétion, le plan, les vues et les notifications récentes. | Calculer la complétion depuis les champs réels, afficher abonnement et activité, puis des raccourcis vers les routes existantes. Le libellé des vues reflétera la période réellement fournie par l'API, sans inventer une valeur à 14 jours. |
+| États | La page actuelle mélange chargement partiel, erreurs locales et valeurs de démonstration codées dans `ProfileDemoPreview.tsx`. | Ajouter un squelette de vue d'ensemble, une erreur avec Réessayer et des états vides par section. La page ne dépendra plus de `ProfileDemoPreview`. |
+
+### Données et fichiers
+
+Créer `src/types/account.ts`, `src/lib/data/account.ts` et `src/demo/fixtures/account.ts`. La couche données sera l'unique point d'accès de la page aux API existantes : profil public, annonces, statistiques vendeur, conversations, rendez-vous, notifications et abonnement. Elle tolérera l'indisponibilité d'un domaine secondaire afin que la page reste utile, tout en remontant une erreur générale si l'identité du compte ne peut pas être chargée.
+
+Les composants nouveaux de la vue d'ensemble resteront sous `src/components/profil/`. Les fichiers existants modifiés seront limités à ceux prévus par la fiche : `src/app/profil/page.tsx`, `src/components/profil/*`, `src/components/PaymentFailureBanner.tsx`, `src/components/PlanBadge.tsx` et ce journal. Aucun changement serveur ni nouvel endpoint n'est prévu.
+
+Le taux de complétion sera calculé sur six preuves disponibles : prénom, nom, avatar, bio, commune et téléphone vérifié. L'email vérifié est présenté dans la sécurité, mais n'entre pas dans la complétion éditable du profil. Les indicateurs seront dérivés des réponses serveur et les dates relatives calculées à l'affichage.
+
+### Démonstration
+
+La fixture dédiée isolera toutes les valeurs de démonstration et couvrira les profils particulier, Pro et bon plan. Pour rendre testables les trois variantes exigées par la fiche, `/profil` acceptera uniquement en mode démo `demoSubscription=active`, `expiring_soon` ou `payment_failed`; un petit contrôle de démonstration mettra à jour ce paramètre. Hors mode démo, le paramètre sera ignoré et aucun composant n'importera directement la fixture.
+
+### QUESTIONS de périmètre avant code
+
+1. Valider la création de la couche `account` typée, de sa fixture de démonstration et de composants de vue d'ensemble sous `src/components/profil/`.
+2. Valider que `PaymentFailureBanner` ne rende rien sur `/profil`, afin que l'alerte prioritaire de la page soit toujours la seule visible.
+3. Valider le sélecteur `demoSubscription` limité au mode démo pour tester les trois états d'abonnement sans modifier l'API ni fabriquer un état en production.
+4. Valider la limitation du bloc sécurité aux vérifications email et téléphone réellement disponibles ; la double authentification et la dernière connexion sont omises faute de données fiables.
+5. Valider le remplacement de l'ancien écran d'édition intégré par la vue d'ensemble de la fiche ; les actions de modification renverront vers `/parametres`, tandis que les annonces et avis restent accessibles par les onglets/routes de compte.
+
+Étape 1 uniquement : aucun code applicatif, aucune fixture et aucune API n'ont été créés ; aucun contrôle de build n'a été lancé. Les étapes 2 à 7 attendent la validation humaine de cet inventaire.
+
+## 07 — Livraison des étapes 2 à 7 (2026-10-05)
+
+L'inventaire et ses cinq décisions ont été validés : couche de données dédiée, alerte unique sur `/profil`, variantes d'abonnement réservées à la démonstration, sécurité limitée aux preuves disponibles et remplacement de l'ancien écran d'édition par la vue d'ensemble.
+
+### Résultat
+
+- Vue d'ensemble : identité, type de compte, plan, onglets partagés, quatre indicateurs, quatre annonces récentes, conversations, rendez-vous, sécurité, activité, complétion et accès rapides.
+- Données : `src/lib/data/account.ts` normalise les API existantes de profil, annonces, statistiques vendeur, messages, rendez-vous, notifications et abonnement. L'identité est obligatoire ; les domaines secondaires peuvent échouer séparément et sont signalés sans rendre toute la page inutilisable.
+- Alertes : une seule alerte est choisie selon la priorité paiement échoué ou abonnement expiré, expiration proche, puis profil incomplet. Le bandeau global ne se rend pas sur `/profil`, ce qui évite les doublons.
+- Sécurité : seuls l'email et le téléphone vérifiés sont affichés. Aucune double authentification ni dernière connexion n'est inventée.
+- Démonstration : fixture `account` isolée pour particulier, Pro et bon plan. Les variantes `active`, `expiring_soon` et `payment_failed` sont sélectionnables par `demoSubscription` uniquement dans l'interface de démonstration.
+- États : squelette global, erreur avec Réessayer, états vides par section et message non bloquant pour les données secondaires indisponibles.
+- Ancien écran : `/profil` est désormais un point d'entrée minimal vers `AccountPage`; l'ancien monolithe d'édition et ses statistiques codées en dur ont été retirés. La modification du profil reste dans `/parametres`.
+
+### Fichiers touchés
+
+- Route et rendu : `src/app/profil/page.tsx`, `src/components/profil/AccountPage.tsx`, `src/components/profil/AccountOverview.tsx`.
+- Données : `src/types/account.ts`, `src/lib/data/account.ts`, `src/demo/fixtures/account.ts`.
+- Composants partagés prévus par la fiche : `src/components/PaymentFailureBanner.tsx`, `src/components/PlanBadge.tsx`.
+- Suivi : `docs/design/PROGRESS.md`.
+
+### Critères d'acceptation
+
+- [x] Structure de la maquette reproduite : bannière de compte, navigation, alerte prioritaire, indicateurs, contenus récents, bloc sécurité et colonne latérale.
+- [x] Mise en page responsive sans largeur fixe obligatoire : grilles repliées à 390 px, onglets horizontalement défilants et actions flexibles.
+- [x] `check-design --changed` : 8 fichiers inspectés, zéro erreur et zéro avertissement.
+- [x] Aucune valeur de maquette dans les composants ; données réelles via la couche `account`, valeurs de démonstration dans la fixture dédiée.
+- [x] Trois variantes d'abonnement testables en mode démo.
+- [x] Une seule alerte affichée, selon la priorité définie.
+
+### Validation et limites
+
+- `npm run lint` : réussi. La configuration ESLint du dépôt cible les fondations ; un lancement manuel sur les fichiers métier les signale comme hors configuration, sans analyser leur contenu.
+- `npx tsc --noEmit` : réussi.
+- `npm run build` avec certificats système : réussi, 105 routes générées ; `/profil` produit 11,2 kB et 180 kB au premier chargement.
+- `node scripts/check-design.mjs --changed` : réussi, zéro erreur et zéro avertissement.
+- `git diff --check` : réussi. Le scan mojibake ciblé des huit fichiers TypeScript/TSX de la fiche ne retourne aucun résultat.
+- Le contrôle d'encodage global signale des problèmes historiques dans des fichiers hors périmètre ; les 132 fichiers gardés par l'outil sont sains. Aucun de ces fichiers hors fiche n'a été modifié.
+- Recette HTTP locale sur le port 3107 : `/profil` répond en 200 pour `active`, `expiring_soon` et `payment_failed`. Les fontes Google utilisent leur repli local en développement lorsque la chaîne de certificats n'est pas disponible ; le build avec certificats système réussit.
+- Le navigateur intégré a reçu l'URL locale. Son contrôle programmatique n'étant pas exposé dans cette session, la comparaison visuelle aux largeurs 1440, 1024, 768 et 390 px reste à confirmer lors de la revue humaine avant fusion.
 - Aucun changement serveur, schéma, secret, paiement, essai, déploiement ou configuration de production.
