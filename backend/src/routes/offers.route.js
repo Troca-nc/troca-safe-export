@@ -40,7 +40,7 @@ const respondSchema = {
 
 // ── POST /api/messages/offers ─────────────────────────────────
 
-router.post('/', validate(createSchema), async (req, res, next) => {
+router.post('/offers', validate(createSchema), async (req, res, next) => {
   const { conv_id, amount_xpf } = req.body;
   const userId = req.user.id;
 
@@ -114,7 +114,7 @@ router.post('/', validate(createSchema), async (req, res, next) => {
 
 // ── POST /api/messages/offers/:id/respond ────────────────────
 
-router.post('/:id/respond', validate(respondSchema), async (req, res, next) => {
+router.post('/offers/:id/respond', validate(respondSchema), async (req, res, next) => {
   const { id } = req.params;
   const { response, counter_amount } = req.body;
   const userId = req.user.id;
@@ -219,6 +219,52 @@ router.post('/:id/respond', validate(respondSchema), async (req, res, next) => {
     return res.json({ data: result });
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message });
+    next(err);
+  }
+});
+
+// ── GET /api/messages/conversations/:id/offers ───────────────
+
+router.get('/offers/received', async (req, res, next) => {
+  try {
+    const rows = await withTransaction(async (client) => {
+      const result = await client.query(
+        `SELECT
+           o.id,
+           o.conv_id,
+           o.amount_xpf,
+           o.status,
+           o.expires_at,
+           o.responded_at,
+           o.counter_offer_id,
+           c.annonce_id AS listing_id,
+           a.titre AS listing_title,
+           a.prix AS asking_price_xpf,
+           buyer.id AS buyer_id,
+           buyer.prenom AS buyer_first_name,
+           buyer.nom AS buyer_last_name,
+           buyer.avatar_url AS buyer_avatar_url,
+           buyer.note_moyenne AS buyer_rating,
+           m.created_at,
+           (SELECT thumbnail_url
+              FROM annonce_images
+             WHERE annonce_id = a.id AND is_cover = TRUE
+             LIMIT 1) AS listing_image
+         FROM message_offers o
+         JOIN conversations c ON c.id = o.conv_id
+         JOIN annonces a ON a.id = c.annonce_id
+         JOIN users buyer ON buyer.id = o.buyer_id
+         JOIN messages m ON m.id = o.message_id
+         WHERE c.seller_id = $1
+           AND m.sender_id = o.buyer_id
+         ORDER BY (o.status = 'pending') DESC, m.created_at DESC
+         LIMIT 100`,
+        [req.user.id]
+      );
+      return result.rows;
+    });
+    return res.json({ data: rows });
+  } catch (err) {
     next(err);
   }
 });

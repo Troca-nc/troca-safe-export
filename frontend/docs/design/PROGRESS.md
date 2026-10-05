@@ -13,7 +13,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [05](specs/05-connexion.md) | Connexion | /connexion, /mot-de-passe-oublie | Fait (fusionnée) | [#220](https://github.com/Troca-nc/troca-safe-export/pull/220) |
 | [06](specs/06-inscription.md) | Inscription | /inscription | Fait (fusionnée) | [#221](https://github.com/Troca-nc/troca-safe-export/pull/221) |
 | [07](specs/07-mon-compte.md) | Mon compte : vue d’ensemble | /profil | Fait (fusionnée) | [#222](https://github.com/Troca-nc/troca-safe-export/pull/222) |
-| [08](specs/08-compte-particulier.md) | Compte particulier : annonces, coups de cœur, alertes, offres | /profil/annonces, /profil/favoris, /profil/alertes, /profil/offres | Inventaire | — |
+| [08](specs/08-compte-particulier.md) | Compte particulier : annonces, coups de cœur, alertes, offres | /profil/annonces, /profil/favoris, /profil/alertes, /profil/offres | À relire | — |
 | [09](specs/09-deposer.md) | Déposer une annonce | /deposer | À faire | — |
 | [10](specs/10-troc.md) | Troc et trocomètre | /troc | À faire | — |
 | [11](specs/11-bons-plans.md) | Bons plans et événements | /bons-plans, | À faire | — |
@@ -821,3 +821,35 @@ La couche `personal-account` peut appeler les endpoints via le client `api` exis
 5. Décider pour la baisse de prix : recommandation sans migration, donc badge uniquement en fixture tant qu'aucune preuve serveur n'existe ; l'alternative est une migration de la table `favoris` pour mémoriser le prix lors de l'ajout, qui exige une autorisation explicite de schéma.
 
 Étape 1 uniquement : aucun code applicatif, endpoint, fixture ou schéma n'a été modifié ; aucun build n'a été lancé. Les étapes 2 à 7 attendent la validation humaine de cet inventaire et de ces extensions.
+
+## 08 — Livraison des étapes 2 à 7 (2026-10-06)
+
+### Réalisation
+
+- Quatre routes dédiées : `/profil/annonces`, `/profil/favoris`, `/profil/alertes` et `/profil/offres`, avec le shell particulier et les onglets partagés.
+- Mes annonces : tous les statuts réels, compteurs de vues, favoris et conversations, expiration, quota actif, filtres, états vides et actions modifier, vendre, renouveler ou supprimer.
+- Coups de cœur : chargement serveur, collections dynamiques par catégorie, filtre des annonces vendues et retrait optimiste avec restauration sur erreur. Le badge de baisse de prix reste exclusivement dans la fixture, conformément à la validation sans migration.
+- Alertes : activation, pause, fréquence, canal réel « E-mail », suppression et résultats récents chargés par la recherche d'annonces.
+- Offres reçues : agrégation des offres de prix et propositions de troc, balance rendue seulement quand les valeurs réelles existent, réponses accepter, refuser et contre-proposer.
+- Compatibilité : `/favoris` conserve le parcours invité et redirige un membre connecté ; `/alertes` redirige un membre connecté vers le nouvel onglet.
+- Démonstration : données isolées dans `src/demo/fixtures/personal-account.ts`, identifiants `demo-*` et libellés « (démo) ». Aucun composant n'importe directement cette fixture.
+
+### Serveur
+
+- `GET /api/listings/mine` renvoie les annonces du propriétaire, leurs statistiques et la capacité active calculée avec la règle commerciale commune.
+- `POST /api/listings/:id/renew` republie uniquement une annonce expirée pour 60 jours, après contrôle de propriété et de quota.
+- `GET /api/users/me/favoris` inclut désormais les favoris vendus mais exclut toujours les annonces supprimées.
+- `GET /api/messages/offers/received` agrège uniquement les offres envoyées par les acheteurs au vendeur connecté. Les routes d'offres existantes utilisent désormais le préfixe `/offers` déjà consommé par le frontend.
+- Aucun schéma ou modèle persistant n'a été ajouté.
+
+### Validation
+
+- `npm run lint` : réussi. La configuration ESLint du dépôt cible les fondations ; les fichiers métier sont validés par TypeScript, build et `check-design`.
+- `npx tsc --noEmit` : réussi.
+- `npm run build` avec certificats système : réussi, 109 routes générées ; les quatre nouvelles routes produisent environ 149 B chacune et 164 kB au premier chargement partagé.
+- `npm test` backend : réussi, y compris les quatre nouveaux contrats de routes du compte particulier.
+- `node frontend/scripts/check-design.mjs --changed` : réussi, 12 fichiers inspectés, zéro erreur et zéro avertissement.
+- `git diff --check` : réussi ; le scan mojibake ciblé des nouveaux fichiers ne retourne aucun résultat.
+- Recette HTTP locale sur le port 3108 : les quatre routes répondent en 200 en mode démonstration.
+- L'aperçu `/profil/annonces` a été envoyé au navigateur intégré. Son contrôle programmatique n'étant pas exposé dans cette session, la comparaison humaine finale aux largeurs 1440, 1024, 768 et 390 px reste requise avant fusion.
+- Aucun secret, paiement, essai, déploiement ou configuration de production n'a été modifié.

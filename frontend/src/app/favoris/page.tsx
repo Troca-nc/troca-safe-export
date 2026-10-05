@@ -1,7 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { ArrowUpDown, Clock, Grid2X2, Heart, List, MapPin, Search, Trash2 } from 'lucide-react'
@@ -124,6 +125,7 @@ function EmptyFavoris({
 }
 
 export default function FavorisPage() {
+  const router = useRouter()
   const { items } = useFavorisStore()
   const { isAuthenticated } = useAuthStore()
   const hasHydrated = useAuthStore((state) => state.hasHydrated)
@@ -133,6 +135,10 @@ export default function FavorisPage() {
   const [sort, setSort] = useState<SortKey>('savedAt_desc')
   const [view, setView] = useState<ViewMode>('grid')
   const [removing, setRemoving] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (hasHydrated && isAuthenticated) router.replace('/profil/favoris')
+  }, [hasHydrated, isAuthenticated, router])
 
   const filtered = useMemo(() => {
     let result = [...items]

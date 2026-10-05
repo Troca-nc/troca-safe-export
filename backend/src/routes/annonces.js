@@ -29,7 +29,7 @@ const { getUserPresence, getPresenceLabel } = require('../services/presenceServi
 const { getSellerResponseTime } = require('../services/sellerInsightsService');
 const { createNotification } = require('../services/notificationService');
 const { sendPushToUser } = require('../services/pushService');
-const { assertActiveListingCapacity } = require('../services/commercialQuotaService');
+const { assertActiveListingCapacity, activeListingLimit } = require('../services/commercialQuotaService');
 const { canChangeListingStatus } = require('../services/listingStatusPolicy');
 const {
   isDonCategory,
@@ -305,6 +305,55 @@ router.get('/dons', optionalAuth, async (req, res, next) => {
 
 router.get('/immobilier', optionalAuth, async (req, res, next) => {
   return executeListingSearch(req, res, next, { category: 'immobilier' });
+});
+
+// ── GET /api/listings/mine — Toutes mes annonces ─────────────
+
+router.get('/mine', authenticate, async (req, res, next) => {
+  try {
+    const result = await query(
+      `SELECT
+          a.id,
+          a.titre,
+          a.prix,
+          a.condition,
+          a.created_at,
+          a.published_at,
+          a.expires_at,
+          a.updated_at,
+          CASE
+            WHEN a.status = 'active' AND a.expires_at IS NOT NULL AND a.expires_at <= NOW() THEN 'expired'
+            ELSE a.status
+          END AS status,
+          COALESCE(a.nb_vues, 0)::int AS view_count,
+          COALESCE(a.nb_favoris, 0)::int AS favorite_count,
+          (SELECT COUNT(*)::int FROM conversations c WHERE c.annonce_id = a.id) AS message_count,
+          a.is_troc,
+          cat.name AS category_name,
+          cat.slug AS category_slug,
+          com.name AS commune_name,
+          (SELECT thumbnail_url
+             FROM annonce_images
+            WHERE annonce_id = a.id AND is_cover = TRUE
+            LIMIT 1) AS cover_image
+       FROM annonces a
+       LEFT JOIN categories cat ON cat.id = a.category_id
+       LEFT JOIN communes com ON com.id = a.commune_id
+       WHERE a.user_id = $1
+         AND a.deleted_at IS NULL
+         AND a.status <> 'deleted'
+       ORDER BY a.updated_at DESC, a.id DESC`,
+      [req.user.id]
+    );
+
+    const used = result.rows.filter((listing) => listing.status === 'active').length;
+    return res.json({
+      data: result.rows,
+      capacity: { used, limit: activeListingLimit(req.user) },
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // ── GET /api/listings/:id — Détail ──────────────────────────
@@ -968,6 +1017,51 @@ router.patch('/:id/status', authenticate, async (req, res, next) => {
     next(err)
   }
 })
+
+// ── POST /api/listings/:id/renew — Republier pour 60 jours ───
+
+router.post('/:id/renew', authenticate, async (req, res, next) => {
+  try {
+    const listingResult = await query(
+      `SELECT id, user_id, status, expires_at
+       FROM annonces
+       WHERE id = $1 AND deleted_at IS NULL
+       LIMIT 1`,
+      [req.params.id]
+    );
+    const listing = listingResult.rows[0];
+    if (!listing) return res.status(404).json({ error: 'Annonce introuvable.' });
+    if (Number(listing.user_id) !== Number(req.user.id)) {
+      return res.status(403).json({ error: 'Vous ne pouvez renouveler que vos propres annonces.' });
+    }
+
+    const isExpired = listing.status === 'expired'
+      || (listing.status === 'active' && listing.expires_at && new Date(listing.expires_at) <= new Date());
+    if (!isExpired) {
+      return res.status(409).json({ error: 'Seule une annonce expirée peut être renouvelée.' });
+    }
+
+    const updated = await withTransaction(async (client) => {
+      await assertActiveListingCapacity(client, req.user, { excludeListingId: listing.id });
+      return client.query(
+        `UPDATE annonces
+         SET status = 'active',
+             published_at = NOW(),
+             expires_at = NOW() + INTERVAL '60 days',
+             updated_at = NOW()
+         WHERE id = $1
+         RETURNING id, status, published_at, expires_at, updated_at`,
+        [listing.id]
+      );
+    });
+
+    void clearListCache();
+    return res.json({ data: updated.rows[0] });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message, code: err.code });
+    next(err);
+  }
+});
 
 router.get('/user/:userId', optionalAuth, async (req, res, next) => {
   try {

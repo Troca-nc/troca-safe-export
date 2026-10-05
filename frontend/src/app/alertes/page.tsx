@@ -1,12 +1,19 @@
 'use client'
 
+import { useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import AlertsManager from '@/components/profil/AlertsManager'
 import { useAuthStore } from '@/store/authStore'
 
 export default function AlertesPage() {
+  const router = useRouter()
   const { isAuthenticated, hasHydrated } = useAuthStore()
+
+  useEffect(() => {
+    if (hasHydrated && isAuthenticated) router.replace('/profil/alertes')
+  }, [hasHydrated, isAuthenticated, router])
 
   return (
     <main className="min-h-screen bg-[var(--color-bg-page)] text-[var(--color-text-primary)]">
