@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 import Header from '@/components/layout/Header'
-import ProsDirectoryClient from './ProsDirectoryClient'
+import ProsDirectoryView from '@/components/pro/ProsDirectoryView'
 import { SITE_URL } from '@/types/seo.types'
 
 export const metadata: Metadata = {
@@ -32,7 +32,7 @@ export default function ProsDirectoryPage() {
   return (
     <>
       <Header />
-      <ProsDirectoryClient />
+      <ProsDirectoryView />
     </>
   )
 }

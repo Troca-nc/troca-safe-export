@@ -12,6 +12,7 @@ import {
   normalizeQuoteTemplate,
   type QuoteTemplate,
 } from '@/components/pro/quoteTemplate'
+import { useDialogAccessibility } from '@/components/pro/useDialogAccessibility'
 
 type ProQuoteModalProps = {
   proId: string | number
@@ -62,6 +63,7 @@ export default function ProQuoteModal({ proId, proName, open, onClose, template,
   const [error, setError] = useState('')
   const [sent, setSent] = useState(false)
   const quoteTemplate = useMemo(() => normalizeQuoteTemplate(template), [template])
+  const { dialogRef, titleId, trapFocus } = useDialogAccessibility(open, onClose)
 
   useEffect(() => {
     if (!open) return
@@ -156,13 +158,18 @@ export default function ProQuoteModal({ proId, proName, open, onClose, template,
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm" onClick={onClose}>
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        onKeyDown={trapFocus}
         className="relative w-full max-w-2xl overflow-hidden rounded-[2rem] bg-[var(--color-surface)] shadow-2xl"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 border-b border-[var(--color-border)] px-6 py-5">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Demande de devis rapide</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">{quoteTemplate.title}</h2>
+            <h2 id={titleId} className="mt-1 font-display text-2xl font-bold text-night">{quoteTemplate.title}</h2>
             <p className="mt-1 text-sm text-night/55">
               {quoteTemplate.subtitle} Le professionnel {proName} reçoit la demande immédiatement.
             </p>

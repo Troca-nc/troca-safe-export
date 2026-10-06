@@ -1,8 +1,13 @@
 'use client'
 
-import Link from 'next/link'
 import Image from 'next/image'
-import { BadgeCheck, MapPin, Quote, Store, ArrowRight } from 'lucide-react'
+import Link from 'next/link'
+import { ArrowRight, MapPin, MessageSquareQuote, Star } from 'lucide-react'
+
+import { ProBadge } from '@/components/ui/Badge'
+import type { ProSummary } from '@/types/pro-public'
+
+const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toLocaleUpperCase('fr-FR')).join('') || 'P'
 
 export type ProCardModel = {
   id: string | number
@@ -15,137 +20,59 @@ export type ProCardModel = {
   pro_banner_url?: string | null
   pro_description?: string | null
   pro_commune?: string | null
-  pro_website?: string | null
-  pro_phone?: string | null
-  pro_hours?: string | null
   pro_quote_template?: unknown
   avg_rating?: number | null
   review_count?: number | null
   listing_count?: number | null
-  is_pro?: boolean
-  pro_verified?: boolean
   latest_review_comment?: string | null
-  latest_review_rating?: number | null
-  latest_review_prenom?: string | null
-  latest_review_created_at?: string | null
 }
 
-function getDisplayName(pro: ProCardModel) {
+function cardModel(pro: ProSummary | ProCardModel): ProSummary {
+  if ('name' in pro) return pro
+  const name = pro.display_name || pro.pro_company_name || [pro.prenom, pro.nom].filter(Boolean).join(' ') || 'Professionnel Kalico'
+  return {
+    id: Number(pro.id), name, firstName: pro.prenom || '', lastName: pro.nom || '', companyName: pro.pro_company_name || '',
+    category: pro.pro_category || 'Professionnel local', commune: pro.pro_commune || 'Nouvelle-Calédonie', description: pro.pro_description || '',
+    logoUrl: pro.pro_logo_url || null, bannerUrl: pro.pro_banner_url || null, rating: Number(pro.avg_rating || 0), reviewCount: Number(pro.review_count || 0),
+    listingCount: Number(pro.listing_count || 0), latestReview: pro.latest_review_comment || null, verified: true, quoteTemplate: pro.pro_quote_template,
+  }
+}
+
+export default function ProCard({ pro }: { pro: ProSummary | ProCardModel }) {
+  const model = cardModel(pro)
   return (
-    pro.display_name
-    || pro.pro_company_name
-    || [pro.prenom, pro.nom].filter(Boolean).join(' ').trim()
-    || 'Professionnel Kalico'
-  )
-}
-
-function getInitials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() || '')
-    .join('')
-    .slice(0, 2) || 'P'
-}
-
-function formatRating(value?: number | null) {
-  const rating = Number(value ?? 0)
-  if (!Number.isFinite(rating) || rating <= 0) return '0.0'
-  return rating.toFixed(1)
-}
-
-export default function ProCard({ pro }: { pro: ProCardModel }) {
-  const displayName = getDisplayName(pro)
-  const initials = getInitials(displayName)
-  const rating = Number(pro.avg_rating ?? 0)
-  const reviewCount = Number(pro.review_count ?? 0)
-  const listingCount = Number(pro.listing_count ?? 0)
-
-  return (
-    <article className="group overflow-hidden rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
-      <div className="relative h-20 overflow-hidden bg-[linear-gradient(135deg,_rgba(8,32,50,0.95),_rgba(10,126,164,0.45))]">
-        {pro.pro_banner_url ? (
-          <Image
-            src={pro.pro_banner_url}
-            alt={displayName}
-            fill
-            sizes="(max-width: 768px) 100vw, 25vw"
-            className="object-cover opacity-85 transition-transform duration-300 group-hover:scale-[1.03]"
-          />
-        ) : null}
+    <article className="group min-w-0 overflow-hidden rounded-card border border-sand bg-cream-surface shadow-card transition hover:-translate-y-0.5 hover:border-ink">
+      <div className="relative h-[88px] overflow-hidden bg-ink">
+        <div className="motif-tressage absolute inset-0 opacity-30" aria-hidden="true" />
+        {model.bannerUrl ? <Image src={model.bannerUrl} alt="" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover opacity-70" /> : null}
       </div>
-
-      <div className="-mt-6 px-4 pb-4">
-        <div className="mb-3 flex items-end justify-between gap-3">
-          <div className="relative">
-            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white shadow-sm">
-              {pro.pro_logo_url ? (
-                <Image
-                  src={pro.pro_logo_url}
-                  alt={displayName}
-                  width={48}
-                  height={48}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <span className="text-sm font-bold text-[#0A7EA4]">{initials}</span>
-              )}
-            </div>
+      <div className="relative p-5 pt-0">
+        <div className="flex items-end justify-between gap-3">
+          <div className="flex h-[60px] w-[60px] -translate-y-5 items-center justify-center overflow-hidden rounded-full border-4 border-cream-surface bg-cream-sunken text-h5 font-semibold text-lagoon-text shadow-card">
+            {model.logoUrl ? <Image src={model.logoUrl} alt={model.name} width={60} height={60} className="h-full w-full object-cover" /> : initials(model.name)}
           </div>
-
-          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
-            <BadgeCheck className="h-3.5 w-3.5" />
-            Pro
-          </span>
+          <ProBadge />
         </div>
 
-        <h3 className="text-base font-semibold text-night">{displayName}</h3>
-        <p className="mt-1 text-xs text-night/60">{pro.pro_category || 'Professionnel local'}</p>
-
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-night/60">
-          <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
-            <MapPin className="h-3.5 w-3.5 text-kalico-blue" />
-            {pro.pro_commune || 'Nouvelle-Calédonie'}
-          </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2.5 py-1">
-            <BadgeCheck className="h-3.5 w-3.5 text-amber-500" />
-            {formatRating(rating)} ({reviewCount} avis)
-          </span>
-        </div>
-
-        <div className="mt-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)]/70 p-3">
-          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-night/45">
-            <Store className="h-3.5 w-3.5 text-[#0A7EA4]" />
-            Vitrine locale
-          </p>
-          <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-night/65">
-            {pro.pro_description || 'Découvrez ce professionnel local sur Kalico.'}
-          </p>
-          <div className="mt-3 flex items-center justify-between gap-3 text-xs text-night/55">
-            <span>{listingCount} annonce{listingCount > 1 ? 's' : ''} active{listingCount > 1 ? 's' : ''}</span>
-            <Link href={`/pro/${pro.id}`} className="inline-flex items-center gap-1 font-semibold text-[#0A7EA4] transition hover:underline">
-              Voir la vitrine
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+        <div className="-mt-3">
+          <h2 className="font-display text-h5 font-semibold text-ink">{model.name}</h2>
+          <p className="mt-1 text-body-sm font-semibold text-lagoon-text">{model.category}</p>
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-body-sm text-ink/70">
+            <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" aria-hidden="true" />{model.commune}</span>
+            {model.reviewCount > 0 ? (
+              <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4 fill-accent text-accent" aria-hidden="true" />{model.rating.toFixed(1)} · {model.reviewCount} avis</span>
+            ) : <span>Aucun avis</span>}
+          </div>
+          <p className="mt-4 line-clamp-3 min-h-[66px] text-body-sm leading-relaxed text-ink/70">{model.description || 'Découvrez les services et les annonces de ce professionnel local.'}</p>
+          {model.latestReview ? (
+            <p className="mt-4 line-clamp-2 rounded-control bg-cream-sunken p-3 text-caption italic text-ink/70">« {model.latestReview} »</p>
+          ) : null}
+          <p className="mt-4 text-caption text-ink/60">{model.listingCount} annonce{model.listingCount > 1 ? 's' : ''} active{model.listingCount > 1 ? 's' : ''}</p>
+          <div className="mt-5 grid gap-2 sm:grid-cols-2">
+            <Link href={`/pro/${model.id}`} className="k-button k-button-secondary"><span className="flex items-center justify-center gap-2">Voir la vitrine<ArrowRight className="h-4 w-4" aria-hidden="true" /></span></Link>
+            <Link href={`/pro/${model.id}?action=devis`} className="k-button k-button-primary"><span className="flex items-center justify-center gap-2"><MessageSquareQuote className="h-4 w-4" aria-hidden="true" />Demander un devis</span></Link>
           </div>
         </div>
-
-        {pro.latest_review_comment ? (
-          <div className="mt-3 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-3">
-            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
-              <Quote className="h-3.5 w-3.5" />
-              Dernier avis
-            </p>
-            <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-night/70">
-              {pro.latest_review_comment}
-            </p>
-            <p className="mt-2 text-xs text-night/50">
-              {pro.latest_review_prenom ? `Par ${pro.latest_review_prenom}` : 'Avis vérifié'}
-              {pro.latest_review_rating ? ` · ${Number(pro.latest_review_rating).toFixed(1)}/5` : ''}
-            </p>
-          </div>
-        ) : null}
       </div>
     </article>
   )

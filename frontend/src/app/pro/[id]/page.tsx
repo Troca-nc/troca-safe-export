@@ -5,8 +5,8 @@ import Header from '@/components/layout/Header'
 import { generateNoindexMetadata } from '@/lib/seoHelpers'
 import { SITE_URL } from '@/types/seo.types'
 
-import ProPublicClient from './ProPublicClient'
-import { fetchProPublicProfile, fetchProPublicReviews } from '../publicStorefrontData'
+import PublicProView from '@/components/pro/PublicProView'
+import { fetchProPublicProfile, fetchProPublicReviews } from '@/lib/data/pros'
 
 function buildDisplayName(profile: NonNullable<Awaited<ReturnType<typeof fetchProPublicProfile>>>) {
   return (
@@ -87,11 +87,7 @@ export default async function ProPublicPage(
   return (
     <>
       <Header />
-      <ProPublicClient
-        proId={id}
-        initialProfile={profile}
-        initialReviews={reviews}
-      />
+      <PublicProView profile={profile} reviews={reviews} />
     </>
   )
 }

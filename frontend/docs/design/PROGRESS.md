@@ -19,7 +19,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [11](specs/11-bons-plans.md) | Bons plans et événements | /bons-plans, /evenements | Fait (fusionnée) | [#226](https://github.com/Troca-nc/troca-safe-export/pull/226) |
 | [12](specs/12-covoiturage.md) | Covoiturage | /covoiturage, /fret | Fait (fusionnée) | [#227](https://github.com/Troca-nc/troca-safe-export/pull/227) |
 | [13](specs/13-services.md) | Services : devis, professionnels, envoi | /services | Fait (fusionnée) | [#228](https://github.com/Troca-nc/troca-safe-export/pull/228) |
-| [14](specs/14-pros.md) | Annuaire et vitrine des pros | /pros, | À faire | — |
+| [14](specs/14-pros.md) | Annuaire et vitrine des pros | /pros, /pro/[id] | En cours (revue visuelle) | — |
 | [15](specs/15-pro-presentation.md) | Présentation de l’offre Pro | /pro | À faire | — |
 | [16](specs/16-devenir-pro.md) | Devenir Pro | /devenir-pro | À faire | — |
 | [17](specs/17-compte-pro.md) | Espace Pro | /pro/espace | À faire | — |
@@ -1192,3 +1192,78 @@ La fixture dédiée couvrira les cinq types et leurs états de chargement, erreu
 - [x] `check-design --changed` sans erreur.
 - [x] Aucune valeur de la maquette recopiée dans un composant.
 - [x] Aucun prix d'envoi calculé côté client sans source serveur.
+
+## 14 — Inventaire (étape 1, sans code)
+
+### Base et références
+
+- Branche isolée `design/14-pros`, worktree `D:\Codex\kalico-worktrees\14-pros`, base `origin/main` au commit de fusion de la fiche 13 (`fdc0179`).
+- Références lues : `14-pros.md`, `DONNEES-DEMO.md`, `frontend/DESIGN.md` §5 et `Pros côté client v2.dc.html`.
+- Historique et PR contrôlés : l'annuaire et la vitrine actuels sont fonctionnels, mais aucune refonte v2 Pros correspondant à cette fiche n'a déjà été livrée.
+- Les profils, produits, créneaux, distances, délais de réponse et statistiques de `renderVals()` sont des exemples de maquette. Ils ne seront pas repris dans le code.
+
+### Fichiers et comportements existants
+
+- `src/app/pros/page.tsx` et `src/app/pros/ProsDirectoryClient.tsx` forment l'annuaire actuel. Le client charge jusqu'à cent pros avec `proApi.list`, puis filtre localement par texte, métier, commune et note. Les listes de métiers et de communes de repli sont toutefois codées dans le composant, l'erreur ne propose pas de nouvelle tentative, et le rendu emploie encore les styles historiques.
+- La vitrine publique existe sous la route canonique `src/app/pro/[id]/`. Son client couvre déjà le héros, le catalogue, les annonces, les réalisations, les avis, la présentation, la demande de devis et la prise de rendez-vous. Il s'agit cependant d'un composant monolithique d'environ neuf cents lignes, avec accès API direct et styles historiques.
+- `src/app/pro/publicStorefrontData.ts` charge le profil et les avis côté serveur, mais les types et la couche de données sont colocalisés dans l'arborescence de route au lieu de `src/types/` et `src/lib/data/`.
+- `src/components/pro/ProQuoteModal.tsx` et `ProBookingModal.tsx` conservent les parcours métier réels. Elles utilisent des overlays personnalisés qui ne ferment pas avec Échap, ne piègent pas le focus et ne le rendent pas au déclencheur. La primitive `src/components/ui/Modal.tsx` fournit déjà ces trois comportements.
+- `src/components/pro/ProCard.tsx` et les liens professionnels de `src/components/services/ServicesPageView.tsx` pointent vers `/pro/[id]`. Ils devront rester cohérents avec la route publique retenue.
+
+### Contrats disponibles et écarts constatés
+
+| Domaine | Disponible | Écart à traiter sans donnée inventée |
+| --- | --- | --- |
+| Annuaire | `GET /api/pros` retourne uniquement les pros actifs, vérifiés et non supprimés, avec identité, entreprise, métier, commune, visuels, description, note, avis, annonces et dernier avis. | L'API ne fournit ni distance, ni délai moyen de réponse, ni zones structurées, ni disponibilité de service. Ces filtres et libellés de la maquette doivent être omis. |
+| Vitrine | `GET /api/pros/:id` fournit profil, catalogue, catégories, annonces, réalisations, avis, paramètres de réservation et créneaux. Les API de devis et de rendez-vous existent déjà. | Le professionnel est adressé par identifiant numérique. Aucun slug de professionnel n'existe dans la base, la réponse ou l'API. |
+| Vérification | Les requêtes d'annuaire, de détail, de devis et d'avis exigent toutes `pro_verified = TRUE` ; le profil public expose donc toujours un pro vérifié. | L'état public « pro non vérifié » demandé par la fiche est inatteignable avec le contrat actuel. Le simuler hors mode démonstration serait trompeur. |
+| Avis | Les avis publiés, leur achat vérifié, les réponses et le total sont disponibles. | L'état « aucun avis » peut être rendu directement lorsque le tableau est vide, sans fixture ni valeur fictive. |
+
+### Sections de la maquette
+
+| Section | Réutilisation | Intervention prévue après validation |
+| --- | --- | --- |
+| Annuaire | `HeaderV2`, `proApi.list`, profils et avis réels. | Recomposer le héros, la recherche, les filtres réellement supportés, le tri, les cartes v2, les squelettes, l'erreur avec nouvelle tentative et l'état vide. |
+| Vitrine publique | Chargement serveur et cinq onglets fonctionnels existants. | Recomposer le héros, les informations de confiance, les onglets Catalogue, Annonces, Réalisations, Avis et À propos avec les tokens v2 et les états vides réels. |
+| Demande de devis | `proApi.requestQuote` et modèle de formulaire personnalisable existants. | Conserver les champs et la soumission, puis intégrer la primitive modale accessible et les états envoi, erreur et succès. |
+| Prise de rendez-vous | Paramètres, services, créneaux et création de réservation existants. | Conserver le calendrier et la soumission, puis intégrer la primitive modale accessible et les états chargement, indisponibilité, erreur et succès. |
+| Responsive | Primitives et breakpoints v2. | Empiler filtres et cartes, rendre les onglets défilables et adapter les modales à 390 px sans débordement. |
+
+### Données et fichiers proposés
+
+- Transformer `src/app/pros/page.tsx` en adaptateur mince et recomposer l'annuaire sous `src/components/pro/`.
+- Recomposer la vitrine actuelle dans `src/app/pro/[id]/page.tsx` et `ProPublicClient.tsx`, car ce sont les fichiers réellement servis aujourd'hui malgré la route différente inscrite dans la fiche.
+- Déplacer les contrats vers `src/types/pro-public.ts` et les lectures/actions vers `src/lib/data/pros.ts`. Ajouter `src/demo/fixtures/pros.ts` uniquement pour le mode démonstration, avec des identités distinctes de la maquette ; aucun composant n'importera directement cette fixture.
+- Adapter `ProCard.tsx`, `ProQuoteModal.tsx` et `ProBookingModal.tsx` ; réutiliser `ui/Modal.tsx` sans modifier son contrat si possible.
+- Ajouter des tests ciblés pour la normalisation, les filtres, les tris et les états sans avis. Aucun changement serveur n'est nécessaire pour les fonctionnalités déjà disponibles.
+
+### QUESTIONS à valider avant code
+
+1. Autoriser la modification de `src/app/pro/[id]/*` et `src/app/pro/publicStorefrontData.ts`, absents de la liste initiale mais indispensables pour refaire la vitrine publique réellement utilisée.
+2. Confirmer le maintien de la route canonique `/pro/[id]`. La route demandée `/pros/[slug]` nécessite un slug professionnel et une évolution serveur, alors que la fiche interdit les changements serveur. Une migration d'URL pourra faire l'objet d'un périmètre séparé.
+3. Autoriser les nouveaux fichiers `src/types/pro-public.ts`, `src/lib/data/pros.ts`, `src/demo/fixtures/pros.ts` et leurs tests ciblés, imposés par les règles de données de la refonte.
+4. Confirmer l'omission des filtres et informations non fournis par l'API : distance, délai de réponse, disponibilité et zones structurées.
+5. Confirmer que l'état « pro non vérifié » sera documenté comme indisponible sur les routes publiques actuelles, au lieu d'être simulé en production. Les états aucun avis, chargement, erreur et nouvelle tentative seront bien implémentés.
+
+Étape 1 uniquement : seul le journal de la fiche 14 a été modifié. Aucun fichier applicatif, fixture ou contrat API n'a été changé. Les étapes 2 à 7 attendent la validation humaine de cet inventaire.
+
+### Réalisation au checkpoint visuel
+
+- `src/app/pros/page.tsx` est désormais un adaptateur vers `src/components/pro/ProsDirectoryView.tsx`. L'annuaire v2 fournit héros, CTA, filtres métier/commune/note, tris, cartes vérifiées, squelettes, erreur avec nouvelle tentative et état vide.
+- La vitrine publique canonique `/pro/[id]` utilise `src/components/pro/PublicProView.tsx`. Elle conserve Catalogue, Annonces, Réalisations, Avis et À propos, ainsi que message, devis, rendez-vous, invitation d'avis et coordonnées publiques.
+- `src/types/pro-public.ts`, `src/lib/data/pros.ts` et `src/lib/prosPresentation.ts` isolent les contrats, la normalisation, les chargements, les filtres et les tris. Les anciens consommateurs de `ProCard` restent compatibles.
+- `src/demo/fixtures/pros.ts` fournit un annuaire et une vitrine de démonstration distincts de la maquette. Aucun composant n'importe directement la fixture.
+- Les modales Devis et Rendez-vous ferment avec Échap, piègent le focus, bloquent le défilement et rendent le focus au déclencheur. L'invitation d'avis utilise directement la primitive `Modal` du design system.
+- Les informations absentes du contrat restent omises : distance, délai de réponse, disponibilité et zones structurées. Aucun état de pro non vérifié n'est simulé sur les routes publiques.
+- Validations réussies : 3 tests ciblés, TypeScript sans erreur, build Next.js de production avec 109 pages, `check-design --changed` avec 0 erreur et 0 avertissement, et `git diff --check`.
+- Le contrôle d'encodage global retrouve uniquement la dette historique déjà connue hors périmètre ; aucun fichier de la fiche 14 n'est signalé. La configuration ESLint actuelle ignore les nouveaux chemins de domaine, tandis que le build Next.js réalise son contrôle de types et se termine avec succès.
+- Prévisualisation locale en données de démonstration : `http://localhost:3014/pros` et `http://localhost:3014/pro/1401`, réponses HTTP 200.
+
+### Critères au checkpoint
+
+- [x] Ressemblance à la maquette à 1440 px : validation humaine reçue le 7 octobre 2026.
+- [x] Aucun débordement à 390 px : validation humaine reçue le 7 octobre 2026.
+- [x] `check-design --changed` sans erreur.
+- [x] Aucune valeur de la maquette recopiée dans un composant.
+- [x] Les données réelles et de démonstration passent par `src/lib/data/`.
+- [x] Les modales se ferment avec Échap et rendent le focus au déclencheur.
