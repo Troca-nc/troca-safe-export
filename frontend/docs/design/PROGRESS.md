@@ -15,7 +15,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [07](specs/07-mon-compte.md) | Mon compte : vue d’ensemble | /profil | Fait (fusionnée) | [#222](https://github.com/Troca-nc/troca-safe-export/pull/222) |
 | [08](specs/08-compte-particulier.md) | Compte particulier : annonces, coups de cœur, alertes, offres | /profil/annonces, /profil/favoris, /profil/alertes, /profil/offres | Fait (fusionnée) | [#223](https://github.com/Troca-nc/troca-safe-export/pull/223) |
 | [09](specs/09-deposer.md) | Déposer une annonce | /deposer | À relire | [#224](https://github.com/Troca-nc/troca-safe-export/pull/224) |
-| [10](specs/10-troc.md) | Troc et trocomètre | /troc | À faire | — |
+| [10](specs/10-troc.md) | Troc et trocomètre | /troc | À relire | [#225](https://github.com/Troca-nc/troca-safe-export/pull/225) |
 | [11](specs/11-bons-plans.md) | Bons plans et événements | /bons-plans, | À faire | — |
 | [12](specs/12-covoiturage.md) | Covoiturage | /covoiturage, | À faire | — |
 | [13](specs/13-services.md) | Services : devis, professionnels, envoi | /services | À faire | — |
@@ -943,3 +943,36 @@ La fixture dédiée couvrira les cinq types et leurs états de chargement, erreu
 7. Valider l'emploi de `ListingCard` uniquement pour vente/troc et d'aperçus métier dédiés pour bon plan, covoiturage et événement.
 
 Étape 1 uniquement : aucun code applicatif, aucune fixture et aucune API n'ont été créés ; aucun contrôle de build n'a été lancé. Les étapes 2 à 7 attendent la validation humaine de cet inventaire.
+## 10 — Réalisation (inventaire validé)
+
+- Base : `origin/main` au commit de fusion de la PR #224 (`2292d8e`), branche isolée `design/10-troc`.
+- Route cible : `/troc`, d'après `10-troc.md`, `DESIGN.md` § 5.2 et la maquette `Troc v2.dc.html`.
+- Existant : la route et le client historique sont présents, ainsi que les composants Trocometer, le catalogue `trocApi`, les annonces du membre via `listingsApi.getMine` et le parcours complet des propositions.
+- API : aucun nouvel endpoint n'est requis. `POST /troc/:id/proposals` accepte déjà l'annonce proposée, le complément, sa direction et le message.
+- Intervention proposée : remplacer l'écran historique par une composition sobre et responsive dans `src/components/troc/`, ajouter une couche de données typée et des fixtures de démonstration, puis conserver les API existantes.
+- Sections : filtres et bascule « compatibles », grille d'annonces avec besoins recherchés, Trocometer collant, choix de l'annonce personnelle, complément automatique ou manuel, proposition, et état guidé lorsqu'aucune annonce personnelle n'est disponible.
+- Calcul : fonction pure testée, tolérance d'équilibre de 10 %, complément arrondi à 500 F, angle borné ; seul l'angle de la balance utilisera un style en ligne.
+- États : chargement squelette, erreur avec nouvelle tentative, liste vide, utilisateur non connecté et absence d'annonce personnelle.
+- Données de démonstration : annonces, souhaits, valeurs et annonces personnelles isolés dans `src/demo/fixtures/troc.ts`, sans valeurs de maquette recopiées dans les composants.
+- Fichiers supplémentaires proposés : `src/types/troc-page.ts`, `src/lib/data/troc.ts`, `src/lib/trocBalance.ts`, tests du calcul et fixtures. Le client historique de `/troc` sera remplacé ou réduit à un adaptateur ; les composants de détail existants restent hors périmètre.
+- Validation attendue avant code : accord sur ce périmètre et sur l'extension de la liste initiale de fichiers aux types, données, fixtures et tests ci-dessus.
+
+### Réalisation au checkpoint visuel
+
+- Route : `src/app/troc/page.tsx` rend désormais `src/components/troc/TrocPageView.tsx` ; le client historique reste non importé afin de préserver les parcours de détail existants.
+- Composants créés : grille sélectionnable, carte Troc v2, balance responsive et panneau Trocomètre collant avec choix de l'annonce personnelle, complément par pas de 500 F, verdict et actions.
+- Données : `src/types/troc-page.ts`, `src/lib/data/troc.ts` et `src/demo/fixtures/troc.ts` isolent les contrats, la normalisation API et les contenus de démonstration. Aucun endpoint backend n'a été ajouté.
+- États couverts : squelettes, erreur avec nouvelle tentative, liste vide, visiteur non connecté, membre sans annonce et confirmation/erreur de proposition.
+- Calcul : `src/lib/trocBalance.ts` applique la tolérance de 10 %, l'arrondi à 500 F et l'angle borné ; `src/lib/trocBalance.test.ts` couvre quatre cas. Le seul style en ligne de la réalisation est l'angle dynamique du fléau.
+- Validations réussies : `npm run lint`, `npx tsc --noEmit`, 4 tests du calcul, build Next.js de production (109 pages), suite backend complète et `node scripts/check-design.mjs --changed` (0 erreur, 1 avertissement attendu pour l'angle dynamique).
+- Prévisualisation : mode démonstration sur `http://localhost:3010/troc`, réponse HTTP 200. Revue humaine validée le 6 octobre 2026.
+- Écart connu : les cartes utilisent le motif de remplacement neutre tant qu'aucune image n'est fournie par l'API ou les fixtures ; aucune image externe n'a été inventée.
+
+### Critères au checkpoint
+
+- [x] Ressemblance à la maquette à 1440 px : validation humaine reçue.
+- [x] Aucun débordement à 390 px : validation humaine reçue.
+- [x] `check-design --changed` sans erreur.
+- [x] Aucune valeur de la maquette recopiée dans un composant.
+- [x] L'angle de la balance est la seule valeur en style en ligne.
+- [x] Calcul d'équilibre pur testé avec une tolérance de 10 %.
