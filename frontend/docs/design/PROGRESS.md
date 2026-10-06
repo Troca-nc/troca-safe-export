@@ -18,7 +18,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [10](specs/10-troc.md) | Troc et trocomètre | /troc | Fait (fusionnée) | [#225](https://github.com/Troca-nc/troca-safe-export/pull/225) |
 | [11](specs/11-bons-plans.md) | Bons plans et événements | /bons-plans, /evenements | Fait (fusionnée) | [#226](https://github.com/Troca-nc/troca-safe-export/pull/226) |
 | [12](specs/12-covoiturage.md) | Covoiturage | /covoiturage, /fret | Fait (fusionnée) | [#227](https://github.com/Troca-nc/troca-safe-export/pull/227) |
-| [13](specs/13-services.md) | Services : devis, professionnels, envoi | /services | À relire | [#228](https://github.com/Troca-nc/troca-safe-export/pull/228) |
+| [13](specs/13-services.md) | Services : devis, professionnels, envoi | /services | Fait (fusionnée) | [#228](https://github.com/Troca-nc/troca-safe-export/pull/228) |
 | [14](specs/14-pros.md) | Annuaire et vitrine des pros | /pros, | À faire | — |
 | [15](specs/15-pro-presentation.md) | Présentation de l’offre Pro | /pro | À faire | — |
 | [16](specs/16-devenir-pro.md) | Devenir Pro | /devenir-pro | À faire | — |
