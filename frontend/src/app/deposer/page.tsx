@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation'
+import PublishFlow from '@/components/listings/publish/PublishFlow'
 
 export default function DeposerPage() {
-  redirect('/annonces/nouvelle')
+  return <PublishFlow />
 }
