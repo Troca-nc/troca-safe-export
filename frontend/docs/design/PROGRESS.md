@@ -16,7 +16,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [08](specs/08-compte-particulier.md) | Compte particulier : annonces, coups de cœur, alertes, offres | /profil/annonces, /profil/favoris, /profil/alertes, /profil/offres | Fait (fusionnée) | [#223](https://github.com/Troca-nc/troca-safe-export/pull/223) |
 | [09](specs/09-deposer.md) | Déposer une annonce | /deposer | À relire | [#224](https://github.com/Troca-nc/troca-safe-export/pull/224) |
 | [10](specs/10-troc.md) | Troc et trocomètre | /troc | À relire | [#225](https://github.com/Troca-nc/troca-safe-export/pull/225) |
-| [11](specs/11-bons-plans.md) | Bons plans et événements | /bons-plans, | À faire | — |
+| [11](specs/11-bons-plans.md) | Bons plans et événements | /bons-plans, /evenements | À relire | — |
 | [12](specs/12-covoiturage.md) | Covoiturage | /covoiturage, | À faire | — |
 | [13](specs/13-services.md) | Services : devis, professionnels, envoi | /services | À faire | — |
 | [14](specs/14-pros.md) | Annuaire et vitrine des pros | /pros, | À faire | — |
@@ -976,3 +976,68 @@ La fixture dédiée couvrira les cinq types et leurs états de chargement, erreu
 - [x] Aucune valeur de la maquette recopiée dans un composant.
 - [x] L'angle de la balance est la seule valeur en style en ligne.
 - [x] Calcul d'équilibre pur testé avec une tolérance de 10 %.
+
+## 11 — Réalisation (inventaire validé)
+
+### Base et références
+
+- Branche isolée `design/11-bons-plans`, worktree `D:\Codex\kalico-worktrees\11-bons-plans`, base `origin/main` au commit de fusion de la fiche 10 (`c0639cc`).
+- Références lues : `11-bons-plans.md`, `DONNEES-DEMO.md`, `frontend/DESIGN.md` et `Bons plans v2.dc.html`.
+- La fiche cite « DESIGN.md §5.2 Liste », mais `frontend/DESIGN.md` définit les formulaires en §5.2 et les listes en §5.3. L'inventaire retient donc §5.1, §5.3 et §5.6 comme références cohérentes avec la maquette.
+- Historique contrôlé : les écrans actuels proviennent des anciens lots fonctionnels (bons plans, calendrier, billetterie) et de corrections transversales. Aucune PR de refonte v2 Bons plans ou Événements n'existe déjà.
+
+### Fichiers existants trouvés
+
+- `src/app/bons-plans/page.tsx` est un client monolithique qui charge directement `bonPlansApi`, mélange données, filtres, suivi d'enseignes et rendu des promotions/événements. Il contient des couleurs littérales, classes historiques interdites, données d'interface locales et de nombreux textes mal encodés. Les erreurs réseau sont transformées en listes vides.
+- `src/app/evenements/page.tsx` est un second client monolithique distinct. Il appelle `eventsApi`, reconstruit un calendrier local, ne possède pas d'état d'erreur explicite et formate les dates sans fixer `Pacific/Noumea`. Il contient également des couleurs littérales, classes historiques et textes mal encodés.
+- `src/components/bon-plans/BonPlanCard.tsx` couvre une partie des cartes promotionnelles, mais mélange normalisation de données et présentation, utilise des styles historiques (`bg-white`, `nc-*`, rayons libres), un emoji de remplacement interdit et calcule l'expiration avec le fuseau implicite du navigateur.
+- `src/app/bons-plans/layout.tsx` et `src/app/evenements/layout.tsx` fournissent déjà les métadonnées correctes et peuvent rester inchangés.
+- `src/lib/api.ts` expose `bonPlansApi.list`, `bonPlansApi.businesses`, les préférences de suivi, ainsi que `eventsApi.list`. Il n'existe aucun domaine Bons plans/Événements dans `src/lib/data/`, `src/demo/fixtures/` ou `src/types/`.
+- Le serveur Bons plans exclut déjà les offres non actives et celles dont `published_until <= NOW()`. Le serveur Événements renvoie les événements `published`, triés par date, mais ne retire pas les dates passées ; cette sélection peut être appliquée dans la couche de données sans modifier l'API.
+
+### Sections de la maquette
+
+| Section | Réutilisation | Intervention prévue après validation |
+| --- | --- | --- |
+| En-tête et héros | `HeaderV2`, footer global, tokens et CTA partagés. | Créer un héros partagé conforme à la maquette, sans compteur inventé ni valeur issue de `renderVals()`. |
+| Onglets, recherche et filtres contextuels | Contrats `bonPlansApi` et `eventsApi`. | Créer une navigation Promotions/Événements utilisable sur les deux routes, recherche typée et filtres issus des données réelles. |
+| Promotions | Contrat public Bons plans et métadonnées d'enseigne. | Refaire la mise en avant, la grille et les cartes en tokens v2 ; fournir chargement, erreur, vide et exclusion défensive des offres expirées. |
+| Colonne enseignes | `bonPlansApi.businesses` et préférences de suivi existantes. | Créer la liste d'enseignes et le CTA professionnel ; conserver le parcours de suivi authentifié sans valeur de maquette. |
+| Événements, vue calendrier | `eventsApi.list`. | Créer un calendrier compact fondé sur les événements réels, avec calculs et libellés explicitement en `Pacific/Noumea`. |
+| Événements, vue agenda | Détails et billetterie existants sous `/evenements/[id]`. | Créer les cartes agenda et filtres, conserver les liens internes/externes et les états chargement, erreur et vide. |
+| Responsive | Grille et composants de layout v2. | Passer de deux colonnes à une colonne, rendre onglets et filtres défilables si nécessaire, sans débordement à 390 px. |
+
+### Données proposées
+
+- Créer `src/types/bon-plans.ts` pour les promotions, enseignes, événements et résultat agrégé de page.
+- Créer `src/lib/data/bon-plans.ts` pour normaliser les réponses des deux API, filtrer défensivement les offres expirées et centraliser le fuseau `Pacific/Noumea`.
+- Créer `src/demo/fixtures/bon-plans.ts` avec identifiants `demo-*`, noms d'enseignes suffixés « (démo) » et contenus distincts des exemples de la maquette.
+- Aucun composant n'importera les fixtures directement. Aucun endpoint, schéma ou service backend ne doit changer.
+
+### QUESTIONS à valider avant code
+
+1. Autoriser l'extension de la liste de fichiers à `src/app/bons-plans/page.tsx` et `src/app/evenements/page.tsx` afin d'en faire de minces adaptateurs vers une vue partagée. Sans ces deux modifications, les nouveaux composants ne peuvent pas devenir les écrans des routes demandées.
+2. Autoriser les nouveaux fichiers `src/types/bon-plans.ts`, `src/lib/data/bon-plans.ts`, `src/demo/fixtures/bon-plans.ts` et leurs tests ciblés, exigés par les règles de données de la refonte.
+3. Confirmer l'interprétation de la référence erronée « §5.2 Liste » comme `frontend/DESIGN.md` §5.3 Page listing, complétée par §5.1 et §5.6.
+
+Étape 1 uniquement : aucun fichier applicatif, aucune fixture et aucune API n'ont été modifiés. Les étapes 2 à 7 attendent la validation humaine de cet inventaire.
+
+### Réalisation au checkpoint visuel
+
+- Les routes `/bons-plans` et `/evenements` sont désormais de minces adaptateurs vers `src/components/bon-plans/BonsPlansPageView.tsx`.
+- La vue partagée reprend le héros, les onglets, la recherche, les filtres issus des données, la mise en avant promotionnelle, la grille, les enseignes, l'agenda et la vue calendrier. Elle couvre chargement, erreur avec nouvelle tentative et listes vides.
+- `src/types/bon-plans.ts`, `src/lib/data/bon-plans.ts` et `src/demo/fixtures/bon-plans.ts` isolent contrats, normalisation API et données de démonstration. Aucun composant n'importe une fixture.
+- Les offres expirées et les événements passés sont retirés défensivement par la couche de données. `src/lib/bonPlansDate.ts` centralise les calculs et formats en `Pacific/Noumea`.
+- Les préférences de suivi d'enseigne passent par la couche de données et conservent le parcours d'authentification existant.
+- Validations réussies : 3 tests de date/expiration, TypeScript sans erreur, `check-design --changed` (0 erreur, 0 avertissement) et `git diff --check`.
+- Le build de production atteint la compilation Next.js, puis reste bloqué par le certificat réseau lors du téléchargement des trois Google Fonts globales ; aucune erreur applicative n'est remontée avant ce blocage.
+- Prévisualisation locale en données de démonstration : `/bons-plans` et `/evenements` répondent HTTP 200 sur `http://localhost:3011`. Revue humaine validée le 6 octobre 2026.
+
+### Critères au checkpoint
+
+- [x] Ressemblance à la maquette à 1440 px : validation humaine reçue.
+- [x] Aucun débordement à 390 px : validation humaine reçue.
+- [x] `check-design --changed` sans erreur.
+- [x] Aucune valeur de la maquette recopiée dans un composant.
+- [x] Dates et comparaisons centralisées en `Pacific/Noumea`.
+- [x] Offres expirées absentes et états chargement/erreur/vide couverts.
