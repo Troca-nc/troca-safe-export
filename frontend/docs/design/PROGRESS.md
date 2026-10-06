@@ -13,7 +13,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [05](specs/05-connexion.md) | Connexion | /connexion, /mot-de-passe-oublie | Fait (fusionnée) | [#220](https://github.com/Troca-nc/troca-safe-export/pull/220) |
 | [06](specs/06-inscription.md) | Inscription | /inscription | Fait (fusionnée) | [#221](https://github.com/Troca-nc/troca-safe-export/pull/221) |
 | [07](specs/07-mon-compte.md) | Mon compte : vue d’ensemble | /profil | Fait (fusionnée) | [#222](https://github.com/Troca-nc/troca-safe-export/pull/222) |
-| [08](specs/08-compte-particulier.md) | Compte particulier : annonces, coups de cœur, alertes, offres | /profil/annonces, /profil/favoris, /profil/alertes, /profil/offres | À relire | — |
+| [08](specs/08-compte-particulier.md) | Compte particulier : annonces, coups de cœur, alertes, offres | /profil/annonces, /profil/favoris, /profil/alertes, /profil/offres | À relire | [#223](https://github.com/Troca-nc/troca-safe-export/pull/223) |
 | [09](specs/09-deposer.md) | Déposer une annonce | /deposer | À faire | — |
 | [10](specs/10-troc.md) | Troc et trocomètre | /troc | À faire | — |
 | [11](specs/11-bons-plans.md) | Bons plans et événements | /bons-plans, | À faire | — |
