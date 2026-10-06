@@ -12,8 +12,8 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [04](specs/04-annonce.md) | Fiche annonce | /annonces/[id] | Fait (fusionnée) | [#219](https://github.com/Troca-nc/troca-safe-export/pull/219) |
 | [05](specs/05-connexion.md) | Connexion | /connexion, /mot-de-passe-oublie | Fait (fusionnée) | [#220](https://github.com/Troca-nc/troca-safe-export/pull/220) |
 | [06](specs/06-inscription.md) | Inscription | /inscription | Fait (fusionnée) | [#221](https://github.com/Troca-nc/troca-safe-export/pull/221) |
-| [07](specs/07-mon-compte.md) | Mon compte : vue d’ensemble | /profil | À relire | — |
-| [08](specs/08-compte-particulier.md) | Compte particulier : annonces, coups de cœur, alertes, offres | /profil/annonces, | À faire | — |
+| [07](specs/07-mon-compte.md) | Mon compte : vue d’ensemble | /profil | Fait (fusionnée) | [#222](https://github.com/Troca-nc/troca-safe-export/pull/222) |
+| [08](specs/08-compte-particulier.md) | Compte particulier : annonces, coups de cœur, alertes, offres | /profil/annonces, /profil/favoris, /profil/alertes, /profil/offres | À relire | [#223](https://github.com/Troca-nc/troca-safe-export/pull/223) |
 | [09](specs/09-deposer.md) | Déposer une annonce | /deposer | À faire | — |
 | [10](specs/10-troc.md) | Troc et trocomètre | /troc | À faire | — |
 | [11](specs/11-bons-plans.md) | Bons plans et événements | /bons-plans, | À faire | — |
@@ -774,3 +774,82 @@ L'inventaire et ses cinq décisions ont été validés : couche de données déd
 - Recette HTTP locale sur le port 3107 : `/profil` répond en 200 pour `active`, `expiring_soon` et `payment_failed`. Les fontes Google utilisent leur repli local en développement lorsque la chaîne de certificats n'est pas disponible ; le build avec certificats système réussit.
 - Le navigateur intégré a reçu l'URL locale. Son contrôle programmatique n'étant pas exposé dans cette session, la comparaison visuelle aux largeurs 1440, 1024, 768 et 390 px reste à confirmer lors de la revue humaine avant fusion.
 - Aucun changement serveur, schéma, secret, paiement, essai, déploiement ou configuration de production.
+
+## 08 — Inventaire (étape 1, sans code)
+
+### Base et références
+
+Branche `design/08-compte-particulier`, créée depuis `origin/main` au commit de fusion de la fiche 07 `3d60195dd42f8c770e450c4db6ac0e9b78c84b15`. Aucune branche distante ni PR `design/08-compte-particulier` existante n'a été trouvée. Références lues : fiche `08-compte-particulier.md`, `DESIGN.md` §5, maquette `Compte particulier v2.dc.html`, routes et composants actuels des annonces, favoris, alertes, offres de prix et propositions de troc.
+
+### Existant et intervention prévue
+
+| Section | Existant trouvé | Intervention prévue après validation |
+| --- | --- | --- |
+| Navigation du compte | `AccountTabs.tsx` est partagé depuis la fiche 01. Seules `/favoris` et `/alertes` existent ; les quatre routes `/profil/*` de la fiche sont absentes. | Créer un shell particulier partagé sous `src/components/profil/` et les quatre routes `/profil/annonces`, `/profil/favoris`, `/profil/alertes`, `/profil/offres`, avec un onglet actif par route. |
+| Mes annonces | `GET /api/listings/user/:id` ne renvoie que les annonces actives. Il omet brouillons, vendues, expirées, favoris reçus, messages, date d'expiration et actions de renouvellement. Les actions modifier, supprimer et marquer vendue existent ; le renouvellement est réservé aux Pros. | Ajouter un endpoint authentifié « mes annonces » couvrant tous les statuts et statistiques nécessaires, plus une action de renouvellement pour particulier respectant la limite active. Cartes, filtres, conseil et retours d'action seront construits sur ces données réelles. |
+| Emplacements utilisés | La limite gratuite est déjà imposée côté serveur par `assertActiveListingCapacity`; le nombre actif est disponible. | Présenter les emplacements comme la capacité d'annonces actives, calculée sur le résultat réel, sans recopier les chiffres de maquette. |
+| Coups de cœur | `/favoris` utilise un store optimiste, mais son hydratation appelle des routes `/api/favoris` absentes. `GET /api/users/me/favoris` existe, mais exclut les annonces vendues. Aucune collection persistante ni valeur de prix au moment de l'ajout n'existe. | Charger les favoris via la couche données, regrouper les collections comme filtres de catégories réelles, inclure les annonces vendues afin que « masquer vendus » fonctionne et conserver le retrait optimiste avec retour visible. |
+| Baisse de prix | Aucun historique de prix, `previous_price` ou prix sauvegardé dans `favoris` n'existe. | Ne jamais déduire une baisse. La fixture pourra montrer cet état, mais la production n'affichera le badge que si une donnée serveur fiable est ajoutée. Une migration éventuelle reste une décision distincte. |
+| Alertes | `AlertsManager.tsx`, `useAlerts`, `alertsApi` et les endpoints liste, mise à jour, pause et suppression existent. L'API fournit fréquence, filtres et nombre total, mais pas les annonces récentes ni un choix de canal ; l'envoi actuel est par e-mail. | Recomposer l'interface avec les actions existantes et charger les résultats récents d'une alerte sélectionnée via la recherche d'annonces. Afficher « E-mail » comme canal réel, sans faux contrôle de notification push. |
+| Offres de prix | Le modèle `message_offers` et les actions accepter, refuser et contre-proposer existent dans `offers.route.js`, mais le frontend n'expose que la création et le serveur ne fournit qu'une liste par conversation. | Ajouter un endpoint agrégé des offres reçues par le vendeur et les méthodes de réponse dans la couche données. Aucun nouveau modèle n'est nécessaire. |
+| Propositions de troc | `GET /api/troc/proposals/received` et les actions accepter, refuser et contre-proposer existent déjà, avec hydratation des annonces proposées et complément XPF. | Normaliser ces propositions avec les offres de prix dans une union typée et rendre la balance uniquement depuis les valeurs réelles disponibles. |
+| États et actions | Les anciennes pages gèrent quelques vides et chargements, mais pas un shell commun ni une erreur avec Réessayer partout. | Ajouter squelettes aux dimensions finales, états vides avec action, erreur avec Réessayer, confirmation/erreur immédiate pour chaque mutation et invalidation ciblée des données. |
+
+### Données, composants et routes
+
+Créer `src/types/personal-account.ts`, `src/lib/data/personal-account.ts` et `src/demo/fixtures/personal-account.ts`. Les composants resteront sous `src/components/profil/` : shell, annonces, favoris, alertes, offres, cartes et modales d'action. Aucun composant n'importera directement la fixture.
+
+Les quatre routes seront de petits points d'entrée sous `src/app/profil/`. La navigation conservera `/profil` pour la vue d'ensemble et utilisera les quatre routes demandées pour les onglets particuliers. Les valeurs de démonstration porteront des identifiants `demo-*` et des libellés « (démo) ».
+
+### Extensions de périmètre nécessaires
+
+Les fichiers serveur ne figurent pas dans la liste initiale, mais les sections demandées ne peuvent pas être réalisées honnêtement sans eux :
+
+- `backend/src/routes/annonces.js` et tests associés : liste authentifiée de toutes les annonces personnelles avec statistiques et renouvellement particulier.
+- `backend/src/routes/users.js` et tests associés : favoris incluant les annonces vendues, avec statut courant.
+- `backend/src/routes/offers.route.js` et tests associés : liste agrégée des offres de prix reçues.
+- `frontend/src/app/favoris/page.tsx` et `src/app/alertes/page.tsx` : conserver les anciennes URL comme compatibilité vers les nouveaux onglets pour un utilisateur connecté ; préserver le parcours invité des favoris.
+
+La couche `personal-account` peut appeler les endpoints via le client `api` existant ; aucune modification de `src/lib/api.ts` n'est requise. `AlertsManager.tsx` sera remplacé ou adapté pour recevoir données et actions par props. `SellerStatsDashboard.tsx`, orienté Pro, ne sera pas utilisé ni modifié dans la fiche particulière.
+
+### QUESTIONS de périmètre avant code
+
+1. Valider les extensions serveur et les deux anciennes routes frontend listées ci-dessus, indispensables pour les statuts d'annonces, les favoris vendus et la liste agrégée des offres reçues.
+2. Valider le renouvellement d'une annonce particulière expirée pour 60 jours, soumis à la limite d'annonces actives déjà appliquée par le serveur.
+3. Valider que les « collections » de favoris sont des filtres dynamiques par catégorie, sans créer de modèle de collection persistant absent de la fiche serveur.
+4. Valider que le canal des alertes est affiché comme « E-mail » et non modifiable, car aucun canal push par alerte n'existe actuellement.
+5. Décider pour la baisse de prix : recommandation sans migration, donc badge uniquement en fixture tant qu'aucune preuve serveur n'existe ; l'alternative est une migration de la table `favoris` pour mémoriser le prix lors de l'ajout, qui exige une autorisation explicite de schéma.
+
+Étape 1 uniquement : aucun code applicatif, endpoint, fixture ou schéma n'a été modifié ; aucun build n'a été lancé. Les étapes 2 à 7 attendent la validation humaine de cet inventaire et de ces extensions.
+
+## 08 — Livraison des étapes 2 à 7 (2026-10-06)
+
+### Réalisation
+
+- Quatre routes dédiées : `/profil/annonces`, `/profil/favoris`, `/profil/alertes` et `/profil/offres`, avec le shell particulier et les onglets partagés.
+- Mes annonces : tous les statuts réels, compteurs de vues, favoris et conversations, expiration, quota actif, filtres, états vides et actions modifier, vendre, renouveler ou supprimer.
+- Coups de cœur : chargement serveur, collections dynamiques par catégorie, filtre des annonces vendues et retrait optimiste avec restauration sur erreur. Le badge de baisse de prix reste exclusivement dans la fixture, conformément à la validation sans migration.
+- Alertes : activation, pause, fréquence, canal réel « E-mail », suppression et résultats récents chargés par la recherche d'annonces.
+- Offres reçues : agrégation des offres de prix et propositions de troc, balance rendue seulement quand les valeurs réelles existent, réponses accepter, refuser et contre-proposer.
+- Compatibilité : `/favoris` conserve le parcours invité et redirige un membre connecté ; `/alertes` redirige un membre connecté vers le nouvel onglet.
+- Démonstration : données isolées dans `src/demo/fixtures/personal-account.ts`, identifiants `demo-*` et libellés « (démo) ». Aucun composant n'importe directement cette fixture.
+
+### Serveur
+
+- `GET /api/listings/mine` renvoie les annonces du propriétaire, leurs statistiques et la capacité active calculée avec la règle commerciale commune.
+- `POST /api/listings/:id/renew` republie uniquement une annonce expirée pour 60 jours, après contrôle de propriété et de quota.
+- `GET /api/users/me/favoris` inclut désormais les favoris vendus mais exclut toujours les annonces supprimées.
+- `GET /api/messages/offers/received` agrège uniquement les offres envoyées par les acheteurs au vendeur connecté. Les routes d'offres existantes utilisent désormais le préfixe `/offers` déjà consommé par le frontend.
+- Aucun schéma ou modèle persistant n'a été ajouté.
+
+### Validation
+
+- `npm run lint` : réussi. La configuration ESLint du dépôt cible les fondations ; les fichiers métier sont validés par TypeScript, build et `check-design`.
+- `npx tsc --noEmit` : réussi.
+- `npm run build` avec certificats système : réussi, 109 routes générées ; les quatre nouvelles routes produisent environ 149 B chacune et 164 kB au premier chargement partagé.
+- `npm test` backend : réussi, y compris les quatre nouveaux contrats de routes du compte particulier.
+- `node frontend/scripts/check-design.mjs --changed` : réussi, 12 fichiers inspectés, zéro erreur et zéro avertissement.
+- `git diff --check` : réussi ; le scan mojibake ciblé des nouveaux fichiers ne retourne aucun résultat.
+- Recette HTTP locale sur le port 3108 : les quatre routes répondent en 200 en mode démonstration.
+- L'aperçu `/profil/annonces` a été envoyé au navigateur intégré. Son contrôle programmatique n'étant pas exposé dans cette session, la comparaison humaine finale aux largeurs 1440, 1024, 768 et 390 px reste requise avant fusion.
+- Aucun secret, paiement, essai, déploiement ou configuration de production n'a été modifié.

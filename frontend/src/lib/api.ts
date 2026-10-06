@@ -346,6 +346,11 @@ export const listingsApi = {
     () => api.get(`/listings/user/${userId}`, { params }),
     CACHE_TTL.short,
   ),
+  getMine: () => cachedGet(
+    buildCacheKey('listings.mine', '/listings/mine'),
+    () => api.get('/listings/mine'),
+    CACHE_TTL.short,
+  ),
   create: async (data: object) => {
     const res = await api.post('/listings', data)
     invalidateApiCache('listings.')
@@ -362,6 +367,12 @@ export const listingsApi = {
     const res = await api.patch(`/listings/${id}/status`, data)
     invalidateApiCache('listings.')
     invalidateApiCache('messages.')
+    return res
+  },
+  renew: async (id: string | number) => {
+    const res = await api.post(`/listings/${id}/renew`)
+    invalidateApiCache('listings.')
+    invalidateApiCache('stats.')
     return res
   },
   delete: async (id: string, reason = 'other') => {
@@ -464,6 +475,23 @@ export const messagesApi = {
   },
   makeOffer: (convId: string | number, amount_xpf: number) =>
     api.post('/messages/offers', { conv_id: Number(convId), amount_xpf }),
+  getOffersReceived: () => cachedGet(
+    buildCacheKey('messages.offersReceived', '/messages/offers/received'),
+    () => api.get('/messages/offers/received'),
+    CACHE_TTL.short,
+  ),
+  respondToOffer: async (
+    offerId: string | number,
+    response: 'accepted' | 'declined' | 'countered',
+    counterAmount?: number,
+  ) => {
+    const res = await api.post(`/messages/offers/${offerId}/respond`, {
+      response,
+      ...(response === 'countered' ? { counter_amount: counterAmount } : {}),
+    })
+    invalidateApiCache('messages.')
+    return res
+  },
   sendMessage: (convId: string, content: string) => {
     if (isDemoMode()) {
       showDemoToast('Dï¿½sactivï¿½ en mode dï¿½mo')

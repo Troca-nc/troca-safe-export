@@ -163,7 +163,7 @@ router.get('/me/favoris', authenticate, async (req, res, next) => {
     const offset   = (pageNum - 1) * pageSize;
 
     const result = await query(
-      `SELECT a.id, a.titre, a.prix, a.condition, a.created_at,
+      `SELECT a.id, a.titre, a.prix, a.condition, a.created_at, a.status, a.expires_at,
               cat.name AS category_name, com.name AS commune_name,
               u.id AS seller_id, u.prenom AS seller_prenom, u.nom AS seller_nom,
               u.avatar_url AS seller_avatar,
@@ -175,7 +175,7 @@ router.get('/me/favoris', authenticate, async (req, res, next) => {
               f.created_at AS favorited_at,
               (SELECT thumbnail_url FROM annonce_images WHERE annonce_id = a.id AND is_cover = TRUE LIMIT 1) AS cover_image
        FROM favoris f
-       JOIN annonces a  ON a.id = f.annonce_id AND a.deleted_at IS NULL AND a.status = 'active'
+       JOIN annonces a  ON a.id = f.annonce_id AND a.deleted_at IS NULL AND a.status <> 'deleted'
        LEFT JOIN categories cat ON cat.id = a.category_id
        LEFT JOIN communes com   ON com.id = a.commune_id
        LEFT JOIN users u       ON u.id = a.user_id
