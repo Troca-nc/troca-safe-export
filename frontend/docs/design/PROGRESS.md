@@ -14,10 +14,10 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [06](specs/06-inscription.md) | Inscription | /inscription | Fait (fusionnée) | [#221](https://github.com/Troca-nc/troca-safe-export/pull/221) |
 | [07](specs/07-mon-compte.md) | Mon compte : vue d’ensemble | /profil | Fait (fusionnée) | [#222](https://github.com/Troca-nc/troca-safe-export/pull/222) |
 | [08](specs/08-compte-particulier.md) | Compte particulier : annonces, coups de cœur, alertes, offres | /profil/annonces, /profil/favoris, /profil/alertes, /profil/offres | Fait (fusionnée) | [#223](https://github.com/Troca-nc/troca-safe-export/pull/223) |
-| [09](specs/09-deposer.md) | Déposer une annonce | /deposer | À relire | [#224](https://github.com/Troca-nc/troca-safe-export/pull/224) |
-| [10](specs/10-troc.md) | Troc et trocomètre | /troc | À relire | [#225](https://github.com/Troca-nc/troca-safe-export/pull/225) |
-| [11](specs/11-bons-plans.md) | Bons plans et événements | /bons-plans, /evenements | À relire | — |
-| [12](specs/12-covoiturage.md) | Covoiturage | /covoiturage, | À faire | — |
+| [09](specs/09-deposer.md) | Déposer une annonce | /deposer | Fait (fusionnée) | [#224](https://github.com/Troca-nc/troca-safe-export/pull/224) |
+| [10](specs/10-troc.md) | Troc et trocomètre | /troc | Fait (fusionnée) | [#225](https://github.com/Troca-nc/troca-safe-export/pull/225) |
+| [11](specs/11-bons-plans.md) | Bons plans et événements | /bons-plans, /evenements | Fait (fusionnée) | [#226](https://github.com/Troca-nc/troca-safe-export/pull/226) |
+| [12](specs/12-covoiturage.md) | Covoiturage | /covoiturage, /fret | À relire | — |
 | [13](specs/13-services.md) | Services : devis, professionnels, envoi | /services | À faire | — |
 | [14](specs/14-pros.md) | Annuaire et vitrine des pros | /pros, | À faire | — |
 | [15](specs/15-pro-presentation.md) | Présentation de l’offre Pro | /pro | À faire | — |
@@ -1041,3 +1041,80 @@ La fixture dédiée couvrira les cinq types et leurs états de chargement, erreu
 - [x] Aucune valeur de la maquette recopiée dans un composant.
 - [x] Dates et comparaisons centralisées en `Pacific/Noumea`.
 - [x] Offres expirées absentes et états chargement/erreur/vide couverts.
+
+## 12 — Inventaire (étape 1, sans code)
+
+### Base et références
+
+- Branche isolée `design/12-covoiturage`, worktree `D:\Codex\kalico-worktrees\12-covoiturage`, base `origin/main` au commit de fusion de la fiche 11 (`54631b3`).
+- Références lues : `12-covoiturage.md`, `DONNEES-DEMO.md`, `frontend/DESIGN.md` et `Covoiturage v2.dc.html`.
+- La fiche cite « DESIGN.md §5.2 Liste », mais le §5.2 décrit les formulaires et le §5.3 les pages de liste. L'inventaire retient donc §5.1, §5.2, §5.3 et §5.6 : cette page combine recherche, liste et publication.
+- Historique et PR contrôlés : les fonctionnalités actuelles viennent des lots Covoiturage, réservation, récurrence, Transport pro et Fret. Aucune refonte v2 correspondant à la fiche 12 n'a déjà été livrée.
+
+### Fichiers existants trouvés
+
+- `src/app/covoiturage/page.tsx` est un client monolithique de plus de 1 200 lignes. Il contient déjà les trois onglets de la maquette (recherche, publication, transport pro), mais mélange types, normalisation, appels API, formulaires et rendu. Les erreurs réseau sont transformées en listes vides ; le fichier contient des textes mal encodés, couleurs littérales, `bg-white`, classes `nc-*`, rayons libres et tailles inférieures aux minima v2.
+- `src/app/fret/page.tsx` est un second client monolithique d'environ 1 000 lignes. Il gère trois catégories de demande, l'estimation, le tableau de bord, les offres, la sélection, la livraison et les avis. Cette route est citée par la fiche, mais aucune section Fret n'existe dans la maquette Covoiturage.
+- `src/components/covoiturage/BookingButton.tsx`, `PassengerProfileModal.tsx` et `RideReviewModal.tsx` portent les parcours fonctionnels de réservation et d'avis. Ils doivent rester compatibles ; seule leur intégration à la nouvelle carte est nécessaire pour la page de liste.
+- `src/components/transport/TransporterCard.tsx` possède le bon contrat métier et les bons liens de détail/devis, mais son rendu emploie des couleurs littérales, `bg-white`, des rayons libres et des textes mal encodés. `AvailabilityCalendar.tsx` et `AvailabilityManager.tsx` concernent les pages de détail et restent hors périmètre.
+- Les routes de profil conducteur, détail transporteur, réservations et mes courses existent déjà. Leurs écrans ne sont pas demandés par la fiche 12 et ne nécessitent pas de modification.
+
+### Données et contrats existants
+
+- `covoiturageApi.list/create/book` et les opérations de réservation couvrent recherche, publication et réservation. Les trajets fournissent date, heure, places, prix, conducteur, confiance, confort, récurrence, vérification, trajet direct/étapes et mode de réservation.
+- `covoitAlertsApi` couvre la création et la gestion des alertes trajet. Le CTA d'état vide peut conserver le parcours authentifié vers `/profil/alertes-trajet`, sans nouvel endpoint.
+- `proTransportApi.list` fournit les transporteurs, types, zones, capacité, tarifs, disponibilité et vérification nécessaires au troisième onglet.
+- `deliveryApi`, également exportée comme `fretApi`, couvre estimation, création de demande, tableau de bord, offres, sélection et livraison pour `/fret`.
+- Aucun changement serveur, route API ou schéma n'est nécessaire.
+- Les statistiques du héros, compteurs d'onglets et axes fréquentés de `renderVals()` sont des exemples. Les compteurs et axes affichables devront être dérivés des réponses réelles ; sinon ils seront omis.
+- La fourchette de prix conseillée n'a pas d'API dédiée. Elle peut être calculée seulement à partir des trajets réellement chargés pour le même axe ; en l'absence d'échantillon, le bloc ne sera pas affiché.
+
+### Sections de la maquette
+
+| Section | Réutilisation | Intervention prévue après validation |
+| --- | --- | --- |
+| Héros et recherche | `HeaderV2`, `covoiturageApi.list`. | Créer le héros clair, la recherche départ/arrivée/date/passagers et l'inversion d'axe. Dériver les axes fréquents des résultats, sans reprendre les compteurs de la maquette. |
+| Onglets collants | État d'onglet et paramètre `?mode=publish` existants. | Créer les trois onglets de la maquette avec comportement responsive et conservation du lien direct vers la publication. |
+| Trouver un trajet | Recherche API, `BookingButton`, profil conducteur et alertes existants. | Créer les cartes v2, filtres femmes/vérifiés, tri, conducteurs dérivés des résultats, sécurité, squelettes, erreur et état vide avec alerte. |
+| Proposer un trajet | `covoiturageApi.create`, récurrence et modes auto/manuel existants. | Recomposer le formulaire avec champs v2, aperçu issu du formulaire et état non connecté. Aucun prix conseillé ne sera inventé. |
+| Transport pro | `proTransportApi.list`, détails et devis existants. | Refaire la grille et `TransporterCard` selon la maquette, avec filtres issus du contrat et états chargement/erreur/vide. |
+| Fret | Flux complet de `src/app/fret/page.tsx` et `fretApi`. | Conserver le flux métier dans une vue dédiée alignée sur les tokens et états v2, sans l'ajouter comme quatrième onglet absent de la maquette. |
+| Responsive | Breakpoints et composants v2. | Empiler recherche, cartes, formulaires et colonnes latérales ; navigation d'onglets défilable sur mobile, sans débordement à 390 px. |
+
+### Fichiers proposés
+
+- Transformer `src/app/covoiturage/page.tsx` et `src/app/fret/page.tsx` en adaptateurs minces vers des composants de domaine.
+- Créer `src/types/covoiturage.ts`, `src/lib/data/covoiturage.ts` et `src/demo/fixtures/covoiturage.ts` pour les trajets, transporteurs et valeurs dérivées.
+- Créer les composants de page, cartes et formulaires nécessaires sous `src/components/covoiturage/` et adapter `src/components/transport/TransporterCard.tsx`.
+- Créer des tests ciblés pour le format d'heure `7 h 30`, le tri et les valeurs dérivées. Les actions de réservation et publication continueront d'utiliser les API existantes via la couche de données.
+- Pour `/fret`, créer les types, données et fixtures dédiés seulement si le flux actuel ne peut pas être extrait sans mélange de domaine. Aucun composant n'importera directement `src/demo/`.
+
+### QUESTIONS à valider avant code
+
+1. Autoriser la modification de `src/app/covoiturage/page.tsx` et `src/app/fret/page.tsx`, absentes de la liste initiale mais indispensables pour raccorder les nouvelles vues aux deux routes demandées.
+2. Autoriser les nouveaux fichiers de types, couche de données, fixtures et tests ciblés décrits ci-dessus, imposés par les règles de données de la refonte.
+3. Confirmer le traitement de `/fret` comme vue dédiée conservant son flux existant et adoptant le langage visuel v2, sans inventer un quatrième onglet dans la maquette Covoiturage.
+4. Confirmer l'interprétation de la référence erronée « §5.2 Liste » comme une combinaison des §5.2 Formulaire et §5.3 Listing.
+
+Étape 1 uniquement : seuls le statut de la fiche 12 et les statuts fusionnés des fiches 09 à 11 ont été corrigés dans ce journal. Aucun fichier applicatif, fixture ou contrat API n'a été modifié. Les étapes 2 à 7 attendent la validation humaine de cet inventaire.
+
+### Réalisation au checkpoint visuel
+
+- `src/app/covoiturage/page.tsx` et `src/app/fret/page.tsx` sont désormais des adaptateurs minces vers les vues du domaine. `/fret` conserve sa redirection historique vers la route canonique `/envoi-livraison`.
+- La vue Covoiturage couvre le héros et la recherche, les trois onglets collants, les cartes trajet, les filtres femmes/vérifiés, le tri, l'état vide avec alerte, le formulaire de publication avec récurrence et la grille Transport pro.
+- La réservation automatique et la demande manuelle avec message sont conservées dans `RideCard`. Les axes fréquents et les compteurs sont dérivés des réponses chargées.
+- La vue Fret conserve la création de demande, l'estimation, l'historique, les offres, leur sélection et la confirmation de livraison dans une interface v2 dédiée.
+- `src/types/covoiturage.ts`, `src/types/freight.ts`, `src/lib/data/covoiturage.ts`, `src/lib/data/freight.ts` et leurs fixtures isolent les contrats, normalisations, actions et données de démonstration. Aucun composant n'importe de fixture.
+- `src/lib/covoiturageFormat.ts` centralise le format horaire demandé et les tris en `Pacific/Noumea` ; deux tests purs couvrent `7 h 30`, `7 h` et l'ordre chronologique.
+- États couverts : squelettes, erreur avec nouvelle tentative, listes vides, visiteur non connecté, publication, réservation et suivi de demande.
+- Validations réussies : 2 tests, TypeScript sans erreur, build Next.js de production (109 pages), `check-design --changed` (0 erreur, 0 avertissement), `git diff --check`, `/covoiturage` HTTP 200 et `/envoi-livraison` HTTP 200. `/fret` répond 308 puis 200 après sa redirection canonique. Le build signale seulement qu'ESLint n'est pas installé dans les dépendances locales disponibles.
+- Revue humaine des rendus 1440 px et 390 px validée le 6 octobre 2026.
+
+### Critères au checkpoint
+
+- [x] Ressemblance à la maquette à 1440 px : validation humaine reçue.
+- [x] Aucun débordement à 390 px : validation humaine reçue.
+- [x] `check-design --changed` sans erreur.
+- [x] Aucune valeur de la maquette recopiée dans un composant.
+- [x] Les heures sont affichées au format `7 h 30`.
+- [x] Les données réelles et de démonstration passent par `src/lib/data/`.
