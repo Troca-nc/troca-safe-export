@@ -11,8 +11,18 @@ import { bonPlansApi, metaApi } from '@/lib/api'
 import { useAutosave, useBeforeUnload } from '@/hooks/useAutosave'
 import { useAuthStore } from '@/store/authStore'
 import { useAuthActionStore } from '@/store/authActionStore'
+import PublishFlow from '@/components/listings/publish/PublishFlow'
 
 export default function NewListingPage() {
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    window.history.replaceState(window.history.state, '', `/deposer${window.location.search}`)
+  }, [])
+
+  return <PublishFlow />
+}
+
+function LegacyNewListingPage() {
   const [mode, setMode] = useState<'wizard' | 'simple' | null>(null)
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const userId = useAuthStore((state) => state.user?.id ?? 'guest')

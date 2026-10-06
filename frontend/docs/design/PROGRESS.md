@@ -13,8 +13,8 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [05](specs/05-connexion.md) | Connexion | /connexion, /mot-de-passe-oublie | Fait (fusionnée) | [#220](https://github.com/Troca-nc/troca-safe-export/pull/220) |
 | [06](specs/06-inscription.md) | Inscription | /inscription | Fait (fusionnée) | [#221](https://github.com/Troca-nc/troca-safe-export/pull/221) |
 | [07](specs/07-mon-compte.md) | Mon compte : vue d’ensemble | /profil | Fait (fusionnée) | [#222](https://github.com/Troca-nc/troca-safe-export/pull/222) |
-| [08](specs/08-compte-particulier.md) | Compte particulier : annonces, coups de cœur, alertes, offres | /profil/annonces, /profil/favoris, /profil/alertes, /profil/offres | À relire | [#223](https://github.com/Troca-nc/troca-safe-export/pull/223) |
-| [09](specs/09-deposer.md) | Déposer une annonce | /deposer | À faire | — |
+| [08](specs/08-compte-particulier.md) | Compte particulier : annonces, coups de cœur, alertes, offres | /profil/annonces, /profil/favoris, /profil/alertes, /profil/offres | Fait (fusionnée) | [#223](https://github.com/Troca-nc/troca-safe-export/pull/223) |
+| [09](specs/09-deposer.md) | Déposer une annonce | /deposer | À relire | [#224](https://github.com/Troca-nc/troca-safe-export/pull/224) |
 | [10](specs/10-troc.md) | Troc et trocomètre | /troc | À faire | — |
 | [11](specs/11-bons-plans.md) | Bons plans et événements | /bons-plans, | À faire | — |
 | [12](specs/12-covoiturage.md) | Covoiturage | /covoiturage, | À faire | — |
@@ -733,6 +733,51 @@ La fixture dédiée isolera toutes les valeurs de démonstration et couvrira les
 
 Étape 1 uniquement : aucun code applicatif, aucune fixture et aucune API n'ont été créés ; aucun contrôle de build n'a été lancé. Les étapes 2 à 7 attendent la validation humaine de cet inventaire.
 
+## 09 — Livraison des étapes 2 à 7 (2026-10-06)
+
+L'inventaire et ses sept décisions ont été validés : `/deposer` canonique, assistant commun aux cinq types, réutilisation des API sans migration, boosts après création, absence de prix covoiturage inventé, omission des champs non persistés et aperçus adaptés à chaque métier.
+
+### Résultat
+
+- Parcours : choix vente, troc, bon plan, covoiturage ou événement ; rail et nombre d'étapes suivent la configuration typée de chaque type.
+- Vente et troc : photos optimisées, catégorie réelle, état, description, prix ou valeur, catégories recherchées, souhait libre, complément maximal, commune et modes de remise. Le contrat troc envoie désormais les champs requis par le serveur.
+- Bon plan : offre, réduction, validité, canal et contact sont traduits vers l'API existante. Le paiement retourné par le serveur est proposé sur la confirmation et n'est jamais simulé en production.
+- Covoiturage : départ, arrivée, arrêts, date, récurrence hebdomadaire, places, participation, préférences et véhicule utilisent le contrat existant. Aucun prix conseillé non sourcé n'est affiché.
+- Événement : informations, date, heure, lieu, commune, accès, prix ou inscription utilisent les champs réellement persistés. Les attributs sans contrat serveur restent omis comme validé.
+- États : autosauvegarde par utilisateur et type, restauration ou abandon du brouillon, protection de sortie, squelette, erreur avec Réessayer, liste accessible des champs manquants et confirmation sans perte de contexte.
+- Aperçu : le vrai `ListingCard` est utilisé pour vente/troc ; les trois autres domaines ont des cartes adaptées à leurs informations propres.
+- Compatibilité : `/deposer` affiche le nouveau parcours. `/annonces/nouvelle` conserve le code historique sans suppression risquée, affiche le même parcours et normalise l'URL vers `/deposer` en conservant la query string.
+- Démonstration : fixtures isolées pour les cinq types ; les créations `demo-*` ne déclenchent ni API, ni paiement, ni boost.
+
+### Fichiers touchés
+
+- Routes : `src/app/deposer/page.tsx`, `src/app/annonces/nouvelle/page.tsx`.
+- Assistant : `src/components/listings/publish/PublishFlow.tsx`, `PublishTypeChooser.tsx`, `PublishStepRail.tsx`, `PublishStepFields.tsx`, `PublishPreview.tsx`, `publishingConfig.ts`, `publishingValidation.ts`.
+- Données : `src/types/publishing.ts`, `src/lib/data/publishing.ts`, `src/demo/fixtures/publishing.ts`.
+- Suivi : `docs/design/PROGRESS.md`.
+
+### Critères d'acceptation
+
+- [ ] Ressemblance section par section à 1440 px : structure, hiérarchie et tokens reproduits ; comparaison visuelle humaine finale requise.
+- [ ] Aucun débordement à 390 px : grilles repliables, rail horizontal et actions flexibles implémentés ; vérification visuelle humaine finale requise.
+- [x] `check-design --changed` : 12 fichiers inspectés, zéro erreur et zéro avertissement.
+- [x] Aucune valeur de maquette recopiée dans un composant : exemples uniquement dans la fixture de démonstration ; les libellés d'interface et options métier restent dans la configuration.
+- [x] Un seul assistant et un seul rendu de champs partagés ; types, étapes et groupes de champs sont pilotés par la configuration, sans cinq formulaires dupliqués.
+- [x] Le vrai `ListingCard` rend l'aperçu vente/troc.
+
+### Validation et limites
+
+- `npm run lint` : réussi.
+- `npx tsc --noEmit` : réussi.
+- `npm run build` avec certificats système : réussi, 109 routes générées ; `/deposer` produit 1,94 kB et 182 kB au premier chargement.
+- Suite backend complète : réussie après installation des dépendances verrouillées du worktree.
+- `node scripts/check-design.mjs --changed` : réussi, zéro erreur et zéro avertissement.
+- `git diff --check` : réussi.
+- Recette HTTP locale sur le port 3109 : `/deposer`, les cinq paramètres `type` et `/annonces/nouvelle?mode=simple` répondent en 200.
+- L'aperçu vente a été envoyé au navigateur intégré. Son contrôle programmatique n'étant pas exposé dans cette session, la comparaison humaine finale aux largeurs 1440, 1024, 768 et 390 px reste requise avant fusion.
+- Les photos bon plan/événement, la date de fin et le badge familial d'événement, ainsi que le prix conseillé covoiturage restent volontairement absents faute de contrat serveur validé.
+- Aucun endpoint, schéma, secret, paiement réel, essai, déploiement ou configuration de production n'a été modifié.
+
 ## 07 — Livraison des étapes 2 à 7 (2026-10-05)
 
 L'inventaire et ses cinq décisions ont été validés : couche de données dédiée, alerte unique sur `/profil`, variantes d'abonnement réservées à la démonstration, sécurité limitée aux preuves disponibles et remplacement de l'ancien écran d'édition par la vue d'ensemble.
@@ -853,3 +898,48 @@ La couche `personal-account` peut appeler les endpoints via le client `api` exis
 - Recette HTTP locale sur le port 3108 : les quatre routes répondent en 200 en mode démonstration.
 - L'aperçu `/profil/annonces` a été envoyé au navigateur intégré. Son contrôle programmatique n'étant pas exposé dans cette session, la comparaison humaine finale aux largeurs 1440, 1024, 768 et 390 px reste requise avant fusion.
 - Aucun secret, paiement, essai, déploiement ou configuration de production n'a été modifié.
+
+## 09 — Inventaire (étape 1, sans code)
+
+### Base et références
+
+Branche `design/09-deposer`, créée depuis `origin/main` au commit de fusion de la fiche 08 `c2371663554edc6652c90d3631513ffed51d36ce`. Aucune branche distante ni PR `design/09-deposer` existante n'a été trouvée. Références lues : fiche `09-deposer.md`, `DESIGN.md` §4, maquette `Déposer une annonce v2.dc.html`, route `/deposer`, parcours `/annonces/nouvelle`, composant `PublishWizard`, cartes d'annonces et contrats serveur des annonces, trocs, bons plans, événements, covoiturage et boosts.
+
+### Existant et intervention prévue
+
+| Section | Existant trouvé | Intervention prévue après validation |
+| --- | --- | --- |
+| Route et en-tête | `src/app/deposer/page.tsx` redirige vers `/annonces/nouvelle`. Le vrai écran est un composant client de plus de 600 lignes dans `src/app/annonces/nouvelle/page.tsx`; il monte déjà `Header` en variante réduite et ouvre la connexion si nécessaire. | Rendre `/deposer` canonique, conserver `/annonces/nouvelle` comme redirection de compatibilité en préservant les paramètres utiles et réutiliser `Header` sans le modifier. |
+| Choix du type | Aucun sélecteur commun n'existe. Le parcours normal ne crée que vente/troc et `?mode=simple` ouvre un second formulaire monolithique de bon plan. | Créer un orchestrateur configuré par type pour les cinq choix de la maquette : vente, troc, bon plan, covoiturage et événement. Les étapes et champs conditionnels seront décrits par configuration typée, sans copier cinq assistants. |
+| Vente et troc | `PublishWizard.tsx` gère trois étapes, catégories réelles, champs de catégorie, compression et ordre des photos, commune/quartier, autosauvegarde, prévisualisation et création d'annonce. Le backend accepte déjà `is_troc`, la valeur via `price`, `troc_wants`, `troc_accepts_complement_xpf` et `troc_complement_max_xpf`; l'UI actuelle n'envoie que `contre_quoi`, donc une création troc réelle est refusée depuis le durcissement serveur. | Réutiliser les briques existantes et corriger le contrat troc : valeur estimée, catégories recherchées, souhait libre et complément maximal. Aucun changement de schéma n'est requis. Les catégories recherchées seront enregistrées dans `troc_wants` sous forme de libellés, conformément au modèle actuel. |
+| Bon plan | `SimpleBonPlanPage`, dans la route actuelle, autosauvegarde et appelle `bonPlansApi.create`. Le serveur calcule le tarif, crée le paiement et retourne l'URL de paiement ; l'offre est gratuite selon l'éligibilité Pro. Le formulaire actuel n'envoie aucune image. | Extraire ce parcours dans la configuration commune, garder le calcul de prix et l'éligibilité exclusivement côté serveur, afficher clairement le passage au paiement retourné par l'API et ne jamais annoncer une publication active avant confirmation. |
+| Covoiturage | `covoiturageApi.create` et `POST /covoiturage` couvrent départ, arrivée, arrêts, date/heure, récurrence, places, prix, véhicule, préférences et réservation automatique/manuelle. L'API ne fournit aucun prix conseillé ; la maquette utilise seulement une table kilométrique et une formule d'exemple. | Brancher l'assistant sur le contrat existant. Présenter la participation saisie et les règles métier, sans fabriquer un conseil de prix en production. Une fixture pourra illustrer l'aide en mode démo seulement si elle est explicitement identifiée. |
+| Événement | `eventsApi.create` et `POST /events` couvrent identité, date/heure, lieu, commune, image par URL, tarifs, capacité, organisateur, catégorie et billetterie. L'API ne modélise pas séparément une date de fin, un badge « en famille » ou un téléversement d'affiche depuis ce parcours. | Réutiliser les champs réellement persistés. Omettre les trois attributs non pris en charge en production plutôt que les stocker implicitement ; conserver une aide explicative dans l'inventaire des écarts. |
+| Photos | `PublishWizard` compresse, prévisualise, réordonne et téléverse les images d'une annonce après sa création via `/upload/listing/:id`. Bons plans et événements n'ont dans ce parcours qu'un contrat d'URL (`image_url`, `photos`, `cover_image_url`). | Réutiliser le téléversement existant pour vente/troc. Pour bon plan/événement, ne pas envoyer d'URL blob ou locale au serveur ; l'ajout d'un stockage générique demanderait un contrat serveur distinct et reste une QUESTION. |
+| Récapitulatif, options et certification | Le boost est une transaction post-publication : les endpoints exigent l'identifiant d'une annonce active appartenant à l'utilisateur. Les seules preuves de confiance existantes sont les vérifications de compte (email, téléphone, Pro), pas une certification d'annonce. | Afficher le récapitulatif avant envoi, puis proposer les boosts seulement sur la confirmation d'une vente/troc créée. Présenter les badges de compte justifiables sans inventer de certification propre à l'annonce. |
+| Aperçu et conseils | Le parcours actuel a deux aperçus maison et une route `/annonces/preview`. `ListingCard` est le composant réel des résultats. Les conseils de la maquette contiennent des statistiques d'exemple non sourcées. | Alimenter un vrai `ListingCard` pour l'aperçu vente/troc. Créer des aperçus légers propres aux trois autres domaines, car `ListingCard` ne représente ni trajet ni événement. Employer uniquement des conseils éditoriaux vérifiables, sans chiffres de performance inventés. |
+| États | L'autosauvegarde locale toutes les 30 secondes et la protection de sortie existent. Les erreurs sont globales, les champs manquants ne sont pas listés, le chargement initial est un écran vide et la relance après erreur n'est pas structurée. | Conserver une clé de brouillon par utilisateur et par type, ajouter squelette, liste des champs manquants, erreurs accessibles et action Réessayer sans perdre les données. La confirmation finale restera dans le même shell. |
+
+### Données et fichiers proposés
+
+Créer `src/types/publishing.ts`, `src/lib/data/publishing.ts` et `src/demo/fixtures/publishing.ts`. La couche données chargera catégories et communes, normalisera les cinq contrats de création et exposera les destinations post-création. Aucun composant n'importera directement la fixture.
+
+Créer les composants du parcours sous `src/components/listings/publish/` : shell, choix du type, rail d'étapes, rendu des champs configurés, photos, récapitulatif, aperçu et confirmation. Le composant réel `src/components/listings/ListingCard.tsx` sera réutilisé sans modification pour vente/troc.
+
+Les fichiers existants à modifier seraient `src/app/deposer/page.tsx`, `src/app/annonces/nouvelle/page.tsx` et le journal. L'ancien `src/components/PublishWizard/PublishWizard.tsx` serait remplacé par les composants ciblés puis supprimé lorsqu'il n'aurait plus d'import. `src/lib/api.ts`, les routes backend et le schéma de données resteraient inchangés dans le périmètre recommandé.
+
+### Démonstration
+
+La fixture dédiée couvrira les cinq types et leurs états de chargement, erreur, champs manquants et confirmation. En mode démo, la création produira des identifiants explicitement préfixés `demo-` et ne lancera ni paiement, ni boost, ni écriture serveur. Les exemples de prix conseillé ou de certification resteront absents s'ils ne sont pas fournis par une source réelle.
+
+### QUESTIONS de périmètre avant code
+
+1. Valider `/deposer` comme route canonique et `/annonces/nouvelle` comme redirection de compatibilité, paramètres conservés.
+2. Valider l'extension aux fichiers réels hors liste initiale de la fiche : `src/app/annonces/nouvelle/page.tsx` et remplacement de `src/components/PublishWizard/PublishWizard.tsx` par `src/components/listings/publish/*`.
+3. Valider un seul assistant piloté par configuration pour les cinq types, branché sur les quatre API métier existantes, sans nouvel endpoint ni migration.
+4. Valider que les boosts apparaissent après création d'une vente/troc, puisque l'API exige déjà une annonce active ; aucun paiement anticipé ne sera simulé.
+5. Valider l'absence de prix conseillé covoiturage en production tant qu'aucune source serveur n'existe ; la formule kilométrique de la maquette ne sera pas recopiée comme vérité métier.
+6. Valider l'omission des champs événement non persistés (date de fin, « en famille ») et des images bon plan/événement tant qu'aucun téléversement générique n'est autorisé. Ajouter ces capacités demanderait une extension serveur distincte.
+7. Valider l'emploi de `ListingCard` uniquement pour vente/troc et d'aperçus métier dédiés pour bon plan, covoiturage et événement.
+
+Étape 1 uniquement : aucun code applicatif, aucune fixture et aucune API n'ont été créés ; aucun contrôle de build n'a été lancé. Les étapes 2 à 7 attendent la validation humaine de cet inventaire.
