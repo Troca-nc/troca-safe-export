@@ -7,7 +7,8 @@ import { proBookingsApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import FeedbackAlert from '@/components/ui/FeedbackAlert'
 import { showToast } from '@/lib/toast'
-import type { ProPublicBookingSettings, ProPublicBookingSlot } from '@/app/pro/publicStorefrontData'
+import type { ProPublicBookingSettings, ProPublicBookingSlot } from '@/types/pro-public'
+import { useDialogAccessibility } from '@/components/pro/useDialogAccessibility'
 
 type BookingService = NonNullable<ProPublicBookingSettings['services']>[number]
 
@@ -109,6 +110,7 @@ export default function ProBookingModal({
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
   const [sent, setSent] = useState(false)
+  const { dialogRef, titleId, trapFocus } = useDialogAccessibility(open, onClose)
 
   useEffect(() => {
     if (!open) return
@@ -260,13 +262,18 @@ export default function ProBookingModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm" onClick={onClose}>
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        onKeyDown={trapFocus}
         className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] bg-[var(--color-surface)] shadow-2xl"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 border-b border-[var(--color-border)] px-6 py-5">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nc-emeraude">Rendez-vous en ligne</p>
-            <h2 className="mt-1 font-display text-2xl font-bold text-night">
+            <h2 id={titleId} className="mt-1 font-display text-2xl font-bold text-night">
               {settings?.title || 'Prendre rendez-vous'}
             </h2>
             <p className="mt-1 text-sm text-night/55">
