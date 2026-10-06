@@ -17,8 +17,8 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [09](specs/09-deposer.md) | Déposer une annonce | /deposer | Fait (fusionnée) | [#224](https://github.com/Troca-nc/troca-safe-export/pull/224) |
 | [10](specs/10-troc.md) | Troc et trocomètre | /troc | Fait (fusionnée) | [#225](https://github.com/Troca-nc/troca-safe-export/pull/225) |
 | [11](specs/11-bons-plans.md) | Bons plans et événements | /bons-plans, /evenements | Fait (fusionnée) | [#226](https://github.com/Troca-nc/troca-safe-export/pull/226) |
-| [12](specs/12-covoiturage.md) | Covoiturage | /covoiturage, /fret | À relire | — |
-| [13](specs/13-services.md) | Services : devis, professionnels, envoi | /services | À faire | — |
+| [12](specs/12-covoiturage.md) | Covoiturage | /covoiturage, /fret | Fait (fusionnée) | [#227](https://github.com/Troca-nc/troca-safe-export/pull/227) |
+| [13](specs/13-services.md) | Services : devis, professionnels, envoi | /services | À relire | — |
 | [14](specs/14-pros.md) | Annuaire et vitrine des pros | /pros, | À faire | — |
 | [15](specs/15-pro-presentation.md) | Présentation de l’offre Pro | /pro | À faire | — |
 | [16](specs/16-devenir-pro.md) | Devenir Pro | /devenir-pro | À faire | — |
@@ -1118,3 +1118,77 @@ La fixture dédiée couvrira les cinq types et leurs états de chargement, erreu
 - [x] Aucune valeur de la maquette recopiée dans un composant.
 - [x] Les heures sont affichées au format `7 h 30`.
 - [x] Les données réelles et de démonstration passent par `src/lib/data/`.
+
+## 13 — Inventaire (étape 1, sans code)
+
+### Base et références
+
+- Branche isolée `design/13-services`, worktree `D:\Codex\kalico-worktrees\13-services`, base `origin/main` au commit de fusion de la fiche 12 (`64f4b82`).
+- Références lues : `13-services.md`, `DONNEES-DEMO.md`, `frontend/DESIGN.md` §5 et `Services v2.dc.html`.
+- Historique et PR contrôlés : `/services` provient encore de l'ancien flux de catégories et aucun chantier ou PR de refonte v2 Services n'existe déjà.
+- La maquette calcule ses tarifs d'envoi dans le navigateur à partir de distances et coefficients fictifs. Ces calculs et leurs montants ne seront pas repris, conformément au critère d'acceptation et à la règle « Tarif sur demande ».
+
+### Fichiers et comportements existants
+
+- `src/app/services/page.tsx` rend seulement `CategoryFeedPage` pour la catégorie `services`. Il ne possède ni onglets, ni demandes de devis, ni annuaire professionnel, ni parcours d'envoi.
+- `src/components/services/ServiceDirectoryPage.tsx` est un ancien annuaire fondé sur `bonPlansApi`, avec modes promotion/événement. Il n'est importé nulle part, ne correspond pas au domaine demandé et contient des styles historiques, couleurs littérales et textes mal encodés ; il ne sera pas utilisé comme source métier.
+- Les écrans `/appels-offres` et `/appels-offres/[id]` implémentent déjà la création de demande, la liste personnelle, le détail, la comparaison et la sélection d'offres. Ils fournissent un comportement de référence réutilisable, sans devoir modifier ces routes.
+- La fiche 12 a livré les contrats Covoiturage et Fret sous `src/lib/data/`. Les trajets peuvent alimenter la section « membres qui font la route ». La vue Services ne réutilisera pas l'estimateur local de Fret : elle appellera directement l'estimation serveur.
+- Les composants `src/components/transport/` restent disponibles pour leurs contrats et leurs liens, mais la composition à trois onglets sera créée sous `src/components/services/` afin de ne pas coupler cette page à la vue `/envoi-livraison`.
+
+### Contrats disponibles et écarts constatés
+
+| Domaine | Disponible | Écart à traiter sans donnée inventée |
+| --- | --- | --- |
+| Devis | `quoteRequestsApi` couvre création ouverte ou ciblée, demandes personnelles, détail avec offres, sélection et annulation. Le contrat accepte catégorie, commune, titre, description, fourchette de budget, date souhaitée et jusqu'à cinq pros ciblés. | Il n'accepte ni photo ni nombre maximal d'offres pour une demande ouverte. Le contrôle « nombre de devis souhaités » de la maquette ne peut donc pas être présenté comme effectif sans extension serveur. |
+| Professionnels | `proApi.list` retourne jusqu'à cent pros actifs et vérifiés avec métier, commune, identité, description, note, avis et annonces ; recherche, filtres et tris peuvent être appliqués dans la couche de données. | L'API ne fournit ni zone d'intervention structurée ni délai moyen de réponse. Le filtre « réponse rapide » ne peut pas être calculé honnêtement. |
+| Envoi | `deliveryApi.estimate` calcule côté serveur une estimation fondée sur la grille Fret ; création, demandes personnelles, offres, sélection et livraison sont déjà disponibles. `getRides` peut rechercher les membres sur le même axe. | L'API retourne une estimation et des offres, pas le catalogue multi-solutions fictif de la maquette. Aucun endpoint ni modèle de suivi par référence ou historique d'étapes n'existe. |
+
+### Sections de la maquette
+
+| Section | Réutilisation | Intervention prévue après validation |
+| --- | --- | --- |
+| En-tête et onglets | `HeaderV2`, footer global et primitives v2. | Créer un héros partagé et trois onglets pilotés par `?onglet=devis|pros|envoi`, avec repli sur `devis`, navigation clavier et comportement responsive. |
+| Faire un devis | API et écrans Appels d'offres existants, métadonnées catégories/communes. | Composer le formulaire, le récapitulatif collant et la comparaison des offres réelles. Les photos et le quota ne seront actifs que si leur contrat serveur est explicitement étendu. |
+| Professionnels | `proApi.list`, vitrines `/pro/[id]` et demande de devis. | Créer recherche, métier, commune, vérification, tri et cartes à partir des champs réels, avec squelettes, erreur, nouvelle tentative et état « aucun pro dans la zone ». |
+| Envoi | `deliveryApi.estimate`, demandes Fret existantes et trajets Covoiturage. | Créer départ, arrivée, gabarit, estimation serveur, membres sur l'axe, récapitulatif et demandes récentes. Pour une estimation absente, afficher « Tarif sur demande ». Pour une même commune, proposer la remise en main propre sans appeler ni inventer un tarif. |
+| Suivi | Statut courant des demandes personnelles uniquement. | Afficher les demandes authentifiées et leur statut réel. Ne pas afficher de champ de référence ou de chronologie fictive tant qu'aucune API de suivi n'existe. |
+| Responsive | Grilles et composants v2. | Empiler formulaires et récapitulatifs, rendre les onglets défilables et transformer les tableaux de comparaison en cartes à 390 px. |
+
+### Données et fichiers proposés
+
+- Transformer `src/app/services/page.tsx` en adaptateur mince et créer la vue, les onglets et les cartes sous `src/components/services/`, chemins déjà autorisés par la fiche.
+- Créer `src/types/services.ts`, `src/lib/data/services.ts` et `src/demo/fixtures/services.ts` pour normaliser devis, pros, estimations, trajets et états de page. Les fixtures porteront des identifiants et libellés de démonstration distincts de la maquette ; aucun composant ne les importera directement.
+- Réutiliser en lecture `src/lib/data/covoiturage.ts` pour les membres effectuant le trajet. Aucun prix de transport ne sera déduit du prix d'une place de covoiturage.
+- Ajouter des tests ciblés pour la normalisation, les filtres/tri et le repli « Tarif sur demande ». Aucun changement serveur n'est requis pour brancher les fonctions déjà disponibles.
+
+### QUESTIONS à valider avant code
+
+1. Autoriser les nouveaux fichiers `src/types/services.ts`, `src/lib/data/services.ts`, `src/demo/fixtures/services.ts` et leurs tests ciblés, en complément des chemins initiaux de la fiche.
+2. Confirmer l'usage des paramètres `?onglet=devis|pros|envoi`, afin de conserver une seule route et des onglets partageables sans créer de sous-routes.
+3. Confirmer, pour cette fiche frontend, le comportement recommandé face aux contrats absents : photos et quota de devis clairement indisponibles, filtre « réponse rapide » omis, suivi limité aux statuts réels des demandes, sans données simulées hors mode démo. Une extension serveur de ces quatre fonctions devra faire l'objet d'un périmètre séparé et explicite.
+4. Confirmer que l'estimation issue de `deliveryApi.estimate` constitue la source serveur exigée ; toute réponse sans montant affichera « Tarif sur demande » et aucun tarif ne sera recalculé côté client.
+
+Étape 1 uniquement : seuls le statut de la fiche 13 et la référence de fusion de la fiche 12 ont été corrigés dans ce journal. Aucun fichier applicatif, fixture ou contrat API n'a été modifié. Les étapes 2 à 7 attendent la validation humaine de cet inventaire.
+
+### Réalisation au checkpoint visuel
+
+- `src/app/services/page.tsx` est désormais un adaptateur mince vers `src/components/services/ServicesPageView.tsx`.
+- La vue partagée fournit les trois onglets adressables par `?onglet=devis|pros|envoi`, le héros contextuel, les formulaires, récapitulatifs, comparaisons, filtres et états de page demandés.
+- Le parcours Devis crée une demande ouverte, charge les demandes personnelles, récupère le détail de leurs offres et permet la sélection d'une offre. Les photos et le quota sont signalés comme non disponibles au lieu de simuler une prise en charge serveur.
+- L'annuaire utilise uniquement les champs réels de `proApi.list` pour la recherche, le métier, la commune, la vérification et les tris. Le délai de réponse est explicitement indiqué comme indisponible.
+- Le parcours Envoi appelle `deliveryApi.estimate` pour tout montant, affiche « Tarif sur demande » sans montant serveur, charge les membres effectuant réellement l'axe sans transformer leur prix de place en tarif colis, et expose les offres et statuts réels des demandes personnelles.
+- Le cas d'une même commune propose la remise en main propre et n'appelle aucun calcul tarifaire. Le suivi par référence et la chronologie ne sont pas simulés en l'absence d'API.
+- `src/types/services.ts`, `src/lib/data/services.ts` et `src/demo/fixtures/services.ts` isolent contrats, normalisation, actions et données de démonstration. Aucun composant n'importe directement de fixture.
+- `src/lib/servicesPresentation.ts` centralise filtres, tris et format tarifaire. Trois tests purs couvrent les filtres, le tri par avis et le repli « Tarif sur demande ».
+- Validations réussies : 3 tests, TypeScript sans erreur, build Next.js de production avec route `/services`, `check-design --changed` (0 erreur, 0 avertissement) et `git diff --check`.
+- `npm run lint` a été exécuté mais reste indisponible sur cette base car l'exécutable ESLint n'est pas présent dans les dépendances locales installées. Aucun téléchargement réseau n'a été ajouté pour contourner cette limite.
+- Prévisualisation locale en données de démonstration : `http://localhost:3013/services?onglet=devis`, réponse HTTP 200. Revue humaine des rendus 1440 px et 390 px validée le 6 octobre 2026.
+
+### Critères au checkpoint
+
+- [x] Ressemblance à la maquette à 1440 px : validation humaine reçue.
+- [x] Aucun débordement à 390 px : validation humaine reçue.
+- [x] `check-design --changed` sans erreur.
+- [x] Aucune valeur de la maquette recopiée dans un composant.
+- [x] Aucun prix d'envoi calculé côté client sans source serveur.
