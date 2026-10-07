@@ -1,5 +1,7 @@
 import { DEMO } from '@/lib/demo'
-import { metaApi, proApi, subscriptionsApi } from '@/lib/api'
+import { metaApi, proApi } from '@/lib/api'
+import { getProPlans } from '@/lib/data/pro-offers'
+import { planFeatureHighlights } from '@/lib/proOffersPresentation'
 import type {
   ProfessionalRegistrationProfile,
   RegistrationCommune,
@@ -58,54 +60,33 @@ export async function getRegistrationCommunes(): Promise<RegistrationCommune[]> 
 }
 
 export async function getRegistrationOffers(): Promise<RegistrationOffer[]> {
-  if (DEMO) {
-    const fixture = await import('@/demo/fixtures/registration')
-    return fixture.registrationOffers
-  }
-
-  const response = await subscriptionsApi.getPlans()
-  const data = asRecord(asRecord(response.data).data)
-  const plans = Array.isArray(data.plans) ? data.plans.map(asRecord) : []
-  const free = plans.find((plan) => asText(plan.id) === 'free')
-  const pro = plans.find((plan) => asText(plan.id) === 'pro')
-
+  const plans = await getProPlans()
+  const free = plans.find((plan) => plan.id === 'free')
+  const pro = plans.find((plan) => plan.id === 'pro')
   if (!free || !pro) throw new Error('Le catalogue des offres est indisponible.')
-
-  const freeFeatures = asRecord(free.features)
-  const proFeatures = asRecord(pro.features)
-  const freeItems = [
-    `${asNumber(freeFeatures.maxActiveListings)} annonces actives`,
-    `${asNumber(freeFeatures.maxPhotosPerListing)} photos par annonce`,
-    'Messagerie intégrée',
-  ]
-  const proItems = [
-    proFeatures.maxActiveListings === 'unlimited' ? 'Annonces illimitées' : `${asNumber(proFeatures.maxActiveListings)} annonces actives`,
-    `${asNumber(proFeatures.maxPhotosPerListing)} photos par annonce`,
-    'Statistiques et badge Pro',
-  ]
 
   return [
     {
       id: 'free',
-      name: asText(free.name) || 'Gratuit',
-      priceXpf: asNumber(free.price_monthly_xpf),
+      name: free.name,
+      priceXpf: free.monthlyPriceXpf,
       cadence: 'sans limite de durée',
-      features: freeItems,
+      features: planFeatureHighlights(free),
     },
     {
       id: 'pro-monthly',
-      name: `${asText(pro.name) || 'Pro'} mensuel`,
-      priceXpf: asNumber(pro.price_monthly_xpf),
+      name: `${pro.name} mensuel`,
+      priceXpf: pro.monthlyPriceXpf,
       cadence: 'par mois',
-      features: proItems,
+      features: planFeatureHighlights(pro),
       recommended: true,
     },
     {
       id: 'pro-yearly',
-      name: `${asText(pro.name) || 'Pro'} annuel`,
-      priceXpf: asNumber(pro.price_yearly_xpf),
+      name: `${pro.name} annuel`,
+      priceXpf: pro.yearlyPriceXpf,
       cadence: 'par an',
-      features: [...proItems, 'Facturation annuelle'],
+      features: [...planFeatureHighlights(pro), 'Facturation annuelle'],
     },
   ]
 }
