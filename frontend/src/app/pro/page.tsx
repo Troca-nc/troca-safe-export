@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import ProLandingPageClient from './ProLandingPageClient'
+import ProOffersPageView from '@/components/pro/ProOffersPageView'
 import { SITE_URL } from '@/types/seo.types'
 
 export const metadata: Metadata = {
@@ -28,5 +28,5 @@ export const metadata: Metadata = {
 }
 
 export default function ProPage() {
-  return <ProLandingPageClient />
+  return <ProOffersPageView />
 }

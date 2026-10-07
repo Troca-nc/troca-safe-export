@@ -19,8 +19,8 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [11](specs/11-bons-plans.md) | Bons plans et événements | /bons-plans, /evenements | Fait (fusionnée) | [#226](https://github.com/Troca-nc/troca-safe-export/pull/226) |
 | [12](specs/12-covoiturage.md) | Covoiturage | /covoiturage, /fret | Fait (fusionnée) | [#227](https://github.com/Troca-nc/troca-safe-export/pull/227) |
 | [13](specs/13-services.md) | Services : devis, professionnels, envoi | /services | Fait (fusionnée) | [#228](https://github.com/Troca-nc/troca-safe-export/pull/228) |
-| [14](specs/14-pros.md) | Annuaire et vitrine des pros | /pros, /pro/[id] | À relire | [#229](https://github.com/Troca-nc/troca-safe-export/pull/229) |
-| [15](specs/15-pro-presentation.md) | Présentation de l’offre Pro | /pro | À faire | — |
+| [14](specs/14-pros.md) | Annuaire et vitrine des pros | /pros, /pro/[id] | Fait (fusionnée) | [#229](https://github.com/Troca-nc/troca-safe-export/pull/229) |
+| [15](specs/15-pro-presentation.md) | Présentation de l’offre Pro | /pro | À relire | — |
 | [16](specs/16-devenir-pro.md) | Devenir Pro | /devenir-pro | À faire | — |
 | [17](specs/17-compte-pro.md) | Espace Pro | /pro/espace | À faire | — |
 | [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | À faire | — |
@@ -1267,3 +1267,100 @@ La fixture dédiée couvrira les cinq types et leurs états de chargement, erreu
 - [x] Aucune valeur de la maquette recopiée dans un composant.
 - [x] Les données réelles et de démonstration passent par `src/lib/data/`.
 - [x] Les modales se ferment avec Échap et rendent le focus au déclencheur.
+
+## 15 — Inventaire (étape 1, sans code)
+
+### Base et références
+
+- Branche isolée `design/15-pro-presentation`, worktree `D:\Codex\kalico-worktrees\15-pro-presentation`, base `origin/main` au commit de fusion de la fiche 14 (`4a5c019`).
+- Références lues : `15-pro-presentation.md`, `DONNEES-DEMO.md`, `frontend/DESIGN.md` §5 et `Pro v2.dc.html`.
+- Historique et PR contrôlés : la route `/pro` a déjà reçu des correctifs de prix et d'encodage, mais aucune PR de refonte v2 correspondant à la fiche 15 n'existe.
+- Tout chiffre, prix, nom d'entreprise, rendez-vous, trajet, devis, statistique ou promotion provenant de `renderVals()` est traité comme exemple et ne sera pas copié.
+
+### Fichiers et comportements existants
+
+- `src/app/pro/page.tsx` fournit les métadonnées et rend `ProLandingPageClient.tsx` sans couche de données.
+- `src/app/pro/ProLandingPageClient.tsx` est un client monolithique d'environ huit cents lignes. Il couvre déjà le héros, six modules, huit secteurs, un comparatif et un appel final, mais ne possède pas de vraie section Tarifs distincte.
+- Le composant contient directement les statistiques, fonctionnalités, secteurs, lignes de comparaison, montants de démonstration, calendrier, courses, devis et boosts. Il emploie également des couleurs littérales, `bg-white`, classes historiques `nc-*`, rayons libres, tailles trop petites et styles en ligne.
+- Le prix mensuel du comparatif est codé en dur. La promotion « trois mois offerts pour les vingt premiers inscrits » n'est exposée par aucun contrat serveur.
+- Les CTA utilisent `/pro/inscription`. Cette route redirige vers `/pro#formulaire-pro`, alors qu'aucune ancre ni formulaire de ce nom n'existe. Le parcours d'inscription réellement disponible est `/inscription` avec `RegistrationFlow`.
+- Les composants `Header`, `Footer`, `Card`, `DeepPanel`, `Button`, `Skeleton`, `FeedbackAlert` et `Placeholder` sont déjà disponibles et réutilisables.
+
+### Contrats et sources vérifiés
+
+| Besoin | Source réelle | Écart à traiter |
+| --- | --- | --- |
+| Tarifs | `GET /api/subscriptions/plans` retourne Gratuit et Pro, prix mensuel et annuel, économies en mois, limites d'annonces/photos, statistiques, badge, boosts et support prioritaire. | La maquette affiche un prix mensuel différent. Seule la réponse API fera foi ; l'économie annuelle sera dérivée des deux prix reçus. |
+| Inscription | `getRegistrationOffers()` consomme déjà la même API pour `RegistrationFlow`, avec une fixture dédiée. | Sa normalisation est spécifique au formulaire et la fixture duplique les prix. Une source Pro partagée est nécessaire pour respecter le critère fiche 15 et préparer la fiche 16. |
+| Modules | Les routes et garde-fous `requirePro` confirment les produits, devis, rendez-vous, vitrine et outils du tableau de bord Pro. | Les aperçus de la maquette utilisent des contenus chiffrés fictifs. Ils seront remplacés par des schémas d'interface sans métriques prétendument réelles. |
+| Chiffres marketing | `src/content/placeholders.ts` et `Placeholder` fournissent membres, visites mensuelles, annonces en ligne et pros vérifiés, avec signalement visible en mode démonstration. | Les valeurs « 33 communes », « 11 % », « XPF » et « un compte » de la maquette ne seront pas recopiées comme statistiques. |
+| Promotion de lancement | Aucune donnée dans `/subscriptions/plans`, les paiements ou une configuration frontend autorisée. | Le badge et la promesse de mois offerts doivent être omis tant qu'une source contractuelle n'existe pas. |
+
+### Sections de la maquette
+
+| Section | Réutilisation | Intervention prévue après validation |
+| --- | --- | --- |
+| Héros | `Header`, `DeepPanel`, CTA et `Placeholder`. | Recomposer le héros sombre, les preuves et un aperçu de tableau de bord non chiffré ; alimenter les chiffres par les placeholders existants. |
+| Modules | Routes Pro existantes et six familles fonctionnelles actuelles. | Créer les onglets accessibles sur bureau et l'accordéon mobile, avec aperçus structurels sans données métier fictives. |
+| Secteurs | Taxonomie marketing actuelle. | Refaire la grille v2 avec libellés d'usage, sans compteur ni donnée utilisateur. |
+| Tarifs | `/subscriptions/plans`. | Créer le basculeur mensuel/annuel, les cartes Gratuit et Pro, le calcul d'économie et les états squelette, erreur avec nouvelle tentative. |
+| Comparatif | Fonctionnalités de l'API et garde-fous Pro vérifiés. | Générer les lignes depuis le modèle normalisé, avec repli honnête si un indicateur manque. |
+| Appel final | CTA et vitrine de démonstration existante. | Créer l'unique bloc sombre final, avec inscription fonctionnelle et lien vers l'annuaire ou la vitrine exemple. |
+
+### Données et fichiers proposés
+
+- Transformer `src/app/pro/page.tsx` en adaptateur et remplacer le monolithe par une vue de domaine sous `src/components/pro/`.
+- Créer `src/types/pro-offers.ts`, `src/lib/data/pro-offers.ts` et `src/demo/fixtures/pro-offers.ts` pour les plans, modules, secteurs et comparatif. Aucun composant n'importera directement la fixture.
+- Ajouter `src/lib/proOffersPresentation.ts` et des tests ciblés pour la normalisation des prix, le calcul de l'économie annuelle et le repli d'erreur.
+- Modifier `src/lib/data/registration.ts`, `src/types/registration.ts` et `src/demo/fixtures/registration.ts` afin que `RegistrationFlow` délègue à la même source tarifaire au lieu de conserver une seconde définition des prix.
+- Conserver les prix et limites du backend sans changement de route, de schéma ou de serveur.
+
+### QUESTIONS à valider avant code
+
+1. Autoriser les trois modifications hors liste initiale : `src/lib/data/registration.ts`, `src/types/registration.ts` et `src/demo/fixtures/registration.ts`, indispensables pour rendre les prix réellement uniques entre la présentation Pro et l'inscription, ainsi que les nouveaux fichiers de données, types, fixture et tests décrits ci-dessus.
+2. Confirmer le remplacement provisoire des CTA cassés `/pro/inscription` par `/inscription`. La future route `/devenir-pro` sera traitée séparément par la fiche 16 et ne doit pas être anticipée ici.
+3. Confirmer l'omission totale de la promotion « trois mois offerts » et de tout badge de lancement tant qu'aucune API ou configuration autorisée ne la fournit.
+4. Confirmer l'usage des quatre placeholders existants, membres, visites mensuelles, annonces en ligne et pros vérifiés, dans le héros à la place des chiffres de la maquette.
+5. Confirmer que le comparatif n'affichera que les limites et avantages provenant de `/subscriptions/plans` ou confirmés par les garde-fous Pro existants, sans promesse marketing non contractuelle.
+
+Étape 1 uniquement : seuls le statut de la fiche 15 et la référence de fusion de la fiche 14 ont été corrigés dans ce journal. Aucun fichier applicatif, fixture, tarif ou contrat API n'a été modifié. Les étapes 2 à 7 attendent la validation humaine de cet inventaire.
+
+### Réalisation au checkpoint visuel
+
+- `src/app/pro/page.tsx` est désormais un adaptateur mince vers `src/components/pro/ProOffersPageView.tsx`. La page suit les six sections de la fiche : héros, modules, secteurs, tarifs, comparatif et appel final.
+- Le héros utilise uniquement les quatre chiffres de `src/content/placeholders.ts`. Les aperçus des modules sont structurels et ne contiennent ni entreprise, ni rendez-vous, ni résultat métier fictif.
+- Les modules sont des onglets accessibles sur bureau et un accordéon sur mobile. Le basculeur tarifaire mensuel/annuel et les CTA vers `/inscription` fonctionnent au clavier et à la souris.
+- `src/types/pro-offers.ts`, `src/lib/data/pro-offers.ts`, `src/lib/proOffersPresentation.ts` et `src/demo/fixtures/pro-offers.ts` isolent le contrat, le chargement, la normalisation, les fixtures et la présentation des plans.
+- `getRegistrationOffers()` délègue maintenant à cette même source. La fixture d'inscription ne contient plus de prix dupliqué.
+- Le comparatif est construit uniquement depuis les fonctionnalités normalisées de `/subscriptions/plans`. La promotion de lancement absente du contrat a été omise.
+- États couverts : squelette aux dimensions finales pendant le chargement et alerte d'erreur avec bouton Réessayer.
+- Validation visuelle locale en mode démonstration : six sections, un seul pied de page, interactions mensuel/annuel et accordéon vérifiées, aucune erreur d'exécution et aucun débordement horizontal à 1440, 1024, 768 ou 390 px.
+- Validations réussies : 4 tests ciblés, TypeScript sans erreur, lint configuré du projet, build Next.js de production avec 109 pages, `check-design --changed` avec 0 erreur et 0 avertissement, et `git diff --check`.
+- Le contrôle d'encodage global retrouve uniquement la dette historique hors périmètre ; aucun fichier de la fiche 15 n'est signalé. La configuration ESLint actuelle ignore les nouveaux chemins de domaine, tandis que TypeScript et le build Next.js passent.
+
+### Écart contractuel observé
+
+- Le catalogue actuel retourne 2 900 XPF par mois et 44 900 XPF par an, tout en annonçant deux mois d'économie. Comme le montant annuel est supérieur à douze mensualités, la page affiche le prix annuel reçu mais n'affiche aucune économie trompeuse. Le calcul réagira automatiquement lorsque les montants du catalogue seront cohérents.
+
+### Fichiers touchés
+
+- `src/app/pro/page.tsx`
+- `src/app/pro/ProLandingPageClient.tsx` supprimé
+- `src/components/pro/ProOffersPageView.tsx`
+- `src/types/pro-offers.ts`
+- `src/lib/data/pro-offers.ts`
+- `src/lib/proOffersPresentation.ts`
+- `src/lib/proOffersPresentation.test.ts`
+- `src/demo/fixtures/pro-offers.ts`
+- `src/lib/data/registration.ts`
+- `src/types/registration.ts`
+- `src/demo/fixtures/registration.ts`
+- `docs/design/PROGRESS.md`
+
+### Critères au checkpoint
+
+- [x] Ressemble à la maquette à 1440 px, section par section.
+- [x] Aucun débordement à 390 px.
+- [x] `check-design --changed` sans erreur.
+- [x] Aucune valeur de la maquette recopiée dans un composant.
+- [x] Les prix viennent d'une seule source, partagée avec l'inscription et prête pour Devenir Pro.

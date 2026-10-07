@@ -1,3 +1,5 @@
+import type { ProBillingOfferId } from './pro-offers'
+
 export type RegistrationAccountType = 'particulier' | 'pro'
 
 export type RegistrationStep =
@@ -8,7 +10,7 @@ export type RegistrationStep =
   | 'plan'
   | 'done'
 
-export type RegistrationPlanId = 'free' | 'pro-monthly' | 'pro-yearly'
+export type RegistrationPlanId = ProBillingOfferId
 
 export interface RegistrationCommune {
   id: number
