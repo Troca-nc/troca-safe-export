@@ -1099,6 +1099,31 @@ export const quoteRequestsApi = {
 }
 
 export const proQuotesApi = {
+  getConfig: () => cachedGet(
+    buildCacheKey('proQuotes.config', '/pro-quotes/config'),
+    () => api.get('/pro-quotes/config'),
+    CACHE_TTL.long,
+  ),
+  listTemplates: () => cachedGet(
+    buildCacheKey('proQuotes.templates', '/pro-quotes/templates'),
+    () => api.get('/pro-quotes/templates'),
+    CACHE_TTL.short,
+  ),
+  createTemplate: async (data: object) => {
+    const res = await api.post('/pro-quotes/templates', data)
+    invalidateApiCache('proQuotes.')
+    return res
+  },
+  updateTemplate: async (id: string | number, data: object) => {
+    const res = await api.put(`/pro-quotes/templates/${id}`, data)
+    invalidateApiCache('proQuotes.')
+    return res
+  },
+  deleteTemplate: async (id: string | number) => {
+    const res = await api.delete(`/pro-quotes/templates/${id}`)
+    invalidateApiCache('proQuotes.')
+    return res
+  },
   create: async (data: object) => {
     const res = await api.post('/pro-quotes', data)
     invalidateApiCache('proQuotes.')
@@ -1143,6 +1168,16 @@ export const proQuotesApi = {
     const res = await api.post(`/pro-quotes/${id}/convert`, data)
     invalidateApiCache('proQuotes.')
     invalidateApiCache('pro.')
+    return res
+  },
+  remind: async (id: string | number) => {
+    const res = await api.post(`/pro-quotes/${id}/remind`)
+    invalidateApiCache('proQuotes.')
+    return res
+  },
+  markPaid: async (id: string | number, data: object = {}) => {
+    const res = await api.post(`/pro-quotes/${id}/mark-paid`, data)
+    invalidateApiCache('proQuotes.')
     return res
   },
   downloadPdf: (id: string | number, token?: string) => api.get(`/pro-quotes/${id}/pdf`, {

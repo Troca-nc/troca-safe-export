@@ -60,6 +60,7 @@ export default function ProDashboardLayout({ children }: { children: ReactNode }
   const [mobileOpen, setMobileOpen] = useState(false)
   const canAccessPubliciteOnly = pathname.startsWith('/pro/dashboard/publicite')
   const canAccessVerifiedPublicite = Boolean(user?.is_verified) && canAccessPubliciteOnly
+  const isWorkspaceRoot = pathname === '/pro/dashboard'
 
   useEffect(() => {
     if (!hasHydrated) return
@@ -74,10 +75,10 @@ export default function ProDashboardLayout({ children }: { children: ReactNode }
 
   if (!hasHydrated || !isAuthenticated || (user && !user.is_pro && !canAccessVerifiedPublicite)) {
     return (
-      <main className="mx-auto flex min-h-[60vh] max-w-7xl items-center justify-center px-4">
-        <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-10 text-center shadow-sm">
-          <div className="mx-auto h-10 w-10 animate-pulse rounded-full bg-sand/80" />
-          <p className="mt-4 text-sm text-night/55">Chargement de votre espace Pro...</p>
+      <main className="mx-auto flex min-h-[60vh] max-w-7xl items-center justify-center bg-cream px-4 text-ink">
+        <div className="rounded-block border border-warm-border bg-cream-surface px-6 py-10 text-center shadow-card">
+          <div className="mx-auto h-10 w-10 animate-pulse rounded-pill bg-cream-sunken" />
+          <p className="mt-4 text-body-sm text-ink/55">Chargement de votre espace Pro...</p>
         </div>
       </main>
     )
@@ -86,12 +87,12 @@ export default function ProDashboardLayout({ children }: { children: ReactNode }
   return (
     <>
       <Header variant="pro" />
-      <div className="mx-auto flex w-full max-w-7xl gap-0 px-0 md:px-4 md:py-6">
-      <aside className="hidden w-56 shrink-0 md:block">
-        <div className="sticky top-20 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-sm">
-          <div className="mb-4 rounded-2xl bg-nc-lagonLight px-4 py-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nc-lagon">Espace Pro</p>
-            <p className="mt-1 text-sm font-semibold text-night">{user?.first_name || 'Bonjour'}</p>
+      <div className={`mx-auto flex w-full gap-0 px-0 ${isWorkspaceRoot ? 'max-w-none' : 'max-w-7xl md:px-4 md:py-6'}`}>
+      {!isWorkspaceRoot ? <aside className="hidden w-56 shrink-0 md:block">
+        <div className="sticky top-20 rounded-block border border-warm-border bg-cream-surface p-3 shadow-card">
+          <div className="mb-4 rounded-control bg-info-soft px-4 py-3">
+            <p className="text-eyebrow-sm uppercase text-info-text">Espace Pro</p>
+            <p className="mt-1 text-body-sm font-semibold text-ink">{user?.first_name || 'Bonjour'}</p>
           </div>
 
           <nav className="space-y-1" aria-label="Navigation dashboard Pro">
@@ -103,10 +104,10 @@ export default function ProDashboardLayout({ children }: { children: ReactNode }
                 <Link
                   key={item.href}
                   href={href}
-                  className={`flex items-center justify-between gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition ${
+                  className={`flex min-h-11 items-center justify-between gap-3 rounded-control px-3 py-2.5 text-body-sm font-medium transition ${
                     active
-                      ? 'bg-nc-lagonLight text-nc-lagon'
-                      : 'text-night/70 hover:bg-[var(--color-background-secondary)] hover:text-night'
+                      ? 'bg-info-soft text-info-text'
+                      : 'text-ink/70 hover:bg-cream-sunken hover:text-ink'
                   }`}
                 >
                   <span className="flex items-center gap-2">
@@ -119,26 +120,26 @@ export default function ProDashboardLayout({ children }: { children: ReactNode }
             })}
           </nav>
         </div>
-      </aside>
+      </aside> : null}
 
       <div className="min-w-0 flex-1">
-        <div className="md:hidden">
-          <div className="mb-4 flex items-center justify-between rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 shadow-sm">
+        {!isWorkspaceRoot ? <div className="md:hidden">
+          <div className="mb-4 flex items-center justify-between rounded-block border border-warm-border bg-cream-surface px-4 py-3 shadow-card">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nc-lagon">Espace Pro</p>
-              <p className="text-sm font-semibold text-night">{user?.first_name || 'Votre dashboard'}</p>
+              <p className="text-eyebrow-sm uppercase text-info-text">Espace Pro</p>
+              <p className="text-body-sm font-semibold text-ink">{user?.first_name || 'Votre tableau de bord'}</p>
             </div>
             <button
               type="button"
               onClick={() => setMobileOpen((value) => !value)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-control border border-warm-border bg-cream-surface"
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
 
           {mobileOpen ? (
-            <div className="mb-4 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-sm">
+            <div className="mb-4 rounded-block border border-warm-border bg-cream-surface p-3 shadow-card">
               <nav className="space-y-1">
                 {NAV_ITEMS.map((item) => {
                   const Icon = item.icon
@@ -149,10 +150,10 @@ export default function ProDashboardLayout({ children }: { children: ReactNode }
                       key={item.href}
                       href={href}
                       onClick={() => setMobileOpen(false)}
-                      className={`flex items-center justify-between gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition ${
+                      className={`flex min-h-11 items-center justify-between gap-3 rounded-control px-3 py-2.5 text-body-sm font-medium transition ${
                         active
-                          ? 'bg-nc-lagonLight text-nc-lagon'
-                          : 'text-night/70 hover:bg-[var(--color-background-secondary)] hover:text-night'
+                          ? 'bg-info-soft text-info-text'
+                          : 'text-ink/70 hover:bg-cream-sunken hover:text-ink'
                       }`}
                     >
                       <span className="flex items-center gap-2">
@@ -166,9 +167,9 @@ export default function ProDashboardLayout({ children }: { children: ReactNode }
               </nav>
             </div>
           ) : null}
-        </div>
+        </div> : null}
 
-        <main className="min-w-0 px-4 pb-8 md:px-0">{children}</main>
+        <div className={`min-w-0 ${isWorkspaceRoot ? '' : 'px-4 pb-8 md:px-0'}`}>{children}</div>
       </div>
       </div>
     </>
