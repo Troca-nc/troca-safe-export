@@ -21,8 +21,8 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [13](specs/13-services.md) | Services : devis, professionnels, envoi | /services | Fait (fusionnée) | [#228](https://github.com/Troca-nc/troca-safe-export/pull/228) |
 | [14](specs/14-pros.md) | Annuaire et vitrine des pros | /pros, /pro/[id] | Fait (fusionnée) | [#229](https://github.com/Troca-nc/troca-safe-export/pull/229) |
 | [15](specs/15-pro-presentation.md) | Présentation de l’offre Pro | /pro | Fait (fusionnée) | [#230](https://github.com/Troca-nc/troca-safe-export/pull/230) |
-| [16](specs/16-devenir-pro.md) | Devenir Pro | /devenir-pro | À relire | [#231](https://github.com/Troca-nc/troca-safe-export/pull/231) |
-| [17](specs/17-compte-pro.md) | Espace Pro | /pro/espace | À faire | — |
+| [16](specs/16-devenir-pro.md) | Devenir Pro | /devenir-pro | Fait (fusionnée) | [#231](https://github.com/Troca-nc/troca-safe-export/pull/231) |
+| [17](specs/17-compte-pro.md) | Espace Pro | /pro/dashboard | En cours | [#232](https://github.com/Troca-nc/troca-safe-export/pull/232) — prérequis serveur |
 | [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | À faire | — |
 | [19](specs/19-admin.md) | Administration | /admin | À faire | — |
 
@@ -1463,3 +1463,98 @@ La fixture dédiée couvrira les cinq types et leurs états de chargement, erreu
 - [x] Aucune valeur de la maquette recopiée dans un composant.
 - [x] Les données réelles et de démonstration passent par `src/lib/data/`.
 - [x] Le montant dû aujourd'hui est 0 XPF uniquement dans le parcours d'essai réel après validation.
+
+## 17 — Inventaire (étape 1, sans code)
+
+### Base et références
+
+- Branche isolée `design/17-compte-pro`, worktree `D:\Codex\kalico-worktrees\17-compte-pro`, base `origin/main` au commit de fusion de la fiche 16 (`f2a68e42`).
+- Références lues : `17-compte-pro.md`, `DONNEES-DEMO.md`, `frontend/DESIGN.md` §5 et `Compte Pro v2.dc.html`.
+- Historique et PR contrôlés : aucune refonte « Espace Pro » n'a déjà été livrée. La route `/pro/espace` n'existe pas ; l'espace réel est aujourd'hui `/pro/dashboard`.
+- La fiche 16 est fusionnée par la PR [#231](https://github.com/Troca-nc/troca-safe-export/pull/231) ; son statut a été corrigé dans le tableau ci-dessus.
+- Les entreprises, montants, rendez-vous, avis, stocks, devis et variations de `renderVals()` sont des exemples de maquette. Ils ne seront pas recopiés dans le code.
+
+### Fichiers et comportements existants
+
+- `src/app/pro/dashboard/page.tsx` est une page monolithique qui appelle directement `proApi`. Elle présente déjà des vues, contacts, messages, annonces, boosts et une courbe, mais pas les quatre espaces demandés.
+- `src/app/pro/dashboard/layout.tsx` protège les routes Pro et affiche une navigation latérale historique. Le tableau de bord racine peut devenir l'espace à onglets en pleine largeur tout en conservant cette navigation sur les sous-routes existantes.
+- `src/components/profil/SellerStatsDashboard.tsx`, `src/components/pro/ProductsManager.tsx` et `src/components/pro/QuoteBuilder.tsx` couvrent une partie des statistiques, du catalogue et des devis, avec appels API directs et styles antérieurs à v2.
+- Les routes détaillées `/pro/dashboard/catalogue`, `/pro/dashboard/devis` et `/pro/dashboard/rdv` existent et doivent rester accessibles. La fiche 17 ne vaut pas autorisation de refaire toutes les sous-pages historiques.
+- Le catalogue serveur prend déjà en charge création, modification, archivage, publication, catégories et quantité de stock. Un stock nul rend le produit indisponible. Aucun champ ne distingue explicitement un produit d'un service et aucune vue par produit n'est exposée.
+- Les devis actuels ont les états `draft`, `sent`, `viewed`, `accepted`, `refused`, `expired` et `converted`. Ils utilisent un taux TGC global, sans unité par ligne, acompte, modèle commercial réutilisable, relance ni état payé.
+
+### Contrats et sources vérifiés
+
+| Besoin | Source réelle | Écart à traiter sans donnée inventée |
+| --- | --- | --- |
+| Indicateurs | `GET /api/pro/dashboard`, statistiques vendeur, demandes de devis, réservations et avis publiés. | Les vues, contacts, demandes à traiter, rendez-vous, avis et stocks faibles sont calculables. Le chiffre d'affaires signé, la comparaison sectorielle et plusieurs variations de la maquette ne le sont pas. |
+| Agenda | `proBookingsApi.getDashboard()` retourne réglages, créneaux et réservations datées avec statut. | Afficher seulement les rendez-vous réels ou une fixture explicitement démo ; aucun nom ni horaire de la maquette. |
+| Boutique et stock | `/api/pro/products` et méthodes catalogue de `proApi`. | Le contrat ne fournit ni type produit/service ni nombre de vues. Les filtres honnêtes sont stock suivi, stock non suivi et stock faible, avec nombre de publications si utile. |
+| Devis | `/api/pro/quotes` calcule et persiste sous-total, taxe globale et total, puis génère le PDF depuis ces montants serveur. | La fiche exige unité et TGC par ligne, acompte, taux autorisés configurés et modèles réutilisables : ces contrats n'existent pas. |
+| Suivi | Demandes reçues et devis avec états serveur existants. | Aucun endpoint de relance, aucune transition manuelle générique et aucun état payé. `converted` ne prouve pas un paiement. |
+| Données frontend | Les modules actuels appellent surtout `src/lib/api.ts` depuis les composants. | La fiche impose un passage par `src/lib/data/`, des types et des fixtures isolées ; la page ne devra plus charger directement une fixture ni l'API. |
+
+### Sections de la maquette
+
+| Section | Réutilisation | Intervention prévue après validation |
+| --- | --- | --- |
+| Tableau de bord | API dashboard, réservations, avis, demandes et catalogue. | Composer les cartes avec métriques vérifiables, une courbe vues/contacts, les demandes à traiter, l'agenda, les avis et les stocks faibles ; omettre revenus, benchmark et deltas non sourcés. |
+| Ma boutique | API produits, profil public et publication existante. | Présenter complétude de vitrine, recherche, filtres fondés sur le stock réel et actions existantes ; conserver la gestion détaillée sur la sous-route catalogue. |
+| Modèles de devis | Calcul serveur et PDF existants. | Nécessite d'abord le lot serveur décrit ci-dessous pour les modèles réutilisables, unités, TGC par ligne, acompte, validité et totaux identiques au PDF. |
+| Suivi des devis | Demandes et états réels des devis. | Construire quatre colonnes correspondant au contrat final, avec relance et transitions seulement après ajout d'endpoints autorisés ; ne jamais assimiler `converted` à payé. |
+| Navigation | Garde Pro et routes historiques du layout. | Garder `/pro/dashboard` comme route canonique, afficher les quatre onglets en pleine largeur à sa racine et conserver la navigation historique sur les sous-routes. |
+| États et responsive | Primitives v2 et composants d'état existants. | Couvrir chargement, vide, erreur avec nouvelle tentative et échec d'action ; vérifier 1440, 1024, 768 et 390 px sans débordement. |
+
+### Données et fichiers frontend proposés
+
+- Transformer `src/app/pro/dashboard/page.tsx` en adaptateur mince et adapter `src/app/pro/dashboard/layout.tsx` pour la présentation pleine largeur de la route racine, sans changer les garde-fous Pro.
+- Créer `src/types/pro-space.ts`, `src/lib/data/pro-space.ts` et `src/demo/fixtures/pro-space.ts` pour agréger tableau de bord, agenda, avis, boutique, demandes et devis. Aucun composant n'importera directement la fixture.
+- Créer une présentation pure et des tests ciblés pour les indicateurs, stocks faibles, colonnes de suivi et calcul d'estimation côté client.
+- Construire la vue et ses sections sous `src/components/pro/`, puis adapter `src/components/profil/SellerStatsDashboard.tsx` afin d'éviter deux normalisations concurrentes.
+- Modifier `src/lib/api.ts` uniquement pour exposer les nouveaux contrats serveur validés. Les routes détaillées existantes restent accessibles et hors refonte complète.
+
+### Prérequis serveur recommandé, dans un lot séparé
+
+- Ajouter une migration versionnée pour les modèles de devis réutilisables, les lignes enrichies, l'acompte et les métadonnées de suivi nécessaires. Aucune migration de production ne sera exécutée dans cette étape.
+- Étendre la route des devis avec unités, taux TGC par ligne, liste de taux autorisés provenant d'une configuration serveur, calcul et ventilation serveur, modèles, relance et transitions contrôlées dont l'état payé si son sens métier est confirmé.
+- Générer le PDF à partir des mêmes montants persistés et ajouter des tests serveur couvrant arrondis, TGC, acompte, autorisations et transitions.
+- Livrer ce prérequis dans une PR indépendante avant l'interface, car il touche aux données financières, au schéma et aux règles métier. La fiche 17 frontend restera basée sur son contrat fusionné.
+
+### QUESTIONS à valider avant code
+
+1. Autoriser les modifications hors liste initiale de `src/app/pro/dashboard/page.tsx`, `src/app/pro/dashboard/layout.tsx` et `src/lib/api.ts`, ainsi que les nouveaux fichiers de types, données, fixture, présentation et tests décrits ci-dessus.
+2. Confirmer `/pro/dashboard` comme route canonique : sa racine devient l'espace à quatre onglets en pleine largeur, tandis que les sous-routes historiques conservent leur navigation et restent accessibles.
+3. Confirmer l'usage exclusif des indicateurs réellement disponibles : vues, contacts, demandes de devis, agenda, avis et stocks faibles ; le chiffre d'affaires signé, le benchmark et les variations sans source seront omis.
+4. Confirmer le repli catalogue sans évolution de schéma : filtres stock suivi, stock non suivi et stock faible, et nombre de publications à la place des distinctions produit/service et vues absentes du contrat.
+5. Autoriser un lot serveur et une PR préalables, séparés de l'interface, pour les modèles de devis, unités et TGC par ligne, taux autorisés configurés côté serveur, acompte, relances, état payé, calculs, PDF, migration et tests. Cette autorisation ne vaut ni déploiement ni exécution de migration en production.
+6. À défaut du lot serveur, confirmer explicitement une version partielle limitée au taux TGC global, à la validité et aux états actuels, sans modèles réutilisables, acompte, relance ni colonne payé ; elle ne satisferait pas tous les critères de la fiche.
+7. Confirmer que cette fiche refond uniquement l'espace principal à quatre onglets et conserve les sous-pages catalogue, devis et rendez-vous comme vues détaillées, sans lancer leur refonte exhaustive.
+
+Étape 1 uniquement : le statut de la fiche 17, la référence de fusion de la fiche 16 et ce journal ont été modifiés. Aucun fichier applicatif, fixture, schéma, devis, montant, compte utilisateur ou contrat API n'a été changé. Les étapes suivantes attendent la validation humaine de cet inventaire.
+
+### Lot serveur préalable — réalisation
+
+- Inventaire validé par l'humain le 7 octobre 2026. Le lot serveur est isolé sur `design/17-compte-pro-devis-server` dans la PR [#232](https://github.com/Troca-nc/troca-safe-export/pull/232) ; la refonte frontend attend sa fusion et fera l'objet d'une PR distincte.
+- `proQuoteService` centralise les taux TGC autorisés par la configuration serveur `PRO_QUOTE_TGC_RATES`, les unités, la normalisation des lignes et les calculs XPF. Chaque ligne est arrondie avant la ventilation TGC ; acompte et solde sont dérivés du total TTC.
+- Les anciens payloads à taux global restent acceptés. Les nouveaux payloads peuvent fournir unité, quantité décimale et TGC par ligne. L'API expose les taux et unités configurés.
+- Les modèles de devis disposent d'un CRUD authentifié et borné au professionnel propriétaire. Les noms sont uniques par professionnel.
+- Les relances sont réservées aux devis envoyés ou vus, limitées atomiquement à une toutes les 24 heures et renouvellent la capacité de partage.
+- La déclaration payée n'est possible qu'après acceptation ou conversion. Elle est enregistrée comme déclaration du professionnel avec date, note et auteur ; elle ne constitue pas une preuve de paiement traitée par Kalico.
+- Les transitions envoi, acceptation, refus, conversion et paiement sont conditionnées à l'état courant dans leur écriture SQL afin de refuser les courses concurrentes.
+- Le PDF utilise les lignes et montants persistés par le serveur, affiche la ventilation TGC, l'acompte et le solde. L'export RGPD inclut les modèles de devis.
+- Migration additive `20261007_pro_quote_workspace.sql` créée avec reprise des soldes et ventilations des devis existants. Elle n'a été exécutée ni en production ni sur une base réelle.
+- Validations locales réussies : 8 tests ciblés, suite backend complète, contrôles syntaxiques de tous les fichiers JavaScript modifiés, chargement à froid de la route, build backend et `git diff --check`.
+
+### Fichiers du lot serveur
+
+- `backend/src/services/proQuoteService.js`
+- `backend/src/routes/pro.quotes.js`
+- `backend/src/routes/rgpd.route.js`
+- `backend/src/scripts/seedPlaywrightUsers.js`
+- `backend/src/tests/proQuoteService.test.js`
+- `backend/src/tests/proQuoteRoutesContract.test.js`
+- `backend/src/tests/run.js`
+- `database/migrations/20261007_pro_quote_workspace.sql`
+- `frontend/docs/design/PROGRESS.md`
+
+Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les types, fixtures, présentations et tests frontend, puis refondre la racine `/pro/dashboard` selon les quatre onglets validés. Aucun code frontend de l'espace Pro n'est inclus dans ce lot serveur.

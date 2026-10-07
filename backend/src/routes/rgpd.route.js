@@ -154,6 +154,7 @@ router.get('/exporter-donnees', async (req, res) => {
       notificationPrefsRes,
       proQuoteRequestsRes,
       proQuotesRes,
+      proQuoteTemplatesRes,
       quoteRequestsRes,
       quoteRequestOffersRes,
       fretRequestsRes,
@@ -197,6 +198,10 @@ router.get('/exporter-donnees', async (req, res) => {
                FROM pro_quotes
                WHERE pro_id = $1 OR requester_user_id = $1
                ORDER BY created_at DESC`, [userId]),
+        query(`SELECT *
+               FROM pro_quote_templates
+               WHERE pro_id = $1
+               ORDER BY updated_at DESC`, [userId]),
         query(`SELECT *
                FROM quote_requests
                WHERE author_id = $1
@@ -250,6 +255,7 @@ router.get('/exporter-donnees', async (req, res) => {
       notification_preferences: notificationPrefsRes.rows,
       pro_quote_requests: proQuoteRequestsRes.rows,
       pro_quotes: proQuotesRes.rows,
+      pro_quote_templates: proQuoteTemplatesRes.rows,
       quote_requests: quoteRequestsRes.rows,
       quote_request_offers: quoteRequestOffersRes.rows,
       fret_requests: fretRequestsRes.rows,
