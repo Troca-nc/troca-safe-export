@@ -22,7 +22,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [14](specs/14-pros.md) | Annuaire et vitrine des pros | /pros, /pro/[id] | Fait (fusionnée) | [#229](https://github.com/Troca-nc/troca-safe-export/pull/229) |
 | [15](specs/15-pro-presentation.md) | Présentation de l’offre Pro | /pro | Fait (fusionnée) | [#230](https://github.com/Troca-nc/troca-safe-export/pull/230) |
 | [16](specs/16-devenir-pro.md) | Devenir Pro | /devenir-pro | Fait (fusionnée) | [#231](https://github.com/Troca-nc/troca-safe-export/pull/231) |
-| [17](specs/17-compte-pro.md) | Espace Pro | /pro/dashboard | En cours | [#232](https://github.com/Troca-nc/troca-safe-export/pull/232) — prérequis serveur |
+| [17](specs/17-compte-pro.md) | Espace Pro | /pro/dashboard | À relire | [#232](https://github.com/Troca-nc/troca-safe-export/pull/232) fusionnée — prérequis serveur ; PR frontend en préparation |
 | [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | À faire | — |
 | [19](specs/19-admin.md) | Administration | /admin | À faire | — |
 
@@ -1558,3 +1558,40 @@ La fixture dédiée couvrira les cinq types et leurs états de chargement, erreu
 - `frontend/docs/design/PROGRESS.md`
 
 Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les types, fixtures, présentations et tests frontend, puis refondre la racine `/pro/dashboard` selon les quatre onglets validés. Aucun code frontend de l'espace Pro n'est inclus dans ce lot serveur.
+
+### Lot frontend — réalisation
+
+- Branche isolée `design/17-compte-pro-frontend`, worktree `D:\Codex\kalico-worktrees\17-compte-pro-ui`, basée sur la fusion du prérequis serveur `33b15cfd`.
+- `/pro/dashboard` est désormais l'espace canonique pleine largeur à quatre onglets. Les sous-routes historiques conservent leur navigation latérale et restent les vues détaillées du catalogue, des devis et des rendez-vous.
+- Le tableau de bord n'affiche que des indicateurs sourcés : vues, contacts, demandes reçues, rendez-vous, avis publiés et stocks faibles. Aucun chiffre d'affaires, benchmark ou delta sans source n'a été ajouté.
+- La boutique expose recherche et filtres fondés sur le stock réellement disponible : tout, stock suivi, stock non suivi et stock faible. La complétude de la vitrine provient du profil public.
+- Les modèles de devis utilisent le contrat serveur fusionné : unités, TGC par ligne, validité, acompte et aperçu client. L'interface indique explicitement que le serveur recalcule les montants persistés et le PDF.
+- Le suivi répartit demandes et devis entre demandes, envoyés, acceptés et payés. Les refusés et expirés restent dans la vue détaillée ; un paiement est présenté comme une déclaration du professionnel, jamais comme une preuve de paiement Kalico.
+- Tous les chargements applicatifs passent par `src/lib/data/pro-space.ts`. Les fixtures restent isolées sous `src/demo/fixtures/` et chaque libellé de démonstration est explicite.
+- La recette a détecté puis corrigé le chargement infini du profil `demo-pro`, dont l'identifiant texte ne pouvait pas être traité comme un identifiant numérique réel.
+
+### Validations du lot frontend
+
+- [x] `npm run lint` réussi ; la configuration ESLint historique ne couvre pas les nouveaux chemins applicatifs, constat confirmé par un contrôle ciblé sans configuration correspondante.
+- [x] `npx tsc --noEmit` réussi avec le compilateur local.
+- [x] `node scripts/check-design.mjs --changed` : 13 fichiers, 0 erreur, 0 avertissement.
+- [x] 3 tests ciblés réussis : arrondis et ventilation du devis, seuil de stock faible, classement contractuel du pipeline.
+- [x] Recette interactive réussie à 1440 px et 390 px sur les quatre onglets, sans erreur console ni débordement horizontal observé.
+- [ ] `npm run build` atteint la compilation Next.js mais reste bloqué dans `next/font` par la réponse du proxy Google Fonts : échec TLS sans certificats système, puis réponse non exploitable avec `--use-system-ca`. Aucun diagnostic applicatif n'est émis avant ce blocage externe.
+
+### Fichiers du lot frontend
+
+- `frontend/src/app/pro/dashboard/layout.tsx`
+- `frontend/src/app/pro/dashboard/page.tsx`
+- `frontend/src/components/pro/ProDashboardOverview.tsx`
+- `frontend/src/components/pro/ProQuoteTemplatesTab.tsx`
+- `frontend/src/components/pro/ProQuoteTrackingTab.tsx`
+- `frontend/src/components/pro/ProShopTab.tsx`
+- `frontend/src/components/pro/ProSpaceView.tsx`
+- `frontend/src/demo/fixtures/pro-space.ts`
+- `frontend/src/lib/api.ts`
+- `frontend/src/lib/data/pro-space.ts`
+- `frontend/src/lib/proSpacePresentation.ts`
+- `frontend/src/lib/proSpacePresentation.test.ts`
+- `frontend/src/types/pro-space.ts`
+- `frontend/docs/design/PROGRESS.md`
