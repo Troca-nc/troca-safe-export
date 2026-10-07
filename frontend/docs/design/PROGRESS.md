@@ -20,8 +20,8 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [12](specs/12-covoiturage.md) | Covoiturage | /covoiturage, /fret | Fait (fusionnée) | [#227](https://github.com/Troca-nc/troca-safe-export/pull/227) |
 | [13](specs/13-services.md) | Services : devis, professionnels, envoi | /services | Fait (fusionnée) | [#228](https://github.com/Troca-nc/troca-safe-export/pull/228) |
 | [14](specs/14-pros.md) | Annuaire et vitrine des pros | /pros, /pro/[id] | Fait (fusionnée) | [#229](https://github.com/Troca-nc/troca-safe-export/pull/229) |
-| [15](specs/15-pro-presentation.md) | Présentation de l’offre Pro | /pro | À relire | [#230](https://github.com/Troca-nc/troca-safe-export/pull/230) |
-| [16](specs/16-devenir-pro.md) | Devenir Pro | /devenir-pro | À faire | — |
+| [15](specs/15-pro-presentation.md) | Présentation de l’offre Pro | /pro | Fait (fusionnée) | [#230](https://github.com/Troca-nc/troca-safe-export/pull/230) |
+| [16](specs/16-devenir-pro.md) | Devenir Pro | /devenir-pro | À relire | — |
 | [17](specs/17-compte-pro.md) | Espace Pro | /pro/espace | À faire | — |
 | [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | À faire | — |
 | [19](specs/19-admin.md) | Administration | /admin | À faire | — |
@@ -1364,3 +1364,102 @@ La fixture dédiée couvrira les cinq types et leurs états de chargement, erreu
 - [x] `check-design --changed` sans erreur.
 - [x] Aucune valeur de la maquette recopiée dans un composant.
 - [x] Les prix viennent d'une seule source, partagée avec l'inscription et prête pour Devenir Pro.
+
+## 16 — Inventaire (étape 1, sans code)
+
+### Base et références
+
+- Branche isolée `design/16-devenir-pro`, worktree `D:\Codex\kalico-worktrees\16-devenir-pro`, base `origin/main` au commit de fusion de la fiche 15 (`609d8cd`).
+- Références lues : `16-devenir-pro.md`, `DONNEES-DEMO.md`, `frontend/DESIGN.md` §4 et `Devenir Pro v2.dc.html`.
+- Historique et PR contrôlés : aucune refonte « Devenir Pro » n'a déjà été livrée. La route `/devenir-pro` n'existe pas.
+- La fiche 15 est fusionnée par la PR [#230](https://github.com/Troca-nc/troca-safe-export/pull/230) ; son statut a été corrigé dans le tableau ci-dessus.
+- Les entreprises, RIDET, zones, prix, formules, durée promotionnelle et moyens de paiement de `renderVals()` sont des exemples de maquette. Ils ne seront pas recopiés dans le code.
+
+### Fichiers et comportements existants
+
+- `src/app/pro/inscription/page.tsx` redirige encore vers `/pro#formulaire-pro`. La page `/pro` issue de la fiche 15 ne contient plus cette ancre : ce parcours historique est cassé et doit rediriger vers `/devenir-pro` lorsque la nouvelle route sera prête.
+- `src/app/inscription/` et `RegistrationFlow` créent un nouveau compte. Ils ne conviennent pas à la conversion demandée d'un membre déjà connecté, mais leurs motifs de formulaire et leurs secteurs peuvent être réutilisés.
+- `proApi.apply()` appelle `POST /api/pros/apply`. Le serveur met à jour la ligne utilisateur existante en `account_type = professional`, laisse `is_pro` inchangé et place `pro_verified` à faux. Les annonces, avis, messages et alertes liés au même identifiant utilisateur ne sont ni supprimés ni déplacés.
+- La demande accepte raison sociale, secteur, présentation, site, téléphone, horaires, une commune et un identifiant RIDET/SIRET. Elle ne prend en charge ni zones multiples, ni logo, ni adresse publique personnalisée.
+- `PATCH /api/pro/me` accepte ensuite le logo et les informations de vitrine, mais `POST /apply` remet d'abord les visuels à `null`. Un enchaînement upload, demande, puis mise à jour du profil serait donc non atomique et devrait afficher un échec partiel honnête.
+- `src/components/monetisation/PaymentProviderSelector.tsx` et `BoostModal.tsx` existent, mais aucun composant de souscription complet ne couvre le parcours de cette fiche.
+
+### Contrats disponibles et écarts constatés
+
+| Domaine | Source réelle | Écart à traiter sans donnée inventée |
+| --- | --- | --- |
+| Profil courant | Session `authApi.me()` / `useAuthStore`, puis mise à jour du même utilisateur par `proApi.apply()`. | Les compteurs détaillés de contenus conservés ne sont pas tous exposés. La page peut garantir la conservation des catégories de données, sans afficher les nombres de la maquette. |
+| RIDET | Le formulaire et l'API acceptent une chaîne ; la liaison d'identité entreprise intervient seulement après validation administrative d'un document `extrait_ridet`. | Aucun service frontend ou backend n'interroge le registre RIDET en temps réel. Les états « trouvé » et « introuvable » ne peuvent pas être affirmés ; seuls format invalide, demande envoyée et validation en attente sont véridiques. |
+| Offres | La source partagée de la fiche 15 consomme `/subscriptions/plans` et retourne Gratuit et Pro, avec prix mensuel et annuel. | Il n'existe pas de troisième offre `Pro+`. Le montant annuel actuel est supérieur à douze mensualités ; aucune économie ne doit être promise tant que le catalogue reste incohérent. |
+| Essai | `POST /subscriptions/trial/start` active une seule période de 30 jours, uniquement pour une entreprise dont le RIDET a déjà été vérifié. | La promotion de trois mois de la maquette n'existe pas. Le démarrage immédiat après saisie est impossible avant validation administrative. Le montant dû aujourd'hui peut être 0 XPF uniquement dans ce vrai parcours d'essai. |
+| Paiement | `POST /payment/subscription` accepte le plan Pro et les fournisseurs hébergés Stripe ou PayPlug. | Le schéma rejette actuellement `yearly` malgré le tarif annuel exposé ; aucun prélèvement ni virement bancaire n'est contracté. Le client n'expose pas encore cette création de souscription. Étendre ce domaine implique un lot serveur et paiement distinct à valider explicitement. |
+| Vitrine | La route publique canonique est `/pro/[id]` et ne devient accessible qu'aux pros actifs et vérifiés. | Aucun slug professionnel n'est stocké. L'adresse `kalico.nc/pros/...` de la maquette ne doit pas être simulée ; l'adresse réelle peut seulement être annoncée comme disponible après validation. |
+| Zone d'activité | Le profil Pro et la demande stockent une unique `commune`. | Les zones multiples de la maquette n'ont aucun champ ni contrat serveur. Une première version doit demander une commune principale ou faire évoluer le serveur. |
+
+### Sections de la maquette
+
+| Section | Réutilisation | Intervention prévue après validation |
+| --- | --- | --- |
+| En-tête et acquis conservés | `HeaderV2`, footer global et session courante. | Présenter la conversion du compte connecté et les catégories de données conservées, sans compteurs fictifs ; rediriger un visiteur non connecté vers la connexion avec retour sur `/devenir-pro`. |
+| Entreprise | Champs de `proApi.apply`, secteurs de l'inscription et métadonnées de communes. | Saisir raison sociale, secteur, téléphone, RIDET et commune principale ; valider le format puis annoncer la vérification administrative, sans résultat de registre simulé. |
+| Vitrine | Upload existant, `PATCH /pro/me` et route publique `/pro/[id]`. | Proposer présentation et logo avec état d'échec partiel ; indiquer que l'adresse publique réelle sera disponible après validation. Aucun slug inventé. |
+| Formule | Source unique `getProPlans()` de la fiche 15. | Afficher uniquement Gratuit et Pro avec bascule mensuel/annuel, squelettes, erreur et nouvelle tentative. Ne pas afficher Pro+ ni économie négative. |
+| Paiement et essai | Essai vérifié de 30 jours et fournisseurs carte existants. | Ne pas activer de contrôle non supporté. Le parcours recommandé envoie d'abord la demande, explique la validation RIDET, puis rend l'essai à 0 XPF disponible une fois l'entreprise vérifiée. Toute extension annuelle ou bancaire doit être séparée. |
+| Récapitulatif | `Card`, `DeepPanel`, `FeedbackAlert` et données normalisées. | Construire un récapitulatif collant des choix réellement enregistrables, avec 0 XPF dû aujourd'hui seulement lorsque l'essai est effectivement éligible. |
+| États et responsive | Primitives v2 et comportements des formulaires existants. | Couvrir chargement, erreur avec nouvelle tentative, RIDET invalide, envoi, validation en attente et échec partiel ; empiler formulaire et récapitulatif sans débordement à 390 px. |
+
+### Données et fichiers proposés
+
+- Créer `src/app/devenir-pro/page.tsx` comme adaptateur mince et le parcours sous `src/components/monetisation/`, à côté des composants de paiement existants.
+- Créer `src/types/pro-upgrade.ts`, `src/lib/data/pro-upgrade.ts` et `src/demo/fixtures/pro-upgrade.ts` pour le profil, la demande, les états et les données de démonstration. Les entreprises de démonstration seront explicitement suffixées « (démo) » et utiliseront un RIDET manifestement factice.
+- Réutiliser `src/lib/data/pro-offers.ts` sans dupliquer les prix. Ajouter une présentation pure et des tests ciblés pour le RIDET, l'éligibilité à l'essai, le récapitulatif et les replis contractuels.
+- Adapter `src/app/pro/inscription/page.tsx` afin que l'ancien lien rejoigne la nouvelle route, puis corriger les CTA encore concernés si l'inventaire d'implémentation en retrouve.
+- Aucun changement serveur ni contrat de paiement ne sera inclus sans validation explicite du périmètre correspondant.
+
+### QUESTIONS à valider avant code
+
+1. Autoriser les nouveaux fichiers de types, données, fixture et tests ci-dessus, ainsi que l'adaptation de `src/app/pro/inscription/page.tsx`, absents de la liste initiale mais nécessaires au parcours réel et à la couche de données imposée.
+2. Confirmer le parcours réservé au membre connecté : redirection vers `/connexion?next=/devenir-pro` pour un visiteur, et redirection vers l'espace Pro pour un compte déjà Pro actif.
+3. Confirmer le comportement RIDET recommandé : contrôle de format, dépôt de la demande puis état « validation en attente », sans prétendre avoir trouvé l'entreprise dans un registre inexistant.
+4. Confirmer l'affichage des deux seules formules contractuelles Gratuit et Pro, et l'omission de Pro+ ainsi que de toute économie annuelle incohérente.
+5. Confirmer l'essai réel de 30 jours après validation du RIDET, avec 0 XPF dû aujourd'hui lorsqu'il est éligible, en remplacement des trois mois fictifs de la maquette.
+6. Confirmer que cette fiche n'ajoutera ni paiement annuel actif, ni prélèvement, ni virement bancaire tant qu'un lot serveur/paiement séparé n'aura pas défini et testé ces contrats. Les fournisseurs carte existants ne seront pas présentés avant l'éligibilité effective.
+7. Confirmer le repli aux capacités actuelles : une commune principale au lieu de zones multiples, logo enregistré par mise à jour séparée avec gestion d'échec partiel, et adresse publique `/pro/[id]` seulement après validation, sans slug fictif.
+
+Étape 1 uniquement : le statut de la fiche 16, la référence de fusion de la fiche 15 et ce journal ont été modifiés. Aucun fichier applicatif, fixture, prix, compte utilisateur ou contrat API n'a été changé. Les étapes 2 à 7 attendent la validation humaine de cet inventaire.
+
+### Réalisation au checkpoint visuel
+
+- `src/app/devenir-pro/page.tsx` sert désormais le parcours dédié. Il redirige les visiteurs vers la connexion avec retour, les comptes Pro actifs vers `/pro/dashboard`, et affiche l'état de validation pour une demande déjà déposée.
+- `src/components/monetisation/ProUpgradeFlow.tsx` compose le héros, les acquis conservés, les quatre sections Entreprise, Vitrine, Formule et Validation, ainsi qu'un récapitulatif collant. Le formulaire couvre chargement, erreur avec nouvelle tentative, validation locale, envoi, succès, demande en attente et échec partiel du logo.
+- Le RIDET est limité à dix chiffres et présenté comme soumis à validation administrative. Aucun résultat de registre n'est simulé.
+- Les formules Gratuit et Pro viennent de la source partagée `getProPlans()`. Le tarif annuel reste informatif et aucune économie incohérente n'est affichée. Pro+, les trois mois fictifs, le prélèvement et le virement sont omis.
+- L'essai réel de 30 jours est annoncé comme activable après validation du RIDET. Le récapitulatif affiche 0 XPF dû lors du dépôt et précise qu'aucun abonnement ni paiement n'est déclenché.
+- La demande réutilise `proApi.apply()` sur le compte courant. Le logo est ensuite compressé, envoyé et enregistré séparément ; tout échec de cette seconde étape est signalé sans masquer la réussite de la demande principale.
+- `src/types/pro-upgrade.ts`, `src/lib/data/pro-upgrade.ts`, `src/lib/proUpgradePresentation.ts` et `src/demo/fixtures/pro-upgrade.ts` isolent contrats, API, règles pures et démonstration. Aucun composant n'importe directement la fixture.
+- L'ancienne route `/pro/inscription` redirige vers `/devenir-pro`. Les CTA Pro de la page `/pro` utilisent aussi le nouveau parcours, tandis que l'offre Gratuit conserve l'inscription générale.
+- Validations réussies : 3 tests ciblés, TypeScript sans erreur, build Next.js de production avec 110 routes, `check-design --changed` avec 0 erreur et 0 avertissement, `git diff --check`, réponse HTTP 200 sur `/devenir-pro`.
+- La configuration ESLint actuelle ignore les nouveaux chemins de domaine lors d'un lint ciblé ; TypeScript et le build Next.js, qui inclut son étape de lint et de vérification des types, se terminent avec succès.
+- Prévisualisation locale en données de démonstration : `http://localhost:3015/devenir-pro`. Revue humaine du parcours validée le 7 octobre 2026.
+
+### Fichiers touchés
+
+- `src/app/devenir-pro/page.tsx`
+- `src/app/pro/inscription/page.tsx`
+- `src/components/monetisation/ProUpgradeFlow.tsx`
+- `src/components/pro/ProOffersPageView.tsx`
+- `src/types/pro-upgrade.ts`
+- `src/lib/data/pro-upgrade.ts`
+- `src/lib/proUpgradePresentation.ts`
+- `src/lib/proUpgradePresentation.test.ts`
+- `src/demo/fixtures/pro-upgrade.ts`
+- `docs/design/PROGRESS.md`
+
+### Critères au checkpoint
+
+- [x] Ressemblance à la maquette à 1440 px : validation humaine reçue le 7 octobre 2026.
+- [x] Aucun débordement à 390 px : validation humaine reçue le 7 octobre 2026.
+- [x] `check-design --changed` sans erreur.
+- [x] Aucune valeur de la maquette recopiée dans un composant.
+- [x] Les données réelles et de démonstration passent par `src/lib/data/`.
+- [x] Le montant dû aujourd'hui est 0 XPF uniquement dans le parcours d'essai réel après validation.
