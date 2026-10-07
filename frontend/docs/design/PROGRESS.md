@@ -20,7 +20,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [12](specs/12-covoiturage.md) | Covoiturage | /covoiturage, /fret | Fait (fusionnée) | [#227](https://github.com/Troca-nc/troca-safe-export/pull/227) |
 | [13](specs/13-services.md) | Services : devis, professionnels, envoi | /services | Fait (fusionnée) | [#228](https://github.com/Troca-nc/troca-safe-export/pull/228) |
 | [14](specs/14-pros.md) | Annuaire et vitrine des pros | /pros, /pro/[id] | Fait (fusionnée) | [#229](https://github.com/Troca-nc/troca-safe-export/pull/229) |
-| [15](specs/15-pro-presentation.md) | Présentation de l’offre Pro | /pro | À relire | — |
+| [15](specs/15-pro-presentation.md) | Présentation de l’offre Pro | /pro | À relire | [#230](https://github.com/Troca-nc/troca-safe-export/pull/230) |
 | [16](specs/16-devenir-pro.md) | Devenir Pro | /devenir-pro | À faire | — |
 | [17](specs/17-compte-pro.md) | Espace Pro | /pro/espace | À faire | — |
 | [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | À faire | — |
