@@ -22,7 +22,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [14](specs/14-pros.md) | Annuaire et vitrine des pros | /pros, /pro/[id] | Fait (fusionnée) | [#229](https://github.com/Troca-nc/troca-safe-export/pull/229) |
 | [15](specs/15-pro-presentation.md) | Présentation de l’offre Pro | /pro | Fait (fusionnée) | [#230](https://github.com/Troca-nc/troca-safe-export/pull/230) |
 | [16](specs/16-devenir-pro.md) | Devenir Pro | /devenir-pro | Fait (fusionnée) | [#231](https://github.com/Troca-nc/troca-safe-export/pull/231) |
-| [17](specs/17-compte-pro.md) | Espace Pro | /pro/dashboard | À relire | [#232](https://github.com/Troca-nc/troca-safe-export/pull/232) fusionnée — prérequis serveur ; PR frontend en préparation |
+| [17](specs/17-compte-pro.md) | Espace Pro | /pro/dashboard | À relire | [#232](https://github.com/Troca-nc/troca-safe-export/pull/232) fusionnée — prérequis serveur ; [#233](https://github.com/Troca-nc/troca-safe-export/pull/233) — frontend |
 | [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | À faire | — |
 | [19](specs/19-admin.md) | Administration | /admin | À faire | — |
 
@@ -1561,6 +1561,7 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 
 ### Lot frontend — réalisation
 
+- PR frontend [#233](https://github.com/Troca-nc/troca-safe-export/pull/233), ouverte le 8 octobre 2026 pour relecture et CI.
 - Branche isolée `design/17-compte-pro-frontend`, worktree `D:\Codex\kalico-worktrees\17-compte-pro-ui`, basée sur la fusion du prérequis serveur `33b15cfd`.
 - `/pro/dashboard` est désormais l'espace canonique pleine largeur à quatre onglets. Les sous-routes historiques conservent leur navigation latérale et restent les vues détaillées du catalogue, des devis et des rendez-vous.
 - Le tableau de bord n'affiche que des indicateurs sourcés : vues, contacts, demandes reçues, rendez-vous, avis publiés et stocks faibles. Aucun chiffre d'affaires, benchmark ou delta sans source n'a été ajouté.
