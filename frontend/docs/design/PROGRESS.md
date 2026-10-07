@@ -22,7 +22,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [14](specs/14-pros.md) | Annuaire et vitrine des pros | /pros, /pro/[id] | Fait (fusionnée) | [#229](https://github.com/Troca-nc/troca-safe-export/pull/229) |
 | [15](specs/15-pro-presentation.md) | Présentation de l’offre Pro | /pro | Fait (fusionnée) | [#230](https://github.com/Troca-nc/troca-safe-export/pull/230) |
 | [16](specs/16-devenir-pro.md) | Devenir Pro | /devenir-pro | Fait (fusionnée) | [#231](https://github.com/Troca-nc/troca-safe-export/pull/231) |
-| [17](specs/17-compte-pro.md) | Espace Pro | /pro/dashboard | En cours | — |
+| [17](specs/17-compte-pro.md) | Espace Pro | /pro/dashboard | En cours | [#232](https://github.com/Troca-nc/troca-safe-export/pull/232) — prérequis serveur |
 | [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | À faire | — |
 | [19](specs/19-admin.md) | Administration | /admin | À faire | — |
 
@@ -1534,7 +1534,7 @@ La fixture dédiée couvrira les cinq types et leurs états de chargement, erreu
 
 ### Lot serveur préalable — réalisation
 
-- Inventaire validé par l'humain le 7 octobre 2026. Le lot serveur est isolé sur `design/17-compte-pro-devis-server` ; la refonte frontend attend sa fusion et fera l'objet d'une PR distincte.
+- Inventaire validé par l'humain le 7 octobre 2026. Le lot serveur est isolé sur `design/17-compte-pro-devis-server` dans la PR [#232](https://github.com/Troca-nc/troca-safe-export/pull/232) ; la refonte frontend attend sa fusion et fera l'objet d'une PR distincte.
 - `proQuoteService` centralise les taux TGC autorisés par la configuration serveur `PRO_QUOTE_TGC_RATES`, les unités, la normalisation des lignes et les calculs XPF. Chaque ligne est arrondie avant la ventilation TGC ; acompte et solde sont dérivés du total TTC.
 - Les anciens payloads à taux global restent acceptés. Les nouveaux payloads peuvent fournir unité, quantité décimale et TGC par ligne. L'API expose les taux et unités configurés.
 - Les modèles de devis disposent d'un CRUD authentifié et borné au professionnel propriétaire. Les noms sont uniques par professionnel.
