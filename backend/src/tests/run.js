@@ -17,6 +17,8 @@ const SUITES = [
   './reviewCreationPolicy.test',
   './reviewTokenService.test',
   './quoteShareTokenService.test',
+  './proQuoteService.test',
+  './proQuoteRoutesContract.test',
   './bookingAccessTokenService.test',
   './unsubscribeTokens.test',
   './authenticationFailClosed.test',

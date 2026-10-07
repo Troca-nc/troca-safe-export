@@ -14,6 +14,13 @@ const {
   hashQuoteShareToken,
   matchesQuoteShareToken,
 } = require('../services/quoteShareTokenService');
+const {
+  QUOTE_UNITS,
+  canMarkQuotePaid,
+  computeQuoteTotals,
+  getAllowedTgcRates,
+  normalizeQuoteItems,
+} = require('../services/proQuoteService');
 
 const router = express.Router();
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
@@ -21,8 +28,10 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 const quoteItemSchema = Joi.object({
   label: Joi.string().trim().min(2).max(180).required(),
   description: Joi.string().trim().max(400).allow('', null).optional(),
-  quantity: Joi.number().integer().min(1).max(9999).required(),
+  unit: Joi.string().valid(...QUOTE_UNITS).default('unit'),
+  quantity: Joi.number().precision(3).min(0.001).max(999999).required(),
   unit_price_xpf: Joi.number().integer().min(0).required(),
+  tgc_rate: Joi.number().min(0).max(50).optional(),
 });
 
 const quoteCreateSchema = Joi.object({
@@ -36,6 +45,7 @@ const quoteCreateSchema = Joi.object({
   items: Joi.array().items(quoteItemSchema).min(1).required(),
   tgc_rate: Joi.number().min(0).max(50).default(0),
   tax_rate: Joi.number().min(0).max(50).optional(),
+  deposit_percent: Joi.number().precision(2).min(0).max(100).default(0),
   validity_days: Joi.number().integer().min(1).max(365).default(30),
   source_quote_request_id: Joi.number().integer().positive().allow(null).optional(),
 });
@@ -50,7 +60,23 @@ const quoteUpdateSchema = Joi.object({
   items: Joi.array().items(quoteItemSchema).min(1).optional(),
   tgc_rate: Joi.number().min(0).max(50).optional(),
   tax_rate: Joi.number().min(0).max(50).optional(),
+  deposit_percent: Joi.number().precision(2).min(0).max(100).optional(),
   validity_days: Joi.number().integer().min(1).max(365).optional(),
+});
+
+const quoteTemplateSchema = Joi.object({
+  name: Joi.string().trim().min(2).max(120).required(),
+  subject: Joi.string().trim().min(2).max(160).required(),
+  client_note: Joi.string().trim().max(1200).allow('', null).optional(),
+  items: Joi.array().items(quoteItemSchema).min(1).required(),
+  tgc_rate: Joi.number().min(0).max(50).default(0),
+  deposit_percent: Joi.number().precision(2).min(0).max(100).default(0),
+  validity_days: Joi.number().integer().min(1).max(365).default(30),
+});
+
+const quotePaymentSchema = Joi.object({
+  paid_at: Joi.date().iso().max('now').optional(),
+  note: Joi.string().trim().max(500).allow('', null).optional(),
 });
 
 function requirePro(req, res) {
@@ -88,35 +114,6 @@ function formatDisplayName(row) {
   return row.pro_company_name
     || [row.pro_prenom, row.pro_nom].filter(Boolean).join(' ').trim()
     || 'Professionnel Kalico';
-}
-
-function normalizeQuoteItems(items) {
-  return (Array.isArray(items) ? items : []).map((item, index) => {
-    const quantity = Math.max(1, Math.round(Number(item.quantity ?? 1)));
-    const unitPrice = Math.max(0, Math.round(Number(item.unit_price_xpf ?? 0)));
-    return {
-      id: item.id || `item_${index + 1}`,
-      label: normalizeMaybeText(item.label) || `Ligne ${index + 1}`,
-      description: normalizeMaybeText(item.description),
-      quantity,
-      unit_price_xpf: unitPrice,
-      total_xpf: quantity * unitPrice,
-    };
-  });
-}
-
-function computeQuoteTotals(items, tgcRate) {
-  const subtotal = normalizeQuoteItems(items).reduce((sum, item) => sum + item.total_xpf, 0);
-  const rate = Number(tgcRate || 0);
-  const tax = Math.round((subtotal * rate) / 100);
-  return {
-    subtotal_xpf: subtotal,
-    tax_rate: rate,
-    tgc_rate: rate,
-    tax_amount_xpf: tax,
-    tgc_amount_xpf: tax,
-    total_xpf: subtotal + tax,
-  };
 }
 
 function buildSimplePdfBuffer(lines) {
@@ -187,14 +184,26 @@ function buildQuotePdfBuffer(quote) {
     const label = item.label || `Ligne ${index + 1}`;
     const description = item.description ? ` - ${item.description}` : '';
     lines.push(`${index + 1}. ${label}${description}`);
-    lines.push(`   ${item.quantity} x ${formatMoney(item.unit_price_xpf)} = ${formatMoney(item.total_xpf)}`);
+    lines.push(`   ${item.quantity} ${item.unit || 'unit'} x ${formatMoney(item.unit_price_xpf)} = ${formatMoney(item.subtotal_xpf ?? item.total_xpf)}`);
+    lines.push(`   TGC ${Number(item.tgc_rate ?? quote.tgc_rate ?? 0)} % : ${formatMoney(item.tgc_amount_xpf ?? 0)}`);
   });
 
   lines.push('');
   lines.push(`Sous-total : ${formatMoney(quote.subtotal_xpf)}`);
-  const tgcRate = Number(quote.tgc_rate ?? quote.tax_rate ?? 0);
-  lines.push(`TGC (${tgcRate} %) : ${formatMoney(quote.tgc_amount_xpf ?? quote.tax_amount_xpf)}`);
+  const breakdown = Array.isArray(quote.tgc_breakdown) ? quote.tgc_breakdown : [];
+  if (breakdown.length > 0) {
+    breakdown.forEach((entry) => {
+      lines.push(`TGC (${Number(entry.rate)} %) : ${formatMoney(entry.amount_xpf)}`);
+    });
+  } else {
+    const tgcRate = Number(quote.tgc_rate ?? quote.tax_rate ?? 0);
+    lines.push(`TGC (${tgcRate} %) : ${formatMoney(quote.tgc_amount_xpf ?? quote.tax_amount_xpf)}`);
+  }
   lines.push(`Total : ${formatMoney(quote.total_xpf)}`);
+  if (Number(quote.deposit_amount_xpf ?? 0) > 0) {
+    lines.push(`Acompte (${Number(quote.deposit_percent ?? 0)} %) : ${formatMoney(quote.deposit_amount_xpf)}`);
+    lines.push(`Solde : ${formatMoney(quote.balance_due_xpf)}`);
+  }
   lines.push('');
   lines.push('Document généré par Kalico.');
 
@@ -221,7 +230,11 @@ function parseQuoteRow(row) {
     tgc_rate: Number(row.tgc_rate ?? row.tax_rate ?? 0),
     tax_amount_xpf: Number(row.tax_amount_xpf ?? 0),
     tgc_amount_xpf: Number(row.tgc_amount_xpf ?? row.tax_amount_xpf ?? 0),
+    tgc_breakdown: Array.isArray(row.tgc_breakdown) ? row.tgc_breakdown : [],
     total_xpf: Number(row.total_xpf ?? 0),
+    deposit_percent: Number(row.deposit_percent ?? 0),
+    deposit_amount_xpf: Number(row.deposit_amount_xpf ?? 0),
+    balance_due_xpf: Number(row.balance_due_xpf ?? row.total_xpf ?? 0),
     validity_days: Number(row.validity_days ?? 30),
     status: row.status,
     valid_until: row.valid_until ?? null,
@@ -230,6 +243,11 @@ function parseQuoteRow(row) {
     accepted_at: row.accepted_at ?? null,
     refused_at: row.refused_at ?? null,
     refused_reason: row.refused_reason ?? null,
+    last_reminded_at: row.last_reminded_at ?? null,
+    reminder_count: Number(row.reminder_count ?? 0),
+    paid_at: row.paid_at ?? null,
+    paid_declared_by_user_id: row.paid_declared_by_user_id == null ? null : Number(row.paid_declared_by_user_id),
+    payment_note: row.payment_note ?? null,
     created_at: row.created_at,
     updated_at: row.updated_at,
     converted_listing_id: row.converted_listing_id == null ? null : Number(row.converted_listing_id),
@@ -244,6 +262,21 @@ function parseQuoteRow(row) {
       pro_website: row.pro_website ?? null,
       display_name: formatDisplayName(row),
     },
+  };
+}
+
+function parseQuoteTemplateRow(row) {
+  return {
+    id: Number(row.id),
+    pro_id: Number(row.pro_id),
+    name: row.name,
+    subject: row.subject,
+    client_note: row.client_note ?? null,
+    items: Array.isArray(row.items) ? row.items : [],
+    validity_days: Number(row.validity_days ?? 30),
+    deposit_percent: Number(row.deposit_percent ?? 0),
+    created_at: row.created_at,
+    updated_at: row.updated_at,
   };
 }
 
@@ -289,8 +322,10 @@ async function loadNextQuoteNumber(client) {
   return `DEVIS-${year}-${String(next).padStart(4, '0')}`;
 }
 
-async function sendQuoteSentEmails(quote) {
-  const subject = `${quote.quote_number} - Devis envoyé par ${quote.pro.display_name}`;
+async function sendQuoteSentEmails(quote, { reminder = false } = {}) {
+  const subject = reminder
+    ? `Rappel — ${quote.quote_number} de ${quote.pro.display_name}`
+    : `${quote.quote_number} - Devis envoyé par ${quote.pro.display_name}`;
   const link = `${BASE_URL}/devis/${quote.id}#token=${encodeURIComponent(quote.share_token)}`;
   const htmlItems = quote.items
     .map((item, index) => `
@@ -308,7 +343,7 @@ async function sendQuoteSentEmails(quote) {
       <div style="background:#0A7EA4;padding:24px 28px;color:#fff;font-size:22px;font-weight:700">Kalico</div>
       <div style="padding:28px;color:#1f2937;line-height:1.6;">
         <p>Bonjour ${escapeHtml(quote.requester_name)},</p>
-        <p>Le professionnel ${escapeHtml(quote.pro.display_name)} vous a envoyé un devis.</p>
+        <p>${reminder ? 'Rappel : ' : ''}Le professionnel ${escapeHtml(quote.pro.display_name)} vous a envoyé un devis.</p>
         <p><strong>Objet :</strong> ${escapeHtml(quote.subject)}</p>
         <p><strong>Validité :</strong> ${quote.valid_until ? new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' }).format(new Date(quote.valid_until)) : 'Non précisée'}</p>
         <table style="width:100%;border-collapse:collapse;margin:20px 0;">
@@ -325,6 +360,7 @@ async function sendQuoteSentEmails(quote) {
         <p><strong>Sous-total :</strong> ${formatMoney(quote.subtotal_xpf)}</p>
         <p><strong>TGC :</strong> ${formatMoney(quote.tgc_amount_xpf ?? quote.tax_amount_xpf)}</p>
         <p><strong>Total :</strong> ${formatMoney(quote.total_xpf)}</p>
+        ${Number(quote.deposit_amount_xpf || 0) > 0 ? `<p><strong>Acompte :</strong> ${formatMoney(quote.deposit_amount_xpf)} · <strong>Solde :</strong> ${formatMoney(quote.balance_due_xpf)}</p>` : ''}
         <p style="margin-top:24px;"><a href="${link}" style="display:inline-block;background:#0A7EA4;color:#fff;text-decoration:none;padding:12px 18px;border-radius:12px;font-weight:700;">Voir mon devis</a></p>
       </div>
     </div>
@@ -339,7 +375,7 @@ async function sendQuoteSentEmails(quote) {
   if (quote.requester_phone) {
     await sendSms({
       to: quote.requester_phone,
-      body: `Kalico : ${quote.pro.display_name} vous a envoyé un devis pour ${quote.subject}. Consultez-le sur kalico.nc`,
+      body: `Kalico : ${reminder ? 'rappel pour le devis' : 'nouveau devis de'} ${quote.pro.display_name} concernant ${quote.subject}. Consultez-le sur kalico.nc`,
     }).catch(() => {});
   }
 }
@@ -373,9 +409,11 @@ router.post('/', authenticate, async (req, res, next) => {
       return res.status(400).json({ error: error.details[0].message });
     }
 
-    const items = normalizeQuoteItems(value.items);
     const tgcRate = value.tgc_rate ?? value.tax_rate ?? 0;
-    const totals = computeQuoteTotals(items, tgcRate);
+    const totals = computeQuoteTotals(value.items, {
+      defaultTgcRate: tgcRate,
+      depositPercent: value.deposit_percent,
+    });
 
     const result = await withTransaction(async (client) => {
       const quoteNumber = await loadNextQuoteNumber(client);
@@ -385,12 +423,14 @@ router.post('/', authenticate, async (req, res, next) => {
            pro_id, requester_user_id, source_quote_request_id,
            quote_number, share_token, requester_name, requester_email, requester_phone,
            commune, subject, client_note, items,
-           subtotal_xpf, tax_rate, tax_amount_xpf, total_xpf, validity_days, status
+           subtotal_xpf, tax_rate, tax_amount_xpf, tgc_breakdown, total_xpf,
+           deposit_percent, deposit_amount_xpf, balance_due_xpf, validity_days, status
          ) VALUES (
            $1,$2,$3,
            $4,$5,$6,$7,$8,
            $9,$10,$11,$12,
-           $13,$14,$15,$16,$17,'draft'
+           $13,$14,$15,$16,$17,
+           $18,$19,$20,$21,'draft'
          )
          RETURNING *`,
         [
@@ -405,11 +445,15 @@ router.post('/', authenticate, async (req, res, next) => {
           value.commune.trim(),
           value.subject.trim(),
           value.client_note ? value.client_note.trim() : null,
-          JSON.stringify(items),
+          JSON.stringify(totals.items),
           totals.subtotal_xpf,
           totals.tgc_rate,
           totals.tax_amount_xpf,
+          JSON.stringify(totals.tgc_breakdown),
           totals.total_xpf,
+          totals.deposit_percent,
+          totals.deposit_amount_xpf,
+          totals.balance_due_xpf,
           value.validity_days,
         ]
       );
@@ -442,6 +486,134 @@ router.get('/', authenticate, async (req, res, next) => {
       params
     );
     return res.json({ data: result.rows.map(parseQuoteRow) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/config', authenticate, (req, res) => {
+  if (!requirePro(req, res)) return;
+  return res.json({
+    data: {
+      tgc_rates: getAllowedTgcRates(),
+      units: QUOTE_UNITS,
+    },
+  });
+});
+
+router.get('/templates', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    const result = await query(
+      `SELECT * FROM pro_quote_templates
+       WHERE pro_id = $1
+       ORDER BY updated_at DESC, id DESC`,
+      [req.user.id]
+    );
+    return res.json({ data: result.rows.map(parseQuoteTemplateRow) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/templates', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    const { error, value } = quoteTemplateSchema.validate(req.body, { stripUnknown: true, convert: true });
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+    const totals = computeQuoteTotals(value.items, {
+      defaultTgcRate: value.tgc_rate,
+      depositPercent: value.deposit_percent,
+    });
+    const result = await query(
+      `INSERT INTO pro_quote_templates (
+         pro_id, name, subject, client_note, items, validity_days, deposit_percent
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7)
+       RETURNING *`,
+      [
+        req.user.id,
+        value.name.trim(),
+        value.subject.trim(),
+        normalizeMaybeText(value.client_note),
+        JSON.stringify(totals.items),
+        value.validity_days,
+        totals.deposit_percent,
+      ]
+    );
+    return res.status(201).json({ data: parseQuoteTemplateRow(result.rows[0]) });
+  } catch (err) {
+    if (err?.code === '23505') {
+      return res.status(409).json({ error: 'Un modèle porte déjà ce nom.' });
+    }
+    next(err);
+  }
+});
+
+router.put('/templates/:templateId', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    const templateId = Number(req.params.templateId);
+    if (!Number.isInteger(templateId) || templateId <= 0) {
+      return res.status(400).json({ error: 'Modèle invalide.' });
+    }
+    const { error, value } = quoteTemplateSchema.validate(req.body, { stripUnknown: true, convert: true });
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+    const totals = computeQuoteTotals(value.items, {
+      defaultTgcRate: value.tgc_rate,
+      depositPercent: value.deposit_percent,
+    });
+    const result = await query(
+      `UPDATE pro_quote_templates
+       SET name = $1,
+           subject = $2,
+           client_note = $3,
+           items = $4,
+           validity_days = $5,
+           deposit_percent = $6
+       WHERE id = $7 AND pro_id = $8
+       RETURNING *`,
+      [
+        value.name.trim(),
+        value.subject.trim(),
+        normalizeMaybeText(value.client_note),
+        JSON.stringify(totals.items),
+        value.validity_days,
+        totals.deposit_percent,
+        templateId,
+        req.user.id,
+      ]
+    );
+    if (!result.rows[0]) {
+      return res.status(404).json({ error: 'Modèle introuvable.' });
+    }
+    return res.json({ data: parseQuoteTemplateRow(result.rows[0]) });
+  } catch (err) {
+    if (err?.code === '23505') {
+      return res.status(409).json({ error: 'Un modèle porte déjà ce nom.' });
+    }
+    next(err);
+  }
+});
+
+router.delete('/templates/:templateId', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    const templateId = Number(req.params.templateId);
+    if (!Number.isInteger(templateId) || templateId <= 0) {
+      return res.status(400).json({ error: 'Modèle invalide.' });
+    }
+    const result = await query(
+      `DELETE FROM pro_quote_templates WHERE id = $1 AND pro_id = $2 RETURNING id`,
+      [templateId, req.user.id]
+    );
+    if (!result.rows[0]) {
+      return res.status(404).json({ error: 'Modèle introuvable.' });
+    }
+    return res.status(204).send();
   } catch (err) {
     next(err);
   }
@@ -495,9 +667,12 @@ router.put('/:id', authenticate, async (req, res, next) => {
       return res.status(400).json({ error: error.details[0].message });
     }
 
-    const items = value.items ? normalizeQuoteItems(value.items) : normalizeQuoteItems(quote.items);
+    const items = value.items || quote.items;
     const taxRate = value.tgc_rate ?? value.tax_rate ?? Number(quote.tgc_rate ?? quote.tax_rate ?? 0);
-    const totals = computeQuoteTotals(items, taxRate);
+    const totals = computeQuoteTotals(items, {
+      defaultTgcRate: taxRate,
+      depositPercent: value.deposit_percent ?? quote.deposit_percent,
+    });
 
     const updated = await query(
       `UPDATE pro_quotes
@@ -511,9 +686,13 @@ router.put('/:id', authenticate, async (req, res, next) => {
            subtotal_xpf = $8,
            tax_rate = $9,
            tax_amount_xpf = $10,
-           total_xpf = $11,
-           validity_days = COALESCE($12, validity_days)
-       WHERE id = $13
+           tgc_breakdown = $11,
+           total_xpf = $12,
+           deposit_percent = $13,
+           deposit_amount_xpf = $14,
+           balance_due_xpf = $15,
+           validity_days = COALESCE($16, validity_days)
+       WHERE id = $17
        RETURNING *`,
       [
         value.requester_name?.trim() ?? null,
@@ -522,11 +701,15 @@ router.put('/:id', authenticate, async (req, res, next) => {
         value.commune?.trim() ?? null,
         value.subject?.trim() ?? null,
         value.client_note !== undefined ? normalizeMaybeText(value.client_note) : null,
-        JSON.stringify(items),
+        JSON.stringify(totals.items),
         totals.subtotal_xpf,
         totals.tgc_rate,
         totals.tax_amount_xpf,
+        JSON.stringify(totals.tgc_breakdown),
         totals.total_xpf,
+        totals.deposit_percent,
+        totals.deposit_amount_xpf,
+        totals.balance_due_xpf,
         value.validity_days ?? null,
         quoteId,
       ]
@@ -570,9 +753,14 @@ router.post('/:id/send', authenticate, async (req, res, next) => {
            share_token = $3,
            viewed_at = COALESCE(viewed_at, NULL)
        WHERE id = $4
+         AND pro_id = $5
+         AND status = ANY($6::text[])
        RETURNING *`,
-      [validUntil.toISOString(), validityDays, hashQuoteShareToken(shareToken), quoteId]
+      [validUntil.toISOString(), validityDays, hashQuoteShareToken(shareToken), quoteId, req.user.id, ['draft', 'refused']]
     );
+    if (!updated.rows[0]) {
+      return res.status(409).json({ error: 'Le devis a changé d’état. Rechargez-le avant de réessayer.' });
+    }
 
     const fullQuote = parseQuoteRow({
       ...quote,
@@ -609,6 +797,103 @@ router.post('/:id/send', authenticate, async (req, res, next) => {
   }
 });
 
+router.post('/:id/remind', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    const quoteId = Number(req.params.id);
+    if (!Number.isInteger(quoteId) || quoteId <= 0) {
+      return res.status(400).json({ error: 'Devis invalide.' });
+    }
+    const quote = await loadQuoteById(quoteId);
+    if (!quote) {
+      return res.status(404).json({ error: 'Devis introuvable.' });
+    }
+    if (Number(quote.pro_id) !== Number(req.user.id)) {
+      return res.status(403).json({ error: 'Accès refusé.' });
+    }
+    if (!['sent', 'viewed'].includes(quote.status)) {
+      return res.status(409).json({ error: 'Seul un devis envoyé et en attente peut être relancé.' });
+    }
+
+    const shareToken = generateQuoteShareToken();
+    const shareTokenHash = hashQuoteShareToken(shareToken);
+    const updated = await query(
+      `UPDATE pro_quotes
+       SET last_reminded_at = NOW(),
+           reminder_count = reminder_count + 1,
+           share_token = $3
+       WHERE id = $1
+         AND pro_id = $2
+         AND status = ANY($4::text[])
+         AND (last_reminded_at IS NULL OR last_reminded_at <= NOW() - INTERVAL '24 hours')
+       RETURNING *`,
+      [quoteId, req.user.id, shareTokenHash, ['sent', 'viewed']]
+    );
+    if (!updated.rows[0]) {
+      res.setHeader('Retry-After', '86400');
+      return res.status(429).json({ error: 'Une relance est possible toutes les 24 heures.' });
+    }
+
+    const parsed = parseQuoteRow({ ...quote, ...updated.rows[0] });
+    parsed.share_token = shareToken;
+    await sendQuoteSentEmails(parsed, { reminder: true });
+    return res.json({ data: parseQuoteRow({ ...quote, ...updated.rows[0], share_token: shareTokenHash }) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/:id/mark-paid', authenticate, async (req, res, next) => {
+  try {
+    if (!requirePro(req, res)) return;
+    const quoteId = Number(req.params.id);
+    if (!Number.isInteger(quoteId) || quoteId <= 0) {
+      return res.status(400).json({ error: 'Devis invalide.' });
+    }
+    const { error, value } = quotePaymentSchema.validate(req.body || {}, { stripUnknown: true, convert: true });
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+    const quote = await loadQuoteById(quoteId);
+    if (!quote) {
+      return res.status(404).json({ error: 'Devis introuvable.' });
+    }
+    if (Number(quote.pro_id) !== Number(req.user.id)) {
+      return res.status(403).json({ error: 'Accès refusé.' });
+    }
+    if (!canMarkQuotePaid(quote.status)) {
+      return res.status(409).json({ error: 'Seul un devis accepté ou converti peut être déclaré payé.' });
+    }
+    const updated = await query(
+      `UPDATE pro_quotes
+       SET status = 'paid',
+           paid_at = $1,
+           payment_note = $2,
+           paid_declared_by_user_id = $4
+       WHERE id = $3
+         AND pro_id = $4
+         AND status = ANY($5::text[])
+       RETURNING *`,
+      [
+        value.paid_at ? new Date(value.paid_at).toISOString() : new Date().toISOString(),
+        normalizeMaybeText(value.note),
+        quoteId,
+        req.user.id,
+        ['accepted', 'converted'],
+      ]
+    );
+    if (!updated.rows[0]) {
+      return res.status(409).json({ error: 'Le devis a changé d’état. Rechargez-le avant de réessayer.' });
+    }
+    return res.json({
+      data: parseQuoteRow({ ...quote, ...updated.rows[0] }),
+      payment_source: 'pro_declared',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post('/:id/accept', optionalAuth, async (req, res, next) => {
   try {
     const quoteId = Number(req.params.id);
@@ -635,10 +920,13 @@ router.post('/:id/accept', optionalAuth, async (req, res, next) => {
        SET status = 'accepted',
            accepted_at = NOW(),
            viewed_at = COALESCE(viewed_at, NOW())
-       WHERE id = $1
+       WHERE id = $1 AND status = ANY($2::text[])
        RETURNING *`,
-      [quoteId]
+      [quoteId, ['sent', 'viewed']]
     );
+    if (!updated.rows[0]) {
+      return res.status(409).json({ error: 'Le devis a changé d’état. Rechargez-le avant de réessayer.' });
+    }
 
     const parsed = parseQuoteRow({ ...quote, ...updated.rows[0] });
     await sendQuoteDecisionEmails(parsed, 'accepted');
@@ -697,10 +985,13 @@ router.post('/:id/refuse', optionalAuth, async (req, res, next) => {
            refused_at = NOW(),
            refused_reason = $1,
            viewed_at = COALESCE(viewed_at, NOW())
-       WHERE id = $2
+       WHERE id = $2 AND status = ANY($3::text[])
        RETURNING *`,
-      [refusedReason, quoteId]
+      [refusedReason, quoteId, ['sent', 'viewed']]
     );
+    if (!updated.rows[0]) {
+      return res.status(409).json({ error: 'Le devis a changé d’état. Rechargez-le avant de réessayer.' });
+    }
 
     const parsed = parseQuoteRow({ ...quote, ...updated.rows[0] });
     await sendQuoteDecisionEmails(parsed, 'refused', refusedReason || undefined);
@@ -745,16 +1036,23 @@ router.post('/:id/convert', authenticate, async (req, res, next) => {
     if (Number(quote.pro_id) !== Number(req.user.id)) {
       return res.status(403).json({ error: 'Accès refusé.' });
     }
+    if (quote.status !== 'accepted') {
+      return res.status(409).json({ error: 'Seul un devis accepté peut être converti.' });
+    }
 
     const convertedListingId = req.body?.listing_id ? Number(req.body.listing_id) : null;
     const updated = await query(
       `UPDATE pro_quotes
        SET status = 'converted',
            converted_listing_id = $1
-       WHERE id = $2
+       WHERE id = $2 AND pro_id = $3 AND status = 'accepted'
        RETURNING *`,
-      [convertedListingId, quoteId]
+      [convertedListingId, quoteId, req.user.id]
     );
+
+    if (!updated.rows[0]) {
+      return res.status(409).json({ error: 'Le devis a changé d’état. Rechargez-le avant de réessayer.' });
+    }
 
     const parsed = parseQuoteRow({ ...quote, ...updated.rows[0] });
     return res.json({ data: parsed });
