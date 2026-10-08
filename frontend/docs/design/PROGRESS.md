@@ -24,7 +24,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [16](specs/16-devenir-pro.md) | Devenir Pro | /devenir-pro | Fait (fusionnée) | [#231](https://github.com/Troca-nc/troca-safe-export/pull/231) |
 | [17](specs/17-compte-pro.md) | Espace Pro | /pro/dashboard | Fait (fusionnée) | [#232](https://github.com/Troca-nc/troca-safe-export/pull/232) — prérequis serveur ; [#233](https://github.com/Troca-nc/troca-safe-export/pull/233) — frontend |
 | [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | À relire | [#234](https://github.com/Troca-nc/troca-safe-export/pull/234) serveur fusionnée ; [#235](https://github.com/Troca-nc/troca-safe-export/pull/235) frontend |
-| [19](specs/19-admin.md) | Administration | /admin | À faire | — |
+| [19](specs/19-admin.md) | Administration | /admin | À relire | Branche `design/19-admin-ui` |
 
 ## Hors site
 
@@ -1596,6 +1596,64 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - `frontend/src/lib/proSpacePresentation.test.ts`
 - `frontend/src/types/pro-space.ts`
 - `frontend/docs/design/PROGRESS.md`
+
+## 19 — Administration
+
+### Inventaire et décision de périmètre
+
+- Les pages historiques `frontend/src/app/admin/*` sont volontairement neutralisées depuis le retrait des écrans simulés. Elles ne constituent plus le back-office opérationnel.
+- L’application autonome `admin/` porte la session serveur, le TOTP, la révocation Redis, le relais authentifié vers l’API et les écrans alimentés par des données réelles.
+- L’adaptation de la fiche 19 à cette application autonome a été autorisée par l’humain le 8 octobre 2026.
+- Branche isolée `design/19-admin-ui`, basée sur `origin/main` au commit `f2db769b`, dans le worktree `D:\Codex\kalico-worktrees\19-admin-ui`.
+
+### Réalisation
+
+- Refonte du shell avec barre latérale bleu profond, repère orange, en-tête contextuel, navigation clavier et tiroir mobile fermé par bouton ou fond interactif.
+- Palette, surfaces, typographie, rayons et états concentrés dans les variables `--admin-*` de `admin/src/app/globals.css`.
+- Harmonisation de la vue d’ensemble, de la modération, des membres, des annonces, des paiements, des statistiques, des rapports, des erreurs, de la connexion et de la fiche membre.
+- Tableaux horizontaux contenus dans leur surface à 390 px, actions tactiles d’au moins 44 px et titres fluides.
+- Ajout d’un état de chargement partagé avec squelettes aux dimensions finales. Les états vides et l’error boundary existants sont conservés et harmonisés.
+- Les métriques, files, utilisateurs, paiements et états de service restent issus des contrats API existants. Aucune valeur de la maquette n’est recopiée.
+- L’authentification, le TOTP, le stockage et la révocation de session, ainsi que les mutations administratives ne sont pas modifiés.
+
+### Limite explicite
+
+- `admin_logs` reçoit les actions administratives, mais aucune route de lecture n’existe. Le journal d’activité de la maquette n’est donc pas affiché dans ce lot afin de ne pas simuler d’événements. Sa réalisation nécessite un lot serveur distinct avec projection minimale et pagination.
+
+### Validation
+
+- Validation humaine de l’aperçu local sur `http://localhost:3016/login` le 8 octobre 2026.
+- Suite admin : 49 tests passés.
+- Build Next.js 15.5.24 : compilation, typage, génération des 13 pages et collecte des traces réussis.
+- `node scripts/check-design.mjs --changed` : 0 erreur et 0 avertissement ; le script ne couvre pas encore `admin/`, donc un contrôle complémentaire des tokens, textes, états et dimensions mobiles a été effectué sur ce périmètre.
+- `git diff --check` passé avant commit.
+
+### Fichiers
+
+- `admin/src/app/dashboard/page.tsx`
+- `admin/src/app/error.tsx`
+- `admin/src/app/errors/page.tsx`
+- `admin/src/app/globals.css`
+- `admin/src/app/listings/page.tsx`
+- `admin/src/app/loading.tsx`
+- `admin/src/app/login/page.tsx`
+- `admin/src/app/moderation/page.tsx`
+- `admin/src/app/payments/page.tsx`
+- `admin/src/app/reports/page.tsx`
+- `admin/src/app/setup/setup-client.tsx`
+- `admin/src/app/stats/page.tsx`
+- `admin/src/app/users/page.tsx`
+- `admin/src/app/users/[id]/page.tsx`
+- `admin/src/components/AdminShell.tsx`
+- `admin/src/components/AlertBanner.tsx`
+- `admin/src/components/CollectionNotice.tsx`
+- `admin/src/components/DataTable.tsx`
+- `admin/src/components/MetricChart.tsx`
+- `admin/src/components/StatCard.tsx`
+- `admin/src/components/UserSearch.tsx`
+- `admin/src/lib/formatters.ts`
+- `frontend/docs/design/PROGRESS.md`
+- `frontend/docs/design/specs/19-admin.md`
 
 ## 18 — Inventaire (étape 1, sans code)
 

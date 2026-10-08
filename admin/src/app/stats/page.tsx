@@ -16,10 +16,10 @@ export default async function StatsPage() {
 
   return (
     <div className="space-y-8">
-      <section className="admin-card">
-        <p className="admin-label">Statistiques</p>
-        <h1 className="mt-2 text-3xl font-semibold">Croissance et revenu</h1>
-        <p className="mt-2 text-slate-400">Période glissante 30 jours</p>
+      <section className="border-b border-[var(--admin-line)] pb-7">
+        <p className="admin-kicker">Analyse</p>
+        <h1 className="admin-page-title mt-3">Statistiques</h1>
+        <p className="admin-muted mt-3 text-sm">Période glissante de 30 jours</p>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -32,7 +32,7 @@ export default async function StatsPage() {
       <section className="grid gap-4 xl:grid-cols-2">
         <div className="admin-card">
           <p className="admin-label">Utilisateurs</p>
-          <h2 className="mt-2 text-xl font-semibold">Nouveaux inscrits</h2>
+          <h2 className="admin-section-title mt-2">Nouveaux inscrits</h2>
           <div className="mt-6">
             <MetricChart type="area" data={rowsOrEmpty(users?.chart_new_users)} xKey="date" yKey="count" />
             <CollectionNotice value={users?.chart_new_users} />
@@ -40,7 +40,7 @@ export default async function StatsPage() {
         </div>
         <div className="admin-card">
           <p className="admin-label">Revenus</p>
-          <h2 className="mt-2 text-xl font-semibold">MRR / ARR</h2>
+          <h2 className="admin-section-title mt-2">MRR / ARR</h2>
           <div className="mt-6">
             <MetricChart type="line" data={rowsOrEmpty(revenue?.chart_revenue)} xKey="date" yKey="subscriptions" />
             <CollectionNotice value={revenue?.chart_revenue} />
@@ -51,16 +51,16 @@ export default async function StatsPage() {
       <section className="grid gap-4 xl:grid-cols-2">
         <div className="admin-card">
           <p className="admin-label">Catalogue</p>
-          <h2 className="mt-2 text-xl font-semibold">Annonces par catégorie</h2>
+          <h2 className="admin-section-title mt-2">Annonces par catégorie</h2>
           <div className="mt-6 space-y-3">
             {rowsOrEmpty(listings?.by_category).map((entry: any) => (
-              <div key={entry.category} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div key={entry.category} className="rounded-xl border border-[var(--admin-line)] bg-[var(--admin-cream)]/55 p-4">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold">{entry.category}</p>
-                  <p className="text-sm text-slate-400">{entry.count}</p>
+                  <p className="text-sm text-[var(--admin-ink-soft)]">{entry.count}</p>
                 </div>
-                <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/5">
-                  <div className="h-full rounded-full bg-emerald-400" style={{ width: `${percentageWidth(entry.pct)}%` }} />
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--admin-line)]">
+                  <div className="h-full rounded-full bg-[var(--admin-lagoon-light)]" style={{ width: `${percentageWidth(entry.pct)}%` }} />
                 </div>
               </div>
             ))}
@@ -69,7 +69,7 @@ export default async function StatsPage() {
         </div>
         <div className="admin-card">
           <p className="admin-label">Engagement</p>
-          <h2 className="mt-2 text-xl font-semibold">Messages et troc</h2>
+          <h2 className="admin-section-title mt-2">Messages et troc</h2>
           <div className="mt-6">
             <MetricChart type="line" data={rowsOrEmpty(engagement?.chart_troc)} xKey="date" yKey="created" />
             <CollectionNotice value={engagement?.chart_troc} />

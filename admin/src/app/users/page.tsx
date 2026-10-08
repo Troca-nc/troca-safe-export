@@ -15,10 +15,10 @@ export default async function UsersPage({ searchParams }: { searchParams?: Promi
 
   return (
     <div className="space-y-6">
-      <section className="admin-card">
-        <p className="admin-label">Utilisateurs</p>
-        <h1 className="mt-2 text-3xl font-semibold">Recherche et gestion</h1>
-        <p className="mt-2 text-slate-400">Total: {displayCount(users?.pagination?.total)}</p>
+      <section className="border-b border-[var(--admin-line)] pb-7">
+        <p className="admin-kicker">Communauté</p>
+        <h1 className="admin-page-title mt-3">Membres</h1>
+        <p className="admin-muted mt-3 text-sm">{displayCount(users?.pagination?.total)} membres inscrits</p>
       </section>
 
       <UserSearch initialValue={search} />
@@ -35,7 +35,7 @@ export default async function UsersPage({ searchParams }: { searchParams?: Promi
         ]}
         rows={rowsOrEmpty(users?.data).map((user: any) => ({
           ...user,
-          action: <Link className="text-emerald-300 underline" href={`/users/${user.id}`}>Voir</Link>,
+          action: <Link className="font-semibold text-[var(--admin-lagoon)] underline decoration-[var(--admin-lagoon)]/30 underline-offset-4 hover:text-[var(--admin-ink)]" href={`/users/${user.id}`}>Voir la fiche</Link>,
         }))}
       />
       <CollectionNotice value={users?.data} emptyLabel="Aucun utilisateur dans ce résultat." />

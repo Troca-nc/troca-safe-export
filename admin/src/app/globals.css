@@ -3,15 +3,21 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
-  --bg: #07111b;
-  --panel: #0f172a;
-  --panel-2: #111c31;
-  --line: rgba(148, 163, 184, 0.18);
-  --text: #e2e8f0;
-  --muted: #94a3b8;
-  --accent: #10b981;
-  --accent-2: #2dd4bf;
+  color-scheme: light;
+  --admin-ink: #123a44;
+  --admin-ink-soft: #315d65;
+  --admin-cream: #f6efe4;
+  --admin-paper: #fffdf8;
+  --admin-ivory: #fbf6ec;
+  --admin-line: #e4d7c3;
+  --admin-lagoon: #2e7b84;
+  --admin-lagoon-light: #55adb3;
+  --admin-mint: #9fc79b;
+  --admin-green: #3f6b3c;
+  --admin-green-light: #6e9a6a;
+  --admin-orange: #e8832a;
+  --admin-red: #b0431c;
+  --admin-red-dark: #7d2c12;
 }
 
 html,
@@ -21,11 +27,9 @@ body {
 
 body {
   margin: 0;
-  background:
-    radial-gradient(circle at top left, rgba(16, 185, 129, 0.18), transparent 28%),
-    radial-gradient(circle at top right, rgba(45, 212, 191, 0.12), transparent 25%),
-    linear-gradient(180deg, #020617 0%, #0f172a 100%);
-  color: var(--text);
+  background: var(--admin-cream);
+  color: var(--admin-ink);
+  font-family: "IBM Plex Sans", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 a {
@@ -37,22 +41,96 @@ a {
   box-sizing: border-box;
 }
 
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(232, 131, 42, 0.4);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: rgba(46, 123, 132, 0.2);
+}
+
 .admin-card {
-  @apply rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-lg backdrop-blur;
+  @apply rounded-[1.25rem] border p-5 md:p-6;
+  border-color: var(--admin-line);
+  background: var(--admin-paper);
+  box-shadow: 0 16px 42px rgba(18, 58, 68, 0.06);
 }
 
 .admin-label {
-  @apply text-xs font-semibold uppercase tracking-[0.18em] text-slate-400;
+  @apply text-[11px] font-bold uppercase tracking-[0.18em];
+  color: var(--admin-lagoon);
 }
 
 .admin-input {
-  @apply w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20;
+  @apply w-full rounded-md border px-4 py-3 text-sm outline-none transition;
+  border-color: var(--admin-line);
+  background: #fefaf3;
+  color: var(--admin-ink);
+}
+
+.admin-input::placeholder {
+  color: rgba(18, 58, 68, 0.48);
+}
+
+.admin-input:focus {
+  border-color: var(--admin-lagoon);
+  box-shadow: 0 0 0 3px rgba(46, 123, 132, 0.12);
 }
 
 .admin-button {
-  @apply inline-flex items-center justify-center rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400;
+  @apply inline-flex min-h-11 items-center justify-center rounded-md px-4 py-3 text-sm font-semibold transition;
+  background: var(--admin-orange);
+  color: #fff;
+}
+
+.admin-button:hover {
+  background: #cf6f1d;
 }
 
 .admin-button-secondary {
-  @apply inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/10;
+  @apply inline-flex min-h-11 items-center justify-center rounded-md border px-4 py-3 text-sm font-semibold transition;
+  border-color: var(--admin-line);
+  background: var(--admin-paper);
+  color: var(--admin-ink);
+}
+
+.admin-button-secondary:hover {
+  border-color: var(--admin-lagoon);
+  color: var(--admin-lagoon);
+}
+
+.admin-page-title {
+  font-family: "Instrument Serif", Georgia, Cambria, "Times New Roman", serif;
+  font-size: clamp(2.25rem, 5vw, 3.25rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.admin-section-title {
+  font-family: "Instrument Serif", Georgia, Cambria, "Times New Roman", serif;
+  font-size: 1.75rem;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.admin-muted {
+  color: rgba(18, 58, 68, 0.64);
+}
+
+.admin-kicker {
+  @apply text-[11px] font-bold uppercase tracking-[0.2em];
+  color: var(--admin-orange);
 }

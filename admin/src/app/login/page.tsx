@@ -38,15 +38,15 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md items-center px-4 py-10">
-      <section className="admin-card w-full">
+    <main className="relative mx-auto flex min-h-screen max-w-md items-center px-4 py-10">
+      <section className="admin-card w-full border-t-4 border-t-[var(--admin-orange)]">
         <div className="flex items-center gap-3">
-          <div className="rounded-2xl bg-emerald-500/15 p-3 text-emerald-300">
+          <div className="rounded-full bg-[var(--admin-ink)] p-3 text-[var(--admin-ivory)]">
             <ShieldCheck className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-sm text-slate-400">Admin sécurisé</p>
-            <h1 className="text-2xl font-semibold">Connexion Kalico</h1>
+            <p className="admin-kicker">Admin sécurisé</p>
+            <h1 className="admin-section-title mt-1">Connexion Kalico</h1>
           </div>
         </div>
 
@@ -55,7 +55,7 @@ export default function LoginPage() {
           <label className="block">
             <span className="admin-label">Email</span>
             <div className="relative mt-2">
-              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-ink-soft)]" />
               <input className="admin-input pl-10" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
           </label>
@@ -63,7 +63,7 @@ export default function LoginPage() {
           <label className="block">
             <span className="admin-label">Mot de passe</span>
             <div className="relative mt-2">
-              <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+              <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-ink-soft)]" />
               <input type="password" className="admin-input pl-10" value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
           </label>
@@ -71,19 +71,19 @@ export default function LoginPage() {
           <label className="block">
             <span className="admin-label">Code TOTP</span>
             <div className="relative mt-2">
-              <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+              <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-ink-soft)]" />
               <input inputMode="numeric" maxLength={6} className="admin-input pl-10 tracking-[0.35em]" value={totp} onChange={(e) => setTotp(e.target.value)} />
             </div>
           </label>
 
-          {error ? <p className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">{error}</p> : null}
+          {error ? <p className="rounded-md border border-[var(--admin-red)]/35 bg-[var(--admin-red)]/10 px-4 py-3 text-sm text-[var(--admin-red-dark)]">{error}</p> : null}
 
           <button disabled={loading} className="admin-button w-full disabled:cursor-not-allowed disabled:opacity-60">
             {loading ? 'Connexion…' : 'Se connecter'}
           </button>
         </form>
 
-        <p className="mt-5 text-sm text-slate-400">
+        <p className="admin-muted mt-5 text-sm">
           Le provisionnement initial est réalisé hors ligne par un opérateur autorisé.
         </p>
       </section>

@@ -15,14 +15,16 @@ export default async function ModerationPage() {
 
   return (
     <div className="space-y-6">
-      <section className="admin-card">
-        <p className="admin-label">Modération</p>
-        <h1 className="mt-2 text-3xl font-semibold">File d’attente centralisée</h1>
+      <section className="border-b border-[var(--admin-line)] pb-7">
+        <p className="admin-kicker">Contrôle des contenus</p>
+        <h1 className="admin-page-title mt-3">Modération</h1>
+        <p className="admin-muted mt-3 text-sm">{payload.total_pending ?? 'Non renseigné'} éléments à traiter</p>
       </section>
 
       <section className="grid gap-4 xl:grid-cols-2">
         <div className="admin-card">
-          <h2 className="text-xl font-semibold">Signalements</h2>
+          <h2 className="admin-section-title">Signalements</h2>
+          <p className="admin-muted mt-2 text-sm">Décidez à partir du motif et du contenu signalé.</p>
           <DataTable
             columns={[
               { key: 'id', label: 'ID' },
@@ -38,7 +40,8 @@ export default async function ModerationPage() {
           />
         </div>
         <div className="admin-card">
-          <h2 className="text-xl font-semibold">Enseignes à vérifier</h2>
+          <h2 className="admin-section-title">Enseignes à vérifier</h2>
+          <p className="admin-muted mt-2 text-sm">Validation administrative des comptes professionnels.</p>
           <DataTable
             columns={[
               { key: 'business_name', label: 'Enseigne' },

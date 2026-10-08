@@ -12,10 +12,10 @@ export default async function ReportsPage({ searchParams }: { searchParams?: Pro
 
   return (
     <div className="space-y-6">
-      <section className="admin-card">
-        <p className="admin-label">Rapport</p>
-        <h1 className="mt-2 text-3xl font-semibold">Export mensuel</h1>
-        <p className="mt-2 text-slate-400">Mois: {month}</p>
+      <section className="border-b border-[var(--admin-line)] pb-7">
+        <p className="admin-kicker">Synthèse</p>
+        <h1 className="admin-page-title mt-3">Rapport mensuel</h1>
+        <p className="admin-muted mt-3 text-sm">Période sélectionnée : {month}</p>
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">

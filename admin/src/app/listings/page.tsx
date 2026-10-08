@@ -10,9 +10,10 @@ export default async function ListingsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="admin-card">
-        <p className="admin-label">Annonces</p>
-        <h1 className="mt-2 text-3xl font-semibold">Catalogue & modération</h1>
+      <section className="border-b border-[var(--admin-line)] pb-7">
+        <p className="admin-kicker">Catalogue</p>
+        <h1 className="admin-page-title mt-3">Annonces</h1>
+        <p className="admin-muted mt-3 text-sm">Consultation des contenus publiés et de leur statut</p>
       </section>
 
       <DataTable

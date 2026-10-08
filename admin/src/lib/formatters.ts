@@ -4,7 +4,7 @@ export function formatXpf(value: number | string | null | undefined) {
 }
 
 export function formatDateNc(value: string | Date | null | undefined) {
-  if (!value) return '—'
+  if (!value) return 'Non renseigné'
   const date = value instanceof Date ? value : new Date(value)
   return new Intl.DateTimeFormat('fr-FR', {
     day: '2-digit',
@@ -14,7 +14,7 @@ export function formatDateNc(value: string | Date | null | undefined) {
 }
 
 export function formatDateTimeNc(value: string | Date | null | undefined) {
-  if (!value) return '—'
+  if (!value) return 'Non renseigné'
   const date = value instanceof Date ? value : new Date(value)
   return new Intl.DateTimeFormat('fr-FR', {
     day: '2-digit',
