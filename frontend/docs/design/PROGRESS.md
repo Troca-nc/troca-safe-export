@@ -23,7 +23,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [15](specs/15-pro-presentation.md) | Présentation de l’offre Pro | /pro | Fait (fusionnée) | [#230](https://github.com/Troca-nc/troca-safe-export/pull/230) |
 | [16](specs/16-devenir-pro.md) | Devenir Pro | /devenir-pro | Fait (fusionnée) | [#231](https://github.com/Troca-nc/troca-safe-export/pull/231) |
 | [17](specs/17-compte-pro.md) | Espace Pro | /pro/dashboard | Fait (fusionnée) | [#232](https://github.com/Troca-nc/troca-safe-export/pull/232) — prérequis serveur ; [#233](https://github.com/Troca-nc/troca-safe-export/pull/233) — frontend |
-| [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | En cours | Lot serveur en cours |
+| [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | À relire | [#234](https://github.com/Troca-nc/troca-safe-export/pull/234) serveur fusionnée ; frontend à ouvrir |
 | [19](specs/19-admin.md) | Administration | /admin | À faire | — |
 
 ## Hors site
@@ -1657,13 +1657,13 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 ### Lot serveur autorisé
 
 - Inventaire validé par l'humain le 8 octobre 2026 avec les sept décisions recommandées ci-dessous.
-- Lot isolé sur `design/18-publicite-server` dans la PR [#234](https://github.com/Troca-nc/troca-safe-export/pull/234), sans autorisation de fusion ni de déploiement.
+- Lot isolé sur `design/18-publicite-server`, fusionné par la PR [#234](https://github.com/Troca-nc/troca-safe-export/pull/234) dans le commit `10c661db`. Aucun déploiement n'a été demandé ni exécuté.
 - Le lot serveur expose `GET /api/campaigns/public/config`, une projection publique en lecture seule des trois formats existants, de leurs libellés, durées, modes tarifaires, tarifs en XPF et capacités simultanées.
 - La réponse est reconstruite depuis `CAMPAIGN_PRICE_TABLE`, `CAMPAIGN_TYPE_LABEL` et `CAMPAIGN_LIMITS` à chaque appel. Aucun tarif n'est dupliqué dans le contrat, aucune donnée mutable interne n'est exposée et aucune lecture de base de données n'est nécessaire.
 - Aucun format, prix, paiement, schéma, ciblage, coefficient d'estimation ou métrique analytique n'est ajouté ou modifié par ce lot.
 - Les tests ciblés couvrent la projection des sources serveur, son isolation entre appels, l'accessibilité sans authentification et le positionnement de la route publique.
 
-### QUESTIONS à valider avant code
+### Décisions validées avant code
 
 1. Les nouveaux fichiers de types, données, fixture et tests ainsi que la modification limitée de `src/lib/api.ts` sont autorisés pour le futur lot frontend.
 2. La fiche est adaptée aux trois formats réellement achetables aujourd'hui : `bon_plan`, `banner` et `popup`. Les deux formats supplémentaires de la maquette nécessiteraient un lot métier distinct.
@@ -1673,4 +1673,33 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 6. Le formulaire de contact Pro est réutilisé avec le délai réel « 24 à 48 heures ouvrées », à la place de la promesse « sous 24 h » de la maquette.
 7. `/pro/dashboard/publicite` reste la vue détaillée existante et sa refonte complète est hors périmètre de la fiche 18.
 
-Le lot serveur préalable est en cours. Aucun composant frontend, fixture, tarif, campagne, paiement, schéma ou donnée réelle n'a été changé.
+### Lot frontend : réalisation
+
+- Branche isolée `design/18-publicite-frontend`, basée sur le commit serveur fusionné `10c661db`.
+- La nouvelle route `/publicite` fournit le héros et ses repères provisoires, les trois formats réels avec schémas d'emplacement, le studio interactif, l'aperçu ordinateur/mobile, la projection, le rapport d'exemple, les accès à l'espace Pro et la demande de rappel.
+- Les tarifs, durées, modes et capacités de production viennent exclusivement de `GET /api/campaigns/public/config`. Aucun montant serveur n'est recopié dans le frontend ; le mode démo masque volontairement les tarifs et capacités.
+- En production, la projection affiche « Estimation momentanément indisponible ». Les seules fourchettes présentes vivent dans la fixture démo et portent visiblement le libellé « Estimation indicative ».
+- Le rapport importe une fixture isolée dans les deux modes et affiche toujours « Exemple » ainsi qu'un avertissement « Données fictives ». Il n'est relié à aucune campagne réelle.
+- La demande de rappel réutilise `POST /api/contact`, catégorie `pro`, et annonce le délai contractuel de 24 à 48 heures ouvrées.
+- `/pro/dashboard/publicite` reste la vue de création, paiement et suivi. Sa refonte et la suppression de ses anciens tarifs en dur restent hors périmètre de cette fiche.
+- Écart assumé avec la maquette : trois formats sont présentés au lieu de cinq, car seuls `bon_plan`, `banner` et `popup` disposent d'un contrat métier complet.
+
+### Validation du lot frontend
+
+- Tests ciblés : `node --test src/lib/advertisingPresentation.test.ts`, 3 tests passés.
+- TypeScript : `npx tsc --noEmit --incremental false`, passé.
+- Lint obligatoire : `npm run lint`, passé selon le périmètre ESLint actuel du dépôt.
+- Build : `NODE_OPTIONS=--use-system-ca npm run build`, passé ; `/publicite` est générée statiquement.
+- Design system : `node scripts/check-design.mjs --changed`, 8 fichiers contrôlés, 0 erreur, 0 avertissement.
+
+### Fichiers du lot frontend
+
+- `frontend/src/app/publicite/page.tsx`
+- `frontend/src/components/monetisation/AdvertisingPageView.tsx`
+- `frontend/src/demo/fixtures/ads.ts`
+- `frontend/src/lib/advertisingPresentation.ts`
+- `frontend/src/lib/advertisingPresentation.test.ts`
+- `frontend/src/lib/api.ts`
+- `frontend/src/lib/data/advertising.ts`
+- `frontend/src/types/advertising.ts`
+- `frontend/docs/design/PROGRESS.md`
