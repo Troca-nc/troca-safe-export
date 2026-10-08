@@ -55,6 +55,46 @@ const CAMPAIGN_LIMITS = {
   popup: 1,
 };
 
+function getPublicCampaignConfig() {
+  const oneShotOptions = (prices) => Object.entries(prices).map(([durationDays, priceXpf]) => ({
+    pricing_mode: 'one_shot',
+    duration_days: Number(durationDays),
+    price_xpf: priceXpf,
+  }));
+
+  return {
+    currency: 'XPF',
+    formats: [
+      {
+        type: 'bon_plan',
+        label: CAMPAIGN_TYPE_LABEL.bon_plan,
+        concurrent_capacity: CAMPAIGN_LIMITS.bon_plan,
+        pricing_options: [
+          ...oneShotOptions(CAMPAIGN_PRICE_TABLE.bon_plan.one_shot),
+          ...Object.entries(CAMPAIGN_PRICE_TABLE.bon_plan.monthly).map(([planKey, priceXpf]) => ({
+            pricing_mode: 'monthly',
+            pricing_plan: planKey,
+            duration_days: 30,
+            price_xpf: priceXpf,
+          })),
+        ],
+      },
+      {
+        type: 'banner',
+        label: CAMPAIGN_TYPE_LABEL.banner,
+        concurrent_capacity: CAMPAIGN_LIMITS.banner,
+        pricing_options: oneShotOptions(CAMPAIGN_PRICE_TABLE.banner),
+      },
+      {
+        type: 'popup',
+        label: CAMPAIGN_TYPE_LABEL.popup,
+        concurrent_capacity: CAMPAIGN_LIMITS.popup,
+        pricing_options: oneShotOptions(CAMPAIGN_PRICE_TABLE.popup),
+      },
+    ],
+  };
+}
+
 const DEFAULT_POPUP = {
   type: 'popup',
   title: 'Bienvenue sur Kalico NC',
@@ -1373,6 +1413,7 @@ module.exports = {
   CAMPAIGN_PRICE_TABLE,
   CAMPAIGN_LIMITS,
   CAMPAIGN_TYPE_LABEL,
+  getPublicCampaignConfig,
   DEFAULT_POPUP,
   autoSelectWeeklyBonPlans,
   getWeeklyBonPlanSelection,

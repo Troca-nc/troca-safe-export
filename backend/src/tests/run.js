@@ -87,6 +87,7 @@ const SUITES = [
   './eventTicketTransaction.test',
   './ticketEmailOutbox.test',
   './campaignActivation.test',
+  './campaignPublicConfig.test',
   './campaignStateTransitions.test',
   './campaignQueuePayment.test',
   './campaignRefund.test',

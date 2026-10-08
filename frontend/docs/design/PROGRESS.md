@@ -22,8 +22,8 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [14](specs/14-pros.md) | Annuaire et vitrine des pros | /pros, /pro/[id] | Fait (fusionnée) | [#229](https://github.com/Troca-nc/troca-safe-export/pull/229) |
 | [15](specs/15-pro-presentation.md) | Présentation de l’offre Pro | /pro | Fait (fusionnée) | [#230](https://github.com/Troca-nc/troca-safe-export/pull/230) |
 | [16](specs/16-devenir-pro.md) | Devenir Pro | /devenir-pro | Fait (fusionnée) | [#231](https://github.com/Troca-nc/troca-safe-export/pull/231) |
-| [17](specs/17-compte-pro.md) | Espace Pro | /pro/dashboard | À relire | [#232](https://github.com/Troca-nc/troca-safe-export/pull/232) fusionnée — prérequis serveur ; [#233](https://github.com/Troca-nc/troca-safe-export/pull/233) — frontend |
-| [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | À faire | — |
+| [17](specs/17-compte-pro.md) | Espace Pro | /pro/dashboard | Fait (fusionnée) | [#232](https://github.com/Troca-nc/troca-safe-export/pull/232) — prérequis serveur ; [#233](https://github.com/Troca-nc/troca-safe-export/pull/233) — frontend |
+| [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | En cours | Lot serveur en cours |
 | [19](specs/19-admin.md) | Administration | /admin | À faire | — |
 
 ## Hors site
@@ -1014,7 +1014,7 @@ La fixture dédiée couvrira les cinq types et leurs états de chargement, erreu
 - Créer `src/demo/fixtures/bon-plans.ts` avec identifiants `demo-*`, noms d'enseignes suffixés « (démo) » et contenus distincts des exemples de la maquette.
 - Aucun composant n'importera les fixtures directement. Aucun endpoint, schéma ou service backend ne doit changer.
 
-### QUESTIONS à valider avant code
+### Décisions validées avant code
 
 1. Autoriser l'extension de la liste de fichiers à `src/app/bons-plans/page.tsx` et `src/app/evenements/page.tsx` afin d'en faire de minces adaptateurs vers une vue partagée. Sans ces deux modifications, les nouveaux composants ne peuvent pas devenir les écrans des routes demandées.
 2. Autoriser les nouveaux fichiers `src/types/bon-plans.ts`, `src/lib/data/bon-plans.ts`, `src/demo/fixtures/bon-plans.ts` et leurs tests ciblés, exigés par les règles de données de la refonte.
@@ -1596,3 +1596,81 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - `frontend/src/lib/proSpacePresentation.test.ts`
 - `frontend/src/types/pro-space.ts`
 - `frontend/docs/design/PROGRESS.md`
+
+## 18 — Inventaire (étape 1, sans code)
+
+### Base et références
+
+- Branche isolée `design/18-publicite-server`, worktree `D:\Codex\kalico-worktrees\18-publicite`, base `origin/main` au commit de fusion de la fiche 17 (`e88c2512`).
+- Références lues : `18-publicite.md`, `METHODE.md`, `DONNEES-DEMO.md`, `frontend/DESIGN.md` §5, `DESIGN.md` racine et `Publicité v2.dc.html`.
+- Historique et PR contrôlés : aucune refonte de la route publique `/publicite` n'existe. Les PR historiques concernent la sécurité des paiements de campagnes et la réparation d'encodage de l'espace Pro, pas cette page publique.
+- La fiche 17 est fusionnée par les PR [#232](https://github.com/Troca-nc/troca-safe-export/pull/232) et [#233](https://github.com/Troca-nc/troca-safe-export/pull/233) ; son statut est corrigé dans le tableau ci-dessus.
+- Tous les montants, audiences, taux, projections, entreprises et résultats issus de `renderVals()` sont des exemples de maquette. Ils ne seront pas recopiés comme données réelles.
+
+### Fichiers et comportements existants
+
+- `src/app/publicite/page.tsx` n'existe pas. Le point d'entrée public demandé est donc entièrement à créer.
+- `src/app/pro/dashboard/publicite/page.tsx` existe déjà. Cette page authentifiée permet de créer, payer, suspendre et reprendre des campagnes, mais elle est monolithique, appelle `campaignsApi` directement, contient les tarifs en dur et utilise encore de nombreux styles antérieurs à v2.
+- `src/components/monetisation/` contient les parcours d'abonnement Pro, de paiement et de boost, mais aucun composant publicitaire réutilisable pour la nouvelle page.
+- `src/lib/api.ts` expose les campagnes publiques actives, le tableau de bord, la sélection hebdomadaire, la création et les changements d'état. Aucun type partagé de campagne ni couche `src/lib/data/` n'existe pour ce domaine.
+- `src/content/placeholders.ts` contient déjà les trois chiffres d'audience demandés par le héros : membres, visites mensuelles et part mobile. Ils sont provisoires et rendus comme tels.
+- Le formulaire de contact et `POST /api/contact` acceptent déjà la catégorie `pro`. Ils peuvent porter une demande de rappel sans créer de nouveau canal serveur, à condition de ne pas promettre un délai de 24 heures que le contrat actuel ne garantit pas.
+
+### Contrats serveur vérifiés
+
+| Besoin | Source réelle | Écart à traiter sans donnée inventée |
+| --- | --- | --- |
+| Formats et tarifs | `CAMPAIGN_PRICE_TABLE` dans `campaignsService.js`, avec durées validées par `campaigns.route.js`. | La configuration est interne au serveur et n'est exposée par aucun endpoint public. Le frontend Pro recopie actuellement ces montants en dur. |
+| Formats achetables | Schéma `campaigns.type` et validation Joi : `bon_plan`, `banner`, `popup`. | La maquette présente cinq formats différents : bannière d'accueil, annonce sponsorisée, vitrine à la une, pavé fiche annonce et notification ciblée. Vitrine, pavé et notification ciblée n'ont aucun contrat d'achat ou de diffusion. |
+| Ciblage | `category_slug` est disponible pour les bannières de catégorie. | Aucun ciblage par commune ou province n'est stocké ; les autres formats n'ont pas de ciblage multi-catégorie. |
+| Estimation | Aucun endpoint, aucune source analytique ni modèle de projection. | Les impressions, clics, contacts, coût par contact, parts géographiques et coefficients de la maquette sont fictifs. Une API et une méthode de calcul sourcée sont nécessaires pour afficher autre chose qu'un état indisponible ou une fixture démo explicitement indicative. |
+| Rapport | La table `campaigns` stocke contenu, prix, durée et état. | Aucun événement d'impression, clic, contact ou conversion n'est enregistré. Le rapport réel n'est pas calculable ; seule une fixture portant la mention visible « Exemple » peut être montrée dans cette fiche. |
+| Rappel | `POST /api/contact`, catégorie `pro`, envoie un e-mail au support et confirme la réception. | Le délai contractuel annoncé est 24 à 48 heures ouvrées en moyenne, pas « sous 24 h ». |
+
+### Sections de la maquette
+
+| Section | Réutilisation | Intervention prévue après validation |
+| --- | --- | --- |
+| Héros et audience | `HeaderV2`, `Placeholder` et les trois clés de `placeholders.ts`. | Créer un héros public v2 avec chiffres provisoires signalés et CTA vers le studio ou l'espace publicitaire authentifié. |
+| Formats | Contrats serveur actuels pour trois familles de campagne. | Construire des cartes et schémas d'emplacement uniquement pour les formats réellement confirmés. Le nombre final dépend de la décision métier ci-dessous. |
+| Studio | Champs titre, description, image, lien, CTA et durée déjà utilisés par la page Pro. | Créer un éditeur et des aperçus ordinateur/mobile alimentés par une couche de données. Les ciblages et projections restent conditionnés au contrat serveur validé. |
+| Rapport | Aucun composant ni métrique réelle. | Afficher une fixture isolée et marquée « Exemple » en permanence, sans la présenter comme le résultat d'une campagne réelle. |
+| Points de contact Pro | Route `/pro/dashboard/publicite` et espace Pro existants. | Présenter des liens contextuels vers la création et le suivi, sans refondre la sous-page Pro dans cette fiche. |
+| Accompagnement | `contactApi.send` et catégorie `pro`. | Ajouter une demande de rappel avec confirmation et erreur, en annonçant le délai réellement garanti de 24 à 48 heures ouvrées. |
+| États et responsive | Primitives v2 `Skeleton`, `LoadingState`, `ErrorState`, cartes et boutons. | Couvrir chargement, erreur et nouvelle tentative ; vérifier 1440, 1024, 768 et 390 px. |
+
+### Données et fichiers proposés
+
+- Créer `src/app/publicite/page.tsx` comme adaptateur mince et les sections sous `src/components/monetisation/`.
+- Créer `src/types/advertising.ts`, `src/lib/data/advertising.ts`, `src/demo/fixtures/ads.ts` et des tests de présentation. Aucun composant n'importera directement la fixture.
+- Modifier `src/lib/api.ts` seulement pour exposer les contrats serveur validés et réutiliser `contactApi` pour la demande de rappel.
+- Si le lot serveur est autorisé, modifier `backend/src/routes/campaigns.route.js`, `backend/src/services/campaignsService.js` et ajouter des tests ciblés. Toute évolution des cinq formats ou du ciblage nécessiterait en plus une migration additive séparée, jamais exécutée en production dans ce chantier.
+- Conserver `src/app/pro/dashboard/publicite/page.tsx` comme espace de gestion détaillé. Sa refonte complète est hors périmètre ; la duplication actuelle des tarifs devra toutefois être supprimée à terme au profit du contrat public.
+
+### Prérequis serveur recommandé, dans un lot séparé
+
+- Exposer une configuration publique en lecture seule dérivée de `CAMPAIGN_PRICE_TABLE` : formats réellement achetables, libellés, durées, tarifs et contraintes de capacité.
+- Définir une estimation indicative côté serveur seulement si ses entrées et coefficients sont validés par le métier. La réponse doit porter sa méthode, sa date et le libellé « estimation indicative ».
+- Ne pas créer de faux rapport réel : aucun schéma analytique n'est proposé dans ce lot. La page montrera uniquement un exemple statique isolé.
+- Si les cinq formats de la maquette sont exigés comme produits achetables, créer un second lot métier avec schéma, diffusion, ciblage, tarification, capacité, paiement et tests pour les formats absents.
+
+### Lot serveur autorisé
+
+- Inventaire validé par l'humain le 8 octobre 2026 avec les sept décisions recommandées ci-dessous.
+- Lot isolé sur `design/18-publicite-server` dans la PR [#234](https://github.com/Troca-nc/troca-safe-export/pull/234), sans autorisation de fusion ni de déploiement.
+- Le lot serveur expose `GET /api/campaigns/public/config`, une projection publique en lecture seule des trois formats existants, de leurs libellés, durées, modes tarifaires, tarifs en XPF et capacités simultanées.
+- La réponse est reconstruite depuis `CAMPAIGN_PRICE_TABLE`, `CAMPAIGN_TYPE_LABEL` et `CAMPAIGN_LIMITS` à chaque appel. Aucun tarif n'est dupliqué dans le contrat, aucune donnée mutable interne n'est exposée et aucune lecture de base de données n'est nécessaire.
+- Aucun format, prix, paiement, schéma, ciblage, coefficient d'estimation ou métrique analytique n'est ajouté ou modifié par ce lot.
+- Les tests ciblés couvrent la projection des sources serveur, son isolation entre appels, l'accessibilité sans authentification et le positionnement de la route publique.
+
+### QUESTIONS à valider avant code
+
+1. Les nouveaux fichiers de types, données, fixture et tests ainsi que la modification limitée de `src/lib/api.ts` sont autorisés pour le futur lot frontend.
+2. La fiche est adaptée aux trois formats réellement achetables aujourd'hui : `bon_plan`, `banner` et `popup`. Les deux formats supplémentaires de la maquette nécessiteraient un lot métier distinct.
+3. Un lot serveur préalable et une PR séparée sont autorisés pour exposer les tarifs et durées depuis leur source serveur, sans valeur financière recopiée dans le frontend. Cette autorisation ne vaut ni déploiement ni changement de tarif.
+4. En l'absence de coefficients métier validés, la production affichera « Estimation momentanément indisponible ». Le mode démo pourra montrer des fourchettes explicitement marquées « estimation indicative » ; aucune formule de la maquette ne sera reprise.
+5. Le rapport reste un exemple explicitement étiqueté, sans ajout de collecte d'impressions, clics ou conversions dans cette fiche.
+6. Le formulaire de contact Pro est réutilisé avec le délai réel « 24 à 48 heures ouvrées », à la place de la promesse « sous 24 h » de la maquette.
+7. `/pro/dashboard/publicite` reste la vue détaillée existante et sa refonte complète est hors périmètre de la fiche 18.
+
+Le lot serveur préalable est en cours. Aucun composant frontend, fixture, tarif, campagne, paiement, schéma ou donnée réelle n'a été changé.
