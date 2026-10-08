@@ -16,10 +16,10 @@ export function AlertBanner({
   return (
     <div
       className={clsx(
-        'rounded-2xl border p-4',
-        level === 'critical' && 'border-rose-500/30 bg-rose-500/10 text-rose-100',
-        level === 'warning' && 'border-amber-400/30 bg-amber-400/10 text-amber-50',
-        level === 'info' && 'border-sky-400/30 bg-sky-400/10 text-sky-100'
+        'rounded-[1.25rem] border p-4',
+        level === 'critical' && 'border-[var(--admin-red)]/35 bg-[var(--admin-red)]/10 text-[var(--admin-red-dark)]',
+        level === 'warning' && 'border-[var(--admin-orange)]/40 bg-[var(--admin-orange)]/10 text-[var(--admin-ink)]',
+        level === 'info' && 'border-[var(--admin-lagoon-light)]/40 bg-[var(--admin-lagoon-light)]/10 text-[var(--admin-ink)]'
       )}
     >
       <div className="flex gap-3">

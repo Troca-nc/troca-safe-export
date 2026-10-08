@@ -19,20 +19,20 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="space-y-6">
-      <section className="admin-card">
-        <p className="admin-label">Fiche utilisateur</p>
-        <h1 className="mt-2 text-3xl font-semibold">
+      <section className="border-b border-[var(--admin-line)] pb-7">
+        <p className="admin-kicker">Fiche membre</p>
+        <h1 className="admin-page-title mt-3">
           {data.user.prenom} {data.user.nom}
         </h1>
-        <p className="mt-2 text-slate-400">{data.user.email}</p>
+        <p className="admin-muted mt-3">{data.user.email}</p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100">
+          <span className="rounded-full border border-[var(--admin-mint)] bg-[var(--admin-mint)]/20 px-3 py-1 text-xs font-semibold text-[var(--admin-green)]">
             {data.user.is_pro ? 'Pro' : 'Gratuit'}
           </span>
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200">
+          <span className="rounded-full border border-[var(--admin-line)] bg-[var(--admin-paper)] px-3 py-1 text-xs font-semibold text-[var(--admin-ink-soft)]">
             {data.user.phone_verified ? 'Téléphone vérifié' : 'Téléphone non vérifié'}
           </span>
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200">
+          <span className="rounded-full border border-[var(--admin-line)] bg-[var(--admin-paper)] px-3 py-1 text-xs font-semibold text-[var(--admin-ink-soft)]">
             {data.user.account_type || 'personal'}
           </span>
         </div>
@@ -54,7 +54,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
             <UserActionButtons userId={id} />
           </div>
         </div>
-        <div className="admin-card text-sm text-slate-300">
+        <div className="admin-card text-sm text-[var(--admin-ink-soft)]">
           <p className="admin-label">Métadonnées</p>
           <div className="mt-4 space-y-2">
             <p>Inscrit le: {formatDateNc(data.user.created_at)}</p>
@@ -66,7 +66,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Annonces</h2>
+        <h2 className="admin-section-title">Annonces</h2>
         <DataTable
           columns={[
             { key: 'titre', label: 'Titre' },
@@ -81,7 +81,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Paiements</h2>
+        <h2 className="admin-section-title">Paiements</h2>
         <DataTable
           columns={[
             { key: 'created_at', label: 'Date' },

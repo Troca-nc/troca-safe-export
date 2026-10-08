@@ -10,9 +10,10 @@ export default async function ErrorsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="admin-card">
-        <p className="admin-label">Erreurs</p>
-        <h1 className="mt-2 text-3xl font-semibold">Timeline d’erreurs</h1>
+      <section className="border-b border-[var(--admin-line)] pb-7">
+        <p className="admin-kicker">Observabilité</p>
+        <h1 className="admin-page-title mt-3">État et erreurs</h1>
+        <p className="admin-muted mt-3 text-sm">Événements techniques des dernières 24 heures</p>
       </section>
 
       <DataTable

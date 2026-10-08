@@ -34,7 +34,7 @@ export default function SetupClient() {
   }
 
   return (
-    <form onSubmit={submit} className="mt-6 flex gap-3">
+    <form onSubmit={submit} className="mt-6 flex flex-wrap gap-3">
       <input
         className="admin-input max-w-40 tracking-[0.35em]"
         inputMode="numeric"
@@ -46,7 +46,7 @@ export default function SetupClient() {
       <button className="admin-button" disabled={loading}>
         {loading ? 'Vérification…' : 'Valider'}
       </button>
-      {message ? <p className="w-full text-sm text-slate-300">{message}</p> : null}
+      {message ? <p className="admin-muted w-full text-sm">{message}</p> : null}
     </form>
   )
 }

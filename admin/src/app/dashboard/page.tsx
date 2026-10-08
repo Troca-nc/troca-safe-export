@@ -37,16 +37,16 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <AutoRefresh />
-      <section className="admin-card flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <section className="flex flex-col gap-4 border-b border-[var(--admin-line)] pb-7 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="admin-label">Bonjour</p>
-          <h1 className="mt-2 text-3xl font-semibold">Vue quotidienne</h1>
-          <p className="mt-2 text-slate-400">
+          <p className="admin-kicker">Pilotage quotidien</p>
+          <h1 className="admin-page-title mt-3">Vue d'ensemble</h1>
+          <p className="admin-muted mt-3 text-sm">
             Dernière mise à jour {formatDateTimeNc(new Date())}
           </p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
-          <p className="font-semibold text-white">État rapporté par les services</p>
+        <div className="rounded-[1.25rem] border border-[var(--admin-mint)] bg-[var(--admin-mint)]/15 px-5 py-4 text-sm text-[var(--admin-ink-soft)]">
+          <p className="font-semibold text-[var(--admin-ink)]">État rapporté par les services</p>
           <p className="mt-1">Backend {valueOrUnavailable(health?.backend?.status)} · DB {valueOrUnavailable(health?.db?.status)} · Redis {valueOrUnavailable(health?.redis?.status)}</p>
         </div>
       </section>
@@ -77,14 +77,14 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="admin-label">À faire aujourd'hui</p>
-              <h2 className="mt-2 text-xl font-semibold">Priorités</h2>
+          <h2 className="admin-section-title mt-2">Priorités</h2>
             </div>
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-2">
             {todayActions.map((item) => (
-              <a key={item.label} href={item.href} className="rounded-2xl border border-white/10 bg-white/5 p-4 transition hover:bg-white/10">
-                <p className="text-sm text-slate-400">{item.label}</p>
-                <p className="mt-2 text-2xl font-semibold text-white">{item.value}</p>
+              <a key={item.label} href={item.href} className="rounded-xl border border-[var(--admin-line)] bg-[var(--admin-cream)]/55 p-4 transition hover:border-[var(--admin-lagoon-light)] hover:bg-[var(--admin-lagoon-light)]/10">
+                <p className="text-sm text-[var(--admin-ink-soft)]">{item.label}</p>
+                <p className="mt-2 font-serif text-3xl text-[var(--admin-ink)]">{item.value}</p>
               </a>
             ))}
           </div>
@@ -92,8 +92,8 @@ export default async function DashboardPage() {
 
         <div className="admin-card">
           <p className="admin-label">Santé système</p>
-          <h2 className="mt-2 text-xl font-semibold">Backend / DB / Redis</h2>
-          <div className="mt-4 space-y-3 text-sm text-slate-300">
+          <h2 className="admin-section-title mt-2">Backend / DB / Redis</h2>
+          <div className="mt-4 space-y-3 text-sm text-[var(--admin-ink-soft)]">
             <p>Backend: {valueOrUnavailable(health?.backend?.status)} · mémoire {measurementOrUnavailable(health?.backend?.memory_mb, 'MB')} · réponse {measurementOrUnavailable(health?.backend?.response_time_ms, 'ms')}</p>
             <p>DB: {valueOrUnavailable(health?.db?.status)} · {valueOrUnavailable(health?.db?.active_connections)} connexions actives</p>
             <p>Redis: {valueOrUnavailable(health?.redis?.status)} · mémoire {measurementOrUnavailable(health?.redis?.memory_mb, 'MB')}</p>
@@ -107,7 +107,7 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="admin-label">Utilisateurs</p>
-              <h2 className="mt-2 text-xl font-semibold">Croissance</h2>
+              <h2 className="admin-section-title mt-2">Croissance</h2>
             </div>
           </div>
           <div className="mt-6">
@@ -119,7 +119,7 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="admin-label">Engagement</p>
-              <h2 className="mt-2 text-xl font-semibold">Messages & troc</h2>
+              <h2 className="admin-section-title mt-2">Messages et troc</h2>
             </div>
           </div>
           <div className="mt-6">

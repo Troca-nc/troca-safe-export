@@ -12,9 +12,10 @@ export default async function PaymentsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="admin-card">
-        <p className="admin-label">Paiements</p>
-        <h1 className="mt-2 text-3xl font-semibold">Revenus & abonnements</h1>
+      <section className="border-b border-[var(--admin-line)] pb-7">
+        <p className="admin-kicker">Suivi financier</p>
+        <h1 className="admin-page-title mt-3">Paiements</h1>
+        <p className="admin-muted mt-3 text-sm">Transactions, abonnements et options payantes</p>
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">

@@ -19,9 +19,9 @@ export function UserSearch({ initialValue = '' }: { initialValue?: string }) {
   }
 
   return (
-    <form onSubmit={submit} className="flex gap-3">
+    <form onSubmit={submit} className="flex flex-col gap-3 sm:flex-row">
       <div className="relative flex-1">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-ink-soft)]" />
         <input
           className="admin-input pl-10"
           placeholder="Rechercher un utilisateur"
@@ -29,7 +29,7 @@ export function UserSearch({ initialValue = '' }: { initialValue?: string }) {
           onChange={(event) => setValue(event.target.value)}
         />
       </div>
-      <button className="admin-button">Rechercher</button>
+      <button className="admin-button sm:min-w-36">Rechercher</button>
     </form>
   )
 }

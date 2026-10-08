@@ -9,7 +9,7 @@ export function CollectionNotice({
 }) {
   if (Array.isArray(value) && value.length > 0) return null
   return (
-    <p className="mt-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
+    <p className="mt-3 rounded-md border border-dashed border-[var(--admin-line)] bg-[var(--admin-cream)]/60 px-4 py-4 text-sm text-[var(--admin-ink-soft)]">
       {Array.isArray(value) ? emptyLabel : missingLabel}
     </p>
   )

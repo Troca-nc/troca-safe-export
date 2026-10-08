@@ -20,7 +20,7 @@ export function MetricChart({
   xKey = 'date',
   yKey = 'value',
   height = 260,
-  color = '#10b981',
+  color = 'var(--admin-lagoon)',
 }: {
   type?: 'line' | 'area' | 'bar'
   data: Array<Record<string, any>>
@@ -34,10 +34,10 @@ export function MetricChart({
     <div style={{ width: '100%', height }}>
       <ResponsiveContainer>
         <Chart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
-          <XAxis dataKey={xKey} tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} />
-          <Tooltip contentStyle={{ background: '#020617', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(18,58,68,0.10)" />
+          <XAxis dataKey={xKey} tick={{ fill: 'var(--admin-ink-soft)', fontSize: 12 }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fill: 'var(--admin-ink-soft)', fontSize: 12 }} axisLine={false} tickLine={false} />
+          <Tooltip contentStyle={{ background: 'var(--admin-paper)', color: 'var(--admin-ink)', border: '1px solid var(--admin-line)', borderRadius: 10, boxShadow: '0 12px 30px rgba(18,58,68,0.12)' }} />
           {type === 'area' ? (
             <Area dataKey={yKey} stroke={color} fill={color} fillOpacity={0.15} strokeWidth={2} />
           ) : type === 'bar' ? (

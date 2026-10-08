@@ -1,13 +1,14 @@
 # 19 · Administration
 
 **Maquette(s)** : `Admin v2.dc.html` dans `frontend/design/`
-**Route** : /admin
+**Route** : domaine d’administration, racine `/` redirigée vers `/dashboard`
 **DESIGN.md** : §5
 
 ## Fichiers
-Point de départ, à confirmer à l’étape 1 (inventaire). Toute modification hors de cette liste passe par une QUESTION.
-- `src/app/admin/*`
-- `src/components/admin/*`
+L’inventaire a confirmé que les anciennes pages `frontend/src/app/admin/*` sont volontairement neutralisées. La surface opérationnelle protégée est l’application autonome `admin/`. Son utilisation pour cette fiche a été autorisée le 8 octobre 2026.
+- `admin/src/app/*`
+- `admin/src/components/*`
+- `admin/src/lib/formatters.ts`
 
 ## Sections, dans l’ordre
 1. Barre latérale sombre et en-tête
@@ -17,8 +18,7 @@ Point de départ, à confirmer à l’étape 1 (inventaire). Toute modification 
 5. Paiements : indicateurs, transactions, revenus par produit
 
 ## Données
-Toutes via `src/lib/data/`, fixtures en mode démo (voir `DONNEES-DEMO.md`). Les valeurs de la maquette sont des exemples.
-- Toutes les données admin — API admin existante, sinon à créer
+Toutes les données passent par le relais serveur `admin/src/lib/load.ts` et les API admin existantes. Aucune valeur ni fixture de la maquette n’est utilisée.
 
 ## États
 - File vide
@@ -26,11 +26,12 @@ Toutes via `src/lib/data/`, fixtures en mode démo (voir `DONNEES-DEMO.md`). Les
 - Erreur : message et bouton Réessayer
 
 ## Côté serveur
-- Journal d’activité et état des services
+- L’état des services est alimenté par `/api/admin/health/full`.
+- Les actions sont écrites dans `admin_logs`, mais aucun endpoint de lecture du journal n’existe encore. Son affichage reste un lot serveur distinct ; aucun journal fictif n’est présenté.
 
 ## Critères d’acceptation
-- [ ] Ressemble à la maquette à 1440 px, section par section
-- [ ] Aucun débordement à 390 px
-- [ ] check-design --changed sans erreur
-- [ ] Aucune valeur de la maquette recopiée dans un composant
-- [ ] Accès limité aux rôles admin, vérifié côté serveur
+- [x] Ressemble à la maquette à 1440 px, section par section
+- [x] Aucun débordement à 390 px
+- [x] check-design --changed sans erreur
+- [x] Aucune valeur de la maquette recopiée dans un composant
+- [x] Accès limité aux rôles admin, vérifié côté serveur
