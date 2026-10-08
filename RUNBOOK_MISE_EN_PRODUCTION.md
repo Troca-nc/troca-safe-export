@@ -7,6 +7,10 @@ Ce runbook suit la stack corrigee:
 - backup PostgreSQL automatise
 - SSL via Let's Encrypt
 
+## Lancement gratuit
+
+Pour lancer Kalico sans paiement ni connexion sociale Apple/Google, suivre la séparation des tâches et les valeurs attendues dans [`docs/free-launch-plan.md`](docs/free-launch-plan.md). Une intégration optionnelle doit rester entièrement vide ou être entièrement configurée ; une configuration partielle est refusée par le preflight.
+
 ## Mode hors ligne
 
 If you are running locally without external providers, keep the following services disabled by leaving their variables blank:

@@ -42,7 +42,6 @@ mkdir -p "$BACKUP_DIR"
 : "${PGDATABASE:?Variable PGDATABASE manquante — vérifiez docker-compose.prod.yml}"
 : "${PGHOST:?Variable PGHOST manquante — vérifiez docker-compose.prod.yml}"
 : "${BACKUP_AGE_RECIPIENT:?Variable BACKUP_AGE_RECIPIENT manquante — configurez la clé publique age de restauration}"
-: "${BACKUP_ALERT_WEBHOOK_URL:?Variable BACKUP_ALERT_WEBHOOK_URL manquante — configurez le webhook de supervision}"
 
 echo "[$(date)] Début de la sauvegarde..."
 

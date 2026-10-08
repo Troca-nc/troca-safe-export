@@ -71,31 +71,18 @@ production_required_vars=(
   ADMIN_TOTP_SECRET
   ADMIN_API_TOKEN
   ADMIN_ALERT_EMAIL
-  NEXT_PUBLIC_STRIPE_PK
-  NEXT_PUBLIC_GOOGLE_CLIENT_ID
   NEXT_PUBLIC_TURNSTILE_SITE_KEY
   NEXT_PUBLIC_SHOW_DEMO_BAR
-  STRIPE_SECRET_KEY
-  STRIPE_WEBHOOK_SECRET
-  PAYPLUG_SECRET_KEY
-  PAYPLUG_WEBHOOK_SECRET
   TWILIO_ACCOUNT_SID
   TWILIO_AUTH_TOKEN
   TWILIO_VERIFY_SID
   TURNSTILE_SECRET_KEY
-  GOOGLE_CLIENT_ID
-  GOOGLE_CLIENT_SECRET
-  APPLE_CLIENT_ID
-  APPLE_TEAM_ID
-  APPLE_KEY_ID
-  APPLE_PRIVATE_KEY
   INTERNAL_API_TOKEN
   AWS_BUCKET
   AWS_REGION
   AWS_ACCESS_KEY_ID
   AWS_SECRET_ACCESS_KEY
   BACKUP_AGE_RECIPIENT
-  BACKUP_ALERT_WEBHOOK_URL
 )
 
 missing=0
@@ -126,6 +113,30 @@ is_weak_legacy_secret() {
   return 1
 }
 
+validate_optional_group() {
+  local provider="$1"
+  shift
+  local configured=0
+  local key value
+
+  for key in "$@"; do
+    value="${!key:-}"
+    if ! is_placeholder "$value"; then
+      configured=$((configured + 1))
+    fi
+  done
+
+  if [[ "$configured" -gt 0 && "$configured" -lt "$#" ]]; then
+    for key in "$@"; do
+      value="${!key:-}"
+      if is_placeholder "$value"; then
+        echo "Missing $key for enabled $provider integration" >&2
+      fi
+    done
+    missing=1
+  fi
+}
+
 for key in "${required_vars[@]}"; do
   value="${!key:-}"
   if is_placeholder "$value"; then
@@ -142,6 +153,11 @@ if [[ "$ENV_FILE" == *production* ]]; then
       missing=1
     fi
   done
+
+  validate_optional_group STRIPE STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET STRIPE_PRICE_PRO_MENSUEL STRIPE_PRICE_PRO_ANNUEL
+  validate_optional_group PAYPLUG PAYPLUG_SECRET_KEY PAYPLUG_WEBHOOK_SECRET
+  validate_optional_group GOOGLE GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET
+  validate_optional_group APPLE APPLE_CLIENT_ID APPLE_TEAM_ID APPLE_KEY_ID APPLE_PRIVATE_KEY
 
   for key in DB_PASSWORD REDIS_PASSWORD; do
     value="${!key:-}"
