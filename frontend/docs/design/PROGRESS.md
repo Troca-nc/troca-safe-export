@@ -23,7 +23,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [15](specs/15-pro-presentation.md) | Présentation de l’offre Pro | /pro | Fait (fusionnée) | [#230](https://github.com/Troca-nc/troca-safe-export/pull/230) |
 | [16](specs/16-devenir-pro.md) | Devenir Pro | /devenir-pro | Fait (fusionnée) | [#231](https://github.com/Troca-nc/troca-safe-export/pull/231) |
 | [17](specs/17-compte-pro.md) | Espace Pro | /pro/dashboard | Fait (fusionnée) | [#232](https://github.com/Troca-nc/troca-safe-export/pull/232) — prérequis serveur ; [#233](https://github.com/Troca-nc/troca-safe-export/pull/233) — frontend |
-| [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | À relire | [#234](https://github.com/Troca-nc/troca-safe-export/pull/234) serveur fusionnée ; frontend à ouvrir |
+| [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | À relire | [#234](https://github.com/Troca-nc/troca-safe-export/pull/234) serveur fusionnée ; [#235](https://github.com/Troca-nc/troca-safe-export/pull/235) frontend |
 | [19](specs/19-admin.md) | Administration | /admin | À faire | — |
 
 ## Hors site
@@ -1675,7 +1675,7 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 
 ### Lot frontend : réalisation
 
-- Branche isolée `design/18-publicite-frontend`, basée sur le commit serveur fusionné `10c661db`.
+- Branche isolée `design/18-publicite-frontend`, basée sur le commit serveur fusionné `10c661db`, dans la PR [#235](https://github.com/Troca-nc/troca-safe-export/pull/235).
 - La nouvelle route `/publicite` fournit le héros et ses repères provisoires, les trois formats réels avec schémas d'emplacement, le studio interactif, l'aperçu ordinateur/mobile, la projection, le rapport d'exemple, les accès à l'espace Pro et la demande de rappel.
 - Les tarifs, durées, modes et capacités de production viennent exclusivement de `GET /api/campaigns/public/config`. Aucun montant serveur n'est recopié dans le frontend ; le mode démo masque volontairement les tarifs et capacités.
 - En production, la projection affiche « Estimation momentanément indisponible ». Les seules fourchettes présentes vivent dans la fixture démo et portent visiblement le libellé « Estimation indicative ».
