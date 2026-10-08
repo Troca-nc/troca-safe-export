@@ -14,6 +14,7 @@ const { getOrCreateStripeCustomer } = require('../services/paymentHelpers');
 const { xpfToEurCents, formatXpfEur } = require('../services/paymentCatalog');
 const {
   CAMPAIGN_PRICE_TABLE,
+  getPublicCampaignConfig,
   createCampaignWithPayment,
   activateCampaignIfSlotAvailable,
   getActivePopup,
@@ -50,6 +51,10 @@ const campaignSchema = Joi.object({
 
 const weeklySelectionSchema = Joi.object({
   campaign_ids: Joi.array().items(Joi.number().integer().positive()).max(2).required(),
+});
+
+router.get('/public/config', (_req, res) => {
+  return res.json({ data: getPublicCampaignConfig() });
 });
 
 function buildCampaignPricing(value) {
