@@ -640,6 +640,11 @@ export const bonPlansApi = {
 }
 
 export const campaignsApi = {
+  getPublicConfig: () => cachedGet(
+    buildCacheKey('campaigns.getPublicConfig', '/campaigns/public/config'),
+    () => api.get('/campaigns/public/config'),
+    CACHE_TTL.static,
+  ),
   getHome: () => cachedGet(
     buildCacheKey('campaigns.getHome', '/campaigns/public/home'),
     () => api.get('/campaigns/public/home'),
