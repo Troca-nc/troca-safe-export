@@ -24,7 +24,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [16](specs/16-devenir-pro.md) | Devenir Pro | /devenir-pro | Fait (fusionnée) | [#231](https://github.com/Troca-nc/troca-safe-export/pull/231) |
 | [17](specs/17-compte-pro.md) | Espace Pro | /pro/dashboard | Fait (fusionnée) | [#232](https://github.com/Troca-nc/troca-safe-export/pull/232) — prérequis serveur ; [#233](https://github.com/Troca-nc/troca-safe-export/pull/233) — frontend |
 | [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | À relire | [#234](https://github.com/Troca-nc/troca-safe-export/pull/234) serveur fusionnée ; [#235](https://github.com/Troca-nc/troca-safe-export/pull/235) frontend |
-| [19](specs/19-admin.md) | Administration | /admin | À relire | Branche `design/19-admin-ui` |
+| [19](specs/19-admin.md) | Administration | /admin | À relire | [#236](https://github.com/Troca-nc/troca-safe-export/pull/236) |
 
 ## Hors site
 
@@ -1604,7 +1604,7 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - Les pages historiques `frontend/src/app/admin/*` sont volontairement neutralisées depuis le retrait des écrans simulés. Elles ne constituent plus le back-office opérationnel.
 - L’application autonome `admin/` porte la session serveur, le TOTP, la révocation Redis, le relais authentifié vers l’API et les écrans alimentés par des données réelles.
 - L’adaptation de la fiche 19 à cette application autonome a été autorisée par l’humain le 8 octobre 2026.
-- Branche isolée `design/19-admin-ui`, basée sur `origin/main` au commit `f2db769b`, dans le worktree `D:\Codex\kalico-worktrees\19-admin-ui`.
+- Branche isolée `design/19-admin-ui`, basée sur `origin/main` au commit `f2db769b`, dans le worktree `D:\Codex\kalico-worktrees\19-admin-ui` et ouverte dans la PR [#236](https://github.com/Troca-nc/troca-safe-export/pull/236).
 
 ### Réalisation
 
