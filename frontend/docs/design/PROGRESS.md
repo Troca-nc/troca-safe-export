@@ -1657,6 +1657,7 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 ### Lot serveur autorisé
 
 - Inventaire validé par l'humain le 8 octobre 2026 avec les sept décisions recommandées ci-dessous.
+- Lot isolé sur `design/18-publicite-server` dans la PR [#234](https://github.com/Troca-nc/troca-safe-export/pull/234), sans autorisation de fusion ni de déploiement.
 - Le lot serveur expose `GET /api/campaigns/public/config`, une projection publique en lecture seule des trois formats existants, de leurs libellés, durées, modes tarifaires, tarifs en XPF et capacités simultanées.
 - La réponse est reconstruite depuis `CAMPAIGN_PRICE_TABLE`, `CAMPAIGN_TYPE_LABEL` et `CAMPAIGN_LIMITS` à chaque appel. Aucun tarif n'est dupliqué dans le contrat, aucune donnée mutable interne n'est exposée et aucune lecture de base de données n'est nécessaire.
 - Aucun format, prix, paiement, schéma, ciblage, coefficient d'estimation ou métrique analytique n'est ajouté ou modifié par ce lot.
