@@ -12,6 +12,7 @@ const SUITES = [
   './security/productionTlsConfig.test',
   './security/backupCompleteness.test',
   './security/containerReproducibility.test',
+  './security/optionalProductionIntegrations.test',
   './security/uploadCachePolicy.test',
   './reviewReportService.test',
   './reviewCreationPolicy.test',
