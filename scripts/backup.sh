@@ -74,12 +74,10 @@ if [ -n "${AWS_ACCESS_KEY_ID:-}" ] && [ -n "${AWS_SECRET_ACCESS_KEY:-}" ] && [ -
   aws s3 cp \
     "$FILEPATH" \
     "s3://${AWS_BUCKET}/backups/${FILENAME}" \
-    --storage-class STANDARD_IA \
     --region "$AWS_REGION"
   aws s3 cp \
     "${FILEPATH}.sha256" \
     "s3://${AWS_BUCKET}/backups/${FILENAME}.sha256" \
-    --storage-class STANDARD_IA \
     --region "$AWS_REGION"
 
   echo "[$(date)] Upload S3 réussi"
