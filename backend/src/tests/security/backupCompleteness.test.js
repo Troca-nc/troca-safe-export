@@ -46,4 +46,11 @@ describe('service backup completeness', () => {
     assert.match(recoveryTest, /\/verify-backup\.sh/);
     assert.match(workflow, /Exercise encrypted backup recovery/);
   });
+
+  it('passes the configured S3-compatible endpoint to the AWS CLI', () => {
+    const compose = read('docker-compose.prod.yml');
+
+    assert.match(compose, /AWS_ENDPOINT_URL:\s+\$\{AWS_ENDPOINT:-\}/);
+    assert.doesNotMatch(compose, /AWS_ENDPOINT_URL:\s+https?:\/\//);
+  });
 });
