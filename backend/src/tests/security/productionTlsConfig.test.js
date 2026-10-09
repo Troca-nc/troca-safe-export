@@ -41,4 +41,26 @@ describe('production TLS configuration', () => {
     assert.doesNotMatch(adminSite, /203\.0\.113\./);
     assert.match(preflight, /production_required_vars=\([\s\S]*ADMIN_ALLOWLIST/);
   });
+
+  it('restaure l IP visiteur uniquement depuis les réseaux Cloudflare publiés', () => {
+    const compose = read('docker-compose.prod.yml');
+    const nginx = read('nginx/nginx.conf');
+    const cloudflare = read('nginx/cloudflare-real-ip.conf');
+
+    assert.match(compose, /cloudflare-real-ip\.conf:\/etc\/nginx\/cloudflare-real-ip\.conf:ro/);
+    assert.match(nginx, /include\s+\/etc\/nginx\/cloudflare-real-ip\.conf;/);
+    assert.match(cloudflare, /real_ip_header CF-Connecting-IP;/);
+    assert.match(cloudflare, /real_ip_recursive on;/);
+    assert.strictEqual((cloudflare.match(/^set_real_ip_from /gm) || []).length, 22);
+    assert.doesNotMatch(cloudflare, /set_real_ip_from\s+(?:0\.0\.0\.0\/0|::\/0)/);
+  });
+
+  it('accepte une adresse admin IPv6 précise sans autoriser de directive arbitraire', () => {
+    const entrypoint = read('docker/nginx/entrypoint.sh');
+
+    assert.match(entrypoint, /valid_admin_network/);
+    assert.match(entrypoint, /\^\[0-9A-Fa-f:\]\+\$/);
+    assert.match(entrypoint, /max_prefix=128/);
+    assert.match(entrypoint, /\[ "\$prefix" -le "\$max_prefix" \]/);
+  });
 });
