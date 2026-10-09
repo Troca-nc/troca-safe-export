@@ -53,4 +53,11 @@ describe('service backup completeness', () => {
     assert.match(compose, /AWS_ENDPOINT_URL:\s+\$\{AWS_ENDPOINT:-\}/);
     assert.doesNotMatch(compose, /AWS_ENDPOINT_URL:\s+https?:\/\//);
   });
+
+  it('uses the storage class selected by the S3-compatible provider', () => {
+    const backup = read('scripts/backup.sh');
+
+    assert.doesNotMatch(backup, /--storage-class\s+STANDARD_IA/);
+    assert.match(backup, /aws s3 cp[\s\S]*--region "\$AWS_REGION"/);
+  });
 });
