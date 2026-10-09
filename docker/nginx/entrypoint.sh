@@ -26,13 +26,38 @@ cp /etc/nginx/nginx.conf "$RENDER_DIR/nginx.conf"
 
 # Render one fail-closed allowlist shared by both admin server variants.
 # Strict validation prevents Nginx directive injection.
+valid_admin_network() {
+  network="$1"
+  address="$network"
+  prefix=""
+  case "$network" in
+    */*)
+      address="${network%/*}"
+      prefix="${network##*/}"
+      ;;
+  esac
+
+  if printf '%s' "$address" | grep -Eq '^([0-9]{1,3}\.){3}[0-9]{1,3}$'; then
+    max_prefix=32
+  elif printf '%s' "$address" | grep -Eq '^[0-9A-Fa-f:]+$' && printf '%s' "$address" | grep -q ':'; then
+    max_prefix=128
+  else
+    return 1
+  fi
+
+  if [ -n "$prefix" ]; then
+    printf '%s' "$prefix" | grep -Eq '^[0-9]{1,3}$' || return 1
+    [ "$prefix" -le "$max_prefix" ] || return 1
+  fi
+}
+
 allowlist_file="$RENDER_DIR/admin-allowlist.inc"
 : > "$allowlist_file"
 old_ifs="$IFS"
 IFS=','
 for network in $ADMIN_ALLOWLIST; do
   network="$(printf '%s' "$network" | tr -d '[:space:]')"
-  if ! printf '%s' "$network" | grep -Eq '^([0-9]{1,3}\.){3}[0-9]{1,3}(/[0-9]{1,2})?$'; then
+  if ! valid_admin_network "$network"; then
     echo "ERROR: invalid ADMIN_ALLOWLIST entry: $network" >&2
     exit 1
   fi
