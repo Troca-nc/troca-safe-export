@@ -26,6 +26,18 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | À relire | [#234](https://github.com/Troca-nc/troca-safe-export/pull/234) serveur fusionnée ; [#235](https://github.com/Troca-nc/troca-safe-export/pull/235) frontend |
 | [19](specs/19-admin.md) | Administration | /admin | À relire | [#236](https://github.com/Troca-nc/troca-safe-export/pull/236) |
 
+### QUESTION — point d’entrée de l’ancien frontend Admin
+
+La vérification du 10 octobre 2026 confirme que l’administration opérationnelle est l’application autonome `admin/`, protégée sur son hôte dédié, et que sa racine redirige correctement vers `/dashboard`. En revanche, la route publique historique `https://kalico-nc.com/admin` répond 404 alors que plusieurs liens résiduels du frontend y renvoient et que `LegacyAdminUnavailable` fournit déjà un écran neutre explicite. La fiche 19 limite volontairement son périmètre à `admin/src/**` : aucune correction du frontend historique n’est donc autorisée sans accord supplémentaire.
+
+QUESTION : autoriser un lot séparé et minimal limité à la création de `frontend/src/app/admin/page.tsx`, au test de non-régression associé sous `frontend/scripts/` et à cette entrée de suivi, afin que `/admin` affiche `LegacyAdminUnavailable` au lieu d’une 404. L’application Admin autonome, ses API, les autres anciennes routes `/admin/*`, la production et les données réelles resteraient inchangées.
+
+### Point d’entrée de l’ancien frontend Admin — À relire
+
+Périmètre autorisé le 11 octobre 2026. La racine historique `/admin` rend désormais le même état neutre et explicite `LegacyAdminUnavailable` que les anciennes pages déjà désactivées. L’application Admin autonome et protégée reste inchangée.
+
+Validation : test de non-régression dédié (2 tests), `npm run test:design` (5 tests), `npm run lint`, `npx tsc --noEmit`, `node scripts/check-design.mjs --changed` (1 fichier, zéro erreur et zéro avertissement), `git diff --check` et build de production (112 pages, route `/admin` générée) réussis. Le build a utilisé `NODE_OPTIONS=--use-system-ca` pour la chaîne de certificats Windows. Aucun déploiement manuel ni accès aux données réelles.
+
 ## Hors site
 
 `Emails prospection pro v2.dc.html` et `Seeding autorisations v2.dc.html` sont des outils internes. Ils ne se codent pas dans le site.
