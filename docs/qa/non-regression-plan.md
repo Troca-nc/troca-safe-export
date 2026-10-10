@@ -54,18 +54,42 @@ Critères de sortie:
 - hero visuel conforme sur Desktop Chrome, iPhone 13 et Samsung Galaxy S22
 
 ### Production
-Objectif: exécuter un contrôle final avant promotion ou publication.
+Objectif: exécuter uniquement des contrôles publics en lecture seule après une publication.
 
 Commandes:
 ```bash
-PLAYWRIGHT_BASE_URL=https://<prod-domain> PLAYWRIGHT_USE_LOCAL_SERVER=false npm run test:e2e -- --project=smoke
-PLAYWRIGHT_BASE_URL=https://<prod-domain> PLAYWRIGHT_USE_LOCAL_SERVER=false npx playwright test tests/visual/home-hero.spec.ts
+PLAYWRIGHT_BASE_URL=https://kalico-nc.com \
+PLAYWRIGHT_BACKEND_URL=https://kalico-nc.com \
+PLAYWRIGHT_USE_LOCAL_SERVER=false \
+PLAYWRIGHT_TARGET_ENV=production \
+npm run test:e2e:prod-public
 ```
 
 Critères de sortie:
+- aucune création de compte, seed, publication ou autre écriture métier
 - pas d'erreur console bloquante
 - pas de 404/500 sur les pages publiques majeures
-- rendu visuel stable
+- hydratation invitée terminée et accès connexion/inscription visibles
+- navigation mobile/tablette disponible entre 390 et 1279 px
+- `/admin` affiche explicitement « Administration indisponible »
+- `/api/health` renvoie `ok: true`
+
+La suite est aussi exécutée par `.github/workflows/production-smoke.yml` toutes les six heures et peut être déclenchée manuellement après un déploiement.
+
+### QA externe isolée
+
+Le parcours authentifié complet est réservé à un environnement QA qui possède sa propre base, son propre Redis, son propre stockage et un collecteur d'emails de test. Le seed externe exige deux capacités explicites :
+
+```bash
+PLAYWRIGHT_BASE_URL=https://<qa-domain> \
+PLAYWRIGHT_BACKEND_URL=https://<qa-api-domain> \
+PLAYWRIGHT_USE_LOCAL_SERVER=false \
+PLAYWRIGHT_TARGET_ENV=qa \
+PLAYWRIGHT_ALLOW_EXTERNAL_SEED=true \
+npm run test:e2e -- --project=smoke
+```
+
+Le setup refuse toujours le seed et l'authentification automatisée sur `kalico-nc.com`, `www.kalico-nc.com`, `kalico.nc` et `www.kalico.nc`, même si ces variables sont mal configurées.
 
 ## 3. Stratégie de sécurité
 
