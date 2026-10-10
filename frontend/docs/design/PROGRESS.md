@@ -224,6 +224,18 @@ Recette Chromium locale réussie sur le serveur isolé 3101 : 45 contrôles vert
 
 Limites : le script lint du dépôt reste ciblé sur les fondations ; une invocation ESLint directe sur les fichiers de cette fiche est ignorée par la configuration actuelle. Le modal de connexion visible sur la page de dépôt et le texte mal encodé déjà présent dans le contenu de `/troc` sont hors du périmètre layout et n'ont pas été modifiés. Aucun changement d'outillage n'a été ajouté hors périmètre.
 
+### QUESTION — stabilisation post-fusion de l'authentification et de la navigation
+
+L'audit de production du 10 octobre 2026 confirme une régression de la fiche 01 : pour un visiteur sans jeton valide, `src/store/authStore.ts` appelle `useAuthStore.setState(...)` depuis son propre callback synchrone `onRehydrateStorage`. L'initialisation échoue avant `setHasHydrated(true)`, ce qui laisse `HeaderV2` sur ses squelettes de compte et bloque les pages qui attendent l'hydratation. La même revue confirme l'absence de lien direct vers `/inscription` et une zone sans navigation principale entre les breakpoints `md` et `xl`.
+
+QUESTION : autoriser, pour un lot correctif unique rattaché à la fiche 01, les modifications de `src/store/authStore.ts`, `src/components/layout/HeaderV2.tsx`, les tests de non-régression à créer sous `src/store/` ou `scripts/`, et cette entrée de suivi. Le lot restera limité à l'hydratation invité/jeton expiré, aux accès « Se connecter »/« Créer un compte » et à la continuité de navigation aux largeurs 768–1279 px ; aucune route, API, donnée réelle, production ou fonctionnalité métier ne sera modifiée.
+
+### Stabilisation post-fusion — À relire
+
+Périmètre autorisé le 10 octobre 2026. L'hydratation du store est différée jusqu'à la fin de son initialisation, le nettoyage d'une session absente ou expirée rétablit explicitement l'état invité et `hasHydrated` est garanti par un `finally`. L'en-tête expose désormais « Se connecter » et « Créer un compte » sur bureau comme dans le tiroir, lequel couvre aussi les largeurs tablette inférieures à `xl`.
+
+Validation : test de non-régression dédié (4 tests), `npm run test:design` (5 tests), `npm run lint`, `npx tsc --noEmit`, `node scripts/check-design.mjs --changed` (2 fichiers, zéro erreur et zéro avertissement) et build de production (111 pages) réussis. Le build a utilisé `NODE_OPTIONS=--use-system-ca` pour la chaîne de certificats Windows. La production n'a pas été modifiée ; fusion et déploiement restent hors de ce lot.
+
 ## 02 — Inventaire (étape 1, sans code)
 
 ### Base et références

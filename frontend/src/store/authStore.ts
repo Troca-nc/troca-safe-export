@@ -96,6 +96,7 @@ interface AuthState {
   setUser:  (user: User) => void
   setDemoProfile: (profile: DemoProfileKey | null) => void
   setHasHydrated: (hydrated: boolean) => void
+  resetAuthState: () => void
 }
 
 type RealAuthBackup = {
@@ -263,6 +264,7 @@ export const useAuthStore = create<AuthState>()(
 
       setUser: (user) => set({ user, isAuthenticated: Boolean(user) }),
       setHasHydrated: (hasHydrated) => set({ hasHydrated }),
+      resetAuthState: () => set({ user: null, isAuthenticated: false, demoProfile: null }),
     }),
     {
       name: 'auth-store',
@@ -271,20 +273,29 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: state.isAuthenticated,
         demoProfile: state.demoProfile,
       }),
-      onRehydrateStorage: () => (state) => {
-        if (typeof window !== 'undefined') {
-          const storedAccessToken = getStoredAccessToken()
-          const shouldClearRealAuth = !state?.demoProfile && (!storedAccessToken || !isStoredAccessTokenValid(storedAccessToken))
+      onRehydrateStorage: () => () => {
+        // Zustand peut terminer cette réhydratation de façon synchrone pendant
+        // l'initialisation du store. Différer le nettoyage évite d'accéder à
+        // useAuthStore avant que sa constante soit initialisée.
+        queueMicrotask(() => {
+          const state = useAuthStore.getState()
 
-          if (shouldClearRealAuth) {
-            clearTokens()
-            useFavorisStore.getState().clear()
-            clearRealAuthBackup()
-            useAuthStore.setState({ user: null, isAuthenticated: false, demoProfile: null })
+          try {
+            if (typeof window !== 'undefined') {
+              const storedAccessToken = getStoredAccessToken()
+              const shouldClearRealAuth = !state.demoProfile && (!storedAccessToken || !isStoredAccessTokenValid(storedAccessToken))
+
+              if (shouldClearRealAuth) {
+                clearTokens()
+                useFavorisStore.getState().clear()
+                clearRealAuthBackup()
+                state.resetAuthState()
+              }
+            }
+          } finally {
+            state.setHasHydrated(true)
           }
-        }
-
-        state?.setHasHydrated(true)
+        })
       },
     }
   )
