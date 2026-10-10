@@ -229,7 +229,7 @@ export default function Header({
           ) : null}
         </nav>
 
-        <div className="hidden shrink-0 items-center gap-1 border-l border-warm-border pl-3 md:flex">
+        <div className="hidden shrink-0 items-center gap-1 border-l border-warm-border pl-3 xl:flex">
           {!hasHydrated ? (
             <div className="flex items-center gap-2" role="status" aria-label="Chargement du compte">
               <span className="h-11 w-11 animate-pulse rounded-control bg-cream-sunken motion-reduce:animate-none" />
@@ -305,12 +305,13 @@ export default function Header({
           ) : (
             <>
               <button type="button" onClick={() => openAuthModal({ type: 'login', redirectTo: '/connexion' })} className="min-h-11 rounded-control px-3 text-[15px] font-semibold text-ink hover:bg-cream-sunken focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-strong">Se connecter</button>
+              <Link href="/inscription" className="inline-flex min-h-11 items-center rounded-control border border-warm-border px-3 text-[15px] font-semibold text-ink transition-colors hover:border-ink hover:bg-cream-sunken focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong">Créer un compte</Link>
               <button type="button" onClick={publish} className="inline-flex min-h-11 items-center gap-2 rounded-control bg-accent-strong px-5 text-[15px] font-semibold text-cream-surface shadow-accent transition-colors hover:bg-accent-strongHover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"><Plus className="h-4 w-4" />Déposer</button>
             </>
           )}
         </div>
 
-        <div className="ml-auto flex items-center gap-1 md:hidden">
+        <div className="ml-auto flex items-center gap-1 xl:hidden">
           <button type="button" onClick={publish} className="inline-flex min-h-11 items-center gap-2 rounded-control bg-accent-strong px-3 text-label text-cream-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink"><Plus className="h-4 w-4" />Déposer</button>
           <button type="button" onClick={() => setMobileOpen((current) => !current)} className="inline-flex h-11 w-11 items-center justify-center rounded-control text-ink hover:bg-cream-sunken focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-strong" aria-label="Menu" aria-expanded={mobileOpen} aria-controls="header-mobile-menu">
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -336,7 +337,7 @@ export default function Header({
       ) : null}
 
       {mobileOpen ? (
-        <div id="header-mobile-menu" className="border-t border-warm-border bg-cream px-4 py-4 md:hidden">
+        <div id="header-mobile-menu" className="border-t border-warm-border bg-cream px-4 py-4 xl:hidden">
           <nav className="mx-auto grid max-w-container gap-1" aria-label="Navigation mobile">
             {navigation.map((item) => <Link key={item.href} href={item.href} className="flex min-h-11 items-center rounded-control px-3 text-[15px] font-medium text-ink hover:bg-cream-sunken focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-strong">{item.label}</Link>)}
             {isAuthenticated ? (
@@ -346,7 +347,10 @@ export default function Header({
                 <Link href="/profil" className="flex min-h-11 items-center gap-3 rounded-control px-3 text-[15px] font-medium text-ink hover:bg-cream-sunken"><User className="h-4 w-4" />Mon compte</Link>
               </>
             ) : (
-              <button type="button" onClick={() => openAuthModal({ type: 'login', redirectTo: '/connexion' })} className="min-h-11 rounded-control px-3 text-left text-[15px] font-semibold text-ink hover:bg-cream-sunken">Se connecter</button>
+              <>
+                <button type="button" onClick={() => openAuthModal({ type: 'login', redirectTo: '/connexion' })} className="min-h-11 rounded-control px-3 text-left text-[15px] font-semibold text-ink hover:bg-cream-sunken">Se connecter</button>
+                <Link href="/inscription" className="flex min-h-11 items-center rounded-control px-3 text-[15px] font-semibold text-accent-text hover:bg-cream-sunken focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-strong">Créer un compte</Link>
+              </>
             )}
           </nav>
         </div>
