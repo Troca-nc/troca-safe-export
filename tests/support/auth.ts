@@ -6,7 +6,7 @@ export type AuthRole = 'particulier' | 'vendeur' | 'pro' | 'conducteur' | 'admin
 
 export const AUTH_DIR = path.resolve(process.cwd(), 'playwright', '.auth')
 
-type AuthUserState = {
+export type AuthUserState = {
   id: string
   email: string
   first_name: string
@@ -17,6 +17,7 @@ type AuthUserState = {
   phone_verified?: boolean
   avatar_url: string | null
   is_verified: boolean
+  email_verified?: boolean
   is_pro: boolean
   is_admin: boolean
   rating: number
@@ -135,6 +136,36 @@ export function sessionStoragePath(role: AuthRole) {
   return path.join(AUTH_DIR, `${role}.session.json`)
 }
 
+export function authUserPath(role: AuthRole) {
+  return path.join(AUTH_DIR, `${role}.user.json`)
+}
+
+export function captureAuthUser(role: AuthRole, user: Partial<AuthUserState>) {
+  const fallback = AUTH_USERS[role]
+  const normalized: AuthUserState = {
+    ...fallback,
+    ...user,
+    id: String(user.id ?? fallback.id),
+    first_name: user.first_name || user.prenom || fallback.first_name,
+    last_name: user.last_name || user.nom || fallback.last_name,
+    is_verified: user.is_verified ?? user.email_verified ?? fallback.is_verified,
+    rating: Number(user.rating ?? fallback.rating),
+  }
+
+  fs.mkdirSync(AUTH_DIR, { recursive: true })
+  fs.writeFileSync(authUserPath(role), JSON.stringify(normalized, null, 2), 'utf-8')
+}
+
+function readAuthUser(role: AuthRole): AuthUserState {
+  const file = authUserPath(role)
+  if (!fs.existsSync(file)) return AUTH_USERS[role]
+  try {
+    return JSON.parse(fs.readFileSync(file, 'utf-8')) as AuthUserState
+  } catch {
+    return AUTH_USERS[role]
+  }
+}
+
 export function readSessionStorage(role: AuthRole): Record<string, string> {
   const file = sessionStoragePath(role)
   if (!fs.existsSync(file)) return {}
@@ -172,7 +203,7 @@ export async function restoreAuthenticatedStore(page: Page, role: AuthRole) {
     throw new Error(`No access token found for ${role}`)
   }
 
-  const user = AUTH_USERS[role]
+  const user = readAuthUser(role)
   const refreshToken = session.refresh_token || session.refreshToken || null
 
   await page.goto('/', { waitUntil: 'domcontentloaded' })
@@ -225,7 +256,7 @@ export async function dismissOnboardingWizard(page: Page) {
   }
 }
 
-export function createConsoleCollector(page: Page) {
+export function createConsoleCollector(page: Page, additionalIgnoredConsolePatterns: RegExp[] = []) {
   const errors: string[] = []
   const pageErrors: string[] = []
 
@@ -249,6 +280,7 @@ export function createConsoleCollector(page: Page) {
     /Loading chunk .* failed/i,
     /__nextjs_original-stack-frames/i,
     /_next\/static\/webpack\/.*hot-update\.json/i,
+    ...additionalIgnoredConsolePatterns,
   ]
 
   page.on('console', (message) => {

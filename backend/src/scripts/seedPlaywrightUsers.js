@@ -1174,7 +1174,6 @@ async function main() {
         'conducteur@playwright.kalico.nc',
         'admin@playwright.kalico.nc',
       ],
-      password: PASSWORD,
       proCompany: 'Entreprise Test NC',
     };
   });

@@ -91,6 +91,13 @@ export default defineConfig({
       },
     },
     {
+      name: 'prod-public',
+      testMatch: /production\/public\.smoke\.spec\.ts$/,
+      use: {
+        ...desktop,
+      },
+    },
+    {
       name: 'public',
       testMatch: /public\.spec\.ts$/,
       use: {

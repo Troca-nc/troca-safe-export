@@ -1,0 +1,57 @@
+name: Production Public Smoke
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+
+concurrency:
+  group: production-public-smoke
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Read-only production smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PLAYWRIGHT_BASE_URL: https://kalico-nc.com
+      PLAYWRIGHT_BACKEND_URL: https://kalico-nc.com
+      PLAYWRIGHT_USE_LOCAL_SERVER: 'false'
+      PLAYWRIGHT_USE_DEMO_SERVER: 'false'
+      PLAYWRIGHT_TARGET_ENV: production
+      PLAYWRIGHT_ALLOW_EXTERNAL_SEED: 'false'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install test dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run read-only production smoke
+        run: npm run test:e2e:prod-public
+
+      - name: Upload browser evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-public-smoke
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 30
