@@ -15,7 +15,7 @@ Le workflow `Ephemeral QA Journey` valide le parcours critique avec les vrais fr
 
 Le test `tests/qa/authenticated-journey.spec.ts` vérifie successivement :
 
-1. création d'un nouveau compte par l'API publique ;
+1. création de deux nouveaux comptes par l'API publique, sans dépendre du jeu de données partagé ;
 2. capture locale des e-mails de bienvenue et de vérification dans Mailpit ;
 3. publication d'une annonce avec photo depuis l'interface ;
 4. recherche de cette annonce depuis un autre compte ;

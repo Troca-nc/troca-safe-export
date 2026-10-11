@@ -2,9 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { PublishWizardPO } from '../pom/publish-wizard.po'
 import {
   dismissOnboardingWizard,
-  restoreAuthenticatedStore,
   restoreAuthStore,
-  restoreSessionStorage,
 } from '../support/auth'
 
 const backendUrl = process.env.PLAYWRIGHT_BACKEND_URL || 'http://127.0.0.1:3001'
@@ -36,30 +34,45 @@ async function waitForRegistrationEmails(request: import('@playwright/test').API
   }).toBeGreaterThanOrEqual(2)
 }
 
-test('inscription, publication, recherche et premier contact restent opérationnels', async ({ browser, page, request }) => {
-  const suffix = `${Date.now()}-${test.info().retry}`
-  const email = `qa-${suffix}@example.test`
-  const title = `Vélo QA ${suffix}`
-  const contactMessage = `Bonjour, test de contact QA ${suffix}`
-
+async function registerAccount(
+  request: import('@playwright/test').APIRequestContext,
+  email: string,
+  prenom: string,
+) {
   const registration = await request.post(`${backendUrl}/api/auth/register`, {
     data: {
       email,
       password: 'QaJourney123!',
-      prenom: 'Camille',
+      prenom,
       nom: 'QA',
       account_type: 'personal',
     },
   })
   expect(registration.status()).toBe(201)
-  const registrationPayload = await registration.json() as {
+  const payload = await registration.json() as {
     data?: { access_token?: string; user?: unknown }
   }
-  expect(registrationPayload.data?.access_token).toBeTruthy()
-  expect(registrationPayload.data?.user).toBeTruthy()
-  await waitForRegistrationEmails(request, email)
+  expect(payload.data?.access_token).toBeTruthy()
+  expect(payload.data?.user).toBeTruthy()
+  return {
+    accessToken: payload.data!.access_token!,
+    user: payload.data!.user!,
+  }
+}
 
-  await installSession(page, registrationPayload.data!.access_token!, registrationPayload.data!.user!)
+test('inscription, publication, recherche et premier contact restent opérationnels', async ({ browser, page, request }) => {
+  const suffix = `${Date.now()}-${test.info().retry}`
+  const sellerEmail = `qa-seller-${suffix}@example.test`
+  const buyerEmail = `qa-buyer-${suffix}@example.test`
+  const title = `Vélo QA ${suffix}`
+  const contactMessage = `Bonjour, test de contact QA ${suffix}`
+
+  const seller = await registerAccount(request, sellerEmail, 'Camille')
+  const buyer = await registerAccount(request, buyerEmail, 'Alex')
+  await waitForRegistrationEmails(request, sellerEmail)
+  await waitForRegistrationEmails(request, buyerEmail)
+
+  await installSession(page, seller.accessToken, seller.user)
   await page.goto('/')
   await dismissOnboardingWizard(page)
 
@@ -77,8 +90,8 @@ test('inscription, publication, recherche et premier contact restent opérationn
   const buyerContext = await browser.newContext()
   const buyerPage = await buyerContext.newPage()
   try {
-    await restoreAuthenticatedStore(buyerPage, 'particulier')
-    await restoreSessionStorage(buyerPage, 'particulier')
+    await installSession(buyerPage, buyer.accessToken, buyer.user)
+    await buyerPage.goto('/')
     await dismissOnboardingWizard(buyerPage)
 
     await buyerPage.goto(`/annonces?q=${encodeURIComponent(title)}`)
