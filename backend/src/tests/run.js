@@ -43,6 +43,7 @@ const SUITES = [
   './personalAccountRoutes.test',
   './listingVisibilityBoundary.test',
   './listingStatusPolicy.test',
+  './listingsQuery.test',
   './antiScamFailClosed.test',
   './rideManualAcceptanceCapacity.test',
   './proBookingStateService.test',
