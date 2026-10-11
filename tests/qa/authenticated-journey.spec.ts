@@ -140,7 +140,7 @@ test('inscription, publication, recherche et premier contact restent opérationn
     await expect(buyerPage).toHaveURL(/\/messages\?conv=\d+/, { timeout: 20_000 })
     conversationId = new URL(buyerPage.url()).searchParams.get('conv') ?? ''
     expect(conversationId).toMatch(/^\d+$/)
-    await expect(buyerPage.getByText(contactMessage)).toBeVisible()
+    await expect(buyerPage.getByText(contactMessage).first()).toBeVisible()
   } finally {
     await buyerContext.close()
   }
