@@ -80,7 +80,17 @@ jobs:
           docker run --rm kalico-backup-test /test-backup-restore.sh
 
       - name: Build optimized frontend for local tests
-        run: npm run build --prefix frontend
+        run: |
+          for attempt in 1 2 3; do
+            if npm run build --prefix frontend; then
+              exit 0
+            fi
+            if [ "$attempt" = 3 ]; then
+              exit 1
+            fi
+            echo "next/font build failed transiently; retrying ($attempt/3)"
+            sleep 5
+          done
         env:
           NEXT_TELEMETRY_DISABLED: '1'
 

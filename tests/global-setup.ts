@@ -18,6 +18,7 @@ const USE_DEMO_SERVER = process.env.PLAYWRIGHT_USE_DEMO_SERVER !== 'false'
 const USE_LOCAL_SERVERS = process.env.PLAYWRIGHT_USE_LOCAL_SERVER !== 'false' && !isExternalUrl
 const TARGET_ENVIRONMENT = process.env.PLAYWRIGHT_TARGET_ENV || (USE_LOCAL_SERVERS ? 'local' : 'public')
 const ALLOW_EXTERNAL_SEED = process.env.PLAYWRIGHT_ALLOW_EXTERNAL_SEED === 'true'
+const SKIP_AUTH_SETUP = process.env.PLAYWRIGHT_SKIP_AUTH_SETUP === 'true'
 const NODE_EXE = process.env.NODE_EXE || process.execPath
 
 const DEMO_AUTH_ACCOUNTS: Array<{ role: AuthRole; email: string; password: string }> = [
@@ -155,6 +156,11 @@ export default async function globalSetup(_config: FullConfig) {
   assertExternalSeedBoundary()
 
   await ensureDevServerStarted()
+
+  if (SKIP_AUTH_SETUP) {
+    clearAuthArtifacts()
+    return
+  }
 
   // External targets are read-only unless both QA mode and the explicit seed
   // capability are enabled. This makes production smoke tests fail closed.

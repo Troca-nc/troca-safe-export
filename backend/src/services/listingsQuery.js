@@ -15,6 +15,8 @@ function toCursorEpoch(value) {
   return Number.isNaN(ts) ? 0 : Math.floor(ts / 1000)
 }
 
+const LISTING_SEARCH_VECTOR_SQL = "to_tsvector('french', lower(coalesce(a.titre, '')) || ' ' || lower(coalesce(a.description, '')))"
+
 function encodeListingCursor(payload) {
   return Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url')
 }
@@ -76,14 +78,14 @@ function getSortConfig(sort, searchText = '') {
         return getSortConfig('date')
       }
       return {
-        orderBy: '-COALESCE(ts_rank_cd(a.search_vector, plainto_tsquery(\'french\', $1)), 0) ASC, -EXTRACT(EPOCH FROM a.created_at) ASC, -a.id ASC',
-        tupleSql: ['-COALESCE(ts_rank_cd(a.search_vector, plainto_tsquery(\'french\', $1)), 0)', '-EXTRACT(EPOCH FROM a.created_at)', '-a.id'],
+        orderBy: `-COALESCE(ts_rank_cd(${LISTING_SEARCH_VECTOR_SQL}, plainto_tsquery('french', $1)), 0) ASC, -EXTRACT(EPOCH FROM a.created_at) ASC, -a.id ASC`,
+        tupleSql: [`-COALESCE(ts_rank_cd(${LISTING_SEARCH_VECTOR_SQL}, plainto_tsquery('french', $1)), 0)`, '-EXTRACT(EPOCH FROM a.created_at)', '-a.id'],
         tupleFromRow: (row) => [
           -Number(row.relevance_score ?? 0),
           -toCursorEpoch(row.published_at ?? row.created_at),
           -Number(row.id),
         ],
-        rankSelect: 'COALESCE(ts_rank_cd(a.search_vector, plainto_tsquery(\'french\', $1)), 0) AS relevance_score',
+        rankSelect: `COALESCE(ts_rank_cd(${LISTING_SEARCH_VECTOR_SQL}, plainto_tsquery('french', $1)), 0) AS relevance_score`,
       }
     case 'views':
       return {
@@ -150,7 +152,7 @@ function buildListingSearchContext(rawQuery = {}) {
 
   if (q) {
     conditions.push(
-      `(a.search_vector @@ plainto_tsquery('french', $${p})
+      `(${LISTING_SEARCH_VECTOR_SQL} @@ plainto_tsquery('french', $${p})
         OR a.titre ILIKE $${p + 1})`
     )
     params.push(q, `%${q}%`)

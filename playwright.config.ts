@@ -98,6 +98,13 @@ export default defineConfig({
       },
     },
     {
+      name: 'qa-journey',
+      testMatch: /qa\/authenticated-journey\.spec\.ts$/,
+      use: {
+        ...desktop,
+      },
+    },
+    {
       name: 'public',
       testMatch: /public\.spec\.ts$/,
       use: {

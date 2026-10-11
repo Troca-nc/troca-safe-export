@@ -1,0 +1,179 @@
+name: Ephemeral QA Journey
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 15 * * *'
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: qa-journey-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  authenticated-journey:
+    name: Register, publish, search and contact
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: kalico_qa
+          POSTGRES_USER: kalico_qa
+          POSTGRES_PASSWORD: qa-postgres-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kalico_qa -d kalico_qa"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7.2-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+      mailpit:
+        image: axllent/mailpit:v1.31.4
+        env:
+          MP_SMTP_AUTH_ACCEPT_ANY: 'true'
+          MP_SMTP_AUTH_ALLOW_INSECURE: 'true'
+          MP_DISABLE_VERSION_CHECK: 'true'
+        ports:
+          - 1025:1025
+          - 8025:8025
+
+    env:
+      NODE_ENV: test
+      PORT: '3001'
+      BASE_URL: http://127.0.0.1:3000
+      DB_HOST: 127.0.0.1
+      DB_PORT: '5432'
+      DB_NAME: kalico_qa
+      DB_USER: kalico_qa
+      DB_PASSWORD: qa-postgres-password
+      REDIS_URL: redis://127.0.0.1:6379
+      REDIS_REQUIRED: 'true'
+      JWT_SECRET: qa-only-jwt-secret-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      JWT_ACCESS_EXPIRES: 15m
+      JWT_REFRESH_EXPIRES: 7d
+      INTERNAL_API_TOKEN: qa-only-internal-token-xxxxxxxxxxxxxxxx
+      ADMIN_API_TOKEN: qa-only-admin-token-xxxxxxxxxxxxxxxxxxx
+      BUSINESS_TIME_ZONE: Pacific/Noumea
+      STORAGE_LOCAL_PATH: /tmp/kalico-qa-uploads
+      RUN_JOBS: 'false'
+      SMTP_HOST: 127.0.0.1
+      SMTP_PORT: '1025'
+      SMTP_USER: qa
+      SMTP_PASS: qa-password
+      SMTP_FROM: qa@kalico.test
+      PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+      PLAYWRIGHT_BACKEND_URL: http://127.0.0.1:3001
+      PLAYWRIGHT_MAILPIT_URL: http://127.0.0.1:8025
+      PLAYWRIGHT_USE_LOCAL_SERVER: 'false'
+      PLAYWRIGHT_USE_DEMO_SERVER: 'false'
+      PLAYWRIGHT_TARGET_ENV: qa
+      PLAYWRIGHT_SKIP_AUTH_SETUP: 'true'
+      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3000
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:3001/api
+      NEXT_PUBLIC_ENABLE_MSW: 'false'
+      NEXT_TELEMETRY_DISABLED: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm ci --prefix backend
+          npm ci --prefix frontend
+
+      - name: Install Chromium
+        run: |
+          sudo find /etc/apt/sources.list.d -maxdepth 1 -type f -exec grep -l 'dl.google.com/linux/chrome' {} + | xargs -r sudo rm -f
+          npx playwright install --with-deps chromium
+
+      - name: Prepare isolated QA database and storage
+        run: |
+          mkdir -p "$STORAGE_LOCAL_PATH"
+          npm run migrate --prefix backend
+
+      - name: Build frontend
+        run: |
+          for attempt in 1 2 3; do
+            if npm run build --prefix frontend; then
+              exit 0
+            fi
+            if [ "$attempt" = 3 ]; then
+              exit 1
+            fi
+            echo "next/font build failed transiently; retrying ($attempt/3)"
+            sleep 5
+          done
+
+      - name: Start real backend and frontend
+        run: |
+          npm run start --prefix backend > qa-backend.log 2>&1 &
+          echo $! > qa-backend.pid
+          npm run start --prefix frontend -- -p 3000 > qa-frontend.log 2>&1 &
+          echo $! > qa-frontend.pid
+
+      - name: Wait for isolated services
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3000 >/dev/null \
+              && curl -fsS http://127.0.0.1:3001/api/health >/dev/null \
+              && curl -fsS http://127.0.0.1:8025/api/v1/info >/dev/null; then
+              exit 0
+            fi
+            sleep 3
+          done
+          cat qa-backend.log || true
+          cat qa-frontend.log || true
+          exit 1
+
+      - name: Run authenticated QA journey
+        run: npm run test:e2e:qa-journey
+
+      - name: Upload QA evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-journey-evidence
+          path: |
+            playwright-report/
+            test-results/
+            screenshots/
+            qa-backend.log
+            qa-frontend.log
+          retention-days: 14
+
+      - name: Stop application processes
+        if: ${{ always() }}
+        run: |
+          if [ -f qa-backend.pid ]; then kill "$(cat qa-backend.pid)" || true; fi
+          if [ -f qa-frontend.pid ]; then kill "$(cat qa-frontend.pid)" || true; fi

@@ -47,7 +47,7 @@ export default function AnnonceDetailV2({ listing, reviews, similarListings }: P
     try {
       const conversationId = await contactListingSeller(listing.id, message.trim())
       setContactOpen(false)
-      if (conversationId) router.push(`/messages/${conversationId}`)
+      if (conversationId) router.push(`/messages?conv=${conversationId}`)
       else setFeedback('Votre message a bien été envoyé.')
     } catch { setFeedback('Impossible d’envoyer le message pour le moment.') }
     finally { setSubmitting(false) }

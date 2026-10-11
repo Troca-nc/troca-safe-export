@@ -456,22 +456,20 @@ export const uploadApi = {
 
 // Messages
 export const messagesApi = {
-  getConversations: () => cachedGet(
-    buildCacheKey('messages.getConversations', '/messages/conversations'),
-    () => api.get('/messages/conversations'),
-    CACHE_TTL.short,
-  ),
+  getConversations: () => api.get('/messages/conversations'),
   getMessages: (convId: string | number, page = 1, limit = 30, before?: string | null) => cachedGet(
     buildCacheKey('messages.getMessages', `/messages/conversations/${convId}`, { page, limit, before: before || '' }),
     () => api.get(`/messages/conversations/${convId}`, { params: { page, limit, before: before || undefined } }),
     CACHE_TTL.short,
   ),
-  startConversation: (data: object) => {
+  startConversation: async (data: object) => {
     if (isDemoMode()) {
       showDemoToast('Dï¿½sactivï¿½ en mode dï¿½mo')
       return Promise.resolve(createDemoResponse({ data: { id: 'demo-conversation', ...data } }))
     }
-    return api.post('/messages/conversations', data)
+    const response = await api.post('/messages/conversations', data)
+    invalidateApiCache('messages.')
+    return response
   },
   makeOffer: (convId: string | number, amount_xpf: number) =>
     api.post('/messages/offers', { conv_id: Number(convId), amount_xpf }),

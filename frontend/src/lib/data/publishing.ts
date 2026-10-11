@@ -149,7 +149,6 @@ export async function publishDraft({
       troc_wants: isTroc ? draft.trocWants : [],
       troc_accepts_complement_xpf: isTroc && numberOrZero(draft.trocComplementXpf) > 0,
       troc_complement_max_xpf: isTroc ? numberOrZero(draft.trocComplementXpf) : 0,
-      duration_days: 30,
       metadata: {
         quartier_zone: draft.quartier.trim() || null,
         handoff_modes: draft.handoffModes,

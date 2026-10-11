@@ -331,7 +331,8 @@ export async function contactListingSeller(listingId: string, message: string) {
   const response = await messagesApi.startConversation({ annonce_id: Number(listingId), message })
   const payload = asRecord(response.data)
   const data = asRecord(payload.data)
-  return asText(data.conversation_id ?? data.conversationId ?? payload.conversation_id ?? payload.conversationId ?? payload.id)
+  const conversationId = data.conversation_id ?? data.conversationId ?? payload.conversation_id ?? payload.conversationId ?? payload.id
+  return asText(conversationId) || (typeof conversationId === 'number' && Number.isFinite(conversationId) ? String(conversationId) : '')
 }
 
 export async function reportListing(listingId: string, reason: string, comment: string) {
