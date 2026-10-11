@@ -48,8 +48,9 @@ async function registerAccount(
       account_type: 'personal',
     },
   })
-  expect(registration.status()).toBe(201)
-  const payload = await registration.json() as {
+  const responseBody = await registration.text()
+  expect(registration.status(), responseBody).toBe(201)
+  const payload = JSON.parse(responseBody) as {
     data?: { access_token?: string; user?: unknown }
   }
   expect(payload.data?.access_token).toBeTruthy()
@@ -62,8 +63,8 @@ async function registerAccount(
 
 test('inscription, publication, recherche et premier contact restent opérationnels', async ({ browser, page, request }) => {
   const suffix = `${Date.now()}-${test.info().retry}`
-  const sellerEmail = `qa-seller-${suffix}@example.test`
-  const buyerEmail = `qa-buyer-${suffix}@example.test`
+  const sellerEmail = `qa-seller-${suffix}@example.com`
+  const buyerEmail = `qa-buyer-${suffix}@example.com`
   const title = `Vélo QA ${suffix}`
   const contactMessage = `Bonjour, test de contact QA ${suffix}`
 
