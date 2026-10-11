@@ -1,5 +1,4 @@
 import { expect, test, type Page } from '@playwright/test'
-import { PublishWizardPO } from '../pom/publish-wizard.po'
 import {
   dismissOnboardingWizard,
   restoreAuthStore,
@@ -18,6 +17,47 @@ async function installSession(page: Page, accessToken: string, user: unknown) {
     window.sessionStorage.setItem('access_token', token)
     window.sessionStorage.removeItem('refresh_token')
   }, accessToken)
+}
+
+async function dismissAuthModal(page: Page) {
+  const closeButton = page.getByRole('button', { name: /^Fermer$/i })
+  if (await closeButton.count()) {
+    await closeButton.first().click()
+    await expect(page.getByText(/Connexion rapide|On vous remet au bon endroit/i)).toHaveCount(0)
+  }
+}
+
+async function publishSale(page: Page, title: string, suffix: string) {
+  await page.goto('/deposer?type=sale')
+  await dismissAuthModal(page)
+
+  await expect(page.getByRole('heading', { name: /Ajoutez vos photos/i })).toBeVisible()
+  await page.locator('input[type="file"]').setInputFiles({
+    name: `qa-${suffix}.png`,
+    mimeType: 'image/png',
+    buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7+8V8AAAAASUVORK5CYII=', 'base64'),
+  })
+  await page.getByRole('button', { name: /Continuer/i }).click()
+
+  await expect(page.getByRole('heading', { name: /Décrivez votre objet/i })).toBeVisible()
+  await page.getByLabel(/^Titre$/i).fill(title)
+  await page.getByLabel(/Catégorie/i).selectOption({ index: 1 })
+  await page.getByLabel(/Description/i).fill('Annonce QA éphémère créée pour valider le parcours métier complet.')
+  await page.getByRole('button', { name: /Continuer/i }).click()
+
+  await expect(page.getByRole('heading', { name: /Fixez votre prix/i })).toBeVisible()
+  await page.getByRole('spinbutton', { name: /Prix/i }).fill('19500')
+  await page.getByRole('button', { name: /Continuer/i }).click()
+
+  await expect(page.getByRole('heading', { name: /Où se fait la remise/i })).toBeVisible()
+  await page.getByLabel(/Commune/i).selectOption({ index: 1 })
+  await page.getByRole('button', { name: /Continuer/i }).click()
+
+  await expect(page.getByRole('heading', { name: /Vérifiez et publiez/i })).toBeVisible()
+  await page.getByRole('button', { name: /Publier maintenant/i }).click()
+  await expect(page.getByRole('heading', { name: /Votre annonce est en ligne/i })).toBeVisible({ timeout: 20_000 })
+  await page.getByRole('link', { name: /Voir la publication/i }).click()
+  await expect(page.getByRole('heading', { name: title })).toBeVisible()
 }
 
 async function waitForRegistrationEmails(request: import('@playwright/test').APIRequestContext, email: string) {
@@ -77,16 +117,7 @@ test('inscription, publication, recherche et premier contact restent opérationn
   await page.goto('/')
   await dismissOnboardingWizard(page)
 
-  const wizard = new PublishWizardPO(page)
-  await wizard.open()
-  await wizard.fillStepOne(title, 'Annonce QA éphémère créée pour valider le parcours métier complet.')
-  await wizard.chooseFirstLeafCategory()
-  await wizard.goToStep2()
-  await wizard.uploadOnePhoto(`qa-${suffix}.png`)
-  await wizard.goToStep3()
-  await wizard.fillStepThree('19500', 1)
-  await wizard.submit()
-  await expect(page.getByRole('heading', { name: title })).toBeVisible()
+  await publishSale(page, title, suffix)
 
   const buyerContext = await browser.newContext()
   const buyerPage = await buyerContext.newPage()
