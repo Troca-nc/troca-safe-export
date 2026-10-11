@@ -35,7 +35,7 @@ async function publishSale(page: Page, title: string, suffix: string) {
   await page.locator('input[type="file"]').setInputFiles({
     name: `qa-${suffix}.png`,
     mimeType: 'image/png',
-    buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7+8V8AAAAASUVORK5CYII=', 'base64'),
+    buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64'),
   })
   await page.getByRole('button', { name: /Continuer/i }).click()
 
