@@ -121,6 +121,7 @@ test('inscription, publication, recherche et premier contact restent opérationn
 
   const buyerContext = await browser.newContext()
   const buyerPage = await buyerContext.newPage()
+  let conversationId = ''
   try {
     await installSession(buyerPage, buyer.accessToken, buyer.user)
     await buyerPage.goto('/')
@@ -136,13 +137,15 @@ test('inscription, publication, recherche et premier contact restent opérationn
     const contactDialog = buyerPage.getByRole('dialog', { name: /Contacter le vendeur/i })
     await contactDialog.getByRole('textbox', { name: /Votre message/i }).fill(contactMessage)
     await contactDialog.getByRole('button', { name: /^Envoyer$/i }).click()
-    await expect(buyerPage).toHaveURL(/\/messages\/\d+/, { timeout: 20_000 })
+    await expect(buyerPage).toHaveURL(/\/messages\?conv=\d+/, { timeout: 20_000 })
+    conversationId = new URL(buyerPage.url()).searchParams.get('conv') ?? ''
+    expect(conversationId).toMatch(/^\d+$/)
     await expect(buyerPage.getByText(contactMessage)).toBeVisible()
   } finally {
     await buyerContext.close()
   }
 
-  await page.goto('/messages')
+  await page.goto(`/messages?conv=${conversationId}`)
   await expect(page.getByText(title).first()).toBeVisible({ timeout: 20_000 })
   await expect(page.getByText(contactMessage).first()).toBeVisible({ timeout: 20_000 })
 })
