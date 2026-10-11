@@ -123,7 +123,17 @@ jobs:
           npm run migrate --prefix backend
 
       - name: Build frontend
-        run: npm run build --prefix frontend
+        run: |
+          for attempt in 1 2 3; do
+            if npm run build --prefix frontend; then
+              exit 0
+            fi
+            if [ "$attempt" = 3 ]; then
+              exit 1
+            fi
+            echo "next/font build failed transiently; retrying ($attempt/3)"
+            sleep 5
+          done
 
       - name: Start real backend and frontend
         run: |
