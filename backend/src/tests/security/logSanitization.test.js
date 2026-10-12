@@ -77,6 +77,20 @@ describe('P0-B log and internal-token boundaries', () => {
     }
   });
 
+  it('conserve les anciens domaines via des redirections permanentes sans perdre les méthodes HTTP', () => {
+    const root = path.resolve(__dirname, '../../../../');
+    const publicLegacy = fs.readFileSync(path.join(root, 'nginx/sites/legacy.kalico.nc.conf'), 'utf8');
+    const adminLegacy = fs.readFileSync(path.join(root, 'nginx/sites/legacy.admin.kalico.nc.conf'), 'utf8');
+    const entrypoint = fs.readFileSync(path.join(root, 'docker/nginx/entrypoint.sh'), 'utf8');
+
+    assert.ok(publicLegacy.includes('return 308 https://${SERVER_NAME}$request_uri;'));
+    assert.ok(adminLegacy.includes('return 308 https://${ADMIN_SERVER_NAME}$request_uri;'));
+    assert.ok(publicLegacy.includes('/etc/letsencrypt/live/${LEGACY_SERVER_NAME}/fullchain.pem'));
+    assert.ok(adminLegacy.includes('/etc/letsencrypt/live/${LEGACY_ADMIN_SERVER_NAME}/fullchain.pem'));
+    assert.ok(entrypoint.includes('[ -n "$LEGACY_SERVER_NAME" ]'));
+    assert.ok(entrypoint.includes('[ -n "$LEGACY_ADMIN_SERVER_NAME" ]'));
+  });
+
   it('interdit tout Referer sur chaque couche HTTP', () => {
     const root = path.resolve(__dirname, '../../../../');
     for (const relative of [

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { normalizeApiBase } from '@/lib/apiBase'
 
 function getApiBase() {
-  return normalizeApiBase(process.env.NEXT_PUBLIC_API_URL || 'https://kalico-nc.com/api')
+  return normalizeApiBase(process.env.NEXT_PUBLIC_API_URL || 'https://kalico.nc/api')
 }
 
 export async function GET(request: NextRequest) {

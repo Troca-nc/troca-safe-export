@@ -3,6 +3,8 @@ set -eu
 
 SERVER_NAME="${SERVER_NAME:-51.255.161.64.nip.io}"
 ADMIN_SERVER_NAME="${ADMIN_SERVER_NAME:-admin.51.255.161.64.nip.io}"
+LEGACY_SERVER_NAME="${LEGACY_SERVER_NAME:-}"
+LEGACY_ADMIN_SERVER_NAME="${LEGACY_ADMIN_SERVER_NAME:-}"
 : "${NGINX_SSL_ENABLED:?NGINX_SSL_ENABLED must be explicitly set to true or false}"
 : "${ADMIN_ALLOWLIST:?ADMIN_ALLOWLIST must contain trusted admin IPv4 addresses or CIDR ranges}"
 
@@ -72,7 +74,7 @@ render_site_block() {
   mode="$3"
   tmp="$dest.tmp"
 
-  envsubst '$SERVER_NAME $ADMIN_SERVER_NAME' < "$src" > "$tmp"
+  envsubst '$SERVER_NAME $ADMIN_SERVER_NAME $LEGACY_SERVER_NAME $LEGACY_ADMIN_SERVER_NAME' < "$src" > "$tmp"
 
   if [ "$mode" = "https" ]; then
     awk '
@@ -96,10 +98,22 @@ if [ "$NGINX_SSL_ENABLED" = "true" ]; then
   if [ -f "$SRC_DIR/admin.kalico.nc.conf" ]; then
     render_site_block "$SRC_DIR/admin.kalico.nc.conf" "$RENDER_DIR/conf.d/admin.kalico.nc.conf" "https"
   fi
+  if [ -n "$LEGACY_SERVER_NAME" ] && [ -f "$SRC_DIR/legacy.kalico.nc.conf" ]; then
+    render_site_block "$SRC_DIR/legacy.kalico.nc.conf" "$RENDER_DIR/conf.d/legacy.kalico.nc.conf" "https"
+  fi
+  if [ -n "$LEGACY_ADMIN_SERVER_NAME" ] && [ -f "$SRC_DIR/legacy.admin.kalico.nc.conf" ]; then
+    render_site_block "$SRC_DIR/legacy.admin.kalico.nc.conf" "$RENDER_DIR/conf.d/legacy.admin.kalico.nc.conf" "https"
+  fi
 else
   render_site_block "$SRC_DIR/kalico.nc.conf" "$RENDER_DIR/conf.d/kalico.nc.conf" "http"
   if [ -f "$SRC_DIR/admin.kalico.nc.conf" ]; then
     render_site_block "$SRC_DIR/admin.kalico.nc.conf" "$RENDER_DIR/conf.d/admin.kalico.nc.conf" "http"
+  fi
+  if [ -n "$LEGACY_SERVER_NAME" ] && [ -f "$SRC_DIR/legacy.kalico.nc.conf" ]; then
+    render_site_block "$SRC_DIR/legacy.kalico.nc.conf" "$RENDER_DIR/conf.d/legacy.kalico.nc.conf" "http"
+  fi
+  if [ -n "$LEGACY_ADMIN_SERVER_NAME" ] && [ -f "$SRC_DIR/legacy.admin.kalico.nc.conf" ]; then
+    render_site_block "$SRC_DIR/legacy.admin.kalico.nc.conf" "$RENDER_DIR/conf.d/legacy.admin.kalico.nc.conf" "http"
   fi
 fi
 

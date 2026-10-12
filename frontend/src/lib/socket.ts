@@ -265,7 +265,7 @@ class ReliableMessagingSocket {
   }
 }
 
-const API_ORIGIN = normalizeApiOrigin(process.env.NEXT_PUBLIC_API_URL || 'https://kalico-nc.com/api')
+const API_ORIGIN = normalizeApiOrigin(process.env.NEXT_PUBLIC_API_URL || 'https://kalico.nc/api')
 
 const accessTokenProvider = () => {
   if (typeof window === 'undefined') return null
