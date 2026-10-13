@@ -18,8 +18,11 @@ describe('Email de vérification téléphone', () => {
     assert.match(email.html, /782939/);
     assert.match(email.html, /brand\/kalico1\.svg/);
     assert.match(email.html, /L’équipe Kalico/);
+    assert.match(email.html, /Confirmez votre adresse e-mail/);
+    assert.match(email.html, /téléphone restera non vérifié/);
     assert.doesNotMatch(email.html, /Bonjour utilisateur/);
     assert.match(email.text, /Bonjour Léa,/);
+    assert.match(email.text, /code de confirmation e-mail/);
     assert.match(email.text, /L'équipe Kalico/);
   });
 

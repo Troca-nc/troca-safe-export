@@ -41,6 +41,7 @@ export interface RegistrationDraft {
   newsletter: boolean
   selectedPlan: RegistrationPlanId
   accountCreated: boolean
+  emailVerified: boolean
   phoneVerified: boolean
 }
 

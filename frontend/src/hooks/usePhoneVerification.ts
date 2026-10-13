@@ -5,6 +5,7 @@ import { phoneApi } from '@/lib/api'
 
 type Step = 'input' | 'otp' | 'verified'
 type DeliveryChannel = 'sms' | 'email'
+export type VerificationTarget = 'phone' | 'email'
 
 function maskPhoneNumber(telephone: string) {
   if (!telephone) return ''
@@ -32,6 +33,7 @@ interface PhoneVerificationState {
   telephone: string
   masked: string
   deliveryChannel: DeliveryChannel
+  verificationTarget: VerificationTarget | null
   loading: boolean
   error: string
   success: string
@@ -45,6 +47,7 @@ function buildDefaultState(): PhoneVerificationState {
     telephone: '',
     masked: '',
     deliveryChannel: 'sms',
+    verificationTarget: null,
     loading: false,
     error: '',
     success: '',
@@ -53,7 +56,7 @@ function buildDefaultState(): PhoneVerificationState {
   }
 }
 
-export function usePhoneVerification(onVerified?: (telephone: string) => void) {
+export function usePhoneVerification(onVerified?: (telephone: string, target: VerificationTarget) => void) {
   const [state, setState] = useState<PhoneVerificationState>(buildDefaultState)
 
   useEffect(() => {
@@ -90,6 +93,7 @@ export function usePhoneVerification(onVerified?: (telephone: string) => void) {
         telephone,
         masked,
         deliveryChannel: channel,
+        verificationTarget: null,
         loading: false,
         error: '',
         success: data.message || 'Code envoyé',
@@ -121,15 +125,17 @@ export function usePhoneVerification(onVerified?: (telephone: string) => void) {
     try {
       const { data } = await phoneApi.verify(state.telephone, code)
       if (data?.verified) {
+        const target = data.verification_target === 'email' ? 'email' : 'phone'
         setState((current) => ({
           ...current,
           step: 'verified',
+          verificationTarget: target,
           loading: false,
           error: '',
           success: data.message || 'Téléphone vérifié',
           cooldown: 0,
         }))
-        onVerified?.(state.telephone)
+        onVerified?.(state.telephone, target)
         return true
       }
 
@@ -169,6 +175,7 @@ export function usePhoneVerification(onVerified?: (telephone: string) => void) {
         step: 'otp',
         masked: typeof data.masked === 'string' && data.masked ? data.masked : current.masked,
         deliveryChannel: nextChannel,
+        verificationTarget: null,
         loading: false,
         error: '',
         success: data.message || 'Code renvoyé',
