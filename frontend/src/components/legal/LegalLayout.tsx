@@ -17,32 +17,32 @@ interface LegalLayoutProps {
 
 export default function LegalLayout({ title, lastUpdated, children }: LegalLayoutProps) {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
+    <main className="mx-auto max-w-4xl px-4 py-10 text-ink">
       <div className="mb-8">
-        <p className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] text-kalico-blue font-semibold">
+        <p className="inline-flex items-center gap-2 text-eyebrow-sm uppercase text-accent-text">
           {title}
         </p>
-        <h1 className="mt-2 text-3xl font-bold text-night">{title}</h1>
-        <p className="mt-2 text-sm text-night/45">Dernière mise à jour : {lastUpdated}</p>
+        <h1 className="mt-2 font-display text-3xl font-bold text-ink">{title}</h1>
+        <p className="mt-2 text-body-sm text-ink/55">Dernière mise à jour : {lastUpdated}</p>
       </div>
 
-      <nav className="mb-8 flex flex-wrap gap-3 text-sm">
+      <nav className="mb-8 flex flex-wrap gap-3 text-body-sm">
         {navLinks.map((link) => (
           <Link
             key={link.href}
             href={link.href}
-            className="rounded-full border border-night/10 bg-white px-3 py-1.5 text-night/65 transition hover:border-kalico-blue/30 hover:text-kalico-blue"
+            className="inline-flex min-h-11 items-center rounded-pill border border-warm-border bg-cream-surface px-3 py-2 text-ink/70 transition hover:border-accent-text/35 hover:text-accent-text"
           >
             {link.label}
           </Link>
         ))}
       </nav>
 
-      <div className="legal-content prose prose-slate dark:prose-invert max-w-none">
+      <div className="legal-content prose max-w-none text-ink">
         {children}
       </div>
 
-      <div className="mt-12 rounded-2xl border border-night/10 bg-white/80 p-4 text-sm text-night/70 shadow-sm">
+      <div className="mt-12 rounded-card border border-warm-border bg-cream-surface p-4 text-body-sm text-ink/70 shadow-card">
         <p>
           Pour toute question juridique : <a href="mailto:legal@kalico.nc">legal@kalico.nc</a>
         </p>
