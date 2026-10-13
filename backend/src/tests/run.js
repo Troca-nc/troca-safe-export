@@ -65,6 +65,7 @@ const SUITES = [
   './legacyAdminUnavailable.test',
   './csrf.test',
   './legal.route.test',
+  './phoneOtpEmail.test',
   './phone.route.test',
   './alert.route.test',
   './jobRuntime.test',
