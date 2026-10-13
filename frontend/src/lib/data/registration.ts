@@ -49,12 +49,22 @@ export async function getRegistrationCommunes(): Promise<RegistrationCommune[]> 
   const root = asRecord(response.data)
   const rows = Array.isArray(root.data) ? root.data : []
   return rows
-    .map((row) => {
-      const item = asRecord(row)
-      return {
-        id: asNumber(item.id),
-        name: asText(item.name) || asText(item.nom),
-      }
+    .flatMap((row) => {
+      const province = asRecord(row)
+      const provinceName = asText(province.name) || asText(province.nom)
+      const nestedCommunes = Array.isArray(province.communes) ? province.communes : []
+      const communes = nestedCommunes.length ? nestedCommunes : [row]
+
+      return communes.map((commune) => {
+        const item = asRecord(commune)
+        return {
+          id: asNumber(item.id),
+          name: asText(item.name) || asText(item.nom),
+          provinceName: nestedCommunes.length
+            ? provinceName
+            : asText(item.province_name) || undefined,
+        }
+      })
     })
     .filter((item) => item.id > 0 && item.name)
 }

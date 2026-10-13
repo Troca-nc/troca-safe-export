@@ -15,6 +15,7 @@ export type RegistrationPlanId = ProBillingOfferId
 export interface RegistrationCommune {
   id: number
   name: string
+  provinceName?: string
 }
 
 export interface RegistrationOffer {
