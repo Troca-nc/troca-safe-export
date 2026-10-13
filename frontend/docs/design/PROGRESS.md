@@ -1825,3 +1825,17 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - Lint obligatoire : `npm run lint`, passé selon le périmètre ESLint actuel du dépôt.
 - Build : `NODE_OPTIONS=--use-system-ca npm run build`, passé ; les cinq pages légales sont générées statiquement.
 - Design system : `node scripts/check-design.mjs --changed`, 2 fichiers contrôlés, 0 erreur, 0 avertissement.
+
+## Correctif fondations — contraste des cartes en thème sombre (14 octobre 2026)
+
+- Le thème sombre était activé à la fois par la classe `.dark` et par l’attribut `data-theme="dark"`, mais les variables de surface sombre n’étaient définies que pour la classe. Avec le seul attribut, les textes devenaient clairs tandis que les cartes conservaient leur fond crème.
+- Les variables sombres ciblent désormais les deux marqueurs. La correction couvre la carte de navigation et les sections de `/parametres`, ainsi que tous les composants communs fondés sur les mêmes variables, sans modifier le thème clair.
+- Aucun changement de route, d’API, de donnée ou de contenu métier.
+
+### Validation
+
+- Lint obligatoire : `npm run lint`, passé.
+- TypeScript : `npx tsc --noEmit --incremental false`, passé.
+- Build : `node --use-system-ca node_modules/next/dist/bin/next build`, passé avec 112 routes, dont `/parametres`.
+- Design system : `node scripts/check-design.mjs --changed`, 1 fichier contrôlé, 0 erreur, 0 avertissement avant mise à jour de ce suivi.
+- Revue visuelle automatisée non exécutée : le contrôleur du navigateur intégré n’était pas exposé dans cette session.

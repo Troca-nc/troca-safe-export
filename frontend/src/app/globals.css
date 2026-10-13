@@ -48,7 +48,8 @@
   color-scheme: light;
 }
 
-.dark {
+.dark,
+html[data-theme='dark'] {
   --color-background-primary: #04121e;
   --color-background-secondary: #082032;
   --color-bg-page: #04121e;
