@@ -44,6 +44,86 @@ function maskEmail(email) {
   return `${local[0]}***${local.slice(-1)}@${domain}`;
 }
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function buildFallbackOtpEmail({ firstName, code, maskedEmail, maskedPhone, baseUrl }) {
+  const normalizedFirstName = String(firstName || '').trim().replace(/\s+/g, ' ');
+  const safeFirstName = escapeHtml(normalizedFirstName);
+  const safeCode = escapeHtml(code);
+  const safeEmail = escapeHtml(maskedEmail);
+  const safePhone = escapeHtml(maskedPhone);
+  const safeBaseUrl = escapeHtml(String(baseUrl || 'https://kalico.nc').replace(/\/$/, ''));
+  const greeting = safeFirstName ? `Bonjour ${safeFirstName},` : 'Bonjour,';
+  const textGreeting = normalizedFirstName ? `Bonjour ${normalizedFirstName},` : 'Bonjour,';
+
+  return {
+    html: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Votre code de vérification Kalico</title>
+</head>
+<body style="margin:0;padding:0;background:#FBF6EC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:#123A44;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#FBF6EC;padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#FEFAF3;border:1px solid #E4D7C3;border-radius:20px;overflow:hidden;box-shadow:0 8px 30px rgba(18,58,68,.10);">
+          <tr>
+            <td style="padding:26px 30px;background:#123A44;">
+              <img src="${safeBaseUrl}/brand/kalico1.svg" width="126" alt="Kalico" style="display:block;max-width:126px;height:auto;border:0;color:#FEFAF3;font-size:22px;font-weight:700;">
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px 30px 26px;">
+              <p style="margin:0 0 16px;font-size:17px;line-height:1.6;color:#123A44;">${greeting}</p>
+              <h1 style="margin:0 0 12px;font-family:Georgia,'Times New Roman',serif;font-size:30px;line-height:1.15;color:#123A44;">Confirmez votre numéro</h1>
+              <p style="margin:0 0 22px;font-size:16px;line-height:1.65;color:#365D65;">Saisissez ce code dans Kalico pour terminer la vérification de votre téléphone.</p>
+              <div style="margin:0 0 22px;padding:20px;text-align:center;background:#F3E9D8;border:1px solid #E4D7C3;border-radius:14px;">
+                <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#9E4E06;">Votre code</p>
+                <p style="margin:0;font-size:36px;line-height:1;font-weight:800;letter-spacing:.16em;color:#123A44;">${safeCode}</p>
+              </div>
+              <p style="margin:0 0 8px;font-size:15px;line-height:1.6;color:#365D65;">Ce code est valable pendant <strong style="color:#123A44;">10 minutes</strong>.</p>
+              <p style="margin:0 0 22px;font-size:13px;line-height:1.6;color:#58757B;">E-mail : ${safeEmail}<br>Téléphone : ${safePhone}</p>
+              <div style="padding:14px 16px;background:#FBF6EC;border-left:4px solid #E8832A;border-radius:10px;">
+                <p style="margin:0;font-size:13px;line-height:1.6;color:#365D65;">Vous n’êtes pas à l’origine de cette demande ? Ignorez simplement cet e-mail. Ne communiquez jamais ce code à une autre personne.</p>
+              </div>
+              <p style="margin:24px 0 0;font-size:15px;line-height:1.6;color:#123A44;">À très vite,<br><strong>L’équipe Kalico</strong></p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:18px 30px;background:#F3E9D8;border-top:1px solid #E4D7C3;font-size:12px;line-height:1.6;color:#58757B;text-align:center;">Kalico — La plateforme locale de Nouvelle-Calédonie</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`,
+    text: `${textGreeting}\n\nVotre code de vérification Kalico est : ${code}\n\nIl est valable pendant 10 minutes.\nE-mail : ${maskedEmail}\nTéléphone : ${maskedPhone}\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail et ne communiquez jamais ce code.\n\nÀ très vite,\nL'équipe Kalico`,
+  };
+}
+
+async function resolveOtpFirstName(user) {
+  const directName = String(user?.prenom || '').trim();
+  if (directName) return directName;
+  if (!user?.id) return '';
+
+  try {
+    const result = await query('SELECT prenom FROM users WHERE id = $1 LIMIT 1', [user.id]);
+    return String(result.rows[0]?.prenom || '').trim();
+  } catch {
+    return '';
+  }
+}
+
 function generateOtpCode() {
   return String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
 }
@@ -206,6 +286,14 @@ async function sendFallbackEmailOtp({ user, telephone, code, reason }) {
   const expiresAt = new Date(Date.now() + OTP_TTL_MS);
   const maskedEmail = maskEmail(user.email);
   const maskedPhone = maskPhoneNumber(telephone);
+  const firstName = await resolveOtpFirstName(user);
+  const email = buildFallbackOtpEmail({
+    firstName,
+    code,
+    maskedEmail,
+    maskedPhone,
+    baseUrl: process.env.BASE_URL || 'https://kalico.nc',
+  });
   const subject = reason === 'resend'
     ? 'Votre code de vérification Kalico'
     : 'Votre code de vérification Kalico';
@@ -213,14 +301,8 @@ async function sendFallbackEmailOtp({ user, telephone, code, reason }) {
   await sendMail({
     to: user.email,
     subject,
-    html: `
-      <p>Bonjour ${user.prenom || 'utilisateur'},</p>
-      <p>Voici votre code de vérification Kalico : <strong>${code}</strong></p>
-      <p>Ce code est valable pendant <strong>10 minutes</strong>.</p>
-      <p>Nous l'avons envoyé en secours par email au compte <strong>${maskedEmail}</strong> pour le numéro <strong>${maskedPhone}</strong>.</p>
-      <p>Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer ce message.</p>
-    `,
-    text: `Votre code de vérification Kalico est ${code}. Il est valable 10 minutes. Email destinataire: ${maskedEmail}. Numero: ${maskedPhone}.`,
+    html: email.html,
+    text: email.text,
   });
 
   return {
@@ -406,6 +488,7 @@ module.exports = {
   OTP_TTL_MS,
   RESEND_MAX,
   RESEND_WINDOW_MS,
+  buildFallbackOtpEmail,
   buildOtpKey,
   buildResendKey,
   clearOtpRecord,
