@@ -84,8 +84,8 @@ function buildFallbackOtpEmail({ firstName, code, maskedEmail, maskedPhone, base
           <tr>
             <td style="padding:32px 30px 26px;">
               <p style="margin:0 0 16px;font-size:17px;line-height:1.6;color:#123A44;">${greeting}</p>
-              <h1 style="margin:0 0 12px;font-family:Georgia,'Times New Roman',serif;font-size:30px;line-height:1.15;color:#123A44;">Confirmez votre numéro</h1>
-              <p style="margin:0 0 22px;font-size:16px;line-height:1.65;color:#365D65;">Saisissez ce code dans Kalico pour terminer la vérification de votre téléphone.</p>
+              <h1 style="margin:0 0 12px;font-family:Georgia,'Times New Roman',serif;font-size:30px;line-height:1.15;color:#123A44;">Confirmez votre adresse e-mail</h1>
+              <p style="margin:0 0 22px;font-size:16px;line-height:1.65;color:#365D65;">Saisissez ce code dans Kalico pour confirmer votre e-mail. Votre téléphone restera non vérifié tant qu’un code reçu par SMS n’aura pas été validé.</p>
               <div style="margin:0 0 22px;padding:20px;text-align:center;background:#F3E9D8;border:1px solid #E4D7C3;border-radius:14px;">
                 <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#9E4E06;">Votre code</p>
                 <p style="margin:0;font-size:36px;line-height:1;font-weight:800;letter-spacing:.16em;color:#123A44;">${safeCode}</p>
@@ -107,7 +107,7 @@ function buildFallbackOtpEmail({ firstName, code, maskedEmail, maskedPhone, base
   </table>
 </body>
 </html>`,
-    text: `${textGreeting}\n\nVotre code de vérification Kalico est : ${code}\n\nIl est valable pendant 10 minutes.\nE-mail : ${maskedEmail}\nTéléphone : ${maskedPhone}\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail et ne communiquez jamais ce code.\n\nÀ très vite,\nL'équipe Kalico`,
+    text: `${textGreeting}\n\nVotre code de confirmation e-mail Kalico est : ${code}\n\nIl est valable pendant 10 minutes. Votre téléphone restera non vérifié tant qu'un code reçu par SMS n'aura pas été validé.\nE-mail : ${maskedEmail}\nTéléphone renseigné : ${maskedPhone}\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail et ne communiquez jamais ce code.\n\nÀ très vite,\nL'équipe Kalico`,
   };
 }
 
@@ -268,6 +268,27 @@ async function verifyStoredOtp({ telephone, code, userId }) {
   if (String(record.code) !== String(code)) return null;
 
   await clearOtpRecord(telephone);
+
+  if (record.channel === 'email') {
+    await query(
+      `UPDATE users
+       SET telephone = $1, phone_verified = FALSE, email_verified = TRUE, updated_at = NOW()
+       WHERE id = $2`,
+      [normalizePhoneNumber(telephone), userId]
+    );
+
+    return {
+      verified: true,
+      verification_target: 'email',
+      email_verified: true,
+      phone_verified: false,
+      message: 'Adresse e-mail vérifiée. Le téléphone reste non vérifié.',
+      channel: 'email',
+    };
+  }
+
+  if (record.channel !== 'sms') return null;
+
   await query(
     `UPDATE users
      SET telephone = $1, phone_verified = TRUE, updated_at = NOW()
@@ -277,8 +298,10 @@ async function verifyStoredOtp({ telephone, code, userId }) {
 
   return {
     verified: true,
+    verification_target: 'phone',
+    phone_verified: true,
     message: 'Téléphone vérifié avec succès',
-    channel: record.channel || 'email',
+    channel: 'sms',
   };
 }
 
@@ -295,8 +318,8 @@ async function sendFallbackEmailOtp({ user, telephone, code, reason }) {
     baseUrl: process.env.BASE_URL || 'https://kalico.nc',
   });
   const subject = reason === 'resend'
-    ? 'Votre code de vérification Kalico'
-    : 'Votre code de vérification Kalico';
+    ? 'Votre code de confirmation e-mail Kalico'
+    : 'Votre code de confirmation e-mail Kalico';
 
   await sendMail({
     to: user.email,
@@ -311,7 +334,7 @@ async function sendFallbackEmailOtp({ user, telephone, code, reason }) {
     masked: maskedEmail,
     expires_at: expiresAt.toISOString(),
     cooldown: 60,
-    message: 'Code envoyé par email',
+    message: 'Code de confirmation envoyé par e-mail',
   };
 }
 
@@ -420,8 +443,44 @@ async function verifyPhoneOtp({ user, telephone, code }) {
   }
 
   const stored = await loadOtpRecord(normalized);
-  if (stored && String(stored.code) === String(code)) {
+  if (stored) {
+    if (
+      String(stored.code) !== String(code)
+      || (stored.userId && Number(stored.userId) !== Number(user.id))
+    ) {
+      const error = new Error('Code incorrect ou expiré');
+      error.status = 400;
+      error.code = 'OTP_INVALID';
+      throw error;
+    }
+
     await clearOtpRecord(normalized);
+
+    if (stored.channel === 'email') {
+      await query(
+        `UPDATE users
+         SET telephone = $1, phone_verified = FALSE, email_verified = TRUE, updated_at = NOW()
+         WHERE id = $2`,
+        [normalized, user.id]
+      );
+
+      return {
+        verified: true,
+        verification_target: 'email',
+        email_verified: true,
+        phone_verified: false,
+        message: 'Adresse e-mail vérifiée. Le téléphone reste non vérifié.',
+        channel: 'email',
+      };
+    }
+
+    if (stored.channel !== 'sms') {
+      const error = new Error('Canal de vérification invalide');
+      error.status = 400;
+      error.code = 'OTP_CHANNEL_INVALID';
+      throw error;
+    }
+
     await query(
       `UPDATE users
        SET telephone = $1, phone_verified = TRUE, updated_at = NOW()
@@ -431,23 +490,9 @@ async function verifyPhoneOtp({ user, telephone, code }) {
 
     return {
       verified: true,
+      verification_target: 'phone',
+      phone_verified: true,
       message: 'Téléphone vérifié avec succès',
-      channel: stored.channel || 'email',
-    };
-  }
-
-  if ((process.env.DEMO_MODE === 'true' || process.env.NODE_ENV !== 'production') && String(code) === DEMO_OTP_CODE) {
-    await clearOtpRecord(normalized);
-    await query(
-      `UPDATE users
-       SET telephone = $1, phone_verified = TRUE, updated_at = NOW()
-       WHERE id = $2`,
-      [normalized, user.id]
-    );
-
-    return {
-      verified: true,
-      message: 'Telephone verifie avec succes',
       channel: 'sms',
     };
   }
@@ -479,6 +524,8 @@ async function verifyPhoneOtp({ user, telephone, code }) {
 
   return {
     verified: true,
+    verification_target: 'phone',
+    phone_verified: true,
     message: 'Téléphone vérifié avec succès',
     channel: 'sms',
   };

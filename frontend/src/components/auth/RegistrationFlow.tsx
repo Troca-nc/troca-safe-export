@@ -60,6 +60,7 @@ const defaultDraft: RegistrationDraft = {
   newsletter: false,
   selectedPlan: 'free',
   accountCreated: false,
+  emailVerified: false,
   phoneVerified: false,
 }
 
@@ -106,6 +107,7 @@ function sanitizeDraft(value: unknown): RegistrationDraft {
     accountType,
     step,
     accountCreated: Boolean(input.accountCreated),
+    emailVerified: Boolean(input.emailVerified),
     phoneVerified: Boolean(input.phoneVerified),
   }
 }
@@ -204,7 +206,7 @@ export default function RegistrationFlow() {
 
   useEffect(() => {
     if (!draftReady || !hasHydrated) return
-    if (draft.accountCreated && !isAuthenticated) updateDraft({ accountCreated: false, phoneVerified: false, step: 'credentials' })
+    if (draft.accountCreated && !isAuthenticated) updateDraft({ accountCreated: false, emailVerified: false, phoneVerified: false, step: 'credentials' })
   }, [draft.accountCreated, draftReady, hasHydrated, isAuthenticated])
 
   const steps = useMemo<Exclude<RegistrationStep, 'done'>[]>(
@@ -406,7 +408,39 @@ export default function RegistrationFlow() {
                 {draft.step === 'verify' ? (
                   <section>
                     <p className="text-eyebrow text-accent-text">Vérification</p>
-                    {hasPhone ? <><h1 className="mt-3 font-display text-h1 text-ink">Confirmez votre numéro</h1><p className="mt-3 text-body text-ink/65">Votre compte a été créé. Recevez maintenant votre code de vérification par SMS.</p><PhoneVerification initialPhone={`+687${phoneDigits}`} variant="inline" className="mt-7" onVerified={() => updateDraft({ phoneVerified: true, step: draft.accountType === 'pro' ? 'plan' : 'done' })} /></> : <><h1 className="mt-3 font-display text-h1 text-ink">Confirmez votre adresse e-mail</h1><div className="mt-7 rounded-card border border-warm-border bg-cream-surface p-5 shadow-card sm:p-6"><span className="flex h-11 w-11 items-center justify-center rounded-control bg-lagoon/20 text-reef-text"><ShieldCheck className="h-5 w-5" /></span><h2 className="mt-4 font-display text-xl text-ink">E-mail de confirmation envoyé</h2><p className="mt-2 text-body-sm text-ink/65">Ouvrez le lien envoyé à <strong className="text-ink">{verificationEmail}</strong>. Pensez à vérifier vos courriers indésirables.</p><Button className="mt-5 w-full" onClick={() => goTo(draft.accountType === 'pro' ? 'plan' : 'done')}>Continuer</Button></div></>}
+                    {hasPhone ? (
+                      <>
+                        <h1 className="mt-3 font-display text-h1 text-ink">Confirmez votre numéro</h1>
+                        <p className="mt-3 text-body text-ink/65">Votre compte a été créé. Recevez maintenant votre code de vérification par SMS.</p>
+                        <PhoneVerification
+                          initialPhone={`+687${phoneDigits}`}
+                          variant="inline"
+                          className="mt-7"
+                          onVerified={(_, target) => updateDraft({
+                            emailVerified: target === 'email' || draft.emailVerified,
+                            phoneVerified: target === 'phone',
+                            step: draft.accountType === 'pro' ? 'plan' : 'done',
+                          })}
+                        />
+                        <Button
+                          variant="ghost"
+                          className="mt-5 w-full"
+                          onClick={() => updateDraft({ phoneVerified: false, step: draft.accountType === 'pro' ? 'plan' : 'done' })}
+                        >
+                          Continuer sans vérifier le téléphone
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <h1 className="mt-3 font-display text-h1 text-ink">Confirmez votre adresse e-mail</h1>
+                        <div className="mt-7 rounded-card border border-warm-border bg-cream-surface p-5 shadow-card sm:p-6">
+                          <span className="flex h-11 w-11 items-center justify-center rounded-control bg-lagoon/20 text-reef-text"><ShieldCheck className="h-5 w-5" /></span>
+                          <h2 className="mt-4 font-display text-xl text-ink">E-mail de confirmation envoyé</h2>
+                          <p className="mt-2 text-body-sm text-ink/65">Ouvrez le lien envoyé à <strong className="text-ink">{verificationEmail}</strong>. Pensez à vérifier vos courriers indésirables.</p>
+                          <Button className="mt-5 w-full" onClick={() => goTo(draft.accountType === 'pro' ? 'plan' : 'done')}>Continuer</Button>
+                        </div>
+                      </>
+                    )}
                   </section>
                 ) : null}
 
@@ -424,8 +458,20 @@ export default function RegistrationFlow() {
                     <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-card bg-reef/15 text-reef-text"><CheckCircle2 className="h-8 w-8" /></span>
                     <p className="mt-6 text-eyebrow text-accent-text">Compte créé</p>
                     <h1 className="mt-3 font-display text-h1 text-ink">Bienvenue sur Kalico, {draft.firstName || 'vous'}.</h1>
-                    <p className="mx-auto mt-3 max-w-xl text-body text-ink/65">{hasPhone ? 'Votre téléphone est vérifié. ' : ''}Consultez votre e-mail pour confirmer votre adresse{draft.accountType === 'pro' ? '; votre RIDET reste en attente de validation' : ''}.</p>
-                    <div className="mt-7 flex flex-wrap justify-center gap-2"><span className="rounded-full border border-reef/30 bg-reef/10 px-3 py-1 text-meta font-semibold text-reef-text">E-mail envoyé</span>{hasPhone && draft.phoneVerified ? <span className="rounded-full border border-reef/30 bg-reef/10 px-3 py-1 text-meta font-semibold text-reef-text">Téléphone vérifié</span> : null}{draft.accountType === 'pro' ? <span className="rounded-full border border-accent/35 bg-accent-soft px-3 py-1 text-meta font-semibold text-accent-text">RIDET en attente</span> : null}</div>
+                    <p className="mx-auto mt-3 max-w-xl text-body text-ink/65">
+                      {draft.phoneVerified ? 'Votre téléphone est vérifié. ' : hasPhone ? 'Votre téléphone reste à vérifier. ' : ''}
+                      {draft.emailVerified ? 'Votre adresse e-mail est confirmée' : 'Consultez votre e-mail pour confirmer votre adresse'}
+                      {draft.accountType === 'pro' ? '; votre RIDET reste en attente de validation' : ''}.
+                    </p>
+                    <div className="mt-7 flex flex-wrap justify-center gap-2">
+                      <span className="rounded-full border border-reef/30 bg-reef/10 px-3 py-1 text-meta font-semibold text-reef-text">{draft.emailVerified ? 'E-mail vérifié' : 'E-mail envoyé'}</span>
+                      {hasPhone ? (
+                        <span className={`rounded-full border px-3 py-1 text-meta font-semibold ${draft.phoneVerified ? 'border-reef/30 bg-reef/10 text-reef-text' : 'border-warm-border bg-cream-sunken text-ink/60'}`}>
+                          {draft.phoneVerified ? 'Téléphone vérifié' : 'Téléphone non vérifié'}
+                        </span>
+                      ) : null}
+                      {draft.accountType === 'pro' ? <span className="rounded-full border border-accent/35 bg-accent-soft px-3 py-1 text-meta font-semibold text-accent-text">RIDET en attente</span> : null}
+                    </div>
                     <div className="mt-8 grid gap-4 text-left sm:grid-cols-3">{(draft.accountType === 'pro' ? [{ title: 'Compléter ma vitrine', href: '/pro/dashboard/parametres' }, { title: 'Publier une annonce', href: '/deposer' }, { title: 'Voir les offres', href: `/abonnement?plan=${draft.selectedPlan}` }] : [{ title: 'Publier une annonce', href: '/deposer' }, { title: 'Créer une alerte', href: '/annonces' }, { title: 'Compléter mon profil', href: '/profil' }]).map((action, index) => <Link key={action.title} href={action.href} className="rounded-card border border-warm-border bg-cream-surface p-5 text-body-sm font-semibold text-ink shadow-card transition hover:border-ink/35"><span className="mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-cream-sunken text-meta text-ink">{index + 1}</span>{action.title}<ArrowRight className="mt-4 h-4 w-4 text-accent-text" /></Link>)}</div>
                     <Button variant="ghost" className="mt-6" onClick={resetFlow}>Recommencer le parcours</Button>
                   </section>

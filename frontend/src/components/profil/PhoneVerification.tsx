@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { CheckCircle2, Phone, RefreshCw, ShieldCheck } from 'lucide-react'
-import { usePhoneVerification } from '@/hooks/usePhoneVerification'
+import { usePhoneVerification, type VerificationTarget } from '@/hooks/usePhoneVerification'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
 
@@ -60,7 +60,7 @@ export default function PhoneVerification({
   variant = 'card',
 }: {
   initialPhone?: string
-  onVerified?: (telephone: string) => void
+  onVerified?: (telephone: string, target: VerificationTarget) => void
   className?: string
   variant?: 'inline' | 'card'
 }) {
@@ -128,8 +128,14 @@ export default function PhoneVerification({
     <div className={`${container} ${className}`}>
       <div className="flex flex-col items-center py-3 text-center">
         <span className="flex h-14 w-14 items-center justify-center rounded-card bg-reef/15 text-reef-text"><CheckCircle2 className="h-7 w-7" /></span>
-        <h2 className="mt-4 font-display text-2xl text-ink">Téléphone vérifié</h2>
-        <p className="mt-2 text-body-sm text-ink/65">Votre numéro est maintenant associé à votre compte.</p>
+        <h2 className="mt-4 font-display text-2xl text-ink">
+          {state.verificationTarget === 'email' ? 'E-mail vérifié' : 'Téléphone vérifié'}
+        </h2>
+        <p className="mt-2 text-body-sm text-ink/65">
+          {state.verificationTarget === 'email'
+            ? 'Votre adresse e-mail est confirmée. Votre numéro reste enregistré, mais il ne sera vérifié qu’après validation d’un code reçu par SMS.'
+            : 'Votre numéro est maintenant associé et vérifié sur votre compte.'}
+        </p>
       </div>
     </div>
   )

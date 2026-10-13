@@ -6,7 +6,6 @@
 
 const assert = require('assert');
 const { describe, it, makeRes, makeAuthReq, assertStatus, assertError } = require('./helpers');
-const { storeOtpRecord } = require('../services/phoneOtpService');
 
 // ── Stubs ─────────────────────────────────────────────────────
 
@@ -32,6 +31,21 @@ let lastQuerySql = '';
 const dbStub = {
   query: async (sql, params) => {
     lastQuerySql = sql;
+    if (/SELECT id, email, is_admin, is_pro,[\s\S]*FROM users WHERE id = \$1/i.test(sql)) {
+      return {
+        rows: [{
+          id: Number(params?.[0] || 1),
+          email: 'test@kalico.nc',
+          prenom: 'Test',
+          nom: 'User',
+          is_admin: false,
+          is_pro: false,
+          deleted_at: null,
+          banned_until: null,
+        }],
+        rowCount: 1,
+      };
+    }
     return { rows: dbRows, rowCount: dbRows.length };
   },
 };
@@ -49,10 +63,12 @@ process.env.TWILIO_AUTH_TOKEN  = 'authtoken';
 process.env.TWILIO_VERIFY_SID  = 'VAtest';
 
 require.cache[databaseModulePath] = { id: databaseModulePath, filename: databaseModulePath, loaded: true, exports: dbStub };
+delete require.cache[require.resolve('../services/phoneOtpService')];
 delete require.cache[require.resolve('../middleware/auth')];
 delete require.cache[require.resolve('../middleware/validate')];
 delete require.cache[require.resolve('../routes/phone.route')];
 
+const { storeOtpRecord } = require('../services/phoneOtpService');
 const router = require('../routes/phone.route');
 
 require('module')._load = origLoad;
@@ -116,23 +132,39 @@ describe('POST /api/phone/verify', () => {
   it('valide le code correct et marque le téléphone comme vérifié', async () => {
     twilioVerifyStatus = 'approved';
     dbRows = [];
+    await storeOtpRecord({
+      telephone: '+687751234',
+      code: '123456',
+      userId: 1,
+      channel: 'sms',
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    });
     const req = makeAuthReq(1, { body: { telephone: '+687751234', code: '123456' } });
     const res = makeRes();
     await callRoute('post', '/verify', req, res);
     assertStatus(res, 200);
     assert.strictEqual(res._payload?.verified, true);
+    assert.strictEqual(res._payload?.verification_target, 'phone');
+    assert.strictEqual(res._payload?.phone_verified, true);
   });
 
   it('retourne 400 si le code est incorrect', async () => {
     twilioVerifyStatus = 'pending'; // pas 'approved'
     dbRows = [];
+    await storeOtpRecord({
+      telephone: '+687751234',
+      code: '111111',
+      userId: 1,
+      channel: 'sms',
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    });
     const req = makeAuthReq(1, { body: { telephone: '+687751234', code: '000000' } });
     const res = makeRes();
     await callRoute('post', '/verify', req, res);
     assertStatus(res, 400);
   });
 
-  it('valide aussi un code issu du fallback email', async () => {
+  it('confirme uniquement l’email avec un code de fallback et laisse le téléphone non vérifié', async () => {
     twilioVerifyStatus = 'pending';
     dbRows = [];
     await storeOtpRecord({
@@ -148,6 +180,11 @@ describe('POST /api/phone/verify', () => {
     await callRoute('post', '/verify', req, res);
     assertStatus(res, 200);
     assert.strictEqual(res._payload?.verified, true);
+    assert.strictEqual(res._payload?.verification_target, 'email');
+    assert.strictEqual(res._payload?.email_verified, true);
+    assert.strictEqual(res._payload?.phone_verified, false);
+    assert.match(lastQuerySql, /phone_verified\s*=\s*FALSE/i);
+    assert.match(lastQuerySql, /email_verified\s*=\s*TRUE/i);
   });
 });
 
