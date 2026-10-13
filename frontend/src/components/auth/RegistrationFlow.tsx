@@ -73,9 +73,9 @@ const stepLabels: Record<Exclude<RegistrationStep, 'done'>, string> = {
 
 const brandByStep: Record<RegistrationStep, { eyebrow: string; title: string; body: string }> = {
   type: { eyebrow: 'Rejoindre Kalico', title: 'Votre marché local, dans une seule application.', body: 'Choisissez le compte qui correspond à votre activité. Vous pourrez faire évoluer votre profil plus tard.' },
-  info: { eyebrow: 'Votre profil', title: 'Des échanges plus proches de chez vous.', body: 'Votre commune et votre téléphone servent à sécuriser le compte et à personnaliser votre expérience.' },
-  credentials: { eyebrow: 'Accès sécurisé', title: 'Un compte simple, protégé dès le départ.', body: 'Votre e-mail reste votre identifiant. Nous vérifions ensuite votre téléphone sans l’afficher publiquement.' },
-  verify: { eyebrow: 'Vérification', title: 'La confiance commence par un contact vérifié.', body: 'Le code reçu confirme que vous gardez le contrôle de votre numéro.' },
+  info: { eyebrow: 'Votre profil', title: 'Des échanges plus proches de chez vous.', body: 'Votre commune personnalise votre expérience. Le téléphone est facultatif, mais recommandé pour renforcer la confiance.' },
+  credentials: { eyebrow: 'Accès sécurisé', title: 'Un compte simple, protégé dès le départ.', body: 'Votre e-mail reste votre identifiant. Si vous ajoutez un mobile, vous pourrez aussi le vérifier par SMS.' },
+  verify: { eyebrow: 'Vérification', title: 'La confiance commence par un contact vérifié.', body: 'Confirmez votre e-mail ou, si vous avez renseigné un mobile, le code reçu par SMS.' },
   plan: { eyebrow: 'Kalico Pro', title: 'Choisissez le rythme qui convient à votre activité.', body: 'Les tarifs et avantages affichés viennent du catalogue Kalico actuel.' },
   done: { eyebrow: 'Bienvenue', title: 'Votre compte Kalico est prêt.', body: 'Vous pouvez maintenant compléter votre profil ou commencer à publier.' },
 }
@@ -138,6 +138,7 @@ function RegistrationSkeleton() {
 
 export default function RegistrationFlow() {
   const registerUser = useAuthStore((state) => state.register)
+  const user = useAuthStore((state) => state.user)
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const hasHydrated = useAuthStore((state) => state.hasHydrated)
   const [draft, setDraft] = useState<RegistrationDraft>(defaultDraft)
@@ -216,11 +217,14 @@ export default function RegistrationFlow() {
   const rules = passwordRules(password)
   const passwordValid = rules.every((rule) => rule.valid)
   const phoneDigits = draft.phone.replace(/\D/g, '').slice(-6)
+  const hasPhone = phoneDigits.length === 6
+  const phoneValid = phoneDigits.length === 0 || hasPhone
+  const verificationEmail = email || user?.email || 'votre adresse e-mail'
   const ridetDigits = draft.ridet.replace(/\D/g, '')
   const infoValid = draft.firstName.trim().length >= 2
     && draft.lastName.trim().length >= 2
     && Boolean(draft.communeId)
-    && phoneDigits.length === 6
+    && phoneValid
     && (draft.accountType === 'particulier'
       || draft.companyName.trim().length >= 2 && ridetDigits.length === 10 && Boolean(draft.sector))
   const credentialsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
@@ -231,8 +235,8 @@ export default function RegistrationFlow() {
 
   const disabledReason = draft.step === 'info' && !infoValid
     ? draft.accountType === 'pro'
-      ? 'Complétez vos coordonnées, votre entreprise, votre secteur et les 10 chiffres du RIDET.'
-      : 'Complétez votre identité, votre commune et les 6 chiffres de votre mobile.'
+      ? 'Complétez votre identité, votre commune, votre entreprise, votre secteur et les 10 chiffres du RIDET. Le mobile est facultatif, mais doit contenir 6 chiffres s’il est renseigné.'
+      : 'Complétez votre identité et votre commune. Le mobile est facultatif, mais doit contenir 6 chiffres s’il est renseigné.'
     : draft.step === 'credentials' && !credentialsValid
       ? 'Utilisez un e-mail valide, respectez les quatre règles du mot de passe et acceptez les conditions.'
       : ''
@@ -267,7 +271,7 @@ export default function RegistrationFlow() {
           prenom: draft.firstName.trim(),
           nom: draft.lastName.trim(),
           commune_id: Number(draft.communeId),
-          telephone: `+687${phoneDigits}`,
+          ...(hasPhone ? { telephone: `+687${phoneDigits}` } : {}),
           account_type: draft.accountType,
         }, turnstileToken || undefined)
         updateDraft({ accountCreated: true })
@@ -279,7 +283,7 @@ export default function RegistrationFlow() {
           sector: draft.sector,
           ridet: ridetDigits,
           commune: draft.communeName,
-          phone: `+687${phoneDigits}`,
+          phone: hasPhone ? `+687${phoneDigits}` : '',
         })
       }
       setPassword('')
@@ -371,8 +375,8 @@ export default function RegistrationFlow() {
                     <div className="mt-7 grid gap-5 sm:grid-cols-2">
                       <Input label="Prénom" value={draft.firstName} onChange={(event) => updateDraft({ firstName: event.target.value })} autoComplete="given-name" />
                       <Input label="Nom" value={draft.lastName} onChange={(event) => updateDraft({ lastName: event.target.value })} autoComplete="family-name" />
-                      {communesLoading ? <div className="sm:col-span-2"><Skeleton className="h-[74px]" /></div> : communesError ? <div role="alert" className="sm:col-span-2 rounded-control border border-alert-error/25 bg-alert-error/10 p-4 text-body-sm text-alert-error"><p>{communesError}</p><Button variant="tertiary" compact className="mt-3" onClick={() => void loadCommunes()}>Réessayer</Button></div> : <Select label="Commune" value={draft.communeId} onChange={(event) => { const commune = communes.find((item) => String(item.id) === event.target.value); updateDraft({ communeId: event.target.value, communeName: commune?.name || '' }) }} className="sm:col-span-2"><option value="">Choisir une commune</option>{communes.map((commune) => <option key={commune.id} value={commune.id}>{commune.name}</option>)}</Select>}
-                      <Input label="Numéro mobile" prefix="+687" value={draft.phone} onChange={(event) => updateDraft({ phone: event.target.value.replace(/\D/g, '').slice(0, 6) })} inputMode="numeric" autoComplete="tel-national" placeholder="XX XX XX" hint="Un code de vérification sera envoyé à ce numéro." className="sm:col-span-2" />
+                      {communesLoading ? <div className="sm:col-span-2"><Skeleton className="h-[74px]" /></div> : communesError ? <div role="alert" className="sm:col-span-2 rounded-control border border-alert-error/25 bg-alert-error/10 p-4 text-body-sm text-alert-error"><p>{communesError}</p><Button variant="tertiary" compact className="mt-3" onClick={() => void loadCommunes()}>Réessayer</Button></div> : <Select label="Commune" value={draft.communeId} onChange={(event) => { const commune = communes.find((item) => String(item.id) === event.target.value); updateDraft({ communeId: event.target.value, communeName: commune?.name || '' }) }} className="sm:col-span-2"><option value="">Choisir une commune</option>{communes.map((commune) => <option key={commune.id} value={commune.id}>{commune.name}{commune.provinceName ? ` — ${commune.provinceName}` : ''}</option>)}</Select>}
+                      <Input label="Numéro mobile (facultatif)" prefix="+687" value={draft.phone} onChange={(event) => updateDraft({ phone: event.target.value.replace(/\D/g, '').slice(0, 6) })} inputMode="numeric" autoComplete="tel-national" placeholder="XX XX XX" error={draft.phone && !phoneValid ? 'Saisissez les 6 chiffres du numéro ou laissez le champ vide.' : undefined} hint="Recommandé : si vous le renseignez, un code de vérification sera envoyé par SMS." className="sm:col-span-2" />
                       {draft.accountType === 'pro' ? <><Input label="Raison sociale" value={draft.companyName} onChange={(event) => updateDraft({ companyName: event.target.value })} className="sm:col-span-2" /><Input label="Numéro RIDET" value={draft.ridet} onChange={(event) => updateDraft({ ridet: event.target.value })} inputMode="numeric" hint={ridetDigits.length === 10 ? 'Format valide. Validation administrative en attente.' : 'Saisissez les 10 chiffres du RIDET.'} /><Select label="Secteur" value={draft.sector} onChange={(event) => updateDraft({ sector: event.target.value })}><option value="">Choisir un secteur</option>{registrationSectors.map((sector) => <option key={sector}>{sector}</option>)}</Select></> : null}
                     </div>
                   </section>
@@ -402,9 +406,7 @@ export default function RegistrationFlow() {
                 {draft.step === 'verify' ? (
                   <section>
                     <p className="text-eyebrow text-accent-text">Vérification</p>
-                    <h1 className="mt-3 font-display text-h1 text-ink">Confirmez votre numéro</h1>
-                    <p className="mt-3 text-body text-ink/65">Votre compte a été créé et l’e-mail de confirmation a été envoyé.</p>
-                    <PhoneVerification initialPhone={`+687${phoneDigits}`} variant="inline" className="mt-7" onVerified={() => updateDraft({ phoneVerified: true, step: draft.accountType === 'pro' ? 'plan' : 'done' })} />
+                    {hasPhone ? <><h1 className="mt-3 font-display text-h1 text-ink">Confirmez votre numéro</h1><p className="mt-3 text-body text-ink/65">Votre compte a été créé. Recevez maintenant votre code de vérification par SMS.</p><PhoneVerification initialPhone={`+687${phoneDigits}`} variant="inline" className="mt-7" onVerified={() => updateDraft({ phoneVerified: true, step: draft.accountType === 'pro' ? 'plan' : 'done' })} /></> : <><h1 className="mt-3 font-display text-h1 text-ink">Confirmez votre adresse e-mail</h1><div className="mt-7 rounded-card border border-warm-border bg-cream-surface p-5 shadow-card sm:p-6"><span className="flex h-11 w-11 items-center justify-center rounded-control bg-lagoon/20 text-reef-text"><ShieldCheck className="h-5 w-5" /></span><h2 className="mt-4 font-display text-xl text-ink">E-mail de confirmation envoyé</h2><p className="mt-2 text-body-sm text-ink/65">Ouvrez le lien envoyé à <strong className="text-ink">{verificationEmail}</strong>. Pensez à vérifier vos courriers indésirables.</p><Button className="mt-5 w-full" onClick={() => goTo(draft.accountType === 'pro' ? 'plan' : 'done')}>Continuer</Button></div></>}
                   </section>
                 ) : null}
 
@@ -422,8 +424,8 @@ export default function RegistrationFlow() {
                     <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-card bg-reef/15 text-reef-text"><CheckCircle2 className="h-8 w-8" /></span>
                     <p className="mt-6 text-eyebrow text-accent-text">Compte créé</p>
                     <h1 className="mt-3 font-display text-h1 text-ink">Bienvenue sur Kalico, {draft.firstName || 'vous'}.</h1>
-                    <p className="mx-auto mt-3 max-w-xl text-body text-ink/65">Votre téléphone est vérifié. Consultez votre e-mail pour confirmer votre adresse{draft.accountType === 'pro' ? '; votre RIDET reste en attente de validation' : ''}.</p>
-                    <div className="mt-7 flex flex-wrap justify-center gap-2"><span className="rounded-full border border-reef/30 bg-reef/10 px-3 py-1 text-meta font-semibold text-reef-text">E-mail envoyé</span><span className="rounded-full border border-reef/30 bg-reef/10 px-3 py-1 text-meta font-semibold text-reef-text">Téléphone vérifié</span>{draft.accountType === 'pro' ? <span className="rounded-full border border-accent/35 bg-accent-soft px-3 py-1 text-meta font-semibold text-accent-text">RIDET en attente</span> : null}</div>
+                    <p className="mx-auto mt-3 max-w-xl text-body text-ink/65">{hasPhone ? 'Votre téléphone est vérifié. ' : ''}Consultez votre e-mail pour confirmer votre adresse{draft.accountType === 'pro' ? '; votre RIDET reste en attente de validation' : ''}.</p>
+                    <div className="mt-7 flex flex-wrap justify-center gap-2"><span className="rounded-full border border-reef/30 bg-reef/10 px-3 py-1 text-meta font-semibold text-reef-text">E-mail envoyé</span>{hasPhone && draft.phoneVerified ? <span className="rounded-full border border-reef/30 bg-reef/10 px-3 py-1 text-meta font-semibold text-reef-text">Téléphone vérifié</span> : null}{draft.accountType === 'pro' ? <span className="rounded-full border border-accent/35 bg-accent-soft px-3 py-1 text-meta font-semibold text-accent-text">RIDET en attente</span> : null}</div>
                     <div className="mt-8 grid gap-4 text-left sm:grid-cols-3">{(draft.accountType === 'pro' ? [{ title: 'Compléter ma vitrine', href: '/pro/dashboard/parametres' }, { title: 'Publier une annonce', href: '/deposer' }, { title: 'Voir les offres', href: `/abonnement?plan=${draft.selectedPlan}` }] : [{ title: 'Publier une annonce', href: '/deposer' }, { title: 'Créer une alerte', href: '/annonces' }, { title: 'Compléter mon profil', href: '/profil' }]).map((action, index) => <Link key={action.title} href={action.href} className="rounded-card border border-warm-border bg-cream-surface p-5 text-body-sm font-semibold text-ink shadow-card transition hover:border-ink/35"><span className="mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-cream-sunken text-meta text-ink">{index + 1}</span>{action.title}<ArrowRight className="mt-4 h-4 w-4 text-accent-text" /></Link>)}</div>
                     <Button variant="ghost" className="mt-6" onClick={resetFlow}>Recommencer le parcours</Button>
                   </section>
