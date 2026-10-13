@@ -1788,7 +1788,7 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 
 ## Correctif inscription — commune et téléphone facultatif (13 octobre 2026)
 
-- L’API `/api/communes` renvoie les 33 communes groupées sous les trois provinces. La couche de données d’inscription traitait à tort chaque province comme une commune. Elle a été corrigée pour aplatir les communes et conserver leur province dans le libellé.
+- L’API `/api/communes` renvoie les communes groupées sous les trois provinces. La couche de données d’inscription traitait à tort chaque province comme une commune. Elle a été corrigée pour aplatir les communes et conserver leur province dans le libellé.
 - Le mobile `+687` n’est plus requis par l’interface, conformément au contrat serveur qui l’acceptait déjà comme facultatif. Un numéro partiellement saisi reste refusé ; un numéro complet déclenche le parcours de vérification SMS.
 - Sans mobile, le parcours présente la confirmation par e-mail déjà envoyée par `POST /api/auth/register`. Avec mobile, il conserve la saisie du code SMS et n’affiche le badge « Téléphone vérifié » qu’après validation.
 - L’implémentation SMS existe via Twilio Verify et exige `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` et `TWILIO_VERIFY_SID`. L’audit de déploiement disponible indique que ces variables n’étaient pas renseignées lors du dernier contrôle ; aucune configuration ni aucun secret de production n’a été modifié dans ce lot.
@@ -1800,3 +1800,15 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - Build : `NODE_OPTIONS=--use-system-ca npm run build`, passé ; `/inscription` est générée statiquement.
 - Design system : `node scripts/check-design.mjs --changed`, 3 fichiers contrôlés, 0 erreur, 0 avertissement avant mise à jour de ce suivi.
 - Revue visuelle automatisée non exécutée : le contrôleur du navigateur intégré n’était pas disponible dans cette session.
+
+## Correctif inscription — contraste de la liste des communes (13 octobre 2026)
+
+- Le sélecteur et chacune de ses options déclarent désormais explicitement le fond `cream-surface` et le texte `ink`, afin que le menu natif conserve un contraste lisible lorsqu’il est ouvert.
+- Le changement reste limité au choix de la commune dans le parcours d’inscription ; les autres champs et sélecteurs ne sont pas modifiés.
+
+### Validation
+
+- TypeScript : `npx tsc --noEmit --incremental false`, passé.
+- Lint obligatoire : `npm run lint`, passé selon le périmètre ESLint actuel du dépôt.
+- Build : `NODE_OPTIONS=--use-system-ca npm run build`, passé ; `/inscription` est générée statiquement.
+- Design system : `node scripts/check-design.mjs --changed`, 1 fichier contrôlé, 0 erreur, 0 avertissement.
