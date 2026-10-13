@@ -750,38 +750,37 @@ header nav button {
   color: var(--coral) !important;
 }
 
+.legal-content {
+  @apply text-ink;
+}
+
+.legal-content p,
+.legal-content li {
+  @apply text-ink/70;
+}
+
 .legal-content h2 {
-  @apply mt-10 mb-4 text-2xl font-bold;
-  color: var(--color-text-primary);
+  @apply mb-4 mt-10 text-2xl font-bold text-ink;
 }
 
 .legal-content h3 {
-  @apply mt-6 mb-3 text-xl font-semibold;
-  color: var(--color-text-primary);
+  @apply mb-3 mt-6 text-xl font-semibold text-ink;
 }
 
 .legal-content table {
-  @apply w-full border-collapse overflow-hidden rounded-2xl border text-sm;
-  border-color: var(--color-border);
+  @apply w-full border-collapse overflow-hidden rounded-card border border-warm-border bg-cream-surface text-body-sm;
 }
 
 .legal-content thead tr {
-  background: rgba(244, 248, 247, 0.8);
-}
-
-.dark .legal-content thead tr {
-  background: rgba(255, 255, 255, 0.04);
+  @apply bg-cream-sunken;
 }
 
 .legal-content th {
-  @apply px-4 py-3 text-left font-semibold;
-  color: var(--color-text-primary);
+  @apply px-4 py-3 text-left font-semibold text-ink;
 }
 
 .legal-content td {
-  @apply border-t px-4 py-3 align-top;
-  border-color: var(--color-border);
-  color: var(--color-text-secondary);
+  @apply border-t border-warm-border px-4 py-3 align-top text-ink/70;
 }
 
 .legal-content ul,
@@ -790,7 +789,7 @@ header nav button {
 }
 
 .legal-content a {
-  color: #c96a1a;
+  @apply text-accent-text;
   text-decoration: underline;
   text-underline-offset: 2px;
 }

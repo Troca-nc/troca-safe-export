@@ -1812,3 +1812,16 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - Lint obligatoire : `npm run lint`, passé selon le périmètre ESLint actuel du dépôt.
 - Build : `NODE_OPTIONS=--use-system-ca npm run build`, passé ; `/inscription` est générée statiquement.
 - Design system : `node scripts/check-design.mjs --changed`, 1 fichier contrôlé, 0 erreur, 0 avertissement.
+
+## Correctif pages légales — contraste des encadrés clairs (13 octobre 2026)
+
+- Le layout partagé des CGU, CGV, mentions légales, politique de confidentialité et politique cookies n'inverse plus la typographie en blanc lorsque ses surfaces restent claires.
+- Navigation, bloc de contact et tableaux utilisent désormais les jetons v2 `cream-surface`, `cream-sunken`, `warm-border`, `ink` et `accent-text` pour garantir un contraste stable dans les thèmes clair et sombre.
+- Le contenu juridique n'est pas modifié dans ce lot ; sa révision métier et juridique reste à planifier séparément.
+
+### Validation
+
+- TypeScript : `npx tsc --noEmit --incremental false`, passé.
+- Lint obligatoire : `npm run lint`, passé selon le périmètre ESLint actuel du dépôt.
+- Build : `NODE_OPTIONS=--use-system-ca npm run build`, passé ; les cinq pages légales sont générées statiquement.
+- Design system : `node scripts/check-design.mjs --changed`, 2 fichiers contrôlés, 0 erreur, 0 avertissement.
