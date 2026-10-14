@@ -1839,3 +1839,18 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - Build : `node --use-system-ca node_modules/next/dist/bin/next build`, passé avec 112 routes, dont `/parametres`.
 - Design system : `node scripts/check-design.mjs --changed`, 1 fichier contrôlé, 0 erreur, 0 avertissement avant mise à jour de ce suivi.
 - Revue visuelle automatisée non exécutée : le contrôleur du navigateur intégré n’était pas exposé dans cette session.
+
+## Correctif Paramètres — survol sombre et encodage (14 octobre 2026)
+
+- La navigation rapide de `/parametres` utilisait `hover:bg-sand`, ce qui réintroduisait un fond clair sous une typographie claire en thème sombre. Le survol utilise désormais `--color-background-secondary`, adapté au thème actif.
+- Tous les textes corrompus de la page ont été restaurés depuis leur version Git saine : offre Pro, erreur newsletter, états de facture, symbole euro, liste d’export RGPD, confirmation d’export et avertissements de suppression du compte.
+- Les commentaires internes mojibakés de ce fichier ont également été nettoyés. Aucun changement de route, d’API, de donnée ou de comportement RGPD.
+
+### Validation
+
+- Recherche ciblée des motifs `?` de remplacement et des marqueurs de mojibake : aucun texte suspect restant dans `src/app/parametres/page.tsx`.
+- Garde-fou d’encodage : la page Paramètres fait partie des 132 fichiers protégés et passe le contrôle ; les dettes historiques signalées hors périmètre restent non bloquantes.
+- Lint obligatoire : `npm run lint`, passé.
+- TypeScript : `npx tsc --noEmit --incremental false`, passé.
+- Build : `node --use-system-ca node_modules/next/dist/bin/next build`, passé avec 112 routes, dont `/parametres`, après une première tentative interrompue par le chargeur réseau des polices Google.
+- Design system : `node scripts/check-design.mjs --changed`, 1 fichier contrôlé, 0 erreur, 0 avertissement avant mise à jour de ce suivi.

@@ -38,7 +38,7 @@ async function downloadRgpdExport() {
   URL.revokeObjectURL(url)
 }
 
-// â”€â”€ Section générique â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Section générique
 
 function Section({ icon: Icon, title, children, id }: {
   icon: React.ElementType; title: string; children: React.ReactNode; id?: string
@@ -56,7 +56,7 @@ function Section({ icon: Icon, title, children, id }: {
   )
 }
 
-// â”€â”€ Export données (Art. 20) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Export données (Art. 20)
 
 // Section Abonnement
 
@@ -102,7 +102,7 @@ function AbonnementSection() {
           <p className="text-night/60 text-sm mb-4">Vous n\'avez pas encore d\'abonnement Pro.</p>
           <Link href="/pro" className="btn-primary inline-flex items-center gap-2 py-2 px-6 text-sm">
             <BadgeCheck className="w-4 h-4" />
-            D?couvrir les offres Pro
+            Découvrir les offres Pro
           </Link>
         </div>
       ) : (
@@ -213,7 +213,7 @@ function NewsletterSection() {
       })
       setEnabled((value) => !value)
     } catch {
-      setError('Impossible de mettre ? jour vos pr?f?rences.')
+      setError('Impossible de mettre à jour vos préférences.')
     } finally {
       setSaving(false)
     }
@@ -271,9 +271,9 @@ function FacturesSection() {
   if (!invoices.length) return null
 
   const labelFor = (inv: any) => {
-    if (inv.document_type === 'refund' || inv.status === 'refunded') return 'Rembours?e'
-    if (inv.status === 'succeeded' || inv.status === 'paid') return 'Pay?e'
-    return '?chou?e'
+    if (inv.document_type === 'refund' || inv.status === 'refunded') return 'Remboursée'
+    if (inv.status === 'succeeded' || inv.status === 'paid') return 'Payée'
+    return 'Échouée'
   }
 
   return (
@@ -287,7 +287,7 @@ function FacturesSection() {
               </p>
               <p className="text-xs text-night/50">
                 {inv.amount_xpf != null ? `${Number(inv.amount_xpf).toLocaleString('fr-FR')} XPF` : 'Montant indisponible'}
-                {inv.amount_eur ? ` · ${inv.amount_eur} â‚¬` : ''}
+                {inv.amount_eur ? ` · ${inv.amount_eur} €` : ''}
                 {inv.provider ? ` · ${inv.provider}` : ''}
               </p>
             </div>
@@ -410,11 +410,11 @@ function ExportSection() {
         Téléchargez une copie complète de toutes vos données : profil, annonces, messages, favoris et historique de paiements. Le fichier ZIP est généré immédiatement.
       </p>
       <div className="bg-sand rounded-xl p-3 mb-4 text-xs text-night/50 space-y-1">
-        <p>ðŸ“‹ Profil et informations personnelles</p>
-        <p>ðŸ“¦ Toutes vos annonces (actives et archivées)</p>
-        <p>ðŸ’¬ Vos conversations et messages</p>
-        <p>ðŸ¤ Vos annonces sauvegardées</p>
-        <p>ðŸ’³ Historique des paiements</p>
+        <p>📋 Profil et informations personnelles</p>
+        <p>📦 Toutes vos annonces (actives et archivées)</p>
+        <p>💬 Vos conversations et messages</p>
+        <p>🤍 Vos annonces sauvegardées</p>
+        <p>💳 Historique des paiements</p>
       </div>
       <button
         onClick={handleExport}
@@ -436,7 +436,7 @@ function ExportSection() {
       ) : null}
       {done ? (
         <p className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
-          Export lance. Verifiez le telechargement de votre navigateur.
+          Export lancé. Vérifiez le téléchargement de votre navigateur.
         </p>
       ) : null}
     </Section>
@@ -497,22 +497,22 @@ function SuppressionSection() {
               <p className="font-semibold">Cette action est irréversible.</p>
               <p>• Vos annonces seront dépubliées immédiatement</p>
               <p>• Vos données personnelles seront anonymisées sous 30 jours</p>
-              <p>? Vous perdrez l'acc?s ? votre compte et vos messages</p>
-              {user?.is_pro && <p className="font-medium">? Votre abonnement Pro sera r?sili?</p>}
+              <p>• Vous perdrez l'accès à votre compte et vos messages</p>
+              {user?.is_pro && <p className="font-medium">• Votre abonnement Pro sera résilié</p>}
             </div>
           </div>
 
-          {/* ?tape 1 : info */}
+          {/* Étape 1 : info */}
           {step === 1 && (
             <div className="space-y-3">
               <p className="text-xs text-night/50">
-                Avant de supprimer votre compte, pensez ?{' '}
+                Avant de supprimer votre compte, pensez à{' '}
                 <button
                   type="button"
                   onClick={() => { void downloadRgpdExport().catch(() => {}) }}
                   className="text-kalico-blue underline"
                 >
-                  t?l?charger vos donn?es
+                  télécharger vos données
                 </button>.
               </p>
               <div className="flex gap-2">
@@ -529,7 +529,7 @@ function SuppressionSection() {
             </div>
           )}
 
-          {/* ?tape 2 : confirmation */}
+          {/* Étape 2 : confirmation */}
           {step === 2 && (
             <div className="space-y-3">
               <div>
@@ -619,7 +619,7 @@ export default function ParametresPage() {
               <Link
                 key={label}
                 href={href}
-                className="flex items-center justify-between px-5 py-3.5 hover:bg-sand transition-colors"
+                className="flex items-center justify-between px-5 py-3.5 hover:bg-[var(--color-background-secondary)] transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <Icon className="w-4 h-4 text-night/50" />
