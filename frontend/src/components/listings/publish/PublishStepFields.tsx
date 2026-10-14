@@ -44,13 +44,13 @@ export default function PublishStepFields({ stepId, draft, metadata, photos, mis
         <label className="flex min-h-[180px] cursor-pointer flex-col items-center justify-center gap-3 rounded-card border-2 border-dashed border-sand bg-cream-sunken p-6 text-center transition hover:border-ink/30">
           <ImagePlus className="h-7 w-7 text-accent-text" aria-hidden="true" />
           <span className="text-label font-semibold text-ink">Ajouter des photos</span>
-          <span className="max-w-[480px] text-meta text-ink/65">JPEG, PNG, WebP ou HEIC. La première image devient la couverture.</span>
+          <span className="rounded-full bg-accent-soft px-3 py-1 text-caption font-semibold text-accent-text">Recommandé, mais facultatif</span>
+          <span className="max-w-[480px] text-meta text-ink/65">JPEG, PNG, WebP ou HEIC. Si vous ajoutez plusieurs images, la première devient la couverture.</span>
           <input className="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/heic" multiple onChange={(event) => {
             if (event.target.files?.length) onAddPhotos(event.target.files)
             event.target.value = ''
           }} />
         </label>
-        {errorFor(missing, 'photos') ? <p role="alert" className="text-meta text-alert-error">{errorFor(missing, 'photos')}</p> : null}
         {photos.length ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {photos.map((photo, index) => (

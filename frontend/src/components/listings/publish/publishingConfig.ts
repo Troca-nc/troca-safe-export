@@ -29,15 +29,15 @@ const PUBLICATION: PublishingStep = {
 
 export const PUBLISHING_STEPS: Record<PublishingKind, PublishingStep[]> = {
   sale: [
-    { id: 'photos', label: 'Photos', title: 'Ajoutez vos photos', description: 'La première photo sert de couverture dans les résultats.' },
     { id: 'details', label: 'Description', title: 'Décrivez votre objet', description: 'Un titre précis et une description honnête facilitent les échanges.' },
+    { id: 'photos', label: 'Photos', title: 'Ajoutez des photos (recommandé)', description: 'Cette étape est facultative, mais de bonnes photos rendent l’annonce plus claire et plus rassurante.' },
     { id: 'price', label: 'Prix', title: 'Fixez votre prix', description: 'Le montant est affiché en francs pacifiques.' },
     { id: 'location', label: 'Lieu', title: 'Où se fait la remise ?', description: 'La commune apparaît sur l’annonce, jamais votre adresse exacte.' },
     PUBLICATION,
   ],
   troc: [
-    { id: 'photos', label: 'Photos', title: 'Ajoutez vos photos', description: 'Montrez clairement l’état réel de l’objet proposé.' },
     { id: 'details', label: 'Description', title: 'Décrivez votre objet', description: 'Ces informations permettent aux autres membres de comparer.' },
+    { id: 'photos', label: 'Photos', title: 'Ajoutez des photos (recommandé)', description: 'Cette étape est facultative, mais des images facilitent l’évaluation de l’objet proposé.' },
     { id: 'exchange', label: 'Échange', title: 'Qu’aimeriez-vous en échange ?', description: 'La valeur et les catégories recherchées alimentent le trocomètre.' },
     { id: 'location', label: 'Lieu', title: 'Où se fait l’échange ?', description: 'La commune est publique, le quartier reste facultatif.' },
     PUBLICATION,

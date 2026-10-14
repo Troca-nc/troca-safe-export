@@ -4,10 +4,10 @@ export type MissingField = { key: keyof PublishingDraft | 'photos'; label: strin
 
 const required = (condition: boolean, key: MissingField['key'], label: string): MissingField[] => condition ? [{ key, label }] : []
 
-export function validatePublishingStep(draft: PublishingDraft, stepId: string, photoCount: number): MissingField[] {
+export function validatePublishingStep(draft: PublishingDraft, stepId: string, _photoCount: number): MissingField[] {
   switch (stepId) {
     case 'photos':
-      return required(photoCount < 1, 'photos', 'Ajoutez au moins une photo')
+      return []
     case 'details':
       return [
         ...required(!draft.title.trim(), 'title', 'Titre'),

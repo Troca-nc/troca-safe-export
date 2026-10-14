@@ -27,22 +27,19 @@ async function dismissAuthModal(page: Page) {
   }
 }
 
-async function publishSale(page: Page, title: string, suffix: string) {
+async function publishSale(page: Page, title: string) {
   await page.goto('/deposer?type=sale')
   await dismissAuthModal(page)
-
-  await expect(page.getByRole('heading', { name: /Ajoutez vos photos/i })).toBeVisible()
-  await page.locator('input[type="file"]').setInputFiles({
-    name: `qa-${suffix}.png`,
-    mimeType: 'image/png',
-    buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64'),
-  })
-  await page.getByRole('button', { name: /Continuer/i }).click()
 
   await expect(page.getByRole('heading', { name: /Décrivez votre objet/i })).toBeVisible()
   await page.getByLabel(/^Titre$/i).fill(title)
   await page.getByLabel(/Catégorie/i).selectOption({ index: 1 })
   await page.getByLabel(/Description/i).fill('Annonce QA éphémère créée pour valider le parcours métier complet.')
+  await page.getByRole('button', { name: /Continuer/i }).click()
+
+  await expect(page.getByRole('heading', { name: /Ajoutez des photos.*recommandé/i })).toBeVisible()
+  await expect(page.getByText(/Recommandé, mais facultatif/i)).toBeVisible()
+  await expect(page.locator('input[type="file"]')).toHaveValue('')
   await page.getByRole('button', { name: /Continuer/i }).click()
 
   await expect(page.getByRole('heading', { name: /Fixez votre prix/i })).toBeVisible()
@@ -117,7 +114,7 @@ test('inscription, publication, recherche et premier contact restent opérationn
   await page.goto('/')
   await dismissOnboardingWizard(page)
 
-  await publishSale(page, title, suffix)
+  await publishSale(page, title)
 
   const buyerContext = await browser.newContext()
   const buyerPage = await buyerContext.newPage()
