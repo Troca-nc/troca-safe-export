@@ -105,7 +105,7 @@ export default function AnnoncesMap({ listings, onBoundsChange }: Props) {
           justify-content: center; font-size: 14px; font-weight: bold;
           transform: rotate(-45deg); border: 2px solid white;
           box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
-          <span style="transform: rotate(45deg)">ð­</span>
+          <span style="transform: rotate(45deg)">🎭</span>
         </div>`,
         iconSize:   [32, 32],
         iconAnchor: [16, 32],

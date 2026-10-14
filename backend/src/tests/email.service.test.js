@@ -44,6 +44,15 @@ describe('emailService — sendMail', () => {
     assert.strictEqual(sentEmails[0].subject, 'Test');
     assert.ok(sentEmails[0].from.includes('Kalico'));
   });
+
+  it('refuse un email contenant du mojibake avant l’envoi SMTP', async () => {
+    sentEmails.length = 0;
+    await assert.rejects(
+      sendMail({ to: 'dest@test.nc', subject: 'Compte crÃ©Ã©', html: '<p>Texte</p>' }),
+      (error) => error.code === 'EMAIL_ENCODING_INVALID'
+    );
+    assert.strictEqual(sentEmails.length, 0);
+  });
 });
 
 describe('emailService — sendResetEmail', () => {
@@ -63,8 +72,14 @@ describe('emailService — sendWelcomeEmail', () => {
     sentEmails.length = 0;
     await sendWelcomeEmail('jean@test.nc', 'Jean');
     assert.strictEqual(sentEmails.length, 1);
-    assert.ok(sentEmails[0].subject.includes('Jean'));
-    assert.ok(sentEmails[0].html.includes('Jean'));
+    assert.strictEqual(sentEmails[0].subject, 'Bienvenue sur Kalico, Jean ! 🎉');
+    assert.ok(sentEmails[0].html.includes('Bonjour Jean'));
+    assert.ok(sentEmails[0].html.includes('Votre compte Kalico est créé'));
+    assert.ok(sentEmails[0].html.includes('Vous pouvez dès maintenant'));
+    assert.ok(sentEmails[0].html.includes('Nouvelle-Calédonie'));
+    assert.ok(sentEmails[0].html.includes('Publier ma première annonce'));
+    assert.ok(sentEmails[0].html.includes('répondez simplement à cet email'));
+    assert.ok(sentEmails[0].html.includes('<meta charset="UTF-8">'));
   });
 });
 

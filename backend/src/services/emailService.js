@@ -1,7 +1,7 @@
 'use strict';
 
 // ============================================================
-//  Kalico â€” Service Email (nodemailer)
+//  Kalico — Service Email (nodemailer)
 //  Centralise tous les envois transactionnels du backend
 // ============================================================
 
@@ -11,7 +11,17 @@ const { ensureNotificationPreferences, issueNotificationUnsubscribeToken } = req
 const { generateQrCode } = require('./qrCodeService');
 const { logger } = require('../utils/logger');
 
-// â”€â”€ Transporter SMTP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const MOJIBAKE_PATTERN = /(?:\u00c3[\u0080-\u00bf]|\u00c2[\u0080-\u00bf]|\u00e2(?:\u20ac|\u2020|\u0153|\u008f|\u201d|\u0161|\u009d|\u02dc)|\u00f0\u0178|\u00ef\u00bf\u00bd|\uFFFD|[\u0080-\u009f])/u;
+
+function assertValidMailEncoding({ subject = '', html = '', text = '' }) {
+  if ([subject, html, text].some((value) => MOJIBAKE_PATTERN.test(String(value)))) {
+    const error = new Error('Email content contains invalid text encoding');
+    error.code = 'EMAIL_ENCODING_INVALID';
+    throw error;
+  }
+}
+
+// ── Transporter SMTP ─────────────────────────────────────────
 
 let _transporter = null;
 
@@ -21,7 +31,7 @@ function getTransporter() {
   const nodemailer = require('nodemailer');
 
   if (!isConfiguredValue(process.env.SMTP_HOST) || !isConfiguredValue(process.env.SMTP_USER) || !isConfiguredValue(process.env.SMTP_PASS)) {
-    console.warn('[email] Variables SMTP manquantes â€” emails dÃ©sactivÃ©s');
+    console.warn('[email] Variables SMTP manquantes — emails désactivés');
     return null;
   }
 
@@ -38,9 +48,11 @@ function getTransporter() {
   return _transporter;
 }
 
-// â”€â”€ Envoi gÃ©nÃ©rique â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Envoi générique ──────────────────────────────────────────
 
 async function sendMail({ to, subject, html, text, replyTo, cc, bcc }) {
+  assertValidMailEncoding({ subject, html, text });
+
   const transporter = getTransporter();
   if (!transporter) {
     logger.info(`[email] (simulé) → ${to} | ${subject}`);
@@ -59,7 +71,7 @@ async function sendMail({ to, subject, html, text, replyTo, cc, bcc }) {
   });
 }
 
-// â”€â”€ Templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Templates ────────────────────────────────────────────────
 
 const BASE_URL = () => process.env.BASE_URL || 'https://kalico.nc';
 async function notificationUnsubscribeUrl(userId, kind) {
@@ -77,15 +89,15 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-function buildNotificationFooter({ manageUrl, unsubscribeUrl, unsubscribeLabel = 'Se dÃ©sabonner' }) {
+function buildNotificationFooter({ manageUrl, unsubscribeUrl, unsubscribeLabel = 'Se désabonner' }) {
   const manageLink = manageUrl
-    ? `<a href="${manageUrl}" style="color:#9ca3af;">GÃ©rer mes notifications</a>`
+    ? `<a href="${manageUrl}" style="color:#9ca3af;">Gérer mes notifications</a>`
     : '';
   const unsubscribeLink = unsubscribeUrl
     ? `<a href="${unsubscribeUrl}" style="color:#9ca3af;">${escapeHtml(unsubscribeLabel)}</a>`
     : '';
 
-  const separator = manageLink && unsubscribeLink ? ' Â· ' : '';
+  const separator = manageLink && unsubscribeLink ? ' · ' : '';
   return `
     <p style="color:#9ca3af;font-size:12px;margin-top:24px;line-height:1.6;">
       ${manageLink}${separator}${unsubscribeLink}
@@ -96,15 +108,15 @@ function buildNotificationFooter({ manageUrl, unsubscribeUrl, unsubscribeLabel =
 function buildListingBoostEstimate(daysLeft = 3) {
   const safeDaysLeft = Number.isFinite(Number(daysLeft)) ? Number(daysLeft) : 3;
   if (safeDaysLeft <= 1) {
-    return 'Un boost peut aider Ã  relancer immÃ©diatement la visibilitÃ© de votre annonce.';
+    return 'Un boost peut aider à relancer immédiatement la visibilité de votre annonce.';
   }
   if (safeDaysLeft === 2 || safeDaysLeft === 3) {
-    return 'Un boost peut offrir jusquâ€™Ã  +45 % de visibilitÃ© estimÃ©e sur les premiers jours.';
+    return 'Un boost peut offrir jusqu’à +45 % de visibilité estimée sur les premiers jours.';
   }
   if (safeDaysLeft <= 5) {
-    return 'Un boost peut offrir jusquâ€™Ã  +35 % de visibilitÃ© estimÃ©e sur la pÃ©riode restante.';
+    return 'Un boost peut offrir jusqu’à +35 % de visibilité estimée sur la période restante.';
   }
-  return 'Un boost peut aider Ã  garder votre annonce plus visible au moment clÃ©.';
+  return 'Un boost peut aider à garder votre annonce plus visible au moment clé.';
 }
 
 function buildListingEmail({
@@ -118,7 +130,7 @@ function buildListingEmail({
   ctaUrl,
   footerManageUrl = `${BASE_URL()}/parametres/notifications`,
   unsubscribeUrl = null,
-  unsubscribeLabel = 'Se dÃ©sabonner',
+  unsubscribeLabel = 'Se désabonner',
   extraHtml = '',
 }) {
   const ctaHtml = ctaLabel && ctaUrl
@@ -167,11 +179,11 @@ function baseTemplate(content) {
 </head>
 <body>
   <div class="wrapper">
-    <div class="header"><h1>ðŸ” Kalico</h1></div>
+    <div class="header"><h1>🔁 Kalico</h1></div>
     <div class="body">${content}</div>
     <div class="footer">
-      Kalico â€” La plateforme de petites annonces de Nouvelle-CalÃ©donie<br>
-      <a href="${BASE_URL()}/politique-de-confidentialite">ConfidentialitÃ©</a> Â·
+      Kalico — La plateforme de petites annonces de Nouvelle-Calédonie<br>
+      <a href="${BASE_URL()}/politique-de-confidentialite">Confidentialité</a> ·
       <a href="${BASE_URL()}/cgu">CGU</a>
     </div>
   </div>
@@ -179,38 +191,38 @@ function baseTemplate(content) {
 </html>`;
 }
 
-// â”€â”€ Emails spÃ©cifiques â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Emails spécifiques ───────────────────────────────────────
 
 /**
- * Email de rÃ©initialisation de mot de passe
+ * Email de réinitialisation de mot de passe
  */
 async function sendResetEmail(to, token) {
   const link = `${BASE_URL()}/mot-de-passe-oublie/reset?token=${token}`;
   return sendMail({
     to,
-    subject: 'RÃ©initialisation de votre mot de passe Kalico',
+    subject: 'Réinitialisation de votre mot de passe Kalico',
     html: baseTemplate(`
       <p>Bonjour,</p>
-      <p>Vous avez demandÃ© Ã  rÃ©initialiser votre mot de passe. Cliquez sur le bouton ci-dessous â€” ce lien est valable <strong>1 heure</strong>.</p>
-      <a class="btn" href="${link}">RÃ©initialiser mon mot de passe</a>
-      <p>Si vous n'Ãªtes pas Ã  l'origine de cette demande, ignorez cet email. Votre mot de passe restera inchangÃ©.</p>
+      <p>Vous avez demandé à réinitialiser votre mot de passe. Cliquez sur le bouton ci-dessous — ce lien est valable <strong>1 heure</strong>.</p>
+      <a class="btn" href="${link}">Réinitialiser mon mot de passe</a>
+      <p>Si vous n'êtes pas à l'origine de cette demande, ignorez cet email. Votre mot de passe restera inchangé.</p>
       <p style="color:#6b7280;font-size:13px;">Lien : <a href="${link}">${link}</a></p>
     `),
   });
 }
 
 /**
- * Email de bienvenue aprÃ¨s inscription
+ * Email de bienvenue après inscription
  */
 async function sendWelcomeEmail(to, prenom) {
   return sendMail({
     to,
-    subject: `Bienvenue sur Kalico, ${prenom} ! ðŸŽ‰`,
+    subject: `Bienvenue sur Kalico, ${prenom} ! 🎉`,
     html: baseTemplate(`
       <p>Bonjour ${prenom},</p>
-      <p>Votre compte Kalico est crÃ©Ã© ! Vous pouvez dÃ¨s maintenant publier des annonces, contacter des vendeurs et troquer sur toute la Nouvelle-CalÃ©donie.</p>
-      <a class="btn" href="${BASE_URL()}/annonces/nouvelle">Publier ma premiÃ¨re annonce</a>
-      <p>Des questions ? Consultez notre <a href="${BASE_URL()}/cgu">guide d'utilisation</a> ou rÃ©pondez simplement Ã  cet email.</p>
+      <p>Votre compte Kalico est créé ! Vous pouvez dès maintenant publier des annonces, contacter des vendeurs et troquer sur toute la Nouvelle-Calédonie.</p>
+      <a class="btn" href="${BASE_URL()}/annonces/nouvelle">Publier ma première annonce</a>
+      <p>Des questions ? Consultez notre <a href="${BASE_URL()}/cgu">guide d'utilisation</a> ou répondez simplement à cet email.</p>
     `),
   });
 }
@@ -245,7 +257,7 @@ async function sendAlertEmail(to, prenom, alert, annonces) {
   const annonceCards = annonces.slice(0, 5).map((a) => `
     <div style="border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px;margin-bottom:12px;">
       <a href="${BASE_URL()}/annonces/${a.id}" style="font-weight:600;color:#2563eb;text-decoration:none;font-size:15px;">${a.titre}</a>
-      <p style="margin:6px 0 0;color:#374151;">${a.prix_xpf ? `${a.prix_xpf.toLocaleString('fr-NC')} XPF` : 'Prix Ã  dÃ©battre'} Â· ${a.commune || ''}</p>
+      <p style="margin:6px 0 0;color:#374151;">${a.prix_xpf ? `${a.prix_xpf.toLocaleString('fr-NC')} XPF` : 'Prix à débattre'} · ${a.commune || ''}</p>
     </div>
   `).join('');
 
@@ -254,9 +266,9 @@ async function sendAlertEmail(to, prenom, alert, annonces) {
     subject: `${annonces.length} nouvelle${annonces.length > 1 ? 's' : ''} annonce${annonces.length > 1 ? 's' : ''} pour "${alert.label}"`,
     html: baseTemplate(`
       <p>Bonjour ${prenom},</p>
-      <p>De nouvelles annonces correspondent Ã  votre alerte <strong>"${alert.label}"</strong> :</p>
+      <p>De nouvelles annonces correspondent à votre alerte <strong>"${alert.label}"</strong> :</p>
       ${annonceCards}
-      ${annonces.length > 5 ? `<p><a href="${BASE_URL()}/annonces?q=${encodeURIComponent(alert.label)}">Voir toutes les annonces â†’</a></p>` : ''}
+      ${annonces.length > 5 ? `<p><a href="${BASE_URL()}/annonces?q=${encodeURIComponent(alert.label)}">Voir toutes les annonces →</a></p>` : ''}
       ${buildNotificationFooter({
         manageUrl: `${BASE_URL()}/parametres/notifications`,
         unsubscribeUrl: unsubLink,
@@ -276,10 +288,10 @@ async function sendNewMessageEmail(to, prenom, senderName, annonceTitle, convId,
   const unsubLink = recipientUserId ? await notificationUnsubscribeUrl(recipientUserId, 'new_message') : null;
   return sendMail({
     to,
-    subject: `${escapeHtml(senderName)} vous a envoyÃ© un message sur Kalico`,
+    subject: `${escapeHtml(senderName)} vous a envoyé un message sur Kalico`,
     html: baseTemplate(`
       <p>Bonjour ${prenom},</p>
-      <p><strong>${escapeHtml(senderName)}</strong> vous a envoyÃ© un message concernant l'annonce <strong>"${escapeHtml(annonceTitle)}"</strong>.</p>
+      <p><strong>${escapeHtml(senderName)}</strong> vous a envoyé un message concernant l'annonce <strong>"${escapeHtml(annonceTitle)}"</strong>.</p>
       <a class="btn" href="${link}">Lire le message</a>
       <p style="color:#6b7280;font-size:13px;">Vous recevez cet email car vous avez une conversation active sur Kalico.</p>
       ${buildNotificationFooter({
@@ -300,7 +312,7 @@ async function sendPerformanceReportEmail({ to, prenom, report, recipientUserId 
   const isPro = Boolean(report?.is_pro);
   const title = isPro
     ? 'Votre rapport business Kalico'
-    : 'Votre rapport dâ€™activitÃ© Kalico';
+    : 'Votre rapport d’activité Kalico';
   const sections = (report?.listings || []).slice(0, isPro ? 5 : 3).map((item) => `
     <tr>
       <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;">${escapeHtml(item.title || 'Annonce')}</td>
@@ -331,12 +343,12 @@ async function sendPerformanceReportEmail({ to, prenom, report, recipientUserId 
 
   return sendMail({
     to,
-    subject: isPro ? 'ðŸ“ˆ Votre rapport business Kalico' : 'ðŸ“Š Votre rapport Kalico',
+    subject: isPro ? '📈 Votre rapport business Kalico' : '📊 Votre rapport Kalico',
     html: baseTemplate(`
       <p>Bonjour ${escapeHtml(prenom)},</p>
       <p>${isPro
-        ? 'Voici le suivi de vos annonces pour cette pÃ©riode. Vous pouvez adapter la rÃ©currence dans votre dashboard.'
-        : 'Voici un aperÃ§u simple de la performance de vos annonces publiÃ©es sur Kalico.'}
+        ? 'Voici le suivi de vos annonces pour cette période. Vous pouvez adapter la récurrence dans votre dashboard.'
+        : 'Voici un aperçu simple de la performance de vos annonces publiées sur Kalico.'}
       </p>
       ${summaryCards}
       <div style="margin-top:22px;">
@@ -349,10 +361,10 @@ async function sendPerformanceReportEmail({ to, prenom, report, recipientUserId 
               <th style="text-align:right;padding:10px 12px;border-bottom:1px solid #e5e7eb;">Favoris</th>
             </tr>
           </thead>
-          <tbody>${sections || '<tr><td colspan="4" style="padding:16px 12px;color:#64748b;">Aucune annonce active sur cette pÃ©riode.</td></tr>'}</tbody>
+          <tbody>${sections || '<tr><td colspan="4" style="padding:16px 12px;color:#64748b;">Aucune annonce active sur cette période.</td></tr>'}</tbody>
         </table>
       </div>
-      <p style="color:#6b7280;font-size:13px;margin-top:18px;">PÃ©riode de suivi : ${escapeHtml(report?.period_label || 'derniers jours')}</p>
+      <p style="color:#6b7280;font-size:13px;margin-top:18px;">Période de suivi : ${escapeHtml(report?.period_label || 'derniers jours')}</p>
       ${buildNotificationFooter({
         manageUrl: `${BASE_URL()}/parametres/notifications`,
         unsubscribeUrl: unsubLink,
@@ -371,17 +383,17 @@ async function sendBoostActivatedEmail(to, prenom, details = {}, recipientUserId
 
   const payload = buildListingEmail({
     prenom,
-    subject: '[Kalico] Votre boost est activÃ©',
-    headline: 'Boost activÃ©',
+    subject: '[Kalico] Votre boost est activé',
+    headline: 'Boost activé',
     intro: `Votre boost <strong>${escapeHtml(details.boostLabel || 'Boost')}</strong> est maintenant actif sur Kalico.`,
     listingTitle: details.annonceTitle || 'Votre annonce',
-    listingMeta: 'Votre annonce gagne en visibilitÃ© et commence Ã  remonter dans les classements.',
-    ctaLabel: 'GÃ©rer mon annonce boostÃ©e',
+    listingMeta: 'Votre annonce gagne en visibilité et commence à remonter dans les classements.',
+    ctaLabel: 'Gérer mon annonce boostée',
     ctaUrl: details.annonceId ? `${BASE_URL()}/annonces/${details.annonceId}/edit` : `${BASE_URL()}/parametres/notifications`,
     unsubscribeUrl,
     unsubscribeLabel: 'Ne plus recevoir les emails de boost',
     extraHtml: boostDays
-      ? `<p style="margin:0;color:#374151;font-size:14px;">DurÃ©e active : <strong>${boostDays} jour${boostDays > 1 ? 's' : ''}</strong>.</p>`
+      ? `<p style="margin:0;color:#374151;font-size:14px;">Durée active : <strong>${boostDays} jour${boostDays > 1 ? 's' : ''}</strong>.</p>`
       : '',
   });
 
@@ -397,12 +409,12 @@ async function sendOfferReceivedEmail(to, prenom, details = {}, recipientUserId)
 
   const payload = buildListingEmail({
     prenom,
-    subject: `[Kalico] Nouvelle offre reÃ§ue pour "${details.annonceTitle || 'votre annonce'}"`,
-    headline: 'Offre de prix reÃ§ue',
-    intro: `<strong>${escapeHtml(details.buyerName || 'Un acheteur')}</strong> vous a envoyÃ© une offre sur la messagerie Kalico.`,
+    subject: `[Kalico] Nouvelle offre reçue pour "${details.annonceTitle || 'votre annonce'}"`,
+    headline: 'Offre de prix reçue',
+    intro: `<strong>${escapeHtml(details.buyerName || 'Un acheteur')}</strong> vous a envoyé une offre sur la messagerie Kalico.`,
     listingTitle: details.annonceTitle || 'Annonce',
     listingMeta: amountXpf
-      ? `Montant proposÃ© : <strong>${amountXpf.toLocaleString('fr-FR')} XPF</strong>`
+      ? `Montant proposé : <strong>${amountXpf.toLocaleString('fr-FR')} XPF</strong>`
       : 'Nouvelle offre disponible dans la conversation.',
     ctaLabel: 'Voir la conversation',
     ctaUrl: `${BASE_URL()}/messages/${details.convId}`,
@@ -429,27 +441,27 @@ async function sendListingExpiringEmail(to, prenom, details = {}, recipientUserI
   const payload = buildListingEmail({
     prenom,
     subject: `[Kalico] Votre annonce expire dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''}`,
-    headline: 'Annonce bientÃ´t expirÃ©e',
-    intro: `Votre annonce <strong>${escapeHtml(details.annonceTitle || 'Kalico')}</strong> arrive Ã  Ã©chÃ©ance dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''}.`,
+    headline: 'Annonce bientôt expirée',
+    intro: `Votre annonce <strong>${escapeHtml(details.annonceTitle || 'Kalico')}</strong> arrive à échéance dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''}.`,
     listingTitle: details.annonceTitle || 'Annonce',
     listingMeta: `Il vous reste environ <strong>${daysLeft} jour${daysLeft > 1 ? 's' : ''}</strong> avant l'expiration.`,
     unsubscribeUrl,
-    unsubscribeLabel: 'Ne plus recevoir les rappels dâ€™expiration',
+    unsubscribeLabel: 'Ne plus recevoir les rappels d’expiration',
     extraHtml: `
       <div style="margin:18px 0 22px;padding:16px 18px;border:1px solid #fde68a;border-radius:14px;background:#fffbeb;">
-        <p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#b45309;">Conseil visibilitÃ©</p>
+        <p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#b45309;">Conseil visibilité</p>
         <p style="margin:0;color:#92400e;font-size:14px;line-height:1.6;">${escapeHtml(buildListingBoostEstimate(daysLeft))}</p>
       </div>
       <div style="margin:0 0 18px;padding:14px 18px;border:1px solid #dbeafe;border-radius:14px;background:#eff6ff;">
-        <p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#0369a1;">Action conseillÃ©e</p>
-        <p style="margin:0;color:#0f172a;font-size:14px;line-height:1.6;">Renouvelez maintenant pour prolonger la publication, ou booster pour relancer la visibilitÃ© au moment oÃ¹ votre annonce commence Ã  ralentir.</p>
+        <p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#0369a1;">Action conseillée</p>
+        <p style="margin:0;color:#0f172a;font-size:14px;line-height:1.6;">Renouvelez maintenant pour prolonger la publication, ou booster pour relancer la visibilité au moment où votre annonce commence à ralentir.</p>
       </div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin:14px 0 22px;">
         <a href="${listingEditUrl}" style="display:inline-block;background:#111827;color:#fff !important;padding:12px 18px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">Renouveler</a>
         <a href="${boostUrl}" style="display:inline-block;background:#0a7ea4;color:#fff !important;padding:12px 18px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">Booster</a>
       </div>
-      <p style="margin:0 0 6px;color:#475569;font-size:14px;line-height:1.6;">Renouvelez pour prolonger la durÃ©e de votre publication et gardez-la visible auprÃ¨s des acheteurs actifs.</p>
-      <p style="margin:0;color:#475569;font-size:14px;line-height:1.6;">Le boost peut vous aider Ã  gagner en visibilitÃ© au moment oÃ¹ votre annonce commence Ã  ralentir.</p>
+      <p style="margin:0 0 6px;color:#475569;font-size:14px;line-height:1.6;">Renouvelez pour prolonger la durée de votre publication et gardez-la visible auprès des acheteurs actifs.</p>
+      <p style="margin:0;color:#475569;font-size:14px;line-height:1.6;">Le boost peut vous aider à gagner en visibilité au moment où votre annonce commence à ralentir.</p>
     `,
   });
 
@@ -464,15 +476,15 @@ async function sendListingExpiredEmail(to, prenom, details = {}, recipientUserId
 
   const payload = buildListingEmail({
     prenom,
-    subject: '[Kalico] Votre annonce est expirÃ©e',
-    headline: 'Annonce expirÃ©e',
-    intro: `Votre annonce <strong>${escapeHtml(details.annonceTitle || 'Kalico')}</strong> vient dâ€™arriver Ã  expiration.`,
+    subject: '[Kalico] Votre annonce est expirée',
+    headline: 'Annonce expirée',
+    intro: `Votre annonce <strong>${escapeHtml(details.annonceTitle || 'Kalico')}</strong> vient d’arriver à expiration.`,
     listingTitle: details.annonceTitle || 'Annonce',
-    listingMeta: 'Vous pouvez la republier ou la rÃ©activer depuis votre espace annonces.',
-    ctaLabel: 'RÃ©activer mon annonce',
+    listingMeta: 'Vous pouvez la republier ou la réactiver depuis votre espace annonces.',
+    ctaLabel: 'Réactiver mon annonce',
     ctaUrl: details.annonceId ? `${BASE_URL()}/annonces/${details.annonceId}/edit` : `${BASE_URL()}/parametres/notifications`,
     unsubscribeUrl,
-    unsubscribeLabel: 'Ne plus recevoir les emails dâ€™expiration',
+    unsubscribeLabel: 'Ne plus recevoir les emails d’expiration',
   });
 
   return sendMail({ to, subject: payload.subject, html: payload.html });
@@ -503,17 +515,17 @@ async function sendNewsletterEmail(to, prenom, newsletter = {}, recipientUserId 
 
   return sendMail({
     to,
-    subject: newsletter.subject || 'ðŸ“° La newsletter locale Kalico',
+    subject: newsletter.subject || '📰 La newsletter locale Kalico',
     html: baseTemplate(`
       <p>Bonjour ${escapeHtml(prenom)},</p>
-      <p>${escapeHtml(newsletter.intro || 'Voici une sÃ©lection locale de nouveautÃ©s publiÃ©es sur Kalico.')}</p>
-      ${items.length ? buildNewsletterItemsHtml(items) : '<p>Aucun contenu Ã  afficher pour le moment.</p>'}
-      ${summary.total ? `<p style="margin-top:18px;color:#475569;font-size:14px;">${escapeHtml(summary.total)} contenu${summary.total > 1 ? 's' : ''} sÃ©lectionnÃ©${summary.total > 1 ? 's' : ''} cette semaine.</p>` : ''}
+      <p>${escapeHtml(newsletter.intro || 'Voici une sélection locale de nouveautés publiées sur Kalico.')}</p>
+      ${items.length ? buildNewsletterItemsHtml(items) : '<p>Aucun contenu à afficher pour le moment.</p>'}
+      ${summary.total ? `<p style="margin-top:18px;color:#475569;font-size:14px;">${escapeHtml(summary.total)} contenu${summary.total > 1 ? 's' : ''} sélectionné${summary.total > 1 ? 's' : ''} cette semaine.</p>` : ''}
       <a class="btn" href="${newsletter.ctaUrl || `${BASE_URL()}/`}">${escapeHtml(newsletter.ctaLabel || 'Voir sur Kalico')}</a>
       ${buildNotificationFooter({
         manageUrl: `${BASE_URL()}/parametres/notifications`,
         unsubscribeUrl,
-        unsubscribeLabel: 'Se dÃ©sabonner de la newsletter',
+        unsubscribeLabel: 'Se désabonner de la newsletter',
       })}
     `),
   });
@@ -523,18 +535,18 @@ async function sendReviewInviteEmail(to, prenom, details = {}) {
   const link = details.reviewUrl || `${BASE_URL()}/avis/${details.token}`;
   return sendMail({
     to,
-    subject: details.subject || 'Votre avis vÃ©rifiÃ© sur Kalico',
+    subject: details.subject || 'Votre avis vérifié sur Kalico',
     html: baseTemplate(`
       <p>Bonjour ${escapeHtml(prenom)},</p>
-      <p>Merci pour votre Ã©change. Vous pouvez maintenant partager votre avis vÃ©rifiÃ© sur <strong>${escapeHtml(details.proName || 'ce professionnel')}</strong>.</p>
+      <p>Merci pour votre échange. Vous pouvez maintenant partager votre avis vérifié sur <strong>${escapeHtml(details.proName || 'ce professionnel')}</strong>.</p>
       <a class="btn" href="${link}">Laisser un avis</a>
-      <p style="color:#6b7280;font-size:13px;">Ce lien est personnel et peut expirer aprÃ¨s un certain dÃ©lai.</p>
+      <p style="color:#6b7280;font-size:13px;">Ce lien est personnel et peut expirer après un certain délai.</p>
     `),
   });
 }
 
 function buildRideSummary(details = {}) {
-  const departure = escapeHtml(details.departure || 'DÃ©part');
+  const departure = escapeHtml(details.departure || 'Départ');
   const destination = escapeHtml(details.destination || 'Destination');
   const date = escapeHtml(details.rideDate || details.ride_date || 'Date libre');
   const time = escapeHtml(String(details.rideTime || details.ride_time || '').slice(0, 5) || 'Heure libre');
@@ -545,9 +557,9 @@ function buildRideSummary(details = {}) {
   return `
     <div style="border:1px solid #e5e7eb;border-radius:14px;padding:16px 18px;margin:18px 0;background:#f8fafc;">
       <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;">Trajet</p>
-      <p style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">${departure} â†’ ${destination}</p>
-      <p style="margin:6px 0 0;color:#475569;font-size:14px;">${date} Â· ${time} Â· ${driver}</p>
-      <p style="margin:6px 0 0;color:#475569;font-size:14px;">${seats} place${seats > 1 ? 's' : ''} Â· ${priceXpf.toLocaleString('fr-FR')} XPF / place</p>
+      <p style="margin:0;font-size:18px;font-weight:700;color:#0f172a;">${departure} → ${destination}</p>
+      <p style="margin:6px 0 0;color:#475569;font-size:14px;">${date} · ${time} · ${driver}</p>
+      <p style="margin:6px 0 0;color:#475569;font-size:14px;">${seats} place${seats > 1 ? 's' : ''} · ${priceXpf.toLocaleString('fr-FR')} XPF / place</p>
     </div>
   `;
 }
@@ -574,13 +586,13 @@ async function sendRideAutoBookingPassengerEmail(to, prenom, details = {}, recip
   const link = `${BASE_URL()}/covoiturage/reservations`;
   return sendMail({
     to,
-    subject: `âœ… Place rÃ©servÃ©e â€” ${details.departure || 'Trajet'} â†’ ${details.destination || 'Destination'}`,
+    subject: `✅ Place réservée — ${details.departure || 'Trajet'} → ${details.destination || 'Destination'}`,
     html: baseTemplate(`
       <p>Bonjour ${escapeHtml(prenom)},</p>
-      <p>Votre place est confirmÃ©e !</p>
+      <p>Votre place est confirmée !</p>
       ${buildRideSummary(details)}
-      <a class="btn" href="${link}">Voir mes rÃ©servations</a>
-      <p>Retrouvez les dÃ©tails de ce trajet sur Kalico.</p>
+      <a class="btn" href="${link}">Voir mes réservations</a>
+      <p>Retrouvez les détails de ce trajet sur Kalico.</p>
     `),
   });
 }
@@ -589,13 +601,13 @@ async function sendRideAutoBookingDriverEmail(to, prenom, details = {}, recipien
   const link = `${BASE_URL()}/covoiturage/reservations`;
   return sendMail({
     to,
-    subject: `ðŸš— Nouvelle rÃ©servation â€” ${details.departure || 'Trajet'} â†’ ${details.destination || 'Destination'}`,
+    subject: `🚗 Nouvelle réservation — ${details.departure || 'Trajet'} → ${details.destination || 'Destination'}`,
     html: baseTemplate(`
       <p>Bonjour ${escapeHtml(prenom)},</p>
-      <p>Une place vient dâ€™Ãªtre rÃ©servÃ©e automatiquement sur votre trajet.</p>
+      <p>Une place vient d’être réservée automatiquement sur votre trajet.</p>
       ${buildRideSummary(details)}
-      <a class="btn" href="${link}">Voir mes rÃ©servations</a>
-      <p>Le passager a reÃ§u sa confirmation immÃ©diatement.</p>
+      <a class="btn" href="${link}">Voir mes réservations</a>
+      <p>Le passager a reçu sa confirmation immédiatement.</p>
     `),
   });
 }
@@ -604,7 +616,7 @@ async function sendRideManualRequestEmail(to, prenom, details = {}, recipientUse
   const link = `${BASE_URL()}/covoiturage/reservations`;
   return sendMail({
     to,
-    subject: 'ðŸ”” Nouvelle demande de rÃ©servation',
+    subject: '🔔 Nouvelle demande de réservation',
     html: baseTemplate(`
       <p>Bonjour ${escapeHtml(prenom)},</p>
       <p>${escapeHtml(details.passengerPrenom || 'Un passager')} souhaite rejoindre votre trajet.</p>
@@ -619,12 +631,12 @@ async function sendRideBookingAcceptedPassengerEmail(to, prenom, details = {}, r
   const link = `${BASE_URL()}/covoiturage/reservations`;
   return sendMail({
     to,
-    subject: 'ðŸŽ‰ RÃ©servation acceptÃ©e !',
+    subject: '🎉 Réservation acceptée !',
     html: baseTemplate(`
       <p>Bonjour ${escapeHtml(prenom)},</p>
-      <p>${escapeHtml(details.driverPrenom || 'Le conducteur')} a acceptÃ© votre demande !</p>
+      <p>${escapeHtml(details.driverPrenom || 'Le conducteur')} a accepté votre demande !</p>
       ${buildRideSummary(details)}
-      <a class="btn" href="${link}">Voir les dÃ©tails</a>
+      <a class="btn" href="${link}">Voir les détails</a>
     `),
   });
 }
@@ -633,12 +645,12 @@ async function sendRideBookingAcceptedDriverEmail(to, prenom, details = {}, reci
   const link = `${BASE_URL()}/covoiturage/reservations`;
   return sendMail({
     to,
-    subject: 'âœ… RÃ©servation confirmÃ©e',
+    subject: '✅ Réservation confirmée',
     html: baseTemplate(`
       <p>Bonjour ${escapeHtml(prenom)},</p>
-      <p>Vous avez acceptÃ© la rÃ©servation de ${escapeHtml(details.passengerPrenom || 'ce passager')}.</p>
+      <p>Vous avez accepté la réservation de ${escapeHtml(details.passengerPrenom || 'ce passager')}.</p>
       ${buildRideSummary(details)}
-      <a class="btn" href="${link}">Voir mes rÃ©servations</a>
+      <a class="btn" href="${link}">Voir mes réservations</a>
     `),
   });
 }
