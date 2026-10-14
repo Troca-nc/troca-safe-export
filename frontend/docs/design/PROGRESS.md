@@ -1870,3 +1870,20 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - TypeScript : `tsc --noEmit --incremental false`, passé.
 - Build : `NODE_OPTIONS=--use-system-ca npm run build`, passé avec 112 routes, dont `/annonces/nouvelle`.
 - Le parcours QA authentifié modifié sera exécuté par la CI avec ses services éphémères (PostgreSQL, Redis, API et frontend).
+
+## Parcours de publication — catégories principales et encodage (15 octobre 2026)
+
+- La base initiale ne proposait que les huit catégories historiques et trois catégories ajoutées ensuite. Le catalogue de dépôt est enrichi avec les grandes familles manquantes : maison, bricolage, mode, famille, animaux, collections, matériel professionnel et pièces/équipement.
+- Les identifiants et les annonces existants sont conservés grâce à un upsert par slug. Le libellé corrompu « Location longue durÃ©e » est réparé en « Location longue durée ».
+- Le sélecteur accepte désormais les catégories principales même lorsqu'elles ont des sous-catégories et affiche les niveaux enfants avec un chemin explicite, par exemple « Immobilier › Vente ».
+- L'ancienne migration reste immuable car son checksum est vérifié. Une nouvelle migration corrective répare sa donnée, et le garde-fou d'encodage protège désormais cette migration ainsi que la couche de données et le champ de publication concernés.
+
+### Validation
+
+- Migration : 2 tests de contrat passés ; l'upsert par slug et la réparation UTF-8 sont couverts.
+- Garde-fou d'encodage : 138 fichiers protégés sont exempts de marqueurs connus ; la dette historique hors périmètre reste signalée sans bloquer.
+- Lint obligatoire : `npm run lint`, passé selon le périmètre ESLint actuel du dépôt.
+- TypeScript : `tsc --noEmit --incremental false`, passé.
+- Build : `NODE_OPTIONS=--use-system-ca npm run build`, passé avec 112 routes, dont `/annonces/nouvelle`.
+- Design system : `node scripts/check-design.mjs --changed`, 4 fichiers contrôlés, 0 erreur, 0 avertissement avant mise à jour de ce suivi.
+- La migration PostgreSQL complète sera exercée par le parcours QA éphémère de la CI avant toute fusion ou application en production.

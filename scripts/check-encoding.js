@@ -13,8 +13,12 @@ const GUARDED_BACKEND_FILES = [
   'backend/src/services/emailService.js',
   'backend/src/services/fretWorkflowService.js',
 ]
+const GUARDED_DATA_FILES = [
+  'database/migrations/20261015_listing_categories.sql',
+]
 const GUARDED_FILES = new Set([
   ...GUARDED_BACKEND_FILES,
+  ...GUARDED_DATA_FILES,
   'frontend/src/app/abonnement/confirmation/page.tsx',
   'frontend/src/app/abonnement/page.tsx',
   'frontend/src/app/annonces/[id]/page.tsx',
@@ -91,6 +95,7 @@ const GUARDED_FILES = new Set([
   'frontend/src/components/messages/MessagesPage.tsx',
   'frontend/src/components/listings/CategoryFeedPage.tsx',
   'frontend/src/components/listings/ListingCard.tsx',
+  'frontend/src/components/listings/publish/PublishStepFields.tsx',
   'frontend/src/components/monetisation/PaymentProviderSelector.tsx',
   'frontend/src/components/onboarding/ContextualTooltips.tsx',
   'frontend/src/components/onboarding/OnboardingChecklist.tsx',
@@ -126,6 +131,7 @@ const GUARDED_FILES = new Set([
   'frontend/src/components/ui/SearchAutocomplete.tsx',
   'frontend/src/lib/categoryCatalog.ts',
   'frontend/src/lib/categoryPresentation.ts',
+  'frontend/src/lib/data/publishing.ts',
   'frontend/src/shared-copy/categoryFields.ts',
   'frontend/src/components/PublishWizard/PublishWizard.tsx',
   'frontend/src/hooks/useImageUpload.ts',
@@ -195,6 +201,7 @@ function detectIssues(buffer) {
 const scannedFiles = [
   ...walk(FRONTEND_SRC),
   ...GUARDED_BACKEND_FILES.map((file) => path.join(ROOT, file)),
+  ...GUARDED_DATA_FILES.map((file) => path.join(ROOT, file)),
 ]
 
 const suspectFiles = scannedFiles.reduce((acc, file) => {

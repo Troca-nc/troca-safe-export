@@ -29,11 +29,20 @@ type RawProvince = {
   communes?: Array<{ id: number; name: string; slug?: string; province_name?: string | null }>
 }
 
-function flattenCategories(nodes: RawCategory[]): PublishingCategory[] {
+export function flattenPublishingCategories(nodes: RawCategory[], ancestors: string[] = []): PublishingCategory[] {
   return nodes.flatMap((node) => {
     const children = node.children ?? node.subcategories ?? []
-    if (children.length > 0) return flattenCategories(children)
-    return [{ id: Number(node.id), name: node.name, slug: node.slug }]
+    const path = [...ancestors, node.name]
+    return [
+      {
+        id: Number(node.id),
+        name: node.name,
+        slug: node.slug,
+        label: path.join(' › '),
+        depth: ancestors.length,
+      },
+      ...flattenPublishingCategories(children, path),
+    ]
   })
 }
 
@@ -100,7 +109,7 @@ export async function loadPublishingMetadata(demoMode: boolean): Promise<Publish
     metaApi.getCategories(),
     metaApi.getCommunes(),
   ])
-  const categories = flattenCategories(Array.isArray(categoriesResponse.data?.data) ? categoriesResponse.data.data : [])
+  const categories = flattenPublishingCategories(Array.isArray(categoriesResponse.data?.data) ? categoriesResponse.data.data : [])
   const communes = normalizeCommunes(Array.isArray(communesResponse.data?.data) ? communesResponse.data.data : [])
 
   if (!categories.length || !communes.length) {

@@ -74,7 +74,7 @@ export default function PublishStepFields({ stepId, draft, metadata, photos, mis
         <Input className="md:col-span-2" label="Titre" maxLength={70} value={draft.title} error={errorFor(missing, 'title')} onChange={(event) => update('title', event.target.value)} placeholder="Ex. Planche de surf avec housse" />
         <Select label="Catégorie" value={draft.categoryId} error={errorFor(missing, 'categoryId')} onChange={(event) => update('categoryId', event.target.value)}>
           <option value="">Choisir une catégorie</option>
-          {metadata.categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+          {metadata.categories.map((category) => <option key={category.id} value={category.id}>{category.label}</option>)}
         </Select>
         <Select label="État" value={draft.condition} onChange={(event) => update('condition', event.target.value as PublishingDraft['condition'])}>
           {CONDITION_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
