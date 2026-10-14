@@ -1854,3 +1854,19 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - TypeScript : `npx tsc --noEmit --incremental false`, passé.
 - Build : `node --use-system-ca node_modules/next/dist/bin/next build`, passé avec 112 routes, dont `/parametres`, après une première tentative interrompue par le chargeur réseau des polices Google.
 - Design system : `node scripts/check-design.mjs --changed`, 1 fichier contrôlé, 0 erreur, 0 avertissement avant mise à jour de ce suivi.
+
+## Parcours de publication — description d'abord, photos facultatives (15 octobre 2026)
+
+- Les parcours de vente et de troc commencent désormais par les informations essentielles de l'annonce : titre, catégorie, état et description. L'ajout de photos vient en deuxième étape.
+- Les photos restent recommandées pour inspirer confiance et mieux présenter l'objet, mais elles ne bloquent plus la progression ni la publication.
+- L'API acceptait déjà les annonces sans image : ce lot ne modifie ni le serveur, ni les données, ni les migrations.
+- Le scénario QA authentifié publie maintenant une annonce réelle sans photo afin de vérifier ce comportement de bout en bout.
+
+### Validation
+
+- Garde-fou d'encodage : les 132 fichiers protégés sont exempts de marqueurs connus ; la dette historique hors périmètre reste non bloquante.
+- Design system : `node scripts/check-design.mjs --changed`, 4 fichiers contrôlés, 0 erreur, 0 avertissement avant mise à jour de ce suivi.
+- Lint obligatoire : `npm run lint`, passé selon le périmètre ESLint actuel du dépôt.
+- TypeScript : `tsc --noEmit --incremental false`, passé.
+- Build : `NODE_OPTIONS=--use-system-ca npm run build`, passé avec 112 routes, dont `/annonces/nouvelle`.
+- Le parcours QA authentifié modifié sera exécuté par la CI avec ses services éphémères (PostgreSQL, Redis, API et frontend).

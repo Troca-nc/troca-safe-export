@@ -218,7 +218,7 @@ export default function PublishFlow() {
                 </section>
               ) : null}
             </div>
-            <aside className="min-w-0 lg:sticky lg:top-28 lg:self-start"><p className="mb-3 text-eyebrow-sm font-semibold uppercase tracking-eyebrow-sm text-ink/55">Aperçu dans les résultats</p>{metadata ? <PublishPreview draft={draft} metadata={metadata} /> : <Skeleton className="h-[420px]" />}<div className="mt-4 rounded-card border-l-[3px] border-l-lagoon bg-lagoon/10 p-4 text-body-sm text-ink/75">{currentStep?.id === 'photos' ? 'Privilégiez une lumière naturelle et montrez les éventuels défauts.' : currentStep?.id === 'publication' ? 'Relisez les montants, les dates et la commune avant de publier.' : 'Les modifications apparaissent dans cet aperçu au fur et à mesure.'}</div></aside>
+            <aside className="min-w-0 lg:sticky lg:top-28 lg:self-start"><p className="mb-3 text-eyebrow-sm font-semibold uppercase tracking-eyebrow-sm text-ink/55">Aperçu dans les résultats</p>{metadata ? <PublishPreview draft={draft} metadata={metadata} /> : <Skeleton className="h-[420px]" />}<div className="mt-4 rounded-card border-l-[3px] border-l-lagoon bg-lagoon/10 p-4 text-body-sm text-ink/75">{currentStep?.id === 'photos' ? 'Les photos sont facultatives. Si vous en ajoutez, privilégiez une lumière naturelle et montrez les éventuels défauts.' : currentStep?.id === 'publication' ? 'Relisez les montants, les dates et la commune avant de publier.' : 'Les modifications apparaissent dans cet aperçu au fur et à mesure.'}</div></aside>
           </div>
         )}
       </main>
