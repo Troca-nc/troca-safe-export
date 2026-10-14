@@ -363,7 +363,7 @@ async function processTrocMatchingQueue() {
   };
 }
 
-// â”€â”€ 1. Expiration des boosts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── 1. Expiration des boosts ─────────────────────────────────
 // Toutes les heures : désactive les boosts dont boost_expires_at est passé
 
 function startBoostExpiryJob() {
@@ -712,10 +712,10 @@ function startAdminAlertsJob() {
   logger.info('cron_job_started', { job: 'admin-alerts' });
 }
 
-// â”€â”€ 2. Envoi des alertes daily â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── 2. Envoi des alertes daily ───────────────────────────────
 // Tous les jours à 8h00 heure Nouméa
 
-// â”€â”€ 2. Email + notif relance annonces expirant dans 3 jours â”€â”€â”€â”€â”€
+// ── 2. Email + notif relance annonces expirant dans 3 jours ─────
 // Tous les jours à 9h00 heure Nouméa
 
 function startExpiringListingsJob() {
@@ -723,7 +723,7 @@ function startExpiringListingsJob() {
     recordJob('started', { job: 'expiring-listings' });
     await runSingletonJob('cron:expiring-listings', 30 * 60 * 1000, async () => {
       try {
-        // Annonces actives qui expirent dans 3 jours exactement (Â±1h)
+        // Annonces actives qui expirent dans 3 jours exactement (±1h)
         const result = await query(`
           SELECT a.id, a.titre, a.user_id, u.email, u.prenom
           FROM annonces a
@@ -770,7 +770,7 @@ function startDailyAlertsJob() {
   logger.info('cron_job_started', { job: 'alerts-daily' });
 }
 
-// â”€â”€ 3. Envoi des alertes weekly â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── 3. Envoi des alertes weekly ──────────────────────────────
 // Tous les lundis à 8h00 heure Nouméa
 
 function startWeeklyAlertsJob() {
@@ -812,7 +812,7 @@ function startAnalyticsPurgeJob() {
   logger.info('cron_job_started', { job: 'analytics-purge' });
 }
 
-// â”€â”€ Logique de matching des alertes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Logique de matching des alertes ──────────────────────────
 
 
 async function issueSearchAlertUnsubscribeToken(alertId) {
@@ -902,7 +902,7 @@ async function runAlertJob(frequency) {
 
 /**
  * Trouve les annonces correspondant aux filtres d'une alerte
- * et non encore envoy?es ? cet utilisateur
+ * et non encore envoyées à cet utilisateur
  */
 async function matchAlerteAnnonces(alert) {
   const filters = typeof alert.filters === 'string'
@@ -1038,7 +1038,7 @@ async function matchImmediateAlerts(annonce) {
 
 // ── Point d'entrée ─────────────────────────────────────────
 
-// â”€â”€ 5. Email post-transaction pour inciter les avis â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── 5. Email post-transaction pour inciter les avis ─────────
 // Tous les jours à 10h00 : envoyer un email 48h après le premier message
 
 async function buildPerformanceReportForUser(userRow, prefs) {
@@ -1188,7 +1188,7 @@ function startReviewReminderJob() {
     recordJob('started', { job: 'reviews' });
     await runSingletonJob('cron:review-reminder', 30 * 60 * 1000, async () => {
       try {
-        // Conversations dont le premier message date d'exactement 48h (Â±1h)
+        // Conversations dont le premier message date d'exactement 48h (±1h)
         // et pour lesquelles aucun avis n'a encore été laissé
         const result = await query(`
           SELECT DISTINCT
@@ -1297,7 +1297,7 @@ function startRideReviewReminderJob() {
           );
           if (!claimed.rows[0]) continue;
 
-          const rideLabel = `${row.departure} â†’ ${row.destination}`;
+          const rideLabel = `${row.departure} → ${row.destination}`;
           const details = {
             departure: row.departure,
             destination: row.destination,
@@ -1311,13 +1311,13 @@ function startRideReviewReminderJob() {
 
           await createNotification(row.passenger_id, {
             type: 'review',
-            title: 'âœï¸ Notez votre conducteur',
-            body: `Partagez votre avis sur ${rideLabel} pour aider la communaut?.`,
+            title: '✍️ Notez votre conducteur',
+            body: `Partagez votre avis sur ${rideLabel} pour aider la communauté.`,
             href: `/covoiturage/reservations?review_booking=${row.booking_id}`,
           }).catch(() => {});
 
           await sendPushToUser(row.passenger_id, {
-            title: 'âœï¸ Notez votre conducteur',
+            title: '✍️ Notez votre conducteur',
             body: `Partagez votre avis sur ${rideLabel}.`,
             data: { type: 'ride_review_reminder', booking_id: row.booking_id, ride_id: row.ride_id },
           }).catch(() => {});
@@ -1533,7 +1533,7 @@ function startProBookingReminderJob() {
           windowStartHours: 1.75,
           windowEndHours: 2.25,
           reminderLabel: 'H-2',
-          notificationTitle: 'â° Rendez-vous dans 2 heures',
+          notificationTitle: '⏰ Rendez-vous dans 2 heures',
           notificationBody: (row, proName, partnerName, when) => `Préparez votre rendez-vous avec ${proName} · ${when}`,
           emailIntro: (role, row, proName, when) => role === 'client'
             ? `Votre rendez-vous avec ${proName} est prévu dans moins de 2 heures.`

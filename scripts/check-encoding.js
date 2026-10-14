@@ -8,7 +8,13 @@ const path = require('path')
 const ROOT = path.resolve(__dirname, '..')
 const FRONTEND_SRC = path.join(ROOT, 'frontend', 'src')
 const TARGET_EXTENSIONS = new Set(['.ts', '.tsx'])
+const GUARDED_BACKEND_FILES = [
+  'backend/src/jobs/scheduler.js',
+  'backend/src/services/emailService.js',
+  'backend/src/services/fretWorkflowService.js',
+]
 const GUARDED_FILES = new Set([
+  ...GUARDED_BACKEND_FILES,
   'frontend/src/app/abonnement/confirmation/page.tsx',
   'frontend/src/app/abonnement/page.tsx',
   'frontend/src/app/annonces/[id]/page.tsx',
@@ -178,10 +184,20 @@ function detectIssues(buffer) {
     issues.push('Mojibake ï¿½ (double-encoded U+FFFD)')
   }
 
+  const text = buffer.toString('utf8')
+  if (/(?:Ã[\u0080-\u00bf]|Â[\u0080-\u00bf]|â(?:€|†|œ||”|š||˜)|ðŸ|ï¿½|[\u0080-\u009f])/u.test(text)) {
+    issues.push('Mojibake signature')
+  }
+
   return issues
 }
 
-const suspectFiles = walk(FRONTEND_SRC).reduce((acc, file) => {
+const scannedFiles = [
+  ...walk(FRONTEND_SRC),
+  ...GUARDED_BACKEND_FILES.map((file) => path.join(ROOT, file)),
+]
+
+const suspectFiles = scannedFiles.reduce((acc, file) => {
   const buffer = fs.readFileSync(file)
   const issues = detectIssues(buffer)
   if (issues.length) {

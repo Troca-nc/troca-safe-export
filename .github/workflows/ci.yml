@@ -54,6 +54,9 @@ jobs:
       - name: Install frontend dependencies
         run: cd frontend && npm ci
 
+      - name: Reject encoding regressions
+        run: npm run check:encoding --prefix frontend
+
       - name: Security scan - dependencies
         if: ${{ env.SNYK_TOKEN != '' }}
         uses: snyk/actions/node@v1.0.0

@@ -118,7 +118,7 @@ function getServiceTypeLabel(value) {
     case 'colis':
       return 'Colis';
     case 'demenagement':
-      return 'D�m�nagement';
+      return 'Déménagement';
     default:
       return 'Fret Pro';
   }
@@ -438,10 +438,10 @@ async function notifyRequesterOfferReceived(requestRow, offerRow, transporter = 
         '<p>Bonjour ' + escapeHtml(requestRow.author_name || 'Bonjour') + ',</p>',
         '<p>Vous avez reçu une nouvelle offre pour votre demande Envoi &amp; Livraison.</p>',
         '<div style="border:1px solid #dbeafe;border-radius:16px;padding:16px 18px;background:#f8fafc;">',
-        '<p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#0f766e;">Offre re�ue</p>',
+        '<p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#0f766e;">Offre reçue</p>',
         '<p style="margin:0;font-size:18px;font-weight:700;">' + escapeHtml(transporterName) + '</p>',
-        '<p style="margin:8px 0 0;">Prix propos� : ' + escapeHtml(formatMoney(offerRow.amount_xpf)) + '</p>',
-        '<p style="margin:0;">Prise en charge : ' + escapeHtml(pickupLabel) + ' � ' + escapeHtml(offerRow.pickup_slot_label || 'Cr�neau � confirmer') + '</p>',
+        '<p style="margin:8px 0 0;">Prix proposé : ' + escapeHtml(formatMoney(offerRow.amount_xpf)) + '</p>',
+        '<p style="margin:0;">Prise en charge : ' + escapeHtml(pickupLabel) + ' · ' + escapeHtml(offerRow.pickup_slot_label || 'Créneau à confirmer') + '</p>',
         '<p style="margin:0;">Vous pouvez comparer les offres et choisir librement le transporteur.</p>',
         '</div>',
         '<p style="margin-top:16px;"><a href="' + href + '" style="display:inline-block;padding:12px 18px;border-radius:999px;background:#0a7ea4;color:#fff;text-decoration:none;font-weight:700;">Voir les offres</a></p>',
