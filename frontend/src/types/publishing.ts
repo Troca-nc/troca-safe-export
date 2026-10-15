@@ -4,6 +4,8 @@ export type PublishingCategory = {
   id: number
   name: string
   slug: string
+  label: string
+  depth: number
 }
 
 export type PublishingCommune = {

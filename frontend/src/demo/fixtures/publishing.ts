@@ -5,11 +5,11 @@ const nextWeek = new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10
 
 export const PUBLISHING_DEMO_METADATA: PublishingMetadata = {
   categories: [
-    { id: 101, name: 'Nautisme', slug: 'nautisme' },
-    { id: 102, name: 'Vélos', slug: 'velos' },
-    { id: 103, name: 'Maison', slug: 'maison' },
-    { id: 104, name: 'Multimédia', slug: 'multimedia' },
-    { id: 105, name: 'Outillage', slug: 'outillage' },
+    { id: 101, name: 'Nautisme', slug: 'nautisme', label: 'Nautisme', depth: 0 },
+    { id: 102, name: 'Vélos', slug: 'velos', label: 'Vélos', depth: 0 },
+    { id: 103, name: 'Maison', slug: 'maison', label: 'Maison', depth: 0 },
+    { id: 104, name: 'Multimédia', slug: 'multimedia', label: 'Multimédia', depth: 0 },
+    { id: 105, name: 'Outillage', slug: 'outillage', label: 'Outillage', depth: 0 },
   ],
   communes: [
     { id: 1, name: 'Nouméa', slug: 'noumea', provinceName: 'Province Sud' },
