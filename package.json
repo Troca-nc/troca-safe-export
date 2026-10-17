@@ -13,10 +13,14 @@
     "test:e2e:smoke": "playwright test --project=smoke",
     "test:e2e:prod-public": "playwright test --project=prod-public",
     "test:e2e:qa-journey": "playwright test --project=qa-journey",
+    "test:e2e:quality": "playwright test --project=quality-public --project=quality-particulier",
     "test:e2e:headed": "playwright test --headed",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "quality:inventory": "node scripts/generate-ui-audit-inventory.js --write",
+    "quality:inventory:check": "node scripts/generate-ui-audit-inventory.js --check"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.60.0",
     "@types/node": "^25.9.2",
     "msw": "^2.14.6"

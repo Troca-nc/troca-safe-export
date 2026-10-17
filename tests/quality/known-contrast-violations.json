@@ -1,0 +1,98 @@
+{
+  "accueil": [
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.42 (foreground color: #8e9a95, background color: #f3e9d8, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.05 (foreground color: #778987, background color: #f3e9d8, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.65 (foreground color: #70878a, background color: #fefaf3, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+  ],
+  "annonces": [
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.22 (foreground color: #7c9093, background color: #fefaf3, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.62 (foreground color: #6f8587, background color: #fbf6ec, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.65 (foreground color: #70878a, background color: #fefaf3, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.95 (foreground color: #617778, background color: #f3e9d8, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.12 (foreground color: #647c7f, background color: #fbf6ec, font size: 12.8pt (17px), font weight: normal). Expected contrast ratio of 4.5:1"
+  ],
+  "inscription": [
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.15 (foreground color: #7b8f90, background color: #fbf6ec, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.62 (foreground color: #6f8587, background color: #fbf6ec, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
+  ],
+  "connexion": [
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.15 (foreground color: #7b8f90, background color: #fbf6ec, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.46 (foreground color: #6c807f, background color: #f3e9d8, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.62 (foreground color: #6f8587, background color: #fbf6ec, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
+  ],
+  "cgu": [],
+  "confidentialite": [],
+  "parametres-normal": [
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.76 (foreground color: #8a9092, background color: #f4ece0, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.82 (foreground color: #8f989c, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.99 (foreground color: #767c7b, background color: #e4d7c3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.25 (foreground color: #838d93, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.61 (foreground color: #ef4444, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.78 (foreground color: #778289, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.22 (foreground color: #667278, background color: #f4ece0, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.42 (foreground color: #6a777f, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.45 (foreground color: #0a7ea4, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+  ],
+  "parametres-survol-Sécurité et connexion": [
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.76 (foreground color: #8a9092, background color: #f4ece0, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.82 (foreground color: #8f989c, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.99 (foreground color: #767c7b, background color: #e4d7c3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.25 (foreground color: #838d93, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.61 (foreground color: #ef4444, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.78 (foreground color: #778289, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.22 (foreground color: #667278, background color: #f4ece0, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.42 (foreground color: #6a777f, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.45 (foreground color: #0a7ea4, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+  ],
+  "parametres-survol-Notifications": [
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.76 (foreground color: #8a9092, background color: #f4ece0, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.82 (foreground color: #8f989c, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.99 (foreground color: #767c7b, background color: #e4d7c3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.25 (foreground color: #838d93, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.61 (foreground color: #ef4444, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.78 (foreground color: #778289, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.22 (foreground color: #667278, background color: #f4ece0, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.42 (foreground color: #6a777f, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.45 (foreground color: #0a7ea4, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+  ],
+  "parametres-survol-Confidentialité": [
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.76 (foreground color: #8a9092, background color: #f4ece0, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.82 (foreground color: #8f989c, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.99 (foreground color: #767c7b, background color: #e4d7c3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.25 (foreground color: #838d93, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.61 (foreground color: #ef4444, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.78 (foreground color: #778289, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.22 (foreground color: #667278, background color: #f4ece0, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.42 (foreground color: #6a777f, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.45 (foreground color: #0a7ea4, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+  ],
+  "parametres-survol-Cookies": [
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.76 (foreground color: #8a9092, background color: #f4ece0, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.82 (foreground color: #8f989c, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.99 (foreground color: #767c7b, background color: #e4d7c3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.25 (foreground color: #838d93, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.61 (foreground color: #ef4444, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.78 (foreground color: #778289, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.22 (foreground color: #667278, background color: #f4ece0, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.42 (foreground color: #6a777f, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.45 (foreground color: #0a7ea4, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+  ],
+  "parametres-survol-Mes données (RGPD)": [
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.76 (foreground color: #8a9092, background color: #f4ece0, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.82 (foreground color: #8f989c, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 2.99 (foreground color: #767c7b, background color: #e4d7c3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.25 (foreground color: #838d93, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.61 (foreground color: #ef4444, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.78 (foreground color: #778289, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.22 (foreground color: #667278, background color: #f4ece0, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.42 (foreground color: #6a777f, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.45 (foreground color: #0a7ea4, background color: #fefaf3, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+  ],
+  "publication-etape-description": [
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.22 (foreground color: #7c9093, background color: #fefaf3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.22 (foreground color: #7c9093, background color: #fefaf3, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.65 (foreground color: #70878a, background color: #fefaf3, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 3.95 (foreground color: #617778, background color: #f3e9d8, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+    "color-contrast::Fix any of the following: Element has insufficient color contrast of 4.2 (foreground color: #657d81, background color: #fefaf3, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
+  ]
+}

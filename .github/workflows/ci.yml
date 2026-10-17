@@ -57,6 +57,9 @@ jobs:
       - name: Reject encoding regressions
         run: npm run check:encoding --prefix frontend
 
+      - name: Check UI audit route inventory
+        run: npm run quality:inventory:check
+
       - name: Security scan - dependencies
         if: ${{ env.SNYK_TOKEN != '' }}
         uses: snyk/actions/node@v1.0.0
@@ -129,6 +132,9 @@ jobs:
 
       - name: Run blocking Playwright CI gate
         run: npm run test:e2e:gate
+
+      - name: Run UI and content quality gate
+        run: npm run test:e2e:quality
 
       # Temporary quarantine: keep the complete report visible without
       # blocking security work on assertions made stale by the current UX.
