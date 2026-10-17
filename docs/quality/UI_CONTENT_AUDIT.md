@@ -10,7 +10,7 @@ Rendre la couverture de l'audit démontrable avant chaque livraison. L'automatis
 - `MANUAL_AUDIT_MATRIX.md` suit les parcours, appareils, états et preuves.
 - `COPY_GLOSSARY.md` fixe les termes et les sources de vérité éditoriales.
 - `tests/quality/` bloque les contrastes insuffisants, les mojibakes visibles et les débordements horizontaux sur les parcours couverts.
-- `tests/quality/known-contrast-violations.json` décrit la dette de contraste initiale. La CI tolère uniquement ces empreintes connues et bloque toute nouvelle violation.
+- `tests/quality/known-contrast-violations.json` décrit la dette de contraste initiale. La CI tolère uniquement les paires de couleurs déjà répertoriées, indépendamment des différences de rendu des polices entre systèmes, et bloque toute nouvelle combinaison insuffisamment contrastée.
 
 ## Campagne manuelle
 

@@ -1,6 +1,6 @@
 # Dette UI connue au démarrage du gate
 
-La baseline ne valide pas ces contrastes : elle les rend visibles et empêche l'ajout de nouveaux styles insuffisamment contrastés. Les nombres représentent des combinaisons distinctes de couleurs, taille, graisse et ratio ; plusieurs éléments peuvent partager le même style.
+La baseline ne valide pas ces contrastes : elle les rend visibles et empêche l'ajout de nouvelles combinaisons de couleurs insuffisamment contrastées. L'empreinte repose sur la paire premier plan/arrière-plan afin de rester stable entre les métriques de police Windows et Linux ; plusieurs éléments et états peuvent partager la même combinaison.
 
 | État audité | Styles de contraste connus |
 |---|---:|

@@ -14,7 +14,19 @@ function readContrastBaseline(): ContrastBaseline {
 
 function fingerprint(rule: string, failureSummary: string | undefined) {
   const normalizedSummary = (failureSummary || 'sans résumé').replace(/\s+/g, ' ').trim()
+  const colors = [...normalizedSummary.matchAll(/(?:foreground|background) color: (#[0-9a-f]{6})/gi)]
+    .map((match) => match[1].toLowerCase())
+
+  // Font metrics vary between Windows and Linux. The foreground/background pair
+  // identifies the design token combination without making the gate OS-dependent.
+  if (colors.length >= 2) return `${rule}::foreground:${colors[0]}::background:${colors[1]}`
   return `${rule}::${normalizedSummary}`
+}
+
+function normalizeStoredFingerprint(value: string) {
+  const separator = value.indexOf('::')
+  if (separator < 0) return value.replace(/\s+/g, ' ').trim()
+  return fingerprint(value.slice(0, separator), value.slice(separator + 2))
 }
 
 export async function openStablePage(page: Page, route: string) {
@@ -62,9 +74,11 @@ export async function expectNoColorContrastViolation(page: Page, testInfo: TestI
     return
   }
 
-  const known = new Set(readContrastBaseline()[label] || [])
+  const baseline = readContrastBaseline()
+  const stateKnown = new Set((baseline[label] || []).map(normalizeStoredFingerprint))
+  const known = new Set(Object.values(baseline).flat().map(normalizeStoredFingerprint))
   const regressions = current.filter((item) => !known.has(item))
-  const resolvedCount = [...known].filter((item) => !current.includes(item)).length
+  const resolvedCount = [...stateKnown].filter((item) => !current.includes(item)).length
   testInfo.annotations.push({
     type: 'dette contraste',
     description: `${current.length} connue(s), ${resolvedCount} résolue(s), ${regressions.length} nouvelle(s)`,
