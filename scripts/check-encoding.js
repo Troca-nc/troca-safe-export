@@ -16,9 +16,13 @@ const GUARDED_BACKEND_FILES = [
 const GUARDED_DATA_FILES = [
   'database/migrations/20261015_listing_categories.sql',
 ]
+const GUARDED_RUNTIME_FILES = [
+  'scripts/demo-server.js',
+]
 const GUARDED_FILES = new Set([
   ...GUARDED_BACKEND_FILES,
   ...GUARDED_DATA_FILES,
+  ...GUARDED_RUNTIME_FILES,
   'frontend/src/app/abonnement/confirmation/page.tsx',
   'frontend/src/app/abonnement/page.tsx',
   'frontend/src/app/annonces/[id]/page.tsx',
@@ -202,6 +206,7 @@ const scannedFiles = [
   ...walk(FRONTEND_SRC),
   ...GUARDED_BACKEND_FILES.map((file) => path.join(ROOT, file)),
   ...GUARDED_DATA_FILES.map((file) => path.join(ROOT, file)),
+  ...GUARDED_RUNTIME_FILES.map((file) => path.join(ROOT, file)),
 ]
 
 const suspectFiles = scannedFiles.reduce((acc, file) => {

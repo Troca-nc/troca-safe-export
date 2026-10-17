@@ -66,6 +66,21 @@ export default defineConfig({
         ...desktop,
       },
     },
+    {
+      name: 'quality-public',
+      testMatch: /quality\/public-ui-quality\.spec\.ts$/,
+      use: {
+        ...desktop,
+      },
+    },
+    {
+      name: 'quality-particulier',
+      testMatch: /quality\/particulier-ui-quality\.spec\.ts$/,
+      use: {
+        ...desktop,
+        storageState: authState('particulier'),
+      },
+    },
     ...visualProjects,
     {
       name: 'mobile-chrome',
