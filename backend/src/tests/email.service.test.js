@@ -80,6 +80,9 @@ describe('emailService — sendWelcomeEmail', () => {
     assert.ok(sentEmails[0].html.includes('Publier ma première annonce'));
     assert.ok(sentEmails[0].html.includes('répondez simplement à cet email'));
     assert.ok(sentEmails[0].html.includes('<meta charset="UTF-8">'));
+    assert.ok(sentEmails[0].html.includes('<img src="https://kalico.nc/brand/kalico1.svg"'));
+    assert.ok(sentEmails[0].html.includes('alt="Kalico"'));
+    assert.ok(!sentEmails[0].html.includes('🔁'));
   });
 });
 

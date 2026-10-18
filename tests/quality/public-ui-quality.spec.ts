@@ -1,4 +1,4 @@
-import { test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 
 import { expectPageQuality, openStablePage } from './support'
 
@@ -18,4 +18,65 @@ test.describe('qualité UI et contenu des pages publiques critiques', () => {
       await expectPageQuality(page, testInfo, entry.name)
     })
   }
+
+  test('inscription: la liste des communes utilise le thème clair natif', async ({ page }) => {
+    await openStablePage(page, '/inscription')
+    await page.getByRole('button', { name: 'Continuer' }).click()
+
+    const communeSelect = page.getByLabel('Commune')
+    await expect(communeSelect).toBeVisible()
+    await expect(communeSelect).toHaveCSS('color-scheme', 'light')
+  })
+
+  test('vérification email: une nouvelle session propose une connexion préremplie', async ({ page }) => {
+    await page.route('**/api/auth/verify-email', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ data: { user: { email: 'testeur@kalico.nc' } } }),
+    }))
+
+    await openStablePage(page, '/verification-email?token=test-token')
+    const loginLink = page.getByRole('link', { name: 'Se connecter' })
+    await expect(loginLink).toBeVisible()
+    await loginLink.click()
+
+    await expect(page.getByLabel('Adresse e-mail')).toHaveValue('testeur@kalico.nc')
+    await expect(page.getByText('Adresse email vérifiée')).toBeVisible()
+  })
+
+  test('vérification email: la session d’inscription continue automatiquement', async ({ page }) => {
+    await page.addInitScript(() => {
+      const payload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3_600 }))
+        .replace(/=/g, '')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+      window.sessionStorage.setItem('access_token', `test.${payload}.signature`)
+      window.sessionStorage.setItem('refresh_token', 'test-refresh-token')
+    })
+    await page.route('**/api/auth/verify-email', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ data: { user: { email: 'testeur@kalico.nc' } } }),
+    }))
+    await page.route('**/api/users/me', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        data: {
+          id: 'audit-user',
+          email: 'testeur@kalico.nc',
+          first_name: 'Test',
+          last_name: 'Kalico',
+          avatar_url: null,
+          is_verified: true,
+          is_pro: false,
+          is_admin: false,
+          rating: 0,
+        },
+      }),
+    }))
+
+    await openStablePage(page, '/verification-email?token=test-token')
+    await expect(page).toHaveURL(/\/$/, { timeout: 5_000 })
+  })
 })

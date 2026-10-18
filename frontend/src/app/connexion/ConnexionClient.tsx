@@ -20,12 +20,12 @@ import type { AuthErrorPresentation } from '@/types/auth'
 
 const schema = z.object({ email: z.string().email('Saisissez une adresse e-mail valide.'), password: z.string().min(1, 'Saisissez votre mot de passe.') })
 type FormData = z.infer<typeof schema>
-type Props = { nextPath: string }
+type Props = { nextPath: string; initialEmail?: string; emailVerified?: boolean }
 
 const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() || ''
 const showGoogleAuth = Boolean(googleClientId && !googleClientId.toLowerCase().includes('changeme'))
 
-export default function ConnexionClient({ nextPath }: Props) {
+export default function ConnexionClient({ nextPath, initialEmail = '', emailVerified = false }: Props) {
   const router = useRouter()
   const login = useAuthStore((state) => state.login)
   const setDemoProfile = useAuthStore((state) => state.setDemoProfile)
@@ -38,7 +38,7 @@ export default function ConnexionClient({ nextPath }: Props) {
   const alertRef = useRef<HTMLDivElement>(null)
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || ''
   const turnstileEnabled = Boolean(turnstileSiteKey && !turnstileSiteKey.toLowerCase().includes('changeme'))
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema), mode: 'onBlur' })
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema), mode: 'onBlur', defaultValues: { email: initialEmail } })
   const demoProfile = getDemoLoginProfile(watch('email') || '')
 
   useEffect(() => { if (failure) alertRef.current?.focus() }, [failure])
@@ -68,6 +68,8 @@ export default function ConnexionClient({ nextPath }: Props) {
         <p className="text-eyebrow uppercase text-accent-text">Votre espace</p>
         <h1 className="mt-3 font-display text-h1-form text-ink">Bon retour sur Kalico.</h1>
         <p className="mt-4 text-body text-ink/65">Connectez-vous pour retrouver vos annonces, vos messages et vos favoris.</p>
+
+        {emailVerified ? <FeedbackAlert tone="success" title="Adresse email vérifiée" className="mt-6"><p>Votre compte est prêt. Saisissez votre mot de passe pour continuer.</p></FeedbackAlert> : null}
 
         {failure ? <div ref={alertRef} tabIndex={-1} className="mt-6 outline-none"><FeedbackAlert tone="error" title={failure.kind === 'locked' ? 'Compte temporairement bloqué' : 'Connexion impossible'}><p>{failure.message}</p>{failure.retryable && lastSubmission ? <Button variant="secondary" compact className="mt-3" onClick={() => void submit(lastSubmission)}>Réessayer</Button> : null}</FeedbackAlert></div> : null}
 
