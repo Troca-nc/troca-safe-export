@@ -56,35 +56,42 @@ test.describe('qualité UI et contenu des pages publiques critiques', () => {
   })
 
   test('vérification email: la session d’inscription continue automatiquement', async ({ page }) => {
-    await page.addInitScript(() => {
-      const payload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3_600 }))
-        .replace(/=/g, '')
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-      window.sessionStorage.setItem('access_token', `test.${payload}.signature`)
+    const user = {
+      id: 'audit-user',
+      email: 'testeur@kalico.nc',
+      first_name: 'Test',
+      last_name: 'Kalico',
+      avatar_url: null,
+      is_verified: true,
+      is_pro: false,
+      is_admin: false,
+      rating: 0,
+    }
+    const payload = Buffer.from(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3_600 })).toString('base64url')
+    const accessToken = `test.${payload}.signature`
+
+    await page.addInitScript(({ token, storedUser }) => {
+      window.sessionStorage.setItem('access_token', token)
       window.sessionStorage.setItem('refresh_token', 'test-refresh-token')
-    })
+      window.localStorage.setItem('auth-store', JSON.stringify({
+        state: { user: storedUser, isAuthenticated: true, demoProfile: null },
+        version: 0,
+      }))
+    }, { token: accessToken, storedUser: user })
     await page.route('**/api/auth/verify-email', (route) => route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ data: { user: { email: 'testeur@kalico.nc' } } }),
     }))
+    await page.route('**/api/auth/refresh', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ data: { access_token: accessToken, refresh_token: 'test-refresh-token' } }),
+    }))
     await page.route('**/api/users/me', (route) => route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({
-        data: {
-          id: 'audit-user',
-          email: 'testeur@kalico.nc',
-          first_name: 'Test',
-          last_name: 'Kalico',
-          avatar_url: null,
-          is_verified: true,
-          is_pro: false,
-          is_admin: false,
-          rating: 0,
-        },
-      }),
+      body: JSON.stringify({ data: user }),
     }))
 
     await openStablePage(page, '/verification-email?token=test-token')
