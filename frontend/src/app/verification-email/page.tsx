@@ -1,11 +1,13 @@
 'use client'
 
-import { Suspense, useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { BadgeCheck, Mail, RefreshCw, ShieldCheck, Sparkles } from 'lucide-react'
 import TurnstileChallenge from '@/components/auth/TurnstileChallenge'
-import { authApi } from '@/lib/api'
+import { authApi, isStoredAccessTokenValid } from '@/lib/api'
+import { getStoredRefreshToken } from '@/lib/tokenStorage'
+import { useAuthStore } from '@/store/authStore'
 
 type Status = 'loading' | 'success' | 'error'
 
@@ -15,26 +17,50 @@ function VerificationEmailContent() {
   const token = searchParams.get('token')
   const email = searchParams.get('email') || ''
   const role = searchParams.get('role') === 'pro' ? 'pro' : 'particulier'
+  const refreshMe = useAuthStore((state) => state.refreshMe)
+  const verificationStarted = useRef(false)
   const [status, setStatus] = useState<Status>(token ? 'loading' : 'error')
   const [message, setMessage] = useState(
     token ? 'Vérification en cours...' : "Vérifiez votre boîte mail pour confirmer votre compte."
   )
   const [resendBusy, setResendBusy] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
+  const [verifiedEmail, setVerifiedEmail] = useState(email)
+  const [continuedSession, setContinuedSession] = useState(false)
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || ''
   const turnstileEnabled = Boolean(turnstileSiteKey && !turnstileSiteKey.startsWith('CHANGEME'))
 
-  const ctaHref = useMemo(() => (role === 'pro' ? '/bienvenue?role=pro' : '/bienvenue?role=particulier'), [role])
+  const ctaHref = useMemo(() => (role === 'pro' ? '/bienvenue?role=pro' : '/'), [role])
+  const loginHref = useMemo(
+    () => `/connexion?verified=1&next=${encodeURIComponent(ctaHref)}${verifiedEmail ? `&email=${encodeURIComponent(verifiedEmail)}` : ''}`,
+    [ctaHref, verifiedEmail],
+  )
 
   useEffect(() => {
-    if (!token) return
+    if (!token || verificationStarted.current) return
+    verificationStarted.current = true
 
     let mounted = true
     authApi.verifyEmail(token)
-      .then(() => {
+      .then(async ({ data }) => {
         if (!mounted) return
+        const confirmedEmail = data?.data?.user?.email || email
+        setVerifiedEmail(confirmedEmail)
+
+        if (isStoredAccessTokenValid() || getStoredRefreshToken()) {
+          await refreshMe()
+          if (!mounted) return
+          if (useAuthStore.getState().isAuthenticated) {
+            setContinuedSession(true)
+            setStatus('success')
+            setMessage('Votre email est confirmé. Vous êtes connecté, redirection vers Kalico…')
+            window.setTimeout(() => router.replace(ctaHref), 900)
+            return
+          }
+        }
+
         setStatus('success')
-        setMessage('Votre email a été confirmé. Votre compte est maintenant prêt.')
+        setMessage('Votre email est confirmé. Connectez-vous pour accéder à votre compte.')
       })
       .catch((err: any) => {
         if (!mounted) return
@@ -45,7 +71,7 @@ function VerificationEmailContent() {
     return () => {
       mounted = false
     }
-  }, [token])
+  }, [ctaHref, email, refreshMe, router, token])
 
   const handleResend = async () => {
     if (!email) {
@@ -129,8 +155,8 @@ function VerificationEmailContent() {
           </div>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <Link href={status === 'success' ? ctaHref : '/inscription'} className="btn-primary justify-center px-5 py-3">
-              {status === 'success' ? 'Continuer' : 'Retour à l’inscription'}
+            <Link href={status === 'success' ? (continuedSession ? ctaHref : loginHref) : '/inscription'} className="btn-primary justify-center px-5 py-3">
+              {status === 'success' ? (continuedSession ? 'Accéder à Kalico' : 'Se connecter') : 'Retour à l’inscription'}
             </Link>
             <button
               type="button"

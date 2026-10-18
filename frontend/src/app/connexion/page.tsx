@@ -4,6 +4,8 @@ type SearchParams = {
   next?: string | string[]
   redirect?: string | string[]
   returnUrl?: string | string[]
+  email?: string | string[]
+  verified?: string | string[]
 }
 
 type PageProps = {
@@ -22,5 +24,11 @@ export default async function ConnexionPage({ searchParams }: PageProps) {
     firstValue(resolvedSearchParams?.returnUrl) ||
     ''
 
-  return <ConnexionClient nextPath={nextPath} />
+  return (
+    <ConnexionClient
+      nextPath={nextPath}
+      initialEmail={firstValue(resolvedSearchParams?.email)}
+      emailVerified={firstValue(resolvedSearchParams?.verified) === '1'}
+    />
+  )
 }

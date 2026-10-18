@@ -168,8 +168,8 @@ function baseTemplate(content) {
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
     .wrapper { max-width: 560px; margin: 40px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
-    .header { background: #2563eb; padding: 28px 32px; }
-    .header h1 { margin: 0; color: #fff; font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+    .header { background: #0a7ea4; padding: 24px 32px; }
+    .header img { display: block; width: 126px; max-width: 100%; height: auto; border: 0; color: #fff; font-size: 22px; font-weight: 700; }
     .body { padding: 32px; color: #1f2937; line-height: 1.6; }
     .body p { margin: 0 0 16px; }
     .btn { display: inline-block; background: #2563eb; color: #fff !important; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; margin: 8px 0 24px; }
@@ -179,7 +179,7 @@ function baseTemplate(content) {
 </head>
 <body>
   <div class="wrapper">
-    <div class="header"><h1>🔁 Kalico</h1></div>
+    <div class="header"><img src="${BASE_URL()}/brand/kalico1.svg" width="126" alt="Kalico"></div>
     <div class="body">${content}</div>
     <div class="footer">
       Kalico — La plateforme de petites annonces de Nouvelle-Calédonie<br>
