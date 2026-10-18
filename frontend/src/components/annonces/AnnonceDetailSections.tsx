@@ -63,10 +63,10 @@ function handoffModeLabels(value: unknown) {
   const labels: Record<string, string> = {
     pickup: 'Remise en main propre',
     'En main propre': 'Remise en main propre',
-    seller_delivery: 'Livraison locale par le vendeur',
-    'Livraison par mes soins': 'Livraison locale par le vendeur',
-    shipping: 'Envoi postal ou par transporteur',
-    'Envoi vers les Îles': 'Envoi postal ou par transporteur',
+    seller_delivery: 'Envoi possible',
+    'Livraison par mes soins': 'Envoi possible',
+    shipping: 'Envoi possible',
+    'Envoi vers les Îles': 'Envoi possible',
   }
   return [...new Set(value.map((item) => labels[String(item)] || String(item)).filter(Boolean))]
 }

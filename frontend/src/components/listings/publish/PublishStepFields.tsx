@@ -33,12 +33,17 @@ function errorFor(missing: MissingField[], key: MissingField['key']) {
 }
 
 export default function PublishStepFields({ stepId, draft, metadata, photos, missing, update, onAddPhotos, onRemovePhoto, photoLimit, photoMaxSizeMb, photoError }: Props) {
+  const mainCategories = metadata.categories.filter((category) => category.depth === 0)
+  const selectedCategory = metadata.categories.find((category) => String(category.id) === draft.categoryId)
+  const selectedMainCategoryId = selectedCategory ? String(selectedCategory.rootId) : ''
+  const subcategories = selectedMainCategoryId
+    ? metadata.categories.filter((category) => category.parentId === Number(selectedMainCategoryId))
+    : []
+  const selectedSubcategoryId = selectedCategory && selectedCategory.depth > 0 ? draft.categoryId : ''
   const toggleTrocWant = (value: string) => update('trocWants', draft.trocWants.includes(value)
     ? draft.trocWants.filter((item) => item !== value)
     : [...draft.trocWants, value])
-  const toggleHandoffMode = (value: PublishingHandoffMode) => update('handoffModes', draft.handoffModes.includes(value)
-    ? draft.handoffModes.filter((item) => item !== value)
-    : [...draft.handoffModes, value])
+  const selectHandoffMode = (value: string) => update('handoffModes', [value as PublishingHandoffMode])
   const toggleDay = (value: number) => update('recurrenceDays', draft.recurrenceDays.includes(value)
     ? draft.recurrenceDays.filter((day) => day !== value)
     : [...draft.recurrenceDays, value])
@@ -79,10 +84,16 @@ export default function PublishStepFields({ stepId, draft, metadata, photos, mis
     return (
       <div className="grid gap-4 md:grid-cols-2">
         <Input className="md:col-span-2" label="Titre" maxLength={70} value={draft.title} error={errorFor(missing, 'title')} onChange={(event) => update('title', event.target.value)} placeholder="Ex. Planche de surf avec housse" />
-        <Select label="Catégorie" value={draft.categoryId} error={errorFor(missing, 'categoryId')} onChange={(event) => update('categoryId', event.target.value)}>
-          <option value="">Choisir une catégorie</option>
-          {metadata.categories.map((category) => <option key={category.id} value={category.id}>{category.label}</option>)}
-        </Select>
+        <div className="grid gap-4 md:col-span-2 md:grid-cols-2">
+          <Select label="Catégorie principale" value={selectedMainCategoryId} error={errorFor(missing, 'categoryId')} onChange={(event) => update('categoryId', event.target.value)}>
+            <option value="">Choisir une catégorie principale</option>
+            {mainCategories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+          </Select>
+          <Select label="Sous-catégorie (facultative)" value={selectedSubcategoryId} disabled={!selectedMainCategoryId || subcategories.length === 0} onChange={(event) => update('categoryId', event.target.value || selectedMainCategoryId)}>
+            <option value="">{subcategories.length ? 'Aucune sous-catégorie' : 'Aucune sous-catégorie disponible'}</option>
+            {subcategories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+          </Select>
+        </div>
         <Select label="État" value={draft.condition} onChange={(event) => update('condition', event.target.value as PublishingDraft['condition'])}>
           {CONDITION_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </Select>
@@ -96,12 +107,7 @@ export default function PublishStepFields({ stepId, draft, metadata, photos, mis
       <div className="flex max-w-[620px] flex-col gap-5">
         <Input label="Prix" type="number" min={10} step={10} suffix="XPF" value={draft.priceXpf} error={errorFor(missing, 'priceXpf')} onChange={(event) => update('priceXpf', event.target.value)} />
         <Switch label="Prix négociable" checked={draft.negotiable} onChange={(event) => update('negotiable', event.target.checked)} />
-        <fieldset>
-          <legend className="mb-3 text-label-sm font-semibold text-ink">Mode de remise</legend>
-          <div className="flex flex-wrap gap-2">
-            {HANDOFF_MODE_OPTIONS.map((mode) => <FilterChip key={mode.value} selected={draft.handoffModes.includes(mode.value)} onClick={() => toggleHandoffMode(mode.value)}>{mode.label}{mode.hint ? ` · ${mode.hint}` : ''}</FilterChip>)}
-          </div>
-        </fieldset>
+        <SegmentedControl label="Mode de remise" value={draft.handoffModes[0] ?? 'pickup'} onChange={selectHandoffMode} options={HANDOFF_MODE_OPTIONS.map(({ value, label }) => ({ value, label }))} />
       </div>
     )
   }
