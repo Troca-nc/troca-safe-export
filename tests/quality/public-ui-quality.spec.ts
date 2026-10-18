@@ -19,13 +19,24 @@ test.describe('qualité UI et contenu des pages publiques critiques', () => {
     })
   }
 
-  test('inscription: la liste des communes utilise le thème clair natif', async ({ page }) => {
+  test('inscription: la liste des communes garde un contraste visible au survol', async ({ page }) => {
     await openStablePage(page, '/inscription')
     await page.getByRole('button', { name: 'Continuer' }).click()
 
-    const communeSelect = page.getByLabel('Commune')
-    await expect(communeSelect).toBeVisible()
-    await expect(communeSelect).toHaveCSS('color-scheme', 'light')
+    const communeSelect = page.getByRole('combobox', { name: 'Commune' })
+    await communeSelect.click()
+    const communeOption = page.getByRole('option').filter({ hasText: 'Nouméa' })
+    await communeOption.hover()
+
+    const colors = await communeOption.evaluate((element) => {
+      const style = window.getComputedStyle(element)
+      return { color: style.color, backgroundColor: style.backgroundColor }
+    })
+    expect(colors.color).not.toBe('rgb(255, 255, 255)')
+    expect(colors.backgroundColor).not.toBe('rgb(255, 255, 255)')
+
+    await communeOption.click()
+    await expect(communeSelect).toContainText('Nouméa')
   })
 
   test('vérification email: une nouvelle session propose une connexion préremplie', async ({ page }) => {
