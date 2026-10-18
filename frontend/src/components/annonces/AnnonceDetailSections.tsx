@@ -58,13 +58,30 @@ function metadataValue(value: unknown) {
   return String(value)
 }
 
+function handoffModeLabels(value: unknown) {
+  if (!Array.isArray(value)) return []
+  const labels: Record<string, string> = {
+    pickup: 'Remise en main propre',
+    'En main propre': 'Remise en main propre',
+    seller_delivery: 'Livraison locale par le vendeur',
+    'Livraison par mes soins': 'Livraison locale par le vendeur',
+    shipping: 'Envoi postal ou par transporteur',
+    'Envoi vers les Îles': 'Envoi postal ou par transporteur',
+  }
+  return [...new Set(value.map((item) => labels[String(item)] || String(item)).filter(Boolean))]
+}
+
 export function DetailInformation({ listing }: { listing: TypedListingDetail }) {
-  const characteristics = Object.entries(listing.metadata).filter(([, value]) => value !== null && value !== undefined && value !== '').slice(0, 8)
+  const handoffModes = handoffModeLabels(listing.metadata?.handoff_modes)
+  const characteristics = Object.entries(listing.metadata)
+    .filter(([key, value]) => key !== 'handoff_modes' && value !== null && value !== undefined && value !== '')
+    .slice(0, 8)
   const specs = [
     ['État', DETAIL_CONDITIONS[listing.condition] || listing.condition || 'Non précisé'],
     ['Localisation', listing.commune_name || 'Nouvelle-Calédonie'],
     ['Catégorie', listing.category_name || 'Annonce'],
     ['Échange', listing.is_troc ? listing.contre_quoi || 'Propositions bienvenues' : 'Non'],
+    ...(handoffModes.length ? [['Remise', handoffModes.join(' · ')]] : []),
   ]
   return <div className="space-y-8">
     <div className="grid gap-3 sm:grid-cols-2">{specs.map(([label, value]) => <div key={label} className="rounded-card border border-warm-border bg-cream-surface p-4"><p className="text-caption uppercase tracking-wider text-ink/50">{label}</p><p className="mt-1 font-semibold text-ink">{value}</p></div>)}</div>

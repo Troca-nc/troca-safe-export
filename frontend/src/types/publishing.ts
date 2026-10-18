@@ -20,6 +20,8 @@ export type PublishingMetadata = {
   communes: PublishingCommune[]
 }
 
+export type PublishingHandoffMode = 'pickup' | 'seller_delivery' | 'shipping'
+
 export type PublishingDraft = {
   kind: PublishingKind | null
   step: number
@@ -31,7 +33,7 @@ export type PublishingDraft = {
   negotiable: boolean
   communeId: string
   quartier: string
-  handoffModes: string[]
+  handoffModes: PublishingHandoffMode[]
   trocWants: string[]
   trocWish: string
   trocComplementXpf: string

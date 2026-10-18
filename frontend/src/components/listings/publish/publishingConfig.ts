@@ -71,6 +71,18 @@ export const CONDITION_OPTIONS = [
   { value: 'for_parts', label: 'À réparer' },
 ]
 
+export const LISTING_PHOTO_LIMITS = {
+  personal: 6,
+  pro: 12,
+  maxSizeMb: 10,
+} as const
+
+export const HANDOFF_MODE_OPTIONS = [
+  { value: 'pickup', label: 'Remise en main propre', hint: '' },
+  { value: 'seller_delivery', label: 'Livraison locale par le vendeur', hint: '' },
+  { value: 'shipping', label: 'Envoi postal ou par transporteur', hint: 'Grande Terre et îles' },
+] as const
+
 export const BON_PLAN_CATEGORIES = [
   { value: 'alimentation', label: 'Alimentation' },
   { value: 'restauration', label: 'Restauration' },

@@ -4,14 +4,14 @@ import { CalendarDays, Car, MapPin, Sparkles } from 'lucide-react'
 
 import ListingCard from '@/components/listings/ListingCard'
 import type { ListingSearchItem } from '@/types/listings'
-import type { PublishingDraft, PublishingMetadata } from '@/types/publishing'
+import type { PublishingDraft, PublishingMetadata, PublishingPhoto } from '@/types/publishing'
 
 function formatXpf(value: string) {
   const amount = Number(value)
   return Number.isFinite(amount) && amount > 0 ? `${amount.toLocaleString('fr-FR')} XPF` : 'Prix à préciser'
 }
 
-export default function PublishPreview({ draft, metadata }: { draft: PublishingDraft; metadata: PublishingMetadata | null }) {
+export default function PublishPreview({ draft, metadata, photos = [] }: { draft: PublishingDraft; metadata: PublishingMetadata | null; photos?: PublishingPhoto[] }) {
   if (draft.kind === 'sale' || draft.kind === 'troc') {
     const category = metadata?.categories.find((item) => String(item.id) === draft.categoryId)
     const commune = metadata?.communes.find((item) => String(item.id) === draft.communeId)
@@ -32,6 +32,7 @@ export default function PublishPreview({ draft, metadata }: { draft: PublishingD
       category_slug: category?.slug || 'annonce',
       seller_prenom: 'Votre',
       seller_nom: 'profil',
+      cover_image: photos[0]?.preview,
     }
     return (
       <div className="pointer-events-none" aria-label="Aperçu de la carte dans les résultats">

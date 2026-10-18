@@ -15,7 +15,10 @@ export function validatePublishingStep(draft: PublishingDraft, stepId: string, _
         ...required(draft.description.trim().length < 10, 'description', 'Description de 10 caractères minimum'),
       ]
     case 'price':
-      return required(Number(draft.priceXpf) <= 0, 'priceXpf', 'Prix supérieur à zéro')
+      return [
+        ...required(Number(draft.priceXpf) <= 0, 'priceXpf', 'Prix supérieur à zéro'),
+        ...required(draft.handoffModes.length === 0, 'handoffModes', 'Au moins un mode de remise'),
+      ]
     case 'exchange':
       return [
         ...required(Number(draft.priceXpf) <= 0, 'priceXpf', 'Valeur estimée supérieure à zéro'),
