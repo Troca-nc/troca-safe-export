@@ -79,8 +79,7 @@ export const LISTING_PHOTO_LIMITS = {
 
 export const HANDOFF_MODE_OPTIONS = [
   { value: 'pickup', label: 'Remise en main propre', hint: '' },
-  { value: 'seller_delivery', label: 'Livraison locale par le vendeur', hint: '' },
-  { value: 'shipping', label: 'Envoi postal ou par transporteur', hint: 'Grande Terre et îles' },
+  { value: 'shipping', label: 'Envoi possible', hint: '' },
 ] as const
 
 export const BON_PLAN_CATEGORIES = [

@@ -38,13 +38,13 @@ function normalizeHandoffModes(values: unknown): PublishingHandoffMode[] {
   const aliases: Record<string, PublishingHandoffMode> = {
     pickup: 'pickup',
     'En main propre': 'pickup',
-    seller_delivery: 'seller_delivery',
-    'Livraison par mes soins': 'seller_delivery',
+    seller_delivery: 'shipping',
+    'Livraison par mes soins': 'shipping',
     shipping: 'shipping',
     'Envoi vers les Îles': 'shipping',
   }
-  const normalized = values.map((value) => aliases[String(value)]).filter(Boolean)
-  return [...new Set(normalized)]
+  const normalized = values.map((value) => aliases[String(value)]).find(Boolean)
+  return [normalized ?? 'pickup']
 }
 
 export default function PublishFlow() {
@@ -177,7 +177,7 @@ export default function PublishFlow() {
 
   const selectedCategory = metadata?.categories.find((item) => String(item.id) === draft.categoryId)
   const selectedCommune = metadata?.communes.find((item) => String(item.id) === draft.communeId)
-  const selectedHandoffModes = HANDOFF_MODE_OPTIONS.filter((option) => draft.handoffModes.includes(option.value))
+  const selectedHandoffMode = HANDOFF_MODE_OPTIONS.find((option) => option.value === draft.handoffModes[0])
 
   const goNext = () => {
     if (!currentStep) return
@@ -254,13 +254,13 @@ export default function PublishFlow() {
                   {missing.length ? <FeedbackAlert tone="error" className="mt-6" title="Informations à compléter"><ul className="mt-1 list-disc space-y-1 pl-5">{missing.map((item) => <li key={String(item.key)}>{item.label}</li>)}</ul></FeedbackAlert> : null}
                   {submitError ? <FeedbackAlert tone="error" className="mt-6" title="Publication impossible"><div className="flex flex-col items-start gap-3"><p>{submitError}</p><Button compact variant="secondary" onClick={() => void submit()}>Réessayer</Button></div></FeedbackAlert> : null}
                   <div className="mt-8"><PublishStepFields stepId={currentStep.id} draft={draft} metadata={metadata} photos={photos} missing={missing} update={update} onAddPhotos={(files) => void addPhotos(files)} onRemovePhoto={removePhoto} photoLimit={photoLimit} photoMaxSizeMb={LISTING_PHOTO_LIMITS.maxSizeMb} photoError={photoError} /></div>
-                  {currentStep.id === 'publication' ? <section className="mt-7 rounded-card border border-sand bg-cream-sunken p-4 md:p-6" aria-labelledby="publication-preview-title"><p className="text-eyebrow-sm font-semibold uppercase tracking-eyebrow-sm text-accent-text">Aperçu final</p><h2 id="publication-preview-title" className="mt-2 font-display text-h3 text-ink">Voici ce que les visiteurs verront</h2><div className="mt-5 grid gap-5 md:grid-cols-[minmax(0,320px)_1fr]"><PublishPreview draft={draft} metadata={metadata} photos={photos} /><dl className="divide-y divide-sand rounded-card border border-sand bg-cream-surface px-4 text-body-sm"><div className="flex justify-between gap-4 py-3"><dt className="text-ink/55">Catégorie</dt><dd className="text-right font-semibold text-ink">{selectedCategory?.label || selectedCategory?.name || 'À vérifier'}</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-ink/55">Commune</dt><dd className="text-right font-semibold text-ink">{selectedCommune?.name || 'À vérifier'}</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-ink/55">Photos</dt><dd className="text-right font-semibold text-ink">{photos.length} / {photoLimit}</dd></div>{draft.kind === 'sale' ? <div className="py-3"><dt className="text-ink/55">Modes de remise</dt><dd className="mt-2 flex flex-wrap gap-2">{selectedHandoffModes.length ? selectedHandoffModes.map((mode) => <span key={mode.value} className="rounded-full bg-accent-soft px-3 py-1 text-caption font-semibold text-accent-text">{mode.label}{mode.hint ? ` · ${mode.hint}` : ''}</span>) : <span className="font-semibold text-alert-error">À préciser</span>}</dd></div> : null}</dl></div></section> : null}
+                  {currentStep.id === 'publication' ? <section className="mt-7 rounded-card border border-sand bg-cream-sunken p-4 md:p-6" aria-labelledby="publication-preview-title"><p className="text-eyebrow-sm font-semibold uppercase tracking-eyebrow-sm text-accent-text">Aperçu final</p><h2 id="publication-preview-title" className="mt-2 font-display text-h3 text-ink">Voici ce que les visiteurs verront</h2><div className="mt-5 grid gap-5 md:grid-cols-[minmax(0,320px)_1fr]"><PublishPreview draft={draft} metadata={metadata} photos={photos} /><dl className="divide-y divide-sand rounded-card border border-sand bg-cream-surface px-4 text-body-sm"><div className="flex justify-between gap-4 py-3"><dt className="text-ink/55">Catégorie</dt><dd className="text-right font-semibold text-ink">{selectedCategory?.label || selectedCategory?.name || 'À vérifier'}</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-ink/55">Commune</dt><dd className="text-right font-semibold text-ink">{selectedCommune?.name || 'À vérifier'}</dd></div><div className="flex justify-between gap-4 py-3"><dt className="text-ink/55">Photos</dt><dd className="text-right font-semibold text-ink">{photos.length} / {photoLimit}</dd></div>{draft.kind === 'sale' ? <div className="py-3"><dt className="text-ink/55">Mode de remise</dt><dd className="mt-2 flex flex-wrap gap-2">{selectedHandoffMode ? <span className="rounded-full bg-accent-soft px-3 py-1 text-caption font-semibold text-accent-text">{selectedHandoffMode.label}</span> : <span className="font-semibold text-alert-error">À préciser</span>}</dd></div> : null}</dl></div></section> : null}
                   {currentStep.id === 'publication' && user?.is_verified ? <div className="mt-5 flex items-start gap-3 rounded-card border border-reef/30 bg-reef/15 p-4 text-body-sm text-reef-text"><BadgeCheck className="mt-0.5 h-5 w-5 shrink-0" /><p><strong>Compte vérifié.</strong> Cette preuve concerne votre profil ; elle ne constitue pas une certification de l’annonce.</p></div> : null}
                   <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-sand pt-6"><Button variant="secondary" onClick={goBack}><ArrowLeft className="h-4 w-4" />Retour</Button>{draft.step < steps.length - 1 ? <Button onClick={goNext}>Continuer<ArrowRight className="h-4 w-4" /></Button> : <Button loading={submitting} loadingLabel="Publication…" onClick={() => void submit()}>Publier maintenant<ArrowRight className="h-4 w-4" /></Button>}<p className="text-meta text-ink/55">Brouillon enregistré automatiquement.</p></div>
                 </section>
               ) : null}
             </div>
-            <aside className="min-w-0 lg:sticky lg:top-28 lg:self-start"><p className="mb-3 text-eyebrow-sm font-semibold uppercase tracking-eyebrow-sm text-ink/55">Aperçu dans les résultats</p>{metadata ? <PublishPreview draft={draft} metadata={metadata} photos={photos} /> : <Skeleton className="h-[420px]" />}<div className="mt-4 rounded-card border-l-[3px] border-l-lagoon bg-lagoon/10 p-4 text-body-sm text-ink/75">{currentStep?.id === 'photos' ? `Les photos sont facultatives. Vous pouvez en ajouter jusqu’à ${photoLimit}, avec une taille maximale de ${LISTING_PHOTO_LIMITS.maxSizeMb} Mo chacune.` : currentStep?.id === 'publication' ? 'Relisez les montants, les dates, la commune et les modes de remise avant de publier.' : 'Les modifications apparaissent dans cet aperçu au fur et à mesure.'}</div></aside>
+            <aside className="min-w-0 lg:sticky lg:top-28 lg:self-start"><p className="mb-3 text-eyebrow-sm font-semibold uppercase tracking-eyebrow-sm text-ink/55">Aperçu dans les résultats</p>{metadata ? <PublishPreview draft={draft} metadata={metadata} photos={photos} /> : <Skeleton className="h-[420px]" />}<div className="mt-4 rounded-card border-l-[3px] border-l-lagoon bg-lagoon/10 p-4 text-body-sm text-ink/75">{currentStep?.id === 'photos' ? `Les photos sont facultatives. Vous pouvez en ajouter jusqu’à ${photoLimit}, avec une taille maximale de ${LISTING_PHOTO_LIMITS.maxSizeMb} Mo chacune.` : currentStep?.id === 'publication' ? 'Relisez les montants, les dates, la commune et le mode de remise avant de publier.' : 'Les modifications apparaissent dans cet aperçu au fur et à mesure.'}</div></aside>
           </div>
         )}
       </main>

@@ -33,7 +33,7 @@ async function publishSale(page: Page, title: string) {
 
   await expect(page.getByRole('heading', { name: /Décrivez votre objet/i })).toBeVisible()
   await page.getByLabel(/^Titre$/i).fill(title)
-  await page.getByLabel(/Catégorie/i).selectOption({ label: 'Sports & Loisirs' })
+  await page.getByLabel(/^Catégorie principale$/i).selectOption({ label: 'Sports & Loisirs' })
   await page.getByLabel(/Description/i).fill('Annonce QA éphémère créée pour valider le parcours métier complet.')
   await page.getByRole('button', { name: /Continuer/i }).click()
 

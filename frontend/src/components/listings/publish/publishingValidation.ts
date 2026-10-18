@@ -17,7 +17,7 @@ export function validatePublishingStep(draft: PublishingDraft, stepId: string, _
     case 'price':
       return [
         ...required(Number(draft.priceXpf) <= 0, 'priceXpf', 'Prix supérieur à zéro'),
-        ...required(draft.handoffModes.length === 0, 'handoffModes', 'Au moins un mode de remise'),
+        ...required(draft.handoffModes.length === 0, 'handoffModes', 'Choisissez un mode de remise'),
       ]
     case 'exchange':
       return [

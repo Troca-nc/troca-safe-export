@@ -6,6 +6,8 @@ export type PublishingCategory = {
   slug: string
   label: string
   depth: number
+  parentId: number | null
+  rootId: number
 }
 
 export type PublishingCommune = {
@@ -20,7 +22,7 @@ export type PublishingMetadata = {
   communes: PublishingCommune[]
 }
 
-export type PublishingHandoffMode = 'pickup' | 'seller_delivery' | 'shipping'
+export type PublishingHandoffMode = 'pickup' | 'shipping'
 
 export type PublishingDraft = {
   kind: PublishingKind | null

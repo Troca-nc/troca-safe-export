@@ -29,19 +29,28 @@ type RawProvince = {
   communes?: Array<{ id: number; name: string; slug?: string; province_name?: string | null }>
 }
 
-export function flattenPublishingCategories(nodes: RawCategory[], ancestors: string[] = []): PublishingCategory[] {
+export function flattenPublishingCategories(
+  nodes: RawCategory[],
+  ancestors: string[] = [],
+  parentId: number | null = null,
+  rootId: number | null = null,
+): PublishingCategory[] {
   return nodes.flatMap((node) => {
     const children = node.children ?? node.subcategories ?? []
     const path = [...ancestors, node.name]
+    const nodeId = Number(node.id)
+    const nodeRootId = rootId ?? nodeId
     return [
       {
-        id: Number(node.id),
+        id: nodeId,
         name: node.name,
         slug: node.slug,
         label: path.join(' › '),
         depth: ancestors.length,
+        parentId,
+        rootId: nodeRootId,
       },
-      ...flattenPublishingCategories(children, path),
+      ...flattenPublishingCategories(children, path, nodeId, nodeRootId),
     ]
   })
 }

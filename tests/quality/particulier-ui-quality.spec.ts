@@ -50,7 +50,10 @@ test.describe('qualité UI et contenu du compte particulier', () => {
 
     const title = 'Vélo de ville pour aperçu'
     await page.getByLabel('Titre', { exact: true }).fill(title)
-    await page.getByLabel('Catégorie', { exact: true }).selectOption({ index: 1 })
+    await page.getByLabel('Catégorie principale', { exact: true }).selectOption({ index: 1 })
+    const subcategory = page.getByLabel('Sous-catégorie (facultative)', { exact: true })
+    await expect(subcategory).toBeEnabled()
+    await subcategory.selectOption({ index: 1 })
     await page.getByLabel('Description', { exact: true }).fill('Vélo entretenu avec quelques marques clairement indiquées.')
     await page.getByRole('button', { name: 'Continuer' }).click()
 
@@ -66,14 +69,21 @@ test.describe('qualité UI et contenu du compte particulier', () => {
     await page.getByRole('button', { name: 'Continuer' }).click()
 
     await page.getByLabel('Prix', { exact: true }).fill('25000')
-    await expect(page.getByText('Envoi postal ou par transporteur', { exact: false })).toBeVisible()
+    const pickup = page.getByRole('radio', { name: 'Remise en main propre', exact: true })
+    const shipping = page.getByRole('radio', { name: 'Envoi possible', exact: true })
+    await expect(pickup).toBeChecked()
+    await expect(shipping).not.toBeChecked()
+    await shipping.locator('..').click()
+    await expect(shipping).toBeChecked()
+    await expect(pickup).not.toBeChecked()
     await page.getByRole('button', { name: 'Continuer' }).click()
 
     await page.getByLabel('Commune', { exact: true }).selectOption({ index: 1 })
     await page.getByRole('button', { name: 'Continuer' }).click()
 
     await expect(page.getByRole('heading', { name: 'Voici ce que les visiteurs verront' })).toBeVisible()
-    await expect(page.getByText('Modes de remise', { exact: true })).toBeVisible()
+    await expect(page.getByText('Mode de remise', { exact: true })).toBeVisible()
+    await expect(page.getByText('Envoi possible', { exact: true })).toBeVisible()
     await expectPageQuality(page, testInfo, 'publication-apercu-final')
   })
 })
