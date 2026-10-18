@@ -32,7 +32,7 @@ test.describe('qualité UI et contenu du compte particulier', () => {
     }
   })
 
-  test('publication: première étape lisible sans photo obligatoire', async ({ page }, testInfo) => {
+  test('publication: limites photo et aperçu final restent explicites', async ({ page }, testInfo) => {
     await openStablePage(page, '/deposer')
     await expect(page.getByRole('heading', { name: 'Que souhaitez-vous publier ?' })).toBeVisible()
 
@@ -47,5 +47,33 @@ test.describe('qualité UI et contenu du compte particulier', () => {
     await expect(page.getByLabel('Description', { exact: true })).toBeVisible()
     await expect(page.locator('input[type="file"]')).toHaveCount(0)
     await expectPageQuality(page, testInfo, 'publication-etape-description')
+
+    const title = 'Vélo de ville pour aperçu'
+    await page.getByLabel('Titre', { exact: true }).fill(title)
+    await page.getByLabel('Catégorie', { exact: true }).selectOption({ index: 1 })
+    await page.getByLabel('Description', { exact: true }).fill('Vélo entretenu avec quelques marques clairement indiquées.')
+    await page.getByRole('button', { name: 'Continuer' }).click()
+
+    await expect(page.getByText('0 / 6 photos', { exact: true })).toBeVisible()
+    await expect(page.getByText(/10 Mo maximum par photo/i)).toBeVisible()
+    await page.locator('input[type="file"]').setInputFiles({
+      name: 'velo.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64'),
+    })
+    await expect(page.getByText('1 / 6 photos', { exact: true })).toBeVisible()
+    await expect(page.getByLabel('Aperçu de la carte dans les résultats').getByRole('img', { name: title })).toBeVisible()
+    await page.getByRole('button', { name: 'Continuer' }).click()
+
+    await page.getByLabel('Prix', { exact: true }).fill('25000')
+    await expect(page.getByText('Envoi postal ou par transporteur', { exact: false })).toBeVisible()
+    await page.getByRole('button', { name: 'Continuer' }).click()
+
+    await page.getByLabel('Commune', { exact: true }).selectOption({ index: 1 })
+    await page.getByRole('button', { name: 'Continuer' }).click()
+
+    await expect(page.getByRole('heading', { name: 'Voici ce que les visiteurs verront' })).toBeVisible()
+    await expect(page.getByText('Modes de remise', { exact: true })).toBeVisible()
+    await expectPageQuality(page, testInfo, 'publication-apercu-final')
   })
 })

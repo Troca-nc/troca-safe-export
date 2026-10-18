@@ -32,7 +32,7 @@ export const EMPTY_PUBLISHING_DRAFT: PublishingDraft = {
   negotiable: false,
   communeId: '',
   quartier: '',
-  handoffModes: ['En main propre'],
+  handoffModes: ['pickup'],
   trocWants: [],
   trocWish: '',
   trocComplementXpf: '0',

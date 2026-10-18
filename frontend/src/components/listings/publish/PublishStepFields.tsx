@@ -5,8 +5,8 @@ import { ImagePlus, Trash2 } from 'lucide-react'
 import { Checkbox, FilterChip, SegmentedControl, Switch } from '@/components/ui/Controls'
 import { Input, Select, Textarea } from '@/components/ui/Field'
 import type { MissingField } from './publishingValidation'
-import { BON_PLAN_CATEGORIES, CONDITION_OPTIONS, EVENT_CATEGORIES } from './publishingConfig'
-import type { PublishingDraft, PublishingMetadata, PublishingPhoto } from '@/types/publishing'
+import { BON_PLAN_CATEGORIES, CONDITION_OPTIONS, EVENT_CATEGORIES, HANDOFF_MODE_OPTIONS } from './publishingConfig'
+import type { PublishingDraft, PublishingHandoffMode, PublishingMetadata, PublishingPhoto } from '@/types/publishing'
 
 type Props = {
   stepId: string
@@ -17,6 +17,9 @@ type Props = {
   update: <K extends keyof PublishingDraft>(key: K, value: PublishingDraft[K]) => void
   onAddPhotos: (files: FileList) => void
   onRemovePhoto: (index: number) => void
+  photoLimit: number
+  photoMaxSizeMb: number
+  photoError?: string
 }
 
 const DAYS = [
@@ -29,11 +32,13 @@ function errorFor(missing: MissingField[], key: MissingField['key']) {
   return missing.find((item) => item.key === key)?.label
 }
 
-export default function PublishStepFields({ stepId, draft, metadata, photos, missing, update, onAddPhotos, onRemovePhoto }: Props) {
-  const toggleString = (key: 'trocWants' | 'handoffModes', value: string) => {
-    const values = draft[key]
-    update(key, values.includes(value) ? values.filter((item) => item !== value) : [...values, value])
-  }
+export default function PublishStepFields({ stepId, draft, metadata, photos, missing, update, onAddPhotos, onRemovePhoto, photoLimit, photoMaxSizeMb, photoError }: Props) {
+  const toggleTrocWant = (value: string) => update('trocWants', draft.trocWants.includes(value)
+    ? draft.trocWants.filter((item) => item !== value)
+    : [...draft.trocWants, value])
+  const toggleHandoffMode = (value: PublishingHandoffMode) => update('handoffModes', draft.handoffModes.includes(value)
+    ? draft.handoffModes.filter((item) => item !== value)
+    : [...draft.handoffModes, value])
   const toggleDay = (value: number) => update('recurrenceDays', draft.recurrenceDays.includes(value)
     ? draft.recurrenceDays.filter((day) => day !== value)
     : [...draft.recurrenceDays, value])
@@ -45,12 +50,14 @@ export default function PublishStepFields({ stepId, draft, metadata, photos, mis
           <ImagePlus className="h-7 w-7 text-accent-text" aria-hidden="true" />
           <span className="text-label font-semibold text-ink">Ajouter des photos</span>
           <span className="rounded-full bg-accent-soft px-3 py-1 text-caption font-semibold text-accent-text">Recommandé, mais facultatif</span>
-          <span className="max-w-[480px] text-meta text-ink/65">JPEG, PNG, WebP ou HEIC. Si vous ajoutez plusieurs images, la première devient la couverture.</span>
-          <input className="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/heic" multiple onChange={(event) => {
+          <span className="text-label-sm font-semibold text-ink">{photos.length} / {photoLimit} photos</span>
+          <span className="max-w-[480px] text-meta text-ink/65">JPEG, PNG, WebP ou HEIC · {photoMaxSizeMb} Mo maximum par photo. La première image devient la couverture.</span>
+          <input className="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/heic" multiple disabled={photos.length >= photoLimit} onChange={(event) => {
             if (event.target.files?.length) onAddPhotos(event.target.files)
             event.target.value = ''
           }} />
         </label>
+        {photoError ? <p role="alert" className="rounded-control border border-alert-error/25 bg-alert-error/10 px-4 py-3 text-body-sm text-alert-error">{photoError}</p> : null}
         {photos.length ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {photos.map((photo, index) => (
@@ -92,7 +99,7 @@ export default function PublishStepFields({ stepId, draft, metadata, photos, mis
         <fieldset>
           <legend className="mb-3 text-label-sm font-semibold text-ink">Mode de remise</legend>
           <div className="flex flex-wrap gap-2">
-            {['En main propre', 'Envoi vers les Îles', 'Livraison par mes soins'].map((mode) => <FilterChip key={mode} selected={draft.handoffModes.includes(mode)} onClick={() => toggleString('handoffModes', mode)}>{mode}</FilterChip>)}
+            {HANDOFF_MODE_OPTIONS.map((mode) => <FilterChip key={mode.value} selected={draft.handoffModes.includes(mode.value)} onClick={() => toggleHandoffMode(mode.value)}>{mode.label}{mode.hint ? ` · ${mode.hint}` : ''}</FilterChip>)}
           </div>
         </fieldset>
       </div>
@@ -107,7 +114,7 @@ export default function PublishStepFields({ stepId, draft, metadata, photos, mis
         <fieldset className="md:col-span-2">
           <legend className="mb-3 text-label-sm font-semibold text-ink">Catégories recherchées</legend>
           <div className="flex flex-wrap gap-2">
-            {metadata.categories.slice(0, 14).map((category) => <FilterChip key={category.id} selected={draft.trocWants.includes(category.name)} onClick={() => toggleString('trocWants', category.name)}>{category.name}</FilterChip>)}
+            {metadata.categories.filter((category) => category.depth === 0).map((category) => <FilterChip key={category.id} selected={draft.trocWants.includes(category.name)} onClick={() => toggleTrocWant(category.name)}>{category.name}</FilterChip>)}
           </div>
           {errorFor(missing, 'trocWants') ? <p role="alert" className="mt-2 text-meta text-alert-error">{errorFor(missing, 'trocWants')}</p> : null}
         </fieldset>
@@ -245,7 +252,7 @@ export default function PublishStepFields({ stepId, draft, metadata, photos, mis
   }
 
   return (
-    <div className="rounded-card border border-sand bg-cream-sunken p-5 text-body-sm text-ink/70">
+    <div className="rounded-card border border-sand bg-cream-sunken p-5 text-body-sm text-ink">
       Vérifiez l’aperçu et les informations avant de publier. Aucun paiement ni boost n’est déclenché sans confirmation explicite.
     </div>
   )

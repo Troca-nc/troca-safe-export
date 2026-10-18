@@ -54,6 +54,7 @@ export default function ListingImage({
       loading={loading}
       placeholder={placeholder}
       blurDataURL={blurDataURL}
+      unoptimized={src.startsWith('blob:') || src.startsWith('data:')}
       onError={() => setErrored(true)}
       onLoadingComplete={onLoadingComplete}
       className={`object-cover ${imgClassName}`}
