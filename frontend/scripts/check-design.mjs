@@ -190,6 +190,20 @@ for (const file of walk(resolve(ROOT, 'src/components/ui'))) {
         )
     })
 }
+// Les étincelles génériques donnent un rendu artificiel dans le parcours de publication.
+for (const file of walk(resolve(ROOT, 'src/components/listings/publish'))) {
+  readFileSync(file, 'utf8')
+    .split('\n')
+    .forEach((line, index) => {
+      if (/\bSparkles\b|IconSparkles|✨/.test(line))
+        errors.push(
+          normalize(relative(ROOT, file)) +
+            ':' +
+            (index + 1) +
+            ' icône étincelles interdite dans le parcours de publication',
+        )
+    })
+}
 if (args.has('--launch')) {
   for (const env of ['.env.production', '.env.production.local']) {
     const file = resolve(ROOT, env)

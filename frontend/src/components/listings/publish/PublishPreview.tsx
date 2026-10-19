@@ -1,6 +1,6 @@
 'use client'
 
-import { CalendarDays, Car, MapPin, Sparkles } from 'lucide-react'
+import { CalendarDays, Car, MapPin } from 'lucide-react'
 
 import ListingCard from '@/components/listings/ListingCard'
 import type { ListingSearchItem } from '@/types/listings'
@@ -79,8 +79,7 @@ export default function PublishPreview({ draft, metadata, photos = [] }: { draft
 
   return (
     <div className="rounded-card border border-sand bg-cream-surface p-5 shadow-card">
-      <span className="flex h-11 w-11 items-center justify-center rounded-control bg-accent-soft text-accent-text"><Sparkles className="h-5 w-5" /></span>
-      <p className="mt-5 text-eyebrow-sm font-semibold uppercase tracking-eyebrow-sm text-accent-text">Bon plan local</p>
+      <p className="text-eyebrow-sm font-semibold uppercase tracking-eyebrow-sm text-accent-text">Bon plan local</p>
       <h3 className="mt-2 text-h4 font-semibold text-ink text-balance">{draft.title || 'Titre de votre offre'}</h3>
       <p className="mt-2 text-body-sm text-ink/65">{draft.businessName || 'Votre commerce'}</p>
       <p className="mt-5 font-display text-price text-ink">

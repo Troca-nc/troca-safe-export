@@ -1887,3 +1887,20 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - Build : `NODE_OPTIONS=--use-system-ca npm run build`, passé avec 112 routes, dont `/annonces/nouvelle`.
 - Design system : `node scripts/check-design.mjs --changed`, 4 fichiers contrôlés, 0 erreur, 0 avertissement avant mise à jour de ce suivi.
 - La migration PostgreSQL complète sera exercée par le parcours QA éphémère de la CI avant toute fusion ou application en production.
+
+## Parcours de publication — aperçu Bon Plan et trajets intra-communaux (19 octobre 2026)
+
+- L’icône générique en forme d’étincelles est retirée de l’aperçu Bon Plan et du message de fin du parcours de publication afin de conserver une identité plus sobre et personnelle.
+- Le contrôle du design interdit désormais la réintroduction d’une icône d’étincelles dans les composants du parcours de publication.
+- Un covoiturage peut utiliser la même commune au départ et à l’arrivée, notamment pour les trajets domicile-travail au sein de Nouméa. Les deux communes restent obligatoires.
+- Aucun changement d’API, de schéma ou de données : le serveur acceptait déjà les trajets intra-communaux.
+
+### Validation
+
+- Test navigateur ciblé : l’aperçu Bon Plan est dépourvu d’étincelles et le formulaire passe à l’étape « Quand partez-vous ? » avec une commune identique, passé.
+- Tests du garde-fou design : 6 tests passés, dont le refus explicite des étincelles dans le parcours de publication.
+- Design system : `node scripts/check-design.mjs --changed`, 3 fichiers contrôlés, 0 erreur, 0 avertissement avant mise à jour de ce suivi.
+- Garde-fou d’encodage : 139 fichiers protégés sont exempts de marqueurs connus ; la dette historique hors périmètre reste signalée sans bloquer.
+- Lint obligatoire : `npm run lint`, passé selon le périmètre ESLint actuel du dépôt.
+- TypeScript : `tsc --noEmit --incremental false`, passé.
+- Build : `NODE_OPTIONS=--use-system-ca npm run build`, passé avec 112 routes, dont `/deposer` et `/covoiturage`.
