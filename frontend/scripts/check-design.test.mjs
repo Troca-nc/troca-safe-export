@@ -111,6 +111,16 @@ test('tokens are exempt, deleted files are ignored, and empty scope is explicit'
   assert.equal(result.status, 0)
   assert.match(result.stdout, /Aucun fichier source/)
 })
+test('refuses sparkle icons in the publishing flow', (t) => {
+  const f = fixture(t)
+  f.put(
+    'src/components/listings/publish/Preview.tsx',
+    "import { Sparkles } from 'lucide-react'; export const Preview = Sparkles;\n",
+  )
+  const result = f.run('--changed')
+  assert.equal(result.status, 1)
+  assert.match(result.stderr, /icône étincelles interdite/)
+})
 test('launch refuses provisional values and demo in production overrides', (t) => {
   const f = fixture(t)
   f.put(

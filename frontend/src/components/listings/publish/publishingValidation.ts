@@ -56,7 +56,6 @@ export function validatePublishingStep(draft: PublishingDraft, stepId: string, _
       return [
         ...required(!draft.departureCommuneId, 'departureCommuneId', 'Commune de départ'),
         ...required(!draft.destinationCommuneId, 'destinationCommuneId', 'Commune d’arrivée'),
-        ...required(Boolean(draft.departureCommuneId && draft.departureCommuneId === draft.destinationCommuneId), 'destinationCommuneId', 'Une arrivée différente du départ'),
       ]
     case 'schedule':
       return [

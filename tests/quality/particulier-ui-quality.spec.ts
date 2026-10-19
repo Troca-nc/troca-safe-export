@@ -86,4 +86,23 @@ test.describe('qualité UI et contenu du compte particulier', () => {
     await expect(page.getByText('Envoi possible', { exact: true })).toBeVisible()
     await expectPageQuality(page, testInfo, 'publication-apercu-final')
   })
+
+  test('publication: bon plan sans étincelles et covoiturage intra-communal', async ({ page }) => {
+    await openStablePage(page, '/deposer?type=bonplan')
+    await expect(page.getByText('Bon plan local', { exact: true })).toBeVisible()
+    await expect(page.locator('.lucide-sparkles')).toHaveCount(0)
+
+    await openStablePage(page, '/deposer?type=carpool')
+    const closeAuthModal = page.getByRole('button', { name: /^Fermer$/i }).first()
+    await closeAuthModal.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {})
+    if (await closeAuthModal.isVisible()) await closeAuthModal.click()
+
+    const departure = page.getByLabel('Départ', { exact: true })
+    const destination = page.getByLabel('Arrivée', { exact: true })
+    await departure.selectOption({ index: 1 })
+    await destination.selectOption(await departure.inputValue())
+    await page.getByRole('button', { name: 'Continuer' }).click()
+
+    await expect(page.getByRole('heading', { name: 'Quand partez-vous ?' })).toBeVisible()
+  })
 })
