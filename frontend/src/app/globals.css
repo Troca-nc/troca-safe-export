@@ -814,6 +814,7 @@ header nav button {
   .k-field-group:has(:disabled) { @apply bg-cream-sunken text-ink/55; }
   .k-field { @apply h-[48px] w-full min-w-0 flex-1 border-0 bg-transparent px-[15px] text-base text-ink outline-none placeholder:text-ink/45 disabled:cursor-not-allowed disabled:text-ink/55; }
   select.k-field { color-scheme: light; }
+  select.k-field option { @apply bg-cream-surface text-ink; }
   .k-textarea { @apply h-auto resize-y px-[14px] py-3 leading-relaxed; }
   .k-field-affix { @apply flex shrink-0 items-center px-3 font-mono text-body-sm text-ink/70; }
   .k-choice { @apply flex min-h-11 cursor-pointer items-center gap-3 text-body-sm text-ink; }

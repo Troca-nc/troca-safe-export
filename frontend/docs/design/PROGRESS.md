@@ -531,7 +531,7 @@ Les fixtures de la fiche 03 ne contiennent que les cartes de recherche. Après v
 - Les textes placés directement sur le fond de page utilisaient encore les couleurs fixes `text-ink`, prévues pour les surfaces crème. En thème sombre, leur contraste devenait insuffisant alors que les contenus des cartes claires restaient corrects.
 - Le fil d’Ariane, les états, la description, les titres de caractéristiques et d’avis, le panneau de sécurité et le titre des annonces similaires utilisent désormais les variables adaptatives `--color-text-primary`, `--color-text-secondary`, `--color-info` et `--color-danger`.
 - Les textes situés dans les cartes crème conservent volontairement les jetons `text-ink` afin de préserver leur contraste sur surface claire.
-- Un scénario Playwright ouvre une fiche de démonstration en thème sombre, vérifie explicitement les couleurs calculées des cinq titres principaux et exécute l’audit automatique de contraste, d’encodage et de débordement.
+- Un scénario Playwright ouvre la fiche n°101 du serveur CI en thème sombre, vérifie explicitement les couleurs calculées des titres principaux et exécute l’audit automatique de contraste, d’encodage et de débordement.
 - Aucun changement de route, d’API, de donnée ou de schéma.
 
 ### Validation
@@ -543,6 +543,17 @@ Les fixtures de la fiche 03 ne contiennent que les cartes de recherche. Après v
 - Garde-fou d’encodage : 139 fichiers protégés sont exempts de marqueurs connus ; la dette historique hors périmètre reste signalée sans bloquer.
 - Build : `NODE_OPTIONS=--use-system-ca npm run build`, passé avec 112 routes, dont `/annonces/[id]`.
 - `git diff --check` : passé.
+
+### Complément — menu de signalement et prévention systémique
+
+- La modale « Signaler cette annonce » utilisait un `<select>` artisanal qui héritait du `color-scheme: dark` de la page tout en conservant une surface crème. Le menu natif pouvait donc afficher l’option survolée en blanc sur blanc.
+- Le champ « Motif » réutilise désormais le composant `Select` du design system. Celui-ci impose un rendu natif clair et des options `cream-surface` / `ink`, y compris lorsque la page est en thème sombre.
+- Le scénario Playwright ouvre maintenant réellement la modale, contrôle le `color-scheme`, les couleurs calculées d’une option, le changement de valeur, puis exécute Axe sur la modale ouverte.
+- Le garde-fou design refuse tout nouveau `<select>` natif brut ajouté hors du composant partagé. Cette règle porte sur les lignes nouvellement ajoutées afin de prévenir les régressions sans transformer la dette historique en blocage hors périmètre.
+- Aucun changement d’API, de donnée, de schéma ou de contenu métier.
+- Validation ciblée : scénario Playwright de la fiche annonce et de la modale de signalement, passé (1/1).
+- Validation élargie : audit Playwright des pages publiques et du compte particulier, passé (13/13).
+- Qualité statique : lint, TypeScript, tests du garde-fou design (7/7), contrôle design des lignes modifiées, build de production et `git diff --check`, passés.
 
 ## 05 — Inventaire (étape 1, sans code)
 
