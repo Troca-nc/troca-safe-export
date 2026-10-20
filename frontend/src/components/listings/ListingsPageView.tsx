@@ -10,6 +10,7 @@ import Header from '@/components/layout/Header'
 import ListingCard from '@/components/listings/ListingCard'
 import ListingsFiltersPanel from '@/components/listings/ListingsFiltersPanel'
 import { ListingSkeletonGrid } from '@/components/ListingSkeleton'
+import { Listbox } from '@/components/ui/Field'
 import { ErrorState } from '@/components/ui/Skeleton'
 import { useListingFilters, type ListingFilters } from '@/hooks/useListingFilters'
 import { consumePendingAuthAction, peekPendingAuthAction } from '@/lib/authAction'
@@ -389,12 +390,16 @@ export default function ListingsPageView({ title, subtitle, categorySlug = '', a
             </div>
             <div className="flex items-center gap-3">
               {activeFilterCount > 0 ? <button type="button" onClick={resetAll} className="hidden min-h-11 items-center gap-2 text-label text-[var(--color-error)] md:inline-flex"><X className="h-4 w-4" /> Réinitialiser ({activeFilterCount})</button> : null}
-              <label className="flex flex-1 items-center gap-2 text-body-sm text-ink/60 sm:flex-none">
+              <div className="flex flex-1 items-center gap-2 text-body-sm text-ink/60 sm:flex-none">
                 <span className="hidden sm:inline">Trier par</span>
-                <select value={filters.sort} onChange={(event) => updateFilter('sort', event.target.value)} className="h-11 flex-1 rounded-control border border-warm-border bg-cream-surface px-3 text-base text-ink outline-none focus:border-ink sm:flex-none">
-                  {SORT_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                </select>
-              </label>
+                <Listbox
+                  label="Trier par"
+                  value={filters.sort}
+                  options={SORT_OPTIONS}
+                  onChange={(value) => updateFilter('sort', value)}
+                  className="min-w-0 flex-1 [&>label]:sr-only sm:w-48 sm:flex-none"
+                />
+              </div>
             </div>
           </div>
         </div>
