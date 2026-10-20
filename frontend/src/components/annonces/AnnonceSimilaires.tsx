@@ -17,8 +17,8 @@ export function SimilarListings({ listings }: { listings: ListingSearchItem[] })
   return (
     <section aria-labelledby="similar-listings-title" className="mt-16">
       <div className="flex items-end justify-between gap-4">
-        <div><p className="text-eyebrow uppercase text-info-text">À découvrir aussi</p><h2 id="similar-listings-title" className="mt-1 font-display text-h2 text-ink">Annonces similaires</h2></div>
-        <Link href="/annonces" className="text-label text-accent-text underline underline-offset-4">Voir toutes les annonces</Link>
+        <div><p className="text-eyebrow uppercase text-info-text dark:text-[var(--color-info)]">À découvrir aussi</p><h2 id="similar-listings-title" className="mt-1 font-display text-h2 text-[var(--color-text-primary)]">Annonces similaires</h2></div>
+        <Link href="/annonces" className="text-label text-accent-text underline underline-offset-4 dark:text-accent">Voir toutes les annonces</Link>
       </div>
       {listings.length ? <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{listings.map((listing) => <ListingCard key={listing.id} listing={listing} />)}</div> : <div className="mt-6 rounded-card border border-dashed border-warm-border bg-cream-surface p-8 text-center text-body-sm text-ink/60">Aucune annonce similaire pour le moment.</div>}
     </section>
