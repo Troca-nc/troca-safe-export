@@ -19,6 +19,32 @@ test.describe('qualité UI et contenu des pages publiques critiques', () => {
     })
   }
 
+  test('annonces: le menu de tri reste lisible au survol', async ({ page }, testInfo) => {
+    await openStablePage(page, '/annonces')
+
+    const sort = page.getByRole('combobox', { name: 'Trier par' })
+    await sort.click()
+    const descendingPrice = page.getByRole('option', { name: 'Prix décroissant' })
+    await descendingPrice.hover()
+
+    const colors = await descendingPrice.evaluate((option) => {
+      const probe = document.createElement('span')
+      probe.className = 'bg-lagoon/25 text-ink'
+      document.body.appendChild(probe)
+      const optionStyle = window.getComputedStyle(option)
+      const probeStyle = window.getComputedStyle(probe)
+      const result = {
+        actual: { color: optionStyle.color, backgroundColor: optionStyle.backgroundColor },
+        expected: { color: probeStyle.color, backgroundColor: probeStyle.backgroundColor },
+      }
+      probe.remove()
+      return result
+    })
+
+    expect(colors.actual).toEqual(colors.expected)
+    await expectPageQuality(page, testInfo, 'annonces-tri-survol')
+  })
+
   test('inscription: la liste des communes garde un contraste visible au survol', async ({ page }) => {
     await openStablePage(page, '/inscription')
     await page.getByRole('button', { name: 'Continuer' }).click()

@@ -446,6 +446,15 @@ Les quatre décisions d'inventaire ont été validées : domaine `listings` déd
 
 Recette locale en mode `NEXT_PUBLIC_DEMO_DATA=true` sur le serveur isolé 3103 : 12 annonces de démonstration, contrastes corrigés, aucun débordement aux quatre largeurs et tiroir mobile fonctionnel. Le contrôle intégré du navigateur n'étant pas exposé dans cette session, la revue a utilisé Chromium headless et son protocole d'émulation locale ; captures conservées hors dépôt dans `C:\Users\Léo\Documents\Codex\kalico-listings-review`. Les bandeaux globaux de consentement et de démonstration observés sont partagés et hors périmètre de cette fiche.
 
+### Complément — contraste du tri (21 octobre 2026)
+
+- Le contrôle « Trier par » utilisait encore un `<select>` natif historique : son menu clair héritait d’une couleur de survol blanche sur certains navigateurs, rendant l’option survolée invisible.
+- Le tri utilise désormais le `Listbox` partagé du design system. Ses états normal, sélectionné et survolé reposent exclusivement sur les jetons Kalico et restent contrôlables par clavier.
+- Le scénario qualité de `/annonces` ouvre réellement le menu, survole « Prix décroissant », compare ses couleurs calculées aux jetons attendus puis exécute les contrôles de contraste, d’encodage et de débordement sur l’état ouvert.
+- Aucun changement d’API, de filtres, de schéma ou de données ; la valeur du tri reste conservée dans l’URL par le mécanisme existant.
+- Validation ciblée : scénario Playwright du menu de tri passé (1/1). Validation élargie : portail qualité public et particulier passé (14/14).
+- Lint, TypeScript, contrôle design des lignes modifiées, build de production des 112 routes et `git diff --check` passés.
+
 ## 04 — Fait
 
 ### Base et références
