@@ -76,6 +76,37 @@ test.describe('qualité UI et contenu des pages publiques critiques', () => {
     }
 
     await expectPageQuality(page, testInfo, 'annonce-detail-sombre')
+
+    await page.getByRole('button', { name: 'Signaler cette annonce' }).click()
+    const reportDialog = page.getByRole('dialog', { name: 'Signaler cette annonce' })
+    await expect(reportDialog).toBeVisible()
+    const reasonSelect = reportDialog.getByLabel('Motif')
+    await expect(reasonSelect).toHaveCSS('color-scheme', 'light')
+    const optionColors = await reasonSelect.locator('option').nth(1).evaluate((option) => {
+      const probe = document.createElement('span')
+      probe.className = 'bg-cream-surface text-ink'
+      document.body.appendChild(probe)
+
+      const optionStyle = window.getComputedStyle(option)
+      const probeStyle = window.getComputedStyle(probe)
+      const colors = {
+        actual: {
+          color: optionStyle.color,
+          backgroundColor: optionStyle.backgroundColor,
+        },
+        expected: {
+          color: probeStyle.color,
+          backgroundColor: probeStyle.backgroundColor,
+        },
+      }
+
+      probe.remove()
+      return colors
+    })
+    expect(optionColors.actual).toEqual(optionColors.expected)
+    await reasonSelect.selectOption('fraud')
+    await expect(reasonSelect).toHaveValue('fraud')
+    await expectPageQuality(page, testInfo, 'annonce-signalement-sombre')
   })
 
   test('vérification email: une nouvelle session propose une connexion préremplie', async ({ page }) => {

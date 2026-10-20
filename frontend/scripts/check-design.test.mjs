@@ -121,6 +121,16 @@ test('refuses sparkle icons in the publishing flow', (t) => {
   assert.equal(result.status, 1)
   assert.match(result.stderr, /icône étincelles interdite/)
 })
+test('refuses newly added raw native selects outside the shared field', (t) => {
+  const f = fixture(t)
+  f.put(
+    'src/components/NewForm.tsx',
+    'export const NewForm = () => <select><option>Choisir</option></select>;\n',
+  )
+  const result = f.run('--changed')
+  assert.equal(result.status, 1)
+  assert.match(result.stderr, /select natif brut/)
+})
 test('launch refuses provisional values and demo in production overrides', (t) => {
   const f = fixture(t)
   f.put(

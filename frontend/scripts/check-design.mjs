@@ -169,6 +169,17 @@ for (const file of files) {
         }
       }
       if (definesTokens) return
+      if (
+        args.has('--changed') &&
+        name !== 'src/components/ui/Field.tsx' &&
+        /<select\b/.test(line)
+      )
+        errors.push(
+          name +
+            ':' +
+            (index + 1) +
+            ' select natif brut : utiliser le composant Select du design system',
+        )
       for (const rule of rules)
         if (rule.re.test(line))
           (rule.warning ? warnings : errors).push(

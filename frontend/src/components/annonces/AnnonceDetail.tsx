@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { BadgeCheck, Clock, Heart, MapPin, MessageCircle, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { Select } from '@/components/ui/Field'
 import { Modal } from '@/components/ui/Modal'
 import ContentShareButton from '@/components/share/ContentShareButton'
 import { useFavorite } from '@/hooks/useFavorite'
@@ -106,6 +107,6 @@ export default function AnnonceDetailV2({ listing, reviews, similarListings }: P
     </main>
 
     <Modal open={contactOpen} onClose={() => setContactOpen(false)} title="Contacter le vendeur" footer={<><Button variant="secondary" onClick={() => setContactOpen(false)}>Annuler</Button><Button loading={submitting} onClick={() => void sendMessage()}>Envoyer</Button></>}><label className="block"><span className="text-label text-ink">Votre message</span><textarea value={message} onChange={(event) => setMessage(event.target.value)} rows={5} className="mt-2 w-full rounded-field border border-warm-border bg-cream-surface p-3 outline-none focus:border-accent" /></label></Modal>
-    <Modal open={reportOpen} onClose={() => setReportOpen(false)} title="Signaler cette annonce" footer={<><Button variant="secondary" onClick={() => setReportOpen(false)}>Annuler</Button><Button loading={submitting} onClick={() => void sendReport()}>Envoyer le signalement</Button></>}><div className="space-y-4"><label className="block"><span className="text-label text-ink">Motif</span><select value={reportReason} onChange={(event) => setReportReason(event.target.value)} className="mt-2 w-full rounded-field border border-warm-border bg-cream-surface p-3"><option value="spam">Contenu indésirable</option><option value="fraud">Suspicion de fraude</option><option value="prohibited">Objet interdit</option><option value="other">Autre</option></select></label><label className="block"><span className="text-label text-ink">Précisions (facultatif)</span><textarea value={reportComment} onChange={(event) => setReportComment(event.target.value)} rows={3} className="mt-2 w-full rounded-field border border-warm-border bg-cream-surface p-3" /></label></div></Modal>
+    <Modal open={reportOpen} onClose={() => setReportOpen(false)} title="Signaler cette annonce" footer={<><Button variant="secondary" onClick={() => setReportOpen(false)}>Annuler</Button><Button loading={submitting} onClick={() => void sendReport()}>Envoyer le signalement</Button></>}><div className="space-y-4"><Select label="Motif" value={reportReason} onChange={(event) => setReportReason(event.target.value)}><option value="spam">Contenu indésirable</option><option value="fraud">Suspicion de fraude</option><option value="prohibited">Objet interdit</option><option value="other">Autre</option></Select><label className="block"><span className="text-label text-ink">Précisions (facultatif)</span><textarea value={reportComment} onChange={(event) => setReportComment(event.target.value)} rows={3} className="mt-2 w-full rounded-field border border-warm-border bg-cream-surface p-3" /></label></div></Modal>
   </>
 }
