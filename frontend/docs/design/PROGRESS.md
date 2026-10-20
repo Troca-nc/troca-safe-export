@@ -526,6 +526,24 @@ Les fixtures de la fiche 03 ne contiennent que les cartes de recherche. Après v
 - `git diff --check` : réussi.
 - Recette HTTP locale en mode démo : annonce active 200 avec titre, annonce vendue 200 avec bandeau et identifiant inconnu avec copie 404 rendue. La route de démonstration a été ouverte dans le navigateur intégré sur le port 3104 ; le contrôle programmatique du navigateur n'étant pas exposé dans cette session, la comparaison visuelle aux quatre largeurs reste à confirmer dans la revue humaine avant fusion.
 
+## Correctif fiche annonce — contraste du thème sombre (20 octobre 2026)
+
+- Les textes placés directement sur le fond de page utilisaient encore les couleurs fixes `text-ink`, prévues pour les surfaces crème. En thème sombre, leur contraste devenait insuffisant alors que les contenus des cartes claires restaient corrects.
+- Le fil d’Ariane, les états, la description, les titres de caractéristiques et d’avis, le panneau de sécurité et le titre des annonces similaires utilisent désormais les variables adaptatives `--color-text-primary`, `--color-text-secondary`, `--color-info` et `--color-danger`.
+- Les textes situés dans les cartes crème conservent volontairement les jetons `text-ink` afin de préserver leur contraste sur surface claire.
+- Un scénario Playwright ouvre une fiche de démonstration en thème sombre, vérifie explicitement les couleurs calculées des cinq titres principaux et exécute l’audit automatique de contraste, d’encodage et de débordement.
+- Aucun changement de route, d’API, de donnée ou de schéma.
+
+### Validation
+
+- Test Playwright ciblé en thème sombre : couleurs calculées des cinq titres principaux conformes aux variables du thème, audit Axe sans nouvelle violation, encodage et largeur validés.
+- Lint obligatoire : `npm run lint`, passé selon le périmètre ESLint actuel du dépôt.
+- TypeScript : `tsc --noEmit --incremental false`, passé.
+- Design system : `node scripts/check-design.mjs --changed`, 3 fichiers contrôlés, 0 erreur, 0 avertissement avant mise à jour de ce suivi.
+- Garde-fou d’encodage : 139 fichiers protégés sont exempts de marqueurs connus ; la dette historique hors périmètre reste signalée sans bloquer.
+- Build : `NODE_OPTIONS=--use-system-ca npm run build`, passé avec 112 routes, dont `/annonces/[id]`.
+- `git diff --check` : passé.
+
 ## 05 — Inventaire (étape 1, sans code)
 
 ### Base et références

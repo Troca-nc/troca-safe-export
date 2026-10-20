@@ -39,6 +39,41 @@ test.describe('qualité UI et contenu des pages publiques critiques', () => {
     await expect(communeSelect).toContainText('Nouméa')
   })
 
+  test('fiche annonce: les textes hors carte restent lisibles en thème sombre', async ({ page }, testInfo) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('theme', 'dark')
+      window.localStorage.setItem('kalico-theme', 'dark')
+    })
+
+    await openStablePage(page, '/annonces/demo-listing-velo')
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+    const acceptCookies = page.getByRole('button', { name: 'Accepter', exact: true })
+    if (await acceptCookies.isVisible()) await acceptCookies.click()
+
+    const primaryText = [
+      page.getByRole('heading', { name: 'Description' }),
+      page.getByRole('heading', { name: 'Caractéristiques' }),
+      page.getByRole('heading', { name: 'Avis sur le vendeur' }),
+      page.getByRole('heading', { name: 'Échangez en toute sécurité' }),
+      page.getByRole('heading', { name: 'Annonces similaires' }),
+    ]
+
+    for (const locator of primaryText) {
+      await expect(locator).toBeVisible()
+      const colors = await locator.evaluate((element) => {
+        const probe = document.createElement('span')
+        probe.style.color = 'var(--color-text-primary)'
+        document.body.appendChild(probe)
+        const expected = window.getComputedStyle(probe).color
+        probe.remove()
+        return { actual: window.getComputedStyle(element).color, expected }
+      })
+      expect(colors.actual).toBe(colors.expected)
+    }
+
+    await expectPageQuality(page, testInfo, 'annonce-detail-sombre')
+  })
+
   test('vérification email: une nouvelle session propose une connexion préremplie', async ({ page }) => {
     await page.route('**/api/auth/verify-email', (route) => route.fulfill({
       status: 200,
