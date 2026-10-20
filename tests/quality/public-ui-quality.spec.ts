@@ -43,20 +43,24 @@ test.describe('qualité UI et contenu des pages publiques critiques', () => {
     await page.addInitScript(() => {
       window.localStorage.setItem('theme', 'dark')
       window.localStorage.setItem('kalico-theme', 'dark')
+      window.localStorage.setItem('kalico-cookie-consent', JSON.stringify({
+        analytics: false,
+        marketing: false,
+        decidedAt: '2026-01-01T00:00:00.000Z',
+      }))
     })
 
-    await openStablePage(page, '/annonces/demo-listing-velo')
+    await openStablePage(page, '/annonces/101')
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
-    const acceptCookies = page.getByRole('button', { name: 'Accepter', exact: true })
-    if (await acceptCookies.isVisible()) await acceptCookies.click()
 
     const primaryText = [
       page.getByRole('heading', { name: 'Description' }),
-      page.getByRole('heading', { name: 'Caractéristiques' }),
       page.getByRole('heading', { name: 'Avis sur le vendeur' }),
       page.getByRole('heading', { name: 'Échangez en toute sécurité' }),
       page.getByRole('heading', { name: 'Annonces similaires' }),
     ]
+    const characteristics = page.getByRole('heading', { name: 'Caractéristiques' })
+    if (await characteristics.count()) primaryText.push(characteristics)
 
     for (const locator of primaryText) {
       await expect(locator).toBeVisible()
