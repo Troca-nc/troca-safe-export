@@ -3,6 +3,8 @@ import { expect, test } from '@playwright/test'
 import { restoreAuthenticatedStore, restoreSessionStorage } from '../support/auth'
 import {
   expectNoColorContrastViolation,
+  expectNoHorizontalOverflow,
+  expectNoVisibleMojibake,
   expectPageQuality,
   openStablePage,
 } from './support'
@@ -30,6 +32,43 @@ test.describe('qualité UI et contenu du compte particulier', () => {
       await link.hover()
       await expectNoColorContrastViolation(page, testInfo, `parametres-survol-${label}`)
     }
+  })
+
+  test('annonces: la modale de création d’alerte reste claire et lisible', async ({ page }, testInfo) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('theme', 'light')
+      window.localStorage.setItem('kalico-theme', 'light')
+    })
+
+    await openStablePage(page, '/annonces')
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+    await page.getByRole('button', { name: 'Créer une alerte', exact: true }).click()
+
+    const dialog = page.getByRole('dialog', { name: 'Créer une alerte' })
+    await expect(dialog).toBeVisible()
+    await expect(dialog).toContainText('Immédiat')
+    await expect(dialog).toContainText('Dès qu’une annonce correspond')
+    await expect(dialog).toContainText('Résumé chaque matin à 8 h')
+    await expect(dialog).toContainText('Résumé chaque lundi matin')
+
+    const colors = await dialog.evaluate((element) => {
+      const probe = document.createElement('span')
+      probe.className = 'bg-cream-surface text-ink'
+      document.body.appendChild(probe)
+      const actual = window.getComputedStyle(element)
+      const expected = window.getComputedStyle(probe)
+      const result = {
+        actual: { color: actual.color, backgroundColor: actual.backgroundColor },
+        expected: { color: expected.color, backgroundColor: expected.backgroundColor },
+      }
+      probe.remove()
+      return result
+    })
+
+    expect(colors.actual).toEqual(colors.expected)
+    await expectNoVisibleMojibake(page)
+    await expectNoHorizontalOverflow(page)
+    await expectNoColorContrastViolation(page, testInfo, 'annonces-alerte-clair', '#search-alert-dialog')
   })
 
   test('publication: limites photo et aperçu final restent explicites', async ({ page }, testInfo) => {

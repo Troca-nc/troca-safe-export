@@ -52,10 +52,10 @@ export async function expectNoHorizontalOverflow(page: Page) {
   ).toBeLessThanOrEqual(overflow.viewport + 1)
 }
 
-export async function expectNoColorContrastViolation(page: Page, testInfo: TestInfo, label: string) {
-  const result = await new AxeBuilder({ page })
-    .withRules(['color-contrast'])
-    .analyze()
+export async function expectNoColorContrastViolation(page: Page, testInfo: TestInfo, label: string, scope?: string) {
+  let builder = new AxeBuilder({ page }).withRules(['color-contrast'])
+  if (scope) builder = builder.include(scope)
+  const result = await builder.analyze()
 
   await testInfo.attach(`axe-color-contrast-${label}`, {
     body: JSON.stringify(result, null, 2),
