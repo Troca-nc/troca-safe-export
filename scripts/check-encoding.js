@@ -157,6 +157,7 @@ const GUARDED_FILES = new Set([
   'frontend/src/hooks/usePhoneVerification.ts',
   'frontend/src/hooks/useMessaging.ts',
   'frontend/src/types/messaging.types.ts',
+  'frontend/src/types/alert.types.ts',
 ])
 
 function walk(dir, files = []) {

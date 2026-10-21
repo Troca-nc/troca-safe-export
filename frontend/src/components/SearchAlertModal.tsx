@@ -145,17 +145,23 @@ export default function SearchAlertModal({
   const isSuccess = savedCount != null
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-night/55 px-4 py-6 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-ink/55 px-4 py-6 backdrop-blur-sm">
       <div className="absolute inset-0" onClick={saving ? undefined : onClose} />
-      <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-[2rem] border border-night/10 bg-white shadow-[0_24px_80px_rgba(8,32,50,0.22)]">
-        <div className="flex items-start justify-between gap-4 border-b border-night/8 px-5 py-4 md:px-6">
+      <div
+        id="search-alert-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="search-alert-title"
+        className="relative z-10 w-full max-w-2xl overflow-hidden rounded-block border border-warm-border bg-cream-surface text-ink shadow-modal"
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-warm-border px-5 py-4 md:px-6">
           <div className="flex items-start gap-3">
-            <div className="mt-0.5 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-kalico-blue/10 text-kalico-blue">
+            <div className="mt-0.5 inline-flex h-11 w-11 items-center justify-center rounded-control bg-info/15 text-ink">
               {isSuccess ? <Check className="h-5 w-5" /> : <Bell className="h-5 w-5" />}
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-kalico-blue/70">Alerte de recherche</p>
-              <h2 className="mt-1 text-xl font-bold text-night">
+              <p className="text-eyebrow uppercase text-ink">Alerte de recherche</p>
+              <h2 id="search-alert-title" className="mt-1 font-display text-h3 text-ink">
                 {isSuccess ? 'Alerte créée' : 'Créer une alerte'}
               </h2>
             </div>
@@ -163,7 +169,7 @@ export default function SearchAlertModal({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-night/10 text-night/45 transition hover:bg-sand hover:text-night"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-warm-border text-ink/55 transition hover:bg-cream-sunken hover:text-ink"
             aria-label="Fermer la modale"
           >
             <X className="h-5 w-5" />
@@ -173,9 +179,9 @@ export default function SearchAlertModal({
         <div className="space-y-5 px-5 py-5 md:px-6">
           {!isSuccess ? (
             <>
-              <div className="rounded-[1.5rem] border border-night/8 bg-sand/25 p-4">
-                <p className="text-sm font-semibold text-night">"{alertLabel}"</p>
-                <p className="mt-2 text-sm leading-6 text-night/65">
+              <div className="rounded-card border border-warm-border bg-cream-sunken p-4">
+                <p className="text-body-sm font-semibold text-ink">« {alertLabel} »</p>
+                <p className="mt-2 text-body-sm leading-6 text-ink/75">
                   {preview.loading
                     ? 'Calcul des résultats en cours...'
                     : preview.error || `${resultCount.toLocaleString('fr-FR')} annonces correspondent actuellement à ces critères.`}
@@ -184,17 +190,17 @@ export default function SearchAlertModal({
 
               <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_240px]">
                 <div className="space-y-2">
-                  <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-night/45">
+                  <p className="text-eyebrow uppercase text-ink/75">
                     Fréquence de notification
-                  </label>
+                  </p>
                   <div className="space-y-2">
                     {FREQUENCY_OPTIONS.map((option) => (
                       <label
                         key={option.value}
                         className={`flex cursor-pointer items-center gap-3 rounded-2xl border px-3 py-3 transition ${
                           frequency === option.value
-                            ? 'border-kalico-blue bg-kalico-blue/5'
-                            : 'border-night/10 bg-white hover:bg-sand'
+                            ? 'border-info bg-info/10'
+                            : 'border-warm-border bg-cream-surface hover:bg-cream-sunken'
                         }`}
                       >
                         <input
@@ -202,35 +208,35 @@ export default function SearchAlertModal({
                           name="search-alert-frequency"
                           checked={frequency === option.value}
                           onChange={() => setFrequency(option.value)}
-                          className="accent-kalico-blue"
+                          className="accent-info"
                         />
                         <div>
-                          <p className="text-sm font-semibold text-night">{option.label}</p>
-                          <p className="text-xs text-night/50">{option.description}</p>
+                          <p className="text-body-sm font-semibold text-ink">{option.label}</p>
+                          <p className="text-body-sm text-ink/75">{option.description}</p>
                         </div>
                       </label>
                     ))}
                   </div>
                 </div>
 
-                <div className="rounded-[1.5rem] border border-lagoon/20 bg-lagoon/8 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-lagoon">Résumé</p>
-                  <div className="mt-3 space-y-2 text-sm text-night/65">
+                <div className="rounded-card border border-info/30 bg-info/10 p-4">
+                  <p className="text-eyebrow uppercase text-ink">Résumé</p>
+                  <div className="mt-3 space-y-2 text-body-sm text-ink/75">
                     <p>
-                      <span className="font-semibold text-night">Résultats actuels</span>
+                      <span className="font-semibold text-ink">Résultats actuels</span>
                       <br />
                       {preview.loading
                         ? 'Chargement...'
                         : `${resultCount.toLocaleString('fr-FR')} annonces`}
                     </p>
                     <p>
-                      <span className="font-semibold text-night">Canal</span>
+                      <span className="font-semibold text-ink">Canal</span>
                       <br />
                       Email de confirmation
                     </p>
                     {communeLabel ? (
                       <p>
-                        <span className="font-semibold text-night">Commune</span>
+                        <span className="font-semibold text-ink">Commune</span>
                         <br />
                         {communeLabel}
                       </p>
@@ -240,28 +246,28 @@ export default function SearchAlertModal({
               </div>
 
               {error ? (
-                <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+                <p className="rounded-control border border-alert-error/30 bg-alert-error/10 px-4 py-3 text-body-sm text-alert-error">{error}</p>
               ) : null}
             </>
           ) : (
-            <div className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-5">
-              <p className="text-sm font-semibold text-emerald-900">
+            <div className="rounded-card border border-success/30 bg-success-soft p-5">
+              <p className="text-body-sm font-semibold text-success-text">
                 {resultCount.toLocaleString('fr-FR')} annonces correspondent actuellement à ces critères.
               </p>
-              <p className="mt-2 text-sm leading-6 text-emerald-900/75">
+              <p className="mt-2 text-body-sm leading-6 text-success-text">
                 Votre alerte a été activée. Un email de confirmation a été envoyé avec le résumé des critères et le lien de gestion.
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
                 <a
                   href="/alertes"
-                  className="inline-flex items-center justify-center rounded-2xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                  className="inline-flex min-h-11 items-center justify-center rounded-control bg-success px-4 py-3 text-body-sm font-semibold text-cream transition hover:brightness-95"
                 >
                   Gérer mes alertes
                 </a>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="inline-flex items-center justify-center rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-100"
+                  className="inline-flex min-h-11 items-center justify-center rounded-control border border-warm-border bg-cream-surface px-4 py-3 text-body-sm font-semibold text-ink transition hover:bg-cream-sunken"
                 >
                   Fermer
                 </button>
@@ -271,11 +277,11 @@ export default function SearchAlertModal({
         </div>
 
         {!isSuccess ? (
-          <div className="flex flex-col-reverse gap-3 border-t border-night/8 px-5 py-4 sm:flex-row sm:justify-end md:px-6">
+          <div className="flex flex-col-reverse gap-3 border-t border-warm-border px-5 py-4 sm:flex-row sm:justify-end md:px-6">
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center justify-center rounded-2xl border border-night/10 bg-white px-4 py-3 text-sm font-semibold text-night transition hover:bg-sand"
+              className="inline-flex min-h-11 items-center justify-center rounded-control border border-warm-border bg-cream-surface px-4 py-3 text-body-sm font-semibold text-ink transition hover:bg-cream-sunken"
               disabled={saving}
             >
               Annuler
@@ -284,7 +290,7 @@ export default function SearchAlertModal({
               type="button"
               onClick={handleSave}
               disabled={saving || preview.loading}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-night px-4 py-3 text-sm font-semibold text-white transition hover:bg-night/90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-control bg-accent-strong px-4 py-3 text-body-sm font-semibold text-cream transition hover:bg-accent-strongHover disabled:cursor-not-allowed disabled:bg-disabled disabled:text-disabled-text"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               {saving ? 'Création…' : 'Activer l’alerte'}

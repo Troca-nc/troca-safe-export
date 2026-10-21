@@ -1942,3 +1942,20 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - Lint obligatoire : `npm run lint`, passé selon le périmètre ESLint actuel du dépôt.
 - TypeScript : `tsc --noEmit --incremental false`, passé.
 - Build : `NODE_OPTIONS=--use-system-ca npm run build`, passé avec 112 routes, dont `/deposer` et `/covoiturage`.
+
+## Liste des annonces — modale « Créer une alerte » en thème clair (21 octobre 2026)
+
+- QUESTION de périmètre résolue par l’autorisation humaine : `SearchAlertModal.tsx` et la source partagée `alert.types.ts`, non listées dans la fiche 03 initiale, devaient être corrigées ensemble puisque la première portait les anciennes couleurs fixes et la seconde fournissait les libellés corrompus visibles dans la modale.
+- La modale repose désormais uniquement sur les surfaces, bordures, textes et états sémantiques v2 de Kalico. Son panneau reste ainsi cohérent avec la page listing claire sans subir les anciennes surcharges de compatibilité appliquées à `bg-white` et `text-night`, et ses textes conservent un contraste suffisant.
+- Les fréquences partagées affichent « Immédiat », « Dès qu’une annonce correspond » et les résumés quotidiens ou hebdomadaires sans mojibake. Le fichier source rejoint le garde-fou d’encodage afin d’empêcher leur régression.
+- Le scénario navigateur authentifié ouvre réellement « Créer une alerte » en thème clair, vérifie sa surface, ses quatre libellés, son contraste WCAG, l’absence de mojibake visible et l’absence de débordement.
+
+### Validation
+
+- Test navigateur ciblé : 1 test passé.
+- Suite hybride complète : 15 tests passés sur les pages publiques et les parcours particuliers.
+- Garde-fou d’encodage : 140 fichiers protégés exempts de marqueurs connus ; la dette historique hors périmètre reste signalée sans bloquer.
+- Design system : `node scripts/check-design.mjs --changed`, 2 fichiers contrôlés, 0 erreur, 0 avertissement avant mise à jour de ce suivi.
+- Lint obligatoire : `npm run lint`, passé selon le périmètre ESLint actuel du dépôt.
+- TypeScript : `tsc --noEmit --incremental false`, passé.
+- Build de production : passé avec 112 routes, dont `/annonces`.
