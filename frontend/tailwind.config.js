@@ -1,3 +1,31 @@
+const rgbVar = (name) => `rgb(var(${name}) / <alpha-value>)`
+const rgbVarWithAlpha = (name, alpha) => `rgb(var(${name}) / calc(<alpha-value> * var(${alpha})))`
+const dynamicV2Colors = {
+  accent: {
+    DEFAULT: rgbVar('--color-accent-rgb'),
+    strong: rgbVar('--color-accent-strong-rgb'),
+    strongHover: rgbVar('--color-accent-strong-hover-rgb'),
+    text: rgbVar('--color-accent-text-rgb'),
+  },
+  ink: { DEFAULT: rgbVar('--color-text-rgb'), deep: rgbVar('--color-deep-rgb') },
+  cream: {
+    DEFAULT: rgbVar('--color-bg-rgb'),
+    surface: rgbVar('--color-surface-rgb'),
+    sunken: rgbVar('--color-surface-sunken-rgb'),
+  },
+  'warm-border': {
+    DEFAULT: rgbVarWithAlpha('--color-border-rgb', '--color-border-alpha'),
+    inner: rgbVarWithAlpha('--color-border-inner-rgb', '--color-border-inner-alpha'),
+  },
+  info: { DEFAULT: rgbVar('--color-info-rgb'), text: rgbVar('--color-info-text-rgb') },
+  reef: {
+    DEFAULT: rgbVar('--color-success-rgb'),
+    text: rgbVar('--color-success-text-rgb'),
+    onDeep: rgbVar('--color-success-on-deep-rgb'),
+  },
+  alert: { warn: rgbVar('--color-warning-rgb'), error: rgbVar('--color-error-rgb') },
+}
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
@@ -10,18 +38,7 @@ module.exports = {
     extend: {
       colors: {
         // Design system v2. Legacy names below stay available during migration.
-        accent: {
-          DEFAULT: '#E8832A',
-          strong: '#A94F0A',
-          strongHover: '#8F420A',
-          text: '#9E4E06',
-        },
-        ink: { DEFAULT: '#123A44', deep: '#0E2A31' },
-        cream: { DEFAULT: '#FBF6EC', surface: '#FEFAF3', sunken: '#F3E9D8' },
-        'warm-border': { DEFAULT: '#E4D7C3', inner: '#EFE3D0' },
-        info: { DEFAULT: '#55ADB3', text: '#2E7B84' },
-        reef: { DEFAULT: '#6E9A6A', text: '#3F6B3C', onDeep: '#9FC79B' },
-        alert: { warn: '#B85C00', error: '#B0431C' },
+        ...dynamicV2Colors,
         // Palette de marque existante
         'kalico-blue': { DEFAULT: '#0A7EA4', light: '#1C9BC2', dark: '#075B77' },
         ocean: { DEFAULT: '#08324F', light: '#0D4C75', dark: '#051E30' },
@@ -209,6 +226,10 @@ for (const [group, values] of Object.entries(v2Theme)) {
     }
   }
 }
+
+// Les valeurs documentaires restent la référence claire, mais les utilitaires
+// compilés doivent lire les canaux actifs afin de suivre le thème à l'exécution.
+Object.assign(legacyTheme.colors, dynamicV2Colors)
 legacyTheme.fontFamily = {
   ...legacyTheme.fontFamily,
   display: ['var(--font-display)', 'Georgia', 'serif'],

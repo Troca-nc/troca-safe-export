@@ -62,6 +62,35 @@
   --color-error: #b0431c;
   --color-error-soft: rgba(176, 67, 28, 0.14);
 
+  /* ---------- Thème sombre ---------- */
+  --color-dark-bg: #04121e;
+  --color-dark-surface: #082032;
+  --color-dark-sunken: #0e2a31;
+  --color-dark-text: #f7fbfc;
+
+  /* Canaux RGB utilisés par Tailwind pour conserver les modificateurs
+     d'opacité tout en laissant le thème remplacer les couleurs. */
+  --color-accent-rgb: 232 131 42;
+  --color-accent-strong-rgb: 169 79 10;
+  --color-accent-strong-hover-rgb: 143 66 10;
+  --color-accent-text-rgb: 158 78 6;
+  --color-text-rgb: 18 58 68;
+  --color-deep-rgb: 14 42 49;
+  --color-bg-rgb: 251 246 236;
+  --color-surface-rgb: 254 250 243;
+  --color-surface-sunken-rgb: 243 233 216;
+  --color-border-rgb: 228 215 195;
+  --color-border-inner-rgb: 239 227 208;
+  --color-border-alpha: 1;
+  --color-border-inner-alpha: 1;
+  --color-info-rgb: 85 173 179;
+  --color-info-text-rgb: 46 123 132;
+  --color-success-rgb: 110 154 106;
+  --color-success-text-rgb: 63 107 60;
+  --color-success-on-deep-rgb: 159 199 155;
+  --color-warning-rgb: 184 92 0;
+  --color-error-rgb: 176 67 28;
+
   /* ---------- Sur fond sombre ---------- */
   --color-on-deep: #fbf6ec;
   --color-on-deep-muted: rgba(251, 246, 236, 0.72);
@@ -123,6 +152,14 @@
   --color-surface: rgba(251, 246, 236, 0.07);
   --color-accent-text: var(--color-accent);
   --color-success-text: var(--color-success-on-deep);
+  --color-text-rgb: 251 246 236;
+  --color-bg-rgb: 251 246 236;
+  --color-surface-rgb: 254 250 243;
+  --color-border-rgb: 251 246 236;
+  --color-border-alpha: 0.16;
+  --color-border-inner-alpha: 0.1;
+  --color-accent-text-rgb: 232 131 42;
+  --color-success-text-rgb: 159 199 155;
   background: var(--color-deep);
   color: var(--color-on-deep);
 }

@@ -50,12 +50,23 @@
 
 .dark,
 html[data-theme='dark'] {
-  --color-background-primary: #04121e;
-  --color-background-secondary: #082032;
-  --color-bg-page: #04121e;
-  --color-surface: #04121e;
-  --color-surface-raised: #082032;
+  --color-accent-strong: var(--color-accent);
+  --color-accent-strong-hover: var(--color-accent);
+  --color-accent-text: var(--color-accent);
+  --color-text: var(--color-dark-text);
+  --color-text-muted: rgba(247, 251, 252, 0.72);
+  --color-text-subtle: rgba(247, 251, 252, 0.55);
+  --color-text-faint: rgba(247, 251, 252, 0.42);
+  --color-bg: var(--color-dark-bg);
+  --color-deep: var(--color-dark-sunken);
+  --color-background-primary: var(--color-dark-bg);
+  --color-background-secondary: var(--color-dark-surface);
+  --color-bg-page: var(--color-dark-bg);
+  --color-surface: var(--color-dark-surface);
+  --color-surface-sunken: var(--color-dark-sunken);
+  --color-surface-raised: var(--color-dark-sunken);
   --color-border: rgba(255, 255, 255, 0.1);
+  --color-border-inner: rgba(255, 255, 255, 0.08);
   --color-border-secondary: rgba(255, 255, 255, 0.1);
   --color-border-strong: rgba(72, 202, 228, 0.28);
   --color-text-primary: #f7fbfc;
@@ -66,7 +77,42 @@ html[data-theme='dark'] {
   --color-danger: #f87171;
   --color-info: #48cae4;
 
+  --color-accent-rgb: 232 131 42;
+  --color-accent-strong-rgb: 232 131 42;
+  --color-accent-strong-hover-rgb: 232 131 42;
+  --color-accent-text-rgb: 232 131 42;
+  --color-text-rgb: 247 251 252;
+  --color-deep-rgb: 14 42 49;
+  --color-bg-rgb: 4 18 30;
+  --color-surface-rgb: 8 32 50;
+  --color-surface-sunken-rgb: 14 42 49;
+  --color-border-rgb: 247 251 252;
+  --color-border-inner-rgb: 247 251 252;
+  --color-border-alpha: 0.16;
+  --color-border-inner-alpha: 0.1;
+  --color-info-rgb: 72 202 228;
+  --color-info-text-rgb: 72 202 228;
+  --color-success-rgb: 159 199 155;
+  --color-success-text-rgb: 159 199 155;
+  --color-success-on-deep-rgb: 159 199 155;
+  --color-warning-rgb: 245 158 11;
+  --color-error-rgb: 248 113 113;
+
   color-scheme: dark;
+}
+
+/* Les panneaux pétrole restent volontairement sombres. Ces canaux locaux
+   empêchent l'inversion des utilitaires `bg-ink` / `text-cream` tout en
+   laissant le reste de la page suivre le thème. */
+.dark .bg-ink,
+.dark .bg-ink-deep,
+html[data-theme='dark'] .bg-ink,
+html[data-theme='dark'] .bg-ink-deep {
+  --color-text-rgb: 14 42 49;
+  --color-deep-rgb: 14 42 49;
+  --color-bg-rgb: 251 246 236;
+  --color-surface-rgb: 254 250 243;
+  --color-border-rgb: 251 246 236;
 }
 
 html[data-theme='dark'] {
