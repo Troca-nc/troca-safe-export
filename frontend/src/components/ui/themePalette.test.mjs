@@ -7,6 +7,7 @@ import tailwindConfig from '../../../tailwind.config.js'
 const colors = tailwindConfig.theme.extend.colors
 const globals = readFileSync(new URL('../../app/globals.css', import.meta.url), 'utf8')
 const tokens = readFileSync(new URL('../../styles/kalico-tokens.css', import.meta.url), 'utf8')
+const listingDetail = readFileSync(new URL('../annonces/AnnonceDetail.tsx', import.meta.url), 'utf8')
 
 test('les couleurs v2 Tailwind utilisent les canaux du thème', () => {
   assert.equal(colors.cream.DEFAULT, 'rgb(var(--color-bg-rgb) / <alpha-value>)')
@@ -32,4 +33,9 @@ test('les panneaux pétrole conservent leur contraste en thème sombre', () => {
   assert.match(globals, /\.dark \.bg-ink,/)
   assert.match(globals, /--color-text-rgb: 14 42 49;/)
   assert.match(globals, /--color-bg-rgb: 251 246 236;/)
+})
+
+test('les initiales du vendeur restent lisibles sur le fond information', () => {
+  assert.match(listingDetail, /bg-info\/15 font-display text-xl text-info-text/)
+  assert.doesNotMatch(listingDetail, /bg-info\/15 font-display text-xl text-ink-deep/)
 })
