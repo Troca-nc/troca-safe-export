@@ -13,7 +13,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
       type="button"
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
       aria-pressed={isDark}
-      className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] text-[var(--color-text-secondary)] transition hover:bg-[var(--color-background-secondary)] hover:text-[var(--color-text-primary)] dark:bg-[var(--color-surface-raised)] dark:text-[var(--color-text-secondary)] dark:hover:bg-[var(--color-background-secondary)] dark:hover:text-[var(--color-text-primary)] ${className}`}
+      className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-control border border-warm-border bg-cream-surface text-ink transition-colors hover:border-ink hover:bg-cream-sunken focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong ${className}`}
       title={isDark ? 'Passer en mode clair' : 'Passer en mode sombre'}
       aria-label={isDark ? 'Passer en mode clair' : 'Passer en mode sombre'}
     >

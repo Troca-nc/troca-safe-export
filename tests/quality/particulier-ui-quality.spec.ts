@@ -71,6 +71,33 @@ test.describe('qualité UI et contenu du compte particulier', () => {
     await expectNoColorContrastViolation(page, testInfo, 'annonces-alerte-clair', '#search-alert-dialog')
   })
 
+  test('annonces: le bouton de thème reste visible dans l’en-tête desktop', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('theme', 'light')
+      window.localStorage.setItem('kalico-theme', 'light')
+    })
+
+    for (const width of [1024, 1440]) {
+      await page.setViewportSize({ width, height: 768 })
+      await openStablePage(page, '/annonces')
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+
+      const themeToggle = page.getByRole('button', { name: 'Passer en mode sombre' })
+      await expect(themeToggle).toBeVisible()
+
+      const bounds = await themeToggle.boundingBox()
+      expect(bounds).not.toBeNull()
+      expect(bounds?.width).toBe(44)
+      expect(bounds?.x).toBeGreaterThanOrEqual(0)
+      expect((bounds?.x ?? 0) + (bounds?.width ?? 0)).toBeLessThanOrEqual(width)
+
+      await themeToggle.click()
+      await expect.poll(() => page.evaluate(() => window.localStorage.getItem('theme'))).toBe('dark')
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+      await expect(page.getByRole('button', { name: 'Passer en mode clair' })).toBeVisible()
+    }
+  })
+
   test('publication: limites photo et aperçu final restent explicites', async ({ page }, testInfo) => {
     await openStablePage(page, '/deposer')
     await expect(page.getByRole('heading', { name: 'Que souhaitez-vous publier ?' })).toBeVisible()
