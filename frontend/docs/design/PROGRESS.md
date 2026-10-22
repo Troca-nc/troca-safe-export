@@ -1959,3 +1959,19 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - Lint obligatoire : `npm run lint`, passé selon le périmètre ESLint actuel du dépôt.
 - TypeScript : `tsc --noEmit --incremental false`, passé.
 - Build de production : passé avec 112 routes, dont `/annonces`.
+
+## Fondations — palette sombre dynamique (22 octobre 2026)
+
+- Retour humain confirmé après la PR #267 : le bouton de thème appliquait bien `dark` au document, mais le contenu v2 restait clair ; seule la bannière cookies, déjà fondée sur des variables CSS, changeait réellement d’apparence.
+- Cause : les couleurs v2 de `tailwind.config.js` étaient compilées en valeurs hexadécimales claires fixes. La fusion finale avec `docs/design/tailwind.kalico.js` réinjectait également ces valeurs après la configuration principale.
+- Correction : les utilitaires `cream`, `ink`, `warm-border`, `accent`, `info`, `reef` et `alert` lisent désormais les canaux RGB des tokens actifs, y compris avec les modificateurs d’opacité Tailwind. Les surfaces, textes et bordures disposent de valeurs sombres cohérentes ; les véritables panneaux pétrole conservent localement leur contraste crème.
+- Fichiers : `src/app/globals.css`, `src/styles/kalico-tokens.css`, `tailwind.config.js` et le test de contrat `src/components/ui/themePalette.test.mjs`.
+
+### Validation
+
+- Test de contrat de palette : 3/3 passés, couvrant la configuration Tailwind, les canaux clair/sombre et la protection des panneaux pétrole.
+- Vérification Chromium sur `/annonces` à 1024 et 1440 px : le fond de page passe de `rgb(251, 246, 236)` à `rgb(4, 18, 30)`, les surfaces de `rgb(254, 250, 243)` à `rgb(8, 32, 50)`, le texte de `rgb(18, 58, 68)` à `rgb(247, 251, 252)` et les bordures sombres conservent une opacité de `0.16`.
+- Lint et TypeScript : passés.
+- Design system : `node scripts/check-design.mjs --changed`, 2 fichiers contrôlés, 0 erreur, 0 avertissement avant mise à jour de ce suivi.
+- Build de production : passé avec 112 routes, dont `/annonces`.
+- `git diff --check` : passé. Aucun changement d’API, de schéma, de migration ou de données.
