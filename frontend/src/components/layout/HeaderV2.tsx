@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 
 import HeaderNotifications from '@/components/layout/HeaderNotifications'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { getLayoutHeaderData, normalizeLayoutAccount } from '@/lib/data/layout'
 import { useAuthActionStore } from '@/store/authActionStore'
 import { useAuthStore } from '@/store/authStore'
@@ -230,6 +231,7 @@ export default function Header({
         </nav>
 
         <div className="hidden shrink-0 items-center gap-1 border-l border-warm-border pl-3 xl:flex">
+          <ThemeToggle />
           {!hasHydrated ? (
             <div className="flex items-center gap-2" role="status" aria-label="Chargement du compte">
               <span className="h-11 w-11 animate-pulse rounded-control bg-cream-sunken motion-reduce:animate-none" />
@@ -313,6 +315,7 @@ export default function Header({
 
         <div className="ml-auto flex items-center gap-1 xl:hidden">
           <button type="button" onClick={publish} className="inline-flex min-h-11 items-center gap-2 rounded-control bg-accent-strong px-3 text-label text-cream-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink"><Plus className="h-4 w-4" />Déposer</button>
+          <ThemeToggle />
           <button type="button" onClick={() => setMobileOpen((current) => !current)} className="inline-flex h-11 w-11 items-center justify-center rounded-control text-ink hover:bg-cream-sunken focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-strong" aria-label="Menu" aria-expanded={mobileOpen} aria-controls="header-mobile-menu">
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
