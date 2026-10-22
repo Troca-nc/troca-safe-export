@@ -233,6 +233,7 @@ export default function ListingCard({ listing, className = '', boosted, featured
       ? `${listing.price.toLocaleString('fr-FR')} XPF`
       : 'Prix à débattre'
   const priceClassName = listing.is_free ? 'text-success-text' : 'text-ink'
+  const categoryLabel = getListingCategoryLabel(listing)
 
   const publishedAt = listing.published_at ?? listing.created_at
   const timeAgo = publishedAt ? formatDistanceToNow(new Date(publishedAt), {
@@ -276,6 +277,9 @@ export default function ListingCard({ listing, className = '', boosted, featured
 
       <div className="space-y-3 p-4">
         <div className="space-y-1.5">
+          <span className="inline-flex max-w-full rounded-pill border border-info-border bg-info-soft px-2.5 py-1 text-caption font-semibold text-info-text">
+            <span className="truncate">{categoryLabel}</span>
+          </span>
           <h3 className="line-clamp-2 text-body-sm font-medium text-ink">
             {listing.title}
           </h3>
