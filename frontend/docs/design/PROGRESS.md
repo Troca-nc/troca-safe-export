@@ -1975,3 +1975,18 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - Design system : `node scripts/check-design.mjs --changed`, 2 fichiers contrôlés, 0 erreur, 0 avertissement avant mise à jour de ce suivi.
 - Build de production : passé avec 112 routes, dont `/annonces`.
 - `git diff --check` : passé. Aucun changement d’API, de schéma, de migration ou de données.
+
+## Liste des annonces — catégorie visible sur les cartes (23 octobre 2026)
+
+- Retour humain pendant la recette de `/annonces` : le filtre par catégorie fonctionne, mais la catégorie associée n’était pas visible dans l’aperçu de chaque annonce.
+- La donnée était déjà fournie et normalisée par la couche listing. Chaque carte affiche désormais un libellé de catégorie compact au-dessus du titre, avec le repli existant sur le slug puis « Annonce » si le libellé manque.
+- Le badge utilise exclusivement les tokens sémantiques `info` afin de rester lisible dans les thèmes clair et sombre. Aucun changement d’API, de schéma, de migration ou de données.
+
+### Validation
+
+- Test de contrat ciblé : 2/2 passés, couvrant le rendu du libellé et l’emploi des tokens de design.
+- Lint obligatoire : `npm run lint`, passé selon le périmètre ESLint actuel du dépôt.
+- TypeScript : `tsc --noEmit`, passé.
+- Design system : `node scripts/check-design.mjs --changed`, 1 fichier contrôlé, 0 erreur, 0 avertissement avant mise à jour de ce suivi.
+- Build de production : `NODE_OPTIONS=--use-system-ca npm run build`, passé avec 112 routes, dont `/annonces`.
+- `git diff --check` : passé. La vérification visuelle humaine reste à effectuer sur l’aperçu de la PR.
