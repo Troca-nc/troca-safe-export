@@ -44,6 +44,7 @@ const SUITES = [
   './listingVisibilityBoundary.test',
   './listingStatusPolicy.test',
   './listingsQuery.test',
+  './platformStats.route.test',
   './antiScamFailClosed.test',
   './rideManualAcceptanceCapacity.test',
   './proBookingStateService.test',

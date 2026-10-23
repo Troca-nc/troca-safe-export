@@ -43,11 +43,17 @@ router.get('/platform', async (_req, res) => {
   }
 
   try {
-    const [listings, bonsPlans, rides] = await Promise.all([
+    const [members, listings, bonsPlans, rides] = await Promise.all([
+      query(`
+        SELECT COUNT(*)::int AS count
+        FROM users
+        WHERE deleted_at IS NULL
+      `),
       query(`
         SELECT COUNT(*)::int AS count
         FROM annonces
         WHERE status = 'active'
+          AND deleted_at IS NULL
       `),
       query(`
         SELECT COUNT(*)::int AS count
@@ -64,6 +70,7 @@ router.get('/platform', async (_req, res) => {
     ]);
 
     const data = {
+      members_count: Number(members.rows[0]?.count ?? 0),
       listings_count: Number(listings.rows[0]?.count ?? 0),
       bons_plans_count: Number(bonsPlans.rows[0]?.count ?? 0),
       rides_count: Number(rides.rows[0]?.count ?? 0),

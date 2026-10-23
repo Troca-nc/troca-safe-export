@@ -51,6 +51,11 @@ export type HomeCommune = {
   slug: string
 }
 
+export type HomePlatformStats = {
+  membersCount: number
+  listingsCount: number
+}
+
 export type HomeNavigation = {
   categories: HomeCategory[]
   communes: HomeCommune[]

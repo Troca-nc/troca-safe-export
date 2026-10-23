@@ -1,8 +1,8 @@
-import { listingsApi, proApi } from '@/lib/api'
+import { listingsApi, proApi, statsApi } from '@/lib/api'
 import { FALLBACK_CATEGORIES } from '@/lib/categoryCatalog'
 import { demoOr } from '@/lib/demo'
 import { GEO_DATA } from '@/shared-copy/geoData'
-import type { HomeCategory, HomeCommune, HomeListing, HomeNavigation, HomePro } from '@/types/home'
+import type { HomeCategory, HomeCommune, HomeListing, HomeNavigation, HomePlatformStats, HomePro } from '@/types/home'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -19,6 +19,12 @@ function asOptionalNumber(value: unknown) {
   if (value === null || value === undefined || value === '') return null
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : null
+}
+
+function asCount(value: unknown) {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed) || parsed < 0) throw new Error('Compteur de plateforme invalide.')
+  return Math.trunc(parsed)
 }
 
 function asText(value: unknown) {
@@ -101,9 +107,17 @@ export function getHomeNavigation(): HomeNavigation {
     .flatMap((province) => province.communes || [])
     .map((commune) => ({ name: asText(commune.name), slug: asText(commune.slug) }))
     .filter((commune) => commune.name && commune.slug)
-    .slice(0, 10)
 
   return { categories, communes }
+}
+
+export async function getHomePlatformStats(): Promise<HomePlatformStats> {
+  const response = await statsApi.getPlatform()
+  const payload = asRecord(response.data)
+  return {
+    membersCount: asCount(payload.members_count),
+    listingsCount: asCount(payload.listings_count),
+  }
 }
 
 export async function getHomeListings(): Promise<HomeListing[]> {
