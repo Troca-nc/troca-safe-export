@@ -55,7 +55,7 @@ function getSortConfig(sort, searchText = '') {
   switch (sort) {
     case 'price_asc':
       return {
-        orderBy: '-COALESCE(a.prix, 999999999) ASC, -EXTRACT(EPOCH FROM a.created_at) ASC, -a.id ASC',
+        orderBy: 'COALESCE(a.prix, 999999999) ASC, -EXTRACT(EPOCH FROM a.created_at) ASC, -a.id ASC',
         tupleSql: ['COALESCE(a.prix, 999999999)', '-EXTRACT(EPOCH FROM a.created_at)', '-a.id'],
         tupleFromRow: (row) => [
           Number(row.prix ?? row.price ?? 999999999),
