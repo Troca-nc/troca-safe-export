@@ -1,7 +1,6 @@
-import { listingsApi, proApi, statsApi } from '@/lib/api'
+import { listingsApi, metaApi, proApi, statsApi } from '@/lib/api'
 import { FALLBACK_CATEGORIES } from '@/lib/categoryCatalog'
 import { demoOr } from '@/lib/demo'
-import { GEO_DATA } from '@/shared-copy/geoData'
 import type { HomeCategory, HomeCommune, HomeListing, HomeNavigation, HomePlatformStats, HomePro } from '@/types/home'
 
 type UnknownRecord = Record<string, unknown>
@@ -102,13 +101,23 @@ export function getHomeNavigation(): HomeNavigation {
     hint: getCategoryHint(category),
   }))
 
-  const provinces = Object.values(GEO_DATA as Record<string, { communes?: Array<{ name?: string; slug?: string }> }>)
-  const communes: HomeCommune[] = provinces
-    .flatMap((province) => province.communes || [])
-    .map((commune) => ({ name: asText(commune.name), slug: asText(commune.slug) }))
-    .filter((commune) => commune.name && commune.slug)
+  return { categories, communes: [] }
+}
 
-  return { categories, communes }
+export async function getHomeCommunes(): Promise<HomeCommune[]> {
+  const response = await metaApi.getCommunes()
+  const provinces = Array.isArray(response.data?.data) ? response.data.data : []
+  const communes: HomeCommune[] = provinces.flatMap((province) => {
+    const values = asRecord(province).communes
+    return Array.isArray(values) ? values : []
+  })
+    .map((commune) => {
+      const item = asRecord(commune)
+      return { name: asText(item.name), slug: asText(item.slug) }
+    })
+    .filter((commune): commune is HomeCommune => Boolean(commune.name && commune.slug))
+
+  return [...new Map(communes.map((commune) => [commune.slug, commune])).values()]
 }
 
 export async function getHomePlatformStats(): Promise<HomePlatformStats> {
