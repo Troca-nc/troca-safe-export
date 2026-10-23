@@ -16,8 +16,8 @@ import {
 } from '@/components/home/HomeSectionsV2'
 import CategoryGridSection from '@/components/home/CategoryGridSection'
 import { trackEvent } from '@/lib/analytics'
-import { getHomeListings, getHomeNavigation, getHomePlatformStats, getHomePros } from '@/lib/data/home'
-import type { HomeListing, HomePlatformStats, HomePro } from '@/types/home'
+import { getHomeCommunes, getHomeListings, getHomeNavigation, getHomePlatformStats, getHomePros } from '@/lib/data/home'
+import type { HomeCommune, HomeListing, HomePlatformStats, HomePro } from '@/types/home'
 
 const navigation = getHomeNavigation()
 
@@ -25,6 +25,7 @@ export default function HomePage() {
   const router = useRouter()
   const [q, setQ] = useState('')
   const [communeSlug, setCommuneSlug] = useState('')
+  const [communes, setCommunes] = useState<HomeCommune[]>([])
   const [platformStats, setPlatformStats] = useState<HomePlatformStats | null>(null)
   const [listings, setListings] = useState<HomeListing[]>([])
   const [listingsLoading, setListingsLoading] = useState(true)
@@ -69,11 +70,20 @@ export default function HomePage() {
     }
   }, [])
 
+  const loadCommunes = useCallback(async () => {
+    try {
+      setCommunes(await getHomeCommunes())
+    } catch {
+      setCommunes([])
+    }
+  }, [])
+
   useEffect(() => {
     void loadListings()
     void loadPros()
     void loadPlatformStats()
-  }, [loadListings, loadPlatformStats, loadPros])
+    void loadCommunes()
+  }, [loadCommunes, loadListings, loadPlatformStats, loadPros])
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -102,13 +112,13 @@ export default function HomePage() {
         onQueryChange={setQ}
         communeSlug={communeSlug}
         onCommuneChange={setCommuneSlug}
-        communes={navigation.communes}
+        communes={communes}
         platformStats={platformStats}
         onSubmit={handleSearch}
         quickCategories={quickCategories}
       />
 
-      <CommunesBarSection communes={navigation.communes} />
+      <CommunesBarSection communes={communes} />
 
       <CategoryGridSection categories={navigation.categories} />
 
