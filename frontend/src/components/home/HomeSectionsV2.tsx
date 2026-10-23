@@ -6,6 +6,7 @@ import {
   ArrowRight,
   BadgeCheck,
   BellRing,
+  ChevronDown,
   CheckCircle2,
   MapPin,
   Search,
@@ -16,8 +17,9 @@ import {
 import ListingCard, { ListingGridSkeleton } from '@/components/listings/ListingCard'
 import HomePlatformStats from '@/components/home/HomePlatformStats'
 import { DeepPanel } from '@/components/ui/Card'
+import { Select } from '@/components/ui/Field'
 import { ErrorState, Skeleton } from '@/components/ui/Skeleton'
-import type { HomeCategory, HomeCommune, HomeListing, HomePro } from '@/types/home'
+import type { HomeCategory, HomeCommune, HomeListing, HomePlatformStats as PlatformStats, HomePro } from '@/types/home'
 
 function SectionHeading({
   eyebrow,
@@ -46,11 +48,19 @@ function SectionHeading({
 export function HomeHeroSection({
   q,
   onQueryChange,
+  communeSlug,
+  onCommuneChange,
+  communes,
+  platformStats,
   onSubmit,
   quickCategories,
 }: {
   q: string
   onQueryChange: (value: string) => void
+  communeSlug: string
+  onCommuneChange: (value: string) => void
+  communes: HomeCommune[]
+  platformStats: PlatformStats | null
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
   quickCategories: HomeCategory[]
 }) {
@@ -80,10 +90,21 @@ export function HomeHeroSection({
                 />
               </label>
               <span className="hidden h-8 w-px shrink-0 bg-warm-border sm:block" aria-hidden="true" />
-              <button type="button" className="hidden min-h-[52px] shrink-0 items-center gap-2 px-4 text-base font-medium text-ink sm:inline-flex">
-                <MapPin className="h-[17px] w-[17px] text-info" aria-hidden="true" />
-                Toute la NC
-              </button>
+              <div className="relative hidden min-w-[180px] shrink-0 sm:block [&>div>label]:sr-only [&_.k-field-group]:rounded-none [&_.k-field-group]:border-0 [&_.k-field-group]:bg-transparent [&_.k-field-group]:focus-within:ring-0">
+                <MapPin className="pointer-events-none absolute left-4 top-1/2 z-10 h-[17px] w-[17px] -translate-y-1/2 text-info" aria-hidden="true" />
+                <Select
+                  label="Commune"
+                  value={communeSlug}
+                  onChange={(event) => onCommuneChange(event.target.value)}
+                  className="min-h-[52px] max-w-[220px] appearance-none py-2 pl-10 pr-9 font-medium"
+                >
+                  <option value="">Toute la NC</option>
+                  {communes.map((commune) => (
+                    <option key={commune.slug} value={commune.slug}>{commune.name}</option>
+                  ))}
+                </Select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/55" aria-hidden="true" />
+              </div>
               <button type="submit" className="inline-flex min-h-[52px] shrink-0 items-center justify-center rounded-control bg-accent-strong px-5 text-label text-cream transition-colors hover:bg-accent-strongHover sm:px-7">
                 Rechercher
               </button>
@@ -121,7 +142,7 @@ export function HomeHeroSection({
           </Link>
           <p className="mb-0 mt-3 text-center text-meta text-cream/55">Gratuit, sans commission</p>
           <div className="mt-7">
-            <HomePlatformStats />
+            <HomePlatformStats stats={platformStats} />
           </div>
         </DeepPanel>
       </div>
@@ -135,7 +156,7 @@ export function CommunesBarSection({ communes }: { communes: HomeCommune[] }) {
       <div className="mx-auto flex max-w-container items-center gap-5 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible lg:pb-0">
         <p className="m-0 shrink-0 text-eyebrow uppercase text-ink/55">Près de chez vous</p>
         <div className="flex shrink-0 gap-2 lg:flex-wrap">
-          {communes.map((commune) => (
+          {communes.slice(0, 10).map((commune) => (
             <Link
               key={commune.slug}
               href={`/annonces?commune=${encodeURIComponent(commune.slug)}`}

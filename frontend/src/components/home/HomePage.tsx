@@ -16,14 +16,16 @@ import {
 } from '@/components/home/HomeSectionsV2'
 import CategoryGridSection from '@/components/home/CategoryGridSection'
 import { trackEvent } from '@/lib/analytics'
-import { getHomeListings, getHomeNavigation, getHomePros } from '@/lib/data/home'
-import type { HomeListing, HomePro } from '@/types/home'
+import { getHomeListings, getHomeNavigation, getHomePlatformStats, getHomePros } from '@/lib/data/home'
+import type { HomeListing, HomePlatformStats, HomePro } from '@/types/home'
 
 const navigation = getHomeNavigation()
 
 export default function HomePage() {
   const router = useRouter()
   const [q, setQ] = useState('')
+  const [communeSlug, setCommuneSlug] = useState('')
+  const [platformStats, setPlatformStats] = useState<HomePlatformStats | null>(null)
   const [listings, setListings] = useState<HomeListing[]>([])
   const [listingsLoading, setListingsLoading] = useState(true)
   const [listingsError, setListingsError] = useState(false)
@@ -59,22 +61,34 @@ export default function HomePage() {
     }
   }, [])
 
+  const loadPlatformStats = useCallback(async () => {
+    try {
+      setPlatformStats(await getHomePlatformStats())
+    } catch {
+      setPlatformStats(null)
+    }
+  }, [])
+
   useEffect(() => {
     void loadListings()
     void loadPros()
-  }, [loadListings, loadPros])
+    void loadPlatformStats()
+  }, [loadListings, loadPlatformStats, loadPros])
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const term = q.trim()
+    const params = new URLSearchParams()
+    if (term) params.set('q', term)
+    if (communeSlug) params.set('commune', communeSlug)
     if (term) {
       void trackEvent('listing_search', {
         query: term,
+        commune: communeSlug || null,
         source: 'home_hero_submit',
       })
-      router.push(`/annonces?q=${encodeURIComponent(term)}`)
     }
-    else router.push('/annonces')
+    router.push(params.size ? `/annonces?${params.toString()}` : '/annonces')
   }
 
   return (
@@ -83,7 +97,16 @@ export default function HomePage() {
       <WelcomeToast />
       <OnboardingToast />
 
-      <HomeHeroSection q={q} onQueryChange={setQ} onSubmit={handleSearch} quickCategories={quickCategories} />
+      <HomeHeroSection
+        q={q}
+        onQueryChange={setQ}
+        communeSlug={communeSlug}
+        onCommuneChange={setCommuneSlug}
+        communes={navigation.communes}
+        platformStats={platformStats}
+        onSubmit={handleSearch}
+        quickCategories={quickCategories}
+      />
 
       <CommunesBarSection communes={navigation.communes} />
 
