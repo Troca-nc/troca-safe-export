@@ -150,29 +150,6 @@ export function HomeHeroSection({
   )
 }
 
-export function CommunesBarSection({ communes }: { communes: HomeCommune[] }) {
-  if (communes.length === 0) return null
-
-  return (
-    <section className="border-b border-warm-border bg-cream-sunken px-4 py-[22px] sm:px-6 lg:px-12" aria-label="Communes populaires">
-      <div className="mx-auto flex max-w-container items-center gap-5 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible lg:pb-0">
-        <p className="m-0 shrink-0 text-eyebrow uppercase text-ink/55">Près de chez vous</p>
-        <div className="flex shrink-0 gap-2 lg:flex-wrap">
-          {communes.slice(0, 10).map((commune) => (
-            <Link
-              key={commune.slug}
-              href={`/annonces?commune=${encodeURIComponent(commune.slug)}`}
-              className="inline-flex min-h-11 shrink-0 items-center rounded-pill border border-warm-border bg-cream-surface px-4 text-sm font-medium text-ink transition-colors hover:border-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-strong focus-visible:ring-offset-2"
-            >
-              {commune.name}
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
 export function RecentListingsSection({
   listings,
   loading,

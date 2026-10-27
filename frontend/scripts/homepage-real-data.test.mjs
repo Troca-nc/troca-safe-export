@@ -23,5 +23,7 @@ test('le choix de commune est interactif et transmis au catalogue', () => {
   assert.match(hero, /<option value="">Toute la NC<\/option>/)
   assert.match(page, /params\.set\('commune', communeSlug\)/)
   assert.match(read('../src/lib/data/home.ts'), /metaApi\.getCommunes\(\)/)
+  assert.doesNotMatch(hero, /Près de chez vous|CommunesBarSection/)
+  assert.doesNotMatch(page, /CommunesBarSection/)
 })
 
