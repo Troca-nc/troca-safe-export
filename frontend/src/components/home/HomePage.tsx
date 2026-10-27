@@ -8,7 +8,6 @@ import WelcomeToast from '@/components/onboarding/WelcomeToast'
 import OnboardingToast from '@/components/onboarding/OnboardingToast'
 import {
   AlertsCtaSection,
-  CommunesBarSection,
   HomeHeroSection,
   LocalProsSection,
   RecentListingsSection,
@@ -117,8 +116,6 @@ export default function HomePage() {
         onSubmit={handleSearch}
         quickCategories={quickCategories}
       />
-
-      <CommunesBarSection communes={communes} />
 
       <CategoryGridSection categories={navigation.categories} />
 
