@@ -151,6 +151,8 @@ export function HomeHeroSection({
 }
 
 export function CommunesBarSection({ communes }: { communes: HomeCommune[] }) {
+  if (communes.length === 0) return null
+
   return (
     <section className="border-b border-warm-border bg-cream-sunken px-4 py-[22px] sm:px-6 lg:px-12" aria-label="Communes populaires">
       <div className="mx-auto flex max-w-container items-center gap-5 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible lg:pb-0">
