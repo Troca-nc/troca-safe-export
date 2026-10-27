@@ -18,8 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      PLAYWRIGHT_BASE_URL: https://kalico-nc.com
-      PLAYWRIGHT_BACKEND_URL: https://kalico-nc.com
+      PLAYWRIGHT_BASE_URL: https://kalico.nc
+      PLAYWRIGHT_BACKEND_URL: https://kalico.nc
       PLAYWRIGHT_USE_LOCAL_SERVER: 'false'
       PLAYWRIGHT_USE_DEMO_SERVER: 'false'
       PLAYWRIGHT_TARGET_ENV: production
