@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Check, ChevronDown, Copy, Facebook, Instagram, Link2, Mail, MessageCircle, Send, Share2, Smartphone, X } from 'lucide-react'
+import { Check, ChevronDown, Facebook, Link2, Mail, MessageCircle, Share2, Smartphone, X } from 'lucide-react'
 import { trackEvent } from '@/lib/analytics'
-import { buildShareMessage, buildShareTrackPayload, buildShareUrls, type ShareContent } from '@/lib/share'
+import { buildShareTrackPayload, buildShareUrls, type ShareContent } from '@/lib/share'
 
 type ShareSheetProps = {
   content: ShareContent
@@ -44,7 +44,6 @@ function useClipboard() {
 
 export default function ShareSheet({ content, variant = 'full', label = 'Partager', className = '' }: ShareSheetProps) {
   const [open, setOpen] = useState(false)
-  const [loadingNative, setLoadingNative] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const { copied, copy } = useClipboard()
   const share = useMemo(() => buildShareUrls(content), [content])
@@ -70,37 +69,13 @@ export default function ShareSheet({ content, variant = 'full', label = 'Partage
     }
   }, [open])
 
-  const onShareAttempt = async () => {
-    void trackEvent('share_click', buildShareTrackPayload(content, 'native'))
-
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      try {
-        setLoadingNative(true)
-        await navigator.share({
-          title: content.title,
-          text: buildShareMessage(content),
-          url: share.url,
-        })
-        setLoadingNative(false)
-        return
-      } catch {
-        setLoadingNative(false)
-      }
-    }
-
+  const onToggleMenu = () => {
     setOpen((value) => !value)
   }
 
   const onCopy = async () => {
     void trackEvent('share_click', buildShareTrackPayload(content, 'copy'))
     await copy(share.url)
-    setOpen(false)
-  }
-
-  const onCopyInstagram = async () => {
-    void trackEvent('share_click', buildShareTrackPayload(content, 'instagram'))
-    await copy(share.instagramCaption)
-    setOpen(false)
   }
 
   const openExternal = (url: string, channel: string) => {
@@ -113,34 +88,34 @@ export default function ShareSheet({ content, variant = 'full', label = 'Partage
     variant === 'icon'
       ? 'rounded-xl p-2 text-night/55 hover:bg-kalico-blue/8 hover:text-kalico-blue transition-colors'
       : variant === 'compact' || variant === 'minimal'
-        ? 'inline-flex items-center gap-2 rounded-2xl border border-night/10 bg-white px-3 py-2 text-sm font-medium text-night/70 hover:border-kalico-blue/30 hover:text-kalico-blue hover:bg-kalico-blue/5 transition-all'
-        : 'inline-flex items-center gap-2 rounded-2xl border border-night/10 bg-white px-4 py-2 text-sm font-medium text-night/70 hover:border-kalico-blue/30 hover:text-kalico-blue hover:bg-kalico-blue/5 transition-all'
+        ? 'inline-flex items-center gap-2 rounded-2xl border border-night/10 bg-cream-surface px-3 py-2 text-sm font-medium text-night/70 hover:border-kalico-blue/30 hover:text-kalico-blue hover:bg-kalico-blue/5 transition-all'
+        : 'inline-flex items-center gap-2 rounded-2xl border border-night/10 bg-cream-surface px-4 py-2 text-sm font-medium text-night/70 hover:border-kalico-blue/30 hover:text-kalico-blue hover:bg-kalico-blue/5 transition-all'
 
   return (
     <div ref={ref} className={`relative ${className}`}>
       <button
         type="button"
-        onClick={onShareAttempt}
+        onClick={onToggleMenu}
         className={buttonClass}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={label}
       >
         <Share2 size={variant === 'icon' ? 18 : 16} />
-        {variant !== 'icon' && <span>{loadingNative ? 'Partage...' : label}</span>}
+        {variant !== 'icon' && <span>{label}</span>}
         {variant === 'full' && <ChevronDown size={12} className="text-night/35" />}
       </button>
 
       {open && (
         <div
-          className="absolute right-0 top-full z-40 mt-2 w-[min(92vw,24rem)] overflow-hidden rounded-[1.5rem] border border-night/10 bg-white shadow-[0_24px_80px_rgba(8,32,50,0.18)]"
+          className="absolute right-0 top-full z-40 mt-2 w-[min(92vw,22rem)] overflow-hidden rounded-[1.25rem] border border-warm-border bg-cream-surface shadow-panel"
           role="menu"
           aria-label="Menu de partage"
         >
           <div className="flex items-center justify-between border-b border-night/6 px-4 py-3">
-            <div>
+            <div className="min-w-0 pr-3">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">Partager</p>
-              <p className="text-sm font-medium text-night">{content.title}</p>
+              <p className="truncate text-sm font-medium text-night">{content.title}</p>
             </div>
             <button
               type="button"
@@ -152,139 +127,62 @@ export default function ShareSheet({ content, variant = 'full', label = 'Partage
             </button>
           </div>
 
-          <div className="grid gap-2 p-3 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-2 p-3">
             <button
               type="button"
-              onClick={onShareAttempt}
-              className="flex items-center gap-3 rounded-2xl border border-night/8 bg-sand/40 px-3 py-3 text-left hover:border-kalico-blue/25 hover:bg-kalico-blue/5"
-            >
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-kalico-blue/10 text-kalico-blue">
-                <Smartphone size={16} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-night">Partage natif</p>
-                <p className="truncate text-[11px] text-night/45">Apps installées et fonctions système</p>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => openExternal(share.whatsapp, 'whatsapp')}
-              className="flex items-center gap-3 rounded-2xl border border-night/8 bg-sand/40 px-3 py-3 text-left hover:border-[#25D366]/25 hover:bg-[#25D366]/5"
-            >
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#25D366] text-white">
-                <MessageCircle size={16} />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-night">WhatsApp</p>
-                <p className="text-[11px] text-night/45">Envoi direct ou fallback web</p>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => openExternal(share.messenger, 'messenger')}
-              className="flex items-center gap-3 rounded-2xl border border-night/8 bg-sand/40 px-3 py-3 text-left hover:border-[#1877F2]/25 hover:bg-[#1877F2]/5"
-            >
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1877F2] text-white">
-                <Facebook size={16} />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-night">Messenger</p>
-                <p className="text-[11px] text-night/45">Lien partagé à vos contacts</p>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => openExternal(share.telegram, 'telegram')}
-              className="flex items-center gap-3 rounded-2xl border border-night/8 bg-sand/40 px-3 py-3 text-left hover:border-[#2AABEE]/25 hover:bg-[#2AABEE]/5"
-            >
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2AABEE] text-white">
-                <Send size={16} />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-night">Telegram</p>
-                <p className="text-[11px] text-night/45">Message vers canal ou DM</p>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => openExternal(share.facebook, 'facebook')}
-              className="flex items-center gap-3 rounded-2xl border border-night/8 bg-sand/40 px-3 py-3 text-left hover:border-[#1877F2]/25 hover:bg-[#1877F2]/5"
-            >
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1877F2] text-white">
-                <Facebook size={16} />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-night">Facebook</p>
-                <p className="text-[11px] text-night/45">Mur, groupe ou message</p>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => openExternal(share.x, 'x')}
-              className="flex items-center gap-3 rounded-2xl border border-night/8 bg-sand/40 px-3 py-3 text-left hover:border-night/20 hover:bg-night/5"
-            >
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-night text-white">
-                <span className="text-sm font-bold">X</span>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-night">X / Twitter</p>
-                <p className="text-[11px] text-night/45">Texte + lien</p>
-              </div>
-            </button>
-
-            <button
-              type="button"
+              role="menuitem"
               onClick={() => openExternal(share.email, 'email')}
-              className="flex items-center gap-3 rounded-2xl border border-night/8 bg-sand/40 px-3 py-3 text-left hover:border-night/20 hover:bg-night/5"
+              className="flex min-h-20 flex-col items-center justify-center gap-2 rounded-2xl border border-night/8 bg-sand/35 px-3 py-3 text-center transition-colors hover:border-kalico-blue/25 hover:bg-kalico-blue/5"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-night/10 text-night">
-                <Mail size={16} />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-night">Email</p>
-                <p className="text-[11px] text-night/45">Ouvrir votre messagerie</p>
-              </div>
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-kalico-blue/10 text-kalico-blue">
+                <Mail size={17} />
+              </span>
+              <span className="text-sm font-semibold text-night">E-mail</span>
             </button>
 
             <button
               type="button"
+              role="menuitem"
               onClick={() => openExternal(share.sms, 'sms')}
-              className="flex items-center gap-3 rounded-2xl border border-night/8 bg-sand/40 px-3 py-3 text-left hover:border-night/20 hover:bg-night/5"
+              className="flex min-h-20 flex-col items-center justify-center gap-2 rounded-2xl border border-night/8 bg-sand/35 px-3 py-3 text-center transition-colors hover:border-kalico-blue/25 hover:bg-kalico-blue/5"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-night/10 text-night">
-                <Copy size={16} />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-night">SMS</p>
-                <p className="text-[11px] text-night/45">Message court avec lien</p>
-              </div>
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-night/10 text-night">
+                <Smartphone size={17} />
+              </span>
+              <span className="text-sm font-semibold text-night">SMS</span>
             </button>
 
             <button
               type="button"
-              onClick={onCopyInstagram}
-              className="flex items-center gap-3 rounded-2xl border border-night/8 bg-sand/40 px-3 py-3 text-left hover:border-[#C13584]/25 hover:bg-[#C13584]/5"
+              role="menuitem"
+              onClick={() => openExternal(share.messenger, 'messenger')}
+              className="flex min-h-20 flex-col items-center justify-center gap-2 rounded-2xl border border-night/8 bg-sand/35 px-3 py-3 text-center transition-colors hover:border-kalico-blue/25 hover:bg-kalico-blue/5"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white">
-                <Instagram size={16} />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-night">Instagram</p>
-                <p className="text-[11px] text-night/45">Copie un texte compatible Instagram</p>
-              </div>
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-kalico-blue text-cream-surface">
+                <Facebook size={17} />
+              </span>
+              <span className="text-sm font-semibold text-night">Messenger</span>
+            </button>
+
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => openExternal(share.whatsapp, 'whatsapp')}
+              className="flex min-h-20 flex-col items-center justify-center gap-2 rounded-2xl border border-night/8 bg-sand/35 px-3 py-3 text-center transition-colors hover:border-jungle/25 hover:bg-jungle/5"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-jungle text-cream-surface">
+                <MessageCircle size={17} />
+              </span>
+              <span className="text-sm font-semibold text-night">WhatsApp</span>
             </button>
           </div>
 
           <div className="border-t border-night/6 p-3">
             <button
               type="button"
+              role="menuitem"
               onClick={onCopy}
-              className="flex w-full items-center gap-3 rounded-2xl border border-night/8 bg-white px-3 py-3 text-left hover:border-kalico-blue/25 hover:bg-kalico-blue/5"
+              className="flex w-full items-center gap-3 rounded-2xl border border-night/8 bg-cream-surface px-3 py-3 text-left hover:border-kalico-blue/25 hover:bg-kalico-blue/5"
             >
               <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${copied ? 'bg-jungle/10 text-jungle' : 'bg-night/10 text-night'}`}>
                 {copied ? <Check size={16} /> : <Link2 size={16} />}
