@@ -350,23 +350,6 @@ export default function ChatInput({
         </div>
       )}
 
-      <div className="flex gap-2 overflow-x-auto px-3 pt-3 sm:px-5" aria-label="Réponses rapides">
-        {['Toujours disponible ?', 'Je peux passer demain', 'Quel est votre dernier prix ?'].map((reply) => (
-          <button
-            key={reply}
-            type="button"
-            onClick={() => {
-              setText(reply)
-              window.setTimeout(() => textareaRef.current?.focus(), 0)
-            }}
-            disabled={disabled || sending || recording || Boolean(pendingDocument)}
-            className="h-9 shrink-0 rounded-pill border border-warm-border bg-cream px-3 text-sm font-medium text-ink transition-colors hover:border-ink disabled:opacity-50"
-          >
-            {reply}
-          </button>
-        ))}
-      </div>
-
       <div className="min-h-[18px] px-3 pt-2 text-center text-mono-xs text-ink/55">
         {audioError ?? (recording ? recordingLabel : '')}
       </div>

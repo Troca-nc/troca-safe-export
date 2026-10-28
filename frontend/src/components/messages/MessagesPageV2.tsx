@@ -277,7 +277,12 @@ export default function MessagesPageV2() {
   }
 
   if (!authReady) {
-    return <div className="h-[calc(100dvh-64px)] animate-pulse bg-cream" />
+    return (
+      <div className="min-h-screen bg-cream">
+        <Header />
+        <div className="h-[calc(100dvh-88px)] min-h-[540px] animate-pulse bg-cream" />
+      </div>
+    )
   }
 
   if (!isAuthenticated) {
@@ -338,7 +343,7 @@ export default function MessagesPageV2() {
           {msgsLoading ? (
             <div className="space-y-4">{Array.from({ length: 5 }).map((_, index) => <div key={index} className={`h-11 animate-pulse rounded-card bg-cream-sunken ${index % 2 ? 'ml-auto w-2/5' : 'w-1/2'}`} />)}</div>
           ) : messages.length === 0 ? (
-            <div className="flex h-full items-center justify-center text-center"><div><p className="font-semibold text-ink">Aucun message pour l’instant</p><p className="mt-2 text-sm text-ink/60">Utilisez une réponse rapide ou écrivez votre premier message.</p></div></div>
+            <div className="flex h-full items-center justify-center text-center"><div><p className="font-semibold text-ink">Aucun message pour l’instant</p><p className="mt-2 text-sm text-ink/60">Écrivez votre premier message.</p></div></div>
           ) : (
             <div className="space-y-3">
               {messages.map((message, index) => {
@@ -365,8 +370,10 @@ export default function MessagesPageV2() {
   ]
 
   return (
-    <div className="h-[calc(100dvh-64px)] min-h-[540px] overflow-hidden bg-cream">
-      <div className="grid h-full min-h-0 grid-cols-1 lg:grid-cols-[360px_minmax(0,1fr)] xl:grid-cols-[392px_minmax(0,1fr)_344px]">
+    <div className="min-h-screen bg-cream">
+      <Header />
+      <div className="h-[calc(100dvh-88px)] min-h-[540px] overflow-hidden bg-cream">
+        <div className="grid h-full min-h-0 grid-cols-1 lg:grid-cols-[360px_minmax(0,1fr)] xl:grid-cols-[392px_minmax(0,1fr)_344px]">
         <aside className={`${threadOpen ? 'hidden' : 'flex'} min-h-0 flex-col border-r border-warm-border bg-cream lg:flex`}>
           <div className="shrink-0 px-5 pb-3 pt-5">
             <p className="text-eyebrow text-accent-text">Messagerie</p>
@@ -385,11 +392,12 @@ export default function MessagesPageV2() {
 
         <main className={`${threadOpen ? 'flex' : 'hidden'} min-h-0 min-w-0 flex-col lg:flex`}>{renderThread()}</main>
         <aside className="hidden min-h-0 border-l border-warm-border xl:block"><ContextPanel conversation={activeConversation} participant={participant} attachments={attachments} /></aside>
+        </div>
+
+        {contextOpen && <div className="fixed inset-0 z-50 xl:hidden"><button type="button" className="absolute inset-0 bg-ink-deep/40" onClick={() => setContextOpen(false)} aria-label="Fermer le contexte" /><aside className="absolute bottom-0 right-0 top-0 w-[min(92vw,360px)] border-l border-warm-border shadow-modal"><ContextPanel conversation={activeConversation} participant={participant} attachments={attachments} onClose={() => setContextOpen(false)} /></aside></div>}
+
+        {counterOffer && <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-deep/45 px-4" onClick={() => setCounterOffer(null)}><div className="w-full max-w-sm rounded-block bg-cream-surface p-6 shadow-modal" onClick={(event) => event.stopPropagation()}><h3 className="font-display text-2xl text-ink">Faire une contre-offre</h3><p className="mt-2 text-sm text-ink/60">Offre reçue : {counterOffer.amount.toLocaleString('fr-FR')} XPF</p><div className="mt-5 flex gap-2"><button type="button" className="min-h-11 flex-1 rounded-control bg-cream-sunken font-semibold text-ink" onClick={() => setCounterOffer(null)}>Annuler</button><button type="button" className="min-h-11 flex-1 rounded-control bg-accent-strong font-semibold text-cream-surface" onClick={() => handleRespondOffer(counterOffer.offer_id, 'countered', Math.round(counterOffer.amount * 1.1))}>Envoyer</button></div></div></div>}
       </div>
-
-      {contextOpen && <div className="fixed inset-0 z-50 xl:hidden"><button type="button" className="absolute inset-0 bg-ink-deep/40" onClick={() => setContextOpen(false)} aria-label="Fermer le contexte" /><aside className="absolute bottom-0 right-0 top-0 w-[min(92vw,360px)] border-l border-warm-border shadow-modal"><ContextPanel conversation={activeConversation} participant={participant} attachments={attachments} onClose={() => setContextOpen(false)} /></aside></div>}
-
-      {counterOffer && <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-deep/45 px-4" onClick={() => setCounterOffer(null)}><div className="w-full max-w-sm rounded-block bg-cream-surface p-6 shadow-modal" onClick={(event) => event.stopPropagation()}><h3 className="font-display text-2xl text-ink">Faire une contre-offre</h3><p className="mt-2 text-sm text-ink/60">Offre reçue : {counterOffer.amount.toLocaleString('fr-FR')} XPF</p><div className="mt-5 flex gap-2"><button type="button" className="min-h-11 flex-1 rounded-control bg-cream-sunken font-semibold text-ink" onClick={() => setCounterOffer(null)}>Annuler</button><button type="button" className="min-h-11 flex-1 rounded-control bg-accent-strong font-semibold text-cream-surface" onClick={() => handleRespondOffer(counterOffer.offer_id, 'countered', Math.round(counterOffer.amount * 1.1))}>Envoyer</button></div></div></div>}
     </div>
   )
 }
