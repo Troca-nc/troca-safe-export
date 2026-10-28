@@ -25,6 +25,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [17](specs/17-compte-pro.md) | Espace Pro | /pro/dashboard | Fait (fusionnée) | [#232](https://github.com/Troca-nc/troca-safe-export/pull/232) — prérequis serveur ; [#233](https://github.com/Troca-nc/troca-safe-export/pull/233) — frontend |
 | [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | À relire | [#234](https://github.com/Troca-nc/troca-safe-export/pull/234) serveur fusionnée ; [#235](https://github.com/Troca-nc/troca-safe-export/pull/235) frontend |
 | [19](specs/19-admin.md) | Administration | /admin | À relire | [#236](https://github.com/Troca-nc/troca-safe-export/pull/236) |
+| 20 | Messagerie | /messages | À relire | — |
 
 ### QUESTION — point d’entrée de l’ancien frontend Admin
 
@@ -1990,3 +1991,21 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - Design system : `node scripts/check-design.mjs --changed`, 1 fichier contrôlé, 0 erreur, 0 avertissement avant mise à jour de ce suivi.
 - Build de production : `NODE_OPTIONS=--use-system-ca npm run build`, passé avec 112 routes, dont `/annonces`.
 - `git diff --check` : passé. La vérification visuelle humaine reste à effectuer sur l’aperçu de la PR.
+
+## 20 — Messagerie v2 (28 octobre 2026)
+
+- Référence fournie par l’humain : `20-messagerie.md` et maquette exportée `Messagerie v2.html`, hors dépôt.
+- Inventaire : le moteur existant couvre déjà les conversations, non-lus, présence, pièces jointes, offres, contre-offres et propositions de troc. Aucun changement d’API, de schéma ou de migration n’est nécessaire pour cette refonte.
+- La route `/messages` utilise une nouvelle coque visuelle claire : liste des discussions 392 px, fil flexible et contexte 344 px à partir de 1280 px ; liste + fil entre 1024 et 1279 px avec contexte en tiroir ; une seule vue à la fois sous 1024 px.
+- La liste fournit recherche, filtres, miniatures, interlocuteurs, rôles Achat/Vente/Troc et compteurs réels. Le fil conserve l’envoi existant, les médias, les offres et le troc, avec bandeau d’annonce, séparateurs de jour, réponses rapides et états vide/chargement/annonce inactive/interlocuteur bloqué.
+- Le panneau de contexte regroupe l’annonce, le profil public disponible, les médias partagés et les conseils de sécurité. L’action « Bloquer » n’est pas inventée : aucune mutation serveur correspondante n’existe dans le périmètre actuel.
+- Aucune fixture de démonstration n’est ajoutée : la page continue d’utiliser exclusivement les API et les données réelles existantes.
+
+### Validation
+
+- Lint obligatoire : passé.
+- TypeScript : passé sans erreur.
+- Design system : 5 fichiers contrôlés, 0 erreur et 0 avertissement avant mise à jour de ce suivi.
+- Encodage : aucun fichier modifié signalé ; la dette historique autorisée reste hors périmètre.
+- Build Next.js de production : passé avec 112 routes, dont `/messages`.
+- `git diff --check` : passé avant mise à jour de ce suivi. La comparaison visuelle humaine à 1440, 1024, 768 et 390 px reste requise sur l’aperçu livré.

@@ -289,7 +289,7 @@ export default function ChatInput({
       : 'file'
 
   return (
-    <div className="border-t border-night/8 bg-white">
+    <div className="shrink-0 border-t border-warm-border bg-cream-surface">
       {offerOpen && (
         <div className="px-4 py-3 border-b border-night/8 bg-sand/50">
           <div className="flex items-center justify-between mb-2">
@@ -350,7 +350,24 @@ export default function ChatInput({
         </div>
       )}
 
-      <div className="px-3 pt-2 text-[11px] text-center text-night/40 min-h-[18px]">
+      <div className="flex gap-2 overflow-x-auto px-3 pt-3 sm:px-5" aria-label="Réponses rapides">
+        {['Toujours disponible ?', 'Je peux passer demain', 'Quel est votre dernier prix ?'].map((reply) => (
+          <button
+            key={reply}
+            type="button"
+            onClick={() => {
+              setText(reply)
+              window.setTimeout(() => textareaRef.current?.focus(), 0)
+            }}
+            disabled={disabled || sending || recording || Boolean(pendingDocument)}
+            className="h-9 shrink-0 rounded-pill border border-warm-border bg-cream px-3 text-sm font-medium text-ink transition-colors hover:border-ink disabled:opacity-50"
+          >
+            {reply}
+          </button>
+        ))}
+      </div>
+
+      <div className="min-h-[18px] px-3 pt-2 text-center text-mono-xs text-ink/55">
         {audioError ?? (recording ? recordingLabel : '')}
       </div>
 
@@ -403,12 +420,12 @@ export default function ChatInput({
         </div>
       )}
 
-      <div className="flex items-end gap-2 px-3 py-2.5">
+      <div className="flex items-end gap-2 px-3 pb-4 pt-2 sm:px-5">
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={disabled || uploading || recording || Boolean(pendingDocument)}
-          className="p-2 text-night/40 hover:text-kalico-blue hover:bg-kalico-blue/8 rounded-xl transition-all shrink-0 disabled:opacity-40"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-control bg-cream-sunken text-ink/65 transition-colors hover:text-info-text disabled:opacity-40"
           aria-label="Envoyer une photo"
         >
           {uploading
@@ -421,7 +438,7 @@ export default function ChatInput({
           type="button"
           onClick={() => documentInputRef.current?.click()}
           disabled={disabled || uploading || recording || Boolean(pendingDocument)}
-          className="p-2 text-night/40 hover:text-kalico-blue hover:bg-kalico-blue/8 rounded-xl transition-all shrink-0 disabled:opacity-40"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-control bg-cream-sunken text-ink/65 transition-colors hover:text-info-text disabled:opacity-40"
           aria-label="Envoyer un document"
         >
           <Paperclip size={18} />
@@ -432,10 +449,10 @@ export default function ChatInput({
             type="button"
             onClick={() => setOfferOpen(!offerOpen)}
             disabled={disabled || recording || Boolean(pendingDocument)}
-            className={`p-2 rounded-xl transition-all shrink-0 disabled:opacity-40 ${
+            className={`flex h-12 shrink-0 items-center justify-center rounded-control px-3 transition-all disabled:opacity-40 ${
               offerOpen
-                ? 'text-kalico-blue bg-kalico-blue/10'
-                : 'text-night/40 hover:text-kalico-blue hover:bg-kalico-blue/8'
+                ? 'bg-accent/15 text-accent-text'
+                : 'bg-accent/10 text-accent-text hover:bg-accent/15'
             }`}
             aria-label="Faire une offre de prix"
           >
@@ -451,7 +468,7 @@ export default function ChatInput({
             placeholder={pendingDocument ? 'Envoyez ou annulez le document en attente…' : recording ? 'Enregistrement audio en cours…' : 'Votre message…'}
             disabled={disabled || sending || recording || Boolean(pendingDocument)}
             rows={1}
-            className="flex-1 resize-none bg-sand rounded-2xl px-3.5 py-2.5 text-sm text-night outline-none placeholder:text-night/35 disabled:opacity-50 max-h-[120px] leading-relaxed"
+            className="max-h-[120px] flex-1 resize-none rounded-control border border-warm-border bg-cream px-4 py-3 text-base leading-relaxed text-ink outline-none placeholder:text-ink/40 focus:border-ink disabled:opacity-50"
             style={{ minHeight: '42px' }}
           />
 
@@ -462,8 +479,8 @@ export default function ChatInput({
           onPointerCancel={handleAudioPressEnd}
           onPointerLeave={recording ? handleAudioPressEnd : undefined}
           disabled={disabled || uploading || sending || Boolean(pendingDocument)}
-          className={`p-2.5 rounded-xl transition-all shrink-0 disabled:opacity-30 ${
-            recording ? 'bg-rose-500 text-white' : 'bg-night text-white hover:bg-ocean'
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-control transition-all disabled:opacity-30 ${
+            recording ? 'bg-alert-error text-cream-surface' : 'bg-ink-deep text-cream-surface'
           }`}
           aria-label={recording ? 'Arrêter l’enregistrement' : 'Maintenir pour enregistrer un message vocal'}
         >
@@ -474,7 +491,7 @@ export default function ChatInput({
           type="button"
           onClick={handleSend}
           disabled={(pendingDocument ? false : !text.trim()) || sending || disabled || recording || uploading}
-          className="p-2.5 bg-kalico-blue text-white rounded-xl hover:bg-kalico-blue-dark transition-all shrink-0 disabled:opacity-30"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-control bg-accent-strong text-cream-surface transition-colors hover:bg-accent-strongHover disabled:opacity-30"
           aria-label={pendingDocument ? 'Envoyer le document' : 'Envoyer le message'}
         >
           {sending

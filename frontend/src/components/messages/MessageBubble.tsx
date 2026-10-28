@@ -23,8 +23,8 @@ function getProposalMetadata(message: Message) {
 }
 
 function TextBubble({ message, isMine }: { message: Message; isMine: boolean }) {
-  const receivedClass = 'bg-nc-lagonLight border border-nc-lagonBorder text-nc-lagonText'
-  const sentClass = 'bg-kalico-blue text-white'
+  const receivedClass = 'bg-cream-sunken text-ink'
+  const sentClass = 'bg-info text-cream-surface'
   const documentLabel = message.attachment_name || 'Document partagé'
   const documentUrl = message.attachment_download_url || message.attachment_url || '#'
   const mediaPath = message.type === 'document' ? documentUrl : message.photo_url
@@ -182,17 +182,17 @@ function OfferBubble({
   const s = statusConfig[offer.status]
 
   return (
-    <div className={`max-w-[280px] overflow-hidden rounded-2xl border-2 bg-white ${isPending ? 'border-kalico-blue/30' : 'border-night/10'}`}>
-      <div className="flex items-center gap-2 border-b border-kalico-blue/10 bg-kalico-blue/5 px-4 py-3">
-        <TrendingUp size={16} className="text-kalico-blue" />
-        <span className="text-sm font-semibold text-night">Offre de prix</span>
+    <div className={`max-w-[420px] overflow-hidden rounded-card border bg-cream-surface shadow-xs ${isPending ? 'border-accent/35' : 'border-warm-border'}`}>
+      <div className="flex items-center gap-2 border-b border-warm-border bg-accent/10 px-4 py-3">
+        <TrendingUp size={16} className="text-accent-text" />
+        <span className="text-sm font-semibold text-ink">Offre de prix</span>
         <span className={`ml-auto rounded-full border px-2 py-0.5 text-[10px] font-medium ${s.color}`}>
           {s.label}
         </span>
       </div>
 
       <div className="px-4 py-4 text-center">
-        <p className="text-3xl font-bold text-kalico-blue">
+        <p className="font-display text-4xl text-ink">
           {offer.amount_xpf.toLocaleString('fr-FR')} XPF
         </p>
         {offer.expires_at && isPending && (
@@ -204,13 +204,13 @@ function OfferBubble({
 
       {isPending && !isMine && isSeller && (
         <div className="flex gap-2 px-4 pb-4">
-          <button onClick={onAccept} className="flex-1 rounded-xl bg-emerald-500 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-600">
+          <button onClick={onAccept} aria-label={`Accepter l’offre de ${offer.amount_xpf.toLocaleString('fr-FR')} XPF`} className="min-h-11 flex-1 rounded-control bg-accent-strong px-3 text-sm font-semibold text-cream-surface transition-colors hover:bg-accent-strongHover">
             Accepter
           </button>
-          <button onClick={onCounter} className="flex-1 rounded-xl border border-blue-200 bg-blue-50 py-2 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-100">
-            Contrer
+          <button onClick={onCounter} aria-label={`Faire une contre-offre à l’offre de ${offer.amount_xpf.toLocaleString('fr-FR')} XPF`} className="min-h-11 flex-1 rounded-control border border-ink px-3 text-sm font-semibold text-ink transition-colors hover:bg-cream-sunken">
+            Contre-offre
           </button>
-          <button onClick={onDecline} className="flex-1 rounded-xl border border-red-200 bg-red-50 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-100">
+          <button onClick={onDecline} aria-label={`Refuser l’offre de ${offer.amount_xpf.toLocaleString('fr-FR')} XPF`} className="min-h-11 flex-1 rounded-control bg-cream-sunken px-3 text-sm font-semibold text-ink transition-colors">
             Refuser
           </button>
         </div>
@@ -253,18 +253,18 @@ function TrocProposalBubble({
   const statusMeta = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending
 
   return (
-    <div className="w-full max-w-[420px] overflow-hidden rounded-3xl border border-kalico-blue/15 bg-white shadow-sm">
-      <div className="flex items-center gap-2 border-b border-kalico-blue/10 bg-kalico-blue/5 px-4 py-3">
-        <TrendingUp size={16} className="text-kalico-blue" />
-        <span className="text-sm font-semibold text-night">Proposition de troc</span>
+    <div className="w-full max-w-[460px] overflow-hidden rounded-card border border-ink-deep bg-ink-deep text-cream-surface shadow-sm">
+      <div className="flex items-center gap-2 border-b border-cream-surface/15 bg-cream-surface/5 px-4 py-3">
+        <TrendingUp size={16} className="text-accent" />
+        <span className="text-sm font-semibold text-cream-surface">Proposition de troc</span>
         <span className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-medium ${statusMeta.className}`}>
           {isMine && isPending ? 'En attente de réponse…' : statusMeta.label}
         </span>
       </div>
 
       <div className="grid gap-3 px-4 py-4 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
-        <div className="rounded-2xl border border-night/10 bg-sand/30 p-2">
-          <div className="relative h-24 overflow-hidden rounded-2xl bg-sand">
+        <div className="rounded-card border border-cream-surface/15 bg-cream-surface/10 p-2">
+          <div className="relative h-24 overflow-hidden rounded-control bg-cream-surface/10">
             <ListingImage
               src={proposerImage || null}
               alt={proposerTitle}
@@ -272,20 +272,20 @@ function TrocProposalBubble({
               className="h-full w-full"
             />
           </div>
-          <p className="mt-2 line-clamp-2 text-sm font-semibold text-night">{proposerTitle}</p>
-          <p className="mt-1 text-sm font-bold text-[#0A7EA4]">
+          <p className="mt-2 line-clamp-2 text-sm font-semibold text-cream-surface">{proposerTitle}</p>
+          <p className="mt-1 text-sm font-bold text-accent">
             {proposerPrice != null ? `${proposerPrice.toLocaleString('fr-FR')} XPF` : 'Prix non communiqué'}
           </p>
         </div>
 
         <div className="flex justify-center">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-kalico-blue/10 text-kalico-blue">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-accent/15 text-accent">
             ⇄
           </div>
         </div>
 
-        <div className="rounded-2xl border border-night/10 bg-sand/30 p-2">
-          <div className="relative h-24 overflow-hidden rounded-2xl bg-sand">
+        <div className="rounded-card border border-cream-surface/15 bg-cream-surface/10 p-2">
+          <div className="relative h-24 overflow-hidden rounded-control bg-cream-surface/10">
             <ListingImage
               src={targetImage || null}
               alt={targetTitle}
@@ -293,8 +293,8 @@ function TrocProposalBubble({
               className="h-full w-full"
             />
           </div>
-          <p className="mt-2 line-clamp-2 text-sm font-semibold text-night">{targetTitle}</p>
-          <p className="mt-1 text-sm font-bold text-[#0A7EA4]">
+          <p className="mt-2 line-clamp-2 text-sm font-semibold text-cream-surface">{targetTitle}</p>
+          <p className="mt-1 text-sm font-bold text-accent">
             {targetPrice != null ? `${targetPrice.toLocaleString('fr-FR')} XPF` : 'Prix non communiqué'}
           </p>
         </div>
@@ -302,31 +302,31 @@ function TrocProposalBubble({
 
       {message.content ? (
         <div className="px-4 pb-4">
-          <div className="rounded-2xl bg-sand/40 px-3 py-2 text-sm leading-relaxed text-night/70">
+          <div className="rounded-control bg-cream-surface/10 px-3 py-2 text-sm leading-relaxed text-cream-surface/75">
             {message.content}
           </div>
         </div>
       ) : null}
 
       {!isMine && isSeller && proposalId && isPending ? (
-        <div className="flex gap-2 border-t border-night/8 px-4 py-4">
+        <div className="flex gap-2 border-t border-cream-surface/15 px-4 py-4">
           <button
             type="button"
             onClick={onAccept}
-            className="flex-1 rounded-2xl bg-emerald-500 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-600"
+            className="min-h-11 flex-1 rounded-control bg-accent px-3 text-sm font-semibold text-ink-deep transition"
           >
             ✓ Accepter
           </button>
           <button
             type="button"
             onClick={onDecline}
-            className="flex-1 rounded-2xl border border-night/10 bg-white px-3 py-2.5 text-sm font-semibold text-night transition hover:border-kalico-blue/25 hover:text-kalico-blue"
+            className="min-h-11 flex-1 rounded-control border border-cream-surface/40 bg-transparent px-3 text-sm font-semibold text-cream-surface transition"
           >
             ✗ Refuser
           </button>
         </div>
       ) : (
-        <div className="border-t border-night/8 px-4 py-3 text-sm text-night/55">
+        <div className="border-t border-cream-surface/15 px-4 py-3 text-sm text-cream-surface/70">
           {status === 'accepted'
             ? '✅ Troc accepté'
             : status === 'declined'
