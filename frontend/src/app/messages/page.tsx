@@ -1,12 +1,12 @@
 'use client'
 
 import { Suspense } from 'react'
-import MessagesPage from '@/components/messages/MessagesPage'
+import MessagesPageV2 from '@/components/messages/MessagesPageV2'
 
 export default function MessagesRoute() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-sand-light" />}>
-      <MessagesPage />
+      <MessagesPageV2 />
     </Suspense>
   )
 }
