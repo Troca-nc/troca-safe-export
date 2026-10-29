@@ -2000,6 +2000,7 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - La liste fournit recherche, filtres, miniatures, interlocuteurs, rôles Achat/Vente/Troc et compteurs réels. Le fil conserve l’envoi existant, les médias, les offres et le troc, avec bandeau d’annonce, séparateurs de jour, réponses rapides et états vide/chargement/annonce inactive/interlocuteur bloqué.
 - Le panneau de contexte regroupe l’annonce, le profil public disponible, les médias partagés et les conseils de sécurité. L’action « Bloquer » n’est pas inventée : aucune mutation serveur correspondante n’existe dans le périmètre actuel.
 - Aucune fixture de démonstration n’est ajoutée : la page continue d’utiliser exclusivement les API et les données réelles existantes.
+- Correctif du 29 octobre 2026 : l’ouverture d’une discussion et l’arrivée d’un message font désormais défiler uniquement la région `role="log"`. L’ancien `scrollIntoView`, qui pouvait déplacer toute la page jusqu’au composeur, a été supprimé au profit du `scrollTo` du conteneur de messages.
 
 ### Validation
 
@@ -2009,3 +2010,4 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - Encodage : aucun fichier modifié signalé ; la dette historique autorisée reste hors périmètre.
 - Build Next.js de production : passé avec 112 routes, dont `/messages`.
 - `git diff --check` : passé avant mise à jour de ce suivi. La comparaison visuelle humaine à 1440, 1024, 768 et 390 px reste requise sur l’aperçu livré.
+- Correctif de défilement du 29 octobre 2026 : test de régression dédié, lint, TypeScript, design system (1 fichier, 0 erreur, 0 avertissement) et build de production (112 routes) passés.
