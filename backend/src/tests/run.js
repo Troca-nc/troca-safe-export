@@ -28,6 +28,7 @@ const SUITES = [
   './conversationTypingAccess.test',
   './conversationReadAccess.test',
   './conversationOffersAccess.test',
+  './conversationMessageAccess.test',
   './eventPublicationRules.test',
   './eventPublicationCreation.test',
   './health.test',
