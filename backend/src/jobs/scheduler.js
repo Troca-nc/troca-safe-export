@@ -77,6 +77,17 @@ function getPerformanceWindowDays(frequency) {
   }
 }
 
+function isPerformanceReportDue(frequency, lastSentAt, now = new Date()) {
+  if (!lastSentAt) return true;
+
+  const lastSent = new Date(lastSentAt);
+  const currentTime = new Date(now);
+  if (Number.isNaN(lastSent.getTime()) || Number.isNaN(currentTime.getTime())) return true;
+
+  const intervalMs = getPerformanceWindowDays(frequency) * 24 * 60 * 60 * 1000;
+  return currentTime.getTime() - lastSent.getTime() >= intervalMs;
+}
+
 function getPerformancePeriodLabel(frequency, startDate) {
   const labelMap = {
     daily: 'les dernières 24 heures',
@@ -1128,6 +1139,14 @@ async function runPerformanceReportsJob() {
 
     for (const recipient of recipients.rows) {
       try {
+        if (!isPerformanceReportDue(
+          recipient.performance_report_frequency,
+          recipient.last_performance_report_at
+        )) {
+          skipped++;
+          continue;
+        }
+
         const report = await buildPerformanceReportForUser(recipient, recipient);
         if (!report) {
           skipped++;
@@ -1610,4 +1629,11 @@ function startAllJobs() {
   importCleanup.startImportCleanupJob();
 }
 
-module.exports = { startAllJobs, matchImmediateAlerts, expireTrocProposals, expireTrocCycles, processTrocMatchingQueue };
+module.exports = {
+  startAllJobs,
+  matchImmediateAlerts,
+  expireTrocProposals,
+  expireTrocCycles,
+  processTrocMatchingQueue,
+  isPerformanceReportDue,
+};

@@ -73,9 +73,34 @@ require('module')._load = function (req, parent, isMain) {
   return origLoad.apply(this, arguments);
 };
 
-const { startAllJobs, matchImmediateAlerts } = require('../jobs/scheduler');
+const { startAllJobs, matchImmediateAlerts, isPerformanceReportDue } = require('../jobs/scheduler');
 
 require('module')._load = origLoad;
+
+describe('scheduler — fréquence des rapports de performance', () => {
+  const now = new Date('2026-10-30T07:30:00.000Z');
+
+  it('autorise immédiatement un premier rapport', () => {
+    assert.strictEqual(isPerformanceReportDue('weekly', null, now), true);
+  });
+
+  it('respecte les intervalles quotidien, hebdomadaire et mensuel', () => {
+    const ago = (days) => new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+
+    assert.strictEqual(isPerformanceReportDue('daily', ago(0.99), now), false);
+    assert.strictEqual(isPerformanceReportDue('daily', ago(1), now), true);
+    assert.strictEqual(isPerformanceReportDue('weekly', ago(6), now), false);
+    assert.strictEqual(isPerformanceReportDue('weekly', ago(7), now), true);
+    assert.strictEqual(isPerformanceReportDue('monthly', ago(29), now), false);
+    assert.strictEqual(isPerformanceReportDue('monthly', ago(30), now), true);
+  });
+
+  it('utilise sept jours par défaut et récupère une date invalide', () => {
+    assert.strictEqual(isPerformanceReportDue('unexpected', new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000), now), false);
+    assert.strictEqual(isPerformanceReportDue('unexpected', new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000), now), true);
+    assert.strictEqual(isPerformanceReportDue('weekly', 'date-invalide', now), true);
+  });
+});
 
 describe('scheduler — startAllJobs', () => {
   it('enregistre 3 jobs cron au démarrage', () => {
