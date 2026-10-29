@@ -189,7 +189,7 @@ export default function MessagesPageV2() {
   const [filter, setFilter] = useState<ConversationFilter>('all')
   const [counterOffer, setCounterOffer] = useState<{ offer_id: number; amount: number } | null>(null)
   const [participantProfile, setParticipantProfile] = useState<Record<string, any> | null>(null)
-  const bottomRef = useRef<HTMLDivElement>(null)
+  const messageListRef = useRef<HTMLDivElement>(null)
   const suppressAutoScrollRef = useRef(false)
   const { convs, loading: convsLoading, error: convsError, refetch: refetchConversations } = useConversations()
   const activeConversation = useMemo(() => convs.find((conversation) => conversation.id === activeConvId) ?? null, [convs, activeConvId])
@@ -236,7 +236,10 @@ export default function MessagesPageV2() {
   }, [activeConversation?.other_user.id])
 
   useEffect(() => {
-    if (!msgsLoading && !suppressAutoScrollRef.current) bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (msgsLoading || suppressAutoScrollRef.current) return
+    const messageList = messageListRef.current
+    if (!messageList) return
+    messageList.scrollTo({ top: messageList.scrollHeight, behavior: 'smooth' })
   }, [messages.length, msgsLoading])
 
   const currentUserId = user ? Number(user.id) : null
@@ -338,7 +341,7 @@ export default function MessagesPageV2() {
         {trocConversation && <div className="flex shrink-0 items-center gap-2 border-b border-warm-border bg-accent/10 px-5 py-2 text-sm font-semibold text-accent-text"><ArrowLeftRight aria-hidden="true" size={16} />Discussion liée à une proposition de troc</div>}
         {inactiveListing && <div className="shrink-0 border-b border-warm-border bg-alert-warn/10 px-5 py-2 text-sm text-alert-warn">L’annonce n’est plus active. La discussion reste disponible.</div>}
 
-        <div role="log" aria-live="polite" aria-label="Messages de la discussion" className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-7">
+        <div ref={messageListRef} role="log" aria-live="polite" aria-label="Messages de la discussion" className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-7">
           {hasMore && <div className="mb-4 text-center"><button type="button" onClick={handleLoadMore} className="min-h-11 px-4 text-sm font-semibold text-info-text">Charger les messages précédents</button></div>}
           {msgsLoading ? (
             <div className="space-y-4">{Array.from({ length: 5 }).map((_, index) => <div key={index} className={`h-11 animate-pulse rounded-card bg-cream-sunken ${index % 2 ? 'ml-auto w-2/5' : 'w-1/2'}`} />)}</div>
@@ -351,7 +354,6 @@ export default function MessagesPageV2() {
                 const previousDay = index > 0 ? new Date(messages[index - 1].created_at).toDateString() : null
                 return <div key={message.id}>{currentDay !== previousDay && <div className="my-4 flex justify-center"><span className="rounded-pill bg-cream-sunken px-3 py-1 text-xs font-semibold text-ink/60">{dayLabel(message.created_at)}</span></div>}<MessageBubble message={message} isMine={Number(message.sender_id) === Number(currentUserId)} isSeller={isSeller} onAcceptOffer={(id) => handleRespondOffer(id, 'accepted')} onDeclineOffer={(id) => handleRespondOffer(id, 'declined')} onCounterOffer={(id) => { const offer = messages.find((item) => item.offer?.id === id)?.offer; if (offer) setCounterOffer({ offer_id: id, amount: offer.amount_xpf }) }} onAcceptTrocProposal={handleAcceptTrocProposal} onDeclineTrocProposal={handleDeclineTrocProposal} /></div>
               })}
-              <div ref={bottomRef} />
             </div>
           )}
         </div>
