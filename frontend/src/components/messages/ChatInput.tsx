@@ -61,8 +61,10 @@ export default function ChatInput({
 }: ChatInputProps) {
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
+  const [sendError, setSendError] = useState<string | null>(null)
   const [offerOpen, setOfferOpen] = useState(false)
   const [offerAmt, setOfferAmt] = useState(annoncePrix ? String(Math.round(annoncePrix * 0.9)) : '')
+  const [offerSending, setOfferSending] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [recording, setRecording] = useState(false)
   const [recordingMs, setRecordingMs] = useState(0)
@@ -81,6 +83,8 @@ export default function ChatInput({
   const audioChunksRef = useRef<Blob[]>([])
   const audioStreamRef = useRef<MediaStream | null>(null)
   const recorderTimerRef = useRef<number | null>(null)
+  const sendLockRef = useRef(false)
+  const offerLockRef = useRef(false)
 
   useEffect(() => {
     return () => {
@@ -107,6 +111,7 @@ export default function ChatInput({
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setText(e.target.value)
+    if (sendError) setSendError(null)
     onTyping()
     const el = e.target
     el.style.height = 'auto'
@@ -115,39 +120,51 @@ export default function ChatInput({
 
   const handleSend = useCallback(async () => {
     if (pendingDocument) {
-      if (uploading) return
+      if (uploading || sendLockRef.current) return
+      sendLockRef.current = true
       setUploading(true)
+      setSendError(null)
       try {
         const res = await uploadApi.uploadChatDocument(pendingDocument.file)
         const payload = res.data?.data
         const url = payload?.url
-        if (url) {
-          await onSendDocument({
-            url,
-            name: payload?.filename || pendingDocument.name,
-            mimeType: payload?.mime_type || pendingDocument.mimeType || pendingDocument.file.type || 'application/octet-stream',
-            sizeBytes: payload?.size_bytes ?? pendingDocument.sizeBytes ?? null,
-          })
-          setPendingDocument(null)
-        }
+        if (!url) throw new Error('Document upload returned no URL')
+        await onSendDocument({
+          url,
+          name: payload?.filename || pendingDocument.name,
+          mimeType: payload?.mime_type || pendingDocument.mimeType || pendingDocument.file.type || 'application/octet-stream',
+          sizeBytes: payload?.size_bytes ?? pendingDocument.sizeBytes ?? null,
+        })
+        setPendingDocument(null)
       } catch (err) {
         console.error('[chat-document]', err)
+        setSendError('Impossible d’envoyer le document. Réessayez.')
       } finally {
+        sendLockRef.current = false
         setUploading(false)
         if (documentInputRef.current) documentInputRef.current.value = ''
       }
       return
     }
 
-    if (!text.trim() || sending) return
+    if (!text.trim() || sendLockRef.current) return
+    sendLockRef.current = true
     setSending(true)
+    setSendError(null)
     const msg = text.trim()
-    setText('')
-    if (textareaRef.current) textareaRef.current.style.height = 'auto'
-    await onSendText(msg)
-    setSending(false)
-    textareaRef.current?.focus()
-  }, [pendingDocument, uploading, text, sending, onSendText, onSendDocument])
+    try {
+      await onSendText(msg)
+      setText('')
+      if (textareaRef.current) textareaRef.current.style.height = 'auto'
+    } catch (err) {
+      console.error('[chat-text]', err)
+      setSendError('Message non envoyé. Vérifiez votre connexion puis réessayez.')
+    } finally {
+      sendLockRef.current = false
+      setSending(false)
+      textareaRef.current?.focus()
+    }
+  }, [pendingDocument, uploading, text, onSendText, onSendDocument])
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -158,18 +175,21 @@ export default function ChatInput({
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file) return
+    if (!file || sendLockRef.current) return
+    sendLockRef.current = true
     setUploading(true)
+    setSendError(null)
     try {
       const optimizedFile = file.type.startsWith('image/') ? await compressImage(file) : file
       const res = await uploadApi.uploadChatPhoto(optimizedFile)
       const url = res.data?.data?.url
-      if (url) {
-        await onSendPhoto(url)
-      }
+      if (!url) throw new Error('Photo upload returned no URL')
+      await onSendPhoto(url)
     } catch (err) {
       console.error('[chat-photo]', err)
+      setSendError('Impossible d’envoyer la photo. Réessayez.')
     } finally {
+      sendLockRef.current = false
       setUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
@@ -178,14 +198,21 @@ export default function ChatInput({
   const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    const optimizedFile = file.type.startsWith('image/') ? await compressImage(file) : file
-    setPendingDocument({
-      file: optimizedFile,
-      name: optimizedFile.name || file.name || 'document',
-      mimeType: optimizedFile.type || file.type || 'application/octet-stream',
-      sizeBytes: optimizedFile.size || file.size || 0,
-    })
-    if (documentInputRef.current) documentInputRef.current.value = ''
+    setSendError(null)
+    try {
+      const optimizedFile = file.type.startsWith('image/') ? await compressImage(file) : file
+      setPendingDocument({
+        file: optimizedFile,
+        name: optimizedFile.name || file.name || 'document',
+        mimeType: optimizedFile.type || file.type || 'application/octet-stream',
+        sizeBytes: optimizedFile.size || file.size || 0,
+      })
+    } catch (err) {
+      console.error('[chat-document-preview]', err)
+      setSendError('Impossible de préparer ce document.')
+    } finally {
+      if (documentInputRef.current) documentInputRef.current.value = ''
+    }
   }
 
   const handleCancelDocument = () => {
@@ -271,9 +298,20 @@ export default function ChatInput({
 
   const handleOffer = async () => {
     const amount = snapTo10(parseInt(offerAmt.replace(/\s/g, '')))
-    if (!amount || amount <= 0) return
-    setOfferOpen(false)
-    await onMakeOffer(amount)
+    if (!amount || amount <= 0 || offerLockRef.current) return
+    offerLockRef.current = true
+    setOfferSending(true)
+    setSendError(null)
+    try {
+      await onMakeOffer(amount)
+      setOfferOpen(false)
+    } catch (err) {
+      console.error('[chat-offer]', err)
+      setSendError('Impossible d’envoyer l’offre. Réessayez.')
+    } finally {
+      offerLockRef.current = false
+      setOfferSending(false)
+    }
   }
 
   const recordingLabel = recording
@@ -315,6 +353,7 @@ export default function ChatInput({
                 value={offerAmt}
                 onChange={(e) => setOfferAmt(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleOffer() }}
+                disabled={offerSending}
                 placeholder="Montant en XPF"
                 className="input w-full pr-12 text-sm"
                 autoFocus
@@ -324,10 +363,10 @@ export default function ChatInput({
             <button
               type="button"
               onClick={handleOffer}
-              disabled={!offerAmt}
+              disabled={!offerAmt || offerSending}
               className="btn-primary text-sm px-4 disabled:opacity-40"
             >
-              Envoyer
+              {offerSending ? 'Envoi…' : 'Envoyer'}
             </button>
           </div>
           {annoncePrix != null && (
@@ -350,8 +389,8 @@ export default function ChatInput({
         </div>
       )}
 
-      <div className="min-h-[18px] px-3 pt-2 text-center text-mono-xs text-ink/55">
-        {audioError ?? (recording ? recordingLabel : '')}
+      <div className={`min-h-[18px] px-3 pt-2 text-center text-mono-xs ${sendError || audioError ? 'text-alert-error' : 'text-ink/55'}`} role={sendError || audioError ? 'alert' : 'status'}>
+        {sendError ?? audioError ?? (recording ? recordingLabel : '')}
       </div>
 
       {pendingDocument && (
