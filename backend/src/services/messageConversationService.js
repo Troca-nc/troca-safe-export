@@ -423,7 +423,7 @@ async function startConversation(userId, listingId, message) {
 async function appendConversationMessage(userId, conversationId, payload) {
   const conv = await query(
     `SELECT id, buyer_id, seller_id, conversation_type, metadata
-     FROM conversations
+     FROM conversations c
      WHERE id = $1 AND ${buildConversationAccessClause('$2')}`,
     [conversationId, userId]
   );
@@ -582,7 +582,7 @@ async function loadMessageNotificationTarget(conversationId, recipientId) {
 async function archiveConversation(userId, conversationId) {
   const conv = await query(
     `SELECT id, buyer_id, seller_id, conversation_type, metadata
-     FROM conversations
+     FROM conversations c
      WHERE id = $1 AND ${buildConversationAccessClause('$2')}`,
     [conversationId, userId]
   );
