@@ -2,27 +2,30 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 
-const source = await readFile(
-  new URL('../src/app/evenements/publier/page.tsx', import.meta.url),
-  'utf8',
-)
+const paths = [
+  '../src/app/evenements/publier/page.tsx',
+  '../src/components/events/PublishPanel.tsx',
+  '../src/components/events/EventPreviewCard.tsx',
+  '../src/lib/data/events.ts',
+]
+const source = (await Promise.all(paths.map((path) => readFile(new URL(path, import.meta.url), 'utf8')))).join('\n')
 
 test('la page de publication d’événement conserve ses libellés français en UTF-8', () => {
   const expectedLabels = [
-    'Publier un événement avec billets',
-    'Créez un événement, définissez vos billets, puis gérez la réservation',
+    'Publie ton événement.',
+    'Événement · Billetterie intégrée',
     'Catégorie',
-    'Conférence',
+    'Atelier ou conférence',
     'Cinéma',
-    'Téléphone organisateur',
+    'Téléphone · facultatif',
     'Billetterie activée',
-    'Événement gratuit',
+    'Sans billetterie',
     'Capacité totale',
-    'Quantité totale',
+    'Ajouter un type de billet',
     'Aperçu',
-    'Réservation native 10 minutes',
-    'QR code de contrôle généré automatiquement',
-    'Besoin d’aide ?',
+    'QR code unique',
+    'Prêt à publier ?',
+    'Un doute ?',
   ]
 
   expectedLabels.forEach((label) => assert.ok(source.includes(label), `Libellé manquant : ${label}`))

@@ -27,6 +27,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [19](specs/19-admin.md) | Administration | /admin | À relire | [#236](https://github.com/Troca-nc/troca-safe-export/pull/236) |
 | 20 | Messagerie | /messages | À relire | — |
 | [21](specs/21-notifications.md) | Préférences de notifications | /parametres/notifications | À relire | [#282](https://github.com/Troca-nc/troca-safe-export/pull/282) |
+| [22](specs/22-evenement-publier.md) | Publier un événement | /evenements/publier | À relire | Refonte v2 intégrée, recette visuelle humaine à faire |
 
 ### QUESTION — point d’entrée de l’ancien frontend Admin
 
@@ -2082,3 +2083,67 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - Build Next.js de production : passé avec 112 routes, dont `/parametres/notifications`.
 - `git diff --check` passé. Le contrôle d’encodage ciblé ne signale aucune anomalie dans les fichiers de la fiche ; le contrôle global retrouve uniquement la dette historique déjà présente hors périmètre.
 - La recette visuelle humaine reste requise sur l’aperçu de la PR, le contrôle du navigateur intégré n’étant pas disponible dans cette session.
+
+## 22 — Publier un événement — À relire
+
+### Références et historique
+
+- Références fournies par l’humain : `22-evenement-publier.md`, `Publier un evenement v2.html` et `LISEZ-MOI _1_.md`, actuellement hors dépôt.
+- Route existante : `src/app/evenements/publier/page.tsx`. Elle crée déjà un événement, ses types de billets et la redirection vers `/evenements/[id]`. Le correctif d’encodage de la PR #283 est présent dans la base de cette branche et doit rester intact.
+- La page réutilise le `Header` connecté. Aucun changement de navigation, d’authentification globale, de paiement, de réservation, de QR code ou de scan n’est prévu dans la refonte visuelle.
+- Aucun ancien lot ou PR de design dédié à `/evenements/publier` n’a été trouvé. La route provient du lot initial de billetterie native puis de corrections transversales d’encodage et de couleur.
+
+### Sections et composants
+
+| Section de la fiche | Existant trouvé | Décision d’inventaire |
+| --- | --- | --- |
+| En-tête éditorial | Bandeau sombre propre à la page, plus `Header`. | Conserver `Header`, remplacer le bandeau par le lien de retour, le chapeau, le titre et le compteur `N sur 5` de la maquette. |
+| 1 — L’événement | Titre, description, catégorie en `<select>` et URL de couverture sont dans la page monolithique. | Créer `EventFormSection`; utiliser les neuf catégories réellement admises par l’API et la base, sous forme de `FilterChip`. Conserver l’URL de couverture tant que le téléversement événement n’existe pas. |
+| 2 — Quand et où | Date, début, fin, lieu, adresse et communes chargées via `metaApi.getCommunes`. | Réorganiser ces champs dans la grille de la maquette en réutilisant `Input` et `Select`; ne pas recopier les huit communes d’exemple. |
+| 3 — Billetterie | Activation, gratuit/payant, capacité séparée et types de billets existent. | Créer `TicketTypeCard`; conserver les types natifs, calculer gratuité et capacité à partir des billets, employer le `Switch` existant et garder le QR code comme information. Le comportement produit actuel confirme le premier billet `Standard`, 0 XPF, 100 places ; les billets ajoutés restent vides, 0 XPF, 50 places. |
+| 4 — Organisateur | Nom, e-mail, téléphone et site web existent, sans préremplissage. | Préremplir une seule fois depuis `useAuthStore.user` (`first_name`/`prenom`, `last_name`/`nom`, `email`, `telephone`) sans écraser la saisie. |
+| Bloc final | Un seul bouton de publication et une alerte d’erreur globale existent. | Créer `PublishPanel`, état de préparation, publication désactivée tant que les cinq contrôles ne passent pas, erreurs conservant la saisie et focus sur le premier champ invalide. Le brouillon reste une QUESTION serveur ci-dessous. |
+| Colonne latérale | Aperçu maison, checklist statique et aide existent. | Extraire la carte `EventCard` privée de `BonsPlansPageView` vers un composant partagé et la réutiliser pour `EventPreviewCard`; créer `PublishChecklist` et l’encart d’aide. |
+| États et responsive | Squelette d’hydratation et erreur d’envoi existent ; pas de garde contre la fermeture. | Ajouter `beforeunload`, chargement des communes, aperçu dynamique, validations accessibles et bascule de la colonne sous le formulaire sous 1000 px. Les recettes 1440/1024/768/390 restent obligatoires. |
+
+### Données et contrats
+
+| Besoin | Source actuelle | Conclusion |
+| --- | --- | --- |
+| Communes | `metaApi.getCommunes()` | Contrat existant, à encapsuler dans `src/lib/data/events.ts`. |
+| Catégories | Enum serveur et contrainte SQL : `concert`, `festival`, `sport`, `marche`, `conference`, `exposition`, `cinema`, `spectacle`, `autre`. | Liste réelle confirmée ; les catégories supplémentaires de la maquette ne seront pas inventées. |
+| Profil organisateur | `useAuthStore.user` | Nom, e-mail et téléphone disponibles sans nouvelle API. |
+| Création et billets | `eventsApi.create`, `POST /events`, `eventTicketingService`. | Contrat existant à préserver derrière la couche `src/lib/data/events.ts`. |
+| Aperçu | `LocalEvent`, `formatNoumeaDate` et `EventCard` dans la fiche 11. | Extraire et partager le composant au lieu d’en créer une copie divergente. |
+| Démonstration | Aucun domaine `events` dans `src/lib/data` ni `src/demo/fixtures`. | Créer les types, la couche de données et une fixture minimale de métadonnées/réponse ; aucun composant n’importera la fixture. |
+| Brouillon | Le statut `draft` est accepté à la création, mais titre, date et heure restent obligatoires ; aucune lecture propriétaire ni mise à jour d’événement n’existe. La création crée aussi un `bon_plan` actif. | Le brouillon vide, rééditable et garanti invisible de la fiche n’est pas fourni par le contrat actuel. |
+| Photo | `cover_image_url` et `photos` n’acceptent que des URL. `uploadApi` et le serveur ne proposent qu’un téléversement lié à une annonce ou un produit. | Aucun dépôt persistant de photo d’événement n’existe. Une zone de dépôt active serait trompeuse sans extension serveur. |
+
+### Fichiers prévus après validation
+
+- Modifier `frontend/src/app/evenements/publier/page.tsx` et extraire la présentation vers des composants sous `frontend/src/components/events/`.
+- Extraire la carte d’événement de `frontend/src/components/bon-plans/BonsPlansPageView.tsx` vers un composant partagé réutilisé par la liste et l’aperçu.
+- Créer `frontend/src/types/events.ts`, `frontend/src/lib/data/events.ts` et `frontend/src/demo/fixtures/events.ts`.
+- Réutiliser sans modifier les primitives `Input`, `Select`, `Textarea`, `FilterChip`, `Switch`, `Button` et `Card` existantes.
+- Ajouter la fiche, la maquette et un test de contrat ciblé, puis mettre à jour uniquement cette entrée de suivi.
+- Aucun changement de paiement, réservation, QR code, scan, Header ou schéma de données dans le lot visuel.
+
+### Décisions validées avant code
+
+1. **Brouillon** — décision humaine : brouillon local au navigateur dans ce lot visuel. Un stockage propriétaire côté serveur reste un éventuel lot séparé.
+2. **Photo** — décision humaine : conserver l’URL comme champ secondaire avec aperçu, sans faire croire à un téléversement. Un vrai dépôt de photo d’événement demanderait un lot serveur/upload séparé.
+3. **Accès non connecté** — décision humaine : conserver le parcours Kalico actuel, avec modale de connexion et retour sur `/evenements/publier`.
+
+Inventaire et trois décisions validés par l’humain le 30 octobre 2026.
+
+### Livraison et validation — 31 octobre 2026
+
+- La page est réorganisée en quatre cartes numérotées, panneau final sombre et colonne latérale collante, avec le `Header` connecté et le lien de retour au calendrier.
+- L’aperçu réutilise désormais la même `EventCard` que la liste Bons plans / événements ; les textes de remplacement, la date, le lieu, le tarif et le CTA suivent la saisie.
+- La checklist et le compteur reposent sur les cinq mêmes règles. La publication reste désactivée tant qu’un bloc manque ; les erreurs détaillées sont associées aux champs et le premier champ invalide reçoit le focus.
+- Les communes et la création passent par `src/lib/data/events.ts`; les neuf catégories sont celles du contrat serveur. Les billets natifs, la capacité, la gratuité, les QR codes, l’authentification et la redirection vers la fiche sont conservés.
+- Le brouillon est enregistré localement par compte et la fermeture d’une page modifiée déclenche la confirmation du navigateur. La photo reste une URL avec aperçu, conformément aux décisions validées.
+- États ajoutés : squelette d’hydratation, chargement/échec des communes avec nouvelle tentative, erreur de publication conservant la saisie et confirmation d’enregistrement local.
+- Validations réussies : 6 tests ciblés, `npm run lint`, `npx tsc --noEmit`, `node scripts/check-design.mjs --changed` (11 fichiers, zéro erreur et zéro avertissement), `git diff --check` et build Next.js de production (112 pages, route `/evenements/publier` générée).
+- Le contrôle global d’encodage confirme les fichiers gardés sans nouvelle anomalie ; il continue de lister la dette historique hors périmètre déjà connue dans d’autres fichiers.
+- Limite de recette : l’outil de navigateur intégré n’était pas disponible dans cette session. La comparaison visuelle humaine à 1440 px reste à faire ; les recettes mobiles humaines à 1024/768/390 restent volontairement reportées au second temps demandé par l’utilisateur.

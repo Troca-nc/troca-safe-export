@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { ArrowRight, BadgeCheck, CalendarDays, CalendarRange, Clock3, Image as ImageIcon, LayoutGrid, List, MapPin, Search, Sparkles, Store, Tag, Ticket } from 'lucide-react'
+import { ArrowRight, BadgeCheck, CalendarDays, CalendarRange, Image as ImageIcon, LayoutGrid, List, MapPin, Search, Sparkles, Store, Tag } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
+import { EventCard } from '@/components/bon-plans/EventCard'
 import { Button } from '@/components/ui/Button'
 import { formatNoumeaDate } from '@/lib/bonPlansDate'
 import { followBonPlanBusiness, getBonsPlansPageData } from '@/lib/data/bon-plans'
@@ -38,20 +39,6 @@ function OfferCard({ offer, featured }: { offer: BonPlan; featured?: boolean }) 
         <div className="mt-4 flex items-center gap-2 text-body-sm font-semibold"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-label-sm text-cream">{offer.businessInitials}</span><span>{offer.businessName}</span>{offer.verified ? <BadgeCheck className="h-5 w-5 text-info-text" aria-label="Commerce vérifié" /> : null}</div>
         {offer.commune ? <p className="mt-3 flex items-center gap-2 text-meta text-ink/60"><MapPin className="h-4 w-4" />{offer.commune}</p> : null}
         <div className="mt-auto flex flex-wrap items-end justify-between gap-4 pt-5"><div>{previousPrice ? <p className="text-meta text-ink/50 line-through">{previousPrice}</p> : null}{currentPrice ? <p className="font-display text-price-sm font-semibold">{currentPrice}</p> : <p className="text-label font-semibold text-reef-text">Offre à découvrir</p>}</div>{offer.ctaUrl ? <a href={offer.ctaUrl} target="_blank" rel="noreferrer" className="k-button k-button-secondary">{offer.ctaLabel}<ArrowRight className="h-4 w-4" /></a> : <span className="text-meta font-semibold text-ink/55">En commerce</span>}</div>
-      </div>
-    </article>
-  )
-}
-
-function EventCard({ event }: { event: LocalEvent }) {
-  const eventPrice = event.isFree ? 'Gratuit' : price(event.priceXpf) || 'Tarif à confirmer'
-  return (
-    <article className="grid overflow-hidden rounded-card border border-warm-border bg-cream-surface shadow-card sm:grid-cols-[11rem_1fr]">
-      {event.coverImageUrl ? <img src={event.coverImageUrl} alt="" className="h-full min-h-44 w-full object-cover" /> : <Placeholder label="Visuel de l’événement" />}
-      <div className="p-5 sm:p-6"><div className="flex flex-wrap gap-2"><span className="rounded-pill bg-info/15 px-3 py-1 text-label-sm font-semibold text-info-text">{event.category}</span><span className="rounded-pill bg-reef/15 px-3 py-1 text-label-sm font-semibold text-reef-text">{eventPrice}</span>{event.verified ? <span className="flex items-center gap-1 text-meta font-semibold text-info-text"><BadgeCheck className="h-4 w-4" />Organisateur vérifié</span> : null}</div>
-        <h3 className="mt-3 font-display text-h4">{event.title}</h3><p className="mt-2 line-clamp-2 text-body-sm text-ink/70">{event.description || 'Les informations pratiques seront précisées par l’organisateur.'}</p>
-        <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-meta font-semibold text-ink/65"><span className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-accent-text" />{formatNoumeaDate(event.dateIso, { weekday: 'long' })}</span>{event.time ? <span className="flex items-center gap-2"><Clock3 className="h-4 w-4 text-accent-text" />{event.time}{event.endTime ? ` – ${event.endTime}` : ''}</span> : null}{event.commune || event.venue ? <span className="flex items-center gap-2"><MapPin className="h-4 w-4 text-accent-text" />{[event.venue, event.commune].filter(Boolean).join(', ')}</span> : null}</div>
-        <div className="mt-5 flex items-center justify-between gap-4"><p className="text-meta text-ink/55">{event.organizerName || 'Organisateur local'}</p>{event.bookingUrl ? <a href={event.bookingUrl} target="_blank" rel="noreferrer" className="k-button k-button-secondary">Réserver<Ticket className="h-4 w-4" /></a> : null}</div>
       </div>
     </article>
   )
