@@ -1,395 +1,222 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { ArrowRight, CalendarDays, Check, Loader2, MapPin, Plus, Ticket } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ArrowLeft, Image as ImageIcon, Plus } from 'lucide-react'
 
+import { EventFormSection } from '@/components/events/EventFormSection'
+import { EventPreviewCard } from '@/components/events/EventPreviewCard'
+import { PublishChecklist, type PublishCheck } from '@/components/events/PublishChecklist'
+import { PublishPanel } from '@/components/events/PublishPanel'
+import { TicketTypeCard, type TicketErrors } from '@/components/events/TicketTypeCard'
 import Header from '@/components/layout/Header'
-import { eventsApi, metaApi } from '@/lib/api'
+import { Button } from '@/components/ui/Button'
+import { FilterChip, Switch } from '@/components/ui/Controls'
+import { Input, Select, Textarea } from '@/components/ui/Field'
+import { clearLocalEventDraft, createEventPublishDraft, EVENT_CATEGORIES, getEventPublishMetadata, INITIAL_EVENT_TICKET, loadLocalEventDraft, publishEvent, saveLocalEventDraft } from '@/lib/data/events'
 import { useAuthActionStore } from '@/store/authActionStore'
 import { useAuthStore } from '@/store/authStore'
+import type { EventPublishDraft, EventTicketDraft } from '@/types/events'
 
-type CommuneOption = { id: number; name: string }
+type FieldErrors = Partial<Record<keyof EventPublishDraft, string>>
+const NEW_TICKET: EventTicketDraft = { name: '', description: '', priceXpf: '0', quantity: '50' }
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-type TicketTypeForm = {
-  name: string
-  description: string
-  price_xpf: string
-  quantity_total: string
+function validUrl(value: string) {
+  if (!value.trim()) return true
+  try {
+    const url = new URL(value)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch { return false }
 }
 
-const INITIAL_TICKET: TicketTypeForm = {
-  name: 'Standard',
-  description: '',
-  price_xpf: '0',
-  quantity_total: '100',
+function snapshot(form: EventPublishDraft, ticketing: boolean, tickets: EventTicketDraft[]) {
+  return JSON.stringify({ form, ticketing, tickets })
 }
 
 export default function EventPublishPage() {
-  const { isAuthenticated } = useAuthStore()
-  const hasHydrated = useAuthStore((state) => state.hasHydrated)
+  const { isAuthenticated, user, hasHydrated } = useAuthStore()
   const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
-  const [communes, setCommunes] = useState<CommuneOption[]>([])
-  const [loadingCommunes, setLoadingCommunes] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  const [form, setForm] = useState<EventPublishDraft>(() => createEventPublishDraft())
   const [ticketing, setTicketing] = useState(true)
-  const [isFree, setIsFree] = useState(false)
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    venue_name: '',
-    venue_address: '',
-    commune_id: '',
-    event_date: '',
-    event_time: '19:00',
-    end_time: '',
-    cover_image_url: '',
-    category: 'concert',
-    organizer_name: '',
-    organizer_email: '',
-    organizer_phone: '',
-    website_url: '',
-    max_capacity: '100',
-  })
-  const [ticketTypes, setTicketTypes] = useState<TicketTypeForm[]>([
-    INITIAL_TICKET,
-  ])
+  const [tickets, setTickets] = useState<EventTicketDraft[]>([{ ...INITIAL_EVENT_TICKET }])
+  const [communes, setCommunes] = useState<{ id: number; name: string }[]>([])
+  const [initialized, setInitialized] = useState(false)
+  const [metadataLoading, setMetadataLoading] = useState(true)
+  const [metadataError, setMetadataError] = useState('')
+  const [metadataAttempt, setMetadataAttempt] = useState(0)
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+  const [ticketErrors, setTicketErrors] = useState<TicketErrors[]>([])
+  const [publishing, setPublishing] = useState(false)
+  const [savingDraft, setSavingDraft] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+  const [success, setSuccess] = useState('')
+  const cleanSnapshot = useRef('')
+  const titleRef = useRef<HTMLInputElement>(null)
+  const dateRef = useRef<HTMLInputElement>(null)
+  const venueRef = useRef<HTMLInputElement>(null)
+  const organizerRef = useRef<HTMLInputElement>(null)
+  const emailRef = useRef<HTMLInputElement>(null)
+  const firstTicketRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    let alive = true
-    setLoadingCommunes(true)
-    metaApi.getCommunes()
-      .then((response) => {
-        if (!alive) return
-        const list = Array.isArray(response.data?.data) ? response.data.data : []
-        setCommunes(list.map((item: any) => ({ id: Number(item.id), name: item.name || item.nom || item.libelle || `Commune ${item.id}` })))
-      })
-      .catch(() => {
-        if (!alive) return
-        setCommunes([])
-      })
-      .finally(() => {
-        if (alive) setLoadingCommunes(false)
-      })
+    if (!hasHydrated || initialized) return
+    const profile = { name: [user?.first_name || user?.prenom, user?.last_name || user?.nom].filter(Boolean).join(' '), email: user?.email, phone: user?.telephone || '' }
+    const stored = loadLocalEventDraft(user?.id)
+    let initialForm = stored?.form || createEventPublishDraft(profile)
+    const category = new URLSearchParams(window.location.search).get('category')
+    if (!stored && EVENT_CATEGORIES.some((option) => option.value === category)) initialForm = { ...initialForm, category: category as EventPublishDraft['category'] }
+    const initialTicketing = stored?.ticketing ?? true
+    const initialTickets = stored?.tickets?.length ? stored.tickets : [{ ...INITIAL_EVENT_TICKET }]
+    setForm(initialForm); setTicketing(initialTicketing); setTickets(initialTickets)
+    cleanSnapshot.current = snapshot(initialForm, initialTicketing, initialTickets)
+    setInitialized(true)
+  }, [hasHydrated, initialized, user])
 
-    return () => {
-      alive = false
-    }
-  }, [])
+  useEffect(() => {
+    let active = true
+    setMetadataLoading(true); setMetadataError('')
+    getEventPublishMetadata()
+      .then((metadata) => { if (active) setCommunes(metadata.communes) })
+      .catch(() => { if (active) setMetadataError('Impossible de charger les communes.') })
+      .finally(() => { if (active) setMetadataLoading(false) })
+    return () => { active = false }
+  }, [metadataAttempt])
 
-  if (!hasHydrated) {
-    return (
-      <main className="min-h-screen bg-sand-light text-night">
-        <Header />
-        <div className="mx-auto max-w-5xl px-4 py-8">
-          <div className="h-72 animate-pulse rounded-[2rem] bg-white" />
-        </div>
-      </main>
-    )
-  }
+  const dirty = initialized && snapshot(form, ticketing, tickets) !== cleanSnapshot.current
+  useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => { if (dirty) { event.preventDefault(); event.returnValue = '' } }
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [dirty])
 
-  const updateField = (key: string, value: string) => {
+  const checks = useMemo<PublishCheck[]>(() => [
+    { label: 'Titre et catégorie', complete: Boolean(form.title.trim() && form.category) },
+    { label: 'Date et heure de début', complete: Boolean(form.eventDate && form.startTime) },
+    { label: 'Lieu et commune', complete: Boolean(form.venueName.trim() && form.communeId) },
+    { label: ticketing ? 'Billets : nom, prix et places' : 'Billetterie désactivée', complete: !ticketing || tickets.every((ticket) => ticket.name.trim() && Number.isInteger(Number(ticket.priceXpf)) && Number(ticket.priceXpf) >= 0 && Number.isInteger(Number(ticket.quantity)) && Number(ticket.quantity) >= 1) },
+    { label: 'Organisateur et e-mail', complete: Boolean(form.organizerName.trim() && emailPattern.test(form.organizerEmail)) },
+  ], [form, ticketing, tickets])
+
+  const done = checks.filter((check) => check.complete).length
+  const remaining = checks.length - done
+  const categoryLabel = EVENT_CATEGORIES.find((option) => option.value === form.category)?.label || 'Catégorie'
+  const communeName = communes.find((commune) => String(commune.id) === form.communeId)?.name || ''
+  const capacity = tickets.reduce((total, ticket) => total + (Number.parseInt(ticket.quantity, 10) || 0), 0)
+
+  const updateField = <K extends keyof EventPublishDraft>(key: K, value: EventPublishDraft[K]) => {
     setForm((current) => ({ ...current, [key]: value }))
-    setError('')
-    setSuccess('')
+    setFieldErrors((current) => ({ ...current, [key]: undefined }))
+    setSubmitError(''); setSuccess('')
+  }
+  const updateTicket = (index: number, key: keyof EventTicketDraft, value: string) => {
+    setTickets((current) => current.map((ticket, ticketIndex) => ticketIndex === index ? { ...ticket, [key]: value } : ticket))
+    setTicketErrors((current) => current.map((error, errorIndex) => errorIndex === index ? { ...error, [key]: undefined } : error))
+    setSubmitError(''); setSuccess('')
+  }
+  const requireAuth = () => {
+    if (isAuthenticated) return false
+    openAuthModal({ type: 'publish_listing', redirectTo: '/evenements/publier' })
+    return true
+  }
+  const handleSaveDraft = () => {
+    if (requireAuth()) return
+    setSavingDraft(true); setSubmitError('')
+    try {
+      saveLocalEventDraft(user?.id, { form, ticketing, tickets, savedAt: new Date().toISOString() })
+      cleanSnapshot.current = snapshot(form, ticketing, tickets)
+      setSuccess('Brouillon enregistré sur cet appareil.')
+    } catch { setSubmitError('Impossible d’enregistrer le brouillon. Réessaie.') }
+    finally { setSavingDraft(false) }
   }
 
-  const updateTicketType = (index: number, key: keyof TicketTypeForm, value: string) => {
-    setTicketTypes((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, [key]: value } : item)))
-    setError('')
-    setSuccess('')
-  }
-
-  const addTicketType = () => {
-    setTicketTypes((current) => [...current, { ...INITIAL_TICKET, name: `Billet ${current.length + 1}` }])
-  }
-
-  const removeTicketType = (index: number) => {
-    setTicketTypes((current) => current.filter((_, itemIndex) => itemIndex !== index))
+  const validate = () => {
+    const errors: FieldErrors = {}
+    const nextTicketErrors: TicketErrors[] = tickets.map(() => ({}))
+    if (!form.title.trim()) errors.title = 'Indique le titre de l’événement.'
+    if (!form.category) errors.category = 'Choisis une catégorie.'
+    if (!form.eventDate) errors.eventDate = 'Choisis une date.'
+    if (!form.startTime) errors.startTime = 'Indique l’heure de début.'
+    if (!form.venueName.trim()) errors.venueName = 'Indique le lieu.'
+    if (!form.communeId) errors.communeId = 'Choisis une commune.'
+    if (!form.organizerName.trim()) errors.organizerName = 'Indique le nom de l’organisateur.'
+    if (!emailPattern.test(form.organizerEmail)) errors.organizerEmail = 'Indique une adresse e-mail valide.'
+    if (!validUrl(form.coverImageUrl)) errors.coverImageUrl = 'Utilise une adresse commençant par http:// ou https://.'
+    if (!validUrl(form.websiteUrl)) errors.websiteUrl = 'Utilise une adresse commençant par http:// ou https://.'
+    if (ticketing) tickets.forEach((ticket, index) => {
+      if (!ticket.name.trim()) nextTicketErrors[index].name = 'Indique un nom.'
+      if (!Number.isInteger(Number(ticket.priceXpf)) || Number(ticket.priceXpf) < 0) nextTicketErrors[index].priceXpf = 'Saisis un entier positif ou nul.'
+      if (!Number.isInteger(Number(ticket.quantity)) || Number(ticket.quantity) < 1) nextTicketErrors[index].quantity = 'Prévois au moins une place.'
+    })
+    setFieldErrors(errors); setTicketErrors(nextTicketErrors)
+    const ticketInvalid = nextTicketErrors.some((ticket) => Object.keys(ticket).length > 0)
+    if (errors.title || errors.category) titleRef.current?.focus()
+    else if (errors.eventDate || errors.startTime) dateRef.current?.focus()
+    else if (errors.venueName || errors.communeId) venueRef.current?.focus()
+    else if (ticketInvalid) firstTicketRef.current?.focus()
+    else if (errors.organizerName) organizerRef.current?.focus()
+    else if (errors.organizerEmail) emailRef.current?.focus()
+    return Object.keys(errors).length === 0 && !ticketInvalid
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setError('')
-    setSuccess('')
-
-    if (!isAuthenticated) {
-      openAuthModal({
-        type: 'publish_listing',
-        redirectTo: '/evenements/publier',
-      })
-      return
-    }
-
-    setSaving(true)
+    if (requireAuth() || !validate()) return
+    setPublishing(true); setSubmitError(''); setSuccess('')
     try {
-      const payload = {
-        title: form.title.trim(),
-        description: form.description.trim(),
-        venue_name: form.venue_name.trim() || null,
-        venue_address: form.venue_address.trim() || null,
-        commune_id: form.commune_id ? Number(form.commune_id) : null,
-        event_date: form.event_date,
-        event_time: form.event_time,
-        end_time: form.end_time || null,
-        cover_image_url: form.cover_image_url.trim() || null,
-        photos: form.cover_image_url ? [form.cover_image_url.trim()] : [],
-        category: form.category,
-        status: 'published',
-        has_ticketing: ticketing,
-        max_capacity: form.max_capacity ? Number(form.max_capacity) : null,
-        is_free: isFree,
-        organizer_name: form.organizer_name.trim() || null,
-        organizer_email: form.organizer_email.trim() || null,
-        organizer_phone: form.organizer_phone.trim() || null,
-        website_url: form.website_url.trim() || null,
-        target_audience: 'particulier',
-        kind: form.category === 'concert' ? 'concert' : 'event',
-        price_xpf: isFree ? 0 : 0,
-        ticket_types: ticketing
-          ? ticketTypes
-              .filter((ticket) => ticket.name.trim())
-              .map((ticket, index) => ({
-                name: ticket.name.trim(),
-                description: ticket.description.trim() || null,
-                price_xpf: isFree ? 0 : Number(ticket.price_xpf || 0),
-                quantity_total: Number(ticket.quantity_total || 0),
-                is_active: true,
-                position: index,
-              }))
-          : [],
-      }
-
-      const { data } = await eventsApi.create(payload)
-      const eventId = data?.data?.id
-      if (eventId) {
-        window.location.assign(`/evenements/${eventId}`)
-        return
-      }
-      setSuccess('Événement publié avec succès.')
-    } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible de publier l’événement.')
-    } finally {
-      setSaving(false)
-    }
+      const result = await publishEvent(form, ticketing, tickets)
+      clearLocalEventDraft(user?.id)
+      cleanSnapshot.current = snapshot(form, ticketing, tickets)
+      window.location.assign(result.href)
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error
+      setSubmitError(message || 'Impossible de publier l’événement. Réessaie.')
+    } finally { setPublishing(false) }
   }
 
-  return (
-    <main className="min-h-screen bg-sand-light text-night">
-      <Header />
+  if (!hasHydrated || !initialized) return <main className="min-h-screen bg-cream"><Header /><div className="mx-auto max-w-7xl space-y-5 px-5 py-10 sm:px-12"><div className="h-32 animate-pulse rounded-card bg-cream-sunken" />{[1, 2, 3, 4].map((item) => <div key={item} className="h-48 animate-pulse rounded-card bg-cream-surface" />)}</div></main>
 
-      <section className="mx-auto max-w-6xl px-4 py-8">
-        <div className="overflow-hidden rounded-[2rem] border border-night/8 bg-white shadow-sm">
-          <div className="bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.18))] px-6 py-8 text-white md:px-8">
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-lagoon">Billetterie native</p>
-            <h1 className="mt-3 font-display text-4xl font-bold">Publier un événement avec billets</h1>
-            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-white/72 md:text-base">
-              Créez un événement, définissez vos billets, puis gérez la réservation et le scan depuis Kalico.
-            </p>
+  return (
+    <main className="min-h-screen bg-cream text-ink">
+      <Header />
+      <div className="mx-auto max-w-7xl px-5 py-8 sm:px-12 sm:py-12">
+        <Link href="/evenements" className="inline-flex min-h-11 items-center gap-2 text-label font-semibold text-ink/70 hover:text-ink"><ArrowLeft className="h-4 w-4" />Retour au calendrier</Link>
+        <div className="mt-5 flex flex-wrap items-end justify-between gap-5">
+          <div className="max-w-3xl"><p className="text-eyebrow uppercase text-accent-text">Événement · Billetterie intégrée</p><h1 className="mt-3 font-display text-display-sm leading-none sm:text-display">Publie ton événement.</h1><p className="mt-4 max-w-2xl text-body text-ink/70">Présente ton rendez-vous, ouvre les réservations et retrouve les billets avec QR code directement dans Kalico.</p></div>
+          <p aria-live="polite" className="flex items-center gap-2 text-label font-semibold"><span className="h-2.5 w-2.5 rounded-pill bg-accent" aria-hidden="true" />{done} sur 5 blocs prêts</p>
+        </div>
+        {metadataError ? <div role="alert" className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-control border border-alert-error bg-cream-surface p-4 text-body-sm"><span>{metadataError}</span><Button variant="secondary" compact onClick={() => setMetadataAttempt((value) => value + 1)}>Réessayer</Button></div> : null}
+
+        <form onSubmit={handleSubmit} className="mt-9 flex flex-col gap-10 min-[1100px]:flex-row min-[1100px]:items-start">
+          <div className="min-w-0 flex-[1_1_560px] space-y-5">
+            <EventFormSection number={1} title="L’événement">
+              <Input ref={titleRef} label="Titre" value={form.title} error={fieldErrors.title} placeholder="Ex. Concert sous les étoiles" onChange={(event) => updateField('title', event.target.value)} />
+              <fieldset className="mt-5"><legend className="text-label-sm font-semibold">Catégorie</legend><div className="mt-2 flex flex-wrap gap-2" aria-invalid={Boolean(fieldErrors.category)}>{EVENT_CATEGORIES.map((category) => <FilterChip key={category.value} selected={form.category === category.value} onClick={() => updateField('category', category.value)}>{category.label}</FilterChip>)}</div>{fieldErrors.category ? <p role="alert" className="mt-2 text-meta text-alert-error">{fieldErrors.category}</p> : null}</fieldset>
+              <div className="mt-5"><Textarea label="Description" rows={4} value={form.description} placeholder="Donne envie de venir et précise les informations utiles." onChange={(event) => updateField('description', event.target.value)} /></div>
+              <div className="mt-5"><p className="text-label-sm font-semibold">Photo de couverture · facultative</p><div className="mt-2 flex h-48 items-center justify-center overflow-hidden rounded-control border border-dashed border-warm-border bg-cream-sunken text-ink/45">{form.coverImageUrl && validUrl(form.coverImageUrl) ? <img src={form.coverImageUrl} alt="Aperçu de la couverture" className="h-full w-full object-cover" /> : <div className="text-center"><ImageIcon className="mx-auto h-10 w-10" aria-hidden="true" /><p className="mt-2 text-body-sm">L’aperçu de la photo apparaîtra ici</p></div>}</div><div className="mt-3"><Input label="Adresse de la photo · facultative" type="url" value={form.coverImageUrl} error={fieldErrors.coverImageUrl} placeholder="https://…" hint="Le téléversement direct sera ajouté plus tard ; utilise pour l’instant une image déjà en ligne." onChange={(event) => updateField('coverImageUrl', event.target.value)} /></div></div>
+            </EventFormSection>
+
+            <EventFormSection number={2} title="Quand et où">
+              <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))]"><Input ref={dateRef} label="Date" type="date" value={form.eventDate} error={fieldErrors.eventDate} onChange={(event) => updateField('eventDate', event.target.value)} /><Input label="Début" type="time" value={form.startTime} error={fieldErrors.startTime} onChange={(event) => updateField('startTime', event.target.value)} /><Input label="Fin · facultative" type="time" value={form.endTime} onChange={(event) => updateField('endTime', event.target.value)} /></div>
+              <div className="mt-4 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]"><Input ref={venueRef} label="Lieu" value={form.venueName} error={fieldErrors.venueName} placeholder="Salle, place ou commerce" onChange={(event) => updateField('venueName', event.target.value)} /><Select label="Commune" value={form.communeId} error={fieldErrors.communeId} disabled={metadataLoading} onChange={(event) => updateField('communeId', event.target.value)}><option value="">{metadataLoading ? 'Chargement…' : 'Choisir une commune'}</option>{communes.map((commune) => <option key={commune.id} value={commune.id}>{commune.name}</option>)}</Select></div>
+              <div className="mt-4"><Input label="Adresse · facultative" value={form.venueAddress} placeholder="Rue, numéro, repère utile" onChange={(event) => updateField('venueAddress', event.target.value)} /></div>
+            </EventFormSection>
+
+            <EventFormSection number={3} title="Billetterie" action={<Switch label={ticketing ? 'Billetterie activée' : 'Sans billetterie'} checked={ticketing} onChange={(event) => setTicketing(event.target.checked)} />}>
+              <p className="text-body-sm text-ink/70">{ticketing ? 'Définis un ou plusieurs types de billets. Laisse le prix à 0 pour un événement gratuit avec réservation.' : 'L’événement est publié avec une entrée libre, sans réservation.'}</p>
+              {ticketing ? <div className="mt-5 space-y-3">{tickets.map((ticket, index) => <TicketTypeCard key={index} ref={index === 0 ? firstTicketRef : undefined} index={index} ticket={ticket} errors={ticketErrors[index]} canRemove={tickets.length > 1} onChange={(key, value) => updateTicket(index, key, value)} onRemove={() => setTickets((current) => current.filter((_, ticketIndex) => ticketIndex !== index))} />)}<Button type="button" variant="secondary" className="w-full border-dashed" onClick={() => setTickets((current) => [...current, { ...NEW_TICKET }])}><Plus className="h-4 w-4" />Ajouter un type de billet</Button><div className="flex flex-wrap items-center justify-between gap-3 rounded-control bg-cream-sunken px-4 py-3 text-body-sm"><span>Capacité totale <strong>{capacity.toLocaleString('fr-FR')} places</strong></span><span className="text-ink/65">Chaque billet reçoit un QR code unique, scanné à l’entrée depuis Kalico.</span></div></div> : null}
+            </EventFormSection>
+
+            <EventFormSection number={4} title="L’organisateur">
+              <p className="text-body-sm text-ink/70">Ces informations sont reprises de ton profil. Les visiteurs te contactent par la messagerie : ton e-mail et ton téléphone ne sont pas affichés.</p>
+              <div className="mt-5 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]"><Input ref={organizerRef} label="Nom de l’organisateur" value={form.organizerName} error={fieldErrors.organizerName} placeholder="Association, commerce ou nom" onChange={(event) => updateField('organizerName', event.target.value)} /><Input label="Site web · facultatif" type="url" value={form.websiteUrl} error={fieldErrors.websiteUrl} placeholder="https://" onChange={(event) => updateField('websiteUrl', event.target.value)} /><Input ref={emailRef} label="E-mail de contact" type="email" value={form.organizerEmail} error={fieldErrors.organizerEmail} placeholder="nom@exemple.nc" onChange={(event) => updateField('organizerEmail', event.target.value)} /><Input label="Téléphone · facultatif" type="tel" value={form.organizerPhone} placeholder="+687" onChange={(event) => updateField('organizerPhone', event.target.value)} /></div>
+            </EventFormSection>
+            <PublishPanel remaining={remaining} publishing={publishing} savingDraft={savingDraft} error={submitError} success={success} onSaveDraft={handleSaveDraft} />
           </div>
 
-          <form onSubmit={handleSubmit} className="grid gap-6 p-6 md:grid-cols-[1.05fr_0.95fr] md:p-8">
-            <div className="space-y-6">
-              {error ? <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div> : null}
-              {success ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{success}</div> : null}
-
-              <section className="rounded-[1.5rem] border border-night/8 bg-sand/40 p-5">
-                <div className="mb-4 flex items-center gap-2 text-night">
-                  <CalendarDays className="h-4 w-4 text-kalico-blue" />
-                  <h2 className="text-lg font-bold">Informations événement</h2>
-                </div>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <label className="space-y-1 md:col-span-2">
-                    <span className="text-sm font-semibold">Titre</span>
-                    <input value={form.title} onChange={(e) => updateField('title', e.target.value)} required className="input w-full" />
-                  </label>
-                  <label className="space-y-1 md:col-span-2">
-                    <span className="text-sm font-semibold">Description</span>
-                    <textarea value={form.description} onChange={(e) => updateField('description', e.target.value)} rows={4} required className="input w-full" />
-                  </label>
-                  <label className="space-y-1">
-                    <span className="text-sm font-semibold">Lieu</span>
-                    <input value={form.venue_name} onChange={(e) => updateField('venue_name', e.target.value)} className="input w-full" />
-                  </label>
-                  <label className="space-y-1">
-                    <span className="text-sm font-semibold">Adresse</span>
-                    <input value={form.venue_address} onChange={(e) => updateField('venue_address', e.target.value)} className="input w-full" />
-                  </label>
-                  <label className="space-y-1">
-                    <span className="text-sm font-semibold">Commune</span>
-                    <select value={form.commune_id} onChange={(e) => updateField('commune_id', e.target.value)} className="input w-full">
-                      <option value="">Choisir une commune</option>
-                      {loadingCommunes ? <option>Chargement...</option> : null}
-                      {communes.map((commune) => (
-                        <option key={commune.id} value={commune.id}>{commune.name}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="space-y-1">
-                    <span className="text-sm font-semibold">Catégorie</span>
-                    <select value={form.category} onChange={(e) => updateField('category', e.target.value)} className="input w-full">
-                      <option value="concert">Concert</option>
-                      <option value="festival">Festival</option>
-                      <option value="sport">Sport</option>
-                      <option value="marche">Marche</option>
-                      <option value="conference">Conférence</option>
-                      <option value="exposition">Exposition</option>
-                      <option value="cinema">Cinéma</option>
-                      <option value="spectacle">Spectacle</option>
-                      <option value="autre">Autre</option>
-                    </select>
-                  </label>
-                  <label className="space-y-1">
-                    <span className="text-sm font-semibold">Date</span>
-                    <input type="date" value={form.event_date} onChange={(e) => updateField('event_date', e.target.value)} required className="input w-full" />
-                  </label>
-                  <label className="space-y-1">
-                    <span className="text-sm font-semibold">Heure</span>
-                    <input type="time" value={form.event_time} onChange={(e) => updateField('event_time', e.target.value)} required className="input w-full" />
-                  </label>
-                  <label className="space-y-1">
-                    <span className="text-sm font-semibold">Fin</span>
-                    <input type="time" value={form.end_time} onChange={(e) => updateField('end_time', e.target.value)} className="input w-full" />
-                  </label>
-                  <label className="space-y-1 md:col-span-2">
-                    <span className="text-sm font-semibold">Image de couverture (URL)</span>
-                    <input value={form.cover_image_url} onChange={(e) => updateField('cover_image_url', e.target.value)} placeholder="https://..." className="input w-full" />
-                  </label>
-                  <label className="space-y-1">
-                    <span className="text-sm font-semibold">Organisateur</span>
-                    <input value={form.organizer_name} onChange={(e) => updateField('organizer_name', e.target.value)} className="input w-full" />
-                  </label>
-                  <label className="space-y-1">
-                    <span className="text-sm font-semibold">Email organisateur</span>
-                    <input value={form.organizer_email} onChange={(e) => updateField('organizer_email', e.target.value)} type="email" className="input w-full" />
-                  </label>
-                  <label className="space-y-1">
-                    <span className="text-sm font-semibold">Téléphone organisateur</span>
-                    <input value={form.organizer_phone} onChange={(e) => updateField('organizer_phone', e.target.value)} className="input w-full" />
-                  </label>
-                  <label className="space-y-1">
-                    <span className="text-sm font-semibold">Site web</span>
-                    <input value={form.website_url} onChange={(e) => updateField('website_url', e.target.value)} placeholder="https://..." className="input w-full" />
-                  </label>
-                </div>
-              </section>
-
-              <section className="rounded-[1.5rem] border border-night/8 bg-sand/40 p-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <div className="mb-2 flex items-center gap-2 text-night">
-                      <Ticket className="h-4 w-4 text-kalico-blue" />
-                      <h2 className="text-lg font-bold">Billetterie</h2>
-                    </div>
-                    <p className="text-sm text-night/60">Ajoutez un ou plusieurs types de billets et activez la réservation native.</p>
-                  </div>
-                  <button type="button" onClick={addTicketType} className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-semibold text-night">
-                    <Plus className="h-4 w-4" />
-                    Ajouter un billet
-                  </button>
-                </div>
-
-                <div className="mt-4 flex flex-wrap gap-3">
-                  <button type="button" onClick={() => setTicketing(true)} className={`rounded-full px-4 py-2 text-sm font-semibold ${ticketing ? 'bg-[#0A7EA4] text-white' : 'bg-white text-night'}`}>
-                    Billetterie activée
-                  </button>
-                  <button type="button" onClick={() => setIsFree((value) => !value)} className={`rounded-full px-4 py-2 text-sm font-semibold ${isFree ? 'bg-emerald-600 text-white' : 'bg-white text-night'}`}>
-                    {isFree ? 'Événement gratuit' : 'Événement payant'}
-                  </button>
-                </div>
-
-                <div className="mt-4 grid gap-4">
-                  <label className="space-y-1 md:max-w-xs">
-                    <span className="text-sm font-semibold">Capacité totale</span>
-                    <input value={form.max_capacity} onChange={(e) => updateField('max_capacity', e.target.value)} type="number" min="1" className="input w-full" />
-                  </label>
-
-                  {ticketTypes.map((ticket, index) => (
-                    <div key={`${ticket.name}-${index}`} className="rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-                      <div className="flex items-center justify-between gap-2">
-                        <h3 className="font-semibold text-night">Billet {index + 1}</h3>
-                        {ticketTypes.length > 1 ? (
-                          <button type="button" onClick={() => removeTicketType(index)} className="text-sm font-semibold text-red-600">
-                            Supprimer
-                          </button>
-                        ) : null}
-                      </div>
-                      <div className="mt-3 grid gap-3 md:grid-cols-2">
-                        <label className="space-y-1">
-                          <span className="text-sm font-semibold">Nom</span>
-                          <input value={ticket.name} onChange={(e) => updateTicketType(index, 'name', e.target.value)} className="input w-full" />
-                        </label>
-                        <label className="space-y-1">
-                          <span className="text-sm font-semibold">Prix XPF</span>
-                          <input value={ticket.price_xpf} onChange={(e) => updateTicketType(index, 'price_xpf', e.target.value)} type="number" min="0" step="10" className="input w-full" />
-                        </label>
-                        <label className="space-y-1 md:col-span-2">
-                          <span className="text-sm font-semibold">Description</span>
-                          <input value={ticket.description} onChange={(e) => updateTicketType(index, 'description', e.target.value)} className="input w-full" />
-                        </label>
-                        <label className="space-y-1">
-                          <span className="text-sm font-semibold">Quantité totale</span>
-                          <input value={ticket.quantity_total} onChange={(e) => updateTicketType(index, 'quantity_total', e.target.value)} type="number" min="1" className="input w-full" />
-                        </label>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              <button type="submit" disabled={saving} className="btn-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3">
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                Publier l’événement
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-
-            <aside className="space-y-4">
-              <div className="rounded-[1.5rem] border border-kalico-blue/15 bg-kalico-blue/5 p-5">
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">Aperçu</p>
-                <div className="mt-3 rounded-[1.25rem] border border-night/8 bg-white p-4 shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-kalico-blue">{form.category}</p>
-                  <h3 className="mt-2 text-xl font-bold text-night">{form.title || 'Titre de l’événement'}</h3>
-                  <p className="mt-2 text-sm text-night/65">{form.description || 'La description de l’événement apparaîtra ici.'}</p>
-                  <div className="mt-4 space-y-2 text-sm text-night/60">
-                    <p className="inline-flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-kalico-blue" />
-                      {form.venue_name || 'Lieu à définir'}
-                    </p>
-                    <p className="inline-flex items-center gap-2">
-                      <CalendarDays className="h-4 w-4 text-kalico-blue" />
-                      {form.event_date || 'Date à définir'} à {form.event_time}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-[1.5rem] border border-night/8 bg-sand/40 p-5">
-                <h3 className="text-lg font-bold text-night">Checklist</h3>
-                <ul className="mt-3 space-y-2 text-sm text-night/65">
-                  <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> Publication sur Kalico</li>
-                  <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> Réservation native 10 minutes</li>
-                  <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> QR code de contrôle généré automatiquement</li>
-                  <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> Scan depuis `/scan/[token]`</li>
-                </ul>
-              </div>
-
-              <div className="rounded-[1.5rem] border border-night/8 bg-white p-5 text-sm text-night/60">
-                <p className="font-semibold text-night">Besoin d’aide ?</p>
-                <p className="mt-2">
-                  Vous pouvez d’abord publier un événement gratuit pour tester le flux, puis activer des billets payants une fois prêt.
-                </p>
-                <Link href="/evenements" className="mt-4 inline-flex items-center gap-2 font-semibold text-kalico-blue">
-                  Retour au calendrier
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-            </aside>
-          </form>
-        </div>
-      </section>
+          <aside className="min-w-0 flex-[0_1_400px] space-y-5 min-[1100px]:min-w-[300px] min-[1100px]:sticky min-[1100px]:top-6"><EventPreviewCard form={form} ticketing={ticketing} tickets={tickets} categoryLabel={categoryLabel} communeName={communeName} /><PublishChecklist checks={checks} /><div className="rounded-card border border-dashed border-warm-border p-5"><h2 className="text-label font-semibold">Un doute ?</h2><p className="mt-2 text-body-sm text-ink/70">Publie d’abord un événement gratuit pour tester, tu pourras ajouter des billets payants ensuite.</p></div></aside>
+        </form>
+      </div>
     </main>
   )
 }
