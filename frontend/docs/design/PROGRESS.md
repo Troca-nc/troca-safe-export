@@ -26,7 +26,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | À relire | [#234](https://github.com/Troca-nc/troca-safe-export/pull/234) serveur fusionnée ; [#235](https://github.com/Troca-nc/troca-safe-export/pull/235) frontend |
 | [19](specs/19-admin.md) | Administration | /admin | À relire | [#236](https://github.com/Troca-nc/troca-safe-export/pull/236) |
 | 20 | Messagerie | /messages | À relire | — |
-| [21](specs/21-notifications.md) | Préférences de notifications | /parametres/notifications | À relire | — |
+| [21](specs/21-notifications.md) | Préférences de notifications | /parametres/notifications | À relire | [#282](https://github.com/Troca-nc/troca-safe-export/pull/282) |
 
 ### QUESTION — point d’entrée de l’ancien frontend Admin
 
