@@ -1096,6 +1096,7 @@ La fixture dédiée couvrira les cinq types et leurs états de chargement, erreu
 - Validations réussies : 3 tests de date/expiration, TypeScript sans erreur, `check-design --changed` (0 erreur, 0 avertissement) et `git diff --check`.
 - Le build de production atteint la compilation Next.js, puis reste bloqué par le certificat réseau lors du téléchargement des trois Google Fonts globales ; aucune erreur applicative n'est remontée avant ce blocage.
 - Prévisualisation locale en données de démonstration : `/bons-plans` et `/evenements` répondent HTTP 200 sur `http://localhost:3011`. Revue humaine validée le 6 octobre 2026.
+- Maintenance du 30 octobre 2026 : les libellés UTF-8 de `/evenements/publier` ont été restaurés depuis leur version française d’origine, sans modification du parcours ni de l’API. Un test ciblé interdit désormais les signatures de mojibake et les caractères de contrôle sur cette page.
 
 ### Critères au checkpoint
 
