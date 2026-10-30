@@ -168,9 +168,9 @@ export default function EventPublishPage() {
         window.location.assign(`/evenements/${eventId}`)
         return
       }
-      setSuccess('ï¿½vï¿½nement publiï¿½ avec succï¿½s.')
+      setSuccess('Événement publié avec succès.')
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Impossible de publier lï¿½vï¿½nement.')
+      setError(err?.response?.data?.error || 'Impossible de publier l’événement.')
     } finally {
       setSaving(false)
     }
@@ -184,9 +184,9 @@ export default function EventPublishPage() {
         <div className="overflow-hidden rounded-[2rem] border border-night/8 bg-white shadow-sm">
           <div className="bg-[linear-gradient(135deg,_rgba(8,32,50,0.98),_rgba(10,126,164,0.18))] px-6 py-8 text-white md:px-8">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-lagoon">Billetterie native</p>
-            <h1 className="mt-3 font-display text-4xl font-bold">Publier un ï¿½vï¿½nement avec billets</h1>
+            <h1 className="mt-3 font-display text-4xl font-bold">Publier un événement avec billets</h1>
             <p className="mt-3 max-w-3xl text-sm leading-relaxed text-white/72 md:text-base">
-              Crï¿½ez un ï¿½vï¿½nement, dï¿½finissez vos billets, puis gï¿½rez la rï¿½servation et le scan depuis Kalico.
+              Créez un événement, définissez vos billets, puis gérez la réservation et le scan depuis Kalico.
             </p>
           </div>
 
@@ -198,7 +198,7 @@ export default function EventPublishPage() {
               <section className="rounded-[1.5rem] border border-night/8 bg-sand/40 p-5">
                 <div className="mb-4 flex items-center gap-2 text-night">
                   <CalendarDays className="h-4 w-4 text-kalico-blue" />
-                  <h2 className="text-lg font-bold">Informations ï¿½vï¿½nement</h2>
+                  <h2 className="text-lg font-bold">Informations événement</h2>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <label className="space-y-1 md:col-span-2">
@@ -228,15 +228,15 @@ export default function EventPublishPage() {
                     </select>
                   </label>
                   <label className="space-y-1">
-                    <span className="text-sm font-semibold">CatÃ©gorie</span>
+                    <span className="text-sm font-semibold">Catégorie</span>
                     <select value={form.category} onChange={(e) => updateField('category', e.target.value)} className="input w-full">
                       <option value="concert">Concert</option>
                       <option value="festival">Festival</option>
                       <option value="sport">Sport</option>
                       <option value="marche">Marche</option>
-                      <option value="conference">Confï¿½rence</option>
+                      <option value="conference">Conférence</option>
                       <option value="exposition">Exposition</option>
-                      <option value="cinema">Cinï¿½ma</option>
+                      <option value="cinema">Cinéma</option>
                       <option value="spectacle">Spectacle</option>
                       <option value="autre">Autre</option>
                     </select>
@@ -266,7 +266,7 @@ export default function EventPublishPage() {
                     <input value={form.organizer_email} onChange={(e) => updateField('organizer_email', e.target.value)} type="email" className="input w-full" />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-sm font-semibold">Tï¿½lï¿½phone organisateur</span>
+                    <span className="text-sm font-semibold">Téléphone organisateur</span>
                     <input value={form.organizer_phone} onChange={(e) => updateField('organizer_phone', e.target.value)} className="input w-full" />
                   </label>
                   <label className="space-y-1">
@@ -283,7 +283,7 @@ export default function EventPublishPage() {
                       <Ticket className="h-4 w-4 text-kalico-blue" />
                       <h2 className="text-lg font-bold">Billetterie</h2>
                     </div>
-                    <p className="text-sm text-night/60">Ajoutez un ou plusieurs types de billets et activez la rï¿½servation native.</p>
+                    <p className="text-sm text-night/60">Ajoutez un ou plusieurs types de billets et activez la réservation native.</p>
                   </div>
                   <button type="button" onClick={addTicketType} className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-semibold text-night">
                     <Plus className="h-4 w-4" />
@@ -293,16 +293,16 @@ export default function EventPublishPage() {
 
                 <div className="mt-4 flex flex-wrap gap-3">
                   <button type="button" onClick={() => setTicketing(true)} className={`rounded-full px-4 py-2 text-sm font-semibold ${ticketing ? 'bg-[#0A7EA4] text-white' : 'bg-white text-night'}`}>
-                    Billetterie activï¿½e
+                    Billetterie activée
                   </button>
                   <button type="button" onClick={() => setIsFree((value) => !value)} className={`rounded-full px-4 py-2 text-sm font-semibold ${isFree ? 'bg-emerald-600 text-white' : 'bg-white text-night'}`}>
-                    {isFree ? 'ï¿½vï¿½nement gratuit' : 'ï¿½vï¿½nement payant'}
+                    {isFree ? 'Événement gratuit' : 'Événement payant'}
                   </button>
                 </div>
 
                 <div className="mt-4 grid gap-4">
                   <label className="space-y-1 md:max-w-xs">
-                    <span className="text-sm font-semibold">Capacitï¿½ totale</span>
+                    <span className="text-sm font-semibold">Capacité totale</span>
                     <input value={form.max_capacity} onChange={(e) => updateField('max_capacity', e.target.value)} type="number" min="1" className="input w-full" />
                   </label>
 
@@ -330,7 +330,7 @@ export default function EventPublishPage() {
                           <input value={ticket.description} onChange={(e) => updateTicketType(index, 'description', e.target.value)} className="input w-full" />
                         </label>
                         <label className="space-y-1">
-                          <span className="text-sm font-semibold">Quantitï¿½ totale</span>
+                          <span className="text-sm font-semibold">Quantité totale</span>
                           <input value={ticket.quantity_total} onChange={(e) => updateTicketType(index, 'quantity_total', e.target.value)} type="number" min="1" className="input w-full" />
                         </label>
                       </div>
@@ -341,26 +341,26 @@ export default function EventPublishPage() {
 
               <button type="submit" disabled={saving} className="btn-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3">
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                Publier lï¿½vï¿½nement
+                Publier l’événement
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
 
             <aside className="space-y-4">
               <div className="rounded-[1.5rem] border border-kalico-blue/15 bg-kalico-blue/5 p-5">
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">Aperï¿½u</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-kalico-blue/80">Aperçu</p>
                 <div className="mt-3 rounded-[1.25rem] border border-night/8 bg-white p-4 shadow-sm">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-kalico-blue">{form.category}</p>
-                  <h3 className="mt-2 text-xl font-bold text-night">{form.title || 'Titre de lï¿½vï¿½nement'}</h3>
-                  <p className="mt-2 text-sm text-night/65">{form.description || 'La description de lï¿½vï¿½nement apparaï¿½tra ici.'}</p>
+                  <h3 className="mt-2 text-xl font-bold text-night">{form.title || 'Titre de l’événement'}</h3>
+                  <p className="mt-2 text-sm text-night/65">{form.description || 'La description de l’événement apparaîtra ici.'}</p>
                   <div className="mt-4 space-y-2 text-sm text-night/60">
                     <p className="inline-flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-kalico-blue" />
-                      {form.venue_name || 'Lieu ï¿½ dï¿½finir'}
+                      {form.venue_name || 'Lieu à définir'}
                     </p>
                     <p className="inline-flex items-center gap-2">
                       <CalendarDays className="h-4 w-4 text-kalico-blue" />
-                      {form.event_date || 'Date ï¿½ dï¿½finir'} ï¿½ {form.event_time}
+                      {form.event_date || 'Date à définir'} à {form.event_time}
                     </p>
                   </div>
                 </div>
@@ -370,16 +370,16 @@ export default function EventPublishPage() {
                 <h3 className="text-lg font-bold text-night">Checklist</h3>
                 <ul className="mt-3 space-y-2 text-sm text-night/65">
                   <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> Publication sur Kalico</li>
-                  <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> Rï¿½servation native 10 minutes</li>
-                  <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> QR code de contrï¿½le gï¿½nï¿½rï¿½ automatiquement</li>
+                  <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> Réservation native 10 minutes</li>
+                  <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> QR code de contrôle généré automatiquement</li>
                   <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-kalico-blue" /> Scan depuis `/scan/[token]`</li>
                 </ul>
               </div>
 
               <div className="rounded-[1.5rem] border border-night/8 bg-white p-5 text-sm text-night/60">
-                <p className="font-semibold text-night">Besoin daide ?</p>
+                <p className="font-semibold text-night">Besoin d’aide ?</p>
                 <p className="mt-2">
-                  Vous pouvez dabord publier un ï¿½vï¿½nement gratuit pour tester le flux, puis activer des billets payants une fois prï¿½t.
+                  Vous pouvez d’abord publier un événement gratuit pour tester le flux, puis activer des billets payants une fois prêt.
                 </p>
                 <Link href="/evenements" className="mt-4 inline-flex items-center gap-2 font-semibold text-kalico-blue">
                   Retour au calendrier
