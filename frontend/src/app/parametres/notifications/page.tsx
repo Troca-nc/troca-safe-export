@@ -1,229 +1,82 @@
 'use client'
 
-import type { ElementType, ReactNode } from 'react'
-import { useEffect, useMemo, useState } from 'react'
-import Link from 'next/link'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  ArrowRight,
-  Bell,
-  Mail,
-  MessageCircle,
-  Megaphone,
-  MonitorSmartphone,
-  Save,
-  Sparkles,
-  Store,
-  Tag,
-  Volume2,
-} from 'lucide-react'
+import { AlertCircle, BarChart3, BellRing, MessageCircle, Search, ShieldCheck, Store, Tag } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
-import { bonPlansApi, notificationsApi } from '@/lib/api'
-import { useAuthStore } from '@/store/authStore'
+import { ChannelHeadings, PreferenceRow, PreferencesNav, PreferencesSection, SafeLink, SaveBar } from '@/components/notifications/NotificationPreferencesUI'
+import { Button } from '@/components/ui/Button'
+import { FilterChip, SegmentedControl, Switch } from '@/components/ui/Controls'
+import { Input } from '@/components/ui/Field'
 import { useAuthSessionSync } from '@/hooks/useAuthSessionSync'
+import {
+  BON_PLAN_CATEGORIES,
+  loadNotificationPreferences,
+  saveNotificationPreferences,
+  type BonPlanPreferences,
+  type NotificationPreferences,
+  type NotificationPreferencesData,
+} from '@/lib/data/notifications'
+import { useAuthStore } from '@/store/authStore'
 
-type NotificationPrefs = {
-  email_new_message: boolean
-  push_new_message: boolean
-  email_search_alert: boolean
-  push_search_alert: boolean
-  email_boost_activated: boolean
-  email_offer_received: boolean
-  email_listing_expiring: boolean
-  email_listing_expired: boolean
-  email_performance_report: boolean
-  push_performance_report: boolean
-  performance_report_frequency: 'daily' | 'weekly' | 'monthly' | 'never'
-}
+type Status = { tone: 'success' | 'error'; text: string } | null
+type BooleanNotificationKey = Exclude<keyof NotificationPreferences, 'performance_report_frequency'>
 
-type BonPlanPrefs = {
-  notify_all: boolean
-  notify_categories: string[]
-  notify_businesses: string[]
-  via_push: boolean
-  via_email: boolean
-}
+const BOOLEAN_NOTIFICATION_KEYS: BooleanNotificationKey[] = [
+  'email_new_message', 'push_new_message', 'email_search_alert', 'push_search_alert',
+  'email_boost_activated', 'email_offer_received', 'email_listing_expiring', 'email_listing_expired',
+  'email_performance_report', 'push_performance_report',
+]
 
-const STORAGE_PREFIX = 'kalico-demo-notification-prefs'
-const BON_PLANS_STORAGE_PREFIX = 'kalico-demo-bon-plan-prefs'
-
-const BON_PLAN_CATEGORIES = [
-  { value: 'alimentation', label: 'Alimentation' },
-  { value: 'mode', label: 'Mode' },
-  { value: 'beaute', label: 'Beauté' },
-  { value: 'high_tech', label: 'High-tech' },
-  { value: 'auto_moto', label: 'Auto / Moto' },
-  { value: 'maison', label: 'Maison' },
-  { value: 'restauration', label: 'Restauration' },
-  { value: 'services', label: 'Services' },
-  { value: 'sport', label: 'Sport' },
-  { value: 'voyages', label: 'Voyages' },
-] as const
-
-const QUICK_LINKS = [
-  { href: '#messages', label: 'Messages', tone: 'coral' as const },
-  { href: '#alerts', label: 'Alertes', tone: 'lagoon' as const },
-  { href: '#reports', label: 'Rapports', tone: 'jungle' as const },
-  { href: '#bons-plans', label: 'Bons Plans', tone: 'ocean' as const },
-] as const
-
-const toneStyles = {
-  coral: {
-    panel: 'border-kalico-blue/15 bg-kalico-blue/5',
-    icon: 'bg-kalico-blue/10 text-kalico-blue',
-  },
-  lagoon: {
-    panel: 'border-lagoon/15 bg-lagoon/5',
-    icon: 'bg-lagoon/10 text-lagoon',
-  },
-  jungle: {
-    panel: 'border-jungle/15 bg-jungle/5',
-    icon: 'bg-jungle/10 text-jungle',
-  },
-  ocean: {
-    panel: 'border-ocean/15 bg-ocean/5',
-    icon: 'bg-ocean/10 text-ocean',
-  },
-} as const
-
-function defaultNotificationPrefs(): NotificationPrefs {
+function copyData(data: NotificationPreferencesData): NotificationPreferencesData {
   return {
-    email_new_message: true,
-    push_new_message: true,
-    email_search_alert: true,
-    push_search_alert: true,
-    email_boost_activated: true,
-    email_offer_received: true,
-    email_listing_expiring: true,
-    email_listing_expired: true,
-    email_performance_report: true,
-    push_performance_report: false,
-    performance_report_frequency: 'weekly',
+    notifications: { ...data.notifications },
+    bonPlans: {
+      ...data.bonPlans,
+      notify_categories: [...data.bonPlans.notify_categories],
+      notify_businesses: [...data.bonPlans.notify_businesses],
+    },
+    businesses: [...data.businesses],
   }
 }
 
-function defaultBonPlanPrefs(): BonPlanPrefs {
-  return {
-    notify_all: false,
-    notify_categories: [],
-    notify_businesses: [],
-    via_push: true,
-    via_email: false,
-  }
-}
-
-function readDemoPrefs<T>(key: string, fallback: T): T | null {
-  if (typeof window === 'undefined') return null
-  try {
-    const raw = window.localStorage.getItem(key)
-    if (!raw) return null
-    const parsed = JSON.parse(raw) as Partial<T>
-    return { ...fallback, ...parsed } as T
-  } catch {
-    return null
-  }
-}
-
-function saveDemoPrefs(key: string, prefs: unknown) {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(key, JSON.stringify(prefs))
-}
-
-function SectionCard({
-  id,
-  title,
-  description,
-  icon: Icon,
-  tone = 'coral',
-  children,
-}: {
-  id?: string
-  title: string
-  description: string
-  icon: ElementType
-  tone?: keyof typeof toneStyles
-  children: ReactNode
-}) {
-  const palette = toneStyles[tone]
-
-  return (
-    <section id={id} className={`rounded-[1.75rem] border ${palette.panel} bg-[var(--color-surface)] p-5 shadow-sm`}>
-      <div className="flex items-start gap-3">
-        <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${palette.icon}`}>
-          <Icon className="h-5 w-5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-base font-semibold text-night">{title}</h2>
-          <p className="mt-1 text-sm leading-relaxed text-night/60">{description}</p>
-        </div>
-      </div>
-      <div className="mt-4">{children}</div>
-    </section>
-  )
-}
-
-function ToggleRow({
-  title,
-  description,
-  checked,
-  onChange,
-  icon: Icon,
-  tone = 'coral',
-}: {
-  title: string
-  description: string
-  checked: boolean
-  onChange: (checked: boolean) => void
-  icon: ElementType
-  tone?: keyof typeof toneStyles
-}) {
-  const palette = toneStyles[tone]
-
-  return (
-    <label className="flex cursor-pointer items-start justify-between gap-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4 transition duration-150 hover:bg-[var(--color-background-tertiary)]">
-      <span className="flex min-w-0 items-start gap-3">
-        <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${palette.icon}`}>
-          <Icon className="h-4 w-4" />
-        </span>
-        <span className="min-w-0">
-          <span className="block text-sm font-semibold text-night">{title}</span>
-          <span className="mt-1 block text-xs leading-relaxed text-night/55">{description}</span>
-        </span>
-      </span>
-      <span
-        className="relative mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full bg-night/10 transition data-[checked=true]:bg-kalico-blue"
-        data-checked={checked ? 'true' : 'false'}
-      >
-        <input
-          type="checkbox"
-          checked={checked}
-          onChange={(event) => onChange(event.target.checked)}
-          className="peer absolute inset-0 h-full w-full cursor-pointer opacity-0"
-          aria-label={title}
-        />
-        <span className="ml-0.5 h-5 w-5 rounded-full bg-white shadow transition peer-checked:translate-x-5" />
-      </span>
-    </label>
-  )
+function samePreferences(left: NotificationPreferencesData | null, right: NotificationPreferencesData | null) {
+  if (!left || !right) return true
+  return JSON.stringify({ notifications: left.notifications, bonPlans: left.bonPlans })
+    === JSON.stringify({ notifications: right.notifications, bonPlans: right.bonPlans })
 }
 
 export default function NotificationPreferencesPage() {
   const router = useRouter()
   const { user, demoProfile, hasHydrated } = useAuthStore()
   useAuthSessionSync()
-  const isDemo = Boolean(demoProfile)
 
-  const notificationStorageKey = useMemo(() => `${STORAGE_PREFIX}:${demoProfile ?? 'visitor'}`, [demoProfile])
-  const bonPlanStorageKey = useMemo(() => `${BON_PLANS_STORAGE_PREFIX}:${demoProfile ?? 'visitor'}`, [demoProfile])
-
-  const [notificationPrefs, setNotificationPrefs] = useState<NotificationPrefs>(defaultNotificationPrefs())
-  const [bonPlanPrefs, setBonPlanPrefs] = useState<BonPlanPrefs>(defaultBonPlanPrefs())
-  const [bonPlanBusinesses, setBonPlanBusinesses] = useState<Array<{ name: string }>>([])
-  const [bonPlanBusinessInput, setBonPlanBusinessInput] = useState('')
+  const [saved, setSaved] = useState<NotificationPreferencesData | null>(null)
+  const [draft, setDraft] = useState<NotificationPreferencesData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
+  const [status, setStatus] = useState<Status>(null)
+  const [businessInput, setBusinessInput] = useState('')
+  const [businessError, setBusinessError] = useState('')
+  const [pushPermission, setPushPermission] = useState<NotificationPermission | 'unsupported'>('unsupported')
+  const isPro = Boolean(user?.is_pro)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    setLoadError(false)
+    setStatus(null)
+    try {
+      const data = await loadNotificationPreferences({ demoProfile, isPro })
+      setSaved(copyData(data))
+      setDraft(copyData(data))
+    } catch {
+      setLoadError(true)
+    } finally {
+      setLoading(false)
+    }
+  }, [demoProfile, isPro])
 
   useEffect(() => {
     if (!hasHydrated) return
@@ -231,527 +84,247 @@ export default function NotificationPreferencesPage() {
       router.replace('/connexion')
       return
     }
-
-    let alive = true
-
-    async function load() {
-      setLoading(true)
-      setMessage(null)
-
-      try {
-        if (isDemo) {
-          const storedNotificationPrefs = readDemoPrefs(notificationStorageKey, defaultNotificationPrefs())
-          const storedBonPlanPrefs = readDemoPrefs(bonPlanStorageKey, defaultBonPlanPrefs())
-          if (alive) {
-            setNotificationPrefs(storedNotificationPrefs ?? defaultNotificationPrefs())
-            setBonPlanPrefs(storedBonPlanPrefs ?? defaultBonPlanPrefs())
-          }
-          return
-        }
-
-        const [notificationResponse, bonPlanResponse, businessesResponse] = await Promise.all([
-          notificationsApi.getPreferences(),
-          bonPlansApi.getPrefs(),
-          bonPlansApi.businesses(),
-        ])
-
-        if (!alive) return
-
-        const notificationCurrent = notificationResponse.data?.data ?? {}
-        const bonPlanCurrent = bonPlanResponse.data?.data ?? {}
-
-        setNotificationPrefs({
-          email_new_message: notificationCurrent.email_new_message !== false,
-          push_new_message: notificationCurrent.push_new_message !== false,
-          email_search_alert: notificationCurrent.email_search_alert !== false,
-          push_search_alert: notificationCurrent.push_search_alert !== false,
-          email_boost_activated: notificationCurrent.email_boost_activated !== false,
-          email_offer_received: notificationCurrent.email_offer_received !== false,
-          email_listing_expiring: notificationCurrent.email_listing_expiring !== false,
-          email_listing_expired: notificationCurrent.email_listing_expired !== false,
-          email_performance_report: notificationCurrent.email_performance_report !== false,
-          push_performance_report: notificationCurrent.push_performance_report === true,
-          performance_report_frequency: notificationCurrent.performance_report_frequency ?? 'weekly',
-        })
-
-        setBonPlanPrefs({
-          notify_all: Boolean(bonPlanCurrent.notify_all),
-          notify_categories: Array.isArray(bonPlanCurrent.notify_categories) ? bonPlanCurrent.notify_categories : [],
-          notify_businesses: Array.isArray(bonPlanCurrent.notify_businesses) ? bonPlanCurrent.notify_businesses : [],
-          via_push: bonPlanCurrent.via_push !== false,
-          via_email: bonPlanCurrent.via_email === true,
-        })
-        setBonPlanBusinesses(Array.isArray(businessesResponse.data?.data) ? businessesResponse.data.data : [])
-      } catch {
-        if (!alive) return
-        setMessage('Les préférences sont momentanément indisponibles.')
-      } finally {
-        if (alive) setLoading(false)
-      }
-    }
-
     void load()
-    return () => {
-      alive = false
+  }, [demoProfile, hasHydrated, load, router, user])
+
+  useEffect(() => {
+    setPushPermission(typeof Notification === 'undefined' ? 'unsupported' : Notification.permission)
+  }, [])
+
+  const dirty = !samePreferences(saved, draft)
+
+  useEffect(() => {
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!dirty) return
+      event.preventDefault()
+      event.returnValue = ''
     }
-  }, [bonPlanStorageKey, demoProfile, hasHydrated, isDemo, notificationStorageKey, router, user])
+    window.addEventListener('beforeunload', warnBeforeUnload)
+    return () => window.removeEventListener('beforeunload', warnBeforeUnload)
+  }, [dirty])
 
-  const updateNotificationPrefs = <K extends keyof NotificationPrefs>(key: K, value: NotificationPrefs[K]) => {
-    setNotificationPrefs((current) => ({ ...current, [key]: value }))
+  const updateNotification = <K extends keyof NotificationPreferences>(key: K, value: NotificationPreferences[K]) => {
+    setStatus(null)
+    setDraft((current) => current ? { ...current, notifications: { ...current.notifications, [key]: value } } : current)
   }
 
-  const updateBonPlanPrefs = <K extends keyof BonPlanPrefs>(key: K, value: BonPlanPrefs[K]) => {
-    setBonPlanPrefs((current) => ({ ...current, [key]: value }))
+  const updateBonPlans = <K extends keyof BonPlanPreferences>(key: K, value: BonPlanPreferences[K]) => {
+    setStatus(null)
+    setDraft((current) => current ? { ...current, bonPlans: { ...current.bonPlans, [key]: value } } : current)
   }
 
-  const toggleCategory = (value: string) => {
-    setBonPlanPrefs((current) => ({
-      ...current,
-      notify_categories: current.notify_categories.includes(value)
-        ? current.notify_categories.filter((item) => item !== value)
-        : [...current.notify_categories, value],
-    }))
+  const setAllChannels = (enabled: boolean) => {
+    setStatus(null)
+    setDraft((current) => {
+      if (!current) return current
+      const notifications = { ...current.notifications }
+      BOOLEAN_NOTIFICATION_KEYS.forEach((key) => { notifications[key] = enabled })
+      return { ...current, notifications, bonPlans: { ...current.bonPlans, notify_all: enabled, via_email: enabled, via_push: enabled } }
+    })
+  }
+
+  const toggleCategory = (category: string) => {
+    if (!draft) return
+    const categories = draft.bonPlans.notify_categories.includes(category)
+      ? draft.bonPlans.notify_categories.filter((item) => item !== category)
+      : [...draft.bonPlans.notify_categories, category]
+    updateBonPlans('notify_categories', categories)
   }
 
   const addBusiness = () => {
-    const nextName = bonPlanBusinessInput.trim()
-    if (!nextName) return
-
-    setBonPlanPrefs((current) => ({
-      ...current,
-      notify_businesses: Array.from(new Set([...current.notify_businesses, nextName])),
-    }))
-    setBonPlanBusinessInput('')
+    if (!draft) return
+    const name = businessInput.trim()
+    if (!name) {
+      setBusinessError('Saisissez le nom d’une enseigne.')
+      return
+    }
+    const duplicate = draft.bonPlans.notify_businesses.some((item) => item.localeCompare(name, 'fr', { sensitivity: 'base' }) === 0)
+    if (duplicate) {
+      setBusinessError('Cette enseigne est déjà suivie.')
+      return
+    }
+    updateBonPlans('notify_businesses', [...draft.bonPlans.notify_businesses, name])
+    setBusinessInput('')
+    setBusinessError('')
   }
 
-  const removeBusiness = (business: string) => {
-    setBonPlanPrefs((current) => ({
-      ...current,
-      notify_businesses: current.notify_businesses.filter((item) => item !== business),
-    }))
+  const removeBusiness = (name: string) => {
+    if (draft) updateBonPlans('notify_businesses', draft.bonPlans.notify_businesses.filter((item) => item !== name))
   }
 
-  const activeMessageChannels = [notificationPrefs.email_new_message, notificationPrefs.push_new_message].filter(Boolean).length
-  const activeBonPlanCategories = bonPlanPrefs.notify_categories.length
+  const handleCancel = () => {
+    if (!saved) return
+    setDraft(copyData(saved))
+    setBusinessInput('')
+    setBusinessError('')
+    setStatus(null)
+  }
 
   const handleSave = async () => {
+    if (!draft || !dirty) return
     setSaving(true)
-    setMessage(null)
-
+    setStatus(null)
     try {
-      if (isDemo) {
-        saveDemoPrefs(notificationStorageKey, notificationPrefs)
-        saveDemoPrefs(bonPlanStorageKey, bonPlanPrefs)
-        setMessage('Préférences démo enregistrées localement.')
-        return
-      }
-
-      await Promise.all([
-        notificationsApi.savePreferences(notificationPrefs),
-        bonPlansApi.savePrefs(bonPlanPrefs),
-      ])
-      setMessage('Vos préférences ont été enregistrées.')
+      await saveNotificationPreferences(draft, demoProfile)
+      setSaved(copyData(draft))
+      setStatus({ tone: 'success', text: demoProfile ? 'Préférences démo enregistrées.' : 'Vos préférences ont été enregistrées.' })
     } catch {
-      setMessage('Impossible d’enregistrer vos préférences pour le moment.')
+      setStatus({ tone: 'error', text: 'Impossible d’enregistrer vos préférences. Réessayez.' })
     } finally {
       setSaving(false)
     }
   }
 
+  const activeCount = useMemo(() => {
+    if (!draft) return 0
+    return [...BOOLEAN_NOTIFICATION_KEYS.map((key) => draft.notifications[key]), draft.bonPlans.notify_all, draft.bonPlans.via_email, draft.bonPlans.via_push].filter(Boolean).length
+  }, [draft])
+
+  const pushSelected = Boolean(draft && (
+    draft.notifications.push_new_message || draft.notifications.push_search_alert
+    || draft.notifications.push_performance_report || draft.bonPlans.via_push
+  ))
+
   if (!hasHydrated || loading) {
     return (
-      <div className="min-h-screen">
-        <Header />
-        <div className="mx-auto max-w-6xl px-4 py-8">
-          <div className="card animate-pulse p-6">
-            <div className="skeleton h-7 w-56 rounded-full" />
-            <div className="mt-4 space-y-3">
-              <div className="skeleton h-24 rounded-[1.5rem]" />
-              <div className="skeleton h-24 rounded-[1.5rem]" />
-              <div className="skeleton h-24 rounded-[1.5rem]" />
-            </div>
+      <div className="min-h-screen bg-cream"><Header />
+        <main className="mx-auto max-w-[1180px] px-4 py-10 sm:px-6">
+          <div className="skeleton h-14 max-w-xl rounded-control" />
+          <div className="mt-10 grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
+            <div className="skeleton h-80 rounded-card" />
+            <div className="space-y-5"><div className="skeleton h-72 rounded-card" /><div className="skeleton h-72 rounded-card" /></div>
           </div>
-        </div>
+        </main>
       </div>
     )
   }
 
+  if (loadError || !draft) {
+    return (
+      <div className="min-h-screen bg-cream"><Header />
+        <main className="mx-auto flex max-w-[760px] flex-col items-center px-4 py-20 text-center">
+          <AlertCircle className="h-10 w-10 text-alert-error" aria-hidden="true" />
+          <h1 className="mt-5 font-display text-title-lg text-ink">Préférences indisponibles</h1>
+          <p className="mt-2 text-body text-ink/65">Nous n’avons pas pu charger vos préférences de notifications.</p>
+          <Button className="mt-6" onClick={() => void load()}>Réessayer</Button>
+        </main>
+      </div>
+    )
+  }
+
+  const navItems = [
+    { href: '#messages', label: 'Messages', count: 2 },
+    { href: '#alertes', label: 'Alertes d’offres', count: 2 },
+    { href: '#annonces', label: 'Mes annonces', count: 4 },
+    { href: '#rapports', label: 'Rapports', count: 3 },
+    { href: '#bons-plans', label: 'Bons Plans', count: 3 },
+  ]
+
   return (
-    <div className="min-h-screen bg-[var(--color-background)]">
-      <Header />
-
-      <main className="mx-auto max-w-6xl px-4 py-8">
-        <div className="overflow-hidden rounded-[2rem] border border-kalico-blue/15 bg-[linear-gradient(135deg,rgba(10,126,164,0.08),rgba(244,248,247,1)_45%,rgba(72,202,228,0.08))] p-6 shadow-sm">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full bg-kalico-blue/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue">
-                <Bell className="h-3.5 w-3.5" />
-                Centre unique de notifications
-              </div>
-              <h1 className="mt-4 font-display text-4xl font-bold text-night md:text-5xl">
-                Choisissez ce qui vous alerte, et comment.
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-night/65 md:text-base">
-                Centralisez ici les messages, les alertes d’offres, les rapports de performance et les Bons Plans.
-                Chaque catégorie peut être ajustée pour l’email, le push mobile ou les deux.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-night/65 shadow-xs">
-                {activeMessageChannels} canal{activeMessageChannels > 1 ? 'aux' : ''} actif{activeMessageChannels > 1 ? 's' : ''}
-              </span>
-              <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-night/65 shadow-xs">
-                {activeBonPlanCategories} catégorie{activeBonPlanCategories > 1 ? 's' : ''} Bons Plans
-              </span>
-              <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-night/65 shadow-xs">
-                Email + push
-              </span>
-            </div>
+    <div className="min-h-screen bg-cream pb-32"><Header />
+      <main className="mx-auto max-w-[1180px] px-4 py-8 sm:px-6 sm:py-12">
+        <div className="flex flex-col gap-6 border-b border-sand pb-8 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-label-sm font-semibold uppercase tracking-[0.18em] text-papaya">Mon compte · Paramètres</p>
+            <h1 className="mt-3 max-w-3xl font-display text-display-sm text-ink">Préférences de notifications</h1>
+            <p className="mt-3 max-w-2xl text-body text-ink/65">Choisissez les informations que vous souhaitez recevoir et le canal qui vous convient.</p>
           </div>
-
-          <div className="mt-5 flex flex-wrap gap-2">
-            {QUICK_LINKS.map((item) => {
-              const palette = toneStyles[item.tone]
-              return (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-3 py-1.5 text-xs font-medium text-night/65 shadow-xs transition hover:-translate-y-0.5 hover:border-kalico-blue/20 hover:text-night"
-                >
-                  <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${palette.icon}`}>
-                    <ArrowRight className="h-3 w-3" />
-                  </span>
-                  {item.label}
-                </a>
-              )
-            })}
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" compact onClick={() => setAllChannels(true)}>Tout activer</Button>
+            <Button variant="ghost" compact onClick={() => setAllChannels(false)}>Tout désactiver</Button>
           </div>
         </div>
 
-        {message && (
-          <div className="mt-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-night/70 shadow-xs">
-            {message}
+        {pushSelected && pushPermission !== 'granted' && (
+          <div className="mt-6 flex items-start gap-3 rounded-control border border-alert-warning/30 bg-alert-warning/10 px-4 py-3 text-body-sm text-ink" role="status">
+            <BellRing className="mt-0.5 h-5 w-5 shrink-0 text-alert-warning" aria-hidden="true" />
+            <p><strong>Notifications push non autorisées.</strong> Activez-les dans les réglages de votre navigateur pour recevoir les alertes choisies.</p>
           </div>
         )}
 
-        <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
-          <div className="space-y-5">
-            <SectionCard
-              id="messages"
-              title="Nouveau message"
-              description="Recevez les réponses d’annonce et les nouvelles conversations par email ou en push."
-              icon={MessageCircle}
-              tone="coral"
-            >
-              <div className="grid gap-3 md:grid-cols-2">
-                <ToggleRow
-                  title="Email"
-                  description="Un email à chaque nouveau message reçu."
-                  checked={notificationPrefs.email_new_message}
-                  onChange={(checked) => updateNotificationPrefs('email_new_message', checked)}
-                  icon={Mail}
-                  tone="coral"
-                />
-                <ToggleRow
-                  title="Push mobile"
-                  description="Une notification discrète s’affiche sur votre téléphone."
-                  checked={notificationPrefs.push_new_message}
-                  onChange={(checked) => updateNotificationPrefs('push_new_message', checked)}
-                  icon={MonitorSmartphone}
-                  tone="coral"
-                />
+        <div className="mt-8 grid gap-7 lg:grid-cols-[220px_minmax(0,1fr)]">
+          <PreferencesNav items={navItems} activeCount={activeCount} />
+          <div className="space-y-6">
+            <PreferencesSection id="messages" title="Messages" description="Soyez averti dès qu’un membre vous écrit au sujet d’une annonce." icon={MessageCircle} count={2}>
+              <ChannelHeadings />
+              <PreferenceRow title="Nouveau message" description="Une nouvelle réponse ou conversation dans votre messagerie." email={draft.notifications.email_new_message} push={draft.notifications.push_new_message} onEmailChange={(value) => updateNotification('email_new_message', value)} onPushChange={(value) => updateNotification('push_new_message', value)} />
+            </PreferencesSection>
+
+            <PreferencesSection id="alertes" title="Alertes d’offres" description="Recevez les nouvelles annonces qui correspondent à vos recherches sauvegardées." icon={Search} count={2}>
+              <ChannelHeadings />
+              <PreferenceRow title="Nouvelle annonce correspondante" description="Une annonce répond aux critères d’une de vos alertes." email={draft.notifications.email_search_alert} push={draft.notifications.push_search_alert} onEmailChange={(value) => updateNotification('email_search_alert', value)} onPushChange={(value) => updateNotification('push_search_alert', value)} />
+            </PreferencesSection>
+
+            <PreferencesSection id="annonces" title="Mes annonces" description="Suivez les événements importants liés aux annonces que vous publiez." icon={Tag} count={4}>
+              <ChannelHeadings />
+              <PreferenceRow title="Boost activé" description="Votre mise en avant vient d’être activée." email={draft.notifications.email_boost_activated} onEmailChange={(value) => updateNotification('email_boost_activated', value)} />
+              <PreferenceRow title="Nouvelle offre reçue" description="Un membre vous propose un prix dans la messagerie." email={draft.notifications.email_offer_received} onEmailChange={(value) => updateNotification('email_offer_received', value)} />
+              <PreferenceRow title="Annonce bientôt expirée" description="Un rappel trois jours avant la fin de publication." email={draft.notifications.email_listing_expiring} onEmailChange={(value) => updateNotification('email_listing_expiring', value)} />
+              <PreferenceRow title="Annonce expirée" description="Votre annonce n’est désormais plus visible en ligne." email={draft.notifications.email_listing_expired} onEmailChange={(value) => updateNotification('email_listing_expired', value)} />
+            </PreferencesSection>
+
+            <PreferencesSection id="rapports" title="Rapports de performance" description="Recevez un résumé des vues, clics et favoris de vos annonces." icon={BarChart3} count={3}>
+              <ChannelHeadings />
+              <PreferenceRow title="Rapport disponible" description="Votre nouveau rapport de performance est prêt." email={draft.notifications.email_performance_report} push={draft.notifications.push_performance_report} onEmailChange={(value) => updateNotification('email_performance_report', value)} onPushChange={(value) => updateNotification('push_performance_report', value)} />
+              <div className="px-5 py-5 sm:px-7">
+                <SegmentedControl label="Fréquence du rapport" value={draft.notifications.performance_report_frequency} onChange={(value) => updateNotification('performance_report_frequency', value as NotificationPreferences['performance_report_frequency'])} options={isPro ? [
+                  { value: 'daily', label: 'Quotidien' }, { value: 'weekly', label: 'Hebdomadaire' },
+                  { value: 'monthly', label: 'Mensuel' }, { value: 'never', label: 'Jamais' },
+                ] : [{ value: 'weekly', label: 'Hebdomadaire' }, { value: 'never', label: 'Jamais' }]} />
+                {!isPro && <p className="mt-2 text-meta text-ink/55">Les fréquences quotidienne et mensuelle sont disponibles avec un compte Pro.</p>}
               </div>
-            </SectionCard>
+            </PreferencesSection>
 
-            <SectionCard
-              id="alerts"
-              title="Alertes d’offres"
-              description="Les nouvelles annonces correspondant à vos recherches peuvent vous être envoyées par email et/ou en push."
-              icon={Megaphone}
-              tone="lagoon"
-            >
-              <div className="grid gap-3 md:grid-cols-2">
-                <ToggleRow
-                  title="Email"
-                  description="Recevez les alertes d’annonces qui correspondent à vos critères."
-                  checked={notificationPrefs.email_search_alert}
-                  onChange={(checked) => updateNotificationPrefs('email_search_alert', checked)}
-                  icon={Mail}
-                  tone="lagoon"
-                />
-                <ToggleRow
-                  title="Push mobile"
-                  description="Une alerte push complète l’email sur les recherches importantes."
-                  checked={notificationPrefs.push_search_alert}
-                  onChange={(checked) => updateNotificationPrefs('push_search_alert', checked)}
-                  icon={Volume2}
-                  tone="lagoon"
-                />
-              </div>
-            </SectionCard>
-
-            <SectionCard
-              id="listing-alerts"
-              title="Annonces, boosts et expirations"
-              description="Suivez les boosts, les offres reçues et les rappels d’expiration d’annonce par email."
-              icon={Tag}
-              tone="ocean"
-            >
-              <div className="grid gap-3 md:grid-cols-2">
-                <ToggleRow
-                  title="Boost d’annonce"
-                  description="Recevez un email quand votre boost est activé."
-                  checked={notificationPrefs.email_boost_activated}
-                  onChange={(checked) => updateNotificationPrefs('email_boost_activated', checked)}
-                  icon={Sparkles}
-                  tone="ocean"
-                />
-                <ToggleRow
-                  title="Nouvelle offre"
-                  description="Un email dès qu’une offre arrive dans la messagerie."
-                  checked={notificationPrefs.email_offer_received}
-                  onChange={(checked) => updateNotificationPrefs('email_offer_received', checked)}
-                  icon={MessageCircle}
-                  tone="ocean"
-                />
-                <ToggleRow
-                  title="Annonce bientôt expirée"
-                  description="Recevez le rappel 3 jours avant l’échéance."
-                  checked={notificationPrefs.email_listing_expiring}
-                  onChange={(checked) => updateNotificationPrefs('email_listing_expiring', checked)}
-                  icon={Bell}
-                  tone="ocean"
-                />
-                <ToggleRow
-                  title="Annonce expirée"
-                  description="Un email quand l’annonce est réellement expirée."
-                  checked={notificationPrefs.email_listing_expired}
-                  onChange={(checked) => updateNotificationPrefs('email_listing_expired', checked)}
-                  icon={Tag}
-                  tone="ocean"
-                />
-              </div>
-            </SectionCard>
-
-            <SectionCard
-              id="reports"
-              title="Rapports de performance"
-              description="Suivez les vues, clics et favoris de vos annonces avec une cadence adaptée à votre activité."
-              icon={Sparkles}
-              tone="jungle"
-            >
-              <div className="grid gap-3 md:grid-cols-2">
-                <ToggleRow
-                  title="Email récapitulatif"
-                  description="Un rapport simple pour les particuliers, plus complet pour les professionnels."
-                  checked={notificationPrefs.email_performance_report}
-                  onChange={(checked) => updateNotificationPrefs('email_performance_report', checked)}
-                  icon={Mail}
-                  tone="jungle"
-                />
-                <ToggleRow
-                  title="Push mobile"
-                  description="Recevez un rappel discret quand un rapport est prêt."
-                  checked={notificationPrefs.push_performance_report}
-                  onChange={(checked) => updateNotificationPrefs('push_performance_report', checked)}
-                  icon={MonitorSmartphone}
-                  tone="jungle"
-                />
-              </div>
-
-              <div className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-                <label className="block text-sm font-semibold text-night">Fréquence du rapport</label>
-                <p className="mt-1 text-xs leading-relaxed text-night/55">
-                  Les comptes professionnels peuvent choisir une cadence quotidienne, hebdomadaire, mensuelle ou l’arrêter.
-                </p>
-                <select
-                  value={notificationPrefs.performance_report_frequency}
-                  onChange={(event) => updateNotificationPrefs('performance_report_frequency', event.target.value as NotificationPrefs['performance_report_frequency'])}
-                  className="mt-3 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-night outline-none transition focus:border-kalico-blue focus:ring-4 focus:ring-kalico-blue/10"
-                >
-                  <option value="daily">Quotidien</option>
-                  <option value="weekly">Hebdomadaire</option>
-                  <option value="monthly">Mensuel</option>
-                  <option value="never">Jamais</option>
-                </select>
-              </div>
-            </SectionCard>
-          </div>
-
-          <div className="space-y-5 xl:sticky xl:top-6 xl:self-start">
-            <SectionCard
-              id="bons-plans"
-              title="Bons Plans & promotions"
-              description="Choisissez si vous voulez recevoir les promos, par canal, par catégorie ou par enseigne."
-              icon={Store}
-              tone="ocean"
-            >
-              <div className="space-y-4">
-                <ToggleRow
-                  title="Toutes les nouvelles promos"
-                  description="Recevoir chaque bon plan publié sur Kalico."
-                  checked={bonPlanPrefs.notify_all}
-                  onChange={(checked) => updateBonPlanPrefs('notify_all', checked)}
-                  icon={Tag}
-                  tone="ocean"
-                />
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <ToggleRow
-                    title="Push mobile"
-                    description="Recevoir les promotions les plus utiles en notification."
-                    checked={bonPlanPrefs.via_push}
-                    onChange={(checked) => updateBonPlanPrefs('via_push', checked)}
-                    icon={MonitorSmartphone}
-                    tone="ocean"
-                  />
-                  <ToggleRow
-                    title="Par email"
-                    description="Une synthèse des meilleures promos dans votre boîte de réception."
-                    checked={bonPlanPrefs.via_email}
-                    onChange={(checked) => updateBonPlanPrefs('via_email', checked)}
-                    icon={Mail}
-                    tone="ocean"
-                  />
+            <PreferencesSection id="bons-plans" title="Bons Plans et promotions" description="Suivez toutes les promotions ou seulement les catégories et enseignes qui vous intéressent." icon={Store} count={3}>
+              <div className="space-y-6 px-5 py-6 sm:px-7">
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <Switch label="Toutes les nouvelles promotions" checked={draft.bonPlans.notify_all} onChange={(event) => updateBonPlans('notify_all', event.target.checked)} />
+                  <Switch label="Par email" checked={draft.bonPlans.via_email} onChange={(event) => updateBonPlans('via_email', event.target.checked)} />
+                  <Switch label="En push" checked={draft.bonPlans.via_push} onChange={(event) => updateBonPlans('via_push', event.target.checked)} />
                 </div>
-
-                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <label className="block text-sm font-semibold text-night">Catégories favorites</label>
-                      <p className="mt-1 text-xs leading-relaxed text-night/55">
-                        Cochez une ou plusieurs familles pour filtrer les promotions utiles.
-                      </p>
+                <div className="border-t border-sand pt-6">
+                  <h3 className="text-body-sm font-semibold text-ink">Catégories favorites</h3>
+                  <p className="mt-1 text-body-sm text-ink/60">Sélectionnez les familles de promotions qui vous intéressent.</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {BON_PLAN_CATEGORIES.map((category) => <FilterChip key={category.value} selected={draft.bonPlans.notify_categories.includes(category.value)} onClick={() => toggleCategory(category.value)}>{category.label}</FilterChip>)}
+                  </div>
+                </div>
+                <div className="border-t border-sand pt-6">
+                  <h3 className="text-body-sm font-semibold text-ink">Enseignes suivies</h3>
+                  <p className="mt-1 text-body-sm text-ink/60">Ajoutez les commerces dont vous ne voulez manquer aucune promotion.</p>
+                  <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-start">
+                    <div className="min-w-0 flex-1">
+                      <Input label="Nom de l’enseigne" list="bon-plan-businesses" value={businessInput} error={businessError} placeholder="Rechercher une enseigne" onChange={(event) => { setBusinessInput(event.target.value); setBusinessError('') }} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); addBusiness() } }} />
+                      <datalist id="bon-plan-businesses">{draft.businesses.map((business) => <option key={business.name} value={business.name} />)}</datalist>
                     </div>
-                    <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-night/50">
-                      {activeBonPlanCategories} sélectionnée{activeBonPlanCategories > 1 ? 's' : ''}
-                    </span>
+                    <Button className="sm:mt-7" variant="secondary" onClick={addBusiness}>Ajouter</Button>
                   </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {BON_PLAN_CATEGORIES.map((category) => {
-                      const active = bonPlanPrefs.notify_categories.includes(category.value)
-                      return (
-                        <button
-                          key={category.value}
-                          type="button"
-                          onClick={() => toggleCategory(category.value)}
-                          className={`rounded-full border px-3 py-2 text-xs font-medium transition duration-150 ${
-                            active
-                              ? 'border-kalico-blue bg-kalico-blue text-white'
-                              : 'border-[var(--color-border)] bg-white text-night/65 hover:border-kalico-blue/30 hover:bg-kalico-blue/5 hover:text-kalico-blue'
-                          }`}
-                        >
-                          {category.label}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
-                  <label className="block text-sm font-semibold text-night">Enseignes favorites</label>
-                  <p className="mt-1 text-xs leading-relaxed text-night/55">
-                    Ajoutez les marques ou commerces que vous souhaitez suivre plus attentivement.
-                  </p>
-                  <div className="mt-3 flex gap-2">
-                    <input
-                      list="bon-plans-businesses"
-                      value={bonPlanBusinessInput}
-                      onChange={(event) => setBonPlanBusinessInput(event.target.value)}
-                      placeholder="Ajouter une enseigne"
-                      className="flex-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-night outline-none transition focus:border-kalico-blue focus:ring-4 focus:ring-kalico-blue/10"
-                    />
-                    <button
-                      type="button"
-                      onClick={addBusiness}
-                      className="inline-flex items-center gap-2 rounded-2xl bg-kalico-blue px-4 py-3 text-sm font-semibold text-white transition hover:bg-kalico-blue/90"
-                    >
-                      Ajouter
-                    </button>
-                  </div>
-                  <datalist id="bon-plans-businesses">
-                    {bonPlanBusinesses.map((business) => (
-                      <option key={business.name} value={business.name} />
-                    ))}
-                  </datalist>
-
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {bonPlanPrefs.notify_businesses.length === 0 ? (
-                      <span className="rounded-full bg-white px-3 py-1.5 text-xs text-night/45">
-                        Aucune enseigne enregistrée pour le moment
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {draft.bonPlans.notify_businesses.length === 0 ? <p className="text-body-sm text-ink/50">Aucune enseigne suivie pour le moment.</p> : draft.bonPlans.notify_businesses.map((business) => (
+                      <span key={business} className="inline-flex items-center gap-2 rounded-full border border-sand bg-cream-sunken px-3 py-1.5 text-body-sm font-semibold text-ink/70">
+                        {business}<button type="button" className="rounded-full text-ink/45 hover:text-alert-error focus-visible:outline focus-visible:outline-2 focus-visible:outline-papaya" onClick={() => removeBusiness(business)} aria-label={`Retirer ${business}`}>×</button>
                       </span>
-                    ) : (
-                      bonPlanPrefs.notify_businesses.map((business) => (
-                        <span
-                          key={business}
-                          className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-3 py-1.5 text-xs font-medium text-night/70"
-                        >
-                          {business}
-                          <button
-                            type="button"
-                            onClick={() => removeBusiness(business)}
-                            className="text-night/30 transition hover:text-kalico-blue"
-                            aria-label={`Retirer ${business}`}
-                          >
-                            ×
-                          </button>
-                        </span>
-                      ))
-                    )}
+                    ))}
                   </div>
                 </div>
-
-                <div className="rounded-2xl border border-jungle/15 bg-jungle/5 p-4 text-sm text-night/65">
-                  Les Bons Plans sont gérés dans le même centre que vos alertes et rappels. Vous pouvez tout ajuster en une seule fois.
-                </div>
               </div>
-            </SectionCard>
+            </PreferencesSection>
 
-            <section className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-              <div className="flex items-start gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-kalico-blue/10 text-kalico-blue">
-                  <Bell className="h-5 w-5" />
+            <section className="rounded-card bg-petrol px-6 py-7 text-white sm:px-8" aria-labelledby="privacy-title">
+              <div className="flex items-start gap-4"><ShieldCheck className="mt-1 h-7 w-7 shrink-0 text-papaya" aria-hidden="true" />
+                <div><h2 id="privacy-title" className="font-display text-title-sm">Confidentialité et désabonnement</h2>
+                  <p className="mt-2 max-w-2xl text-body-sm text-white/70">Chaque email contient un lien permettant de désactiver la catégorie concernée. Vous pouvez aussi revenir modifier vos choix ici à tout moment.</p>
+                  <div className="mt-5 flex flex-wrap gap-4 text-body-sm font-semibold">
+                    <SafeLink href="/politique-de-confidentialite" dirty={dirty} className="text-papaya hover:underline">Politique de confidentialité</SafeLink>
+                    <SafeLink href="/parametres" dirty={dirty} className="text-white hover:underline">Retour aux paramètres</SafeLink>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h2 className="text-base font-semibold text-night">Confidentialité et désabonnement</h2>
-                  <p className="mt-1 text-sm leading-relaxed text-night/60">
-                    Chaque email contient un lien direct pour couper la catégorie concernée sans connexion. Vous pouvez aussi revenir ici à tout moment.
-                  </p>
-                </div>
-              </div>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Link href="/politique-de-confidentialite" className="btn-ghost px-4 py-2 text-sm">
-                  Lire la politique
-                </Link>
-                <Link href="/parametres" className="btn-secondary px-4 py-2 text-sm">
-                  Retour aux paramètres
-                </Link>
               </div>
             </section>
           </div>
         </div>
-
-        <div className="mt-6 flex flex-col gap-3 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm md:flex-row md:items-center md:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-kalico-blue/80">Enregistrement</p>
-            <p className="mt-2 text-sm leading-relaxed text-night/65">
-              Vous pouvez modifier vos canaux à tout moment. Les changements s’appliquent immédiatement sur le web et sur mobile.
-            </p>
-          </div>
-          <button onClick={handleSave} disabled={saving} className="btn-primary px-5 py-3 text-sm">
-            {saving ? (
-              'Enregistrement…'
-            ) : (
-              <span className="inline-flex items-center gap-2">
-                <Save className="h-4 w-4" />
-                Enregistrer mes préférences
-                <ArrowRight className="h-4 w-4" />
-              </span>
-            )}
-          </button>
-        </div>
       </main>
+      <SaveBar dirty={dirty} saving={saving} status={status} onCancel={handleCancel} onSave={() => void handleSave()} />
     </div>
   )
 }

@@ -26,6 +26,7 @@ Codex met à jour sa ligne et la section de sa page à la fin de chaque étape.
 | [18](specs/18-publicite.md) | Publicité (Kalico Pub) | /publicite | À relire | [#234](https://github.com/Troca-nc/troca-safe-export/pull/234) serveur fusionnée ; [#235](https://github.com/Troca-nc/troca-safe-export/pull/235) frontend |
 | [19](specs/19-admin.md) | Administration | /admin | À relire | [#236](https://github.com/Troca-nc/troca-safe-export/pull/236) |
 | 20 | Messagerie | /messages | À relire | — |
+| [21](specs/21-notifications.md) | Préférences de notifications | /parametres/notifications | À relire | — |
 
 ### QUESTION — point d’entrée de l’ancien frontend Admin
 
@@ -2011,3 +2012,72 @@ Restant après fusion de ce prérequis : créer la couche `src/lib/data/`, les t
 - Build Next.js de production : passé avec 112 routes, dont `/messages`.
 - `git diff --check` : passé avant mise à jour de ce suivi. La comparaison visuelle humaine à 1440, 1024, 768 et 390 px reste requise sur l’aperçu livré.
 - Correctif de défilement du 29 octobre 2026 : test de régression dédié, lint, TypeScript, design system (1 fichier, 0 erreur, 0 avertissement) et build de production (112 routes) passés.
+
+## 21 — Préférences de notifications v2 — Inventaire (étape 1, sans code)
+
+### Références et périmètre
+
+- Références fournies par l’humain : `21-notifications.md`, `Preferences notifications v2.html` et `LISEZ-MOI.md`, actuellement hors dépôt.
+- Route concernée : `/parametres/notifications`. Le `Header` connecté existant reste la coque commune ; la page `/notifications` qui affiche l’historique des notifications n’est pas modifiée.
+- La demande est une refonte de présentation et d’ergonomie. Le moteur, les règles d’envoi, les API, les schémas, les migrations et les données réelles restent inchangés.
+- La maquette 1440 px sert de référence visuelle. Les adaptations étroites suivent la fiche : navigation latérale repliée, cartes sur une colonne et barre d’enregistrement utilisable sans masquer le contenu.
+
+### Existant fonctionnel à préserver
+
+| Domaine | Existant trouvé | Traitement prévu |
+| --- | --- | --- |
+| Authentification | Redirection vers `/connexion`, synchronisation de session, comptes réels et profils de démonstration. Le store expose `user.is_pro`. | Conserver le garde d’accès et utiliser `is_pro` pour limiter la fréquence des particuliers à `Hebdomadaire` ou `Jamais`, sans modifier le contrat serveur. |
+| Messages | `email_new_message`, `push_new_message`. | Représenter les deux canaux dans la section « Messages » sans sauvegarde immédiate. |
+| Alertes d’offres | `email_search_alert`, `push_search_alert`. | Représenter les deux canaux dans la section dédiée. |
+| Mes annonces | `email_boost_activated`, `email_offer_received`, `email_listing_expiring`, `email_listing_expired`. | Préserver les quatre préférences email dans la section « Mes annonces » ; aucune préférence push inexistante ne sera inventée. |
+| Rapports | `email_performance_report`, `push_performance_report`, fréquence `daily`, `weekly`, `monthly` ou `never`. | Conserver les deux canaux. Afficher les quatre fréquences aux comptes Pro et seulement `weekly` / `never` aux particuliers, conformément à la fiche. |
+| Bons Plans | `notify_all`, `notify_categories`, `notify_businesses`, `via_push`, `via_email`. L’API accepte 11 catégories et fournit jusqu’à 100 enseignes réelles. | Conserver tous les champs. Utiliser les catégories reconnues par l’API, y compris `autre`, et les enseignes retournées par l’API ; empêcher les doublons d’enseigne sans modifier les valeurs déjà enregistrées. |
+| Enregistrement | Un clic actuel lance deux écritures agrégées en parallèle : préférences générales et préférences Bons Plans. La démo enregistre les mêmes objets en local. | Conserver ces deux contrats existants derrière une unique action « Enregistrer les modifications » ; aucun appel par interrupteur. Ajouter brouillon local, annulation, état modifié, succès/échec et avertissement `beforeunload`. |
+| Push | Les préférences push existent mais la page ne rend pas l’état de permission du navigateur. | Afficher une aide non bloquante quand la permission est refusée ou non accordée ; ne pas déclencher de demande de permission automatique. |
+| Confidentialité | Liens vers la politique de confidentialité et retour aux paramètres. | Reprendre ces liens dans le bloc sombre de la maquette et conserver l’information de désabonnement. |
+| États | Chargement squelette et erreur globale existent ; l’enregistrement affiche un message unique. | Conserver le chargement et ajouter les états prévus par la fiche : erreur de chargement avec nouvel essai, erreur d’enregistrement, succès, entrée d’enseigne vide, doublon, liste vide et permission push. |
+
+### Composants et données
+
+| Élément | Décision d’inventaire |
+| --- | --- |
+| Design system | Réutiliser `Button`, `Input`, `Switch`, `FilterChip` et `SegmentedControl` existants. Ils couvrent déjà clavier, focus, `role="switch"`, `aria-pressed`, labels et erreurs ; aucune nouvelle primitive UI n’est nécessaire. |
+| Composants de page | Extraire des composants propres aux notifications pour la navigation de section, les cartes, les lignes de préférence et la barre fixe d’enregistrement, afin que la route n’embarque plus toute la présentation dans un seul fichier. |
+| Couche de données | Créer `src/lib/data/notifications.ts` pour normaliser chargement et enregistrement à partir des API existantes, ainsi qu’une fixture dédiée sous `src/demo/fixtures/` pour le mode démonstration. Les types et valeurs par défaut seront centralisés dans cette couche. |
+| Références de design | Après validation de l’inventaire, copier la fiche et la maquette fournies dans `docs/design/specs/21-notifications.md` et `design/Preferences notifications v2.html` afin de rendre la référence durable dans la branche. |
+| Validation ciblée | Ajouter une vérification de contrat couvrant la présence de toutes les clés, l’absence de sauvegarde par interrupteur, les fréquences selon le type de compte, la protection des changements non enregistrés et les attributs accessibles essentiels. |
+
+### Fichiers prévus
+
+- Modifier `frontend/src/app/parametres/notifications/page.tsx`.
+- Créer les composants de domaine nécessaires sous `frontend/src/components/notifications/`.
+- Créer `frontend/src/lib/data/notifications.ts` et `frontend/src/demo/fixtures/notifications.ts`.
+- Ajouter la fiche, la maquette et un test de contrat ciblé comme nouveaux fichiers.
+- Mettre à jour uniquement cette entrée de `frontend/docs/design/PROGRESS.md` pendant les étapes suivantes.
+- Ne pas modifier le backend, la base de données, les routes API, le `Header`, la page `/notifications`, les règles d’envoi ni les autres pages de paramètres.
+
+### Questions et écarts
+
+- Aucun blocage de périmètre identifié. L’« enregistrement unique » de la fiche sera une seule action utilisateur qui envoie les deux objets complets aux deux routes agrégées déjà en production ; créer une troisième route serveur ne serait ni nécessaire ni conforme au caractère visuel de la refonte.
+- La maquette ne montre pas explicitement la catégorie Bons Plans `autre`, pourtant acceptée et potentiellement déjà enregistrée. Elle sera conservée sous le libellé « Autres » pour ne perdre aucune préférence existante.
+- Inventaire validé par l’humain le 30 octobre 2026.
+
+### Livraison des étapes 2 à 7 — 30 octobre 2026
+
+- La route adopte la mise en page de la maquette : en-tête éditorial, navigation latérale, cinq cartes de préférences, bloc de confidentialité et barre d’enregistrement fixe. Le `Header` connecté reste visible et inchangé.
+- Toutes les clés existantes sont conservées. Les réglages sont modifiés dans un brouillon local ; les interrupteurs, catégories, enseignes et fréquence n’écrivent jamais directement sur le serveur.
+- « Tout activer » et « Tout désactiver » ne touchent que les canaux booléens. « Annuler » restaure la dernière version enregistrée. Une seule action utilisateur enregistre les deux objets complets via les deux API agrégées existantes.
+- Les comptes particuliers voient `Hebdomadaire` et `Jamais`. Les comptes Pro voient aussi `Quotidien` et `Mensuel`. La permission push refusée ou absente déclenche une aide non bloquante sans demande automatique au navigateur.
+- Les catégories Bons Plans reconnues par l’API incluent désormais explicitement « Autres ». Les enseignes utilisent les suggestions réelles, gèrent l’état vide et refusent les doublons sans distinction de casse.
+- Les changements non enregistrés sont protégés lors d’un rechargement ou d’une fermeture, ainsi que sur les deux liens sortants du bloc de confidentialité.
+- La couche `src/lib/data/notifications.ts` centralise les valeurs par défaut, la normalisation, les API et le stockage de démonstration. Une fixture dédiée remplace les valeurs de démonstration mêlées à la page.
+
+### Validation
+
+- Test de contrat ciblé : 3/3 passés, couvrant toutes les clés existantes, l’enregistrement explicite unique, les fréquences par type de compte et les attributs accessibles des contrôles.
+- Lint obligatoire du dépôt : passé. Le lint ciblé direct reste hors configuration ESLint actuelle, qui ignore les dossiers de cette page ; TypeScript et le build assurent néanmoins leur compilation complète.
+- TypeScript : passé sans erreur.
+- Design system : 4 fichiers contrôlés, 0 erreur et 0 avertissement.
+- Build Next.js de production : passé avec 112 routes, dont `/parametres/notifications`.
+- `git diff --check` passé. Le contrôle d’encodage ciblé ne signale aucune anomalie dans les fichiers de la fiche ; le contrôle global retrouve uniquement la dette historique déjà présente hors périmètre.
+- La recette visuelle humaine reste requise sur l’aperçu de la PR, le contrôle du navigateur intégré n’étant pas disponible dans cette session.
