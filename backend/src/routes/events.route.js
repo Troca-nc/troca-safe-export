@@ -10,6 +10,7 @@ const {
   expireEventTicketReservations,
   getPublicEventById,
   getTicketByToken,
+  listEventsByOrganizer,
   serializeTicketForViewer,
   listPublicEvents,
   reserveEventTickets,
@@ -87,6 +88,18 @@ router.get('/', async (req, res, next) => {
       limit,
       category: req.query.category || req.query.kind || '',
       commune: req.query.commune || '',
+    });
+    return res.json({ data: events });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/mine', authenticate, async (req, res, next) => {
+  try {
+    const events = await listEventsByOrganizer({
+      organizerId: req.user.id,
+      limit: req.query.limit,
     });
     return res.json({ data: events });
   } catch (err) {

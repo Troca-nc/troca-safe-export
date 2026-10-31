@@ -133,6 +133,20 @@ async function listPublicEvents({ limit = 24, category = '', commune = '' } = {}
   return events;
 }
 
+async function listEventsByOrganizer({ organizerId, limit = 50 }) {
+  const safeLimit = Math.min(Math.max(Number(limit) || 50, 1), 100);
+  const { rows } = await query(
+    `SELECT e.*, c.name AS commune_name
+       FROM events e
+       LEFT JOIN communes c ON c.id = e.commune_id
+      WHERE e.organizer_id = $1
+      ORDER BY e.created_at DESC, e.id DESC
+      LIMIT $2`,
+    [organizerId, safeLimit]
+  );
+  return rows.map((row) => serializeEventRow(row));
+}
+
 async function getPublicEventById(id) {
   // Historical cancelled/completed rows have no verified publication history.
   // Fail closed until a server-owned publication record permits public archives.
@@ -784,6 +798,7 @@ module.exports = {
   canManageTicket,
   serializeTicketForViewer,
   getPublicEventById,
+  listEventsByOrganizer,
   listPublicEvents,
   reserveEventTickets,
   scanTicket,

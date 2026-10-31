@@ -46,4 +46,13 @@ describe('Personal account route contracts', () => {
     assert.ok(source.includes("router.post('/offers/:id/respond'"));
     assert.ok(source.includes("router.post('/offers'"));
   });
+
+  it('expose les événements du compte avant la fiche publique dynamique', () => {
+    const source = routeSource('events.route.js');
+    const mine = source.indexOf("router.get('/mine', authenticate");
+    const detail = source.indexOf("router.get('/:id'");
+    assert.ok(mine >= 0);
+    assert.ok(detail > mine);
+    assert.ok(source.includes('organizerId: req.user.id'));
+  });
 });

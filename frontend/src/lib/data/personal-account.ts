@@ -1,10 +1,11 @@
-import { api, listingsApi, messagesApi, trocApi } from '@/lib/api'
+import { api, eventsApi, listingsApi, messagesApi, trocApi } from '@/lib/api'
 import { DEMO } from '@/lib/demo'
 import type { AccountSession } from '@/types/account'
 import type { AlertFilters, SearchAlert } from '@/types/alert.types'
 import type {
   AlertRecentResult,
   PersonalFavorite,
+  PersonalEvent,
   PersonalListing,
   PersonalListingsData,
   PersonalOffer,
@@ -38,6 +39,24 @@ function normalizeListing(value: unknown): PersonalListing {
     publishedAt: nullableText(row.published_at ?? row.created_at),
     expiresAt: nullableText(row.expires_at),
     isTroc: Boolean(row.is_troc),
+  }
+}
+
+function normalizeEvent(value: unknown): PersonalEvent {
+  const row = record(value)
+  return {
+    id: String(row.id ?? ''),
+    title: text(row.title) || 'Événement',
+    status: (text(row.status) || 'draft') as PersonalEvent['status'],
+    category: text(row.category) || 'autre',
+    eventDate: nullableText(row.event_date),
+    eventTime: nullableText(row.event_time),
+    venueName: text(row.venue_name),
+    communeName: text(row.commune_name),
+    coverImage: nullableText(row.cover_image_url),
+    ticketsSold: number(row.tickets_sold),
+    maxCapacity: nullableNumber(row.max_capacity),
+    createdAt: nullableText(row.created_at),
   }
 }
 
@@ -114,6 +133,15 @@ export async function getPersonalListings(session: AccountSession): Promise<Pers
       limit: number(response.data?.capacity?.limit, 5),
     },
   }
+}
+
+export async function getPersonalEvents(session: AccountSession): Promise<PersonalEvent[]> {
+  if (isDemoSession(session)) {
+    const { personalAccountFixture } = await import('@/demo/fixtures/personal-account')
+    return personalAccountFixture.events
+  }
+  const response = await eventsApi.listMine({ limit: 100 })
+  return array(response.data?.data).map(normalizeEvent).filter((item) => item.id)
 }
 
 export async function getPersonalFavorites(session: AccountSession): Promise<PersonalFavorite[]> {

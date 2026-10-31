@@ -5,6 +5,7 @@ import Link from 'next/link'
 import {
   Archive,
   Bell,
+  CalendarDays,
   Check,
   Clock3,
   Eye,
@@ -28,6 +29,7 @@ import PersonalAlertsManager from '@/components/profil/PersonalAlertsManager'
 import { DEMO } from '@/lib/demo'
 import {
   getPersonalFavorites,
+  getPersonalEvents,
   getPersonalListings,
   getPersonalOffers,
   personalAccountActions,
@@ -37,15 +39,17 @@ import { useAuthStore } from '@/store/authStore'
 import type { AccountSession } from '@/types/account'
 import type {
   PersonalFavorite,
+  PersonalEvent,
   PersonalListing,
   PersonalListingsData,
   PersonalOffer,
 } from '@/types/personal-account'
 
-export type PersonalAccountTab = 'listings' | 'favorites' | 'alerts' | 'offers'
+export type PersonalAccountTab = 'listings' | 'events' | 'favorites' | 'alerts' | 'offers'
 
 const TAB_META: Record<PersonalAccountTab, { title: string; subtitle: string }> = {
   listings: { title: 'Mes annonces', subtitle: 'Vos annonces et leurs performances' },
+  events: { title: 'Mes événements', subtitle: 'Retrouvez les événements publiés avec votre compte' },
   favorites: { title: 'Coups de cœur', subtitle: 'Les annonces que vous gardez de côté' },
   alerts: { title: 'Alertes', subtitle: 'Vos recherches enregistrées et leurs résultats récents' },
   offers: { title: 'Offres reçues', subtitle: 'Répondez aux offres de prix et propositions de troc' },
@@ -53,6 +57,7 @@ const TAB_META: Record<PersonalAccountTab, { title: string; subtitle: string }> 
 
 const TABS = [
   { id: 'listings', label: 'Mes annonces', href: '/profil/annonces', icon: <Archive className="h-4 w-4" /> },
+  { id: 'events', label: 'Mes événements', href: '/profil/evenements', icon: <CalendarDays className="h-4 w-4" /> },
   { id: 'favorites', label: 'Coups de cœur', href: '/profil/favoris', icon: <Heart className="h-4 w-4" /> },
   { id: 'alerts', label: 'Alertes', href: '/profil/alertes', icon: <Bell className="h-4 w-4" /> },
   { id: 'offers', label: 'Offres reçues', href: '/profil/offres', icon: <Inbox className="h-4 w-4" /> },
@@ -233,6 +238,53 @@ function ListingsView({ session, demo }: { session: AccountSession; demo: boolea
   )
 }
 
+const eventStatusMeta: Record<PersonalEvent['status'], { label: string; className: string }> = {
+  published: { label: 'En ligne', className: 'bg-green-100 text-green-800' },
+  draft: { label: 'Brouillon', className: 'bg-sand text-ink/70' },
+  cancelled: { label: 'Annulé', className: 'bg-red-50 text-red-700' },
+  completed: { label: 'Terminé', className: 'bg-night text-white' },
+}
+
+function EventsView({ session }: { session: AccountSession }) {
+  const [events, setEvents] = useState<PersonalEvent[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const load = useCallback(async () => {
+    setLoading(true); setError(null)
+    try { setEvents(await getPersonalEvents(session)) } catch (err) { setError(getErrorMessage(err)) } finally { setLoading(false) }
+  }, [session])
+  useEffect(() => { void load() }, [load])
+
+  if (loading) return <PageSkeleton />
+  if (error) return <ErrorState message={error} onRetry={load} />
+  if (!events.length) return <EmptyState icon={<CalendarDays className="h-6 w-6" />} title="Aucun événement" body="Les événements que vous publiez apparaîtront ici." href="/evenements/publier" action="Publier un événement" />
+
+  return (
+    <div className="space-y-5">
+      <div className="flex justify-end"><Link href="/evenements/publier" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-rust px-5 py-2.5 text-sm font-semibold text-white"><Plus className="h-4 w-4" /> Publier un événement</Link></div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {events.map((event) => {
+          const meta = eventStatusMeta[event.status] ?? eventStatusMeta.draft
+          return <article key={event.id} className="overflow-hidden rounded-[2rem] border border-warm-border bg-surface shadow-sm">
+            <div className="flex aspect-[16/8] items-center justify-center bg-sand text-ink/25">{event.coverImage ? <img src={event.coverImage} alt="" className="h-full w-full object-cover" /> : <CalendarDays className="h-10 w-10" />}</div>
+            <div className="p-5">
+              <div className="flex flex-wrap items-center justify-between gap-2"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${meta.className}`}>{meta.label}</span><span className="text-xs font-semibold uppercase tracking-[0.14em] text-rust">{event.category}</span></div>
+              <h2 className="mt-3 font-display text-xl font-bold text-ink">{event.title}</h2>
+              <div className="mt-3 space-y-1.5 text-sm text-ink/60">
+                <p className="inline-flex items-center gap-2"><Clock3 className="h-4 w-4" /> {event.eventDate ? formatDate(event.eventDate) : 'Date non renseignée'}{event.eventTime ? ` à ${event.eventTime.slice(0, 5)}` : ''}</p>
+                <p className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {[event.venueName, event.communeName].filter(Boolean).join(' · ') || 'Lieu non renseigné'}</p>
+              </div>
+              {event.maxCapacity != null ? <p className="mt-3 text-xs font-semibold text-ink/50">{event.ticketsSold} billet{event.ticketsSold > 1 ? 's' : ''} sur {event.maxCapacity}</p> : null}
+              {event.status === 'published' ? <Link href={`/evenements/${event.id}`} className="mt-5 inline-flex min-h-10 items-center gap-2 rounded-full border border-warm-border px-4 py-2 text-sm font-semibold text-ink">Voir la fiche <Eye className="h-4 w-4" /></Link> : <p className="mt-5 text-sm text-ink/50">La fiche publique sera accessible lorsque l’événement sera en ligne.</p>}
+            </div>
+          </article>
+        })}
+      </div>
+    </div>
+  )
+}
+
 function FavoritesView({ session, demo }: { session: AccountSession; demo: boolean }) {
   const [items, setItems] = useState<PersonalFavorite[]>([])
   const [category, setCategory] = useState('Tout')
@@ -354,13 +406,14 @@ export default function PersonalAccountPage({ activeTab }: { activeTab: Personal
           <div className="rounded-[2rem] border border-warm-border bg-surface p-8 text-center shadow-sm">
             <h1 className="font-display text-3xl font-bold">Connectez-vous à votre espace</h1>
             <p className="mx-auto mt-3 max-w-lg text-sm text-ink/60">Vos annonces, favoris, alertes et offres sont réservés à votre compte.</p>
-            <Link href={`/connexion?next=/profil/${activeTab === 'favorites' ? 'favoris' : activeTab === 'alerts' ? 'alertes' : activeTab === 'offers' ? 'offres' : 'annonces'}`} className="btn-primary mt-5 inline-flex rounded-full px-5 py-2.5">Se connecter</Link>
+            <Link href={`/connexion?next=/profil/${activeTab === 'favorites' ? 'favoris' : activeTab === 'alerts' ? 'alertes' : activeTab === 'offers' ? 'offres' : activeTab === 'events' ? 'evenements' : 'annonces'}`} className="btn-primary mt-5 inline-flex rounded-full px-5 py-2.5">Se connecter</Link>
           </div>
         ) : (
           <>
             <div className="mb-6"><p className="text-xs font-semibold uppercase tracking-[0.22em] text-rust">Espace particulier</p><h1 className="mt-2 font-display text-4xl font-bold text-ink sm:text-5xl">{meta.title}</h1><p className="mt-2 text-sm text-ink/55 sm:text-base">{meta.subtitle}</p></div>
             <div className="mb-7 rounded-[1.5rem] border border-warm-border bg-surface px-2 shadow-sm"><AccountTabs items={tabs} activeId={activeTab} label="Espace particulier" /></div>
             {activeTab === 'listings' ? <ListingsView session={session} demo={demo} /> : null}
+            {activeTab === 'events' ? <EventsView session={session} /> : null}
             {activeTab === 'favorites' ? <FavoritesView session={session} demo={demo} /> : null}
             {activeTab === 'alerts' ? <PersonalAlertsManager session={session} /> : null}
             {activeTab === 'offers' ? <OffersView session={session} demo={demo} /> : null}

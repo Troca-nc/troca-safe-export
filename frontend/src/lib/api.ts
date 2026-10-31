@@ -705,6 +705,7 @@ export const eventsApi = {
     () => api.get(`/events/${id}`),
     CACHE_TTL.short,
   ),
+  listMine: (params: object = {}) => api.get('/events/mine', { params }),
   create: async (data: object) => {
     const res = await api.post('/events', data)
     invalidateApiCache('events.')

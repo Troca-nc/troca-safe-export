@@ -2,7 +2,7 @@
 
 > Généré par `npm run quality:inventory`. Ne pas modifier manuellement.
 
-Routes détectées : **109**.
+Routes détectées : **110**.
 
 | Route | Audience | Priorité | Automatisation actuelle | Audit manuel |
 |---|---|---:|---|---|
@@ -102,6 +102,7 @@ Routes détectées : **109**.
 | `/profil/alertes` | particulier connecté | P1 | à planifier | À auditer |
 | `/profil/alertes-trajet` | particulier connecté | P1 | à planifier | À auditer |
 | `/profil/annonces` | particulier connecté | P1 | à planifier | À auditer |
+| `/profil/evenements` | particulier connecté | P1 | à planifier | À auditer |
 | `/profil/favoris` | particulier connecté | P1 | à planifier | À auditer |
 | `/profil/offres` | particulier connecté | P1 | à planifier | À auditer |
 | `/pros` | public | P1 | à planifier | À auditer |

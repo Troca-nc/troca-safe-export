@@ -23,6 +23,21 @@ export type PersonalListingsData = {
   capacity: { used: number; limit: number }
 }
 
+export type PersonalEvent = {
+  id: string
+  title: string
+  status: 'draft' | 'published' | 'cancelled' | 'completed'
+  category: string
+  eventDate: string | null
+  eventTime: string | null
+  venueName: string
+  communeName: string
+  coverImage: string | null
+  ticketsSold: number
+  maxCapacity: number | null
+  createdAt: string | null
+}
+
 export type PersonalFavorite = {
   id: string
   title: string
@@ -82,6 +97,7 @@ export type AlertRecentResult = {
 
 export type PersonalAccountFixture = {
   listings: PersonalListingsData
+  events: PersonalEvent[]
   favorites: PersonalFavorite[]
   alerts: SearchAlert[]
   alertResults: Record<string, AlertRecentResult[]>
