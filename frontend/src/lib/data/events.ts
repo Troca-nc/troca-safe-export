@@ -56,9 +56,14 @@ function asCommunes(value: unknown): EventPublishMetadata['communes'] {
   return value.flatMap((item) => {
     if (!item || typeof item !== 'object') return []
     const row = item as Record<string, unknown>
-    const id = Number(row.id)
-    const name = String(row.name ?? row.nom ?? row.libelle ?? '').trim()
-    return Number.isFinite(id) && name ? [{ id, name }] : []
+    const nestedCommunes = Array.isArray(row.communes) ? row.communes : [row]
+    return nestedCommunes.flatMap((commune) => {
+      if (!commune || typeof commune !== 'object') return []
+      const communeRow = commune as Record<string, unknown>
+      const id = Number(communeRow.id)
+      const name = String(communeRow.name ?? communeRow.nom ?? communeRow.libelle ?? '').trim()
+      return Number.isFinite(id) && name ? [{ id, name }] : []
+    })
   })
 }
 

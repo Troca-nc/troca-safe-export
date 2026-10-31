@@ -177,7 +177,7 @@ async function createEventAndBonPlan({ user, payload }) {
       [
         user.id,
         payload.title,
-        payload.description || null,
+        payload.description || '',
         payload.kind || 'event',
         payload.target_audience || 'particulier',
         payload.commune_id || null,
@@ -200,7 +200,7 @@ async function createEventAndBonPlan({ user, payload }) {
           end_time, cover_image_url, photos, category, status, has_ticketing, max_capacity, tickets_sold, is_free,
           organizer_name, organizer_email, organizer_phone, booking_url, room, version, is_3d, price_normal_xpf, price_reduced_xpf)
        VALUES
-         ($1, $2, $3, $4, $5, $6, $7, $8::date, $9::time, $10::time, $11, $12::jsonb, $13, $14, $15, $16, 0, $17, $18, $19, $20, $21, $22, $23, $24, $25)
+         ($1, $2, $3, $4, $5, $6, $7, $8::date, $9::time, $10::time, $11, $12::jsonb, $13, $14, $15, $16, 0, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
        RETURNING *`,
       [
         bonPlanId,

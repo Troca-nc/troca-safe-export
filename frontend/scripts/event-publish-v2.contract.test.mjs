@@ -38,6 +38,12 @@ test('les catégories envoyées correspondent au contrat serveur', async () => {
   }
 })
 
+test('les communes imbriquées dans les provinces sont aplaties pour le menu', async () => {
+  const data = await read('src/lib/data/events.ts')
+  assert.match(data, /Array\.isArray\(row\.communes\) \? row\.communes : \[row\]/)
+  assert.match(data, /nestedCommunes\.flatMap/)
+})
+
 test('les fichiers du lot ne contiennent pas de signature mojibake', async () => {
   const paths = [
     'src/app/evenements/publier/page.tsx',
