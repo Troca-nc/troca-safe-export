@@ -31,6 +31,7 @@ const SUITES = [
   './conversationMessageAccess.test',
   './eventPublicationRules.test',
   './eventPublicationCreation.test',
+  './eventOwnerListing.test',
   './health.test',
   './validate.test',
   './jwt.test',

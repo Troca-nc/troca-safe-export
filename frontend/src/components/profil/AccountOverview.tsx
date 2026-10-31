@@ -32,6 +32,7 @@ import type { AccountOverviewData, AccountSubscriptionState } from '@/types/acco
 const ACCOUNT_TABS = [
   { id: 'overview', label: 'Vue d’ensemble', href: '/profil', icon: <CircleUserRound className="h-4 w-4" /> },
   { id: 'listings', label: 'Mes annonces', href: '/profil/annonces', icon: <Package className="h-4 w-4" /> },
+  { id: 'events', label: 'Mes événements', href: '/profil/evenements', icon: <CalendarDays className="h-4 w-4" /> },
   { id: 'favorites', label: 'Coups de cœur', href: '/favoris', icon: <Heart className="h-4 w-4" /> },
   { id: 'messages', label: 'Messages', href: '/messages', icon: <MessageCircle className="h-4 w-4" /> },
   { id: 'appointments', label: 'Rendez-vous', href: '/mes-rdv', icon: <CalendarDays className="h-4 w-4" /> },
