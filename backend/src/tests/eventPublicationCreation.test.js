@@ -24,11 +24,15 @@ async function run() {
                 if (normalized.startsWith('INSERT INTO bon_plans ')) {
                   assert.match(normalized, /'active', NOW\(\) \+ INTERVAL '365 days'/);
                   assert.strictEqual(params[0], 7);
+                  assert.strictEqual(params[2], '');
                   assert.strictEqual(params[8], 0);
                   assert.strictEqual(params[9], isFree);
                   return { rows: [{ id: 41 }] };
                 }
                 if (normalized.startsWith('INSERT INTO events ')) {
+                  const placeholders = [...normalized.matchAll(/\$(\d+)/g)].map((match) => Number(match[1]));
+                  assert.strictEqual(Math.max(...placeholders), params.length);
+                  assert.strictEqual(params.length, 26);
                   assert.strictEqual(params[0], 41);
                   assert.strictEqual(params[1], 7);
                   assert.strictEqual(params[13], status || 'published');
@@ -51,7 +55,7 @@ async function run() {
         user: { id: 7, email: 'organizer@example.invalid' },
         payload: {
           title: 'Synthetic event', category: 'autre', event_date: '2026-10-01',
-          event_time: '10:00', status, is_free: isFree, has_ticketing: false,
+          event_time: '10:00', description: '', status, is_free: isFree, has_ticketing: false,
           price_xpf: 0, ticket_types: [],
         },
       });
