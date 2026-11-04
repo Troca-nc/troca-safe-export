@@ -54,5 +54,7 @@ describe('Personal account route contracts', () => {
     assert.ok(mine >= 0);
     assert.ok(detail > mine);
     assert.ok(source.includes('organizerId: req.user.id'));
+    assert.ok(source.includes("router.delete('/:id', authenticate"));
+    assert.ok(source.includes('deleteEventByOrganizer'));
   });
 });

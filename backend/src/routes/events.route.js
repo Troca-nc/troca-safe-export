@@ -7,6 +7,7 @@ const { scanLimiter } = require('../middleware/rateLimit');
 const { sendTicketEmail } = require('../services/emailService');
 const {
   createEventAndBonPlan,
+  deleteEventByOrganizer,
   expireEventTicketReservations,
   getPublicEventById,
   getTicketByToken,
@@ -81,6 +82,12 @@ const scanSchema = Joi.object({
   location: Joi.string().trim().max(255).allow('', null),
 });
 
+const eventIdSchema = {
+  params: Joi.object({
+    id: Joi.number().integer().positive().required(),
+  }),
+};
+
 router.get('/', async (req, res, next) => {
   try {
     const limit = Number(req.query.limit || 24);
@@ -121,6 +128,18 @@ router.post('/', authenticate, validate(createEventSchema), async (req, res, nex
     return res.status(201).json({
       data: event,
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/:id', authenticate, validate(eventIdSchema), async (req, res, next) => {
+  try {
+    const result = await deleteEventByOrganizer({
+      eventId: req.params.id,
+      organizerId: req.user.id,
+    });
+    return res.json({ data: result, message: 'Événement supprimé.' });
   } catch (err) {
     next(err);
   }

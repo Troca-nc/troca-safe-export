@@ -2147,3 +2147,17 @@ Inventaire et trois décisions validés par l’humain le 30 octobre 2026.
 - Validations réussies : 6 tests ciblés, `npm run lint`, `npx tsc --noEmit`, `node scripts/check-design.mjs --changed` (11 fichiers, zéro erreur et zéro avertissement), `git diff --check` et build Next.js de production (112 pages, route `/evenements/publier` générée).
 - Le contrôle global d’encodage confirme les fichiers gardés sans nouvelle anomalie ; il continue de lister la dette historique hors périmètre déjà connue dans d’autres fichiers.
 - Limite de recette : l’outil de navigateur intégré n’était pas disponible dans cette session. La comparaison visuelle humaine à 1440 px reste à faire ; les recettes mobiles humaines à 1024/768/390 restent volontairement reportées au second temps demandé par l’utilisateur.
+
+## 23 — Gestion de mes événements — Implémenté
+
+### Livraison — 1er novembre 2026
+
+- L’onglet `/profil/evenements` propose désormais une action « Supprimer » sur chaque événement, avec confirmation, état occupé et retour visible de succès ou d’échec.
+- La suppression est réservée au créateur authentifié. Elle retire immédiatement l’événement des listes publiques et personnelles, expire le bon plan associé et désactive ses types de billets.
+- Les données sont supprimées logiquement via `events.deleted_at` afin de préserver l’intégrité des historiques. Une suppression est refusée si une réservation active ou un paiement existe déjà ; le message oriente alors vers une annulation accompagnée.
+- Le mode démonstration simule l’action sans écriture serveur.
+
+### Validation
+
+- Tests ciblés : liste propriétaire, suppression propriétaire, droits, historique de billetterie et syntaxe serveur passés.
+- Suite backend complète, lint frontend, TypeScript, contrôle design et build Next.js de production passés.

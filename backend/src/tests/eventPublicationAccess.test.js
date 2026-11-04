@@ -24,7 +24,7 @@ function harness({ status = 'published', missing = false, queryError = false } =
         if (normalized.startsWith('SELECT e.*, c.name AS commune_name FROM events e')) {
           // Assert the production predicate before simulating its selection.
           // Removing the filter must fail, not be concealed by mock behavior.
-          assert.match(normalized, /WHERE e\.id = \$1 AND e\.status = 'published' LIMIT 1$/);
+          assert.match(normalized, /WHERE e\.id = \$1 AND e\.status = 'published' AND e\.deleted_at IS NULL LIMIT 1$/);
           assert.strictEqual(params.length, 1);
           assert.strictEqual(params[0], 42);
           return { rows: missing || status !== 'published' ? [] : [row] };

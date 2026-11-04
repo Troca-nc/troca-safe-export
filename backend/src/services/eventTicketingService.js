@@ -106,7 +106,7 @@ async function loadEventTicketTypes(eventId) {
 
 async function listPublicEvents({ limit = 24, category = '', commune = '' } = {}) {
   const params = [];
-  const where = [`e.status = 'published'`];
+  const where = [`e.status = 'published'`, `e.deleted_at IS NULL`];
 
   if (category) {
     params.push(String(category).split(',').map((value) => value.trim()).filter(Boolean));
@@ -140,11 +140,75 @@ async function listEventsByOrganizer({ organizerId, limit = 50 }) {
        FROM events e
        LEFT JOIN communes c ON c.id = e.commune_id
       WHERE e.organizer_id = $1
+        AND e.deleted_at IS NULL
       ORDER BY e.created_at DESC, e.id DESC
       LIMIT $2`,
     [organizerId, safeLimit]
   );
   return rows.map((row) => serializeEventRow(row));
+}
+
+async function deleteEventByOrganizer({ eventId, organizerId }) {
+  const safeEventId = Number(eventId);
+  const safeOrganizerId = Number(organizerId);
+  if (!Number.isInteger(safeEventId) || safeEventId <= 0) {
+    throw Object.assign(new Error('Événement introuvable.'), { status: 404 });
+  }
+
+  return withTransaction(async (client) => {
+    const { rows } = await client.query(
+      `SELECT e.id, e.organizer_id, e.bon_plan_id,
+              EXISTS (
+                SELECT 1
+                  FROM ticket_orders o
+                 WHERE o.event_id = e.id
+                   AND o.status IN ('reserved', 'paid')
+              ) AS has_active_orders
+         FROM events e
+        WHERE e.id = $1
+          AND e.deleted_at IS NULL
+        FOR UPDATE`,
+      [safeEventId]
+    );
+    const event = rows[0];
+    if (!event) {
+      throw Object.assign(new Error('Événement introuvable.'), { status: 404 });
+    }
+    if (Number(event.organizer_id) !== safeOrganizerId) {
+      throw Object.assign(new Error('Vous ne pouvez supprimer que vos propres événements.'), { status: 403 });
+    }
+    if (event.has_active_orders) {
+      throw Object.assign(
+        new Error('Cet événement possède déjà des réservations ou des billets payés. Contactez le support pour l’annuler.'),
+        { status: 409 }
+      );
+    }
+
+    await client.query(
+      `UPDATE events
+          SET status = 'cancelled', deleted_at = NOW(), updated_at = NOW()
+        WHERE id = $1`,
+      [safeEventId]
+    );
+    await client.query(
+      `UPDATE ticket_types
+          SET is_active = FALSE
+        WHERE event_id = $1`,
+      [safeEventId]
+    );
+    if (event.bon_plan_id != null) {
+      await client.query(
+        `UPDATE bon_plans
+            SET status = 'expired',
+                expires_at = LEAST(COALESCE(expires_at, NOW()), NOW()),
+                updated_at = NOW()
+          WHERE id = $1`,
+        [event.bon_plan_id]
+      );
+    }
+
+    return { id: safeEventId };
+  });
 }
 
 async function getPublicEventById(id) {
@@ -154,7 +218,7 @@ async function getPublicEventById(id) {
     `SELECT e.*, c.name AS commune_name
        FROM events e
        LEFT JOIN communes c ON c.id = e.commune_id
-      WHERE e.id = $1 AND e.status = 'published'
+      WHERE e.id = $1 AND e.status = 'published' AND e.deleted_at IS NULL
       LIMIT 1`,
     [id]
   );
@@ -792,6 +856,7 @@ async function scanTicket({ token, scannerUser, location = null }) {
 
 module.exports = {
   createEventAndBonPlan,
+  deleteEventByOrganizer,
   expireEventTicketReservations,
   finalizeEventTicketPayment,
   getTicketByToken,

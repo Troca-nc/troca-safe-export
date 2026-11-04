@@ -706,6 +706,13 @@ export const eventsApi = {
     CACHE_TTL.short,
   ),
   listMine: (params: object = {}) => api.get('/events/mine', { params }),
+  deleteMine: async (id: string | number) => {
+    const res = await api.delete(`/events/${id}`)
+    invalidateApiCache('events.')
+    invalidateApiCache('bonPlans.')
+    invalidateApiCache('stats.')
+    return res
+  },
   create: async (data: object) => {
     const res = await api.post('/events', data)
     invalidateApiCache('events.')
