@@ -6,16 +6,19 @@ const { authenticate, optionalAuth } = require('../middleware/auth');
 const { scanLimiter } = require('../middleware/rateLimit');
 const { sendTicketEmail } = require('../services/emailService');
 const {
+  cancelEventByOrganizer,
   createEventAndBonPlan,
   deleteEventByOrganizer,
   expireEventTicketReservations,
   getPublicEventById,
+  getEventByOrganizer,
   getTicketByToken,
   listEventsByOrganizer,
   serializeTicketForViewer,
   listPublicEvents,
   reserveEventTickets,
   scanTicket,
+  updateEventByOrganizer,
 } = require('../services/eventTicketingService');
 
 const router = express.Router();
@@ -114,6 +117,19 @@ router.get('/mine', authenticate, async (req, res, next) => {
   }
 });
 
+router.get('/mine/:id', authenticate, validate(eventIdSchema), async (req, res, next) => {
+  try {
+    const event = await getEventByOrganizer({
+      eventId: req.params.id,
+      organizerId: req.user.id,
+    });
+    if (!event) return res.status(404).json({ error: 'Événement introuvable.' });
+    return res.json({ data: event });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post('/', authenticate, validate(createEventSchema), async (req, res, next) => {
   try {
     if (!req.user?.id) {
@@ -128,6 +144,31 @@ router.post('/', authenticate, validate(createEventSchema), async (req, res, nex
     return res.status(201).json({
       data: event,
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/:id', authenticate, validate({ params: eventIdSchema.params, body: createEventSchema }), async (req, res, next) => {
+  try {
+    const event = await updateEventByOrganizer({
+      eventId: req.params.id,
+      organizerId: req.user.id,
+      payload: req.body,
+    });
+    return res.json({ data: event, message: 'Événement modifié.' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/:id/cancel', authenticate, validate(eventIdSchema), async (req, res, next) => {
+  try {
+    const event = await cancelEventByOrganizer({
+      eventId: req.params.id,
+      organizerId: req.user.id,
+    });
+    return res.json({ data: event, message: 'Événement annulé.' });
   } catch (err) {
     next(err);
   }

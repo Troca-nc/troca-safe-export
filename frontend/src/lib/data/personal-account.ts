@@ -209,6 +209,7 @@ export const personalAccountActions = {
   renew: (id: string) => listingsApi.renew(id),
   deleteListing: (id: string) => listingsApi.delete(id),
   deleteEvent: (id: string) => eventsApi.deleteMine(id),
+  cancelEvent: (id: string) => eventsApi.cancelMine(id),
   removeFavorite: (id: string) => api.post(`/listings/${id}/favoris`),
   respondPriceOffer: (id: string, response: 'accepted' | 'declined' | 'countered', counterAmount?: number) =>
     messagesApi.respondToOffer(id, response, counterAmount),

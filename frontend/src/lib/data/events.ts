@@ -2,6 +2,7 @@ import { eventsApi, metaApi } from '@/lib/api'
 import { demoOr } from '@/lib/demo'
 import type {
   EventCategoryOption,
+  ManagedEventDraft,
   EventPublishDraft,
   EventPublishMetadata,
   EventPublishResult,
@@ -106,6 +107,108 @@ function integer(value: string) {
   return Number.parseInt(value, 10) || 0
 }
 
+function buildEventPayload(form: EventPublishDraft, ticketing: boolean, tickets: EventTicketDraft[]) {
+  const prices = ticketing ? tickets.map((ticket) => integer(ticket.priceXpf)) : [0]
+  const isFree = !ticketing || prices.every((value) => value === 0)
+  return {
+    title: form.title.trim(),
+    description: form.description.trim() || null,
+    venue_name: form.venueName.trim(),
+    venue_address: form.venueAddress.trim() || null,
+    commune_id: Number(form.communeId),
+    event_date: form.eventDate,
+    event_time: form.startTime,
+    end_time: form.endTime || null,
+    cover_image_url: form.coverImageUrl.trim() || null,
+    photos: form.coverImageUrl.trim() ? [form.coverImageUrl.trim()] : [],
+    category: form.category,
+    status: 'published',
+    has_ticketing: ticketing,
+    max_capacity: ticketing ? tickets.reduce((sum, ticket) => sum + integer(ticket.quantity), 0) : null,
+    is_free: isFree,
+    organizer_name: form.organizerName.trim(),
+    organizer_email: form.organizerEmail.trim(),
+    organizer_phone: form.organizerPhone.trim() || null,
+    website_url: form.websiteUrl.trim() || null,
+    target_audience: 'particulier',
+    kind: form.category === 'concert' ? 'concert' : 'event',
+    price_xpf: prices.length ? Math.min(...prices) : 0,
+    ticket_types: ticketing
+      ? tickets.map((ticket, index) => ({
+          name: ticket.name.trim(),
+          description: ticket.description.trim() || null,
+          price_xpf: integer(ticket.priceXpf),
+          quantity_total: integer(ticket.quantity),
+          is_active: true,
+          position: index,
+        }))
+      : [],
+  }
+}
+
+function normalizeManagedEvent(value: unknown): ManagedEventDraft {
+  const row = value && typeof value === 'object' ? value as Record<string, unknown> : {}
+  const ticketRows = Array.isArray(row.ticket_types) ? row.ticket_types : []
+  return {
+    id: String(row.id ?? ''),
+    status: row.status === 'draft' ? 'draft' : 'published',
+    form: {
+      title: String(row.title ?? ''),
+      description: String(row.description ?? ''),
+      category: EVENT_CATEGORIES.some((option) => option.value === row.category) ? row.category as EventPublishDraft['category'] : 'autre',
+      eventDate: String(row.event_date ?? '').slice(0, 10),
+      startTime: String(row.event_time ?? '').slice(0, 5),
+      endTime: String(row.end_time ?? '').slice(0, 5),
+      venueName: String(row.venue_name ?? ''),
+      communeId: row.commune_id == null ? '' : String(row.commune_id),
+      venueAddress: String(row.venue_address ?? ''),
+      coverImageUrl: String(row.cover_image_url ?? ''),
+      organizerName: String(row.organizer_name ?? ''),
+      organizerEmail: String(row.organizer_email ?? ''),
+      organizerPhone: String(row.organizer_phone ?? ''),
+      websiteUrl: String(row.website_url ?? ''),
+    },
+    ticketing: Boolean(row.has_ticketing),
+    tickets: ticketRows.map((value) => {
+      const ticket = value && typeof value === 'object' ? value as Record<string, unknown> : {}
+      return {
+        name: String(ticket.name ?? ''),
+        description: String(ticket.description ?? ''),
+        priceXpf: String(ticket.price_xpf ?? 0),
+        quantity: String(ticket.quantity_total ?? 1),
+      }
+    }),
+    ticketingLocked: Boolean(row.ticketing_locked),
+  }
+}
+
+export async function getManagedEvent(id: string): Promise<ManagedEventDraft> {
+  return demoOr(
+    async () => (await import('@/demo/fixtures/events')).managedEventDraftFixture,
+    async () => {
+      const response = await eventsApi.getMineById(id)
+      const managed = normalizeManagedEvent(response.data?.data)
+      if (!managed.id) throw new Error('Événement introuvable.')
+      return managed
+    },
+  )
+}
+
+export async function updateManagedEvent(
+  id: string,
+  form: EventPublishDraft,
+  ticketing: boolean,
+  tickets: EventTicketDraft[],
+): Promise<EventPublishResult> {
+  return demoOr(
+    async () => ({ id, href: '/profil/evenements' }),
+    async () => {
+      await eventsApi.updateMine(id, buildEventPayload(form, ticketing, tickets))
+      return { id, href: '/profil/evenements' }
+    },
+  )
+}
+
 export async function publishEvent(
   form: EventPublishDraft,
   ticketing: boolean,
@@ -114,44 +217,7 @@ export async function publishEvent(
   return demoOr(
     async () => (await import('@/demo/fixtures/events')).eventPublishResultFixture,
     async () => {
-      const prices = ticketing ? tickets.map((ticket) => integer(ticket.priceXpf)) : [0]
-      const isFree = !ticketing || prices.every((value) => value === 0)
-      const response = await eventsApi.create({
-        title: form.title.trim(),
-        description: form.description.trim() || null,
-        venue_name: form.venueName.trim(),
-        venue_address: form.venueAddress.trim() || null,
-        commune_id: Number(form.communeId),
-        event_date: form.eventDate,
-        event_time: form.startTime,
-        end_time: form.endTime || null,
-        cover_image_url: form.coverImageUrl.trim() || null,
-        photos: form.coverImageUrl.trim() ? [form.coverImageUrl.trim()] : [],
-        category: form.category,
-        status: 'published',
-        has_ticketing: ticketing,
-        max_capacity: ticketing
-          ? tickets.reduce((sum, ticket) => sum + integer(ticket.quantity), 0)
-          : null,
-        is_free: isFree,
-        organizer_name: form.organizerName.trim(),
-        organizer_email: form.organizerEmail.trim(),
-        organizer_phone: form.organizerPhone.trim() || null,
-        website_url: form.websiteUrl.trim() || null,
-        target_audience: 'particulier',
-        kind: form.category === 'concert' ? 'concert' : 'event',
-        price_xpf: prices.length ? Math.min(...prices) : 0,
-        ticket_types: ticketing
-          ? tickets.map((ticket, index) => ({
-              name: ticket.name.trim(),
-              description: ticket.description.trim() || null,
-              price_xpf: integer(ticket.priceXpf),
-              quantity_total: integer(ticket.quantity),
-              is_active: true,
-              position: index,
-            }))
-          : [],
-      })
+      const response = await eventsApi.create(buildEventPayload(form, ticketing, tickets))
       const id = String(response.data?.data?.id ?? '')
       if (!id) throw new Error('Le serveur n’a pas retourné l’identifiant de l’événement.')
       return { id, href: `/evenements/${id}` }
