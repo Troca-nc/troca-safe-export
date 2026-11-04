@@ -245,10 +245,12 @@ const eventStatusMeta: Record<PersonalEvent['status'], { label: string; classNam
   completed: { label: 'Terminé', className: 'bg-night text-white' },
 }
 
-function EventsView({ session }: { session: AccountSession }) {
+function EventsView({ session, demo }: { session: AccountSession; demo: boolean }) {
   const [events, setEvents] = useState<PersonalEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+  const [busyId, setBusyId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true); setError(null)
@@ -256,12 +258,35 @@ function EventsView({ session }: { session: AccountSession }) {
   }, [session])
   useEffect(() => { void load() }, [load])
 
+  const remove = async (event: PersonalEvent) => {
+    if (!window.confirm(`Supprimer « ${event.title} » ? L’événement ne sera plus visible sur Kalico.`)) return
+    setBusyId(event.id)
+    setFeedback(null)
+    try {
+      if (demo) {
+        showDemoToast('Suppression simulée en mode démo')
+        setEvents((current) => current.filter((item) => item.id !== event.id))
+      } else {
+        await personalAccountActions.deleteEvent(event.id)
+        setEvents((current) => current.filter((item) => item.id !== event.id))
+      }
+      setFeedback({ type: 'success', message: 'Événement supprimé.' })
+    } catch (err) {
+      setFeedback({ type: 'error', message: getErrorMessage(err) })
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  const feedbackBanner = feedback ? <div role="status" className={`rounded-2xl border px-4 py-3 text-sm ${feedback.type === 'success' ? 'border-green-200 bg-green-50 text-green-800' : 'border-red-200 bg-red-50 text-red-800'}`}>{feedback.message}</div> : null
+
   if (loading) return <PageSkeleton />
   if (error) return <ErrorState message={error} onRetry={load} />
-  if (!events.length) return <EmptyState icon={<CalendarDays className="h-6 w-6" />} title="Aucun événement" body="Les événements que vous publiez apparaîtront ici." href="/evenements/publier" action="Publier un événement" />
+  if (!events.length) return <div className="space-y-5">{feedbackBanner}<EmptyState icon={<CalendarDays className="h-6 w-6" />} title="Aucun événement" body="Les événements que vous publiez apparaîtront ici." href="/evenements/publier" action="Publier un événement" /></div>
 
   return (
     <div className="space-y-5">
+      {feedbackBanner}
       <div className="flex justify-end"><Link href="/evenements/publier" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-rust px-5 py-2.5 text-sm font-semibold text-white"><Plus className="h-4 w-4" /> Publier un événement</Link></div>
       <div className="grid gap-4 sm:grid-cols-2">
         {events.map((event) => {
@@ -276,7 +301,11 @@ function EventsView({ session }: { session: AccountSession }) {
                 <p className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {[event.venueName, event.communeName].filter(Boolean).join(' · ') || 'Lieu non renseigné'}</p>
               </div>
               {event.maxCapacity != null ? <p className="mt-3 text-xs font-semibold text-ink/50">{event.ticketsSold} billet{event.ticketsSold > 1 ? 's' : ''} sur {event.maxCapacity}</p> : null}
-              {event.status === 'published' ? <Link href={`/evenements/${event.id}`} className="mt-5 inline-flex min-h-10 items-center gap-2 rounded-full border border-warm-border px-4 py-2 text-sm font-semibold text-ink">Voir la fiche <Eye className="h-4 w-4" /></Link> : <p className="mt-5 text-sm text-ink/50">La fiche publique sera accessible lorsque l’événement sera en ligne.</p>}
+              {event.status !== 'published' ? <p className="mt-5 text-sm text-ink/50">La fiche publique sera accessible lorsque l’événement sera en ligne.</p> : null}
+              <div className="mt-5 flex flex-wrap gap-2">
+                {event.status === 'published' ? <Link href={`/evenements/${event.id}`} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-warm-border px-4 py-2 text-sm font-semibold text-ink">Voir la fiche <Eye className="h-4 w-4" /></Link> : null}
+                <button type="button" disabled={busyId === event.id} onClick={() => void remove(event)} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50"><Trash2 className="h-4 w-4" /> {busyId === event.id ? 'Suppression…' : 'Supprimer'}</button>
+              </div>
             </div>
           </article>
         })}
@@ -413,7 +442,7 @@ export default function PersonalAccountPage({ activeTab }: { activeTab: Personal
             <div className="mb-6"><p className="text-xs font-semibold uppercase tracking-[0.22em] text-rust">Espace particulier</p><h1 className="mt-2 font-display text-4xl font-bold text-ink sm:text-5xl">{meta.title}</h1><p className="mt-2 text-sm text-ink/55 sm:text-base">{meta.subtitle}</p></div>
             <div className="mb-7 rounded-[1.5rem] border border-warm-border bg-surface px-2 shadow-sm"><AccountTabs items={tabs} activeId={activeTab} label="Espace particulier" /></div>
             {activeTab === 'listings' ? <ListingsView session={session} demo={demo} /> : null}
-            {activeTab === 'events' ? <EventsView session={session} /> : null}
+            {activeTab === 'events' ? <EventsView session={session} demo={demo} /> : null}
             {activeTab === 'favorites' ? <FavoritesView session={session} demo={demo} /> : null}
             {activeTab === 'alerts' ? <PersonalAlertsManager session={session} /> : null}
             {activeTab === 'offers' ? <OffersView session={session} demo={demo} /> : null}
