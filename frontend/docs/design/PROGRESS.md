@@ -2161,3 +2161,19 @@ Inventaire et trois décisions validés par l’humain le 30 octobre 2026.
 
 - Tests ciblés : liste propriétaire, suppression propriétaire, droits, historique de billetterie et syntaxe serveur passés.
 - Suite backend complète, lint frontend, TypeScript, contrôle design et build Next.js de production passés.
+
+## 24 — Modifier et annuler mes événements — Implémenté
+
+### Livraison
+
+- « Mes événements » propose désormais « Modifier » pour les brouillons et événements publiés, ainsi qu’une annulation confirmée pour les événements en ligne.
+- Le formulaire de publication est réutilisé en mode modification : il charge exclusivement l’événement du compte connecté, conserve l’aperçu et renvoie vers `/profil/evenements` après enregistrement.
+- Les informations générales restent modifiables. Dès qu’une réservation ou un billet existe, la billetterie devient volontairement non modifiable afin de préserver les commandes déjà créées.
+- L’annulation retire l’événement du calendrier et désactive ses billets. Les réservations non payées sont annulées et leur stock libéré ; une annulation est refusée si un paiement existe afin qu’un remboursement soit traité avec le support.
+- La suppression logique existante reste disponible séparément pour nettoyer un événement sans historique incompatible.
+- Le mode démonstration dispose d’une fiche propriétaire dédiée et simule l’annulation sans écriture serveur.
+
+### Validation
+
+- Tests serveur ciblés passés : lecture propriétaire, droits, modification avec et sans verrou de billetterie, annulation autorisée et refus en présence d’un paiement.
+- Suite backend complète, lint frontend, TypeScript, contrôle design (9 fichiers, zéro erreur et zéro avertissement), inventaire UI, build Next.js de production (113 routes) et `git diff --check` passés.

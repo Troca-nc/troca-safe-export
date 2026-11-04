@@ -58,3 +58,12 @@ export type EventPublishResult = {
   id: string
   href: string
 }
+
+export type ManagedEventDraft = {
+  id: string
+  status: 'draft' | 'published'
+  form: EventPublishDraft
+  ticketing: boolean
+  tickets: EventTicketDraft[]
+  ticketingLocked: boolean
+}

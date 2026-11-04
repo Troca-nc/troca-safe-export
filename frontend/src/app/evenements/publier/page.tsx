@@ -13,7 +13,7 @@ import Header from '@/components/layout/Header'
 import { Button } from '@/components/ui/Button'
 import { FilterChip, Switch } from '@/components/ui/Controls'
 import { Input, Select, Textarea } from '@/components/ui/Field'
-import { clearLocalEventDraft, createEventPublishDraft, EVENT_CATEGORIES, getEventPublishMetadata, INITIAL_EVENT_TICKET, loadLocalEventDraft, publishEvent, saveLocalEventDraft } from '@/lib/data/events'
+import { clearLocalEventDraft, createEventPublishDraft, EVENT_CATEGORIES, getEventPublishMetadata, getManagedEvent, INITIAL_EVENT_TICKET, loadLocalEventDraft, publishEvent, saveLocalEventDraft, updateManagedEvent } from '@/lib/data/events'
 import { useAuthActionStore } from '@/store/authActionStore'
 import { useAuthStore } from '@/store/authStore'
 import type { EventPublishDraft, EventTicketDraft } from '@/types/events'
@@ -42,6 +42,9 @@ export default function EventPublishPage() {
   const [tickets, setTickets] = useState<EventTicketDraft[]>([{ ...INITIAL_EVENT_TICKET }])
   const [communes, setCommunes] = useState<{ id: number; name: string }[]>([])
   const [initialized, setInitialized] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [ticketingLocked, setTicketingLocked] = useState(false)
+  const [initializationError, setInitializationError] = useState('')
   const [metadataLoading, setMetadataLoading] = useState(true)
   const [metadataError, setMetadataError] = useState('')
   const [metadataAttempt, setMetadataAttempt] = useState(0)
@@ -62,16 +65,54 @@ export default function EventPublishPage() {
   useEffect(() => {
     if (!hasHydrated || initialized) return
     const profile = { name: [user?.first_name || user?.prenom, user?.last_name || user?.nom].filter(Boolean).join(' '), email: user?.email, phone: user?.telephone || '' }
-    const stored = loadLocalEventDraft(user?.id)
-    let initialForm = stored?.form || createEventPublishDraft(profile)
-    const category = new URLSearchParams(window.location.search).get('category')
-    if (!stored && EVENT_CATEGORIES.some((option) => option.value === category)) initialForm = { ...initialForm, category: category as EventPublishDraft['category'] }
-    const initialTicketing = stored?.ticketing ?? true
-    const initialTickets = stored?.tickets?.length ? stored.tickets : [{ ...INITIAL_EVENT_TICKET }]
-    setForm(initialForm); setTicketing(initialTicketing); setTickets(initialTickets)
-    cleanSnapshot.current = snapshot(initialForm, initialTicketing, initialTickets)
-    setInitialized(true)
-  }, [hasHydrated, initialized, user])
+    const params = new URLSearchParams(window.location.search)
+    const editId = params.get('edit')
+    setEditingId(editId)
+
+    if (editId && !isAuthenticated) {
+      const initialForm = createEventPublishDraft(profile)
+      setForm(initialForm)
+      cleanSnapshot.current = snapshot(initialForm, true, [{ ...INITIAL_EVENT_TICKET }])
+      setInitialized(true)
+      openAuthModal({ type: 'publish_listing', redirectTo: `/evenements/publier?edit=${encodeURIComponent(editId)}` })
+      return
+    }
+
+    let active = true
+    const initialize = async () => {
+      try {
+        if (editId) {
+          const managed = await getManagedEvent(editId)
+          if (!active) return
+          const initialTickets = managed.tickets.length ? managed.tickets : [{ ...INITIAL_EVENT_TICKET }]
+          setForm(managed.form)
+          setTicketing(managed.ticketing)
+          setTickets(initialTickets)
+          setTicketingLocked(managed.ticketingLocked)
+          cleanSnapshot.current = snapshot(managed.form, managed.ticketing, initialTickets)
+          return
+        }
+
+        const stored = loadLocalEventDraft(user?.id)
+        let initialForm = stored?.form || createEventPublishDraft(profile)
+        const category = params.get('category')
+        if (!stored && EVENT_CATEGORIES.some((option) => option.value === category)) initialForm = { ...initialForm, category: category as EventPublishDraft['category'] }
+        const initialTicketing = stored?.ticketing ?? true
+        const initialTickets = stored?.tickets?.length ? stored.tickets : [{ ...INITIAL_EVENT_TICKET }]
+        if (!active) return
+        setForm(initialForm); setTicketing(initialTicketing); setTickets(initialTickets)
+        cleanSnapshot.current = snapshot(initialForm, initialTicketing, initialTickets)
+      } catch (error: unknown) {
+        if (!active) return
+        const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error
+        setInitializationError(message || 'Impossible de charger cet événement. Vérifie qu’il t’appartient puis réessaie.')
+      } finally {
+        if (active) setInitialized(true)
+      }
+    }
+    void initialize()
+    return () => { active = false }
+  }, [hasHydrated, initialized, isAuthenticated, openAuthModal, user])
 
   useEffect(() => {
     let active = true
@@ -116,7 +157,7 @@ export default function EventPublishPage() {
   }
   const requireAuth = () => {
     if (isAuthenticated) return false
-    openAuthModal({ type: 'publish_listing', redirectTo: '/evenements/publier' })
+    openAuthModal({ type: 'publish_listing', redirectTo: editingId ? `/evenements/publier?edit=${encodeURIComponent(editingId)}` : '/evenements/publier' })
     return true
   }
   const handleSaveDraft = () => {
@@ -164,13 +205,15 @@ export default function EventPublishPage() {
     if (requireAuth() || !validate()) return
     setPublishing(true); setSubmitError(''); setSuccess('')
     try {
-      const result = await publishEvent(form, ticketing, tickets)
-      clearLocalEventDraft(user?.id)
+      const result = editingId
+        ? await updateManagedEvent(editingId, form, ticketing, tickets)
+        : await publishEvent(form, ticketing, tickets)
+      if (!editingId) clearLocalEventDraft(user?.id)
       cleanSnapshot.current = snapshot(form, ticketing, tickets)
       window.location.assign(result.href)
     } catch (error: unknown) {
       const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error
-      setSubmitError(message || 'Impossible de publier l’événement. Réessaie.')
+      setSubmitError(message || (editingId ? 'Impossible d’enregistrer les modifications. Réessaie.' : 'Impossible de publier l’événement. Réessaie.'))
     } finally { setPublishing(false) }
   }
 
@@ -180,14 +223,15 @@ export default function EventPublishPage() {
     <main className="min-h-screen bg-cream text-ink">
       <Header />
       <div className="mx-auto max-w-7xl px-5 py-8 sm:px-12 sm:py-12">
-        <Link href="/evenements" className="inline-flex min-h-11 items-center gap-2 text-label font-semibold text-ink/70 hover:text-ink"><ArrowLeft className="h-4 w-4" />Retour au calendrier</Link>
+        <Link href={editingId ? '/profil/evenements' : '/evenements'} className="inline-flex min-h-11 items-center gap-2 text-label font-semibold text-ink/70 hover:text-ink"><ArrowLeft className="h-4 w-4" />{editingId ? 'Retour à mes événements' : 'Retour au calendrier'}</Link>
         <div className="mt-5 flex flex-wrap items-end justify-between gap-5">
-          <div className="max-w-3xl"><p className="text-eyebrow uppercase text-accent-text">Événement · Billetterie intégrée</p><h1 className="mt-3 font-display text-display-sm leading-none sm:text-display">Publie ton événement.</h1><p className="mt-4 max-w-2xl text-body text-ink/70">Présente ton rendez-vous, ouvre les réservations et retrouve les billets avec QR code directement dans Kalico.</p></div>
+          <div className="max-w-3xl"><p className="text-eyebrow uppercase text-accent-text">{editingId ? 'Gestion de l’événement' : 'Événement · Billetterie intégrée'}</p><h1 className="mt-3 font-display text-display-sm leading-none sm:text-display">{editingId ? 'Modifie ton événement.' : 'Publie ton événement.'}</h1><p className="mt-4 max-w-2xl text-body text-ink/70">{editingId ? 'Mets à jour les informations visibles sur la fiche publique.' : 'Présente ton rendez-vous, ouvre les réservations et retrouve les billets avec QR code directement dans Kalico.'}</p></div>
           <p aria-live="polite" className="flex items-center gap-2 text-label font-semibold"><span className="h-2.5 w-2.5 rounded-pill bg-accent" aria-hidden="true" />{done} sur 5 blocs prêts</p>
         </div>
         {metadataError ? <div role="alert" className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-control border border-alert-error bg-cream-surface p-4 text-body-sm"><span>{metadataError}</span><Button variant="secondary" compact onClick={() => setMetadataAttempt((value) => value + 1)}>Réessayer</Button></div> : null}
+        {initializationError ? <div role="alert" className="mt-6 rounded-control border border-alert-error bg-cream-surface p-4 text-body-sm text-alert-error">{initializationError}</div> : null}
 
-        <form onSubmit={handleSubmit} className="mt-9 flex flex-col gap-10 min-[1100px]:flex-row min-[1100px]:items-start">
+        <form onSubmit={handleSubmit} className="mt-9 flex flex-col gap-10 min-[1100px]:flex-row min-[1100px]:items-start" aria-disabled={Boolean(initializationError)}>
           <div className="min-w-0 flex-[1_1_560px] space-y-5">
             <EventFormSection number={1} title="L’événement">
               <Input ref={titleRef} label="Titre" value={form.title} error={fieldErrors.title} placeholder="Ex. Concert sous les étoiles" onChange={(event) => updateField('title', event.target.value)} />
@@ -202,16 +246,16 @@ export default function EventPublishPage() {
               <div className="mt-4"><Input label="Adresse · facultative" value={form.venueAddress} placeholder="Rue, numéro, repère utile" onChange={(event) => updateField('venueAddress', event.target.value)} /></div>
             </EventFormSection>
 
-            <EventFormSection number={3} title="Billetterie" action={<Switch label={ticketing ? 'Billetterie activée' : 'Sans billetterie'} checked={ticketing} onChange={(event) => setTicketing(event.target.checked)} />}>
-              <p className="text-body-sm text-ink/70">{ticketing ? 'Définis un ou plusieurs types de billets. Laisse le prix à 0 pour un événement gratuit avec réservation.' : 'L’événement est publié avec une entrée libre, sans réservation.'}</p>
-              {ticketing ? <div className="mt-5 space-y-3">{tickets.map((ticket, index) => <TicketTypeCard key={index} ref={index === 0 ? firstTicketRef : undefined} index={index} ticket={ticket} errors={ticketErrors[index]} canRemove={tickets.length > 1} onChange={(key, value) => updateTicket(index, key, value)} onRemove={() => setTickets((current) => current.filter((_, ticketIndex) => ticketIndex !== index))} />)}<Button type="button" variant="secondary" className="w-full border-dashed" onClick={() => setTickets((current) => [...current, { ...NEW_TICKET }])}><Plus className="h-4 w-4" />Ajouter un type de billet</Button><div className="flex flex-wrap items-center justify-between gap-3 rounded-control bg-cream-sunken px-4 py-3 text-body-sm"><span>Capacité totale <strong>{capacity.toLocaleString('fr-FR')} places</strong></span><span className="text-ink/65">Chaque billet reçoit un QR code unique, scanné à l’entrée depuis Kalico.</span></div></div> : null}
+            <EventFormSection number={3} title="Billetterie" action={<Switch label={ticketing ? 'Billetterie activée' : 'Sans billetterie'} checked={ticketing} disabled={ticketingLocked} onChange={(event) => setTicketing(event.target.checked)} />}>
+              <p className="text-body-sm text-ink/70">{ticketingLocked ? 'La billetterie est verrouillée car une réservation existe déjà. Les autres informations de l’événement restent modifiables.' : ticketing ? 'Définis un ou plusieurs types de billets. Laisse le prix à 0 pour un événement gratuit avec réservation.' : 'L’événement est publié avec une entrée libre, sans réservation.'}</p>
+              {ticketing ? <div className="mt-5 space-y-3">{tickets.map((ticket, index) => <TicketTypeCard key={index} ref={index === 0 ? firstTicketRef : undefined} index={index} ticket={ticket} errors={ticketErrors[index]} canRemove={tickets.length > 1} disabled={ticketingLocked} onChange={(key, value) => updateTicket(index, key, value)} onRemove={() => setTickets((current) => current.filter((_, ticketIndex) => ticketIndex !== index))} />)}{!ticketingLocked ? <Button type="button" variant="secondary" className="w-full border-dashed" onClick={() => setTickets((current) => [...current, { ...NEW_TICKET }])}><Plus className="h-4 w-4" />Ajouter un type de billet</Button> : null}<div className="flex flex-wrap items-center justify-between gap-3 rounded-control bg-cream-sunken px-4 py-3 text-body-sm"><span>Capacité totale <strong>{capacity.toLocaleString('fr-FR')} places</strong></span><span className="text-ink/65">Chaque billet reçoit un QR code unique, scanné à l’entrée depuis Kalico.</span></div></div> : null}
             </EventFormSection>
 
             <EventFormSection number={4} title="L’organisateur">
               <p className="text-body-sm text-ink/70">Ces informations sont reprises de ton profil. Les visiteurs te contactent par la messagerie : ton e-mail et ton téléphone ne sont pas affichés.</p>
               <div className="mt-5 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]"><Input ref={organizerRef} label="Nom de l’organisateur" value={form.organizerName} error={fieldErrors.organizerName} placeholder="Association, commerce ou nom" onChange={(event) => updateField('organizerName', event.target.value)} /><Input label="Site web · facultatif" type="url" value={form.websiteUrl} error={fieldErrors.websiteUrl} placeholder="https://" onChange={(event) => updateField('websiteUrl', event.target.value)} /><Input ref={emailRef} label="E-mail de contact" type="email" value={form.organizerEmail} error={fieldErrors.organizerEmail} placeholder="nom@exemple.nc" onChange={(event) => updateField('organizerEmail', event.target.value)} /><Input label="Téléphone · facultatif" type="tel" value={form.organizerPhone} placeholder="+687" onChange={(event) => updateField('organizerPhone', event.target.value)} /></div>
             </EventFormSection>
-            <PublishPanel remaining={remaining} publishing={publishing} savingDraft={savingDraft} error={submitError} success={success} onSaveDraft={handleSaveDraft} />
+            <PublishPanel remaining={remaining} publishing={publishing} savingDraft={savingDraft} error={submitError} success={success} mode={editingId ? 'edit' : 'create'} onSaveDraft={handleSaveDraft} />
           </div>
 
           <aside className="min-w-0 flex-[0_1_400px] space-y-5 min-[1100px]:min-w-[300px] min-[1100px]:sticky min-[1100px]:top-6"><EventPreviewCard form={form} ticketing={ticketing} tickets={tickets} categoryLabel={categoryLabel} communeName={communeName} /><PublishChecklist checks={checks} /><div className="rounded-card border border-dashed border-warm-border p-5"><h2 className="text-label font-semibold">Un doute ?</h2><p className="mt-2 text-body-sm text-ink/70">Publie d’abord un événement gratuit pour tester, tu pourras ajouter des billets payants ensuite.</p></div></aside>

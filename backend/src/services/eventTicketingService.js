@@ -85,6 +85,8 @@ function serializeEventRow(row, ticketTypes = []) {
     organizer_name: row.organizer_name ?? null,
     organizer_email: row.organizer_email ?? null,
     organizer_phone: row.organizer_phone ?? null,
+    website_url: row.website_url ?? null,
+    ticketing_locked: Boolean(row.ticketing_locked),
     created_at: row.created_at ?? null,
     updated_at: row.updated_at ?? null,
     commune_name: row.commune_name ?? null,
@@ -148,6 +150,31 @@ async function listEventsByOrganizer({ organizerId, limit = 50 }) {
   return rows.map((row) => serializeEventRow(row));
 }
 
+async function getEventByOrganizer({ eventId, organizerId }) {
+  const { rows } = await query(
+    `SELECT e.*, c.name AS commune_name, b.website_url,
+            (
+              EXISTS (SELECT 1 FROM tickets t WHERE t.event_id = e.id)
+              OR EXISTS (
+                SELECT 1 FROM ticket_orders o
+                 WHERE o.event_id = e.id
+                   AND o.status IN ('pending', 'reserved', 'paid')
+              )
+            ) AS ticketing_locked
+       FROM events e
+       LEFT JOIN communes c ON c.id = e.commune_id
+       LEFT JOIN bon_plans b ON b.id = e.bon_plan_id
+      WHERE e.id = $1
+        AND e.organizer_id = $2
+        AND e.deleted_at IS NULL
+      LIMIT 1`,
+    [eventId, organizerId]
+  );
+  const event = rows[0];
+  if (!event) return null;
+  return serializeEventRow(event, await loadEventTicketTypes(event.id));
+}
+
 async function deleteEventByOrganizer({ eventId, organizerId }) {
   const safeEventId = Number(eventId);
   const safeOrganizerId = Number(organizerId);
@@ -209,6 +236,248 @@ async function deleteEventByOrganizer({ eventId, organizerId }) {
 
     return { id: safeEventId };
   });
+}
+
+async function insertEventTicketTypes(client, eventId, ticketTypes) {
+  const created = [];
+  for (const ticketType of ticketTypes) {
+    const ticketResult = await client.query(
+      `INSERT INTO ticket_types
+         (event_id, name, description, price_xpf, quantity_total, quantity_sold, quantity_reserved,
+          sale_starts_at, sale_ends_at, is_active, position)
+       VALUES ($1, $2, $3, $4, $5, 0, 0, $6, $7, $8, $9)
+       RETURNING *`,
+      [
+        eventId,
+        ticketType.name,
+        ticketType.description,
+        ticketType.price_xpf,
+        ticketType.quantity_total,
+        ticketType.sale_starts_at,
+        ticketType.sale_ends_at,
+        ticketType.is_active,
+        ticketType.position,
+      ]
+    );
+    created.push(serializeTicketType(ticketResult.rows[0]));
+  }
+  return created;
+}
+
+async function updateEventByOrganizer({ eventId, organizerId, payload }) {
+  const ticketTypes = Array.isArray(payload.ticket_types) ? payload.ticket_types.map(normalizeTicketType) : [];
+  const requestedTicketing = Boolean(payload.has_ticketing || ticketTypes.length);
+  const requestedFree = Boolean(payload.is_free);
+  const requestedCapacity = payload.max_capacity == null
+    ? (ticketTypes.length ? ticketTypes.reduce((sum, ticket) => sum + Number(ticket.quantity_total || 0), 0) : null)
+    : Number(payload.max_capacity);
+
+  if (!EVENT_CATEGORIES.has(String(payload.category || 'autre'))) {
+    throw Object.assign(new Error('Catégorie d’événement invalide.'), { status: 400 });
+  }
+  if (ticketTypes.length && !requestedTicketing) {
+    throw Object.assign(new Error('Les types de billets nécessitent `has_ticketing = true`.'), { status: 400 });
+  }
+
+  await withTransaction(async (client) => {
+    const { rows } = await client.query(
+      `SELECT e.id, e.organizer_id, e.bon_plan_id, e.status, e.has_ticketing, e.max_capacity, e.is_free,
+              (
+                EXISTS (SELECT 1 FROM tickets t WHERE t.event_id = e.id)
+                OR EXISTS (
+                  SELECT 1 FROM ticket_orders o
+                   WHERE o.event_id = e.id
+                     AND o.status IN ('pending', 'reserved', 'paid')
+                )
+              ) AS ticketing_locked
+         FROM events e
+        WHERE e.id = $1
+          AND e.deleted_at IS NULL
+        FOR UPDATE`,
+      [eventId]
+    );
+    const event = rows[0];
+    if (!event) throw Object.assign(new Error('Événement introuvable.'), { status: 404 });
+    if (Number(event.organizer_id) !== Number(organizerId)) {
+      throw Object.assign(new Error('Vous ne pouvez modifier que vos propres événements.'), { status: 403 });
+    }
+    if (!['draft', 'published'].includes(event.status)) {
+      throw Object.assign(new Error('Cet événement ne peut plus être modifié.'), { status: 409 });
+    }
+
+    const hasTicketing = event.ticketing_locked ? Boolean(event.has_ticketing) : requestedTicketing;
+    const maxCapacity = event.ticketing_locked
+      ? event.max_capacity
+      : (Number.isFinite(requestedCapacity) ? Math.max(0, Math.round(requestedCapacity)) : null);
+    const isFree = event.ticketing_locked ? Boolean(event.is_free) : requestedFree;
+    const photos = JSON.stringify(Array.isArray(payload.photos) ? payload.photos.filter(Boolean) : []);
+
+    await client.query(
+      `UPDATE events
+          SET title = $2,
+              description = $3,
+              venue_name = $4,
+              venue_address = $5,
+              commune_id = $6,
+              event_date = $7::date,
+              event_time = $8::time,
+              end_time = $9::time,
+              cover_image_url = $10,
+              photos = $11::jsonb,
+              category = $12,
+              has_ticketing = $13,
+              max_capacity = $14,
+              is_free = $15,
+              organizer_name = $16,
+              organizer_email = $17,
+              organizer_phone = $18,
+              updated_at = NOW()
+        WHERE id = $1`,
+      [
+        eventId,
+        payload.title,
+        payload.description || null,
+        payload.venue_name || null,
+        payload.venue_address || null,
+        payload.commune_id || null,
+        payload.event_date,
+        payload.event_time,
+        payload.end_time || null,
+        payload.cover_image_url || null,
+        photos,
+        payload.category,
+        hasTicketing,
+        maxCapacity,
+        isFree,
+        payload.organizer_name || null,
+        payload.organizer_email || null,
+        payload.organizer_phone || null,
+      ]
+    );
+
+    if (event.bon_plan_id != null) {
+      await client.query(
+        `UPDATE bon_plans
+            SET title = $2,
+                description = $3,
+                kind = $4,
+                target_audience = $5,
+                commune_id = $6,
+                location_name = $7,
+                event_date = $8::date,
+                price_xpf = $9,
+                is_free_included = $10,
+                contact_name = $11,
+                contact_phone = $12,
+                contact_email = $13,
+                website_url = $14,
+                photos = $15::jsonb,
+                updated_at = NOW()
+          WHERE id = $1`,
+        [
+          event.bon_plan_id,
+          payload.title,
+          payload.description || '',
+          payload.kind || 'event',
+          payload.target_audience || 'particulier',
+          payload.commune_id || null,
+          payload.venue_name || null,
+          payload.event_date,
+          Number(payload.price_xpf ?? 0),
+          isFree,
+          payload.organizer_name || null,
+          payload.organizer_phone || null,
+          payload.organizer_email || null,
+          payload.website_url || null,
+          photos,
+        ]
+      );
+    }
+
+    if (!event.ticketing_locked) {
+      await client.query(`DELETE FROM ticket_types WHERE event_id = $1`, [eventId]);
+      await insertEventTicketTypes(client, eventId, hasTicketing ? ticketTypes : []);
+    }
+  });
+
+  return getEventByOrganizer({ eventId, organizerId });
+}
+
+async function cancelEventByOrganizer({ eventId, organizerId }) {
+  await withTransaction(async (client) => {
+    const { rows } = await client.query(
+      `SELECT e.id, e.organizer_id, e.bon_plan_id, e.status,
+              EXISTS (
+                SELECT 1 FROM ticket_orders o
+                 WHERE o.event_id = e.id AND o.status = 'paid'
+              ) AS has_paid_orders
+         FROM events e
+        WHERE e.id = $1
+          AND e.deleted_at IS NULL
+        FOR UPDATE`,
+      [eventId]
+    );
+    const event = rows[0];
+    if (!event) throw Object.assign(new Error('Événement introuvable.'), { status: 404 });
+    if (Number(event.organizer_id) !== Number(organizerId)) {
+      throw Object.assign(new Error('Vous ne pouvez annuler que vos propres événements.'), { status: 403 });
+    }
+    if (!['draft', 'published'].includes(event.status)) {
+      throw Object.assign(new Error('Cet événement est déjà annulé ou terminé.'), { status: 409 });
+    }
+    if (event.has_paid_orders) {
+      throw Object.assign(
+        new Error('Des billets ont déjà été payés. Contactez le support pour organiser l’annulation et les remboursements.'),
+        { status: 409 }
+      );
+    }
+
+    await client.query(
+      `UPDATE ticket_types tt
+          SET quantity_reserved = GREATEST(tt.quantity_reserved - reserved.quantity, 0)
+         FROM (
+           SELECT ticket_type_id, COUNT(*)::int AS quantity
+             FROM tickets
+            WHERE event_id = $1 AND status = 'reserved'
+            GROUP BY ticket_type_id
+         ) reserved
+        WHERE tt.id = reserved.ticket_type_id`,
+      [eventId]
+    );
+    await client.query(
+      `UPDATE tickets SET status = 'cancelled'
+        WHERE event_id = $1 AND status = 'reserved'`,
+      [eventId]
+    );
+    await client.query(
+      `UPDATE ticket_orders
+          SET status = 'cancelled',
+              cancelled_at = COALESCE(cancelled_at, NOW()),
+              cancellation_reason = COALESCE(cancellation_reason, 'event_cancelled')
+        WHERE event_id = $1 AND status IN ('pending', 'reserved')`,
+      [eventId]
+    );
+    await client.query(
+      `UPDATE events SET status = 'cancelled', updated_at = NOW() WHERE id = $1`,
+      [eventId]
+    );
+    await client.query(
+      `UPDATE ticket_types SET is_active = FALSE WHERE event_id = $1`,
+      [eventId]
+    );
+    if (event.bon_plan_id != null) {
+      await client.query(
+        `UPDATE bon_plans
+            SET status = 'expired',
+                expires_at = LEAST(COALESCE(expires_at, NOW()), NOW()),
+                updated_at = NOW()
+          WHERE id = $1`,
+        [event.bon_plan_id]
+      );
+    }
+  });
+
+  return getEventByOrganizer({ eventId, organizerId });
 }
 
 async function getPublicEventById(id) {
@@ -315,28 +584,7 @@ async function createEventAndBonPlan({ user, payload }) {
       throw new Error('Impossible de créer l’événement');
     }
 
-    const createdTicketTypes = [];
-    for (const ticketType of ticketTypes) {
-      const ticketResult = await client.query(
-        `INSERT INTO ticket_types
-           (event_id, name, description, price_xpf, quantity_total, quantity_sold, quantity_reserved,
-            sale_starts_at, sale_ends_at, is_active, position)
-         VALUES ($1, $2, $3, $4, $5, 0, 0, $6, $7, $8, $9)
-         RETURNING *`,
-        [
-          event.id,
-          ticketType.name,
-          ticketType.description,
-          ticketType.price_xpf,
-          ticketType.quantity_total,
-          ticketType.sale_starts_at,
-          ticketType.sale_ends_at,
-          ticketType.is_active,
-          ticketType.position,
-        ]
-      );
-      createdTicketTypes.push(serializeTicketType(ticketResult.rows[0]));
-    }
+    const createdTicketTypes = await insertEventTicketTypes(client, event.id, ticketTypes);
 
     return serializeEventRow(event, createdTicketTypes);
   });
@@ -855,6 +1103,7 @@ async function scanTicket({ token, scannerUser, location = null }) {
 }
 
 module.exports = {
+  cancelEventByOrganizer,
   createEventAndBonPlan,
   deleteEventByOrganizer,
   expireEventTicketReservations,
@@ -863,10 +1112,12 @@ module.exports = {
   canManageTicket,
   serializeTicketForViewer,
   getPublicEventById,
+  getEventByOrganizer,
   listEventsByOrganizer,
   listPublicEvents,
   reserveEventTickets,
   scanTicket,
+  updateEventByOrganizer,
   serializeEventRow,
   serializeTicketType,
   loadEventTicketTypes,

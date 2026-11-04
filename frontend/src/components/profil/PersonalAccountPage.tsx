@@ -278,6 +278,25 @@ function EventsView({ session, demo }: { session: AccountSession; demo: boolean 
     }
   }
 
+  const cancel = async (event: PersonalEvent) => {
+    if (!window.confirm(`Annuler « ${event.title} » ? La fiche restera dans votre compte, mais ne sera plus visible dans le calendrier.`)) return
+    setBusyId(event.id)
+    setFeedback(null)
+    try {
+      if (demo) {
+        showDemoToast('Annulation simulée en mode démo')
+      } else {
+        await personalAccountActions.cancelEvent(event.id)
+      }
+      setEvents((current) => current.map((item) => item.id === event.id ? { ...item, status: 'cancelled' } : item))
+      setFeedback({ type: 'success', message: 'Événement annulé. Les réservations en attente ont été libérées.' })
+    } catch (err) {
+      setFeedback({ type: 'error', message: getErrorMessage(err) })
+    } finally {
+      setBusyId(null)
+    }
+  }
+
   const feedbackBanner = feedback ? <div role="status" className={`rounded-2xl border px-4 py-3 text-sm ${feedback.type === 'success' ? 'border-green-200 bg-green-50 text-green-800' : 'border-red-200 bg-red-50 text-red-800'}`}>{feedback.message}</div> : null
 
   if (loading) return <PageSkeleton />
@@ -304,6 +323,8 @@ function EventsView({ session, demo }: { session: AccountSession; demo: boolean 
               {event.status !== 'published' ? <p className="mt-5 text-sm text-ink/50">La fiche publique sera accessible lorsque l’événement sera en ligne.</p> : null}
               <div className="mt-5 flex flex-wrap gap-2">
                 {event.status === 'published' ? <Link href={`/evenements/${event.id}`} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-warm-border px-4 py-2 text-sm font-semibold text-ink">Voir la fiche <Eye className="h-4 w-4" /></Link> : null}
+                {['published', 'draft'].includes(event.status) ? <Link href={`/evenements/publier?edit=${event.id}`} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-warm-border px-4 py-2 text-sm font-semibold text-ink"><Pencil className="h-4 w-4" /> Modifier</Link> : null}
+                {event.status === 'published' ? <button type="button" disabled={busyId === event.id} onClick={() => void cancel(event)} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-orange-200 px-4 py-2 text-sm font-semibold text-orange-800 disabled:opacity-50"><X className="h-4 w-4" /> {busyId === event.id ? 'Annulation…' : 'Annuler l’événement'}</button> : null}
                 <button type="button" disabled={busyId === event.id} onClick={() => void remove(event)} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50"><Trash2 className="h-4 w-4" /> {busyId === event.id ? 'Suppression…' : 'Supprimer'}</button>
               </div>
             </div>

@@ -33,6 +33,7 @@ const SUITES = [
   './eventPublicationCreation.test',
   './eventOwnerListing.test',
   './eventOwnerDeletion.test',
+  './eventOwnerManagement.test',
   './health.test',
   './validate.test',
   './jwt.test',
