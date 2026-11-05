@@ -2191,3 +2191,16 @@ Inventaire et trois décisions validés par l’humain le 30 octobre 2026.
 
 - Contrats ciblés du formulaire de publication et de la réservation passés, ainsi que la suite backend complète, lint, TypeScript, contrôle design (1 fichier, zéro erreur et zéro avertissement), inventaire UI, build Next.js de production (113 routes) et `git diff --check`.
 - Le test d’intégration PostgreSQL applique désormais la migration deux fois avant les transactions de paiement. Docker Desktop n’étant pas démarré sur le poste, son exécution locale est reportée à la CI obligatoire de la PR.
+
+## 26 — Accès aux fiches événement — Correctif
+
+### Livraison
+
+- Chaque carte de l’agenda ouvre désormais sa fiche interne, quel que soit le compte connecté et même sans lien de réservation externe.
+- Le CTA indique « Acheter une place » lorsque la billetterie Kalico est active, sinon « En savoir plus ».
+- Un éventuel lien de réservation externe reste disponible comme action secondaire distincte.
+- Les événements de la vue calendrier sont également accessibles au clavier et ouvrent la même fiche détaillée.
+
+### Validation locale
+
+- Contrat ciblé des liens de cartes, lint, TypeScript, contrôle design, inventaire UI, build Next.js de production et `git diff --check`.

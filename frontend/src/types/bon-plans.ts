@@ -40,6 +40,7 @@ export type LocalEvent = {
   organizerName: string | null
   verified: boolean
   isFree: boolean
+  hasTicketing?: boolean
   priceXpf: number | null
   bookingUrl: string | null
   coverImageUrl: string | null
