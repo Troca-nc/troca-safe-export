@@ -14,7 +14,9 @@ test('la page publier conserve ses contrats produit', async () => {
     assert.match(source, new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
   }
   assert.match(page, /beforeunload/)
-  assert.match(page, /openAuthModal\(\{ type: 'publish_listing', redirectTo: '\/evenements\/publier' \}\)/)
+  assert.match(page, /openAuthModal\(\{ type: 'publish_listing'/)
+  assert.match(page, /successfulNavigation\.current = true/)
+  assert.match(page, /dirty && !successfulNavigation\.current/)
   assert.match(page, /Adresse de la photo · facultative/)
   assert.match(page, /EventPreviewCard/)
   assert.doesNotMatch(page, /eventsApi|metaApi/)

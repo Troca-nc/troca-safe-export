@@ -38,20 +38,30 @@ async function run() {
         metadata jsonb, status text, amount_xpf int, updated_at timestamptz);
       CREATE TABLE ticket_orders (id int PRIMARY KEY, event_id int REFERENCES events, status text,
         expires_at timestamptz, buyer_email text, buyer_name text, total_xpf int,
-        paid_at timestamptz, updated_at timestamptz);
-      CREATE TABLE ticket_types (id int PRIMARY KEY, quantity_reserved int, quantity_sold int, updated_at timestamptz, name text);
+        paid_at timestamptz);
+      CREATE TABLE ticket_types (id int PRIMARY KEY, quantity_reserved int, quantity_sold int, name text);
       CREATE TABLE tickets (id int PRIMARY KEY, order_id int REFERENCES ticket_orders,
         event_id int REFERENCES events, ticket_type_id int REFERENCES ticket_types,
         token text, qr_code_url text, status text, price_xpf int);
     `);
+    const ticketingTimestampMigration = fs.readFileSync(
+      path.join(__dirname, '../../../../database/migrations/20261105_ticketing_timestamps.sql'),
+      'utf8',
+    );
+    await pool.query(ticketingTimestampMigration);
+    await pool.query(ticketingTimestampMigration);
     await pool.query(fs.readFileSync(path.join(__dirname, '../../../../database/migrations/20260830_payment_types_campaign_ticket.sql'), 'utf8'));
     await pool.query(fs.readFileSync(path.join(__dirname, '../../../../database/migrations/20260830_ticket_email_outbox.sql'), 'utf8'));
     async function seed() {
       await pool.query('TRUNCATE webhook_events, ticket_email_outbox, tickets, ticket_types, ticket_orders, payments, events');
       await pool.query("INSERT INTO events VALUES (12, 'Synthetic event', 0, NOW())");
       await pool.query("INSERT INTO payments VALUES (9, 'stripe', 'cs_synthetic', 7, 'event_ticket', $1, 'pending', 3600, NOW())", [metadata]);
-      await pool.query("INSERT INTO ticket_orders VALUES (34, 12, 'reserved', NOW() + interval '1 hour', 'synthetic@example.invalid', 'Test', 3600, NULL, NOW())");
-      await pool.query("INSERT INTO ticket_types VALUES (60, 2, 0, NOW(), 'Synthetic ticket')");
+      await pool.query(`INSERT INTO ticket_orders
+        (id, event_id, status, expires_at, buyer_email, buyer_name, total_xpf, paid_at, updated_at)
+        VALUES (34, 12, 'reserved', NOW() + interval '1 hour', 'synthetic@example.invalid', 'Test', 3600, NULL, NOW())`);
+      await pool.query(`INSERT INTO ticket_types
+        (id, quantity_reserved, quantity_sold, name, updated_at)
+        VALUES (60, 2, 0, 'Synthetic ticket', NOW())`);
       await pool.query("INSERT INTO tickets VALUES (50, 34, 12, 60, 'synthetic-1', NULL, 'reserved', 1800), (51, 34, 12, 60, 'synthetic-2', NULL, 'reserved', 1800)");
     }
     async function state() {

@@ -2177,3 +2177,17 @@ Inventaire et trois décisions validés par l’humain le 30 octobre 2026.
 
 - Tests serveur ciblés passés : lecture propriétaire, droits, modification avec et sans verrou de billetterie, annulation autorisée et refus en présence d’un paiement.
 - Suite backend complète, lint frontend, TypeScript, contrôle design (9 fichiers, zéro erreur et zéro avertissement), inventaire UI, build Next.js de production (113 routes) et `git diff --check` passés.
+
+## 25 — Publication et réservation d’événement — Correctif
+
+### Livraison
+
+- La redirection qui suit une publication ou une modification réussie n’active plus la confirmation « quitter ou rester ». La protection `beforeunload` reste active pour les véritables modifications non enregistrées.
+- La billetterie dispose désormais des colonnes `updated_at` déjà utilisées par les transitions de réservation et de paiement sur `ticket_types` et `ticket_orders`.
+- La migration est additive et rejouable sans effet secondaire grâce à `ADD COLUMN IF NOT EXISTS`.
+- Une réservation gratuite avec le compte organisateur est explicitement couverte : ce cas reste autorisé et produit normalement une commande payée à 0 XPF ainsi qu’un billet actif.
+
+### Validation locale
+
+- Contrats ciblés du formulaire de publication et de la réservation passés, ainsi que la suite backend complète, lint, TypeScript, contrôle design (1 fichier, zéro erreur et zéro avertissement), inventaire UI, build Next.js de production (113 routes) et `git diff --check`.
+- Le test d’intégration PostgreSQL applique désormais la migration deux fois avant les transactions de paiement. Docker Desktop n’étant pas démarré sur le poste, son exécution locale est reportée à la CI obligatoire de la PR.
