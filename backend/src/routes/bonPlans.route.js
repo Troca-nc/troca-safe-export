@@ -146,8 +146,14 @@ function decodeCursor(cursor) {
 
 function serializeBonPlan(row) {
   const pricing = getBonPlanPricing(Number(row.duration_days || 7), Boolean(row.user_is_pro));
-  const promoPrice = row.amount_xpf ?? row.promo_price_xpf ?? pricing.final_price_xpf;
-  const originalPrice = row.original_price_xpf ?? row.normal_price_xpf ?? pricing.original_price_xpf;
+  const publicationPrice = row.amount_xpf ?? pricing.final_price_xpf;
+  const offerPrice = row.promo_price_xpf ?? null;
+  const originalPrice = row.original_price_xpf ?? row.normal_price_xpf ?? null;
+  const offerDiscount = row.discount_pct ?? (
+    Number(originalPrice) > 0 && Number(offerPrice) >= 0 && Number(offerPrice) < Number(originalPrice)
+      ? Math.round((1 - Number(offerPrice) / Number(originalPrice)) * 100)
+      : null
+  );
   const photos = Array.isArray(row.photos)
     ? row.photos
     : (() => {
@@ -185,17 +191,17 @@ function serializeBonPlan(row) {
     duration_days: Number(row.duration_days || 7),
     payment_provider: row.payment_provider ?? null,
     payment_intent_id: row.payment_intent_id ?? null,
-    amount_xpf: row.amount_xpf ?? promoPrice,
+    amount_xpf: publicationPrice,
     amount_eur: row.amount_eur ?? null,
     paid_at: row.paid_at ?? null,
     status: row.status,
     view_count: Number(row.view_count || 0),
     click_count: Number(row.click_count || 0),
-    price_xpf: promoPrice,
-    price_display: promoPrice ? formatXpfEur(Number(promoPrice)) : null,
+    price_xpf: offerPrice,
+    price_display: offerPrice ? formatXpfEur(Number(offerPrice)) : null,
     is_free_included: Boolean(row.is_free_included),
     normal_price_xpf: originalPrice ?? null,
-    discount_pct: row.discount_pct ?? pricing.discount_pct,
+    discount_pct: offerDiscount,
     contact_name: cleanDisplayText(row.contact_name, null),
     contact_phone: row.contact_phone ?? null,
     contact_email: row.contact_email ?? null,
@@ -719,12 +725,14 @@ router.post('/', authenticate, paymentLimiter, validate({ body: createSchema }),
       user_id: req.user.id,
       business_name: businessName,
       business_logo_url: value.business_logo_url || null,
+      catalog_pdf_url: value.catalog_pdf_url || null,
+      catalog_pdf_pages: value.catalog_pdf_pages ?? null,
       title: value.title.trim(),
       description: value.description.trim(),
       image_url: value.image_url || null,
       promo_label: value.promo_label?.trim() || null,
-      original_price_xpf: toNumberOrNull(value.original_price_xpf ?? value.normal_price_xpf) ?? pricing.original_price_xpf,
-      promo_price_xpf: toNumberOrNull(value.promo_price_xpf) ?? pricing.final_price_xpf,
+      original_price_xpf: toNumberOrNull(value.original_price_xpf ?? value.normal_price_xpf),
+      promo_price_xpf: toNumberOrNull(value.promo_price_xpf),
       cta_label: value.cta_label?.trim() || 'En profiter',
       cta_url: value.cta_url?.trim() || value.link_url?.trim() || value.website_url?.trim() || null,
       category,
