@@ -2204,3 +2204,25 @@ Inventaire et trois décisions validés par l’humain le 30 octobre 2026.
 ### Validation locale
 
 - Contrat ciblé des liens de cartes, lint, TypeScript, contrôle design, inventaire UI, build Next.js de production et `git diff --check`.
+
+## 27 — Publier un bon plan v2 — Implémenté
+
+### Livraison
+
+- La page `/bons-plans/publier` reprend la structure de la maquette : quatre cartes de type d’offre, sections numérotées, aperçu direct, checklist et panneau final sombre.
+- Les types Prix réduit, Pourcentage, Code promo et Offre spéciale conservent séparément leurs valeurs. La remise est calculée à chaque frappe.
+- Les communes proviennent du contrat réel, la saisie peut viser un magasin, une offre en ligne ou les deux, et les erreurs sont reliées aux champs avec focus sur la première erreur.
+- Le brouillon est local au compte et la protection de sortie ne s’active que pour une saisie réellement non enregistrée.
+- Les fonctions existantes restent disponibles : durées 7/30 jours, tarifs public/Pro, Stripe/PayPlug, logo par URL et catalogue PDF.
+- Le serveur conserve désormais réellement l’URL du catalogue PDF déjà acceptée par son schéma.
+
+### Limites confirmées par l’inventaire
+
+- La photo reste une URL avec aperçu : aucun téléversement d’image de bon plan dédié n’existe encore.
+- Le brouillon est local : le serveur ne propose pas d’enregistrement propriétaire sans initialiser le paiement.
+- La comparaison visuelle humaine à 1440 px reste à faire, le contrôleur du navigateur intégré n’étant pas disponible dans cette session.
+- Les tests visuels mobiles restent prévus dans le second temps demandé par l’utilisateur.
+
+### Validation locale
+
+- Tests de contrat de la page et de persistance du PDF, suite backend complète, lint, TypeScript, contrôle design, inventaire UI, build Next.js de production et `git diff --check`.
