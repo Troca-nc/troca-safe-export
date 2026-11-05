@@ -55,6 +55,7 @@ export default function EventPublishPage() {
   const [submitError, setSubmitError] = useState('')
   const [success, setSuccess] = useState('')
   const cleanSnapshot = useRef('')
+  const successfulNavigation = useRef(false)
   const titleRef = useRef<HTMLInputElement>(null)
   const dateRef = useRef<HTMLInputElement>(null)
   const venueRef = useRef<HTMLInputElement>(null)
@@ -126,7 +127,12 @@ export default function EventPublishPage() {
 
   const dirty = initialized && snapshot(form, ticketing, tickets) !== cleanSnapshot.current
   useEffect(() => {
-    const warn = (event: BeforeUnloadEvent) => { if (dirty) { event.preventDefault(); event.returnValue = '' } }
+    const warn = (event: BeforeUnloadEvent) => {
+      if (dirty && !successfulNavigation.current) {
+        event.preventDefault()
+        event.returnValue = ''
+      }
+    }
     window.addEventListener('beforeunload', warn)
     return () => window.removeEventListener('beforeunload', warn)
   }, [dirty])
@@ -210,8 +216,10 @@ export default function EventPublishPage() {
         : await publishEvent(form, ticketing, tickets)
       if (!editingId) clearLocalEventDraft(user?.id)
       cleanSnapshot.current = snapshot(form, ticketing, tickets)
+      successfulNavigation.current = true
       window.location.assign(result.href)
     } catch (error: unknown) {
+      successfulNavigation.current = false
       const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error
       setSubmitError(message || (editingId ? 'Impossible d’enregistrer les modifications. Réessaie.' : 'Impossible de publier l’événement. Réessaie.'))
     } finally { setPublishing(false) }

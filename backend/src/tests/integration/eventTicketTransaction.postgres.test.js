@@ -38,12 +38,18 @@ async function run() {
         metadata jsonb, status text, amount_xpf int, updated_at timestamptz);
       CREATE TABLE ticket_orders (id int PRIMARY KEY, event_id int REFERENCES events, status text,
         expires_at timestamptz, buyer_email text, buyer_name text, total_xpf int,
-        paid_at timestamptz, updated_at timestamptz);
-      CREATE TABLE ticket_types (id int PRIMARY KEY, quantity_reserved int, quantity_sold int, updated_at timestamptz, name text);
+        paid_at timestamptz);
+      CREATE TABLE ticket_types (id int PRIMARY KEY, quantity_reserved int, quantity_sold int, name text);
       CREATE TABLE tickets (id int PRIMARY KEY, order_id int REFERENCES ticket_orders,
         event_id int REFERENCES events, ticket_type_id int REFERENCES ticket_types,
         token text, qr_code_url text, status text, price_xpf int);
     `);
+    const ticketingTimestampMigration = fs.readFileSync(
+      path.join(__dirname, '../../../../database/migrations/20261105_ticketing_timestamps.sql'),
+      'utf8',
+    );
+    await pool.query(ticketingTimestampMigration);
+    await pool.query(ticketingTimestampMigration);
     await pool.query(fs.readFileSync(path.join(__dirname, '../../../../database/migrations/20260830_payment_types_campaign_ticket.sql'), 'utf8'));
     await pool.query(fs.readFileSync(path.join(__dirname, '../../../../database/migrations/20260830_ticket_email_outbox.sql'), 'utf8'));
     async function seed() {
