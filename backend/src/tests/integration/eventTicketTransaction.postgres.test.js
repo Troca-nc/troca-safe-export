@@ -56,8 +56,12 @@ async function run() {
       await pool.query('TRUNCATE webhook_events, ticket_email_outbox, tickets, ticket_types, ticket_orders, payments, events');
       await pool.query("INSERT INTO events VALUES (12, 'Synthetic event', 0, NOW())");
       await pool.query("INSERT INTO payments VALUES (9, 'stripe', 'cs_synthetic', 7, 'event_ticket', $1, 'pending', 3600, NOW())", [metadata]);
-      await pool.query("INSERT INTO ticket_orders VALUES (34, 12, 'reserved', NOW() + interval '1 hour', 'synthetic@example.invalid', 'Test', 3600, NULL, NOW())");
-      await pool.query("INSERT INTO ticket_types VALUES (60, 2, 0, NOW(), 'Synthetic ticket')");
+      await pool.query(`INSERT INTO ticket_orders
+        (id, event_id, status, expires_at, buyer_email, buyer_name, total_xpf, paid_at, updated_at)
+        VALUES (34, 12, 'reserved', NOW() + interval '1 hour', 'synthetic@example.invalid', 'Test', 3600, NULL, NOW())`);
+      await pool.query(`INSERT INTO ticket_types
+        (id, quantity_reserved, quantity_sold, name, updated_at)
+        VALUES (60, 2, 0, 'Synthetic ticket', NOW())`);
       await pool.query("INSERT INTO tickets VALUES (50, 34, 12, 60, 'synthetic-1', NULL, 'reserved', 1800), (51, 34, 12, 60, 'synthetic-2', NULL, 'reserved', 1800)");
     }
     async function state() {
