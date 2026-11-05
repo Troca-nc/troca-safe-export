@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { BadgeCheck, CalendarDays, Clock3, Image as ImageIcon, MapPin, Ticket } from 'lucide-react'
 
 import { formatNoumeaDate } from '@/lib/bonPlansDate'
@@ -90,7 +91,13 @@ export function EventCard({
         </div>
         <div className="mt-5 flex items-center justify-between gap-4">
           <p className="text-meta text-ink/55">{event.organizerName || 'Organisateur local'}</p>
-          {event.bookingUrl ? <a href={event.bookingUrl} target="_blank" rel="noreferrer" className="k-button k-button-secondary">Réserver<Ticket className="h-4 w-4" /></a> : null}
+          <div className="flex flex-wrap justify-end gap-2">
+            <Link href={`/evenements/${event.id}`} className="k-button k-button-secondary">
+              {event.hasTicketing ? 'Acheter une place' : 'En savoir plus'}
+              {event.hasTicketing ? <Ticket className="h-4 w-4" /> : null}
+            </Link>
+            {event.bookingUrl ? <a href={event.bookingUrl} target="_blank" rel="noreferrer" className="k-button k-button-secondary">Réserver sur le site<Ticket className="h-4 w-4" /></a> : null}
+          </div>
         </div>
       </div>
     </article>

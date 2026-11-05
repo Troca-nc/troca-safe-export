@@ -105,6 +105,7 @@ function normalizeEvent(value: unknown): LocalEvent | null {
     organizerName: asText(item.organizer_name ?? item.business_name ?? item.author_name) || null,
     verified: Boolean(item.organizer_verified ?? item.author_is_pro ?? item.author_pro_verified),
     isFree: Boolean(item.is_free) || Number(item.price_xpf) === 0,
+    hasTicketing: Boolean(item.has_ticketing),
     priceXpf: asOptionalNumber(item.price_xpf ?? item.price),
     bookingUrl: asText(item.booking_url ?? item.ticketing_url ?? item.link_url ?? item.website_url) || null,
     coverImageUrl: asText(item.cover_image_url ?? item.cover_image ?? (Array.isArray(item.photos) ? item.photos[0] : '')) || null,
