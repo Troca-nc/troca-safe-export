@@ -2244,3 +2244,18 @@ Inventaire et trois décisions validés par l’humain le 30 octobre 2026.
 ### Validation locale
 
 - Contrats ciblés frontend et backend, syntaxe serveur, TypeScript, lint, contrôle design, build Next.js de production et `git diff --check`.
+
+## 29 — Détection d’une nouvelle version — Correctif de layout
+
+### Livraison
+
+- L’en-tête relève l’identifiant du build Next.js chargé par l’onglet et vérifie la version publique au retour du focus, lorsque l’onglet redevient visible et toutes les cinq minutes.
+- Si un déploiement plus récent est détecté, un panneau accessible propose explicitement « Actualiser » au lieu d’interrompre automatiquement une saisie en cours.
+- L’action ajoute temporairement un paramètre de contournement de cache pour forcer un nouveau document, puis le retire de l’adresse après chargement.
+- Une erreur réseau pendant la vérification reste silencieuse et ne perturbe jamais la navigation.
+
+### Validation locale
+
+- Contrat ciblé 2/2, lint, TypeScript, contrôle design (1 fichier, zéro erreur et zéro avertissement) et build Next.js standalone de 113 routes verts.
+- Le premier build a seulement rencontré l’indisponibilité réseau de Google Fonts dans le bac à sable ; la relance autorisée avec les certificats système, sans changement de code ni affaiblissement TLS, est entièrement verte.
+- `git diff --check` et l’état final du worktree sont contrôlés avant commit.
