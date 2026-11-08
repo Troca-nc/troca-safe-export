@@ -1,7 +1,8 @@
-import { eventsApi, metaApi } from '@/lib/api'
+import { eventsApi, metaApi, uploadApi } from '@/lib/api'
 import { demoOr } from '@/lib/demo'
 import type {
   EventCategoryOption,
+  EventAdmissionMode,
   ManagedEventDraft,
   EventPublishDraft,
   EventPublishMetadata,
@@ -45,6 +46,7 @@ export function createEventPublishDraft(profile?: {
     communeId: '',
     venueAddress: '',
     coverImageUrl: '',
+    photoUrls: [],
     organizerName: profile?.name || '',
     organizerEmail: profile?.email || '',
     organizerPhone: profile?.phone || '',
@@ -87,7 +89,17 @@ export function loadLocalEventDraft(userId?: string | null): StoredEventDraft | 
   if (typeof window === 'undefined') return null
   try {
     const raw = window.localStorage.getItem(eventDraftStorageKey(userId))
-    return raw ? JSON.parse(raw) as StoredEventDraft : null
+    if (!raw) return null
+    const stored = JSON.parse(raw) as StoredEventDraft
+    const coverImageUrl = String(stored.form?.coverImageUrl || '')
+    return {
+      ...stored,
+      form: {
+        ...stored.form,
+        coverImageUrl,
+        photoUrls: normalizeEventPhotoUrls(stored.form?.photoUrls, coverImageUrl),
+      },
+    }
   } catch {
     return null
   }
@@ -107,9 +119,36 @@ function integer(value: string) {
   return Number.parseInt(value, 10) || 0
 }
 
-function buildEventPayload(form: EventPublishDraft, ticketing: boolean, tickets: EventTicketDraft[]) {
-  const prices = ticketing ? tickets.map((ticket) => integer(ticket.priceXpf)) : [0]
-  const isFree = !ticketing || prices.every((value) => value === 0)
+export function normalizeEventPhotoUrls(value: unknown, coverImageUrl = '') {
+  const rows = Array.isArray(value) ? value : []
+  const urls = [coverImageUrl, ...rows]
+    .map((item) => String(item || '').trim())
+    .filter((item) => /^https?:\/\//i.test(item))
+  return Array.from(new Set(urls)).slice(0, 12)
+}
+
+export function resolveEventAdmissionMode(ticketing: boolean, tickets: EventTicketDraft[]): EventAdmissionMode {
+  if (!ticketing) return 'open'
+  return tickets.some((ticket) => integer(ticket.priceXpf) > 0) ? 'paid' : 'free'
+}
+
+export async function uploadEventPhotos(files: File[], onProgress?: (percentage: number) => void) {
+  const response = await uploadApi.uploadEventImages(files, {
+    onUploadProgress: (event) => {
+      if (event.total) onProgress?.(Math.round((event.loaded / event.total) * 100))
+    },
+  })
+  const rows = Array.isArray(response.data?.data) ? response.data.data : []
+  return normalizeEventPhotoUrls(rows.map((item: { url?: string }) => item.url))
+}
+
+function buildEventPayload(form: EventPublishDraft, admissionMode: EventAdmissionMode, tickets: EventTicketDraft[]) {
+  const ticketing = admissionMode !== 'open'
+  const photos = normalizeEventPhotoUrls(form.photoUrls, form.coverImageUrl)
+  const prices = ticketing
+    ? tickets.map((ticket) => admissionMode === 'free' ? 0 : integer(ticket.priceXpf))
+    : [0]
+  const isFree = admissionMode !== 'paid'
   return {
     title: form.title.trim(),
     description: form.description.trim() || null,
@@ -119,8 +158,8 @@ function buildEventPayload(form: EventPublishDraft, ticketing: boolean, tickets:
     event_date: form.eventDate,
     event_time: form.startTime,
     end_time: form.endTime || null,
-    cover_image_url: form.coverImageUrl.trim() || null,
-    photos: form.coverImageUrl.trim() ? [form.coverImageUrl.trim()] : [],
+    cover_image_url: photos[0] || null,
+    photos,
     category: form.category,
     status: 'published',
     has_ticketing: ticketing,
@@ -137,7 +176,7 @@ function buildEventPayload(form: EventPublishDraft, ticketing: boolean, tickets:
       ? tickets.map((ticket, index) => ({
           name: ticket.name.trim(),
           description: ticket.description.trim() || null,
-          price_xpf: integer(ticket.priceXpf),
+          price_xpf: admissionMode === 'free' ? 0 : integer(ticket.priceXpf),
           quantity_total: integer(ticket.quantity),
           is_active: true,
           position: index,
@@ -149,6 +188,17 @@ function buildEventPayload(form: EventPublishDraft, ticketing: boolean, tickets:
 function normalizeManagedEvent(value: unknown): ManagedEventDraft {
   const row = value && typeof value === 'object' ? value as Record<string, unknown> : {}
   const ticketRows = Array.isArray(row.ticket_types) ? row.ticket_types : []
+  const normalizedTickets = ticketRows.map((value) => {
+    const ticket = value && typeof value === 'object' ? value as Record<string, unknown> : {}
+    return {
+      name: String(ticket.name ?? ''),
+      description: String(ticket.description ?? ''),
+      priceXpf: String(ticket.price_xpf ?? 0),
+      quantity: String(ticket.quantity_total ?? 1),
+    }
+  })
+  const ticketing = Boolean(row.has_ticketing)
+  const coverImageUrl = String(row.cover_image_url ?? '')
   return {
     id: String(row.id ?? ''),
     status: row.status === 'draft' ? 'draft' : 'published',
@@ -162,22 +212,16 @@ function normalizeManagedEvent(value: unknown): ManagedEventDraft {
       venueName: String(row.venue_name ?? ''),
       communeId: row.commune_id == null ? '' : String(row.commune_id),
       venueAddress: String(row.venue_address ?? ''),
-      coverImageUrl: String(row.cover_image_url ?? ''),
+      coverImageUrl,
+      photoUrls: normalizeEventPhotoUrls(row.photos, coverImageUrl),
       organizerName: String(row.organizer_name ?? ''),
       organizerEmail: String(row.organizer_email ?? ''),
       organizerPhone: String(row.organizer_phone ?? ''),
       websiteUrl: String(row.website_url ?? ''),
     },
-    ticketing: Boolean(row.has_ticketing),
-    tickets: ticketRows.map((value) => {
-      const ticket = value && typeof value === 'object' ? value as Record<string, unknown> : {}
-      return {
-        name: String(ticket.name ?? ''),
-        description: String(ticket.description ?? ''),
-        priceXpf: String(ticket.price_xpf ?? 0),
-        quantity: String(ticket.quantity_total ?? 1),
-      }
-    }),
+    ticketing,
+    admissionMode: resolveEventAdmissionMode(ticketing, normalizedTickets),
+    tickets: normalizedTickets,
     ticketingLocked: Boolean(row.ticketing_locked),
   }
 }
@@ -197,13 +241,13 @@ export async function getManagedEvent(id: string): Promise<ManagedEventDraft> {
 export async function updateManagedEvent(
   id: string,
   form: EventPublishDraft,
-  ticketing: boolean,
+  admissionMode: EventAdmissionMode,
   tickets: EventTicketDraft[],
 ): Promise<EventPublishResult> {
   return demoOr(
     async () => ({ id, href: '/profil/evenements' }),
     async () => {
-      await eventsApi.updateMine(id, buildEventPayload(form, ticketing, tickets))
+      await eventsApi.updateMine(id, buildEventPayload(form, admissionMode, tickets))
       return { id, href: '/profil/evenements' }
     },
   )
@@ -211,13 +255,13 @@ export async function updateManagedEvent(
 
 export async function publishEvent(
   form: EventPublishDraft,
-  ticketing: boolean,
+  admissionMode: EventAdmissionMode,
   tickets: EventTicketDraft[],
 ): Promise<EventPublishResult> {
   return demoOr(
     async () => (await import('@/demo/fixtures/events')).eventPublishResultFixture,
     async () => {
-      const response = await eventsApi.create(buildEventPayload(form, ticketing, tickets))
+      const response = await eventsApi.create(buildEventPayload(form, admissionMode, tickets))
       const id = String(response.data?.data?.id ?? '')
       if (!id) throw new Error('Le serveur n’a pas retourné l’identifiant de l’événement.')
       return { id, href: `/evenements/${id}` }

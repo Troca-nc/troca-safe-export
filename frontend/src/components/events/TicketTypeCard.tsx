@@ -11,10 +11,11 @@ export const TicketTypeCard = forwardRef<HTMLInputElement, {
   ticket: EventTicketDraft
   errors?: TicketErrors
   canRemove: boolean
+  free?: boolean
   disabled?: boolean
   onChange: (field: keyof EventTicketDraft, value: string) => void
   onRemove: () => void
-}>(function TicketTypeCard({ index, ticket, errors = {}, canRemove, disabled = false, onChange, onRemove }, ref) {
+}>(function TicketTypeCard({ index, ticket, errors = {}, canRemove, free = false, disabled = false, onChange, onRemove }, ref) {
   return (
     <div className="grid grid-cols-[0.5rem_minmax(0,1fr)] overflow-hidden rounded-control border border-sand bg-cream-sunken">
       <div className="bg-accent" aria-hidden="true" />
@@ -25,7 +26,7 @@ export const TicketTypeCard = forwardRef<HTMLInputElement, {
         </div>
         <div className="mt-2 grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))]">
           <Input ref={ref} label="Nom" value={ticket.name} error={errors.name} disabled={disabled} onChange={(event) => onChange('name', event.target.value)} />
-          <Input label="Prix (XPF)" type="number" min="0" step="1" value={ticket.priceXpf} error={errors.priceXpf} disabled={disabled} onChange={(event) => onChange('priceXpf', event.target.value)} />
+          <Input label="Prix (XPF)" type="number" min="0" step="1" value={free ? '0' : ticket.priceXpf} error={errors.priceXpf} hint={free ? 'Réservation gratuite' : undefined} disabled={disabled || free} onChange={(event) => onChange('priceXpf', event.target.value)} />
           <Input label="Places" type="number" min="1" step="1" value={ticket.quantity} error={errors.quantity} disabled={disabled} onChange={(event) => onChange('quantity', event.target.value)} />
         </div>
         <div className="mt-3">

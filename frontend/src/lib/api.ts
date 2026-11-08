@@ -431,6 +431,14 @@ export const uploadApi = {
       ...config,
     })
   },
+  uploadEventImages: (files: File[], config?: Pick<AxiosRequestConfig, 'onUploadProgress'>) => {
+    const form = new FormData()
+    files.forEach((file) => form.append('images', file))
+    return api.post('/upload/event', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      ...config,
+    })
+  },
   uploadChatPhoto: (file: File) => {
     const form = new FormData()
     form.append('image', file)

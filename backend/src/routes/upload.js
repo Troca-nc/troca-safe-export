@@ -289,6 +289,35 @@ router.post('/product', uploadLimiter, upload.array('images', MAX_IMAGES), async
   }
 });
 
+// ── POST /upload/event — Préparer les photos d'un événement ─
+
+router.post('/event', uploadLimiter, upload.array('images', MAX_IMAGES), async (req, res, next) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: 'Aucune image reçue' });
+    }
+
+    const savedImages = [];
+    for (const file of req.files) {
+      const processed = await processImage(file.buffer, `events/${req.user.id}`);
+      savedImages.push({
+        url: processed.url,
+        thumbnail_url: processed.thumbnail_url,
+      });
+    }
+
+    return res.status(201).json({
+      message: `${savedImages.length} photo(s) importée(s)`,
+      data: savedImages,
+    });
+  } catch (err) {
+    if (err.message?.includes('Format non supporté')) {
+      return res.status(400).json({ error: err.message });
+    }
+    return next(err);
+  }
+});
+
 // ── POST /upload/chat — Uploader une image de messagerie ─────────
 
 router.post('/chat', uploadLimiter, upload.single('image'), async (req, res, next) => {

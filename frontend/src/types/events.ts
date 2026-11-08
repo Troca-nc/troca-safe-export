@@ -26,6 +26,8 @@ export type EventTicketDraft = {
   quantity: string
 }
 
+export type EventAdmissionMode = 'open' | 'free' | 'paid'
+
 export type EventPublishDraft = {
   title: string
   description: string
@@ -37,6 +39,7 @@ export type EventPublishDraft = {
   communeId: string
   venueAddress: string
   coverImageUrl: string
+  photoUrls: string[]
   organizerName: string
   organizerEmail: string
   organizerPhone: string
@@ -46,6 +49,7 @@ export type EventPublishDraft = {
 export type StoredEventDraft = {
   form: EventPublishDraft
   ticketing: boolean
+  admissionMode?: EventAdmissionMode
   tickets: EventTicketDraft[]
   savedAt: string
 }
@@ -64,6 +68,7 @@ export type ManagedEventDraft = {
   status: 'draft' | 'published'
   form: EventPublishDraft
   ticketing: boolean
+  admissionMode: EventAdmissionMode
   tickets: EventTicketDraft[]
   ticketingLocked: boolean
 }

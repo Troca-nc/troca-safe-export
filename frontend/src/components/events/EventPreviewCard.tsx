@@ -1,11 +1,11 @@
 import { EventCard } from '@/components/bon-plans/EventCard'
-import type { EventPublishDraft, EventTicketDraft } from '@/types/events'
+import type { EventAdmissionMode, EventPublishDraft, EventTicketDraft } from '@/types/events'
 
 const money = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 })
 
-export function EventPreviewCard({ form, ticketing, tickets, categoryLabel, communeName }: {
+export function EventPreviewCard({ form, admissionMode, tickets, categoryLabel, communeName }: {
   form: EventPublishDraft
-  ticketing: boolean
+  admissionMode: EventAdmissionMode
   tickets: EventTicketDraft[]
   categoryLabel: string
   communeName: string
@@ -13,7 +13,8 @@ export function EventPreviewCard({ form, ticketing, tickets, categoryLabel, comm
   const prices = tickets.map((ticket) => Number.parseInt(ticket.priceXpf, 10) || 0)
   const min = prices.length ? Math.min(...prices) : 0
   const max = prices.length ? Math.max(...prices) : 0
-  const priceLabel = !ticketing ? 'Entrée libre' : max === 0 ? 'Gratuit' : min === max ? `${money.format(min)} XPF` : `Dès ${money.format(min)} XPF`
+  const ticketing = admissionMode !== 'open'
+  const priceLabel = admissionMode === 'open' ? 'Entrée libre' : admissionMode === 'free' ? 'Réservation gratuite' : min === max ? `${money.format(min)} XPF` : `Dès ${money.format(min)} XPF`
 
   return (
     <div>
@@ -35,10 +36,10 @@ export function EventPreviewCard({ form, ticketing, tickets, categoryLabel, comm
           category: categoryLabel,
           organizerName: form.organizerName.trim() || null,
           verified: false,
-          isFree: !ticketing || max === 0,
+          isFree: admissionMode !== 'paid',
           priceXpf: min,
           bookingUrl: null,
-          coverImageUrl: form.coverImageUrl.trim() || null,
+          coverImageUrl: form.photoUrls[0] || form.coverImageUrl.trim() || null,
         }}
       />
     </div>
