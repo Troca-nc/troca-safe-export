@@ -7,6 +7,7 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8')
 test('la page publier conserve ses contrats produit', async () => {
   const page = await read('src/app/evenements/publier/page.tsx')
   const data = await read('src/lib/data/events.ts')
+  const api = await read('src/lib/api.ts')
   const publishPanel = await read('src/components/events/PublishPanel.tsx')
   const source = `${page}\n${publishPanel}`
 
@@ -17,12 +18,20 @@ test('la page publier conserve ses contrats produit', async () => {
   assert.match(page, /openAuthModal\(\{ type: 'publish_listing'/)
   assert.match(page, /successfulNavigation\.current = true/)
   assert.match(page, /dirty && !successfulNavigation\.current/)
-  assert.match(page, /Adresse de la photo · facultative/)
+  assert.match(page, /EventPhotosField/)
+  assert.match(page, /Entrée libre/)
+  assert.match(page, /Réservation gratuite/)
+  assert.match(page, /Billets payants/)
+  assert.match(page, /Ajouter un type de billet/)
   assert.match(page, /EventPreviewCard/)
   assert.doesNotMatch(page, /eventsApi|metaApi/)
   assert.match(data, /saveLocalEventDraft/)
   assert.match(data, /status: 'published'/)
   assert.match(data, /ticket_types:/)
+  assert.match(data, /uploadEventPhotos/)
+  assert.match(data, /admissionMode === 'free' \? 0/)
+  assert.match(api, /uploadEventImages/)
+  assert.match(api, /\/upload\/event/)
 })
 
 test('la carte publique est réellement partagée avec l’aperçu', async () => {
@@ -51,6 +60,7 @@ test('les fichiers du lot ne contiennent pas de signature mojibake', async () =>
     'src/app/evenements/publier/page.tsx',
     'src/lib/data/events.ts',
     'src/components/events/EventFormSection.tsx',
+    'src/components/events/EventPhotosField.tsx',
     'src/components/events/TicketTypeCard.tsx',
     'src/components/events/EventPreviewCard.tsx',
     'src/components/events/PublishChecklist.tsx',

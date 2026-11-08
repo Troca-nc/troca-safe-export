@@ -2,21 +2,22 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, Image as ImageIcon, Plus } from 'lucide-react'
+import { ArrowLeft, Plus } from 'lucide-react'
 
 import { EventFormSection } from '@/components/events/EventFormSection'
+import { EventPhotosField } from '@/components/events/EventPhotosField'
 import { EventPreviewCard } from '@/components/events/EventPreviewCard'
 import { PublishChecklist, type PublishCheck } from '@/components/events/PublishChecklist'
 import { PublishPanel } from '@/components/events/PublishPanel'
 import { TicketTypeCard, type TicketErrors } from '@/components/events/TicketTypeCard'
 import Header from '@/components/layout/Header'
 import { Button } from '@/components/ui/Button'
-import { FilterChip, Switch } from '@/components/ui/Controls'
+import { FilterChip, SegmentedControl } from '@/components/ui/Controls'
 import { Input, Select, Textarea } from '@/components/ui/Field'
-import { clearLocalEventDraft, createEventPublishDraft, EVENT_CATEGORIES, getEventPublishMetadata, getManagedEvent, INITIAL_EVENT_TICKET, loadLocalEventDraft, publishEvent, saveLocalEventDraft, updateManagedEvent } from '@/lib/data/events'
+import { clearLocalEventDraft, createEventPublishDraft, EVENT_CATEGORIES, getEventPublishMetadata, getManagedEvent, INITIAL_EVENT_TICKET, loadLocalEventDraft, publishEvent, resolveEventAdmissionMode, saveLocalEventDraft, updateManagedEvent, uploadEventPhotos } from '@/lib/data/events'
 import { useAuthActionStore } from '@/store/authActionStore'
 import { useAuthStore } from '@/store/authStore'
-import type { EventPublishDraft, EventTicketDraft } from '@/types/events'
+import type { EventAdmissionMode, EventPublishDraft, EventTicketDraft } from '@/types/events'
 
 type FieldErrors = Partial<Record<keyof EventPublishDraft, string>>
 const NEW_TICKET: EventTicketDraft = { name: '', description: '', priceXpf: '0', quantity: '50' }
@@ -30,15 +31,15 @@ function validUrl(value: string) {
   } catch { return false }
 }
 
-function snapshot(form: EventPublishDraft, ticketing: boolean, tickets: EventTicketDraft[]) {
-  return JSON.stringify({ form, ticketing, tickets })
+function snapshot(form: EventPublishDraft, admissionMode: EventAdmissionMode, tickets: EventTicketDraft[]) {
+  return JSON.stringify({ form, admissionMode, tickets })
 }
 
 export default function EventPublishPage() {
   const { isAuthenticated, user, hasHydrated } = useAuthStore()
   const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
   const [form, setForm] = useState<EventPublishDraft>(() => createEventPublishDraft())
-  const [ticketing, setTicketing] = useState(true)
+  const [admissionMode, setAdmissionMode] = useState<EventAdmissionMode>('free')
   const [tickets, setTickets] = useState<EventTicketDraft[]>([{ ...INITIAL_EVENT_TICKET }])
   const [communes, setCommunes] = useState<{ id: number; name: string }[]>([])
   const [initialized, setInitialized] = useState(false)
@@ -51,6 +52,9 @@ export default function EventPublishPage() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [ticketErrors, setTicketErrors] = useState<TicketErrors[]>([])
   const [publishing, setPublishing] = useState(false)
+  const [uploadingPhotos, setUploadingPhotos] = useState(false)
+  const [photoUploadProgress, setPhotoUploadProgress] = useState(0)
+  const [photoUploadError, setPhotoUploadError] = useState('')
   const [savingDraft, setSavingDraft] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [success, setSuccess] = useState('')
@@ -73,7 +77,7 @@ export default function EventPublishPage() {
     if (editId && !isAuthenticated) {
       const initialForm = createEventPublishDraft(profile)
       setForm(initialForm)
-      cleanSnapshot.current = snapshot(initialForm, true, [{ ...INITIAL_EVENT_TICKET }])
+      cleanSnapshot.current = snapshot(initialForm, 'free', [{ ...INITIAL_EVENT_TICKET }])
       setInitialized(true)
       openAuthModal({ type: 'publish_listing', redirectTo: `/evenements/publier?edit=${encodeURIComponent(editId)}` })
       return
@@ -87,10 +91,10 @@ export default function EventPublishPage() {
           if (!active) return
           const initialTickets = managed.tickets.length ? managed.tickets : [{ ...INITIAL_EVENT_TICKET }]
           setForm(managed.form)
-          setTicketing(managed.ticketing)
+          setAdmissionMode(managed.admissionMode)
           setTickets(initialTickets)
           setTicketingLocked(managed.ticketingLocked)
-          cleanSnapshot.current = snapshot(managed.form, managed.ticketing, initialTickets)
+          cleanSnapshot.current = snapshot(managed.form, managed.admissionMode, initialTickets)
           return
         }
 
@@ -98,11 +102,11 @@ export default function EventPublishPage() {
         let initialForm = stored?.form || createEventPublishDraft(profile)
         const category = params.get('category')
         if (!stored && EVENT_CATEGORIES.some((option) => option.value === category)) initialForm = { ...initialForm, category: category as EventPublishDraft['category'] }
-        const initialTicketing = stored?.ticketing ?? true
         const initialTickets = stored?.tickets?.length ? stored.tickets : [{ ...INITIAL_EVENT_TICKET }]
+        const initialAdmissionMode = stored?.admissionMode || resolveEventAdmissionMode(stored?.ticketing ?? true, initialTickets)
         if (!active) return
-        setForm(initialForm); setTicketing(initialTicketing); setTickets(initialTickets)
-        cleanSnapshot.current = snapshot(initialForm, initialTicketing, initialTickets)
+        setForm(initialForm); setAdmissionMode(initialAdmissionMode); setTickets(initialTickets)
+        cleanSnapshot.current = snapshot(initialForm, initialAdmissionMode, initialTickets)
       } catch (error: unknown) {
         if (!active) return
         const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error
@@ -125,7 +129,8 @@ export default function EventPublishPage() {
     return () => { active = false }
   }, [metadataAttempt])
 
-  const dirty = initialized && snapshot(form, ticketing, tickets) !== cleanSnapshot.current
+  const ticketing = admissionMode !== 'open'
+  const dirty = initialized && snapshot(form, admissionMode, tickets) !== cleanSnapshot.current
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {
       if (dirty && !successfulNavigation.current) {
@@ -141,9 +146,9 @@ export default function EventPublishPage() {
     { label: 'Titre et catégorie', complete: Boolean(form.title.trim() && form.category) },
     { label: 'Date et heure de début', complete: Boolean(form.eventDate && form.startTime) },
     { label: 'Lieu et commune', complete: Boolean(form.venueName.trim() && form.communeId) },
-    { label: ticketing ? 'Billets : nom, prix et places' : 'Billetterie désactivée', complete: !ticketing || tickets.every((ticket) => ticket.name.trim() && Number.isInteger(Number(ticket.priceXpf)) && Number(ticket.priceXpf) >= 0 && Number.isInteger(Number(ticket.quantity)) && Number(ticket.quantity) >= 1) },
+    { label: admissionMode === 'open' ? 'Entrée libre sans réservation' : admissionMode === 'free' ? 'Réservations gratuites configurées' : 'Billets et tarifs configurés', complete: !ticketing || (tickets.every((ticket) => ticket.name.trim() && (admissionMode === 'free' || (ticket.priceXpf.trim() && Number.isInteger(Number(ticket.priceXpf)) && Number(ticket.priceXpf) >= 0)) && Number.isInteger(Number(ticket.quantity)) && Number(ticket.quantity) >= 1) && (admissionMode !== 'paid' || tickets.some((ticket) => Number(ticket.priceXpf) > 0))) },
     { label: 'Organisateur et e-mail', complete: Boolean(form.organizerName.trim() && emailPattern.test(form.organizerEmail)) },
-  ], [form, ticketing, tickets])
+  ], [admissionMode, form, ticketing, tickets])
 
   const done = checks.filter((check) => check.complete).length
   const remaining = checks.length - done
@@ -166,12 +171,47 @@ export default function EventPublishPage() {
     openAuthModal({ type: 'publish_listing', redirectTo: editingId ? `/evenements/publier?edit=${encodeURIComponent(editingId)}` : '/evenements/publier' })
     return true
   }
+  const handlePhotoUpload = async (files: File[]) => {
+    if (!files.length || requireAuth()) return
+    const remaining = 12 - form.photoUrls.length
+    if (files.length > remaining) {
+      setPhotoUploadError(`Tu peux encore ajouter ${remaining} photo${remaining > 1 ? 's' : ''}.`)
+      return
+    }
+    setUploadingPhotos(true); setPhotoUploadProgress(0); setPhotoUploadError('')
+    try {
+      const uploadedUrls = await uploadEventPhotos(files, setPhotoUploadProgress)
+      if (!uploadedUrls.length) throw new Error('Aucune photo n’a pu être importée.')
+      setForm((current) => {
+        const photoUrls = Array.from(new Set([...current.photoUrls, ...uploadedUrls])).slice(0, 12)
+        return { ...current, photoUrls, coverImageUrl: current.coverImageUrl || photoUrls[0] || '' }
+      })
+      setSuccess(`${uploadedUrls.length} photo${uploadedUrls.length > 1 ? 's' : ''} importée${uploadedUrls.length > 1 ? 's' : ''}.`)
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { error?: string } }; message?: string })?.response?.data?.error
+        || (error as { message?: string })?.message
+      setPhotoUploadError(message || 'Impossible d’importer ces photos. Réessaie.')
+    } finally {
+      setUploadingPhotos(false); setPhotoUploadProgress(0)
+    }
+  }
+  const handleRemovePhoto = (url: string) => {
+    setForm((current) => {
+      const photoUrls = current.photoUrls.filter((photoUrl) => photoUrl !== url)
+      return { ...current, photoUrls, coverImageUrl: current.coverImageUrl === url ? photoUrls[0] || '' : current.coverImageUrl }
+    })
+    setPhotoUploadError(''); setSuccess('')
+  }
+  const handleSetCover = (url: string) => {
+    setForm((current) => ({ ...current, coverImageUrl: url, photoUrls: [url, ...current.photoUrls.filter((photoUrl) => photoUrl !== url)] }))
+    setPhotoUploadError(''); setSuccess('')
+  }
   const handleSaveDraft = () => {
     if (requireAuth()) return
     setSavingDraft(true); setSubmitError('')
     try {
-      saveLocalEventDraft(user?.id, { form, ticketing, tickets, savedAt: new Date().toISOString() })
-      cleanSnapshot.current = snapshot(form, ticketing, tickets)
+      saveLocalEventDraft(user?.id, { form, ticketing, admissionMode, tickets, savedAt: new Date().toISOString() })
+      cleanSnapshot.current = snapshot(form, admissionMode, tickets)
       setSuccess('Brouillon enregistré sur cet appareil.')
     } catch { setSubmitError('Impossible d’enregistrer le brouillon. Réessaie.') }
     finally { setSavingDraft(false) }
@@ -188,13 +228,13 @@ export default function EventPublishPage() {
     if (!form.communeId) errors.communeId = 'Choisis une commune.'
     if (!form.organizerName.trim()) errors.organizerName = 'Indique le nom de l’organisateur.'
     if (!emailPattern.test(form.organizerEmail)) errors.organizerEmail = 'Indique une adresse e-mail valide.'
-    if (!validUrl(form.coverImageUrl)) errors.coverImageUrl = 'Utilise une adresse commençant par http:// ou https://.'
     if (!validUrl(form.websiteUrl)) errors.websiteUrl = 'Utilise une adresse commençant par http:// ou https://.'
     if (ticketing) tickets.forEach((ticket, index) => {
       if (!ticket.name.trim()) nextTicketErrors[index].name = 'Indique un nom.'
-      if (!Number.isInteger(Number(ticket.priceXpf)) || Number(ticket.priceXpf) < 0) nextTicketErrors[index].priceXpf = 'Saisis un entier positif ou nul.'
+      if (admissionMode === 'paid' && (!ticket.priceXpf.trim() || !Number.isInteger(Number(ticket.priceXpf)) || Number(ticket.priceXpf) < 0)) nextTicketErrors[index].priceXpf = 'Saisis un prix entier positif ou nul.'
       if (!Number.isInteger(Number(ticket.quantity)) || Number(ticket.quantity) < 1) nextTicketErrors[index].quantity = 'Prévois au moins une place.'
     })
+    if (admissionMode === 'paid' && !tickets.some((ticket) => Number(ticket.priceXpf) > 0)) nextTicketErrors[0].priceXpf = 'Ajoute au moins un tarif payant.'
     setFieldErrors(errors); setTicketErrors(nextTicketErrors)
     const ticketInvalid = nextTicketErrors.some((ticket) => Object.keys(ticket).length > 0)
     if (errors.title || errors.category) titleRef.current?.focus()
@@ -208,14 +248,18 @@ export default function EventPublishPage() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (uploadingPhotos) {
+      setSubmitError('Attends la fin de l’import des photos avant de publier.')
+      return
+    }
     if (requireAuth() || !validate()) return
     setPublishing(true); setSubmitError(''); setSuccess('')
     try {
       const result = editingId
-        ? await updateManagedEvent(editingId, form, ticketing, tickets)
-        : await publishEvent(form, ticketing, tickets)
+        ? await updateManagedEvent(editingId, form, admissionMode, tickets)
+        : await publishEvent(form, admissionMode, tickets)
       if (!editingId) clearLocalEventDraft(user?.id)
-      cleanSnapshot.current = snapshot(form, ticketing, tickets)
+      cleanSnapshot.current = snapshot(form, admissionMode, tickets)
       successfulNavigation.current = true
       window.location.assign(result.href)
     } catch (error: unknown) {
@@ -245,7 +289,7 @@ export default function EventPublishPage() {
               <Input ref={titleRef} label="Titre" value={form.title} error={fieldErrors.title} placeholder="Ex. Concert sous les étoiles" onChange={(event) => updateField('title', event.target.value)} />
               <fieldset className="mt-5"><legend className="text-label-sm font-semibold">Catégorie</legend><div className="mt-2 flex flex-wrap gap-2" aria-invalid={Boolean(fieldErrors.category)}>{EVENT_CATEGORIES.map((category) => <FilterChip key={category.value} selected={form.category === category.value} onClick={() => updateField('category', category.value)}>{category.label}</FilterChip>)}</div>{fieldErrors.category ? <p role="alert" className="mt-2 text-meta text-alert-error">{fieldErrors.category}</p> : null}</fieldset>
               <div className="mt-5"><Textarea label="Description" rows={4} value={form.description} placeholder="Donne envie de venir et précise les informations utiles." onChange={(event) => updateField('description', event.target.value)} /></div>
-              <div className="mt-5"><p className="text-label-sm font-semibold">Photo de couverture · facultative</p><div className="mt-2 flex h-48 items-center justify-center overflow-hidden rounded-control border border-dashed border-warm-border bg-cream-sunken text-ink/45">{form.coverImageUrl && validUrl(form.coverImageUrl) ? <img src={form.coverImageUrl} alt="Aperçu de la couverture" className="h-full w-full object-cover" /> : <div className="text-center"><ImageIcon className="mx-auto h-10 w-10" aria-hidden="true" /><p className="mt-2 text-body-sm">L’aperçu de la photo apparaîtra ici</p></div>}</div><div className="mt-3"><Input label="Adresse de la photo · facultative" type="url" value={form.coverImageUrl} error={fieldErrors.coverImageUrl} placeholder="https://…" hint="Le téléversement direct sera ajouté plus tard ; utilise pour l’instant une image déjà en ligne." onChange={(event) => updateField('coverImageUrl', event.target.value)} /></div></div>
+              <EventPhotosField photos={form.photoUrls} uploading={uploadingPhotos} uploadProgress={photoUploadProgress} error={photoUploadError} disabled={publishing} onFilesSelected={handlePhotoUpload} onRemove={handleRemovePhoto} onSetCover={handleSetCover} />
             </EventFormSection>
 
             <EventFormSection number={2} title="Quand et où">
@@ -254,19 +298,20 @@ export default function EventPublishPage() {
               <div className="mt-4"><Input label="Adresse · facultative" value={form.venueAddress} placeholder="Rue, numéro, repère utile" onChange={(event) => updateField('venueAddress', event.target.value)} /></div>
             </EventFormSection>
 
-            <EventFormSection number={3} title="Billetterie" action={<Switch label={ticketing ? 'Billetterie activée' : 'Sans billetterie'} checked={ticketing} disabled={ticketingLocked} onChange={(event) => setTicketing(event.target.checked)} />}>
-              <p className="text-body-sm text-ink/70">{ticketingLocked ? 'La billetterie est verrouillée car une réservation existe déjà. Les autres informations de l’événement restent modifiables.' : ticketing ? 'Définis un ou plusieurs types de billets. Laisse le prix à 0 pour un événement gratuit avec réservation.' : 'L’événement est publié avec une entrée libre, sans réservation.'}</p>
-              {ticketing ? <div className="mt-5 space-y-3">{tickets.map((ticket, index) => <TicketTypeCard key={index} ref={index === 0 ? firstTicketRef : undefined} index={index} ticket={ticket} errors={ticketErrors[index]} canRemove={tickets.length > 1} disabled={ticketingLocked} onChange={(key, value) => updateTicket(index, key, value)} onRemove={() => setTickets((current) => current.filter((_, ticketIndex) => ticketIndex !== index))} />)}{!ticketingLocked ? <Button type="button" variant="secondary" className="w-full border-dashed" onClick={() => setTickets((current) => [...current, { ...NEW_TICKET }])}><Plus className="h-4 w-4" />Ajouter un type de billet</Button> : null}<div className="flex flex-wrap items-center justify-between gap-3 rounded-control bg-cream-sunken px-4 py-3 text-body-sm"><span>Capacité totale <strong>{capacity.toLocaleString('fr-FR')} places</strong></span><span className="text-ink/65">Chaque billet reçoit un QR code unique, scanné à l’entrée depuis Kalico.</span></div></div> : null}
+            <EventFormSection number={3} title="Entrée et billetterie">
+              <SegmentedControl label="Mode d’entrée" value={admissionMode} disabled={ticketingLocked} onChange={(value) => { setAdmissionMode(value as EventAdmissionMode); setTicketErrors([]); setSubmitError(''); setSuccess('') }} options={[{ value: 'open', label: 'Entrée libre' }, { value: 'free', label: 'Réservation gratuite' }, { value: 'paid', label: 'Billets payants' }]} />
+              <p className="mt-3 text-body-sm text-ink/70">{ticketingLocked ? 'La billetterie est verrouillée car une réservation existe déjà. Les autres informations de l’événement restent modifiables.' : admissionMode === 'open' ? 'Les visiteurs viennent librement, sans réservation ni billet.' : admissionMode === 'free' ? 'Crée un ou plusieurs billets gratuits pour suivre les réservations et la capacité.' : 'Crée plusieurs tarifs nommés, par exemple Standard, Enfant ou VIP. Un tarif peut rester à 0 XPF.'}</p>
+              {ticketing ? <div className="mt-5 space-y-3">{tickets.map((ticket, index) => <TicketTypeCard key={index} ref={index === 0 ? firstTicketRef : undefined} index={index} ticket={ticket} errors={ticketErrors[index]} canRemove={tickets.length > 1} free={admissionMode === 'free'} disabled={ticketingLocked} onChange={(key, value) => updateTicket(index, key, value)} onRemove={() => setTickets((current) => current.filter((_, ticketIndex) => ticketIndex !== index))} />)}{!ticketingLocked ? <Button type="button" variant="secondary" className="w-full border-dashed" onClick={() => setTickets((current) => [...current, { ...NEW_TICKET }])}><Plus className="h-4 w-4" />Ajouter un type de billet</Button> : null}<div className="flex flex-wrap items-center justify-between gap-3 rounded-control bg-cream-sunken px-4 py-3 text-body-sm"><span>Capacité totale <strong>{capacity.toLocaleString('fr-FR')} places</strong></span><span className="text-ink/65">Chaque réservation reçoit un QR code unique, scanné à l’entrée depuis Kalico.</span></div></div> : null}
             </EventFormSection>
 
             <EventFormSection number={4} title="L’organisateur">
               <p className="text-body-sm text-ink/70">Ces informations sont reprises de ton profil. Les visiteurs te contactent par la messagerie : ton e-mail et ton téléphone ne sont pas affichés.</p>
               <div className="mt-5 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]"><Input ref={organizerRef} label="Nom de l’organisateur" value={form.organizerName} error={fieldErrors.organizerName} placeholder="Association, commerce ou nom" onChange={(event) => updateField('organizerName', event.target.value)} /><Input label="Site web · facultatif" type="url" value={form.websiteUrl} error={fieldErrors.websiteUrl} placeholder="https://" onChange={(event) => updateField('websiteUrl', event.target.value)} /><Input ref={emailRef} label="E-mail de contact" type="email" value={form.organizerEmail} error={fieldErrors.organizerEmail} placeholder="nom@exemple.nc" onChange={(event) => updateField('organizerEmail', event.target.value)} /><Input label="Téléphone · facultatif" type="tel" value={form.organizerPhone} placeholder="+687" onChange={(event) => updateField('organizerPhone', event.target.value)} /></div>
             </EventFormSection>
-            <PublishPanel remaining={remaining} publishing={publishing} savingDraft={savingDraft} error={submitError} success={success} mode={editingId ? 'edit' : 'create'} onSaveDraft={handleSaveDraft} />
+            <PublishPanel remaining={remaining} publishing={publishing || uploadingPhotos} savingDraft={savingDraft} error={submitError} success={success} mode={editingId ? 'edit' : 'create'} onSaveDraft={handleSaveDraft} />
           </div>
 
-          <aside className="min-w-0 flex-[0_1_400px] space-y-5 min-[1100px]:min-w-[300px] min-[1100px]:sticky min-[1100px]:top-6"><EventPreviewCard form={form} ticketing={ticketing} tickets={tickets} categoryLabel={categoryLabel} communeName={communeName} /><PublishChecklist checks={checks} /><div className="rounded-card border border-dashed border-warm-border p-5"><h2 className="text-label font-semibold">Un doute ?</h2><p className="mt-2 text-body-sm text-ink/70">Publie d’abord un événement gratuit pour tester, tu pourras ajouter des billets payants ensuite.</p></div></aside>
+          <aside className="min-w-0 flex-[0_1_400px] space-y-5 min-[1100px]:min-w-[300px] min-[1100px]:sticky min-[1100px]:top-6"><EventPreviewCard form={form} admissionMode={admissionMode} tickets={tickets} categoryLabel={categoryLabel} communeName={communeName} /><PublishChecklist checks={checks} /><div className="rounded-card border border-dashed border-warm-border p-5"><h2 className="text-label font-semibold">Un doute ?</h2><p className="mt-2 text-body-sm text-ink/70">Choisis « Réservation gratuite » pour tester les billets et QR codes sans demander de paiement.</p></div></aside>
         </form>
       </div>
     </main>

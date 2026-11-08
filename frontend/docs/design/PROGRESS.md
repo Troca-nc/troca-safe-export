@@ -2226,3 +2226,21 @@ Inventaire et trois décisions validés par l’humain le 30 octobre 2026.
 ### Validation locale
 
 - Tests de contrat de la page et de persistance du PDF, suite backend complète, lint, TypeScript, contrôle design, inventaire UI, build Next.js de production et `git diff --check`.
+
+## 28 — Photos et billetterie de publication d’événement — Correctif
+
+### Livraison
+
+- Le nouveau design est conservé et accepte désormais jusqu’à douze photos réellement importées depuis l’appareil.
+- La première photo sert de couverture ; une autre photo peut être choisie comme couverture ou retirée avant la publication.
+- Le mode d’entrée distingue clairement l’entrée libre, la réservation gratuite et les billets payants.
+- Les réservations gratuites et payantes acceptent plusieurs types de billets nommés avec leur capacité ; le mode payant exige au moins un tarif supérieur à zéro.
+- Les événements existants conservent leurs photos et leur configuration lors d’une modification. Les anciens brouillons locaux à photo unique restent compatibles.
+
+### Limite
+
+- Une photo importée puis retirée avant publication n’est plus référencée par l’événement, mais son nettoyage physique reste géré comme les imports de produits existants.
+
+### Validation locale
+
+- Contrats ciblés frontend et backend, syntaxe serveur, TypeScript, lint, contrôle design, build Next.js de production et `git diff --check`.

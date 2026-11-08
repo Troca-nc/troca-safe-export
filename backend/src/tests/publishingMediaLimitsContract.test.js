@@ -23,3 +23,9 @@ test('la taille maximale annoncée correspond à la valeur serveur par défaut',
   assert.match(frontendConfig, /maxSizeMb:\s*10/);
   assert.match(uploadRoute, /MAX_FILE_SIZE_MB\) \|\| 10/);
 });
+
+test('les événements disposent d’un téléversement multiple authentifié', () => {
+  assert.match(uploadRoute, /router\.use\(authenticate\)/);
+  assert.match(uploadRoute, /router\.post\('\/event',[\s\S]*upload\.array\('images', MAX_IMAGES\)/);
+  assert.match(uploadRoute, /processImage\(file\.buffer, `events\/\$\{req\.user\.id\}`\)/);
+});
