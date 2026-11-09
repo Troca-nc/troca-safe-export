@@ -222,7 +222,14 @@ export function UpcomingEventsSection({
           {Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} className="h-64 rounded-card" />)}
         </div>
       ) : null}
-      {!loading && error ? <ErrorState message="Impossible de charger les événements." onRetry={onRetry} /> : null}
+      {!loading && error ? (
+        <div className="rounded-card border border-warm-border bg-cream-surface px-6 py-10 text-center" role="alert">
+          <p className="mb-0 text-body text-ink/70">Impossible de charger les événements.</p>
+          <button type="button" onClick={onRetry} className="mt-5 min-h-11 rounded-control border border-warm-border px-4 text-label font-semibold text-ink hover:border-ink">
+            Réessayer
+          </button>
+        </div>
+      ) : null}
       {!loading && !error && events.length === 0 ? (
         <div className="rounded-card border border-dashed border-warm-border bg-cream-surface px-6 py-12 text-center">
           <CalendarDays className="mx-auto h-9 w-9 text-accent-text" aria-hidden="true" />

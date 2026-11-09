@@ -26,6 +26,8 @@ test('la section d’accueil réutilise la carte publique et les routes canoniqu
   assert.match(sections, /<EventCard key=\{event\.id\} event=\{event\} \/>/)
   assert.match(sections, /href="\/evenements"/)
   assert.match(sections, /href="\/evenements\/publier"/)
+  assert.match(sections, /Impossible de charger les événements\./)
+  assert.doesNotMatch(sections, /<ErrorState message="Impossible de charger les événements\./)
 })
 
 test('la source d’accueil exclut les événements passés et trie les prochains', async () => {
