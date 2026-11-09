@@ -17,10 +17,12 @@ const statsRouter = require('./stats.route');
 const {
   activateBonPlanFromPayment,
   getBonPlanPricing,
+  notifyBonPlanUsers,
   recordBonPlanView,
   normalizeBusinessName,
   slugifyBusinessName,
   formatXpf,
+  upsertBusinessFromBonPlan,
 } = require('../services/bonPlansService');
 
 const router = express.Router();
@@ -28,6 +30,8 @@ const router = express.Router();
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
 const demoModeEnabled = process.env.DEMO_MODE === 'true';
+// Temporary launch rule: publishing a bon plan is free for every account.
+const freeBonPlanPublication = true;
 const stripe = isConfiguredValue(process.env.STRIPE_SECRET_KEY)
   ? new Stripe(process.env.STRIPE_SECRET_KEY.trim(), { apiVersion: '2023-10-16' })
   : null;
@@ -713,10 +717,18 @@ router.post('/:id/click', async (req, res, next) => {
 router.post('/', authenticate, paymentLimiter, validate({ body: createSchema }), async (req, res, next) => {
   try {
     const value = req.body || {};
-    const isPro = Boolean(req.user?.is_pro && (req.user?.pro_plan === 'pro' || req.user?.pro_plan == null || req.user?.pro_expires_at == null || new Date(req.user.pro_expires_at) > new Date()));
     const durationDays = Number(value.duration_days) === 3 ? 7 : Number(value.duration_days);
-    const pricing = getBonPlanPricing(durationDays, isPro);
-    const paymentProvider = String(value.payment_provider || 'stripe');
+    const isPro = Boolean(req.user?.is_pro && (req.user?.pro_plan === 'pro' || req.user?.pro_plan == null || req.user?.pro_expires_at == null || new Date(req.user.pro_expires_at) > new Date()));
+    const pricing = freeBonPlanPublication
+      ? {
+          duration_days: durationDays,
+          original_price_xpf: 0,
+          discount_pct: 0,
+          final_price_xpf: 0,
+          final_price_eur: 0,
+        }
+      : getBonPlanPricing(durationDays, isPro);
+    const paymentProvider = freeBonPlanPublication ? null : String(value.payment_provider || 'stripe');
     const businessName = normalizeBusinessName(value.business_name || value.contact_name || value.title);
     const category = String(value.category || mapLegacyCategory(value.kind)).trim().toLowerCase();
     const publishedUntil = new Date(Date.now() + durationDays * 86400_000);
@@ -751,7 +763,7 @@ router.post('/', authenticate, paymentLimiter, validate({ body: createSchema }),
       opening_hours: value.opening_hours?.trim() || null,
       photos: JSON.stringify(Array.isArray(value.photos) ? value.photos.filter(Boolean) : []),
       social_links: JSON.stringify(value.social_links || {}),
-      status: 'draft',
+      status: freeBonPlanPublication ? 'active' : 'draft',
       published_from: new Date(),
       published_until: publishedUntil,
       amount_xpf: pricing.final_price_xpf,
@@ -810,37 +822,48 @@ router.post('/', authenticate, paymentLimiter, validate({ body: createSchema }),
       const bonPlan = inserted.rows[0];
       if (!bonPlan) throw new Error('Impossible de creer le bon plan');
 
-      const payment = await createPaymentForBonPlan({
-        user: req.user,
-        bonPlan,
-        provider: paymentProvider,
-        amountXpf: pricing.final_price_xpf,
-        amountEur: payload.amount_eur,
-        durationDays,
-      });
+      let payment = null;
+      let business = null;
 
-      // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
-      if (!demoModeEnabled) {
-        await client.query(
-          `UPDATE bon_plans
-           SET payment_intent_id = $2,
-               updated_at = NOW()
-           WHERE id = $1`,
-          [bonPlan.id, payment.payment_id || payment.checkout_url || `pending_${bonPlan.id}`]
-        );
+      if (freeBonPlanPublication) {
+        business = await upsertBusinessFromBonPlan(client, bonPlan);
       } else {
-        await client.query(
-          `UPDATE bon_plans
-           SET status = 'active',
-               paid_at = NOW(),
-               updated_at = NOW()
-           WHERE id = $1`,
-          [bonPlan.id]
-        );
+        payment = await createPaymentForBonPlan({
+          user: req.user,
+          bonPlan,
+          provider: paymentProvider,
+          amountXpf: pricing.final_price_xpf,
+          amountEur: payload.amount_eur,
+          durationDays,
+        });
+
+        // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
+        if (!demoModeEnabled) {
+          await client.query(
+            `UPDATE bon_plans
+             SET payment_intent_id = $2,
+                 updated_at = NOW()
+             WHERE id = $1`,
+            [bonPlan.id, payment.payment_id || payment.checkout_url || `pending_${bonPlan.id}`]
+          );
+        } else {
+          await client.query(
+            `UPDATE bon_plans
+             SET status = 'active',
+                 paid_at = NOW(),
+                 updated_at = NOW()
+             WHERE id = $1`,
+            [bonPlan.id]
+          );
+        }
       }
 
-      return { bonPlan: { ...bonPlan, ...payload }, payment, pricing };
+      return { bonPlan: { ...bonPlan, ...payload }, business, payment, pricing };
     });
+
+    if (freeBonPlanPublication) {
+      await notifyBonPlanUsers(query, created.bonPlan, created.business).catch(() => {});
+    }
 
     if (statsRouter.invalidateCache) {
       await statsRouter.invalidateCache('home');
@@ -849,19 +872,19 @@ router.post('/', authenticate, paymentLimiter, validate({ body: createSchema }),
     return res.status(201).json({
       data: {
         id: created.bonPlan.id,
-        payment_url: created.payment.checkout_url,
-        checkout_url: created.payment.checkout_url,
+        payment_url: created.payment?.checkout_url || null,
+        checkout_url: created.payment?.checkout_url || null,
         payment_provider: paymentProvider,
-        demo: Boolean(created.payment.demo),
-        success: Boolean(created.payment.success),
-        message: created.payment.message || null,
+        demo: Boolean(created.payment?.demo),
+        success: freeBonPlanPublication || Boolean(created.payment?.success),
+        message: freeBonPlanPublication ? 'Bon plan publié gratuitement.' : created.payment?.message || null,
         pricing: created.pricing,
         bon_plan: serializeBonPlan({
           ...created.bonPlan,
           amount_xpf: created.pricing.final_price_xpf,
           amount_eur: Math.round(created.pricing.final_price_xpf / 119.3317),
           // DEMO_MODE guard — inactif en prod (DEMO_MODE=false)
-          status: demoModeEnabled ? 'active' : 'draft',
+          status: freeBonPlanPublication || demoModeEnabled ? 'active' : 'draft',
         }),
       },
     });

@@ -18,7 +18,7 @@ import { uploadApi } from '@/lib/api'
 import { clearLocalDealDraft, computeDiscountPercent, createDealPublishDraft, DEAL_CATEGORIES, getDealPublishMetadata, loadLocalDealDraft, publishDeal, saveLocalDealDraft } from '@/lib/data/deals'
 import { useAuthActionStore } from '@/store/authActionStore'
 import { useAuthStore } from '@/store/authStore'
-import type { DealDurationDays, DealOfferType, DealPaymentProvider, DealPlaceMode, DealPublishDraft } from '@/types/deals'
+import type { DealDurationDays, DealOfferType, DealPlaceMode, DealPublishDraft } from '@/types/deals'
 
 const OFFER_TYPES = [
   { value: 'price' as const, symbol: '− XPF', label: 'Prix réduit', hint: 'Ancien prix barré et nouveau prix.', icon: Tag },
@@ -29,8 +29,8 @@ const OFFER_TYPES = [
 
 type FieldErrors = Partial<Record<keyof DealPublishDraft | 'offerType' | 'placeMode', string>>
 
-function snapshot(form: DealPublishDraft, offerType: DealOfferType, placeMode: DealPlaceMode, durationDays: DealDurationDays, paymentProvider: DealPaymentProvider) {
-  return JSON.stringify({ form, offerType, placeMode, durationDays, paymentProvider })
+function snapshot(form: DealPublishDraft, offerType: DealOfferType, placeMode: DealPlaceMode, durationDays: DealDurationDays) {
+  return JSON.stringify({ form, offerType, placeMode, durationDays })
 }
 
 function validHttpUrl(value: string) {
@@ -44,7 +44,6 @@ export default function PublishBonPlanPage() {
   const [offerType, setOfferType] = useState<DealOfferType>('')
   const [placeMode, setPlaceMode] = useState<DealPlaceMode>('shop')
   const [durationDays, setDurationDays] = useState<DealDurationDays>(7)
-  const [paymentProvider, setPaymentProvider] = useState<DealPaymentProvider>('stripe')
   const [communes, setCommunes] = useState<{ id: number; name: string }[]>([])
   const [metadataLoading, setMetadataLoading] = useState(true)
   const [metadataError, setMetadataError] = useState('')
@@ -67,8 +66,7 @@ export default function PublishBonPlanPage() {
     setOfferType(stored?.offerType || '')
     setPlaceMode(stored?.placeMode || 'shop')
     setDurationDays(stored?.durationDays || 7)
-    setPaymentProvider(stored?.paymentProvider || 'stripe')
-    cleanSnapshot.current = snapshot(initialForm, stored?.offerType || '', stored?.placeMode || 'shop', stored?.durationDays || 7, stored?.paymentProvider || 'stripe')
+    cleanSnapshot.current = snapshot(initialForm, stored?.offerType || '', stored?.placeMode || 'shop', stored?.durationDays || 7)
     setInitialized(true)
   }, [hasHydrated, initialized, profileName, user?.email, user?.id])
 
@@ -83,7 +81,7 @@ export default function PublishBonPlanPage() {
 
   useEffect(() => { loadMetadata() }, [])
 
-  const currentSnapshot = snapshot(form, offerType, placeMode, durationDays, paymentProvider)
+  const currentSnapshot = snapshot(form, offerType, placeMode, durationDays)
   const dirty = initialized && currentSnapshot !== cleanSnapshot.current
 
   useEffect(() => {
@@ -163,7 +161,7 @@ export default function PublishBonPlanPage() {
       return
     }
     setSavingDraft(true)
-    saveLocalDealDraft(user?.id, { form, offerType, placeMode, durationDays, paymentProvider, savedAt: new Date().toISOString() })
+    saveLocalDealDraft(user?.id, { form, offerType, placeMode, durationDays, savedAt: new Date().toISOString() })
     cleanSnapshot.current = currentSnapshot
     setSuccess('Brouillon enregistré sur cet appareil.')
     setTimeout(() => setSavingDraft(false), 250)
@@ -197,15 +195,11 @@ export default function PublishBonPlanPage() {
     if (!validate()) return
     setPublishing(true)
     try {
-      const result = await publishDeal(form, offerType, placeMode, durationDays, paymentProvider)
+      const result = await publishDeal(form, offerType, placeMode, durationDays)
       clearLocalDealDraft(user?.id)
       cleanSnapshot.current = currentSnapshot
-      if (result.checkoutUrl) {
-        successfulNavigation.current = true
-        window.location.assign(result.checkoutUrl)
-        return
-      }
-      setSuccess(result.message || 'Ton bon plan est enregistré.')
+      successfulNavigation.current = true
+      window.location.assign(`/bons-plans/${result.id}`)
     } catch (reason: any) {
       successfulNavigation.current = false
       setError(reason?.response?.data?.error || reason?.message || 'Publication impossible. Réessaie sans perdre ta saisie.')
@@ -218,15 +212,12 @@ export default function PublishBonPlanPage() {
     return <><Header /><main className="min-h-screen bg-cream px-4 py-8 text-ink"><div className="mx-auto max-w-container animate-pulse space-y-5"><div className="h-28 rounded-block bg-cream-sunken" /><div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_25rem]"><div className="h-[42rem] rounded-block bg-cream-sunken" /><div className="h-96 rounded-block bg-cream-sunken" /></div></div></main></>
   }
 
-  const baseAmount = durationDays === 7 ? 2900 : 7900
-  const proAmount = durationDays === 7 ? 2320 : 6320
-
   return (
     <><Header /><main className="min-h-screen bg-cream text-ink">
       <div className="mx-auto max-w-container px-4 py-8 sm:px-6 lg:px-12 lg:py-12">
         <Link href="/bons-plans" className="text-label font-semibold text-accent-text hover:underline">← Retour aux bons plans</Link>
         <header className="mt-8 flex flex-wrap items-end justify-between gap-6">
-          <div className="max-w-3xl"><p className="text-eyebrow uppercase text-accent-text">Bon plan · Promotions et soldes</p><h1 className="mt-3 font-display text-h1-form leading-none sm:text-h1">Publie ton bon plan.</h1><p className="mt-4 max-w-2xl text-body text-ink/70">Présente une offre claire, choisis où elle s’applique et vérifie son rendu avant le paiement.</p></div>
+          <div className="max-w-3xl"><p className="text-eyebrow uppercase text-accent-text">Bon plan · Promotions et soldes</p><h1 className="mt-3 font-display text-h1-form leading-none sm:text-h1">Publie ton bon plan.</h1><p className="mt-4 max-w-2xl text-body text-ink/70">Présente une offre claire, choisis où elle s’applique et publie-la gratuitement.</p></div>
           <p aria-live="polite" className="rounded-pill bg-cream-sunken px-4 py-2 text-label font-semibold">{5 - remaining} sur 5 blocs prêts</p>
         </header>
 
@@ -264,19 +255,19 @@ export default function PublishBonPlanPage() {
 
             <EventFormSection number={4} title="Qui propose l’offre ?">
               <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]"><div data-deal-field="businessName"><Input label="Enseigne ou commerce" value={form.businessName} error={fieldErrors.businessName} onChange={(event) => updateField('businessName', event.target.value)} /></div><div data-deal-field="contactEmail"><Input label="E-mail de contact" type="email" value={form.contactEmail} error={fieldErrors.contactEmail} onChange={(event) => updateField('contactEmail', event.target.value)} /></div><Input label="Adresse du logo · facultative" type="url" value={form.businessLogoUrl} placeholder="https://" onChange={(event) => updateField('businessLogoUrl', event.target.value)} /></div>
-              <p className="mt-3 text-meta text-ink/60">L’e-mail n’est pas affiché publiquement. Il sert au suivi de la publication et du paiement.</p>
-              <div className="mt-5 rounded-control bg-cream-sunken p-4">{user?.is_pro ? <div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 text-reef-text" /><div><p className="font-semibold">Compte Pro reconnu</p><p className="mt-1 text-body-sm text-ink/65">Ton tarif Pro sera appliqué automatiquement au paiement.</p></div></div> : <div><p className="font-semibold">Publiez régulièrement ?</p><p className="mt-1 text-body-sm text-ink/65">Le compte Pro bénéficie d’un tarif réduit et d’une vitrine dédiée.</p><Link href="/devenir-pro" className="mt-2 inline-flex text-label font-semibold text-accent-text hover:underline">Découvrir l’offre Pro</Link></div>}</div>
-              <div className="mt-6 border-t border-sand pt-5"><h3 className="font-display text-h4">Diffusion et paiement</h3><div className="mt-4 grid gap-3 sm:grid-cols-2">{([{ days: 7, public: 2900, pro: 2320 }, { days: 30, public: 7900, pro: 6320 }] as const).map((item) => <button key={item.days} type="button" aria-pressed={durationDays === item.days} onClick={() => setDurationDays(item.days)} className={`min-h-28 rounded-card border p-4 text-left ${durationDays === item.days ? 'border-ink bg-ink text-cream' : 'border-warm-border bg-cream-surface'}`}><span className="text-label font-semibold">{item.days} jours</span><span className="mt-2 block font-display text-h4">{item.public.toLocaleString('fr-FR')} XPF</span><span className={`mt-1 block text-meta ${durationDays === item.days ? 'text-cream/70' : 'text-ink/60'}`}>Pro : {item.pro.toLocaleString('fr-FR')} XPF</span></button>)}</div><div className="mt-4"><SegmentedControl label="Moyen de paiement" value={paymentProvider} onChange={(value) => setPaymentProvider(value as DealPaymentProvider)} options={[{ value: 'stripe', label: 'Carte internationale' }, { value: 'payplug', label: 'Carte locale / OPT-NC' }]} /></div></div>
+              <p className="mt-3 text-meta text-ink/60">L’e-mail n’est pas affiché publiquement. Il sert au suivi de la publication.</p>
+              <div className="mt-5 rounded-control bg-cream-sunken p-4">{user?.is_pro ? <div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 text-reef-text" /><div><p className="font-semibold">Compte Pro reconnu</p><p className="mt-1 text-body-sm text-ink/65">Ton bon plan est publié gratuitement et ta vitrine Pro reste mise en avant.</p></div></div> : <div><p className="font-semibold">Publication gratuite</p><p className="mt-1 text-body-sm text-ink/65">Tous les comptes peuvent publier un bon plan sans paiement.</p><Link href="/devenir-pro" className="mt-2 inline-flex text-label font-semibold text-accent-text hover:underline">Découvrir les avantages Pro</Link></div>}</div>
+              <div className="mt-6 border-t border-sand pt-5"><h3 className="font-display text-h4">Durée de diffusion</h3><div className="mt-4 grid gap-3 sm:grid-cols-2">{([7, 30] as const).map((days) => <button key={days} type="button" aria-pressed={durationDays === days} onClick={() => setDurationDays(days)} className={`min-h-28 rounded-card border p-4 text-left ${durationDays === days ? 'border-ink bg-ink text-cream' : 'border-warm-border bg-cream-surface'}`}><span className="text-label font-semibold">{days} jours</span><span className="mt-2 block font-display text-h4">Gratuit</span><span className={`mt-1 block text-meta ${durationDays === days ? 'text-cream/70' : 'text-ink/60'}`}>Pour tous les comptes</span></button>)}</div></div>
             </EventFormSection>
 
-            <PublishPanel remaining={remaining} publishing={publishing} savingDraft={savingDraft} error={error} success={success} subject="bon plan" publishLabel="Publier le bon plan" readyMessage="Tout est renseigné. Le paiement ouvrira la diffusion de ton bon plan." onSaveDraft={saveDraft} />
+            <PublishPanel remaining={remaining} publishing={publishing} savingDraft={savingDraft} error={error} success={success} subject="bon plan" publishLabel="Publier gratuitement" readyMessage="Tout est renseigné. Ton bon plan sera visible immédiatement et gratuitement." onSaveDraft={saveDraft} />
           </div>
 
           <aside className="min-w-0 flex-[0_1_400px] space-y-5 min-[1000px]:min-w-[300px] min-[1000px]:sticky min-[1000px]:top-6">
             <DealPreviewCard form={form} offerType={offerType} placeMode={placeMode} communeName={communeName} />
             <PublishChecklist checks={checks} />
             <section className="rounded-card border border-dashed border-warm-border p-5"><BadgePercent className="h-6 w-6 text-accent-text" /><h2 className="mt-3 font-display text-h4">Une offre honnête</h2><p className="mt-2 text-body-sm text-ink/65">Le prix « avant » doit être celui réellement pratiqué. Un bon plan expiré est retiré automatiquement.</p></section>
-            <section className="rounded-card border border-warm-border bg-cream-surface p-5"><p className="text-eyebrow uppercase text-accent-text">Récapitulatif</p><div className="mt-3 flex items-baseline justify-between gap-3"><span className="text-body-sm">Prix public</span><strong>{baseAmount.toLocaleString('fr-FR')} XPF</strong></div><div className="mt-2 flex items-baseline justify-between gap-3"><span className="text-body-sm">Prix Pro</span><strong>{proAmount.toLocaleString('fr-FR')} XPF</strong></div><p className="mt-3 text-meta text-ink/60">Le bon plan devient visible après confirmation du paiement.</p></section>
+            <section className="rounded-card border border-warm-border bg-cream-surface p-5"><p className="text-eyebrow uppercase text-accent-text">Récapitulatif</p><div className="mt-3 flex items-baseline justify-between gap-3"><span className="text-body-sm">Publication</span><strong>Gratuite</strong></div><div className="mt-2 flex items-baseline justify-between gap-3"><span className="text-body-sm">Durée</span><strong>{durationDays} jours</strong></div><p className="mt-3 text-meta text-ink/60">Aucun paiement ne sera demandé. Le bon plan devient visible dès sa publication.</p></section>
           </aside>
         </form>
       </div>
