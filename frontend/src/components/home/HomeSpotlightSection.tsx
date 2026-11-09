@@ -266,7 +266,7 @@ export function HomeSpotlightSection({
                 title: 'Les meilleurs rendez-vous apparaîtront ici',
                 subtitle: 'Ajoutez un événement pour faire vibrer la communauté locale.',
                 cta: 'Publier un événement',
-                href: '/annonces/nouvelle',
+                href: '/evenements/publier',
               }
             : {
                 title: 'La mobilité locale démarre ici',

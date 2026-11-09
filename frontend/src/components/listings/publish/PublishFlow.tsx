@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { ArrowLeft, ArrowRight, BadgeCheck, CheckCircle2, ExternalLink, Lock, RotateCcw } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
@@ -48,6 +49,7 @@ function normalizeHandoffModes(values: unknown): PublishingHandoffMode[] {
 }
 
 export default function PublishFlow() {
+  const router = useRouter()
   const user = useAuthStore((state) => state.user)
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
@@ -101,8 +103,12 @@ export default function PublishFlow() {
     const kind = VALID_KINDS.includes(requested as PublishingKind)
       ? requested as PublishingKind
       : params.get('mode') === 'simple' ? 'bonplan' : null
+    if (kind === 'event') {
+      router.replace('/evenements/publier')
+      return
+    }
     if (kind) setDraft(createPublishingDraft({ kind, demoMode, ...identity }))
-  }, [demoMode, identity, initialQueryRead])
+  }, [demoMode, identity, initialQueryRead, router])
 
   useEffect(() => { photosRef.current = photos }, [photos])
 
@@ -122,6 +128,10 @@ export default function PublishFlow() {
   }
 
   const selectKind = (kind: PublishingKind) => {
+    if (kind === 'event') {
+      router.push('/evenements/publier')
+      return
+    }
     photos.forEach((photo) => URL.revokeObjectURL(photo.preview))
     setPhotos([])
     setDraft(createPublishingDraft({ kind, demoMode, ...identity }))
