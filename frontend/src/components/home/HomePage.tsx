@@ -12,10 +12,13 @@ import {
   LocalProsSection,
   RecentListingsSection,
   TrustSection,
+  UpcomingEventsSection,
 } from '@/components/home/HomeSectionsV2'
 import CategoryGridSection from '@/components/home/CategoryGridSection'
 import { trackEvent } from '@/lib/analytics'
+import { getUpcomingEvents } from '@/lib/data/bon-plans'
 import { getHomeCommunes, getHomeListings, getHomeNavigation, getHomePlatformStats, getHomePros } from '@/lib/data/home'
+import type { LocalEvent } from '@/types/bon-plans'
 import type { HomeCommune, HomeListing, HomePlatformStats, HomePro } from '@/types/home'
 
 const navigation = getHomeNavigation()
@@ -29,6 +32,9 @@ export default function HomePage() {
   const [listings, setListings] = useState<HomeListing[]>([])
   const [listingsLoading, setListingsLoading] = useState(true)
   const [listingsError, setListingsError] = useState(false)
+  const [events, setEvents] = useState<LocalEvent[]>([])
+  const [eventsLoading, setEventsLoading] = useState(true)
+  const [eventsError, setEventsError] = useState(false)
   const [pros, setPros] = useState<HomePro[]>([])
   const [prosLoading, setProsLoading] = useState(true)
   const [prosError, setProsError] = useState(false)
@@ -61,6 +67,19 @@ export default function HomePage() {
     }
   }, [])
 
+  const loadEvents = useCallback(async () => {
+    setEventsLoading(true)
+    setEventsError(false)
+    try {
+      setEvents(await getUpcomingEvents(4))
+    } catch {
+      setEvents([])
+      setEventsError(true)
+    } finally {
+      setEventsLoading(false)
+    }
+  }, [])
+
   const loadPlatformStats = useCallback(async () => {
     try {
       setPlatformStats(await getHomePlatformStats())
@@ -79,10 +98,11 @@ export default function HomePage() {
 
   useEffect(() => {
     void loadListings()
+    void loadEvents()
     void loadPros()
     void loadPlatformStats()
     void loadCommunes()
-  }, [loadCommunes, loadListings, loadPlatformStats, loadPros])
+  }, [loadCommunes, loadEvents, loadListings, loadPlatformStats, loadPros])
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -118,6 +138,13 @@ export default function HomePage() {
       />
 
       <CategoryGridSection categories={navigation.categories} />
+
+      <UpcomingEventsSection
+        events={events}
+        loading={eventsLoading}
+        error={eventsError}
+        onRetry={() => void loadEvents()}
+      />
 
       <RecentListingsSection
         listings={listings}
