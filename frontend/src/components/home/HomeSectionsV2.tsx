@@ -6,6 +6,7 @@ import {
   ArrowRight,
   BadgeCheck,
   BellRing,
+  CalendarDays,
   ChevronDown,
   CheckCircle2,
   MapPin,
@@ -15,10 +16,12 @@ import {
 } from 'lucide-react'
 
 import ListingCard, { ListingGridSkeleton } from '@/components/listings/ListingCard'
+import { EventCard } from '@/components/bon-plans/EventCard'
 import HomePlatformStats from '@/components/home/HomePlatformStats'
 import { DeepPanel } from '@/components/ui/Card'
 import { Select } from '@/components/ui/Field'
 import { ErrorState, Skeleton } from '@/components/ui/Skeleton'
+import type { LocalEvent } from '@/types/bon-plans'
 import type { HomeCategory, HomeCommune, HomeListing, HomePlatformStats as PlatformStats, HomePro } from '@/types/home'
 
 function SectionHeading({
@@ -185,6 +188,70 @@ export function RecentListingsSection({
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {listings.map((listing) => <ListingCard key={listing.id} listing={listing} />)}
         </div>
+      ) : null}
+    </section>
+  )
+}
+
+export function UpcomingEventsSection({
+  events,
+  loading,
+  error,
+  onRetry,
+}: {
+  events: LocalEvent[]
+  loading: boolean
+  error: boolean
+  onRetry: () => void
+}) {
+  return (
+    <section className="mx-auto max-w-container px-4 pt-[72px] sm:px-6 lg:px-12" aria-labelledby="home-events-title">
+      <SectionHeading
+        eyebrow="Agenda local"
+        title="Les prochains événements"
+        titleId="home-events-title"
+        action={(
+          <Link href="/evenements" className="inline-flex min-h-11 items-center gap-2 text-label text-ink">
+            Tout l&apos;agenda <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        )}
+      />
+
+      {loading ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} className="h-64 rounded-card" />)}
+        </div>
+      ) : null}
+      {!loading && error ? (
+        <div className="rounded-card border border-warm-border bg-cream-surface px-6 py-10 text-center" role="alert">
+          <p className="mb-0 text-body text-ink/70">Impossible de charger les événements.</p>
+          <button type="button" onClick={onRetry} className="mt-5 min-h-11 rounded-control border border-warm-border px-4 text-label font-semibold text-ink hover:border-ink">
+            Réessayer
+          </button>
+        </div>
+      ) : null}
+      {!loading && !error && events.length === 0 ? (
+        <div className="rounded-card border border-dashed border-warm-border bg-cream-surface px-6 py-12 text-center">
+          <CalendarDays className="mx-auto h-9 w-9 text-accent-text" aria-hidden="true" />
+          <p className="mb-0 mt-4 text-body text-ink/65">Aucun événement à venir pour l&apos;instant.</p>
+          <Link href="/evenements/publier" className="mt-5 inline-flex min-h-11 items-center rounded-control bg-accent-strong px-4 text-label font-semibold text-cream-surface">
+            Publier un événement
+          </Link>
+        </div>
+      ) : null}
+      {!loading && !error && events.length > 0 ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {events.map((event) => <EventCard key={event.id} event={event} />)}
+        </div>
+      ) : null}
+
+      {!loading && !error && events.length > 0 ? (
+        <p className="mb-0 mt-6 text-body-sm text-ink/65">
+          Vous organisez un rendez-vous local ?{' '}
+          <Link href="/evenements/publier" className="font-semibold text-accent-text underline-offset-4 hover:underline">
+            Publier un événement
+          </Link>
+        </p>
       ) : null}
     </section>
   )

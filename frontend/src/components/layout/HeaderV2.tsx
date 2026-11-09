@@ -27,6 +27,7 @@ import type { LayoutHeaderData } from '@/types/layout'
 
 const NAV_LINKS = [
   { href: '/annonces', label: 'Annonces' },
+  { href: '/evenements', label: 'Événements' },
   { href: '/bons-plans', label: 'Bons plans' },
   { href: '/pros', label: 'Pros' },
   { href: '/covoiturage', label: 'Covoiturage' },

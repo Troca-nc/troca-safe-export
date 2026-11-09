@@ -112,6 +112,20 @@ function normalizeEvent(value: unknown): LocalEvent | null {
   }
 }
 
+export async function getUpcomingEvents(limit = 4): Promise<LocalEvent[]> {
+  return demoOr(
+    async () => (await import('@/demo/fixtures/bon-plans')).bonsPlansPageFixture.events.slice(0, limit),
+    async () => {
+      const response = await eventsApi.list({ limit: Math.max(limit, 24) })
+      return extractRows(response.data)
+        .map(normalizeEvent)
+        .filter((item): item is LocalEvent => Boolean(item) && !isPastEvent(item.dateIso))
+        .sort((left, right) => left.dateIso.localeCompare(right.dateIso))
+        .slice(0, limit)
+    },
+  )
+}
+
 export async function getBonsPlansPageData(): Promise<BonsPlansPageData> {
   return demoOr(
     async () => (await import('@/demo/fixtures/bon-plans')).bonsPlansPageFixture,
