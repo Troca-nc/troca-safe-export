@@ -38,6 +38,7 @@ const SUITES = [
   './bonPlanCatalogPersistence.test',
   './health.test',
   './validate.test',
+  './bonPlansFreePublication.contract.test',
   './jwt.test',
   './auth.middleware.test',
   './email.service.test',

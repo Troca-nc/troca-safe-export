@@ -2,7 +2,6 @@ import { bonPlansApi, metaApi } from '@/lib/api'
 import type {
   DealDurationDays,
   DealOfferType,
-  DealPaymentProvider,
   DealPlaceMode,
   DealPublishDraft,
   DealPublishMetadata,
@@ -125,7 +124,6 @@ export function buildDealPayload(
   offerType: DealOfferType,
   placeMode: DealPlaceMode,
   durationDays: DealDurationDays,
-  paymentProvider: DealPaymentProvider,
 ) {
   const hasShop = placeMode !== 'online'
   const hasOnline = placeMode !== 'shop'
@@ -151,7 +149,6 @@ export function buildDealPayload(
       : form.description.trim() || null,
     kind: 'promo',
     duration_days: durationDays,
-    payment_provider: paymentProvider,
     contact_email: form.contactEmail.trim(),
   }
 }
@@ -161,15 +158,13 @@ export async function publishDeal(
   offerType: DealOfferType,
   placeMode: DealPlaceMode,
   durationDays: DealDurationDays,
-  paymentProvider: DealPaymentProvider,
 ): Promise<DealPublishResult> {
-  const response = await bonPlansApi.create(buildDealPayload(form, offerType, placeMode, durationDays, paymentProvider))
+  const response = await bonPlansApi.create(buildDealPayload(form, offerType, placeMode, durationDays))
   const data = response.data?.data
   const id = String(data?.id ?? '')
   if (!id) throw new Error('Le serveur n’a pas retourné l’identifiant du bon plan.')
   return {
     id,
-    checkoutUrl: data?.payment_url || data?.checkout_url || null,
     success: Boolean(data?.success),
     message: data?.message || null,
   }

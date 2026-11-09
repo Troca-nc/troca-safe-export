@@ -1,6 +1,5 @@
 export type DealOfferType = '' | 'price' | 'percent' | 'code' | 'multi'
 export type DealPlaceMode = 'shop' | 'online' | 'both'
-export type DealPaymentProvider = 'stripe' | 'payplug'
 export type DealDurationDays = 7 | 30
 
 export type DealPublishDraft = {
@@ -29,7 +28,6 @@ export type StoredDealDraft = {
   offerType: DealOfferType
   placeMode: DealPlaceMode
   durationDays: DealDurationDays
-  paymentProvider: DealPaymentProvider
   savedAt: string
 }
 
@@ -38,7 +36,6 @@ export type DealPublishMetadata = { communes: DealCommuneOption[] }
 
 export type DealPublishResult = {
   id: string
-  checkoutUrl: string | null
   success: boolean
   message: string | null
 }
