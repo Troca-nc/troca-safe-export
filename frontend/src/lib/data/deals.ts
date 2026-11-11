@@ -149,7 +149,7 @@ export function buildDealPayload(
       : form.description.trim() || null,
     kind: 'promo',
     duration_days: durationDays,
-    contact_email: form.contactEmail.trim(),
+    contact_email: form.contactEmail.trim() || null,
   }
 }
 

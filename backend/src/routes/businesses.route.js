@@ -37,7 +37,6 @@ function mapBusinessRow(row) {
     name: row.name,
     slug: row.slug,
     logo_url: row.logo_url ?? null,
-    contact_email: row.contact_email ?? null,
     category: row.category ?? null,
     badge: row.badge ?? 'none',
     verified_at: row.verified_at ?? null,

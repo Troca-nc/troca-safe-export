@@ -109,13 +109,13 @@ export default function PublishBonPlanPage() {
   const shopComplete = Boolean(form.locationName.trim() && form.communeId)
   const onlineComplete = validHttpUrl(form.offerUrl)
   const placeComplete = placeMode === 'shop' ? shopComplete : placeMode === 'online' ? onlineComplete : shopComplete && onlineComplete
-  const identityComplete = Boolean(form.businessName.trim() && /.+@.+\..+/.test(form.contactEmail.trim()))
+  const identityComplete = Boolean(form.businessName.trim() && (!form.contactEmail.trim() || /.+@.+\..+/.test(form.contactEmail.trim())))
   const checks = [
     { label: 'Type d’offre et titre', complete: Boolean(offerType && form.title.trim()) },
     { label: 'Offre complète et catégorie', complete: Boolean(offerComplete && form.category) },
     { label: 'Dates de validité', complete: datesComplete },
     { label: placeMode === 'online' ? 'Lien vers l’offre' : placeMode === 'both' ? 'Lieu, commune et lien' : 'Lieu et commune', complete: placeComplete },
-    { label: 'Enseigne et e-mail', complete: identityComplete },
+    { label: 'Enseigne et contact', complete: identityComplete },
   ]
   const remaining = checks.filter((check) => !check.complete).length
   const communeName = communes.find((commune) => String(commune.id) === form.communeId)?.name || ''
@@ -149,7 +149,7 @@ export default function PublishBonPlanPage() {
     if (placeMode !== 'online' && !form.communeId) errors.communeId = 'Choisissez une commune.'
     if (placeMode !== 'shop' && !validHttpUrl(form.offerUrl)) errors.offerUrl = 'Saisissez un lien commençant par http:// ou https://.'
     if (!form.businessName.trim()) errors.businessName = 'Le nom de l’enseigne est requis.'
-    if (!/.+@.+\..+/.test(form.contactEmail.trim())) errors.contactEmail = 'Saisissez une adresse e-mail valide.'
+    if (form.contactEmail.trim() && !/.+@.+\..+/.test(form.contactEmail.trim())) errors.contactEmail = 'Saisissez une adresse e-mail valide ou laissez le champ vide.'
     setFieldErrors(errors)
     focusFirstError(errors)
     return Object.keys(errors).length === 0
@@ -254,8 +254,8 @@ export default function PublishBonPlanPage() {
             </EventFormSection>
 
             <EventFormSection number={4} title="Qui propose l’offre ?">
-              <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]"><div data-deal-field="businessName"><Input label="Enseigne ou commerce" value={form.businessName} error={fieldErrors.businessName} onChange={(event) => updateField('businessName', event.target.value)} /></div><div data-deal-field="contactEmail"><Input label="E-mail de contact" type="email" value={form.contactEmail} error={fieldErrors.contactEmail} onChange={(event) => updateField('contactEmail', event.target.value)} /></div><Input label="Adresse du logo · facultative" type="url" value={form.businessLogoUrl} placeholder="https://" onChange={(event) => updateField('businessLogoUrl', event.target.value)} /></div>
-              <p className="mt-3 text-meta text-ink/60">L’e-mail n’est pas affiché publiquement. Il sert au suivi de la publication.</p>
+              <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]"><div data-deal-field="businessName"><Input label="Enseigne ou commerce" value={form.businessName} error={fieldErrors.businessName} onChange={(event) => updateField('businessName', event.target.value)} /></div><div data-deal-field="contactEmail"><Input label="E-mail de contact · facultatif" type="email" value={form.contactEmail} error={fieldErrors.contactEmail} onChange={(event) => updateField('contactEmail', event.target.value)} /></div><Input label="Adresse du logo · facultative" type="url" value={form.businessLogoUrl} placeholder="https://" onChange={(event) => updateField('businessLogoUrl', event.target.value)} /></div>
+              <p className="mt-3 text-meta text-ink/60">Tu peux laisser ce champ vide. Si tu renseignes un e-mail, il sert uniquement au suivi de la publication et n’est jamais affiché publiquement.</p>
               <div className="mt-5 rounded-control bg-cream-sunken p-4">{user?.is_pro ? <div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 text-reef-text" /><div><p className="font-semibold">Compte Pro reconnu</p><p className="mt-1 text-body-sm text-ink/65">Ton bon plan est publié gratuitement et ta vitrine Pro reste mise en avant.</p></div></div> : <div><p className="font-semibold">Publication gratuite</p><p className="mt-1 text-body-sm text-ink/65">Tous les comptes peuvent publier un bon plan sans paiement.</p><Link href="/devenir-pro" className="mt-2 inline-flex text-label font-semibold text-accent-text hover:underline">Découvrir les avantages Pro</Link></div>}</div>
               <div className="mt-6 border-t border-sand pt-5"><h3 className="font-display text-h4">Durée de diffusion</h3><div className="mt-4 grid gap-3 sm:grid-cols-2">{([7, 30] as const).map((days) => <button key={days} type="button" aria-pressed={durationDays === days} onClick={() => setDurationDays(days)} className={`min-h-28 rounded-card border p-4 text-left ${durationDays === days ? 'border-ink bg-ink text-cream' : 'border-warm-border bg-cream-surface'}`}><span className="text-label font-semibold">{days} jours</span><span className="mt-2 block font-display text-h4">Gratuit</span><span className={`mt-1 block text-meta ${durationDays === days ? 'text-cream/70' : 'text-ink/60'}`}>Pour tous les comptes</span></button>)}</div></div>
             </EventFormSection>
