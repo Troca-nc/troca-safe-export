@@ -120,12 +120,15 @@ router.get('/:slug', optionalAuth, async (req, res, next) => {
          bp.title,
          bp.description,
          bp.image_url,
+         bp.catalog_pdf_url,
+         bp.catalog_pdf_pages,
          bp.promo_label,
          bp.original_price_xpf,
          bp.promo_price_xpf,
          bp.cta_label,
          bp.cta_url,
          bp.category,
+         bp.promo_valid_until,
          bp.published_until,
          bp.view_count,
          bp.click_count,
@@ -137,6 +140,7 @@ router.get('/:slug', optionalAuth, async (req, res, next) => {
        WHERE bp.business_id = $1
          AND bp.status = 'active'
          AND bp.published_until > NOW()
+         AND (bp.promo_valid_until IS NULL OR bp.promo_valid_until >= (NOW() AT TIME ZONE 'Pacific/Noumea')::date)
        ORDER BY bp.published_from DESC, bp.id DESC
        LIMIT 24`,
       [business.id]

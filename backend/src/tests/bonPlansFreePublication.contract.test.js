@@ -15,6 +15,7 @@ const dealDataSource = fs.readFileSync(
   'utf8'
 );
 const businessesRouteSource = fs.readFileSync(path.join(__dirname, '..', 'routes', 'businesses.route.js'), 'utf8');
+const uploadRouteSource = fs.readFileSync(path.join(__dirname, '..', 'routes', 'upload.js'), 'utf8');
 const publishFlowSource = fs.readFileSync(
   path.join(__dirname, '..', '..', '..', 'frontend', 'src', 'components', 'listings', 'publish', 'PublishFlow.tsx'),
   'utf8'
@@ -88,5 +89,25 @@ describe('publication gratuite des bons plans', () => {
     assert.match(frontendSource, /`\/bons-plans\/enseigne\/\$\{encodeURIComponent\(result\.businessSlug\)\}`/);
     assert.match(frontendSource, /: '\/bons-plans'/);
     assert.doesNotMatch(frontendSource, /`\/bons-plans\/\$\{result\.id\}`/);
+  });
+
+  it('retire les offres après leur date de fin en heure civile de Nouméa', () => {
+    const noumeaExpiry = /promo_valid_until IS NULL OR bp\.promo_valid_until >= \(NOW\(\) AT TIME ZONE 'Pacific\/Noumea'\)::date/g;
+    assert.ok((routeSource.match(noumeaExpiry) || []).length >= 2, 'la liste et le détail doivent appliquer la date de fin');
+    assert.match(businessesRouteSource, noumeaExpiry);
+  });
+
+  it('utilise des téléversements dédiés et publics pour la photo et le catalogue', () => {
+    assert.match(uploadRouteSource, /router\.post\('\/bon-plan\/image'/);
+    assert.match(uploadRouteSource, /processImage\(req\.file\.buffer, `bon-plans\/\$\{req\.user\.id\}`\)/);
+    assert.match(uploadRouteSource, /router\.post\('\/bon-plan\/catalog'/);
+    assert.match(uploadRouteSource, /file\.mimetype !== 'application\/pdf'/);
+    assert.match(uploadRouteSource, /err\.code === 'LIMIT_FILE_SIZE'/);
+    assert.match(uploadRouteSource, /res\.status\(413\)/);
+    assert.match(uploadRouteSource, /path\.join\('bon-plans', String\(req\.user\.id\)\)/);
+    assert.doesNotMatch(frontendSource, /uploadChatDocument|Adresse de la photo/);
+    assert.match(dealDataSource, /uploadApi\.uploadBonPlanImage/);
+    assert.match(dealDataSource, /uploadApi\.uploadBonPlanCatalog/);
+    assert.match(businessesRouteSource, /bp\.catalog_pdf_url/);
   });
 });

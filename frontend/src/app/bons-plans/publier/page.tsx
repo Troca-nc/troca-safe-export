@@ -6,6 +6,7 @@ import { BadgePercent, Gift, KeyRound, Percent, ShieldCheck, Tag } from 'lucide-
 
 import { DealPreviewCard } from '@/components/deals/DealPreviewCard'
 import { DiscountReadout } from '@/components/deals/DiscountReadout'
+import { DealMediaFields } from '@/components/deals/DealMediaFields'
 import { OfferTypeCard } from '@/components/deals/OfferTypeCard'
 import { EventFormSection } from '@/components/events/EventFormSection'
 import { PublishChecklist } from '@/components/events/PublishChecklist'
@@ -14,8 +15,7 @@ import Header from '@/components/layout/Header'
 import { Button } from '@/components/ui/Button'
 import { FilterChip, SegmentedControl } from '@/components/ui/Controls'
 import { Input, Select, Textarea } from '@/components/ui/Field'
-import { uploadApi } from '@/lib/api'
-import { clearLocalDealDraft, computeDiscountPercent, createDealPublishDraft, DEAL_CATEGORIES, getDealPublishMetadata, loadLocalDealDraft, publishDeal, saveLocalDealDraft } from '@/lib/data/deals'
+import { clearLocalDealDraft, computeDiscountPercent, createDealPublishDraft, DEAL_CATEGORIES, getDealPublishMetadata, loadLocalDealDraft, publishDeal, saveLocalDealDraft, uploadDealCatalog, uploadDealPhoto } from '@/lib/data/deals'
 import { useAuthActionStore } from '@/store/authActionStore'
 import { useAuthStore } from '@/store/authStore'
 import type { DealDurationDays, DealOfferType, DealPlaceMode, DealPublishDraft } from '@/types/deals'
@@ -49,6 +49,9 @@ export default function PublishBonPlanPage() {
   const [metadataError, setMetadataError] = useState('')
   const [initialized, setInitialized] = useState(false)
   const [publishing, setPublishing] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [imageUploadProgress, setImageUploadProgress] = useState(0)
+  const [uploadingCatalog, setUploadingCatalog] = useState(false)
   const [savingDraft, setSavingDraft] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -167,20 +170,49 @@ export default function PublishBonPlanPage() {
     setTimeout(() => setSavingDraft(false), 250)
   }
 
-  const uploadCatalogPdf = async (file: File | null) => {
-    if (!file) return
+  const requireMediaAuth = () => {
+    if (isAuthenticated) return false
+    openAuthModal({ type: 'publish_listing', redirectTo: '/bons-plans/publier' })
+    return true
+  }
+
+  const uploadImage = async (file: File) => {
+    if (requireMediaAuth()) return
+    setUploadingImage(true)
+    setImageUploadProgress(0)
+    setError('')
+    setSuccess('')
+    try {
+      const url = await uploadDealPhoto(file, setImageUploadProgress)
+      updateField('imageUrl', url)
+      setSuccess('Photo prête à être publiée.')
+    } catch (reason: unknown) {
+      const uploadError = reason as { response?: { data?: { error?: string } }; message?: string }
+      setError(uploadError.response?.data?.error || uploadError.message || 'Impossible de téléverser la photo.')
+    } finally {
+      setUploadingImage(false)
+      setImageUploadProgress(0)
+    }
+  }
+
+  const uploadCatalogPdf = async (file: File) => {
+    if (requireMediaAuth()) return
     if (file.type !== 'application/pdf') {
       setError('Le catalogue doit être un fichier PDF.')
       return
     }
+    setUploadingCatalog(true)
+    setError('')
+    setSuccess('')
     try {
-      const response = await uploadApi.uploadChatDocument(file)
-      const url = String(response.data?.data?.url || '')
-      if (!url) throw new Error('URL manquante')
+      const url = await uploadDealCatalog(file)
       updateField('catalogPdfUrl', url)
       setSuccess('Catalogue PDF prêt à être publié.')
-    } catch {
-      setError('Impossible de téléverser le catalogue PDF.')
+    } catch (reason: unknown) {
+      const uploadError = reason as { response?: { data?: { error?: string } }; message?: string }
+      setError(uploadError.response?.data?.error || uploadError.message || 'Impossible de téléverser le catalogue PDF.')
+    } finally {
+      setUploadingCatalog(false)
     }
   }
 
@@ -188,6 +220,10 @@ export default function PublishBonPlanPage() {
     event.preventDefault()
     setError('')
     setSuccess('')
+    if (uploadingImage || uploadingCatalog) {
+      setError('Attends la fin de l’import des médias avant de publier.')
+      return
+    }
     if (!isAuthenticated) {
       openAuthModal({ type: 'publish_listing', redirectTo: '/bons-plans/publier' })
       return
@@ -246,7 +282,7 @@ export default function PublishBonPlanPage() {
               </div>
               <div className="mt-5"><p className="mb-2 text-label-sm font-semibold">Catégorie</p><div data-deal-field="category" className="flex flex-wrap gap-2">{DEAL_CATEGORIES.map((item) => <FilterChip key={item.value} selected={form.category === item.value} onClick={() => updateField('category', item.value)}>{item.label}</FilterChip>)}</div>{fieldErrors.category ? <p className="mt-2 text-meta text-alert-error" role="alert">{fieldErrors.category}</p> : null}</div>
               <div className="mt-5"><Textarea label="Conditions et détails · facultatif" value={form.description} maxLength={500} placeholder="Précise les produits concernés et les éventuelles exclusions." onChange={(event) => updateField('description', event.target.value)} /></div>
-              <div className="mt-5 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]"><Input label="Adresse de la photo · facultative" type="url" value={form.imageUrl} hint="Le téléversement d’image sera ajouté dans un lot séparé." placeholder="https://" onChange={(event) => updateField('imageUrl', event.target.value)} /><label className="flex min-w-0 flex-col gap-2"><span className="text-label-sm font-semibold">Catalogue PDF · facultatif</span><input type="file" accept="application/pdf" onChange={(event) => void uploadCatalogPdf(event.target.files?.[0] || null)} className="k-field min-h-12 file:mr-3 file:rounded-control file:border-0 file:bg-ink file:px-3 file:py-2 file:text-cream" />{form.catalogPdfUrl ? <span className="text-meta text-success-text">Catalogue prêt.</span> : <span className="text-meta text-ink/60">PDF uniquement.</span>}</label></div>
+              <DealMediaFields imageUrl={form.imageUrl} catalogPdfUrl={form.catalogPdfUrl} uploadingImage={uploadingImage} imageUploadProgress={imageUploadProgress} uploadingCatalog={uploadingCatalog} disabled={publishing} onImageSelected={(file) => void uploadImage(file)} onCatalogSelected={(file) => void uploadCatalogPdf(file)} onRemoveImage={() => updateField('imageUrl', '')} onRemoveCatalog={() => updateField('catalogPdfUrl', '')} />
             </EventFormSection>
 
             <EventFormSection number={3} title="Quand et où">
@@ -263,7 +299,7 @@ export default function PublishBonPlanPage() {
               <div className="mt-6 border-t border-sand pt-5"><h3 className="font-display text-h4">Durée de diffusion</h3><div className="mt-4 grid gap-3 sm:grid-cols-2">{([7, 30] as const).map((days) => <button key={days} type="button" aria-pressed={durationDays === days} onClick={() => setDurationDays(days)} className={`min-h-28 rounded-card border p-4 text-left ${durationDays === days ? 'border-ink bg-ink text-cream' : 'border-warm-border bg-cream-surface'}`}><span className="text-label font-semibold">{days} jours</span><span className="mt-2 block font-display text-h4">Gratuit</span><span className={`mt-1 block text-meta ${durationDays === days ? 'text-cream/70' : 'text-ink/60'}`}>Pour tous les comptes</span></button>)}</div></div>
             </EventFormSection>
 
-            <PublishPanel remaining={remaining} publishing={publishing} savingDraft={savingDraft} error={error} success={success} subject="bon plan" publishLabel="Publier gratuitement" readyMessage="Tout est renseigné. Ton bon plan sera visible immédiatement et gratuitement." onSaveDraft={saveDraft} />
+            <PublishPanel remaining={remaining} publishing={publishing || uploadingImage || uploadingCatalog} savingDraft={savingDraft} error={error} success={success} subject="bon plan" publishLabel="Publier gratuitement" readyMessage="Tout est renseigné. Ton bon plan sera visible immédiatement et gratuitement." onSaveDraft={saveDraft} />
           </div>
 
           <aside className="min-w-0 flex-[0_1_400px] space-y-5 min-[1000px]:min-w-[300px] min-[1000px]:sticky min-[1000px]:top-6">

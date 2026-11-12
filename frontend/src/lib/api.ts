@@ -439,6 +439,21 @@ export const uploadApi = {
       ...config,
     })
   },
+  uploadBonPlanImage: (file: File, config?: Pick<AxiosRequestConfig, 'onUploadProgress'>) => {
+    const form = new FormData()
+    form.append('image', file)
+    return api.post('/upload/bon-plan/image', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      ...config,
+    })
+  },
+  uploadBonPlanCatalog: (file: File) => {
+    const form = new FormData()
+    form.append('file', file)
+    return api.post('/upload/bon-plan/catalog', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
   uploadChatPhoto: (file: File) => {
     const form = new FormData()
     form.append('image', file)
