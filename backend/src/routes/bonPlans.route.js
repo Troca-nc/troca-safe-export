@@ -734,6 +734,8 @@ router.post('/', authenticate, paymentLimiter, validate({ body: createSchema }),
 
     const payload = {
       user_id: req.user.id,
+      kind: value.kind || 'promo',
+      target_audience: value.target_audience || 'particulier',
       business_name: businessName,
       business_logo_url: value.business_logo_url || null,
       catalog_pdf_url: value.catalog_pdf_url || null,
@@ -772,16 +774,18 @@ router.post('/', authenticate, paymentLimiter, validate({ body: createSchema }),
     const created = await withTransaction(async (client) => {
       const inserted = await client.query(
         `INSERT INTO bon_plans
-           (user_id, business_name, business_logo_url, catalog_pdf_url, catalog_pdf_pages, title, description, image_url, promo_label, original_price_xpf, promo_price_xpf, cta_label, cta_url,
+           (user_id, kind, target_audience, business_name, business_logo_url, catalog_pdf_url, catalog_pdf_pages, title, description, image_url, promo_label, original_price_xpf, promo_price_xpf, cta_label, cta_url,
             category, promo_valid_from, promo_valid_until, commune_id, location_name, event_date, duration_days, payment_provider, contact_name, contact_phone,
             contact_email, website_url, conditions, opening_hours, photos, social_links, status, published_from, published_until, amount_xpf, amount_eur)
          VALUES
            ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,
             $12,$13,$14,$15,$16,$17,$18,$19,$20,$21,
-            $22,$23,$24,$25,$26,$27::jsonb,$28::jsonb,$29,$30,$31,$32,$33,$34)
+            $22,$23,$24,$25,$26,$27,$28,$29::jsonb,$30::jsonb,$31,$32,$33,$34,$35,$36)
          RETURNING *`,
         [
           payload.user_id,
+          payload.kind,
+          payload.target_audience,
           payload.business_name,
           payload.business_logo_url,
           payload.catalog_pdf_url,
