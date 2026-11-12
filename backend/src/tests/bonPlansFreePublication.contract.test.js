@@ -80,4 +80,13 @@ describe('publication gratuite des bons plans', () => {
     assert.match(headerSource, /redirectTo: '\/deposer'/);
     assert.doesNotMatch(headerSource, /router\.push\('\/annonces\/nouvelle'\)/);
   });
+
+  it('redirige une publication réussie vers la fiche d’enseigne existante', () => {
+    assert.match(createRoute, /business_slug: created\.business\?\.slug \|\| null/);
+    assert.match(dealDataSource, /const businessSlug = String\(data\?\.business_slug \?\? ''\)\.trim\(\)/);
+    assert.match(dealDataSource, /businessSlug: businessSlug \|\| null/);
+    assert.match(frontendSource, /`\/bons-plans\/enseigne\/\$\{encodeURIComponent\(result\.businessSlug\)\}`/);
+    assert.match(frontendSource, /: '\/bons-plans'/);
+    assert.doesNotMatch(frontendSource, /`\/bons-plans\/\$\{result\.id\}`/);
+  });
 });

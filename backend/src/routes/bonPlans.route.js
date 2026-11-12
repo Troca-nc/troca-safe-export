@@ -877,6 +877,7 @@ router.post('/', authenticate, paymentLimiter, validate({ body: createSchema }),
     return res.status(201).json({
       data: {
         id: created.bonPlan.id,
+        business_slug: created.business?.slug || null,
         payment_url: created.payment?.checkout_url || null,
         checkout_url: created.payment?.checkout_url || null,
         payment_provider: paymentProvider,

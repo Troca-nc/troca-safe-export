@@ -2219,6 +2219,13 @@ Inventaire et trois décisions validés par l’humain le 30 octobre 2026.
 ### Limites confirmées par l’inventaire
 
 - La photo reste une URL avec aperçu : aucun téléversement d’image de bon plan dédié n’existe encore.
+
+### Redirection après publication — correction fonctionnelle autorisée (12 novembre 2026)
+
+- Incident production prouvé : `POST /api/bon-plans` répond `201`, puis le formulaire redirige vers `/bons-plans/{id}`, route frontend inexistante. La publication est enregistrée mais l’utilisateur arrive sur la page 404.
+- La destination existante est `/bons-plans/enseigne/{slug}`. L’enseigne et son slug sont créés dans la même transaction, mais le slug n’est pas exposé dans le résultat normalisé de publication.
+- Exception fonctionnelle explicitement autorisée par l’utilisateur. Fichiers hors de la liste historique `src/components/bon-plans/*` : `backend/src/routes/bonPlans.route.js`, `backend/src/tests/bonPlansFreePublication.contract.test.js`, `frontend/src/types/deals.ts`, `frontend/src/lib/data/deals.ts` et `frontend/src/app/bons-plans/publier/page.tsx`.
+- Le résultat de création expose le slug de l’enseigne créée dans la même transaction. Après succès, le client ouvre `/bons-plans/enseigne/{slug}` ; `/bons-plans` reste le repli sûr si un ancien serveur ne renvoie pas encore le slug. La route inexistante `/bons-plans/{id}` n’est plus utilisée.
 - Le brouillon est local : le serveur ne propose pas d’enregistrement propriétaire sans initialiser le paiement.
 - La comparaison visuelle humaine à 1440 px reste à faire, le contrôleur du navigateur intégré n’étant pas disponible dans cette session.
 - Les tests visuels mobiles restent prévus dans le second temps demandé par l’utilisateur.

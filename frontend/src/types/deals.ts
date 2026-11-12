@@ -36,6 +36,7 @@ export type DealPublishMetadata = { communes: DealCommuneOption[] }
 
 export type DealPublishResult = {
   id: string
+  businessSlug: string | null
   success: boolean
   message: string | null
 }

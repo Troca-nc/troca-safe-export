@@ -163,8 +163,10 @@ export async function publishDeal(
   const data = response.data?.data
   const id = String(data?.id ?? '')
   if (!id) throw new Error('Le serveur n’a pas retourné l’identifiant du bon plan.')
+  const businessSlug = String(data?.business_slug ?? '').trim()
   return {
     id,
+    businessSlug: businessSlug || null,
     success: Boolean(data?.success),
     message: data?.message || null,
   }
