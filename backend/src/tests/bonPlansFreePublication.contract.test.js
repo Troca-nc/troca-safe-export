@@ -15,6 +15,14 @@ const dealDataSource = fs.readFileSync(
   'utf8'
 );
 const businessesRouteSource = fs.readFileSync(path.join(__dirname, '..', 'routes', 'businesses.route.js'), 'utf8');
+const publishFlowSource = fs.readFileSync(
+  path.join(__dirname, '..', '..', '..', 'frontend', 'src', 'components', 'listings', 'publish', 'PublishFlow.tsx'),
+  'utf8'
+);
+const headerSource = fs.readFileSync(
+  path.join(__dirname, '..', '..', '..', 'frontend', 'src', 'components', 'layout', 'HeaderV2.tsx'),
+  'utf8'
+);
 const createRoute = routeSource.slice(routeSource.indexOf("router.post('/',"));
 const serializedBonPlan = routeSource.slice(routeSource.indexOf('function serializeBonPlan'), routeSource.indexOf('async function queryBonPlans'));
 const mappedBusiness = businessesRouteSource.slice(businessesRouteSource.indexOf('function mapBusinessRow'), businessesRouteSource.indexOf("router.get('/',"));
@@ -52,6 +60,8 @@ describe('publication gratuite des bons plans', () => {
   it('alimente les colonnes legacy obligatoires lors de la création', () => {
     assert.match(createRoute, /kind: value\.kind \|\| 'promo'/);
     assert.match(createRoute, /target_audience: value\.target_audience \|\| 'particulier'/);
+    assert.match(createRoute, /expires_at: publishedUntil/);
+    assert.match(createRoute, /published_until, expires_at, amount_xpf/);
     assert.match(createRoute, /\(user_id, kind, target_audience, business_name/);
     assert.match(createRoute, /payload\.user_id,\s*payload\.kind,\s*payload\.target_audience,\s*payload\.business_name/);
 
@@ -61,5 +71,13 @@ describe('publication gratuite des bons plans', () => {
     const placeholders = [...insertSql[2].matchAll(/\$(\d+)/g)].map((match) => Number(match[1]));
     assert.strictEqual(placeholders.length, columns.length);
     assert.deepStrictEqual(placeholders, columns.map((_, index) => index + 1));
+  });
+
+  it('redirige tous les choix bon plan vers le formulaire canonique', () => {
+    assert.match(publishFlowSource, /if \(kind === 'bonplan'\) \{\s*router\.replace\('\/bons-plans\/publier'\)/);
+    assert.match(publishFlowSource, /if \(kind === 'bonplan'\) \{\s*router\.push\('\/bons-plans\/publier'\)/);
+    assert.match(headerSource, /router\.push\('\/deposer'\)/);
+    assert.match(headerSource, /redirectTo: '\/deposer'/);
+    assert.doesNotMatch(headerSource, /router\.push\('\/annonces\/nouvelle'\)/);
   });
 });

@@ -767,6 +767,7 @@ router.post('/', authenticate, paymentLimiter, validate({ body: createSchema }),
       status: freeBonPlanPublication ? 'active' : 'draft',
       published_from: new Date(),
       published_until: publishedUntil,
+      expires_at: publishedUntil,
       amount_xpf: pricing.final_price_xpf,
       amount_eur: Math.round(pricing.final_price_xpf / 119.3317),
     };
@@ -776,11 +777,11 @@ router.post('/', authenticate, paymentLimiter, validate({ body: createSchema }),
         `INSERT INTO bon_plans
            (user_id, kind, target_audience, business_name, business_logo_url, catalog_pdf_url, catalog_pdf_pages, title, description, image_url, promo_label, original_price_xpf, promo_price_xpf, cta_label, cta_url,
             category, promo_valid_from, promo_valid_until, commune_id, location_name, event_date, duration_days, payment_provider, contact_name, contact_phone,
-            contact_email, website_url, conditions, opening_hours, photos, social_links, status, published_from, published_until, amount_xpf, amount_eur)
+            contact_email, website_url, conditions, opening_hours, photos, social_links, status, published_from, published_until, expires_at, amount_xpf, amount_eur)
          VALUES
            ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,
             $12,$13,$14,$15,$16,$17,$18,$19,$20,$21,
-            $22,$23,$24,$25,$26,$27,$28,$29::jsonb,$30::jsonb,$31,$32,$33,$34,$35,$36)
+            $22,$23,$24,$25,$26,$27,$28,$29::jsonb,$30::jsonb,$31,$32,$33,$34,$35,$36,$37)
          RETURNING *`,
         [
           payload.user_id,
@@ -817,6 +818,7 @@ router.post('/', authenticate, paymentLimiter, validate({ body: createSchema }),
           payload.status,
           payload.published_from,
           payload.published_until,
+          payload.expires_at,
           payload.amount_xpf,
           payload.amount_eur,
         ]

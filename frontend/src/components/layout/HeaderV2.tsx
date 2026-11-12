@@ -158,10 +158,10 @@ export default function Header({
 
   const publish = () => {
     if (isAuthenticated) {
-      router.push('/annonces/nouvelle')
+      router.push('/deposer')
       return
     }
-    openAuthModal({ type: 'publish_listing', redirectTo: '/annonces/nouvelle' })
+    openAuthModal({ type: 'publish_listing', redirectTo: '/deposer' })
   }
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
