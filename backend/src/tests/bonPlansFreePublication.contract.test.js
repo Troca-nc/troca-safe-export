@@ -48,4 +48,18 @@ describe('publication gratuite des bons plans', () => {
     assert.match(frontendSource, /form\.contactEmail\.trim\(\) && !\/\.\+@\.\+\\\.\.\+\/\.test/);
     assert.match(dealDataSource, /contact_email: form\.contactEmail\.trim\(\) \|\| null/);
   });
+
+  it('alimente les colonnes legacy obligatoires lors de la création', () => {
+    assert.match(createRoute, /kind: value\.kind \|\| 'promo'/);
+    assert.match(createRoute, /target_audience: value\.target_audience \|\| 'particulier'/);
+    assert.match(createRoute, /\(user_id, kind, target_audience, business_name/);
+    assert.match(createRoute, /payload\.user_id,\s*payload\.kind,\s*payload\.target_audience,\s*payload\.business_name/);
+
+    const insertSql = createRoute.match(/INSERT INTO bon_plans\s*\(([\s\S]*?)\)\s*VALUES\s*\(([\s\S]*?)\)\s*RETURNING \*/);
+    assert.ok(insertSql, 'la requête INSERT doit rester détectable par le contrat');
+    const columns = insertSql[1].split(',').map((column) => column.trim()).filter(Boolean);
+    const placeholders = [...insertSql[2].matchAll(/\$(\d+)/g)].map((match) => Number(match[1]));
+    assert.strictEqual(placeholders.length, columns.length);
+    assert.deepStrictEqual(placeholders, columns.map((_, index) => index + 1));
+  });
 });
