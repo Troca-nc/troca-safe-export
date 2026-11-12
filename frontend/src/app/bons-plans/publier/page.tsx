@@ -199,7 +199,10 @@ export default function PublishBonPlanPage() {
       clearLocalDealDraft(user?.id)
       cleanSnapshot.current = currentSnapshot
       successfulNavigation.current = true
-      window.location.assign(`/bons-plans/${result.id}`)
+      const destination = result.businessSlug
+        ? `/bons-plans/enseigne/${encodeURIComponent(result.businessSlug)}`
+        : '/bons-plans'
+      window.location.assign(destination)
     } catch (reason: any) {
       successfulNavigation.current = false
       setError(reason?.response?.data?.error || reason?.message || 'Publication impossible. Réessaie sans perdre ta saisie.')
