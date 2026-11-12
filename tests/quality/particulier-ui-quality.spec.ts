@@ -155,7 +155,8 @@ test.describe('qualité UI et contenu du compte particulier', () => {
 
   test('publication: bon plan sans étincelles et covoiturage intra-communal', async ({ page }) => {
     await openStablePage(page, '/deposer?type=bonplan')
-    await expect(page.getByText('Bon plan local', { exact: true })).toBeVisible()
+    await expect(page).toHaveURL(/\/bons-plans\/publier$/)
+    await expect(page.getByRole('heading', { name: 'Publie ton bon plan.' })).toBeVisible()
     await expect(page.locator('.lucide-sparkles')).toHaveCount(0)
 
     await openStablePage(page, '/deposer?type=carpool')

@@ -107,6 +107,10 @@ export default function PublishFlow() {
       router.replace('/evenements/publier')
       return
     }
+    if (kind === 'bonplan') {
+      router.replace('/bons-plans/publier')
+      return
+    }
     if (kind) setDraft(createPublishingDraft({ kind, demoMode, ...identity }))
   }, [demoMode, identity, initialQueryRead, router])
 
@@ -130,6 +134,10 @@ export default function PublishFlow() {
   const selectKind = (kind: PublishingKind) => {
     if (kind === 'event') {
       router.push('/evenements/publier')
+      return
+    }
+    if (kind === 'bonplan') {
+      router.push('/bons-plans/publier')
       return
     }
     photos.forEach((photo) => URL.revokeObjectURL(photo.preview))
