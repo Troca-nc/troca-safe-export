@@ -47,7 +47,7 @@ const createEventSchema = Joi.object({
   end_time: Joi.string().trim().pattern(/^\d{2}:\d{2}(:\d{2})?$/).allow('', null),
   cover_image_url: Joi.string().uri().allow('', null),
   photos: Joi.array().items(Joi.string().uri().allow('', null)).max(12).default([]),
-  booking_url: Joi.string().uri().allow('', null),
+  booking_url: Joi.string().uri({ scheme: ['http', 'https'] }).allow('', null),
   room: Joi.string().trim().max(120).allow('', null),
   version: Joi.string().trim().max(30).allow('', null),
   is_3d: Joi.boolean().default(false),
@@ -72,7 +72,7 @@ const reserveSchema = Joi.object({
   buyer_email: Joi.string().email().max(255).required(),
   buyer_name: Joi.string().trim().min(2).max(200).required(),
   buyer_phone: Joi.string().trim().max(30).allow('', null),
-  provider: Joi.string().valid('stripe').default('stripe'),
+  provider: Joi.string().valid('stripe', 'onsite').default('stripe'),
   items: Joi.array().items(
     Joi.object({
       ticket_type_id: Joi.number().integer().positive().required(),
@@ -202,7 +202,7 @@ router.post('/:id/reservations', optionalAuth, validate(reserveSchema), async (r
       demoMode: process.env.DEMO_MODE === 'true',
     });
 
-    if (result.order?.status === 'paid') {
+    if (result.order?.status === 'paid' || result.payment_method === 'onsite') {
       await sendTicketEmail(result.order, result.tickets).catch(() => {});
     }
 
@@ -215,6 +215,7 @@ router.post('/:id/reservations', optionalAuth, validate(reserveSchema), async (r
         session_id: result.session_id || null,
         payment_id: result.payment_id || null,
         provider: result.provider,
+        payment_method: result.payment_method || null,
         demo: Boolean(result.demo),
       },
     });

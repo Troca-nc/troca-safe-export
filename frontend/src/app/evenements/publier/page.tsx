@@ -17,7 +17,7 @@ import { Input, Select, Textarea } from '@/components/ui/Field'
 import { clearLocalEventDraft, createEventPublishDraft, EVENT_CATEGORIES, getEventPublishMetadata, getManagedEvent, INITIAL_EVENT_TICKET, loadLocalEventDraft, publishEvent, resolveEventAdmissionMode, saveLocalEventDraft, updateManagedEvent, uploadEventPhotos } from '@/lib/data/events'
 import { useAuthActionStore } from '@/store/authActionStore'
 import { useAuthStore } from '@/store/authStore'
-import type { EventAdmissionMode, EventPublishDraft, EventTicketDraft } from '@/types/events'
+import type { EventAdmissionMode, EventPaidReservationMode, EventPublishDraft, EventTicketDraft } from '@/types/events'
 
 type FieldErrors = Partial<Record<keyof EventPublishDraft, string>>
 const NEW_TICKET: EventTicketDraft = { name: '', description: '', priceXpf: '0', quantity: '50' }
@@ -31,8 +31,8 @@ function validUrl(value: string) {
   } catch { return false }
 }
 
-function snapshot(form: EventPublishDraft, admissionMode: EventAdmissionMode, tickets: EventTicketDraft[]) {
-  return JSON.stringify({ form, admissionMode, tickets })
+function snapshot(form: EventPublishDraft, admissionMode: EventAdmissionMode, paidReservationMode: EventPaidReservationMode, tickets: EventTicketDraft[]) {
+  return JSON.stringify({ form, admissionMode, paidReservationMode, tickets })
 }
 
 export default function EventPublishPage() {
@@ -40,6 +40,7 @@ export default function EventPublishPage() {
   const openAuthModal = useAuthActionStore((state) => state.openAuthModal)
   const [form, setForm] = useState<EventPublishDraft>(() => createEventPublishDraft())
   const [admissionMode, setAdmissionMode] = useState<EventAdmissionMode>('free')
+  const [paidReservationMode, setPaidReservationMode] = useState<EventPaidReservationMode>('onsite')
   const [tickets, setTickets] = useState<EventTicketDraft[]>([{ ...INITIAL_EVENT_TICKET }])
   const [communes, setCommunes] = useState<{ id: number; name: string }[]>([])
   const [initialized, setInitialized] = useState(false)
@@ -77,7 +78,7 @@ export default function EventPublishPage() {
     if (editId && !isAuthenticated) {
       const initialForm = createEventPublishDraft(profile)
       setForm(initialForm)
-      cleanSnapshot.current = snapshot(initialForm, 'free', [{ ...INITIAL_EVENT_TICKET }])
+      cleanSnapshot.current = snapshot(initialForm, 'free', 'onsite', [{ ...INITIAL_EVENT_TICKET }])
       setInitialized(true)
       openAuthModal({ type: 'publish_listing', redirectTo: `/evenements/publier?edit=${encodeURIComponent(editId)}` })
       return
@@ -92,9 +93,10 @@ export default function EventPublishPage() {
           const initialTickets = managed.tickets.length ? managed.tickets : [{ ...INITIAL_EVENT_TICKET }]
           setForm(managed.form)
           setAdmissionMode(managed.admissionMode)
+          setPaidReservationMode(managed.paidReservationMode)
           setTickets(initialTickets)
           setTicketingLocked(managed.ticketingLocked)
-          cleanSnapshot.current = snapshot(managed.form, managed.admissionMode, initialTickets)
+          cleanSnapshot.current = snapshot(managed.form, managed.admissionMode, managed.paidReservationMode, initialTickets)
           return
         }
 
@@ -104,9 +106,10 @@ export default function EventPublishPage() {
         if (!stored && EVENT_CATEGORIES.some((option) => option.value === category)) initialForm = { ...initialForm, category: category as EventPublishDraft['category'] }
         const initialTickets = stored?.tickets?.length ? stored.tickets : [{ ...INITIAL_EVENT_TICKET }]
         const initialAdmissionMode = stored?.admissionMode || resolveEventAdmissionMode(stored?.ticketing ?? true, initialTickets)
+        const initialPaidReservationMode = stored?.paidReservationMode || (initialForm.bookingUrl ? 'external' : 'onsite')
         if (!active) return
-        setForm(initialForm); setAdmissionMode(initialAdmissionMode); setTickets(initialTickets)
-        cleanSnapshot.current = snapshot(initialForm, initialAdmissionMode, initialTickets)
+        setForm(initialForm); setAdmissionMode(initialAdmissionMode); setPaidReservationMode(initialPaidReservationMode); setTickets(initialTickets)
+        cleanSnapshot.current = snapshot(initialForm, initialAdmissionMode, initialPaidReservationMode, initialTickets)
       } catch (error: unknown) {
         if (!active) return
         const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error
@@ -130,7 +133,7 @@ export default function EventPublishPage() {
   }, [metadataAttempt])
 
   const ticketing = admissionMode !== 'open'
-  const dirty = initialized && snapshot(form, admissionMode, tickets) !== cleanSnapshot.current
+  const dirty = initialized && snapshot(form, admissionMode, paidReservationMode, tickets) !== cleanSnapshot.current
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {
       if (dirty && !successfulNavigation.current) {
@@ -146,9 +149,9 @@ export default function EventPublishPage() {
     { label: 'Titre et catégorie', complete: Boolean(form.title.trim() && form.category) },
     { label: 'Date et heure de début', complete: Boolean(form.eventDate && form.startTime) },
     { label: 'Lieu et commune', complete: Boolean(form.venueName.trim() && form.communeId) },
-    { label: admissionMode === 'open' ? 'Entrée libre sans réservation' : admissionMode === 'free' ? 'Réservations gratuites configurées' : 'Billets et tarifs configurés', complete: !ticketing || (tickets.every((ticket) => ticket.name.trim() && (admissionMode === 'free' || (ticket.priceXpf.trim() && Number.isInteger(Number(ticket.priceXpf)) && Number(ticket.priceXpf) >= 0)) && Number.isInteger(Number(ticket.quantity)) && Number(ticket.quantity) >= 1) && (admissionMode !== 'paid' || tickets.some((ticket) => Number(ticket.priceXpf) > 0))) },
+    { label: admissionMode === 'open' ? 'Entrée libre sans réservation' : admissionMode === 'free' ? 'Réservations gratuites configurées' : paidReservationMode === 'external' ? 'Tarifs et lien de réservation configurés' : 'Tarifs et paiement sur place configurés', complete: !ticketing || (tickets.every((ticket) => ticket.name.trim() && (admissionMode === 'free' || (ticket.priceXpf.trim() && Number.isInteger(Number(ticket.priceXpf)) && Number(ticket.priceXpf) >= 0)) && Number.isInteger(Number(ticket.quantity)) && Number(ticket.quantity) >= 1) && (admissionMode !== 'paid' || tickets.some((ticket) => Number(ticket.priceXpf) > 0)) && (admissionMode !== 'paid' || paidReservationMode !== 'external' || Boolean(form.bookingUrl.trim()) && validUrl(form.bookingUrl))) },
     { label: 'Organisateur et e-mail', complete: Boolean(form.organizerName.trim() && emailPattern.test(form.organizerEmail)) },
-  ], [admissionMode, form, ticketing, tickets])
+  ], [admissionMode, form, paidReservationMode, ticketing, tickets])
 
   const done = checks.filter((check) => check.complete).length
   const remaining = checks.length - done
@@ -210,8 +213,8 @@ export default function EventPublishPage() {
     if (requireAuth()) return
     setSavingDraft(true); setSubmitError('')
     try {
-      saveLocalEventDraft(user?.id, { form, ticketing, admissionMode, tickets, savedAt: new Date().toISOString() })
-      cleanSnapshot.current = snapshot(form, admissionMode, tickets)
+      saveLocalEventDraft(user?.id, { form, ticketing, admissionMode, paidReservationMode, tickets, savedAt: new Date().toISOString() })
+      cleanSnapshot.current = snapshot(form, admissionMode, paidReservationMode, tickets)
       setSuccess('Brouillon enregistré sur cet appareil.')
     } catch { setSubmitError('Impossible d’enregistrer le brouillon. Réessaie.') }
     finally { setSavingDraft(false) }
@@ -229,6 +232,8 @@ export default function EventPublishPage() {
     if (!form.organizerName.trim()) errors.organizerName = 'Indique le nom de l’organisateur.'
     if (!emailPattern.test(form.organizerEmail)) errors.organizerEmail = 'Indique une adresse e-mail valide.'
     if (!validUrl(form.websiteUrl)) errors.websiteUrl = 'Utilise une adresse commençant par http:// ou https://.'
+    if (admissionMode === 'paid' && paidReservationMode === 'external' && !form.bookingUrl.trim()) errors.bookingUrl = 'Ajoute le lien de réservation de l’organisateur.'
+    else if (!validUrl(form.bookingUrl)) errors.bookingUrl = 'Utilise une adresse commençant par http:// ou https://.'
     if (ticketing) tickets.forEach((ticket, index) => {
       if (!ticket.name.trim()) nextTicketErrors[index].name = 'Indique un nom.'
       if (admissionMode === 'paid' && (!ticket.priceXpf.trim() || !Number.isInteger(Number(ticket.priceXpf)) || Number(ticket.priceXpf) < 0)) nextTicketErrors[index].priceXpf = 'Saisis un prix entier positif ou nul.'
@@ -256,10 +261,10 @@ export default function EventPublishPage() {
     setPublishing(true); setSubmitError(''); setSuccess('')
     try {
       const result = editingId
-        ? await updateManagedEvent(editingId, form, admissionMode, tickets)
-        : await publishEvent(form, admissionMode, tickets)
+        ? await updateManagedEvent(editingId, form, admissionMode, paidReservationMode, tickets)
+        : await publishEvent(form, admissionMode, paidReservationMode, tickets)
       if (!editingId) clearLocalEventDraft(user?.id)
-      cleanSnapshot.current = snapshot(form, admissionMode, tickets)
+      cleanSnapshot.current = snapshot(form, admissionMode, paidReservationMode, tickets)
       successfulNavigation.current = true
       window.location.assign(result.href)
     } catch (error: unknown) {
@@ -301,7 +306,8 @@ export default function EventPublishPage() {
             <EventFormSection number={3} title="Entrée et billetterie">
               <SegmentedControl label="Mode d’entrée" value={admissionMode} disabled={ticketingLocked} onChange={(value) => { setAdmissionMode(value as EventAdmissionMode); setTicketErrors([]); setSubmitError(''); setSuccess('') }} options={[{ value: 'open', label: 'Entrée libre' }, { value: 'free', label: 'Réservation gratuite' }, { value: 'paid', label: 'Billets payants' }]} />
               <p className="mt-3 text-body-sm text-ink/70">{ticketingLocked ? 'La billetterie est verrouillée car une réservation existe déjà. Les autres informations de l’événement restent modifiables.' : admissionMode === 'open' ? 'Les visiteurs viennent librement, sans réservation ni billet.' : admissionMode === 'free' ? 'Crée un ou plusieurs billets gratuits pour suivre les réservations et la capacité.' : 'Crée plusieurs tarifs nommés, par exemple Standard, Enfant ou VIP. Un tarif peut rester à 0 XPF.'}</p>
-              {ticketing ? <div className="mt-5 space-y-3">{tickets.map((ticket, index) => <TicketTypeCard key={index} ref={index === 0 ? firstTicketRef : undefined} index={index} ticket={ticket} errors={ticketErrors[index]} canRemove={tickets.length > 1} free={admissionMode === 'free'} disabled={ticketingLocked} onChange={(key, value) => updateTicket(index, key, value)} onRemove={() => setTickets((current) => current.filter((_, ticketIndex) => ticketIndex !== index))} />)}{!ticketingLocked ? <Button type="button" variant="secondary" className="w-full border-dashed" onClick={() => setTickets((current) => [...current, { ...NEW_TICKET }])}><Plus className="h-4 w-4" />Ajouter un type de billet</Button> : null}<div className="flex flex-wrap items-center justify-between gap-3 rounded-control bg-cream-sunken px-4 py-3 text-body-sm"><span>Capacité totale <strong>{capacity.toLocaleString('fr-FR')} places</strong></span><span className="text-ink/65">Chaque réservation reçoit un QR code unique, scanné à l’entrée depuis Kalico.</span></div></div> : null}
+              {admissionMode === 'paid' ? <div className="mt-5 rounded-control border border-warm-border bg-cream-sunken p-4"><SegmentedControl label="Comment les participants réservent-ils ?" value={paidReservationMode} disabled={ticketingLocked} onChange={(value) => { setPaidReservationMode(value as EventPaidReservationMode); setFieldErrors((current) => ({ ...current, bookingUrl: undefined })); setSubmitError(''); setSuccess('') }} options={[{ value: 'onsite', label: 'Payer sur place' }, { value: 'external', label: 'Lien externe' }]} /><p className="mt-3 text-body-sm text-ink/70">{paidReservationMode === 'onsite' ? 'Kalico enregistre la réservation et génère les billets. Le montant reste à régler directement auprès de l’organisateur.' : 'Le bouton de réservation ouvre le site commercial de l’organisateur. Les disponibilités restent gérées sur ce site.'}</p>{paidReservationMode === 'external' ? <div className="mt-4"><Input label="Lien de réservation" type="url" disabled={ticketingLocked} value={form.bookingUrl} error={fieldErrors.bookingUrl} placeholder="https://billetterie.exemple.nc" onChange={(event) => updateField('bookingUrl', event.target.value)} /></div> : null}</div> : null}
+              {ticketing ? <div className="mt-5 space-y-3">{tickets.map((ticket, index) => <TicketTypeCard key={index} ref={index === 0 ? firstTicketRef : undefined} index={index} ticket={ticket} errors={ticketErrors[index]} canRemove={tickets.length > 1} free={admissionMode === 'free'} disabled={ticketingLocked} onChange={(key, value) => updateTicket(index, key, value)} onRemove={() => setTickets((current) => current.filter((_, ticketIndex) => ticketIndex !== index))} />)}{!ticketingLocked ? <Button type="button" variant="secondary" className="w-full border-dashed" onClick={() => setTickets((current) => [...current, { ...NEW_TICKET }])}><Plus className="h-4 w-4" />Ajouter un type de billet</Button> : null}<div className="flex flex-wrap items-center justify-between gap-3 rounded-control bg-cream-sunken px-4 py-3 text-body-sm"><span>Capacité totale <strong>{capacity.toLocaleString('fr-FR')} places</strong></span><span className="text-ink/65">{admissionMode === 'paid' && paidReservationMode === 'external' ? 'Les billets et disponibilités définitifs sont gérés sur le site externe.' : 'Chaque réservation reçoit un QR code unique, scanné à l’entrée depuis Kalico.'}</span></div></div> : null}
             </EventFormSection>
 
             <EventFormSection number={4} title="L’organisateur">

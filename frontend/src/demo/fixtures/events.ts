@@ -35,9 +35,11 @@ export const managedEventDraftFixture: ManagedEventDraft = {
     organizerEmail: 'demo@kalico.nc',
     organizerPhone: '+687 00 00 00',
     websiteUrl: 'https://kalico.nc',
+    bookingUrl: '',
   },
   ticketing: false,
   admissionMode: 'open',
+  paidReservationMode: 'onsite',
   tickets: [],
   ticketingLocked: false,
 }

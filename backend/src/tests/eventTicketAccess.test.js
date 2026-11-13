@@ -20,6 +20,7 @@ const ticket = {
   buyer_name: 'Acheteur privé',
   buyer_email: 'private@example.test',
   order_status: 'paid',
+  payment_method: 'stripe',
   organizer_id: 7,
   buyer_id: 9,
 };
@@ -34,6 +35,7 @@ describe('Event ticket access control', () => {
     assert.strictEqual(result.buyer_name, undefined);
     assert.strictEqual(result.buyer_email, undefined);
     assert.strictEqual(result.order_status, undefined);
+    assert.strictEqual(result.payment_method, undefined);
     assert.strictEqual(result.scan_location, undefined);
   });
 
@@ -52,5 +54,6 @@ describe('Event ticket access control', () => {
     assert.strictEqual(result.buyer_name, 'Acheteur privé');
     assert.strictEqual(result.buyer_email, 'private@example.test');
     assert.strictEqual(result.order_status, 'paid');
+    assert.strictEqual(result.payment_method, 'stripe');
   });
 });

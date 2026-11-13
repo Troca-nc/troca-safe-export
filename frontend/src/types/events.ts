@@ -28,6 +28,8 @@ export type EventTicketDraft = {
 
 export type EventAdmissionMode = 'open' | 'free' | 'paid'
 
+export type EventPaidReservationMode = 'onsite' | 'external'
+
 export type EventPublishDraft = {
   title: string
   description: string
@@ -44,12 +46,14 @@ export type EventPublishDraft = {
   organizerEmail: string
   organizerPhone: string
   websiteUrl: string
+  bookingUrl: string
 }
 
 export type StoredEventDraft = {
   form: EventPublishDraft
   ticketing: boolean
   admissionMode?: EventAdmissionMode
+  paidReservationMode?: EventPaidReservationMode
   tickets: EventTicketDraft[]
   savedAt: string
 }
@@ -69,6 +73,7 @@ export type ManagedEventDraft = {
   form: EventPublishDraft
   ticketing: boolean
   admissionMode: EventAdmissionMode
+  paidReservationMode: EventPaidReservationMode
   tickets: EventTicketDraft[]
   ticketingLocked: boolean
 }
