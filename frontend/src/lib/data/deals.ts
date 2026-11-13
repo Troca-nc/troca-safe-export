@@ -1,4 +1,4 @@
-import { bonPlansApi, metaApi } from '@/lib/api'
+import { bonPlansApi, metaApi, uploadApi } from '@/lib/api'
 import type {
   DealDurationDays,
   DealOfferType,
@@ -94,6 +94,24 @@ export function saveLocalDealDraft(userId: string | null | undefined, draft: Sto
 
 export function clearLocalDealDraft(userId?: string | null) {
   if (typeof window !== 'undefined') window.localStorage.removeItem(dealDraftStorageKey(userId))
+}
+
+export async function uploadDealPhoto(file: File, onProgress?: (percentage: number) => void) {
+  const response = await uploadApi.uploadBonPlanImage(file, {
+    onUploadProgress: (event) => {
+      if (event.total) onProgress?.(Math.round((event.loaded / event.total) * 100))
+    },
+  })
+  const url = String(response.data?.data?.url || '').trim()
+  if (!url) throw new Error('Le serveur n’a pas retourné la photo importée.')
+  return url
+}
+
+export async function uploadDealCatalog(file: File) {
+  const response = await uploadApi.uploadBonPlanCatalog(file)
+  const url = String(response.data?.data?.url || '').trim()
+  if (!url) throw new Error('Le serveur n’a pas retourné le catalogue importé.')
+  return url
 }
 
 function integer(value: string) {

@@ -2234,6 +2234,15 @@ Inventaire et trois décisions validés par l’humain le 30 octobre 2026.
 
 - Tests de contrat de la page et de persistance du PDF, suite backend complète, lint, TypeScript, contrôle design, inventaire UI, build Next.js de production et `git diff --check`.
 
+### Téléversement des médias et expiration réelle — correction fonctionnelle autorisée (13 novembre 2026)
+
+- Retour humain : la saisie d’une adresse URL pour illustrer un bon plan est incompréhensible, le catalogue PDF manque de contexte et une offre restait publiquement visible après sa date de fin tant que sa durée de diffusion n’était pas écoulée.
+- Exception fonctionnelle explicitement autorisée par l’utilisateur. Fichiers hors de la liste historique `src/components/bon-plans/*` : route d’upload et routes publiques backend, contrat backend, API et couche de données frontend, page `/bons-plans/publier`, nouveau composant média, contrat frontend et présent suivi.
+- La photo et le catalogue utilisent désormais des téléversements dédiés aux bons plans. Le formulaire propose des sélecteurs de fichiers explicites, un aperçu de la photo, le remplacement et le retrait ; le PDF est présenté comme un prospectus facultatif pour plusieurs offres.
+- Les listes, le détail API et la fiche d’enseigne excluent une offre dès le lendemain de `promo_valid_until`, selon le jour civil `Pacific/Noumea`, même si sa durée de diffusion de 7 ou 30 jours n’est pas terminée. Les anciennes offres sans date de fin conservent leur comportement historique.
+- Limite conservée comme pour les imports d’événement : un média téléversé puis retiré avant publication n’est plus référencé, mais son nettoyage physique n’est pas traité dans ce lot.
+- Validation locale verte : contrats ciblés backend 8/8 et frontend 5/5, syntaxe des trois routes backend, suite backend complète, lint obligatoire, TypeScript, contrôle design sur 4 fichiers avec 0 erreur/0 avertissement, garde d’encodage avec 140 fichiers protégés propres, `git diff --check` et build Next.js de production avec 113 routes. CI GitHub en attente de la PR.
+
 ## 28 — Photos et billetterie de publication d’événement — Correctif
 
 ### Livraison

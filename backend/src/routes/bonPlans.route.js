@@ -238,7 +238,11 @@ async function queryBonPlans(filters = {}) {
   } = filters;
 
   const params = [];
-  const where = [`bp.status = 'active'`, `bp.published_until > NOW()`];
+  const where = [
+    `bp.status = 'active'`,
+    `bp.published_until > NOW()`,
+    `(bp.promo_valid_until IS NULL OR bp.promo_valid_until >= (NOW() AT TIME ZONE 'Pacific/Noumea')::date)`,
+  ];
 
   if (kind) {
     const kinds = String(kind)
@@ -679,6 +683,7 @@ router.get('/:id', optionalAuth, async (req, res, next) => {
        WHERE bp.id = $1
          AND bp.status = 'active'
          AND bp.published_until > NOW()
+         AND (bp.promo_valid_until IS NULL OR bp.promo_valid_until >= (NOW() AT TIME ZONE 'Pacific/Noumea')::date)
        LIMIT 1`,
       [id]
     );

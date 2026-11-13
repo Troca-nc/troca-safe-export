@@ -68,6 +68,30 @@ const chatDocumentUpload = multer({
   },
 });
 
+const bonPlanCatalogUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fieldArrayIndexLimit: 1000, fieldNestingDepth: 8, fileSize: (parseInt(process.env.MAX_BON_PLAN_CATALOG_SIZE_MB) || 20) * 1024 * 1024, files: 1 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype !== 'application/pdf') {
+      return cb(new Error('Le catalogue doit être un fichier PDF.'));
+    }
+    cb(null, true);
+  },
+});
+
+function singlePublicMediaUpload(middleware, tooLargeMessage) {
+  return (req, res, next) => middleware(req, res, (err) => {
+    if (!err) return next();
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ error: tooLargeMessage });
+    }
+    return res.status(400).json({ error: err.message || 'Fichier non pris en charge.' });
+  });
+}
+
+const singleBonPlanImage = singlePublicMediaUpload(upload.single('image'), 'La photo dépasse la taille maximale de 10 Mo.');
+const singleBonPlanCatalog = singlePublicMediaUpload(bonPlanCatalogUpload.single('file'), 'Le catalogue dépasse la taille maximale de 20 Mo.');
+
 const getUploadDir = () => {
   return path.resolve(process.env.STORAGE_LOCAL_PATH || './uploads');
 };
@@ -314,6 +338,56 @@ router.post('/event', uploadLimiter, upload.array('images', MAX_IMAGES), async (
     if (err.message?.includes('Format non supporté')) {
       return res.status(400).json({ error: err.message });
     }
+    return next(err);
+  }
+});
+
+// ── Médias d'un bon plan ────────────────────────────────────
+
+router.post('/bon-plan/image', uploadLimiter, singleBonPlanImage, async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Aucune image reçue' });
+    }
+
+    const processed = await processImage(req.file.buffer, `bon-plans/${req.user.id}`);
+    return res.status(201).json({
+      data: {
+        url: processed.url,
+        thumbnail_url: processed.thumbnail_url,
+      },
+    });
+  } catch (err) {
+    if (err.message?.includes('Format non supporté')) {
+      return res.status(400).json({ error: err.message });
+    }
+    return next(err);
+  }
+});
+
+router.post('/bon-plan/catalog', uploadLimiter, singleBonPlanCatalog, async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Aucun catalogue reçu' });
+    }
+
+    const relativeFolder = path.join('bon-plans', String(req.user.id));
+    const uploadDir = path.join(getUploadDir(), relativeFolder);
+    await ensureDir(uploadDir);
+
+    const filename = `${uuidv4()}.pdf`;
+    await fs.writeFile(path.join(uploadDir, filename), req.file.buffer);
+
+    const baseUrl = (process.env.BASE_URL || 'http://localhost:3001').replace(/\/$/, '');
+    return res.status(201).json({
+      data: {
+        url: `${baseUrl}/uploads/${relativeFolder.replace(/\\/g, '/')}/${filename}`,
+        filename: req.file.originalname || filename,
+        mime_type: 'application/pdf',
+        size_bytes: req.file.size,
+      },
+    });
+  } catch (err) {
     return next(err);
   }
 });
