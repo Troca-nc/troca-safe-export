@@ -281,7 +281,7 @@ async function updateEventByOrganizer({ eventId, organizerId, payload }) {
 
   await withTransaction(async (client) => {
     const { rows } = await client.query(
-      `SELECT e.id, e.organizer_id, e.bon_plan_id, e.status, e.has_ticketing, e.max_capacity, e.is_free,
+      `SELECT e.id, e.organizer_id, e.bon_plan_id, e.status, e.has_ticketing, e.max_capacity, e.is_free, e.booking_url,
               (
                 EXISTS (SELECT 1 FROM tickets t WHERE t.event_id = e.id)
                 OR EXISTS (
@@ -310,6 +310,7 @@ async function updateEventByOrganizer({ eventId, organizerId, payload }) {
       ? event.max_capacity
       : (Number.isFinite(requestedCapacity) ? Math.max(0, Math.round(requestedCapacity)) : null);
     const isFree = event.ticketing_locked ? Boolean(event.is_free) : requestedFree;
+    const bookingUrl = event.ticketing_locked ? event.booking_url : (payload.booking_url || null);
     const photos = JSON.stringify(Array.isArray(payload.photos) ? payload.photos.filter(Boolean) : []);
 
     await client.query(
@@ -331,6 +332,7 @@ async function updateEventByOrganizer({ eventId, organizerId, payload }) {
               organizer_name = $16,
               organizer_email = $17,
               organizer_phone = $18,
+              booking_url = $19,
               updated_at = NOW()
         WHERE id = $1`,
       [
@@ -352,6 +354,7 @@ async function updateEventByOrganizer({ eventId, organizerId, payload }) {
         payload.organizer_name || null,
         payload.organizer_email || null,
         payload.organizer_phone || null,
+        bookingUrl,
       ]
     );
 
@@ -438,15 +441,26 @@ async function cancelEventByOrganizer({ eventId, organizerId }) {
          FROM (
            SELECT ticket_type_id, COUNT(*)::int AS quantity
              FROM tickets
-            WHERE event_id = $1 AND status = 'reserved'
+            WHERE event_id = $1
+              AND status IN ('reserved', 'active')
+              AND EXISTS (
+                SELECT 1 FROM ticket_orders o
+                 WHERE o.id = tickets.order_id
+                   AND o.status = 'reserved'
+              )
             GROUP BY ticket_type_id
          ) reserved
         WHERE tt.id = reserved.ticket_type_id`,
       [eventId]
     );
     await client.query(
-      `UPDATE tickets SET status = 'cancelled'
-        WHERE event_id = $1 AND status = 'reserved'`,
+      `UPDATE tickets t
+          SET status = 'cancelled'
+         FROM ticket_orders o
+        WHERE t.order_id = o.id
+          AND t.event_id = $1
+          AND o.status = 'reserved'
+          AND t.status IN ('reserved', 'active')`,
       [eventId]
     );
     await client.query(
@@ -660,15 +674,27 @@ async function reserveEventTickets({ eventId, buyer, items, provider = 'stripe',
 
   const totalXpf = selectedTickets.reduce((sum, item) => sum + item.quantity * Number(item.ticketType.price_xpf || 0), 0);
 
-  if (totalXpf > 0 && provider !== 'stripe') {
+  if (totalXpf > 0 && event.booking_url) {
+    throw Object.assign(new Error('La réservation de cet événement se fait sur le site de l’organisateur.'), { status: 409 });
+  }
+  if (totalXpf > 0 && !['stripe', 'onsite'].includes(provider)) {
     throw Object.assign(new Error('Ce moyen de paiement n’est pas encore disponible pour la billetterie.'), { status: 503 });
   }
+
+  const paymentMethod = totalXpf <= 0 ? 'free' : provider;
 
   return withTransaction(async (client) => {
     const orderResult = await client.query(
       `INSERT INTO ticket_orders
-         (event_id, buyer_id, buyer_email, buyer_name, buyer_phone, status, total_xpf, reserved_at, expires_at)
-       VALUES ($1, $2, $3, $4, $5, 'reserved', $6, NOW(), NOW() + INTERVAL '10 minutes')
+         (event_id, buyer_id, buyer_email, buyer_name, buyer_phone, status, total_xpf, reserved_at, expires_at, payment_method)
+       VALUES (
+         $1, $2, $3, $4, $5, 'reserved', $6, NOW(),
+         CASE WHEN $7 = 'onsite'
+           THEN NULL
+           ELSE NOW() + INTERVAL '10 minutes'
+         END,
+         $7
+       )
        RETURNING *`,
       [
         eventId,
@@ -677,6 +703,7 @@ async function reserveEventTickets({ eventId, buyer, items, provider = 'stripe',
         orderBuyer.name,
         orderBuyer.phone,
         totalXpf,
+        paymentMethod,
       ]
     );
     const order = orderResult.rows[0];
@@ -714,6 +741,24 @@ async function reserveEventTickets({ eventId, buyer, items, provider = 'stripe',
         );
         tickets.push(ticketResult.rows[0]);
       }
+    }
+
+    if (totalXpf > 0 && paymentMethod === 'onsite') {
+      await client.query(
+        `UPDATE tickets
+            SET status = 'active'
+          WHERE order_id = $1`,
+        [order.id]
+      );
+
+      return {
+        order: { ...order, status: 'reserved', payment_method: 'onsite', total_xpf: totalXpf, event_title: event.title },
+        tickets: tickets.map((ticket) => ({ ...ticket, status: 'active' })),
+        checkout_url: null,
+        provider: 'onsite',
+        payment_method: 'onsite',
+        demo: false,
+      };
     }
 
     if (totalXpf <= 0 || demoMode) {
@@ -757,6 +802,7 @@ async function reserveEventTickets({ eventId, buyer, items, provider = 'stripe',
         order: { ...order, status: 'paid', total_xpf: totalXpf, event_title: event.title },
         tickets: tickets.map((ticket) => ({ ...ticket, status: 'active' })),
         checkout_url: null,
+        payment_method: totalXpf <= 0 ? 'free' : provider,
         demo: true,
       };
     }
@@ -835,6 +881,7 @@ async function reserveEventTickets({ eventId, buyer, items, provider = 'stripe',
       client_secret: session.payment_intent ? session.client_secret || null : null,
       session_id: session.id,
       provider: 'stripe',
+      payment_method: 'stripe',
     };
   });
 }
@@ -999,7 +1046,8 @@ async function getTicketByToken(token) {
   const { rows } = await query(
     `SELECT t.*, e.title AS event_title, e.event_date, e.event_time, e.status AS event_status,
             tt.name AS ticket_type_name, tt.price_xpf AS ticket_price_xpf,
-            e.organizer_id, o.buyer_id, o.buyer_name, o.buyer_email, o.status AS order_status
+            e.organizer_id, o.buyer_id, o.buyer_name, o.buyer_email, o.status AS order_status,
+            o.payment_method
        FROM tickets t
        JOIN events e ON e.id = t.event_id
        LEFT JOIN ticket_types tt ON tt.id = t.ticket_type_id
@@ -1027,6 +1075,7 @@ async function getTicketByToken(token) {
     buyer_name: row.buyer_name ?? null,
     buyer_email: row.buyer_email ?? null,
     order_status: row.order_status ?? null,
+    payment_method: row.payment_method ?? null,
     organizer_id: row.organizer_id == null ? null : Number(row.organizer_id),
     buyer_id: row.buyer_id == null ? null : Number(row.buyer_id),
   };
@@ -1064,6 +1113,7 @@ function serializeTicketForViewer(ticket, user = null) {
     buyer_name: ticket.buyer_name,
     buyer_email: ticket.buyer_email,
     order_status: ticket.order_status,
+    payment_method: ticket.payment_method,
   };
 }
 
@@ -1078,7 +1128,9 @@ async function scanTicket({ token, scannerUser, location = null }) {
   if (ticket.status === 'used') {
     return { ticket, already_scanned: true };
   }
-  if (ticket.status !== 'active' || ticket.order_status !== 'paid') {
+  const validOrder = ticket.order_status === 'paid'
+    || (ticket.order_status === 'reserved' && ticket.payment_method === 'onsite');
+  if (ticket.status !== 'active' || !validOrder) {
     throw Object.assign(new Error('Ce billet n’est pas valide.'), { status: 409 });
   }
 

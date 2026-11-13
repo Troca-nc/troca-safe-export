@@ -2275,3 +2275,18 @@ Inventaire et trois décisions validés par l’humain le 30 octobre 2026.
 - Contrat ciblé 2/2, lint, TypeScript, contrôle design (1 fichier, zéro erreur et zéro avertissement) et build Next.js standalone de 113 routes verts.
 - Le premier build a seulement rencontré l’indisponibilité réseau de Google Fonts dans le bac à sable ; la relance autorisée avec les certificats système, sans changement de code ni affaiblissement TLS, est entièrement verte.
 - `git diff --check` et l’état final du worktree sont contrôlés avant commit.
+
+## 30 — Réservation payante sans Stripe — Correctif fonctionnel
+
+### Livraison
+
+- Pour un événement payant, l’organisateur choisit désormais entre « Payer sur place » et « Lien externe » dans le formulaire de publication.
+- Le lien externe est limité à HTTP/HTTPS, conservé dans `booking_url` et ouvre directement le site commercial ; Kalico n’y crée aucune commande ni disponibilité parallèle.
+- Le paiement sur place crée une réservation Kalico et des billets actifs avec QR code, tout en conservant la commande au statut réservé et le montant explicitement dû à l’organisateur.
+- Une colonne additive `ticket_orders.payment_method` distingue les réservations gratuites, sur place et Stripe. La migration est livrée mais ne doit jamais être appliquée en production sans autorisation distincte.
+- Les événements payants historiques sans lien externe utilisent le paiement sur place, ce qui remplace proprement l’erreur « Stripe non configuré » sans prétendre qu’un paiement a été encaissé.
+
+### Validation locale
+
+- Contrats ciblés de réservation et du frontend verts, gestion propriétaire/annulation verte, suite backend complète verte, syntaxe backend, lint obligatoire, TypeScript, design 0/0, garde d’encodage des 140 fichiers protégés, build Next.js de production 113/113 routes et `git diff --check`.
+- Le premier build a seulement rencontré le certificat local lors du chargement des polices ; la relance avec les certificats système, sans affaiblissement TLS, est entièrement verte.

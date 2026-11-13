@@ -798,6 +798,7 @@ async function sendTicketEmailV2(order, tickets = []) {
   const venueAddress = escapeHtml(event?.venue_address || order?.venue_address || '');
   const communeName = escapeHtml(event?.commune_name || order?.commune_name || '');
   const eventUrl = `${BASE_URL()}/evenements/${encodeURIComponent(String(event?.id || order?.event_id || tickets[0]?.event_id || ''))}`;
+  const paymentOnsite = order?.payment_method === 'onsite';
 
   const ticketCards = [];
   for (const [index, ticket] of tickets.slice(0, 12).entries()) {
@@ -809,9 +810,10 @@ async function sendTicketEmailV2(order, tickets = []) {
     subject: `🎟️ Vos billets — ${String(eventTitleRaw)}`,
     html: baseTemplate(`
       ${buildKalicoEmailHeader()}
-      <p style="font-size:18px;font-weight:800;color:#0f172a;margin:0 0 8px;">Votre commande est confirmée !</p>
+      <p style="font-size:18px;font-weight:800;color:#0f172a;margin:0 0 8px;">${paymentOnsite ? 'Votre réservation est confirmée !' : 'Votre commande est confirmée !'}</p>
       <p>Bonjour ${escapeHtml(order?.buyer_name || order?.buyerName || 'Participant')},</p>
       <p>Nous vous remercions pour votre réservation sur Kalico. Voici le récapitulatif de vos billets.</p>
+      ${paymentOnsite ? `<div style="border:1px solid #f59e0b;border-radius:16px;padding:14px 16px;margin:16px 0;background:#fffbeb;color:#92400e;"><strong>Paiement sur place :</strong> ${Number(order?.total_xpf || 0).toLocaleString('fr-FR')} XPF restent à régler directement auprès de l’organisateur.</div>` : ''}
 
       <div style="border:1px solid #e5e7eb;border-radius:18px;padding:18px;margin:18px 0;background:linear-gradient(135deg,#f8fafc,#ffffff);">
         <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;">Détails événement</p>

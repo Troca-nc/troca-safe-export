@@ -22,6 +22,9 @@ test('la page publier conserve ses contrats produit', async () => {
   assert.match(page, /Entrée libre/)
   assert.match(page, /Réservation gratuite/)
   assert.match(page, /Billets payants/)
+  assert.match(page, /Payer sur place/)
+  assert.match(page, /Lien externe/)
+  assert.match(page, /Lien de réservation/)
   assert.match(page, /Ajouter un type de billet/)
   assert.match(page, /EventPreviewCard/)
   assert.doesNotMatch(page, /eventsApi|metaApi/)
@@ -30,8 +33,18 @@ test('la page publier conserve ses contrats produit', async () => {
   assert.match(data, /ticket_types:/)
   assert.match(data, /uploadEventPhotos/)
   assert.match(data, /admissionMode === 'free' \? 0/)
+  assert.match(data, /booking_url: admissionMode === 'paid' && paidReservationMode === 'external'/)
   assert.match(api, /uploadEventImages/)
   assert.match(api, /\/upload\/event/)
+})
+
+test('la fiche événement distingue le lien externe du paiement sur place', async () => {
+  const detail = await read('src/app/evenements/[id]/page.tsx')
+  assert.match(detail, /event\?\.booking_url/)
+  assert.match(detail, /Réserver sur le site de l’organisateur/)
+  assert.match(detail, /provider: event\.is_free \? 'stripe' : 'onsite'/)
+  assert.match(detail, /seront à régler sur place auprès de l’organisateur/)
+  assert.doesNotMatch(detail, /Stripe non configuré/)
 })
 
 test('la carte publique est réellement partagée avec l’aperçu', async () => {

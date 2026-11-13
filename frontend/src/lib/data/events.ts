@@ -3,6 +3,7 @@ import { demoOr } from '@/lib/demo'
 import type {
   EventCategoryOption,
   EventAdmissionMode,
+  EventPaidReservationMode,
   ManagedEventDraft,
   EventPublishDraft,
   EventPublishMetadata,
@@ -51,6 +52,7 @@ export function createEventPublishDraft(profile?: {
     organizerEmail: profile?.email || '',
     organizerPhone: profile?.phone || '',
     websiteUrl: '',
+    bookingUrl: '',
   }
 }
 
@@ -92,11 +94,14 @@ export function loadLocalEventDraft(userId?: string | null): StoredEventDraft | 
     if (!raw) return null
     const stored = JSON.parse(raw) as StoredEventDraft
     const coverImageUrl = String(stored.form?.coverImageUrl || '')
+    const bookingUrl = String(stored.form?.bookingUrl || '')
     return {
       ...stored,
+      paidReservationMode: stored.paidReservationMode || (bookingUrl ? 'external' : 'onsite'),
       form: {
         ...stored.form,
         coverImageUrl,
+        bookingUrl,
         photoUrls: normalizeEventPhotoUrls(stored.form?.photoUrls, coverImageUrl),
       },
     }
@@ -142,7 +147,7 @@ export async function uploadEventPhotos(files: File[], onProgress?: (percentage:
   return normalizeEventPhotoUrls(rows.map((item: { url?: string }) => item.url))
 }
 
-function buildEventPayload(form: EventPublishDraft, admissionMode: EventAdmissionMode, tickets: EventTicketDraft[]) {
+function buildEventPayload(form: EventPublishDraft, admissionMode: EventAdmissionMode, paidReservationMode: EventPaidReservationMode, tickets: EventTicketDraft[]) {
   const ticketing = admissionMode !== 'open'
   const photos = normalizeEventPhotoUrls(form.photoUrls, form.coverImageUrl)
   const prices = ticketing
@@ -169,6 +174,7 @@ function buildEventPayload(form: EventPublishDraft, admissionMode: EventAdmissio
     organizer_email: form.organizerEmail.trim(),
     organizer_phone: form.organizerPhone.trim() || null,
     website_url: form.websiteUrl.trim() || null,
+    booking_url: admissionMode === 'paid' && paidReservationMode === 'external' ? form.bookingUrl.trim() : null,
     target_audience: 'particulier',
     kind: form.category === 'concert' ? 'concert' : 'event',
     price_xpf: prices.length ? Math.min(...prices) : 0,
@@ -218,9 +224,11 @@ function normalizeManagedEvent(value: unknown): ManagedEventDraft {
       organizerEmail: String(row.organizer_email ?? ''),
       organizerPhone: String(row.organizer_phone ?? ''),
       websiteUrl: String(row.website_url ?? ''),
+      bookingUrl: String(row.booking_url ?? ''),
     },
     ticketing,
     admissionMode: resolveEventAdmissionMode(ticketing, normalizedTickets),
+    paidReservationMode: row.booking_url ? 'external' : 'onsite',
     tickets: normalizedTickets,
     ticketingLocked: Boolean(row.ticketing_locked),
   }
@@ -242,12 +250,13 @@ export async function updateManagedEvent(
   id: string,
   form: EventPublishDraft,
   admissionMode: EventAdmissionMode,
+  paidReservationMode: EventPaidReservationMode,
   tickets: EventTicketDraft[],
 ): Promise<EventPublishResult> {
   return demoOr(
     async () => ({ id, href: '/profil/evenements' }),
     async () => {
-      await eventsApi.updateMine(id, buildEventPayload(form, admissionMode, tickets))
+      await eventsApi.updateMine(id, buildEventPayload(form, admissionMode, paidReservationMode, tickets))
       return { id, href: '/profil/evenements' }
     },
   )
@@ -256,12 +265,13 @@ export async function updateManagedEvent(
 export async function publishEvent(
   form: EventPublishDraft,
   admissionMode: EventAdmissionMode,
+  paidReservationMode: EventPaidReservationMode,
   tickets: EventTicketDraft[],
 ): Promise<EventPublishResult> {
   return demoOr(
     async () => (await import('@/demo/fixtures/events')).eventPublishResultFixture,
     async () => {
-      const response = await eventsApi.create(buildEventPayload(form, admissionMode, tickets))
+      const response = await eventsApi.create(buildEventPayload(form, admissionMode, paidReservationMode, tickets))
       const id = String(response.data?.data?.id ?? '')
       if (!id) throw new Error('Le serveur n’a pas retourné l’identifiant de l’événement.')
       return { id, href: `/evenements/${id}` }

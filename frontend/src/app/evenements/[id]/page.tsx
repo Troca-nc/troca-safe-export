@@ -41,6 +41,7 @@ type EventDetail = {
   organizer_name?: string | null
   organizer_email?: string | null
   website_url?: string | null
+  booking_url?: string | null
   ticket_types?: EventTicketType[]
 }
 
@@ -134,10 +135,20 @@ export default function EventDetailPage() {
     [selectedItems],
   )
 
+  const externalBookingUrl = useMemo(() => {
+    const value = String(event?.booking_url || '').trim()
+    return !event?.is_free && /^https?:\/\//i.test(value) ? value : ''
+  }, [event?.booking_url, event?.is_free])
+
   const handleReserve = async () => {
     if (!event) return
     setError('')
     setSuccess('')
+
+    if (externalBookingUrl) {
+      window.location.assign(externalBookingUrl)
+      return
+    }
 
     if (!isAuthenticated) {
         openAuthModal({
@@ -163,7 +174,7 @@ export default function EventDetailPage() {
         buyer_email: buyerEmail.trim(),
         buyer_name: buyerName.trim(),
         buyer_phone: buyerPhone.trim() || null,
-        provider: 'stripe',
+        provider: event.is_free ? 'stripe' : 'onsite',
         items: selectedItems.map((item) => ({
           ticket_type_id: item.ticket.id,
           quantity: item.quantity,
@@ -176,7 +187,9 @@ export default function EventDetailPage() {
         return
       }
 
-      setSuccess(`Commande confirmée. Total payé: ${formatMoney(totalXpf)}.`)
+      setSuccess(event.is_free
+        ? 'Réservation confirmée. Vos billets ont été envoyés par e-mail.'
+        : `Réservation confirmée. ${formatMoney(totalXpf)} seront à régler sur place auprès de l’organisateur.`)
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Impossible de réserver les billets.')
     } finally {
@@ -258,14 +271,7 @@ export default function EventDetailPage() {
                           </div>
                           <p className="text-sm font-bold text-night">{formatMoney(ticket.price_xpf)}</p>
                         </div>
-                        <div className="mt-3 flex items-center justify-between gap-3">
-                          <span className="text-xs text-night/50">Restant: {ticket.remaining}</span>
-                          <div className="flex items-center gap-2">
-                            <button type="button" onClick={() => setQuantities((current) => ({ ...current, [ticket.id]: Math.max(0, (current[ticket.id] || 0) - 1) }))} className="rounded-full border border-[var(--color-border)] px-3 py-1 text-sm font-semibold">-</button>
-                            <span className="min-w-8 text-center text-sm font-semibold">{quantities[ticket.id] || 0}</span>
-                            <button type="button" onClick={() => setQuantities((current) => ({ ...current, [ticket.id]: Math.min(ticket.remaining, (current[ticket.id] || 0) + 1) }))} className="rounded-full border border-[var(--color-border)] px-3 py-1 text-sm font-semibold">+</button>
-                          </div>
-                        </div>
+                        {externalBookingUrl ? <p className="mt-3 text-xs text-night/50">Disponibilités et choix du tarif sur le site de l’organisateur.</p> : <div className="mt-3 flex items-center justify-between gap-3"><span className="text-xs text-night/50">Restant: {ticket.remaining}</span><div className="flex items-center gap-2"><button type="button" onClick={() => setQuantities((current) => ({ ...current, [ticket.id]: Math.max(0, (current[ticket.id] || 0) - 1) }))} className="rounded-full border border-[var(--color-border)] px-3 py-1 text-sm font-semibold">-</button><span className="min-w-8 text-center text-sm font-semibold">{quantities[ticket.id] || 0}</span><button type="button" onClick={() => setQuantities((current) => ({ ...current, [ticket.id]: Math.min(ticket.remaining, (current[ticket.id] || 0) + 1) }))} className="rounded-full border border-[var(--color-border)] px-3 py-1 text-sm font-semibold">+</button></div></div>}
                       </div>
                     ))
                   ) : (
@@ -275,7 +281,7 @@ export default function EventDetailPage() {
                   )}
                 </div>
 
-                <div className="mt-4 grid gap-3">
+                {!externalBookingUrl ? <div className="mt-4 grid gap-3">
                   <label className="space-y-1">
                     <span className="text-sm font-semibold">Nom</span>
                     <input value={buyerName} onChange={(e) => setBuyerName(e.target.value)} className="input w-full rounded-2xl" />
@@ -288,18 +294,18 @@ export default function EventDetailPage() {
                     <span className="text-sm font-semibold">Téléphone</span>
                     <input value={buyerPhone} onChange={(e) => setBuyerPhone(e.target.value)} className="input w-full rounded-2xl" />
                   </label>
-                </div>
+                </div> : <div className="mt-4 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4 text-sm text-night/65">La réservation et le paiement sont gérés directement sur le site de l’organisateur.</div>}
 
-                <div className="mt-4 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
+                {!externalBookingUrl ? <div className="mt-4 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Total</p>
                   <p className="mt-1 text-2xl font-bold text-night">{formatMoney(totalXpf)}</p>
-                  <p className="mt-1 text-sm text-night/55">Réservation temporaire 10 minutes avant expiration.</p>
-                </div>
+                  <p className="mt-1 text-sm text-night/55">{event.is_free ? 'Réservation gratuite confirmée dans Kalico.' : 'Montant à régler sur place auprès de l’organisateur.'}</p>
+                </div> : null}
 
                 {error ? <p className="mt-4 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
                 {success ? <p className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{success}</p> : null}
 
-                <button
+                {externalBookingUrl ? <a href={externalBookingUrl} className="btn-primary mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3" rel="noopener noreferrer">Réserver sur le site de l’organisateur<ArrowRight className="h-4 w-4" /></a> : <button
                   type="button"
                   onClick={handleReserve}
                   disabled={submitting || !selectedItems.length}
@@ -308,7 +314,7 @@ export default function EventDetailPage() {
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                   Réserver mes billets
                   <ArrowRight className="h-4 w-4" />
-                </button>
+                </button>}
               </div>
             </aside>
           </div>
