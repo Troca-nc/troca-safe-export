@@ -74,6 +74,46 @@ export async function getDealPublishMetadata(): Promise<DealPublishMetadata> {
   return { communes: asCommunes(response.data?.data) }
 }
 
+export async function getDealForEditing(id: string) {
+  const response = await bonPlansApi.getMineById(id)
+  const row = (response.data?.data || {}) as Record<string, unknown>
+  const label = String(row.promo_label || '').trim()
+  const originalPrice = row.original_price_xpf == null ? '' : String(row.original_price_xpf)
+  const promoPrice = row.promo_price_xpf == null ? '' : String(row.promo_price_xpf)
+  const hasPrice = originalPrice !== '' && promoPrice !== ''
+  const percentMatch = label.match(/[-−]\s*(\d{1,2})\s*%/)
+  const codeMatch = String(row.conditions || '').match(/Code\s*:\s*([^·]+)/i)
+  const offerType: DealOfferType = hasPrice ? 'price' : percentMatch ? 'percent' : /^CODE\s+/i.test(label) || codeMatch ? 'code' : 'multi'
+  const hasShop = Boolean(String(row.location_name || '').trim() || row.commune_id)
+  const hasOnline = Boolean(String(row.cta_url || '').trim())
+  const placeMode: DealPlaceMode = hasShop && hasOnline ? 'both' : hasOnline ? 'online' : 'shop'
+  const form = createDealPublishDraft()
+  form.title = String(row.title || '')
+  form.originalPriceXpf = originalPrice
+  form.promoPriceXpf = promoPrice
+  form.discountPercent = percentMatch?.[1] || ''
+  form.promoCode = codeMatch?.[1]?.trim() || label.replace(/^CODE\s+/i, '').trim()
+  form.specialDetail = offerType === 'multi' ? label : ''
+  form.category = String(row.category || '') as DealPublishDraft['category']
+  form.description = String(row.conditions || row.description || '').replace(/^Code\s*:\s*[^·]+\s*·?\s*/i, '')
+  form.imageUrl = String(row.image_url || '')
+  form.validFrom = String(row.promo_valid_from || '').slice(0, 10)
+  form.validUntil = String(row.promo_valid_until || '').slice(0, 10)
+  form.locationName = String(row.location_name || '')
+  form.communeId = row.commune_id == null ? '' : String(row.commune_id)
+  form.offerUrl = String(row.cta_url || '')
+  form.businessName = String(row.business_name || '')
+  form.businessLogoUrl = String(row.business_logo_url || '')
+  form.contactEmail = String(row.contact_email || '')
+  form.catalogPdfUrl = String(row.catalog_pdf_url || '')
+  return {
+    form,
+    offerType,
+    placeMode,
+    durationDays: (Number(row.duration_days) === 30 ? 30 : 7) as DealDurationDays,
+  }
+}
+
 export function dealDraftStorageKey(userId?: string | null) {
   return `kalico:deal-publish-draft:${userId || 'visitor'}`
 }
@@ -188,4 +228,14 @@ export async function publishDeal(
     success: Boolean(data?.success),
     message: data?.message || null,
   }
+}
+
+export async function updateDeal(
+  id: string,
+  form: DealPublishDraft,
+  offerType: DealOfferType,
+  placeMode: DealPlaceMode,
+  durationDays: DealDurationDays,
+) {
+  await bonPlansApi.updateMine(id, buildDealPayload(form, offerType, placeMode, durationDays))
 }

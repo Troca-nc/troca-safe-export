@@ -38,6 +38,20 @@ export type PersonalEvent = {
   createdAt: string | null
 }
 
+export type PersonalBonPlan = {
+  id: string
+  title: string
+  status: 'draft' | 'active' | 'expired'
+  category: string
+  businessName: string
+  imageUrl: string | null
+  promoLabel: string | null
+  promoPriceXpf: number | null
+  validUntil: string | null
+  publishedUntil: string | null
+  createdAt: string | null
+}
+
 export type PersonalFavorite = {
   id: string
   title: string
@@ -98,6 +112,7 @@ export type AlertRecentResult = {
 export type PersonalAccountFixture = {
   listings: PersonalListingsData
   events: PersonalEvent[]
+  bonPlans?: PersonalBonPlan[]
   favorites: PersonalFavorite[]
   alerts: SearchAlert[]
   alertResults: Record<string, AlertRecentResult[]>

@@ -25,7 +25,7 @@ const headerSource = fs.readFileSync(
   'utf8'
 );
 const createRoute = routeSource.slice(routeSource.indexOf("router.post('/',"));
-const serializedBonPlan = routeSource.slice(routeSource.indexOf('function serializeBonPlan'), routeSource.indexOf('async function queryBonPlans'));
+const serializedBonPlan = routeSource.slice(routeSource.indexOf('function serializeBonPlan'), routeSource.indexOf('function serializeOwnedBonPlan'));
 const mappedBusiness = businessesRouteSource.slice(businessesRouteSource.indexOf('function mapBusinessRow'), businessesRouteSource.indexOf("router.get('/',"));
 
 describe('publication gratuite des bons plans', () => {

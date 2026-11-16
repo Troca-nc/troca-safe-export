@@ -1,10 +1,11 @@
-import { api, eventsApi, listingsApi, messagesApi, trocApi } from '@/lib/api'
+import { api, bonPlansApi, eventsApi, listingsApi, messagesApi, trocApi } from '@/lib/api'
 import { DEMO } from '@/lib/demo'
 import type { AccountSession } from '@/types/account'
 import type { AlertFilters, SearchAlert } from '@/types/alert.types'
 import type {
   AlertRecentResult,
   PersonalFavorite,
+  PersonalBonPlan,
   PersonalEvent,
   PersonalListing,
   PersonalListingsData,
@@ -57,6 +58,23 @@ function normalizeEvent(value: unknown): PersonalEvent {
     ticketsSold: number(row.tickets_sold),
     maxCapacity: nullableNumber(row.max_capacity),
     createdAt: nullableText(row.created_at),
+  }
+}
+
+function normalizeBonPlan(value: unknown): PersonalBonPlan {
+  const row = record(value)
+  return {
+    id: String(row.id ?? ''),
+    title: text(row.title) || 'Bon plan',
+    status: (text(row.status) || 'draft') as PersonalBonPlan['status'],
+    category: text(row.category) || 'autre',
+    businessName: text(row.business_name) || 'Commerce local',
+    imageUrl: nullableText(row.image_url),
+    promoLabel: nullableText(row.promo_label),
+    promoPriceXpf: nullableNumber(row.promo_price_xpf),
+    validUntil: nullableText(row.promo_valid_until),
+    publishedUntil: nullableText(row.published_until),
+    createdAt: nullableText(row.created_at ?? row.published_from),
   }
 }
 
@@ -144,6 +162,15 @@ export async function getPersonalEvents(session: AccountSession): Promise<Person
   return array(response.data?.data).map(normalizeEvent).filter((item) => item.id)
 }
 
+export async function getPersonalBonPlans(session: AccountSession): Promise<PersonalBonPlan[]> {
+  if (isDemoSession(session)) {
+    const { personalAccountFixture } = await import('@/demo/fixtures/personal-account')
+    return personalAccountFixture.bonPlans ?? []
+  }
+  const response = await bonPlansApi.listMine({ limit: 100 })
+  return array(response.data?.data).map(normalizeBonPlan).filter((item) => item.id)
+}
+
 export async function getPersonalFavorites(session: AccountSession): Promise<PersonalFavorite[]> {
   if (isDemoSession(session)) {
     const { personalAccountFixture } = await import('@/demo/fixtures/personal-account')
@@ -210,6 +237,7 @@ export const personalAccountActions = {
   deleteListing: (id: string) => listingsApi.delete(id),
   deleteEvent: (id: string) => eventsApi.deleteMine(id),
   cancelEvent: (id: string) => eventsApi.cancelMine(id),
+  deleteBonPlan: (id: string) => bonPlansApi.deleteMine(id),
   removeFavorite: (id: string) => api.post(`/listings/${id}/favoris`),
   respondPriceOffer: (id: string, response: 'accepted' | 'declined' | 'countered', counterAmount?: number) =>
     messagesApi.respondToOffer(id, response, counterAmount),

@@ -30,15 +30,15 @@ function OfferCard({ offer, featured }: { offer: BonPlan; featured?: boolean }) 
   const currentPrice = price(offer.promoPriceXpf ?? offer.originalPriceXpf)
   const previousPrice = offer.promoPriceXpf !== null ? price(offer.originalPriceXpf) : null
   return (
-    <article className={`group overflow-hidden rounded-card border border-warm-border bg-cream-surface shadow-card transition hover:-translate-y-1 hover:shadow-hover ${featured ? 'md:grid md:grid-cols-2' : ''}`}>
+    <article className={`group relative overflow-hidden rounded-card border border-warm-border bg-cream-surface shadow-card transition hover:-translate-y-1 hover:shadow-hover ${featured ? 'md:grid md:grid-cols-2' : ''}`}>
       {offer.imageUrl ? <img src={offer.imageUrl} alt="" className="h-full min-h-44 w-full object-cover" /> : <Placeholder label="Visuel de l’offre" />}
       <div className="flex flex-col p-5 sm:p-6">
         <div className="flex flex-wrap gap-2"><span className="rounded-pill bg-accent/15 px-3 py-1 text-label-sm font-semibold text-accent-text">{offer.category}</span>{offer.discountPercent !== null ? <span className="rounded-pill bg-reef/15 px-3 py-1 text-label-sm font-semibold text-reef-text">-{offer.discountPercent} %</span> : null}</div>
-        <h3 className={`mt-4 font-display font-semibold text-ink ${featured ? 'text-h3' : 'text-h4'}`}>{offer.title}</h3>
+        <h3 className={`mt-4 font-display font-semibold text-ink ${featured ? 'text-h3' : 'text-h4'}`}><Link href={`/bons-plans/${offer.id}`} className="rounded-control transition after:absolute after:inset-0 group-hover:text-accent-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent">{offer.title}</Link></h3>
         <p className="mt-2 line-clamp-3 text-body-sm text-ink/70">{offer.description || 'Les détails sont disponibles auprès du commerce.'}</p>
         <div className="mt-4 flex items-center gap-2 text-body-sm font-semibold"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-label-sm text-cream">{offer.businessInitials}</span><span>{offer.businessName}</span>{offer.verified ? <BadgeCheck className="h-5 w-5 text-info-text" aria-label="Commerce vérifié" /> : null}</div>
         {offer.commune ? <p className="mt-3 flex items-center gap-2 text-meta text-ink/60"><MapPin className="h-4 w-4" />{offer.commune}</p> : null}
-        <div className="mt-auto flex flex-wrap items-end justify-between gap-4 pt-5"><div>{previousPrice ? <p className="text-meta text-ink/50 line-through">{previousPrice}</p> : null}{currentPrice ? <p className="font-display text-price-sm font-semibold">{currentPrice}</p> : <p className="text-label font-semibold text-reef-text">Offre à découvrir</p>}</div>{offer.ctaUrl ? <a href={offer.ctaUrl} target="_blank" rel="noreferrer" className="k-button k-button-secondary">{offer.ctaLabel}<ArrowRight className="h-4 w-4" /></a> : <span className="text-meta font-semibold text-ink/55">En commerce</span>}</div>
+        <div className="mt-auto flex flex-wrap items-end justify-between gap-4 pt-5"><div>{previousPrice ? <p className="text-meta text-ink/50 line-through">{previousPrice}</p> : null}{currentPrice ? <p className="font-display text-price-sm font-semibold">{currentPrice}</p> : <p className="text-label font-semibold text-reef-text">Offre à découvrir</p>}</div><div className="relative z-10 flex flex-wrap justify-end gap-2"><Link href={`/bons-plans/${offer.id}`} className="k-button k-button-secondary">Voir les détails<ArrowRight className="h-4 w-4" /></Link>{offer.ctaUrl ? <a href={offer.ctaUrl} target="_blank" rel="noreferrer" className="k-button k-button-secondary">{offer.ctaLabel}</a> : null}</div></div>
       </div>
     </article>
   )

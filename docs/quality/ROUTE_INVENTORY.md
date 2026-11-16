@@ -2,7 +2,7 @@
 
 > Généré par `npm run quality:inventory`. Ne pas modifier manuellement.
 
-Routes détectées : **110**.
+Routes détectées : **112**.
 
 | Route | Audience | Priorité | Automatisation actuelle | Audit manuel |
 |---|---|---:|---|---|
@@ -29,6 +29,7 @@ Routes détectées : **110**.
 | `/avis/[token]` | public | P2 | à planifier | À auditer |
 | `/bienvenue` | public | P2 | à planifier | À auditer |
 | `/bons-plans` | public | P2 | à planifier | À auditer |
+| `/bons-plans/[id]` | public | P2 | à planifier | À auditer |
 | `/bons-plans/enseigne/[slug]` | public | P2 | à planifier | À auditer |
 | `/bons-plans/publier` | public | P2 | à planifier | À auditer |
 | `/cgu` | public | P1 | contraste + texte + largeur | À auditer |
@@ -102,6 +103,7 @@ Routes détectées : **110**.
 | `/profil/alertes` | particulier connecté | P1 | à planifier | À auditer |
 | `/profil/alertes-trajet` | particulier connecté | P1 | à planifier | À auditer |
 | `/profil/annonces` | particulier connecté | P1 | à planifier | À auditer |
+| `/profil/bons-plans` | particulier connecté | P1 | à planifier | À auditer |
 | `/profil/evenements` | particulier connecté | P1 | à planifier | À auditer |
 | `/profil/favoris` | particulier connecté | P1 | à planifier | À auditer |
 | `/profil/offres` | particulier connecté | P1 | à planifier | À auditer |

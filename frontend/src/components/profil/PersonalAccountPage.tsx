@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
   Archive,
+  BadgePercent,
   Bell,
   CalendarDays,
   Check,
@@ -29,6 +30,7 @@ import PersonalAlertsManager from '@/components/profil/PersonalAlertsManager'
 import { DEMO } from '@/lib/demo'
 import {
   getPersonalFavorites,
+  getPersonalBonPlans,
   getPersonalEvents,
   getPersonalListings,
   getPersonalOffers,
@@ -39,16 +41,18 @@ import { useAuthStore } from '@/store/authStore'
 import type { AccountSession } from '@/types/account'
 import type {
   PersonalFavorite,
+  PersonalBonPlan,
   PersonalEvent,
   PersonalListing,
   PersonalListingsData,
   PersonalOffer,
 } from '@/types/personal-account'
 
-export type PersonalAccountTab = 'listings' | 'events' | 'favorites' | 'alerts' | 'offers'
+export type PersonalAccountTab = 'listings' | 'bonPlans' | 'events' | 'favorites' | 'alerts' | 'offers'
 
 const TAB_META: Record<PersonalAccountTab, { title: string; subtitle: string }> = {
   listings: { title: 'Mes annonces', subtitle: 'Vos annonces et leurs performances' },
+  bonPlans: { title: 'Mes bons plans', subtitle: 'Consultez, modifiez ou retirez vos offres locales' },
   events: { title: 'Mes événements', subtitle: 'Retrouvez les événements publiés avec votre compte' },
   favorites: { title: 'Coups de cœur', subtitle: 'Les annonces que vous gardez de côté' },
   alerts: { title: 'Alertes', subtitle: 'Vos recherches enregistrées et leurs résultats récents' },
@@ -57,6 +61,7 @@ const TAB_META: Record<PersonalAccountTab, { title: string; subtitle: string }> 
 
 const TABS = [
   { id: 'listings', label: 'Mes annonces', href: '/profil/annonces', icon: <Archive className="h-4 w-4" /> },
+  { id: 'bonPlans', label: 'Mes bons plans', href: '/profil/bons-plans', icon: <BadgePercent className="h-4 w-4" /> },
   { id: 'events', label: 'Mes événements', href: '/profil/evenements', icon: <CalendarDays className="h-4 w-4" /> },
   { id: 'favorites', label: 'Coups de cœur', href: '/profil/favoris', icon: <Heart className="h-4 w-4" /> },
   { id: 'alerts', label: 'Alertes', href: '/profil/alertes', icon: <Bell className="h-4 w-4" /> },
@@ -243,6 +248,54 @@ const eventStatusMeta: Record<PersonalEvent['status'], { label: string; classNam
   draft: { label: 'Brouillon', className: 'bg-sand text-ink/70' },
   cancelled: { label: 'Annulé', className: 'bg-red-50 text-red-700' },
   completed: { label: 'Terminé', className: 'bg-night text-white' },
+}
+
+const bonPlanStatusMeta: Record<PersonalBonPlan['status'], { label: string; className: string }> = {
+  active: { label: 'En ligne', className: 'bg-green-100 text-green-800' },
+  draft: { label: 'Brouillon', className: 'bg-sand text-ink/70' },
+  expired: { label: 'Expiré', className: 'bg-orange-100 text-orange-800' },
+}
+
+function BonPlansView({ session, demo }: { session: AccountSession; demo: boolean }) {
+  const [items, setItems] = useState<PersonalBonPlan[]>([])
+  const [filter, setFilter] = useState<'all' | PersonalBonPlan['status']>('all')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+  const [busyId, setBusyId] = useState<string | null>(null)
+
+  const load = useCallback(async () => {
+    setLoading(true); setError(null)
+    try { setItems(await getPersonalBonPlans(session)) } catch (reason) { setError(getErrorMessage(reason)) } finally { setLoading(false) }
+  }, [session])
+  useEffect(() => { void load() }, [load])
+
+  const remove = async (item: PersonalBonPlan) => {
+    if (!window.confirm(`Supprimer définitivement « ${item.title} » ?`)) return
+    setBusyId(item.id); setFeedback(null)
+    try {
+      if (demo) showDemoToast('Suppression simulée en mode démo')
+      else await personalAccountActions.deleteBonPlan(item.id)
+      setItems((current) => current.filter((value) => value.id !== item.id))
+      setFeedback({ type: 'success', message: 'Bon plan supprimé.' })
+    } catch (reason) {
+      setFeedback({ type: 'error', message: getErrorMessage(reason) })
+    } finally { setBusyId(null) }
+  }
+
+  if (loading) return <PageSkeleton />
+  if (error) return <ErrorState message={error} onRetry={load} />
+  const filters: Array<['all' | PersonalBonPlan['status'], string]> = [['all', 'Tout'], ['active', 'En ligne'], ['expired', 'Expirés'], ['draft', 'Brouillons']]
+  const shown = items.filter((item) => filter === 'all' || item.status === filter)
+
+  return <div className="space-y-5">
+    {feedback ? <div role="status" className={`rounded-2xl border px-4 py-3 text-sm ${feedback.type === 'success' ? 'border-green-200 bg-green-50 text-green-800' : 'border-red-200 bg-red-50 text-red-800'}`}>{feedback.message}</div> : null}
+    <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex gap-2 overflow-x-auto pb-1">{filters.map(([id, label]) => <button key={id} type="button" onClick={() => setFilter(id)} className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold ${filter === id ? 'border-ink bg-ink text-white' : 'border-warm-border bg-surface text-ink/65'}`}>{label} · {items.filter((item) => id === 'all' || item.status === id).length}</button>)}</div><Link href="/bons-plans/publier" className="k-button k-button-primary inline-flex min-h-11 items-center gap-2"><Plus className="h-4 w-4" /> Publier un bon plan</Link></div>
+    {shown.length === 0 ? <EmptyState icon={<BadgePercent className="h-6 w-6" />} title="Aucun bon plan ici" body="Publiez une offre ou choisissez un autre filtre pour retrouver vos bons plans." href="/bons-plans/publier" action="Publier un bon plan" /> : <div className="grid gap-4 sm:grid-cols-2">{shown.map((item) => {
+      const meta = bonPlanStatusMeta[item.status] ?? bonPlanStatusMeta.draft
+      return <article key={item.id} className="overflow-hidden rounded-[2rem] border border-warm-border bg-surface shadow-sm"><div className="flex aspect-[16/8] items-center justify-center bg-sand text-ink/25">{item.imageUrl ? <img src={item.imageUrl} alt="" className="h-full w-full object-cover" /> : <BadgePercent className="h-10 w-10" />}</div><div className="p-5"><div className="flex flex-wrap items-center justify-between gap-2"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${meta.className}`}>{meta.label}</span><span className="text-xs font-semibold uppercase tracking-[0.14em] text-rust">{item.category}</span></div><h2 className="mt-3 font-display text-xl font-bold text-ink">{item.title}</h2><p className="mt-1 text-sm text-ink/60">{item.businessName}</p>{item.promoLabel ? <p className="mt-3 font-semibold text-reef-text">{item.promoLabel}</p> : null}{item.promoPriceXpf != null ? <p className="mt-1 font-display text-2xl">{formatXpf(item.promoPriceXpf)}</p> : null}<p className="mt-3 text-xs text-ink/50">{item.validUntil ? `Offre valable jusqu’au ${formatDate(item.validUntil)}` : item.publishedUntil ? `Diffusion jusqu’au ${formatDate(item.publishedUntil)}` : 'Échéance non renseignée'}</p>{item.status === 'expired' ? <p className="mt-3 rounded-2xl bg-orange-50 p-3 text-sm text-orange-800">Cette offre n’est plus visible publiquement.</p> : null}<div className="mt-5 flex flex-wrap gap-2">{item.status === 'active' ? <Link href={`/bons-plans/${item.id}`} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-warm-border px-4 py-2 text-sm font-semibold text-ink">Voir la fiche <Eye className="h-4 w-4" /></Link> : null}<Link href={`/bons-plans/publier?edit=${item.id}`} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-warm-border px-4 py-2 text-sm font-semibold text-ink"><Pencil className="h-4 w-4" /> Modifier</Link><button type="button" disabled={busyId === item.id} onClick={() => void remove(item)} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50"><Trash2 className="h-4 w-4" />{busyId === item.id ? 'Suppression…' : 'Supprimer'}</button></div></div></article>
+    })}</div>}
+  </div>
 }
 
 function EventsView({ session, demo }: { session: AccountSession; demo: boolean }) {
@@ -456,13 +509,14 @@ export default function PersonalAccountPage({ activeTab }: { activeTab: Personal
           <div className="rounded-[2rem] border border-warm-border bg-surface p-8 text-center shadow-sm">
             <h1 className="font-display text-3xl font-bold">Connectez-vous à votre espace</h1>
             <p className="mx-auto mt-3 max-w-lg text-sm text-ink/60">Vos annonces, favoris, alertes et offres sont réservés à votre compte.</p>
-            <Link href={`/connexion?next=/profil/${activeTab === 'favorites' ? 'favoris' : activeTab === 'alerts' ? 'alertes' : activeTab === 'offers' ? 'offres' : activeTab === 'events' ? 'evenements' : 'annonces'}`} className="btn-primary mt-5 inline-flex rounded-full px-5 py-2.5">Se connecter</Link>
+            <Link href={`/connexion?next=/profil/${activeTab === 'favorites' ? 'favoris' : activeTab === 'alerts' ? 'alertes' : activeTab === 'offers' ? 'offres' : activeTab === 'events' ? 'evenements' : activeTab === 'bonPlans' ? 'bons-plans' : 'annonces'}`} className="btn-primary mt-5 inline-flex rounded-full px-5 py-2.5">Se connecter</Link>
           </div>
         ) : (
           <>
             <div className="mb-6"><p className="text-xs font-semibold uppercase tracking-[0.22em] text-rust">Espace particulier</p><h1 className="mt-2 font-display text-4xl font-bold text-ink sm:text-5xl">{meta.title}</h1><p className="mt-2 text-sm text-ink/55 sm:text-base">{meta.subtitle}</p></div>
             <div className="mb-7 rounded-[1.5rem] border border-warm-border bg-surface px-2 shadow-sm"><AccountTabs items={tabs} activeId={activeTab} label="Espace particulier" /></div>
             {activeTab === 'listings' ? <ListingsView session={session} demo={demo} /> : null}
+            {activeTab === 'bonPlans' ? <BonPlansView session={session} demo={demo} /> : null}
             {activeTab === 'events' ? <EventsView session={session} demo={demo} /> : null}
             {activeTab === 'favorites' ? <FavoritesView session={session} demo={demo} /> : null}
             {activeTab === 'alerts' ? <PersonalAlertsManager session={session} /> : null}
