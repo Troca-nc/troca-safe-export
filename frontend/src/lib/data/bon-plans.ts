@@ -92,6 +92,15 @@ function normalizeEvent(value: unknown): LocalEvent | null {
   const dateIso = asText(item.event_date ?? item.start_at ?? item.date)
   if (!id || !title || !dateIso) return null
 
+  const bookingUrl = asText(item.booking_url ?? item.ticketing_url ?? item.link_url) || null
+  const hasTicketing = Boolean(item.has_ticketing)
+  const isFree = Boolean(item.is_free)
+  const ticketPrices = (Array.isArray(item.ticket_types) ? item.ticket_types : [])
+    .map((value) => asRecord(value))
+    .filter((ticket) => ticket.is_active !== false)
+    .map((ticket) => asOptionalNumber(ticket.price_xpf))
+    .filter((price): price is number => price !== null)
+
   return {
     id,
     title,
@@ -104,10 +113,11 @@ function normalizeEvent(value: unknown): LocalEvent | null {
     category: asText(item.category_name ?? item.category) || 'Autres',
     organizerName: asText(item.organizer_name ?? item.business_name ?? item.author_name) || null,
     verified: Boolean(item.organizer_verified ?? item.author_is_pro ?? item.author_pro_verified),
-    isFree: Boolean(item.is_free) || Number(item.price_xpf) === 0,
-    hasTicketing: Boolean(item.has_ticketing),
-    priceXpf: asOptionalNumber(item.price_xpf ?? item.price),
-    bookingUrl: asText(item.booking_url ?? item.ticketing_url ?? item.link_url ?? item.website_url) || null,
+    isFree,
+    hasTicketing,
+    paymentMode: !hasTicketing ? 'open' : isFree ? 'free' : bookingUrl ? 'external' : 'onsite',
+    priceXpf: ticketPrices.length ? Math.min(...ticketPrices) : asOptionalNumber(item.price_xpf ?? item.price),
+    bookingUrl,
     coverImageUrl: asText(item.cover_image_url ?? item.cover_image ?? (Array.isArray(item.photos) ? item.photos[0] : '')) || null,
   }
 }

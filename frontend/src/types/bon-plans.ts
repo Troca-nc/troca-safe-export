@@ -41,6 +41,7 @@ export type LocalEvent = {
   verified: boolean
   isFree: boolean
   hasTicketing?: boolean
+  paymentMode?: 'open' | 'free' | 'onsite' | 'external'
   priceXpf: number | null
   bookingUrl: string | null
   coverImageUrl: string | null
