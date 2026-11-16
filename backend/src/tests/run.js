@@ -39,6 +39,7 @@ const SUITES = [
   './health.test',
   './validate.test',
   './bonPlansFreePublication.contract.test',
+  './publicationLifecycleConsistency.test',
   './jwt.test',
   './auth.middleware.test',
   './email.service.test',

@@ -171,6 +171,7 @@ function serializeBonPlan(row) {
   return {
     id: row.id,
     business_id: row.business_id ?? null,
+    business_slug: row.business_slug ?? null,
     business_name: cleanDisplayText(row.business_name, cleanDisplayText(row.title, 'Kalico')),
     business_logo_url: row.business_logo_url ?? null,
     catalog_pdf_url: row.catalog_pdf_url ?? null,
@@ -206,6 +207,7 @@ function serializeBonPlan(row) {
     is_free_included: Boolean(row.is_free_included),
     normal_price_xpf: originalPrice ?? null,
     discount_pct: offerDiscount,
+    conditions: row.conditions ?? null,
     contact_name: cleanDisplayText(row.contact_name, null),
     contact_phone: row.contact_phone ?? null,
     website_url: row.website_url ?? null,
@@ -222,6 +224,15 @@ function serializeBonPlan(row) {
     author_is_pro: Boolean(row.author_is_pro),
     kind: row.kind || 'promo',
     target_audience: row.target_audience || (row.business_name ? 'pro' : 'particulier'),
+  };
+}
+
+function serializeOwnedBonPlan(row) {
+  return {
+    ...serializeBonPlan({ ...row, status: row.lifecycle_status || row.status }),
+    business_slug: row.business_slug ?? null,
+    contact_email: row.contact_email ?? null,
+    conditions: row.conditions ?? null,
   };
 }
 
@@ -352,6 +363,7 @@ async function queryBonPlans(filters = {}) {
       u.nom AS author_nom,
       CASE WHEN u.is_pro = TRUE AND u.pro_expires_at > NOW() THEN TRUE ELSE FALSE END AS author_is_pro,
       b.badge AS business_badge,
+      b.slug AS business_slug,
       b.review_avg AS business_review_avg,
       b.review_count AS business_review_count
     FROM bon_plans bp
@@ -510,6 +522,168 @@ router.get('/', optionalAuth, async (req, res, next) => {
         has_more: data.length === limit,
       },
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/mine', authenticate, async (req, res, next) => {
+  try {
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit || 100)));
+    const { rows } = await query(
+      `SELECT bp.*, com.name AS commune_name, b.slug AS business_slug,
+              b.badge AS business_badge, b.review_avg AS business_review_avg, b.review_count AS business_review_count,
+              CASE
+                WHEN bp.status = 'active' AND (
+                  bp.published_until <= NOW()
+                  OR (bp.promo_valid_until IS NOT NULL AND bp.promo_valid_until < (NOW() AT TIME ZONE 'Pacific/Noumea')::date)
+                ) THEN 'expired'
+                ELSE bp.status
+              END AS lifecycle_status
+         FROM bon_plans bp
+         LEFT JOIN communes com ON com.id = bp.commune_id
+         LEFT JOIN businesses b ON b.id = bp.business_id
+        WHERE bp.user_id = $1
+          AND bp.kind = 'promo'
+        ORDER BY bp.created_at DESC, bp.id DESC
+        LIMIT $2`,
+      [req.user.id, limit]
+    );
+    return res.json({ data: rows.map(serializeOwnedBonPlan) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/mine/:id', authenticate, async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Bon plan invalide.' });
+    const { rows } = await query(
+      `SELECT bp.*, com.name AS commune_name, b.slug AS business_slug,
+              b.badge AS business_badge, b.review_avg AS business_review_avg, b.review_count AS business_review_count,
+              CASE
+                WHEN bp.status = 'active' AND (
+                  bp.published_until <= NOW()
+                  OR (bp.promo_valid_until IS NOT NULL AND bp.promo_valid_until < (NOW() AT TIME ZONE 'Pacific/Noumea')::date)
+                ) THEN 'expired'
+                ELSE bp.status
+              END AS lifecycle_status
+         FROM bon_plans bp
+         LEFT JOIN communes com ON com.id = bp.commune_id
+         LEFT JOIN businesses b ON b.id = bp.business_id
+        WHERE bp.id = $1 AND bp.user_id = $2 AND bp.kind = 'promo'
+        LIMIT 1`,
+      [id, req.user.id]
+    );
+    if (!rows[0]) return res.status(404).json({ error: 'Bon plan introuvable.' });
+    return res.json({ data: serializeOwnedBonPlan(rows[0]) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/mine/:id', authenticate, validate({ body: createSchema }), async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Bon plan invalide.' });
+    const value = req.body || {};
+    const durationDays = Number(value.duration_days) === 3 ? 7 : Number(value.duration_days);
+    const category = String(value.category || mapLegacyCategory(value.kind)).trim().toLowerCase();
+    const updated = await withTransaction(async (client) => {
+      const { rows } = await client.query(
+        `UPDATE bon_plans
+          SET business_logo_url = $3,
+              catalog_pdf_url = $4,
+              catalog_pdf_pages = $5,
+              title = $6,
+              description = $7,
+              image_url = $8,
+              promo_label = $9,
+              original_price_xpf = $10,
+              promo_price_xpf = $11,
+              cta_label = $12,
+              cta_url = $13,
+              category = $14,
+              promo_valid_from = $15,
+              promo_valid_until = $16,
+              commune_id = $17,
+              location_name = $18,
+              duration_days = $19,
+              contact_email = $20,
+              conditions = $21,
+              updated_at = NOW()
+        WHERE id = $1 AND user_id = $2 AND kind = 'promo'
+        RETURNING *`,
+        [
+        id,
+        req.user.id,
+        value.business_logo_url || null,
+        value.catalog_pdf_url || null,
+        value.catalog_pdf_pages ?? null,
+        value.title.trim(),
+        value.description.trim(),
+        value.image_url || null,
+        value.promo_label?.trim() || null,
+        toNumberOrNull(value.original_price_xpf ?? value.normal_price_xpf),
+        toNumberOrNull(value.promo_price_xpf),
+        value.cta_label?.trim() || 'En profiter',
+        value.cta_url?.trim() || value.link_url?.trim() || value.website_url?.trim() || null,
+        category,
+        toDateOrNull(value.promo_valid_from),
+        toDateOrNull(value.promo_valid_until),
+        value.commune_id ?? null,
+        value.location_name?.trim() || null,
+        durationDays,
+        value.contact_email?.trim() || null,
+        value.conditions?.trim() || null,
+        ]
+      );
+      const row = rows[0];
+      if (row?.business_id) {
+        await client.query(
+          `UPDATE businesses
+              SET logo_url = $2, contact_email = $3, category = $4, updated_at = NOW()
+            WHERE id = $1 AND owner_user_id = $5`,
+          [row.business_id, row.business_logo_url, row.contact_email, row.category, req.user.id]
+        );
+      }
+      return row || null;
+    });
+    if (!updated) return res.status(404).json({ error: 'Bon plan introuvable.' });
+    if (statsRouter.invalidateCache) await statsRouter.invalidateCache('home');
+    return res.json({ data: serializeOwnedBonPlan(updated), message: 'Bon plan modifié.' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/mine/:id', authenticate, async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Bon plan invalide.' });
+    const deleted = await withTransaction(async (client) => {
+      const { rows } = await client.query(
+        `DELETE FROM bon_plans
+          WHERE id = $1 AND user_id = $2 AND kind = 'promo'
+          RETURNING id, business_id`,
+        [id, req.user.id]
+      );
+      const row = rows[0];
+      if (!row) return null;
+      if (row.business_id) {
+        await client.query(
+          `UPDATE businesses
+              SET bon_plan_count = GREATEST(0, bon_plan_count - 1), updated_at = NOW()
+            WHERE id = $1`,
+          [row.business_id]
+        );
+      }
+      return row;
+    });
+    if (!deleted) return res.status(404).json({ error: 'Bon plan introuvable.' });
+    if (statsRouter.invalidateCache) await statsRouter.invalidateCache('home');
+    return res.json({ data: { id: deleted.id }, message: 'Bon plan supprimé.' });
   } catch (err) {
     next(err);
   }
@@ -674,6 +848,7 @@ router.get('/:id', optionalAuth, async (req, res, next) => {
          u.nom AS author_nom,
          CASE WHEN u.is_pro = TRUE AND u.pro_expires_at > NOW() THEN TRUE ELSE FALSE END AS author_is_pro,
          b.badge AS business_badge,
+         b.slug AS business_slug,
          b.review_avg AS business_review_avg,
          b.review_count AS business_review_count
        FROM bon_plans bp

@@ -21,6 +21,27 @@ function normalizeMaybeText(value) {
   return text.length ? text : null;
 }
 
+function noumeaDayKey(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Pacific/Noumea',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function eventLifecycleStatus(row, now = new Date()) {
+  if (row.status !== 'published' || !row.event_date) return row.status ?? 'draft';
+  const eventDay = typeof row.event_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(row.event_date)
+    ? row.event_date
+    : noumeaDayKey(row.event_date);
+  return eventDay && eventDay < noumeaDayKey(now) ? 'completed' : 'published';
+}
+
 function normalizeTicketType(value, index = 0) {
   const priceXpf = Number(value?.price_xpf ?? 0);
   const quantityTotal = Math.max(1, Number(value?.quantity_total ?? 0) || 1);
@@ -77,7 +98,7 @@ function serializeEventRow(row, ticketTypes = []) {
     price_normal_xpf: row.price_normal_xpf == null ? null : Number(row.price_normal_xpf),
     price_reduced_xpf: row.price_reduced_xpf == null ? null : Number(row.price_reduced_xpf),
     external_id: row.external_id ?? null,
-    status: row.status ?? 'draft',
+    status: eventLifecycleStatus(row),
     has_ticketing: Boolean(row.has_ticketing),
     max_capacity: row.max_capacity == null ? null : Number(row.max_capacity),
     tickets_sold: row.tickets_sold == null ? 0 : Number(row.tickets_sold),
@@ -108,7 +129,11 @@ async function loadEventTicketTypes(eventId) {
 
 async function listPublicEvents({ limit = 24, category = '', commune = '' } = {}) {
   const params = [];
-  const where = [`e.status = 'published'`, `e.deleted_at IS NULL`];
+  const where = [
+    `e.status = 'published'`,
+    `e.deleted_at IS NULL`,
+    `e.event_date >= (NOW() AT TIME ZONE 'Pacific/Noumea')::date`,
+  ];
 
   if (category) {
     params.push(String(category).split(',').map((value) => value.trim()).filter(Boolean));

@@ -47,6 +47,10 @@ export const personalAccountFixture: PersonalAccountFixture = {
     { id: 'demo-event-marche', title: 'Marché des créateurs (démo)', status: 'published', category: 'marche', eventDate: days(8), eventTime: '09:00:00', venueName: 'Place des Cocotiers', communeName: 'Nouméa', coverImage: null, ticketsSold: 0, maxCapacity: null, createdAt: days(-3) },
     { id: 'demo-event-atelier', title: 'Atelier découverte (démo)', status: 'draft', category: 'conference', eventDate: days(15), eventTime: '14:00:00', venueName: 'Maison de quartier', communeName: 'Dumbéa', coverImage: null, ticketsSold: 0, maxCapacity: 30, createdAt: days(-1) },
   ],
+  bonPlans: [
+    { id: 'demo-deal-menu', title: 'Menu du midi à prix réduit (démo)', status: 'active', category: 'restauration', businessName: 'Le Comptoir local', imageUrl: null, promoLabel: '−20 %', promoPriceXpf: 1600, validUntil: days(9), publishedUntil: days(14), createdAt: days(-2) },
+    { id: 'demo-deal-expired', title: 'Offre découverte terminée (démo)', status: 'expired', category: 'services', businessName: 'Atelier du quartier', imageUrl: null, promoLabel: 'OFFRE', promoPriceXpf: null, validUntil: days(-2), publishedUntil: days(5), createdAt: days(-12) },
+  ],
   favorites: [
     { id: 'demo-favorite-paddle', title: 'Paddle gonflable (démo)', price: 35000, status: 'active', categoryName: 'Nautisme', communeName: 'Mont-Dore', coverImage: null, savedAt: days(-2), priceDropXpf: 5000 },
     { id: 'demo-favorite-hilux', title: 'Toyota Hilux 2019 (démo)', price: 4250000, status: 'active', categoryName: 'Véhicules', communeName: 'Nouméa', coverImage: null, savedAt: days(-5), priceDropXpf: null },

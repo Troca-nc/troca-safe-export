@@ -645,6 +645,20 @@ export const bonPlansApi = {
     () => api.get(`/bon-plans/${id}`),
     CACHE_TTL.short,
   ),
+  listMine: (params: object = {}) => api.get('/bon-plans/mine', { params }),
+  getMineById: (id: string | number) => api.get(`/bon-plans/mine/${id}`),
+  updateMine: async (id: string | number, data: object) => {
+    const res = await api.put(`/bon-plans/mine/${id}`, data)
+    invalidateApiCache('bonPlans.')
+    invalidateApiCache('stats.')
+    return res
+  },
+  deleteMine: async (id: string | number) => {
+    const res = await api.delete(`/bon-plans/mine/${id}`)
+    invalidateApiCache('bonPlans.')
+    invalidateApiCache('stats.')
+    return res
+  },
   businesses: (params: object = {}) => cachedGet(
     buildCacheKey('bonPlans.businesses', '/bon-plans/businesses', params),
     () => api.get('/bon-plans/businesses', { params }),
