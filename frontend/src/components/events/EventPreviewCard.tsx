@@ -1,20 +1,24 @@
 import { EventCard } from '@/components/bon-plans/EventCard'
-import type { EventAdmissionMode, EventPublishDraft, EventTicketDraft } from '@/types/events'
+import type { EventAdmissionMode, EventPaidReservationMode, EventPublishDraft, EventTicketDraft } from '@/types/events'
 
-const money = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 })
-
-export function EventPreviewCard({ form, admissionMode, tickets, categoryLabel, communeName }: {
+export function EventPreviewCard({ form, admissionMode, paidReservationMode, tickets, categoryLabel, communeName }: {
   form: EventPublishDraft
   admissionMode: EventAdmissionMode
+  paidReservationMode: EventPaidReservationMode
   tickets: EventTicketDraft[]
   categoryLabel: string
   communeName: string
 }) {
   const prices = tickets.map((ticket) => Number.parseInt(ticket.priceXpf, 10) || 0)
   const min = prices.length ? Math.min(...prices) : 0
-  const max = prices.length ? Math.max(...prices) : 0
   const ticketing = admissionMode !== 'open'
-  const priceLabel = admissionMode === 'open' ? 'Entrée libre' : admissionMode === 'free' ? 'Réservation gratuite' : min === max ? `${money.format(min)} XPF` : `Dès ${money.format(min)} XPF`
+  const priceLabel = admissionMode === 'open'
+    ? 'Entrée libre'
+    : admissionMode === 'free'
+      ? 'Réservation gratuite'
+      : paidReservationMode === 'external'
+        ? 'Paiement en ligne'
+        : 'Paiement sur place'
 
   return (
     <div>
@@ -23,7 +27,7 @@ export function EventPreviewCard({ form, admissionMode, tickets, categoryLabel, 
         variant="preview"
         titleMuted={!form.title.trim()}
         priceLabel={priceLabel}
-        ctaLabel={ticketing ? 'Réserver' : 'Voir'}
+        ctaLabel={ticketing ? 'Voir les détails' : 'Découvrir'}
         event={{
           id: 'preview',
           title: form.title.trim() || 'Titre de l’événement',
@@ -37,6 +41,8 @@ export function EventPreviewCard({ form, admissionMode, tickets, categoryLabel, 
           organizerName: form.organizerName.trim() || null,
           verified: false,
           isFree: admissionMode !== 'paid',
+          hasTicketing: ticketing,
+          paymentMode: admissionMode === 'open' ? 'open' : admissionMode === 'free' ? 'free' : paidReservationMode,
           priceXpf: min,
           bookingUrl: null,
           coverImageUrl: form.photoUrls[0] || form.coverImageUrl.trim() || null,

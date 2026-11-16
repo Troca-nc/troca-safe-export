@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, Plus } from 'lucide-react'
+import { ArrowLeft, ArrowRight, CheckCircle2, Eye, Plus } from 'lucide-react'
 
 import { EventFormSection } from '@/components/events/EventFormSection'
 import { EventPhotosField } from '@/components/events/EventPhotosField'
@@ -59,6 +59,7 @@ export default function EventPublishPage() {
   const [savingDraft, setSavingDraft] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [success, setSuccess] = useState('')
+  const [publishedEventId, setPublishedEventId] = useState('')
   const cleanSnapshot = useRef('')
   const successfulNavigation = useRef(false)
   const titleRef = useRef<HTMLInputElement>(null)
@@ -266,7 +267,12 @@ export default function EventPublishPage() {
       if (!editingId) clearLocalEventDraft(user?.id)
       cleanSnapshot.current = snapshot(form, admissionMode, paidReservationMode, tickets)
       successfulNavigation.current = true
-      window.location.assign(result.href)
+      if (editingId) {
+        window.location.assign(result.href)
+      } else {
+        setPublishedEventId(result.id)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
     } catch (error: unknown) {
       successfulNavigation.current = false
       const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error
@@ -275,6 +281,25 @@ export default function EventPublishPage() {
   }
 
   if (!hasHydrated || !initialized) return <main className="min-h-screen bg-cream"><Header /><div className="mx-auto max-w-7xl space-y-5 px-5 py-10 sm:px-12"><div className="h-32 animate-pulse rounded-card bg-cream-sunken" />{[1, 2, 3, 4].map((item) => <div key={item} className="h-48 animate-pulse rounded-card bg-cream-surface" />)}</div></main>
+
+  if (publishedEventId) return (
+    <main className="min-h-screen bg-cream text-ink">
+      <Header />
+      <div className="mx-auto max-w-5xl px-5 py-10 sm:px-12 sm:py-16">
+        <div className="rounded-block border border-warm-border bg-cream-surface p-6 shadow-panel sm:p-10">
+          <div className="flex max-w-3xl items-start gap-4">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-pill bg-reef/15 text-reef-text"><CheckCircle2 className="h-6 w-6" aria-hidden="true" /></span>
+            <div><p className="text-eyebrow uppercase text-reef-text">Publication réussie</p><h1 className="mt-2 font-display text-display-sm leading-none">Ton événement est en ligne.</h1><p className="mt-4 text-body text-ink/70">Voici l’aperçu présenté dans l’agenda. Tu peux maintenant revenir aux événements ou ouvrir la fiche publique complète.</p></div>
+          </div>
+          <div className="mx-auto mt-8 max-w-md"><EventPreviewCard form={form} admissionMode={admissionMode} paidReservationMode={paidReservationMode} tickets={tickets} categoryLabel={categoryLabel} communeName={communeName} /></div>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link href="/evenements" className="k-button k-button-primary inline-flex min-h-12 items-center gap-2 px-5">Voir tous les événements<ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
+            <Link href={`/evenements/${publishedEventId}`} className="k-button k-button-secondary inline-flex min-h-12 items-center gap-2 px-5">Voir la fiche publique<Eye className="h-4 w-4" aria-hidden="true" /></Link>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
 
   return (
     <main className="min-h-screen bg-cream text-ink">
@@ -317,7 +342,7 @@ export default function EventPublishPage() {
             <PublishPanel remaining={remaining} publishing={publishing || uploadingPhotos} savingDraft={savingDraft} error={submitError} success={success} mode={editingId ? 'edit' : 'create'} onSaveDraft={handleSaveDraft} />
           </div>
 
-          <aside className="min-w-0 flex-[0_1_400px] space-y-5 min-[1100px]:min-w-[300px] min-[1100px]:sticky min-[1100px]:top-6"><EventPreviewCard form={form} admissionMode={admissionMode} tickets={tickets} categoryLabel={categoryLabel} communeName={communeName} /><PublishChecklist checks={checks} /><div className="rounded-card border border-dashed border-warm-border p-5"><h2 className="text-label font-semibold">Un doute ?</h2><p className="mt-2 text-body-sm text-ink/70">Choisis « Réservation gratuite » pour tester les billets et QR codes sans demander de paiement.</p></div></aside>
+          <aside className="min-w-0 flex-[0_1_400px] space-y-5 min-[1100px]:min-w-[300px] min-[1100px]:sticky min-[1100px]:top-6"><EventPreviewCard form={form} admissionMode={admissionMode} paidReservationMode={paidReservationMode} tickets={tickets} categoryLabel={categoryLabel} communeName={communeName} /><PublishChecklist checks={checks} /><div className="rounded-card border border-dashed border-warm-border p-5"><h2 className="text-label font-semibold">Un doute ?</h2><p className="mt-2 text-body-sm text-ink/70">Choisis « Réservation gratuite » pour tester les billets et QR codes sans demander de paiement.</p></div></aside>
         </form>
       </div>
     </main>

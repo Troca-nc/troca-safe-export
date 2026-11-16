@@ -37,22 +37,22 @@ export const bonsPlansPageFixture: BonsPlansPageData = {
     {
       id: 'demo-event-artisans', title: 'Rencontre avec les artisans', description: 'Créateurs et savoir-faire locaux réunis le temps d’une journée.',
       dateIso: '2027-02-06T09:00:00+11:00', time: '09:00', endTime: '17:00', commune: 'Nouméa', venue: 'Maison de quartier',
-      category: 'Marché', organizerName: 'Collectif local (démo)', verified: true, isFree: true, priceXpf: 0, bookingUrl: null, coverImageUrl: null,
+      category: 'Marché', organizerName: 'Collectif local (démo)', verified: true, isFree: true, hasTicketing: true, paymentMode: 'free', priceXpf: 0, bookingUrl: null, coverImageUrl: null,
     },
     {
       id: 'demo-event-musique', title: 'Soirée musique du Pacifique', description: 'Une scène ouverte consacrée aux artistes du territoire.',
       dateIso: '2027-02-13T18:30:00+11:00', time: '18:30', endTime: '22:00', commune: 'Dumbéa', venue: 'Centre culturel',
-      category: 'Concert', organizerName: 'Scène du Caillou (démo)', verified: true, isFree: false, priceXpf: 2500, bookingUrl: null, coverImageUrl: null,
+      category: 'Concert', organizerName: 'Scène du Caillou (démo)', verified: true, isFree: false, hasTicketing: true, paymentMode: 'onsite', priceXpf: 2500, bookingUrl: null, coverImageUrl: null,
     },
     {
       id: 'demo-event-famille', title: 'Matinée découverte en famille', description: 'Des ateliers accessibles aux petits comme aux grands.',
       dateIso: '2027-02-20T08:30:00+11:00', time: '08:30', endTime: '12:00', commune: 'Païta', venue: 'Parc municipal',
-      category: 'Famille', organizerName: 'Association du parc (démo)', verified: false, isFree: true, priceXpf: 0, bookingUrl: null, coverImageUrl: null,
+      category: 'Famille', organizerName: 'Association du parc (démo)', verified: false, isFree: true, hasTicketing: false, paymentMode: 'open', priceXpf: 0, bookingUrl: null, coverImageUrl: null,
     },
     {
       id: 'demo-event-sport', title: 'Initiation sportive en plein air', description: 'Une séance collective encadrée, ouverte aux débutants.',
       dateIso: '2027-02-27T07:00:00+11:00', time: '07:00', endTime: '10:00', commune: 'Mont-Dore', venue: 'Bord de mer',
-      category: 'Sport', organizerName: 'Bouger ensemble (démo)', verified: true, isFree: true, priceXpf: 0, bookingUrl: null, coverImageUrl: null,
+      category: 'Sport', organizerName: 'Bouger ensemble (démo)', verified: true, isFree: true, hasTicketing: true, paymentMode: 'free', priceXpf: 0, bookingUrl: null, coverImageUrl: null,
     },
   ],
 }

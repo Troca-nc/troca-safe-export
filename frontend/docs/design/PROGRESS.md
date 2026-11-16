@@ -2148,6 +2148,14 @@ Inventaire et trois décisions validés par l’humain le 30 octobre 2026.
 - Le contrôle global d’encodage confirme les fichiers gardés sans nouvelle anomalie ; il continue de lister la dette historique hors périmètre déjà connue dans d’autres fichiers.
 - Limite de recette : l’outil de navigateur intégré n’était pas disponible dans cette session. La comparaison visuelle humaine à 1440 px reste à faire ; les recettes mobiles humaines à 1024/768/390 restent volontairement reportées au second temps demandé par l’utilisateur.
 
+### Clarté après publication et réservation — 16 novembre 2026
+
+- Retour humain : après publication, l’organisateur était envoyé directement dans la fiche de réservation ; dans l’agenda, la carte n’était accessible que par un petit CTA, affichait « Tarif à confirmer » malgré les billets configurés et employait « Acheter une place » sans distinguer gratuité, paiement externe et paiement sur place.
+- Diagnostic : la publication appelait directement `window.location.assign` vers `/evenements/[id]`; le mapping public ignorait `ticket_types` et cherchait un ancien `price_xpf` absent de l’événement ; la fiche utilisait le même titre et le même bouton génériques pour tous les parcours locaux.
+- Correction : la création affiche désormais une confirmation avec l’aperçu partagé, un bouton principal vers l’agenda et un accès secondaire à la fiche publique. Le visuel et le contenu principal de chaque carte ouvrent les détails. Les badges indiquent « Entrée libre », « Réservation gratuite », « Paiement en ligne » ou « Paiement sur place » selon les données réelles ; seul le lien de réservation explicite déclenche le mode externe.
+- La fiche distingue l’entrée libre, le gratuit, le paiement sur le site de l’organisateur et la réservation Kalico avec règlement sur place. Le dernier mode précise qu’aucun paiement en ligne n’a lieu et utilise « Confirmer — paiement sur place » au lieu du bouton ambigu « Réserver mes billets ».
+- Validation : contrats ciblés 10/10, TypeScript, lint configuré, design 7 fichiers avec 0 erreur/0 avertissement, `git diff --check` et build Next.js 113/113 routes verts. Recette Playwright locale à 1280 px validée sur l’agenda et sur une fiche paiement sur place simulée sans écriture métier. L’outil de navigateur intégré n’a pas pu initialiser ses ressources locales ; Playwright a servi de solution de repli.
+
 ## 23 — Gestion de mes événements — Implémenté
 
 ### Livraison — 1er novembre 2026

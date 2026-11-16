@@ -1,14 +1,14 @@
 import Link from 'next/link'
-import { BadgeCheck, CalendarDays, Clock3, Image as ImageIcon, MapPin, Ticket } from 'lucide-react'
+import { ArrowRight, BadgeCheck, CalendarDays, Clock3, ExternalLink, Image as ImageIcon, MapPin } from 'lucide-react'
 
 import { formatNoumeaDate } from '@/lib/bonPlansDate'
 import type { LocalEvent } from '@/types/bon-plans'
 
-const money = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 })
-
 function defaultPrice(event: LocalEvent) {
-  if (event.isFree) return 'Gratuit'
-  return event.priceXpf === null ? 'Tarif à confirmer' : `${money.format(event.priceXpf)} F`
+  if (event.paymentMode === 'open' || !event.hasTicketing) return 'Entrée libre'
+  if (event.paymentMode === 'free' || event.isFree) return 'Réservation gratuite'
+  if (event.paymentMode === 'external' || event.bookingUrl) return 'Paiement en ligne'
+  return 'Paiement sur place'
 }
 
 function Placeholder({ className = 'min-h-44' }: { className?: string }) {
@@ -75,28 +75,32 @@ export function EventCard({
 
   return (
     <article className="grid overflow-hidden rounded-card border border-warm-border bg-cream-surface shadow-card sm:grid-cols-[11rem_1fr]">
-      {event.coverImageUrl ? <img src={event.coverImageUrl} alt="" className="h-full min-h-44 w-full object-cover" /> : <Placeholder />}
+      <Link href={`/evenements/${event.id}`} aria-label={`Voir tous les détails de ${event.title}`} className="block min-h-44 overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+        {event.coverImageUrl ? <img src={event.coverImageUrl} alt="" className="h-full min-h-44 w-full object-cover transition duration-300 hover:scale-[1.03]" /> : <Placeholder />}
+      </Link>
       <div className="p-5 sm:p-6">
-        <div className="flex flex-wrap gap-2">
-          <span className="rounded-pill bg-info/15 px-3 py-1 text-label-sm font-semibold text-info-text">{event.category}</span>
-          <span className="rounded-pill bg-reef/15 px-3 py-1 text-label-sm font-semibold text-reef-text">{eventPrice}</span>
-          {event.verified ? <span className="flex items-center gap-1 text-meta font-semibold text-info-text"><BadgeCheck className="h-4 w-4" />Organisateur vérifié</span> : null}
-        </div>
-        <h3 className="mt-3 font-display text-h4">{event.title}</h3>
-        <p className="mt-2 line-clamp-2 text-body-sm text-ink/70">{event.description || 'Les informations pratiques seront précisées par l’organisateur.'}</p>
-        <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-meta font-semibold text-ink/65">
-          <span className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-accent-text" />{formatNoumeaDate(event.dateIso, { weekday: 'long' })}</span>
-          {event.time ? <span className="flex items-center gap-2"><Clock3 className="h-4 w-4 text-accent-text" />{event.time}{event.endTime ? ` – ${event.endTime}` : ''}</span> : null}
-          {event.commune || event.venue ? <span className="flex items-center gap-2"><MapPin className="h-4 w-4 text-accent-text" />{[event.venue, event.commune].filter(Boolean).join(', ')}</span> : null}
-        </div>
+        <Link href={`/evenements/${event.id}`} className="group block rounded-control focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent">
+          <div className="flex flex-wrap gap-2">
+            <span className="rounded-pill bg-info/15 px-3 py-1 text-label-sm font-semibold text-info-text">{event.category}</span>
+            <span className="rounded-pill bg-reef/15 px-3 py-1 text-label-sm font-semibold text-reef-text">{eventPrice}</span>
+            {event.verified ? <span className="flex items-center gap-1 text-meta font-semibold text-info-text"><BadgeCheck className="h-4 w-4" />Organisateur vérifié</span> : null}
+          </div>
+          <h3 className="mt-3 font-display text-h4 transition group-hover:text-accent-text">{event.title}</h3>
+          <p className="mt-2 line-clamp-2 text-body-sm text-ink/70">{event.description || 'Les informations pratiques seront précisées par l’organisateur.'}</p>
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-meta font-semibold text-ink/65">
+            <span className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-accent-text" />{formatNoumeaDate(event.dateIso, { weekday: 'long' })}</span>
+            {event.time ? <span className="flex items-center gap-2"><Clock3 className="h-4 w-4 text-accent-text" />{event.time}{event.endTime ? ` – ${event.endTime}` : ''}</span> : null}
+            {event.commune || event.venue ? <span className="flex items-center gap-2"><MapPin className="h-4 w-4 text-accent-text" />{[event.venue, event.commune].filter(Boolean).join(', ')}</span> : null}
+          </div>
+        </Link>
         <div className="mt-5 flex items-center justify-between gap-4">
           <p className="text-meta text-ink/55">{event.organizerName || 'Organisateur local'}</p>
           <div className="flex flex-wrap justify-end gap-2">
-            <Link href={`/evenements/${event.id}`} className="k-button k-button-secondary">
-              {event.hasTicketing ? 'Acheter une place' : 'En savoir plus'}
-              {event.hasTicketing ? <Ticket className="h-4 w-4" /> : null}
+            <Link href={`/evenements/${event.id}`} className="k-button k-button-secondary inline-flex items-center gap-2 whitespace-nowrap">
+              Voir les détails
+              <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
             </Link>
-            {event.bookingUrl ? <a href={event.bookingUrl} target="_blank" rel="noreferrer" className="k-button k-button-secondary">Réserver sur le site<Ticket className="h-4 w-4" /></a> : null}
+            {event.bookingUrl ? <a href={event.bookingUrl} target="_blank" rel="noreferrer" className="k-button k-button-secondary inline-flex items-center gap-2 whitespace-nowrap">Payer en ligne<ExternalLink className="h-4 w-4 shrink-0" aria-hidden="true" /></a> : null}
           </div>
         </div>
       </div>
