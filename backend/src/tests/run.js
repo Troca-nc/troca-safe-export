@@ -43,6 +43,7 @@ const SUITES = [
   './jwt.test',
   './auth.middleware.test',
   './email.service.test',
+  './eventTicketQrUx.contract.test',
   './authAccountService.test',
   './accountDeletionService.test',
   './proEntitlementBoundary.test',

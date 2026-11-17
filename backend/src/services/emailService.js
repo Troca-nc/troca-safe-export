@@ -10,6 +10,7 @@ const { query } = require('../config/database');
 const { ensureNotificationPreferences, issueNotificationUnsubscribeToken } = require('./notificationPreferencesService');
 const { generateQrCode } = require('./qrCodeService');
 const { logger } = require('../utils/logger');
+const path = require('path');
 
 const MOJIBAKE_PATTERN = /(?:\u00c3[\u0080-\u00bf]|\u00c2[\u0080-\u00bf]|\u00e2(?:\u20ac|\u2020|\u0153|\u008f|\u201d|\u0161|\u009d|\u02dc)|\u00f0\u0178|\u00ef\u00bf\u00bd|\uFFFD|[\u0080-\u009f])/u;
 
@@ -50,7 +51,7 @@ function getTransporter() {
 
 // ── Envoi générique ──────────────────────────────────────────
 
-async function sendMail({ to, subject, html, text, replyTo, cc, bcc }) {
+async function sendMail({ to, subject, html, text, replyTo, cc, bcc, attachments = [] }) {
   assertValidMailEncoding({ subject, html, text });
 
   const transporter = getTransporter();
@@ -65,6 +66,7 @@ async function sendMail({ to, subject, html, text, replyTo, cc, bcc }) {
     subject,
     html,
     text: text || html.replace(/<[^>]+>/g, ''),
+    attachments,
     ...(replyTo ? { replyTo } : {}),
     ...(cc ? { cc } : {}),
     ...(bcc ? { bcc } : {}),
@@ -158,7 +160,7 @@ function buildListingEmail({
   };
 }
 
-function baseTemplate(content) {
+function baseTemplate(content, { logoSrc = `${BASE_URL()}/brand/kalico1.svg` } = {}) {
   return `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -179,7 +181,7 @@ function baseTemplate(content) {
 </head>
 <body>
   <div class="wrapper">
-    <div class="header"><img src="${BASE_URL()}/brand/kalico1.svg" width="126" alt="Kalico"></div>
+    <div class="header"><img src="${logoSrc}" width="126" alt="Kalico"></div>
     <div class="body">${content}</div>
     <div class="footer">
       Kalico — La plateforme de petites annonces de Nouvelle-Calédonie<br>
@@ -721,18 +723,6 @@ async function loadTicketEmailEvent(order, tickets = []) {
   return rows[0] || null;
 }
 
-function buildKalicoEmailHeader() {
-  return `
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
-      <div style="width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,#0A7EA4,#082032);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;letter-spacing:-0.04em;">K</div>
-      <div>
-        <div style="font-size:20px;font-weight:800;color:#0f172a;line-height:1;">Kalico</div>
-        <div style="font-size:12px;color:#64748b;margin-top:2px;">Nouvelle-Calédonie</div>
-      </div>
-    </div>
-  `;
-}
-
 async function buildTicketCardHtml(ticket, index) {
   const holderName = ticket.holder_name || ticket.buyer_name || ticket.buyer || ticket.order_buyer_name || 'Porteur du billet';
   const ticketType = ticket.ticket_type_name || ticket.ticketTypeName || 'Billet';
@@ -740,8 +730,21 @@ async function buildTicketCardHtml(ticket, index) {
   const token = String(ticket.token || '').trim();
   const truncatedToken = token.length > 12 ? `${token.slice(0, 12)}…` : token;
   const qrData = ticket.qr_code_data || ticket.qr_code_base64 || (token ? await generateQrCode(token) : '');
+  const ticketUrl = token ? `${BASE_URL()}/scan/${encodeURIComponent(token)}` : '';
+  const qrMatch = String(qrData).match(/^data:image\/png;base64,(.+)$/i);
+  const qrCid = `ticket-qr-${Number(ticket.id) || index + 1}@kalico.nc`;
+  const attachment = qrMatch ? {
+    filename: `billet-${index + 1}-qr.png`,
+    content: Buffer.from(qrMatch[1], 'base64'),
+    contentType: 'image/png',
+    contentDisposition: 'inline',
+    cid: qrCid,
+  } : null;
 
-  return `
+  return {
+    ticketUrl,
+    attachment,
+    html: `
     <div style="border:1px solid #e5e7eb;border-radius:18px;padding:18px;margin:0 0 14px;background:#ffffff;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
         <p style="margin:0;font-size:14px;font-weight:800;color:#0f172a;">Billet ${index + 1}</p>
@@ -749,11 +752,12 @@ async function buildTicketCardHtml(ticket, index) {
       </div>
       <p style="margin:10px 0 0;color:#475569;font-size:14px;"><strong>Porteur :</strong> ${escapeHtml(holderName)}</p>
       <p style="margin:6px 0 0;color:#475569;font-size:14px;"><strong>Prix :</strong> ${priceXpf > 0 ? `${priceXpf.toLocaleString('fr-FR')} XPF` : 'Gratuit'}</p>
-      ${qrData ? `<img src="${qrData}" alt="QR code du billet" style="width:168px;height:168px;border-radius:20px;border:1px solid #e5e7eb;display:block;margin:16px auto 12px;object-fit:contain;background:#fff;" />` : ''}
-      <p style="margin:0;color:#64748b;font-size:13px;text-align:center;">QR Code intégré</p>
+      ${attachment ? `<img src="cid:${qrCid}" alt="QR code du billet" width="168" height="168" style="width:168px;height:168px;border-radius:20px;border:1px solid #e5e7eb;display:block;margin:16px auto 12px;object-fit:contain;background:#fff;" />` : ''}
+      ${ticketUrl ? `<p style="margin:0;color:#64748b;font-size:13px;text-align:center;">Si le QR code ne s’affiche pas, <a href="${ticketUrl}" style="color:#0A7EA4;font-weight:700;">ouvrez le billet</a>.</p>` : ''}
       <p style="margin:12px 0 0;color:#475569;font-size:14px;text-align:center;"><strong>Billet n°</strong> ${escapeHtml(truncatedToken)}</p>
     </div>
-  `;
+  `,
+  };
 }
 
 async function sendTicketEmail(order, tickets = []) {
@@ -805,13 +809,51 @@ async function sendTicketEmailV2(order, tickets = []) {
     ticketCards.push(await buildTicketCardHtml(ticket, index));
   }
 
+  const logoCid = 'kalico-logo@kalico.nc';
+  const attachments = [
+    {
+      filename: 'kalico-email.png',
+      path: path.join(__dirname, '..', 'emails', 'assets', 'kalico-email.png'),
+      contentType: 'image/png',
+      contentDisposition: 'inline',
+      cid: logoCid,
+    },
+    ...ticketCards.map((card) => card.attachment).filter(Boolean),
+  ];
+  const buyerName = order?.buyer_name || order?.buyerName || 'Participant';
+  const plainText = [
+    'Kalico — Nouvelle-Calédonie',
+    '',
+    paymentOnsite ? 'Votre réservation est confirmée !' : 'Votre commande est confirmée !',
+    `Bonjour ${buyerName},`,
+    '',
+    `Événement : ${eventTitleRaw}`,
+    `Date : ${dateLabel} à ${timeLabel}`,
+    `Lieu : ${[event?.venue_name || order?.venue_name || 'Lieu à confirmer', event?.commune_name || order?.commune_name].filter(Boolean).join(' · ')}`,
+    ...(paymentOnsite ? [`Paiement sur place : ${Number(order?.total_xpf || 0).toLocaleString('fr-FR')} XPF restent à régler auprès de l’organisateur.`, ''] : []),
+    ...tickets.slice(0, 12).flatMap((ticket, index) => {
+      const card = ticketCards[index];
+      const priceXpf = Number(ticket.ticket_price_xpf ?? ticket.price_xpf ?? 0);
+      return [
+        `Billet ${index + 1} — ${ticket.ticket_type_name || ticket.ticketTypeName || 'Billet'}`,
+        `Porteur : ${ticket.holder_name || ticket.buyer_name || ticket.buyer || ticket.order_buyer_name || 'Porteur du billet'}`,
+        `Prix : ${priceXpf > 0 ? `${priceXpf.toLocaleString('fr-FR')} XPF` : 'Gratuit'}`,
+        ...(card?.ticketUrl ? [`Ouvrir le billet et son QR code : ${card.ticketUrl}`] : []),
+        '',
+      ];
+    }),
+    'Chaque billet est nominatif et à usage unique.',
+    `Voir la page de l’événement : ${eventUrl}`,
+  ].join('\n');
+
   return sendMail({
     to: buyerEmail,
     subject: `🎟️ Vos billets — ${String(eventTitleRaw)}`,
+    text: plainText,
+    attachments,
     html: baseTemplate(`
-      ${buildKalicoEmailHeader()}
       <p style="font-size:18px;font-weight:800;color:#0f172a;margin:0 0 8px;">${paymentOnsite ? 'Votre réservation est confirmée !' : 'Votre commande est confirmée !'}</p>
-      <p>Bonjour ${escapeHtml(order?.buyer_name || order?.buyerName || 'Participant')},</p>
+      <p>Bonjour ${escapeHtml(buyerName)},</p>
       <p>Nous vous remercions pour votre réservation sur Kalico. Voici le récapitulatif de vos billets.</p>
       ${paymentOnsite ? `<div style="border:1px solid #f59e0b;border-radius:16px;padding:14px 16px;margin:16px 0;background:#fffbeb;color:#92400e;"><strong>Paiement sur place :</strong> ${Number(order?.total_xpf || 0).toLocaleString('fr-FR')} XPF restent à régler directement auprès de l’organisateur.</div>` : ''}
 
@@ -823,7 +865,7 @@ async function sendTicketEmailV2(order, tickets = []) {
         ${venueAddress ? `<p style="margin:6px 0 0;color:#64748b;font-size:13px;">${venueAddress}</p>` : ''}
       </div>
 
-      ${ticketCards.join('')}
+      ${ticketCards.map((card) => card.html).join('')}
 
       <div style="margin-top:16px;padding:16px 18px;border-radius:16px;background:#f8fafc;border:1px solid #e5e7eb;">
         <p style="margin:0;color:#0f172a;font-size:14px;line-height:1.7;">
@@ -832,7 +874,7 @@ async function sendTicketEmailV2(order, tickets = []) {
         </p>
         <p style="margin:12px 0 0;"><a href="${eventUrl}" style="color:#0A7EA4;font-weight:700;text-decoration:none;">Voir la page de l’événement</a></p>
       </div>
-    `),
+    `, { logoSrc: `cid:${logoCid}` }),
   });
 }
 
