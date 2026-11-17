@@ -87,7 +87,7 @@ export default function TicketValidationPage() {
     try {
       const response = await eventsApi.scanTicket(token, { location: location.trim() || null })
       setTicket(response.data?.data?.ticket || ticket)
-      setSuccess('Billet validï¿½ avec succï¿½s.')
+      setSuccess('Billet validé avec succès.')
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Impossible de valider ce billet.')
     } finally {
@@ -114,22 +114,22 @@ export default function TicketValidationPage() {
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Statut</p>
-                <p className="mt-2 text-lg font-bold text-night">{ticket.status === 'used' ? 'Dï¿½jï¿½ utilisï¿½' : 'Valide'}</p>
-                <p className="mt-1 text-sm text-night/60">{ticket.is_scanned ? 'Ce billet a dï¿½jï¿½ ï¿½tï¿½ scannï¿½.' : 'Ce billet est prï¿½t ï¿½ ï¿½tre contrï¿½lï¿½.'}</p>
+                <p className="mt-2 text-lg font-bold text-night">{ticket.status === 'used' ? 'Déjà utilisé' : 'Valide'}</p>
+                <p className="mt-1 text-sm text-night/60">{ticket.is_scanned ? 'Ce billet a déjà été scanné.' : 'Ce billet est prêt à être contrôlé.'}</p>
               </div>
               {ticket.can_manage ? <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-night/45">Acheteur</p>
-                <p className="mt-2 text-lg font-bold text-night">{ticket.buyer_name || 'Non renseignï¿½'}</p>
-                <p className="mt-1 text-sm text-night/60">{ticket.buyer_email || 'Email non renseignï¿½'}</p>
+                <p className="mt-2 text-lg font-bold text-night">{ticket.buyer_name || 'Non renseigné'}</p>
+                <p className="mt-1 text-sm text-night/60">{ticket.buyer_email || 'Email non renseigné'}</p>
               </div> : null}
             </div>
 
             {ticket.can_manage ? <div className="mt-6 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5">
-              <p className="text-sm font-semibold text-night">Contrï¿½le sur place</p>
+              <p className="text-sm font-semibold text-night">Contrôle sur place</p>
               <input
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder="Ex: Entrï¿½e principale / Scï¿½ne"
+                placeholder="Ex : Entrée principale / Scène"
                 className="input mt-3 w-full rounded-2xl"
               />
               {error ? <p className="mt-4 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
@@ -142,7 +142,7 @@ export default function TicketValidationPage() {
                 className="btn-primary mt-4 inline-flex items-center gap-2 rounded-2xl px-5 py-3 disabled:opacity-60"
               >
                 {scanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <BadgeCheck className="h-4 w-4" />}
-                Marquer comme utilisï¿½
+                Marquer comme utilisé
               </button>
             </div> : (
               <div className="mt-6 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-5 text-sm text-night/60">
@@ -153,7 +153,7 @@ export default function TicketValidationPage() {
             <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-night/60">
               <span className="inline-flex items-center gap-2 rounded-full bg-sand px-3 py-1.5">
                 <UserCheck className="h-4 w-4 text-kalico-blue" />
-                {isAuthenticated ? `Connectï¿½${user?.first_name ? ` ï¿½ ${user.first_name}` : ''}` : 'Connexion requise pour scanner'}
+                {isAuthenticated ? `Connecté${user?.first_name ? ` à ${user.first_name}` : ''}` : 'Connexion requise pour scanner'}
               </span>
               <Link href="/scan" className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 font-semibold text-night">
                 Scanner un autre billet
@@ -163,7 +163,7 @@ export default function TicketValidationPage() {
         ) : (
           <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-14 text-center text-night/55">
             <p className="text-lg font-semibold text-night">Billet introuvable</p>
-            <p className="mt-2 text-sm">Le QR code scannï¿½ ne correspond ï¿½ aucun billet connu.</p>
+            <p className="mt-2 text-sm">Le QR code scanné ne correspond à aucun billet connu.</p>
             <Link href="/scan" className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-[#0A7EA4] px-4 py-2.5 text-sm font-semibold text-white">
               Retour au scanner
             </Link>

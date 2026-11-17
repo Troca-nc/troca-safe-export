@@ -33,6 +33,7 @@ const {
   sendWelcomeEmail,
   sendAlertEmail,
   sendNewMessageEmail,
+  sendTicketEmail,
 } = require('../services/emailService');
 
 describe('emailService — sendMail', () => {
@@ -116,5 +117,46 @@ describe('emailService — sendNewMessageEmail', () => {
     assert.ok(sentEmails[0].subject.includes('Marie Martin'));
     assert.ok(sentEmails[0].html.includes('Vélo de route'));
     assert.ok(sentEmails[0].html.includes('/messages/42'));
+  });
+});
+
+describe('emailService — sendTicketEmail', () => {
+  it('joint le logo et le QR en CID avec une version texte utilisable', async () => {
+    sentEmails.length = 0;
+    await sendTicketEmail(
+      {
+        buyer_email: 'participant@test.nc',
+        buyer_name: 'Léo Do',
+        event_title: 'Concert sous les étoiles',
+        event_date: '2026-11-19',
+        event_time: '19:00',
+        venue_name: 'Place du village',
+        commune_name: 'Bourail',
+        payment_method: 'free',
+        total_xpf: 0,
+      },
+      [{
+        id: 42,
+        token: 'KAL-4ad461e8test',
+        buyer_name: 'Léo Do',
+        ticket_type_name: 'Entrée gratuite',
+        price_xpf: 0,
+      }]
+    );
+
+    assert.strictEqual(sentEmails.length, 1);
+    const email = sentEmails[0];
+    assert.ok(email.html.includes('src="cid:kalico-logo@kalico.nc"'));
+    assert.ok(email.html.includes('src="cid:ticket-qr-42@kalico.nc"'));
+    assert.ok(!email.html.includes('src="data:image'));
+    assert.strictEqual(email.attachments.length, 2);
+    assert.strictEqual(email.attachments[0].cid, 'kalico-logo@kalico.nc');
+    assert.strictEqual(email.attachments[1].cid, 'ticket-qr-42@kalico.nc');
+    assert.ok(Buffer.isBuffer(email.attachments[1].content));
+    assert.ok(email.attachments[1].content.length > 100);
+    assert.ok(email.text.includes('Ouvrir le billet et son QR code : https://kalico.nc/scan/KAL-4ad461e8test'));
+    assert.ok(email.text.includes('Prix : Gratuit'));
+    assert.ok(!email.text.includes('&#x20;'));
+    assert.ok(!email.text.includes('<strong>'));
   });
 });
