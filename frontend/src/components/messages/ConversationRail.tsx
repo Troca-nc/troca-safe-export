@@ -4,7 +4,7 @@ import { formatDistanceToNow, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeftRight, ImageIcon, MessageCircle } from 'lucide-react'
+import { ArrowLeftRight, CalendarDays, ImageIcon, MessageCircle } from 'lucide-react'
 import type { Conversation } from '@/types/messaging.types'
 
 interface ConversationRailProps {
@@ -33,12 +33,18 @@ function getPreview(conversation: Conversation) {
 
 export function isTrocConversation(conversation: Conversation) {
   const conversationType = conversation.conversation_type || 'listing_chat'
-  return conversationType !== 'listing_chat'
+  return conversationType === 'troc_negotiation'
+    || conversationType === 'troc_cycle'
     || conversation.last_message?.type === 'troc_proposal'
     || Boolean(conversation.last_message?.metadata?.proposer_listing_id)
 }
 
+export function isEventConversation(conversation: Conversation) {
+  return conversation.conversation_type === 'event_chat' || Boolean(conversation.event_id)
+}
+
 function getLabel(conversation: Conversation, currentUserId?: number | null) {
+  if (isEventConversation(conversation)) return Number(conversation.seller_id) === Number(currentUserId) ? 'Mon événement' : 'Événement'
   if (isTrocConversation(conversation)) return 'Troc'
   if (currentUserId && Number(conversation.seller_id) === Number(currentUserId)) return 'Ma vente'
   return 'Mon achat'
@@ -93,6 +99,7 @@ export default function ConversationRail({
         const isActive = conversation.id === activeId
         const hasUnread = conversation.unread_count > 0
         const troc = isTrocConversation(conversation)
+        const event = isEventConversation(conversation)
 
         return (
           <li key={conversation.id}>
@@ -125,11 +132,12 @@ export default function ConversationRail({
                 <span className="flex items-center gap-2">
                   <span className={`truncate text-sm text-ink ${hasUnread ? 'font-bold' : 'font-semibold'}`}>{user.prenom} {user.nom}</span>
                   {troc && <ArrowLeftRight aria-hidden="true" size={13} className="shrink-0 text-accent-text" />}
+                  {event && <CalendarDays aria-hidden="true" size={13} className="shrink-0 text-info-text" />}
                 </span>
                 <span className="mt-0.5 block truncate text-xs font-medium text-info-text">{conversation.annonce.titre}</span>
                 <span className={`mt-1 block truncate text-sm ${hasUnread ? 'font-semibold text-ink' : 'text-ink/65'}`}>{getPreview(conversation)}</span>
                 <span className="mt-2 flex flex-wrap items-center gap-1.5">
-                  <span className={`rounded-pill px-2 py-1 text-caption font-semibold ${troc ? 'bg-ink-deep text-cream-surface' : 'bg-cream-sunken text-ink/70'}`}>
+                  <span className={`rounded-pill px-2 py-1 text-caption font-semibold ${troc ? 'bg-ink-deep text-cream-surface' : event ? 'bg-info/15 text-info-text' : 'bg-cream-sunken text-ink/70'}`}>
                     {getLabel(conversation, currentUserId)}
                   </span>
                   {conversation.last_message?.type === 'offer' && (

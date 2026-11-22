@@ -34,6 +34,7 @@ export const managedEventDraftFixture: ManagedEventDraft = {
     organizerName: 'Collectif Kalico',
     organizerEmail: 'demo@kalico.nc',
     organizerPhone: '+687 00 00 00',
+    allowOrganizerMessages: true,
     websiteUrl: 'https://kalico.nc',
     bookingUrl: '',
   },

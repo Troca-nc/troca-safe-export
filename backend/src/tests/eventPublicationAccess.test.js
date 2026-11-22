@@ -64,6 +64,8 @@ async function run() {
       assert.strictEqual(event.id, 42);
       assert.strictEqual(event.status, 'published');
       assert.strictEqual(event.ticket_types.length, 0);
+      assert.strictEqual(Object.hasOwn(event, 'organizer_email'), false);
+      assert.strictEqual(Object.hasOwn(event, 'organizer_phone'), false);
       assert.strictEqual(h.calls.length, 2);
   });
 

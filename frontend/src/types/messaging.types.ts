@@ -25,7 +25,8 @@ export interface MessageMetadata {
 
 export interface Conversation {
   id:              number
-  annonce_id:      number
+  annonce_id:      number | null
+  event_id?:       number | null
   buyer_id:        number
   seller_id:       number
   conversation_type?: string

@@ -28,16 +28,23 @@ const {
   loadMessageNotificationTarget,
   markConversationMessagesRead,
   startConversation,
+  startEventConversation,
 } = require('../services/messageConversationService');
 
 const router = express.Router();
 router.use(authenticate);
 
+const conversationTargetIdSchema = Joi.alternatives().try(
+  Joi.number().integer().positive(),
+  Joi.string().trim().pattern(/^[1-9]\d*$/)
+);
+
 const startConversationSchema = Joi.object({
-  annonce_id: Joi.alternatives().try(Joi.number().integer(), Joi.string().trim()).optional(),
-  listing_id: Joi.alternatives().try(Joi.number().integer(), Joi.string().trim()).optional(),
+  annonce_id: conversationTargetIdSchema.optional(),
+  listing_id: conversationTargetIdSchema.optional(),
+  event_id: conversationTargetIdSchema.optional(),
   message: Joi.string().min(1).max(2000).required(),
-}).or('annonce_id', 'listing_id');
+}).or('annonce_id', 'listing_id', 'event_id');
 
 const sendMessageSchema = Joi.object({
   type: Joi.string().valid('text', 'photo', 'audio', 'document').default('text'),
@@ -135,9 +142,30 @@ router.post('/conversations', messageLimiter, validate({ body: startConversation
   try {
     const buyerId = req.user.id;
     const listingId = req.body.listing_id ?? req.body.annonce_id;
+    const eventId = req.body.event_id;
     const { message } = req.body;
+    const hasEventId = eventId !== undefined && eventId !== null;
+    const hasListingId = listingId !== undefined && listingId !== null;
+    if (hasEventId && hasListingId) {
+      return res.status(400).json({ error: 'Choisissez une annonce ou un événement, pas les deux.' });
+    }
 
-    const result = await startConversation(buyerId, listingId, message);
+    const result = hasEventId
+      ? await startEventConversation(buyerId, eventId, message)
+      : await startConversation(buyerId, listingId, message);
+
+    const sender = `${req.user.prenom || ''} ${req.user.nom || ''}`.trim() || 'Un utilisateur';
+    emitNewMessage(result.conversationId, { ...result.message, conversation_id: result.conversationId }, result.sellerId);
+    loadMessageNotificationTarget(result.conversationId, result.sellerId).then((target) => {
+      if (!target) return;
+      sendNewMessageEmail(target.email, target.prenom, sender, target.titre, result.conversationId, result.sellerId).catch(() => {});
+      sendPushToUser(result.sellerId, {
+        title: `💬 ${sender}`,
+        body: result.message.content?.slice(0, 100) || 'Nouveau message',
+        data: { type: 'new_message', convId: result.conversationId },
+      }).catch(() => {});
+      notifyNewMessage(result.sellerId, sender, target.titre || '', result.conversationId).catch(() => {});
+    }).catch(() => {});
 
     res.status(201).json({
       message: 'Conversation démarrée',

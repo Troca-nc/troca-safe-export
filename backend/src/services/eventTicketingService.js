@@ -75,7 +75,7 @@ function serializeTicketType(row) {
   };
 }
 
-function serializeEventRow(row, ticketTypes = []) {
+function serializeEventRow(row, ticketTypes = [], { includePrivateContact = false } = {}) {
   return {
     id: Number(row.id),
     bon_plan_id: row.bon_plan_id == null ? null : Number(row.bon_plan_id),
@@ -104,8 +104,11 @@ function serializeEventRow(row, ticketTypes = []) {
     tickets_sold: row.tickets_sold == null ? 0 : Number(row.tickets_sold),
     is_free: Boolean(row.is_free),
     organizer_name: row.organizer_name ?? null,
-    organizer_email: row.organizer_email ?? null,
-    organizer_phone: row.organizer_phone ?? null,
+    ...(includePrivateContact ? {
+      organizer_email: row.organizer_email ?? null,
+      organizer_phone: row.organizer_phone ?? null,
+    } : {}),
+    allow_organizer_messages: Boolean(row.allow_organizer_messages),
     website_url: row.website_url ?? null,
     ticketing_locked: Boolean(row.ticketing_locked),
     created_at: row.created_at ?? null,
@@ -197,7 +200,7 @@ async function getEventByOrganizer({ eventId, organizerId }) {
   );
   const event = rows[0];
   if (!event) return null;
-  return serializeEventRow(event, await loadEventTicketTypes(event.id));
+  return serializeEventRow(event, await loadEventTicketTypes(event.id), { includePrivateContact: true });
 }
 
 async function deleteEventByOrganizer({ eventId, organizerId }) {
@@ -358,6 +361,7 @@ async function updateEventByOrganizer({ eventId, organizerId, payload }) {
               organizer_email = $17,
               organizer_phone = $18,
               booking_url = $19,
+              allow_organizer_messages = $20,
               updated_at = NOW()
         WHERE id = $1`,
       [
@@ -380,6 +384,7 @@ async function updateEventByOrganizer({ eventId, organizerId, payload }) {
         payload.organizer_email || null,
         payload.organizer_phone || null,
         bookingUrl,
+        Boolean(payload.allow_organizer_messages),
       ]
     );
 
@@ -584,9 +589,10 @@ async function createEventAndBonPlan({ user, payload }) {
       `INSERT INTO events
          (bon_plan_id, organizer_id, title, description, venue_name, venue_address, commune_id, event_date, event_time,
           end_time, cover_image_url, photos, category, status, has_ticketing, max_capacity, tickets_sold, is_free,
-          organizer_name, organizer_email, organizer_phone, booking_url, room, version, is_3d, price_normal_xpf, price_reduced_xpf)
+          organizer_name, organizer_email, organizer_phone, booking_url, room, version, is_3d, price_normal_xpf, price_reduced_xpf,
+          allow_organizer_messages)
        VALUES
-         ($1, $2, $3, $4, $5, $6, $7, $8::date, $9::time, $10::time, $11, $12::jsonb, $13, $14, $15, $16, 0, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
+         ($1, $2, $3, $4, $5, $6, $7, $8::date, $9::time, $10::time, $11, $12::jsonb, $13, $14, $15, $16, 0, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
        RETURNING *`,
       [
         bonPlanId,
@@ -615,6 +621,7 @@ async function createEventAndBonPlan({ user, payload }) {
         Boolean(payload.is_3d),
         payload.price_normal_xpf == null ? null : Number(payload.price_normal_xpf),
         payload.price_reduced_xpf == null ? null : Number(payload.price_reduced_xpf),
+        Boolean(payload.allow_organizer_messages),
       ]
     );
 

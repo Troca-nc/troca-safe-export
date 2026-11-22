@@ -52,6 +52,7 @@ const payload = {
   organizer_name: 'Association Test',
   organizer_email: 'events@example.invalid',
   organizer_phone: null,
+  allow_organizer_messages: true,
   website_url: 'https://example.invalid/event',
   target_audience: 'particulier',
   kind: 'event',
@@ -65,11 +66,13 @@ async function expectStatus(promise, status) {
 
 async function run() {
   {
-    const managed = { id: 42, organizer_id: 7, title: 'Mon événement', status: 'published', ticketing_locked: true };
+    const managed = { id: 42, organizer_id: 7, title: 'Mon événement', status: 'published', ticketing_locked: true, organizer_email: 'events@example.invalid', organizer_phone: '+687 00 00 00' };
     const { service, calls } = buildService(null, managed, [{ id: 12, event_id: 42, name: 'Standard', price_xpf: 0, quantity_total: 20 }]);
     const event = await service.getEventByOrganizer({ eventId: 42, organizerId: 7 });
     assert.strictEqual(event.id, 42);
     assert.strictEqual(event.ticketing_locked, true);
+    assert.strictEqual(event.organizer_email, 'events@example.invalid');
+    assert.strictEqual(event.organizer_phone, '+687 00 00 00');
     assert.strictEqual(event.ticket_types.length, 1);
     assert.deepStrictEqual(calls[0].params, [42, 7]);
   }
@@ -80,6 +83,7 @@ async function run() {
     const event = await service.updateEventByOrganizer({ eventId: 42, organizerId: 7, payload });
     assert.strictEqual(event.id, 42);
     assert.ok(calls.some(({ sql }) => sql.startsWith('UPDATE events')));
+    assert.ok(calls.some(({ sql, params }) => sql.startsWith('UPDATE events') && params[19] === true));
     assert.ok(calls.some(({ sql }) => sql.startsWith('UPDATE bon_plans')));
     assert.ok(!calls.some(({ sql }) => sql.startsWith('DELETE FROM ticket_types')));
     assert.ok(!calls.some(({ sql }) => sql.startsWith('INSERT INTO ticket_types')));

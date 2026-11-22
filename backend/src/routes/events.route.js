@@ -61,6 +61,7 @@ const createEventSchema = Joi.object({
   organizer_name: Joi.string().trim().max(200).allow('', null),
   organizer_email: Joi.string().email().max(255).allow('', null),
   organizer_phone: Joi.string().trim().max(30).allow('', null),
+  allow_organizer_messages: Joi.boolean().default(false),
   target_audience: Joi.string().valid('particulier', 'pro').default('particulier'),
   kind: Joi.string().valid('event', 'concert').default('event'),
   ticket_types: Joi.array().items(ticketTypeSchema).default([]),

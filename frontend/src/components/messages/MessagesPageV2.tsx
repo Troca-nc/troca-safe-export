@@ -21,7 +21,7 @@ import {
 } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import ChatInput from '@/components/messages/ChatInput'
-import ConversationRail, { isTrocConversation } from '@/components/messages/ConversationRail'
+import ConversationRail, { isEventConversation, isTrocConversation } from '@/components/messages/ConversationRail'
 import MessageBubble from '@/components/messages/MessageBubble'
 import { useAuthSessionSync } from '@/hooks/useAuthSessionSync'
 import { useConversation, useConversations } from '@/hooks/useMessaging'
@@ -29,7 +29,7 @@ import { openPrivateAttachment } from '@/hooks/usePrivateAttachment'
 import { trocApi, usersApi } from '@/lib/api'
 import type { Conversation, Message } from '@/types/messaging.types'
 
-type ConversationFilter = 'all' | 'unread' | 'buy' | 'sell' | 'troc'
+type ConversationFilter = 'all' | 'unread' | 'buy' | 'sell' | 'events' | 'troc'
 type AttachmentKind = 'image' | 'audio' | 'document'
 
 type Attachment = {
@@ -75,6 +75,7 @@ function buildAttachments(messages: Message[]): Attachment[] {
 }
 
 function conversationRole(conversation: Conversation, currentUserId: number | null) {
+  if (isEventConversation(conversation)) return Number(conversation.seller_id) === Number(currentUserId) ? 'Ton événement' : 'Événement suivi'
   if (isTrocConversation(conversation)) return 'Ton annonce de troc'
   return Number(conversation.seller_id) === Number(currentUserId) ? 'Ton annonce' : 'Ton achat'
 }
@@ -94,7 +95,10 @@ function ContextPanel({
     return <div className="p-6 text-sm leading-6 text-ink/65">Sélectionnez une discussion pour afficher son contexte.</div>
   }
 
+  const eventConversation = isEventConversation(conversation)
   const inactive = isListingInactive(conversation.annonce.statut)
+  const subjectId = eventConversation ? conversation.event_id ?? conversation.annonce.id : conversation.annonce.id
+  const subjectHref = eventConversation ? `/evenements/${subjectId}` : `/annonces/${subjectId}`
   const commune = participant?.commune ?? participant?.ville ?? null
   const memberSince = participant?.created_at
     ? new Date(participant.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
@@ -121,17 +125,17 @@ function ContextPanel({
             )}
           </div>
           <div className="p-4">
-            <p className="text-eyebrow text-accent-text">Annonce liée</p>
+            <p className="text-eyebrow text-accent-text">{eventConversation ? 'Événement lié' : 'Annonce liée'}</p>
             <h2 className="mt-2 text-lg font-semibold leading-6 text-ink">{conversation.annonce.titre}</h2>
-            <p className="mt-2 font-display text-3xl text-ink">{formatMoney(conversation.annonce.prix)}</p>
+            {!eventConversation && <p className="mt-2 font-display text-3xl text-ink">{formatMoney(conversation.annonce.prix)}</p>}
             <div className="mt-3 flex flex-wrap gap-2">
               <span className={`rounded-pill px-2.5 py-1 text-xs font-semibold ${inactive ? 'bg-alert-warn/10 text-alert-warn' : 'bg-reef/10 text-reef-text'}`}>
-                {inactive ? 'Annonce terminée' : 'En ligne'}
+                {inactive ? (eventConversation ? 'Événement terminé' : 'Annonce terminée') : (eventConversation ? 'À venir' : 'En ligne')}
               </span>
               {commune && <span className="rounded-pill bg-cream-sunken px-2.5 py-1 text-xs font-semibold text-ink/70">{commune}</span>}
             </div>
-            <Link href={`/annonces/${conversation.annonce.id}`} className="mt-4 flex min-h-11 items-center justify-center rounded-control border border-ink px-4 text-sm font-semibold text-ink hover:bg-cream-sunken">
-              Ouvrir l’annonce
+            <Link href={subjectHref} className="mt-4 flex min-h-11 items-center justify-center rounded-control border border-ink px-4 text-sm font-semibold text-ink hover:bg-cream-sunken">
+              {eventConversation ? 'Ouvrir l’événement' : 'Ouvrir l’annonce'}
             </Link>
           </div>
         </section>
@@ -145,7 +149,7 @@ function ContextPanel({
           </dl>
           <div className="mt-4 grid grid-cols-2 gap-2 border-t border-warm-border pt-4">
             <Link href={`/profil/${conversation.other_user.id}`} className="flex min-h-11 items-center justify-center rounded-control bg-cream-sunken px-2 text-center text-sm font-semibold text-ink">Voir le profil</Link>
-            <Link href={`/annonces?user=${conversation.other_user.id}`} className="flex min-h-11 items-center justify-center rounded-control bg-cream-sunken px-2 text-center text-sm font-semibold text-ink">Ses annonces</Link>
+            <Link href={eventConversation ? '/evenements' : `/annonces?user=${conversation.other_user.id}`} className="flex min-h-11 items-center justify-center rounded-control bg-cream-sunken px-2 text-center text-sm font-semibold text-ink">{eventConversation ? 'Les événements' : 'Ses annonces'}</Link>
           </div>
         </section>
 
@@ -169,8 +173,8 @@ function ContextPanel({
 
         <section className="shrink-0 rounded-card bg-ink-deep p-4 text-cream-surface">
           <div className="flex items-center gap-2 text-accent"><ShieldCheck aria-hidden="true" size={18} /><p className="text-eyebrow">Reste en sécurité</p></div>
-          <p className="mt-3 text-sm leading-6 text-cream-surface/75">Pas d’acompte avant d’avoir vu l’objet. Privilégiez un lieu public. Votre numéro reste masqué sur Kalico.</p>
-          <Link href={`/contact?objet=signalement&annonce=${conversation.annonce.id}`} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-cream-surface underline">Signaler un problème</Link>
+          <p className="mt-3 text-sm leading-6 text-cream-surface/75">{eventConversation ? 'Échangez ici avec l’organisateur et ne partagez pas d’informations sensibles. Vos coordonnées restent masquées sur Kalico.' : 'Pas d’acompte avant d’avoir vu l’objet. Privilégiez un lieu public. Votre numéro reste masqué sur Kalico.'}</p>
+          <Link href={eventConversation ? `/contact?objet=signalement&evenement=${subjectId}` : `/contact?objet=signalement&annonce=${subjectId}`} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-cream-surface underline">Signaler un problème</Link>
         </section>
       </div>
     </div>
@@ -245,7 +249,8 @@ export default function MessagesPageV2() {
   const currentUserId = user ? Number(user.id) : null
   const isSeller = Number(activeConversation?.seller_id) === Number(currentUserId)
   const isBuyer = Number(activeConversation?.buyer_id) === Number(currentUserId)
-  const inactiveListing = isListingInactive(activeConversation?.annonce.statut)
+  const activeIsEvent = Boolean(activeConversation && isEventConversation(activeConversation))
+  const inactiveListing = !activeIsEvent && isListingInactive(activeConversation?.annonce.statut)
   const participant = participantProfile ?? activeConversation?.other_user ?? null
   const attachments = useMemo(() => buildAttachments(messages), [messages])
   const filteredConversations = useMemo(() => {
@@ -254,8 +259,9 @@ export default function MessagesPageV2() {
       const searchable = `${conversation.other_user.prenom} ${conversation.other_user.nom} ${conversation.annonce.titre}`.toLocaleLowerCase('fr')
       if (needle && !searchable.includes(needle)) return false
       if (filter === 'unread') return conversation.unread_count > 0
-      if (filter === 'buy') return Number(conversation.buyer_id) === Number(currentUserId) && !isTrocConversation(conversation)
-      if (filter === 'sell') return Number(conversation.seller_id) === Number(currentUserId) && !isTrocConversation(conversation)
+      if (filter === 'events') return isEventConversation(conversation)
+      if (filter === 'buy') return Number(conversation.buyer_id) === Number(currentUserId) && !isTrocConversation(conversation) && !isEventConversation(conversation)
+      if (filter === 'sell') return Number(conversation.seller_id) === Number(currentUserId) && !isTrocConversation(conversation) && !isEventConversation(conversation)
       if (filter === 'troc') return isTrocConversation(conversation)
       return true
     })
@@ -313,6 +319,8 @@ export default function MessagesPageV2() {
 
     const blocked = activeConversation.status === 'blocked'
     const trocConversation = isTrocConversation(activeConversation)
+    const eventConversation = isEventConversation(activeConversation)
+    const subjectId = eventConversation ? activeConversation.event_id ?? activeConversation.annonce.id : activeConversation.annonce.id
 
     return (
       <div className="flex h-full min-h-0 flex-col bg-cream-surface">
@@ -334,8 +342,8 @@ export default function MessagesPageV2() {
             {activeConversation.annonce.image ? <Image src={activeConversation.annonce.image} alt="" width={44} height={44} className="h-full w-full object-cover" /> : <ImageIcon aria-hidden="true" size={18} />}
           </span>
           <div className="min-w-0 flex-1"><p className="text-xs font-semibold uppercase tracking-wider text-ink/55">{conversationRole(activeConversation, currentUserId)}</p><p className="truncate font-semibold text-ink">{activeConversation.annonce.titre}</p></div>
-          <p className="hidden shrink-0 font-display text-2xl text-ink sm:block">{formatMoney(activeConversation.annonce.prix)}</p>
-          <Link href={`/annonces/${activeConversation.annonce.id}`} className="shrink-0 px-2 py-2 text-sm font-semibold text-ink underline">Voir l’annonce</Link>
+          {!eventConversation && <p className="hidden shrink-0 font-display text-2xl text-ink sm:block">{formatMoney(activeConversation.annonce.prix)}</p>}
+          <Link href={eventConversation ? `/evenements/${subjectId}` : `/annonces/${subjectId}`} className="shrink-0 px-2 py-2 text-sm font-semibold text-ink underline">{eventConversation ? 'Voir l’événement' : 'Voir l’annonce'}</Link>
         </div>
 
         {trocConversation && <div className="flex shrink-0 items-center gap-2 border-b border-warm-border bg-accent/10 px-5 py-2 text-sm font-semibold text-accent-text"><ArrowLeftRight aria-hidden="true" size={16} />Discussion liée à une proposition de troc</div>}
@@ -361,14 +369,14 @@ export default function MessagesPageV2() {
         {blocked ? (
           <div className="shrink-0 border-t border-warm-border bg-cream px-5 py-4 text-center text-sm font-semibold text-ink">Vous avez bloqué cette personne.</div>
         ) : (
-          <ChatInput onSendText={sendMessage} onSendPhoto={sendPhoto} onSendDocument={sendDocument} onSendAudio={sendAudio} onMakeOffer={makeOffer} onTyping={onTyping} isBuyer={isBuyer} annoncePrix={activeConversation.annonce.prix} disabled={false} />
+          <ChatInput onSendText={sendMessage} onSendPhoto={sendPhoto} onSendDocument={sendDocument} onSendAudio={sendAudio} onMakeOffer={makeOffer} onTyping={onTyping} isBuyer={isBuyer && !eventConversation} annoncePrix={activeConversation.annonce.prix} disabled={false} />
         )}
       </div>
     )
   }
 
   const filters: Array<{ id: ConversationFilter; label: string }> = [
-    { id: 'all', label: 'Tous' }, { id: 'unread', label: 'Non lus' }, { id: 'buy', label: 'Achats' }, { id: 'sell', label: 'Ventes' }, { id: 'troc', label: 'Troc' },
+    { id: 'all', label: 'Tous' }, { id: 'unread', label: 'Non lus' }, { id: 'events', label: 'Événements' }, { id: 'buy', label: 'Achats' }, { id: 'sell', label: 'Ventes' }, { id: 'troc', label: 'Troc' },
   ]
 
   return (

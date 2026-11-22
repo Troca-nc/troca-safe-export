@@ -34,6 +34,7 @@ const SUITES = [
   './eventOwnerListing.test',
   './eventOwnerDeletion.test',
   './eventOwnerManagement.test',
+  './eventOrganizerMessaging.test',
   './eventReservationCreation.test',
   './bonPlanCatalogPersistence.test',
   './health.test',

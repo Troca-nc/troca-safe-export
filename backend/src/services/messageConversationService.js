@@ -127,12 +127,12 @@ async function listConversationOffersForUser(userId, conversationId) {
 async function listConversationsForUser(userId) {
   const result = await query(`
     SELECT
-      c.id, c.annonce_id, c.buyer_id, c.seller_id, c.status, c.conversation_type, c.metadata, c.created_at, c.updated_at,
-      l.id AS listing_id,
-      l.titre AS listing_title,
+      c.id, c.annonce_id, c.event_id, c.buyer_id, c.seller_id, c.status, c.conversation_type, c.metadata, c.created_at, c.updated_at,
+      COALESCE(l.id, e.id) AS listing_id,
+      COALESCE(l.titre, e.title) AS listing_title,
       l.prix AS listing_price,
-      l.status AS listing_status,
-      img.thumbnail_url AS listing_image,
+      COALESCE(l.status, e.status) AS listing_status,
+      COALESCE(img.thumbnail_url, e.cover_image_url) AS listing_image,
       buyer.prenom AS buyer_first_name,
       buyer.nom AS buyer_last_name,
       buyer.avatar_url AS buyer_avatar,
@@ -163,6 +163,7 @@ async function listConversationsForUser(userId) {
     JOIN users buyer  ON buyer.id = c.buyer_id
     JOIN users seller ON seller.id = c.seller_id
     LEFT JOIN annonces l ON l.id = c.annonce_id
+    LEFT JOIN events e ON e.id = c.event_id
     LEFT JOIN LATERAL (
       SELECT thumbnail_url FROM annonce_images
        WHERE annonce_id = c.annonce_id AND is_cover = TRUE
@@ -177,7 +178,7 @@ async function listConversationsForUser(userId) {
     ) last_msg ON TRUE
     WHERE ${buildConversationAccessClause('$1')}
       AND CASE
-            WHEN COALESCE(c.conversation_type, 'listing_chat') = 'listing_chat'
+            WHEN COALESCE(c.conversation_type, 'listing_chat') IN ('listing_chat', 'event_chat')
               THEN CASE WHEN c.buyer_id = $1 THEN c.is_archived_buyer = FALSE
                         ELSE c.is_archived_seller = FALSE END
             ELSE TRUE
@@ -213,11 +214,13 @@ async function listConversationsForUser(userId) {
 
 async function loadConversationThread(userId, conversationId, page = 1, limit = 30, before = null) {
   const convResult = await query(
-    `SELECT c.id, c.annonce_id, c.buyer_id, c.seller_id, c.status, c.conversation_type, c.metadata, c.created_at, c.updated_at,
-            a.titre AS listing_title, a.prix AS listing_price, a.status AS listing_status,
-            img.thumbnail_url AS listing_image
+    `SELECT c.id, c.annonce_id, c.event_id, c.buyer_id, c.seller_id, c.status, c.conversation_type, c.metadata, c.created_at, c.updated_at,
+            COALESCE(a.titre, e.title) AS listing_title, a.prix AS listing_price,
+            COALESCE(a.status, e.status) AS listing_status,
+            COALESCE(img.thumbnail_url, e.cover_image_url) AS listing_image
      FROM conversations c
-     JOIN annonces a ON a.id = c.annonce_id
+     LEFT JOIN annonces a ON a.id = c.annonce_id
+     LEFT JOIN events e ON e.id = c.event_id
      LEFT JOIN LATERAL (
        SELECT thumbnail_url FROM annonce_images
        WHERE annonce_id = c.annonce_id AND is_cover = TRUE
@@ -307,6 +310,7 @@ async function loadConversationThread(userId, conversationId, page = 1, limit = 
     conversation: {
       id: conversation.id,
       annonce_id: conversation.annonce_id,
+      event_id: conversation.event_id,
       buyer_id: conversation.buyer_id,
       seller_id: conversation.seller_id,
       status: conversation.status,
@@ -315,7 +319,7 @@ async function loadConversationThread(userId, conversationId, page = 1, limit = 
       created_at: conversation.created_at,
       updated_at: conversation.updated_at,
       annonce: {
-        id: conversation.annonce_id,
+        id: conversation.event_id || conversation.annonce_id,
         titre: conversation.listing_title,
         prix: conversation.listing_price,
         image: conversation.listing_image,
@@ -416,6 +420,55 @@ async function startConversation(userId, listingId, message) {
       conversationId,
       message: mapMessageRow(msg.rows[0], conversationId, userId),
       sellerId: listing.user_id,
+    };
+  });
+}
+
+async function startEventConversation(userId, eventId, message) {
+  const eventResult = await query(
+    `SELECT id, organizer_id, title, status, allow_organizer_messages
+       FROM events
+      WHERE id = $1
+        AND deleted_at IS NULL
+        AND event_date >= (NOW() AT TIME ZONE 'Pacific/Noumea')::date`,
+    [eventId]
+  );
+  const event = eventResult.rows[0];
+  if (!event || event.status !== 'published') {
+    throw createHttpError(404, 'Événement introuvable');
+  }
+  if (!event.allow_organizer_messages) {
+    throw createHttpError(403, "L’organisateur n’accepte pas les messages pour cet événement");
+  }
+  if (!event.organizer_id) {
+    throw createHttpError(409, 'Cet événement ne possède pas de compte organisateur joignable');
+  }
+  if (Number(event.organizer_id) === Number(userId)) {
+    throw createHttpError(400, 'Vous ne pouvez pas vous écrire à vous-même');
+  }
+
+  return withTransaction(async (client) => {
+    const conversation = await client.query(
+      `INSERT INTO conversations
+         (annonce_id, event_id, buyer_id, seller_id, conversation_type, metadata)
+       VALUES (NULL, $1, $2, $3, 'event_chat', jsonb_build_object('event_id', $1::int))
+       ON CONFLICT (event_id, buyer_id) WHERE event_id IS NOT NULL
+       DO UPDATE SET updated_at = NOW(), is_archived_buyer = FALSE, is_archived_seller = FALSE
+       RETURNING id`,
+      [eventId, userId, event.organizer_id]
+    );
+    const conversationId = conversation.rows[0].id;
+
+    const msg = await client.query(
+      `INSERT INTO messages (conv_id, sender_id, type, content)
+       VALUES ($1, $2, 'text', $3)
+       RETURNING id, content, created_at, type, sender_id`,
+      [conversationId, userId, message]
+    );
+    return {
+      conversationId,
+      message: mapMessageRow(msg.rows[0], conversationId, userId),
+      sellerId: event.organizer_id,
     };
   });
 }
@@ -569,10 +622,11 @@ async function loadConversationAttachmentForUser(userId, messageId) {
 
 async function loadMessageNotificationTarget(conversationId, recipientId) {
   const result = await query(`
-    SELECT u.email, u.prenom, a.titre
+    SELECT u.email, u.prenom, COALESCE(a.titre, e.title) AS titre
     FROM users u
     JOIN conversations c ON c.id = $1
-    JOIN annonces a ON a.id = c.annonce_id
+    LEFT JOIN annonces a ON a.id = c.annonce_id
+    LEFT JOIN events e ON e.id = c.event_id
     WHERE u.id = $2
   `, [conversationId, recipientId]);
 
@@ -611,4 +665,5 @@ module.exports = {
   loadConversationAttachmentForUser,
   markConversationMessagesRead,
   startConversation,
+  startEventConversation,
 };
