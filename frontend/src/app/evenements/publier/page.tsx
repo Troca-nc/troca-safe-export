@@ -336,7 +336,11 @@ export default function EventPublishPage() {
             </EventFormSection>
 
             <EventFormSection number={4} title="L’organisateur">
-              <p className="text-body-sm text-ink/70">Ces informations sont reprises de ton profil. Les visiteurs te contactent par la messagerie : ton e-mail et ton téléphone ne sont pas affichés.</p>
+              <p className="text-body-sm text-ink/70">Ces informations sont reprises de ton profil. Ton e-mail et ton téléphone ne sont pas affichés publiquement.</p>
+              <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-control border border-warm-border bg-cream-sunken p-4">
+                <input type="checkbox" checked={form.allowOrganizerMessages} onChange={(event) => updateField('allowOrganizerMessages', event.target.checked)} className="mt-1 h-5 w-5 accent-[var(--color-accent-strong)]" />
+                <span><span className="block font-semibold text-ink">Autoriser les visiteurs à me contacter sur Kalico</span><span className="mt-1 block text-body-sm text-ink/65">Un bouton de contact apparaîtra sur la fiche de l’événement. Tu pourras répondre depuis ta messagerie sans dévoiler tes coordonnées.</span></span>
+              </label>
               <div className="mt-5 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]"><Input ref={organizerRef} label="Nom de l’organisateur" value={form.organizerName} error={fieldErrors.organizerName} placeholder="Association, commerce ou nom" onChange={(event) => updateField('organizerName', event.target.value)} /><Input label="Site web · facultatif" type="url" value={form.websiteUrl} error={fieldErrors.websiteUrl} placeholder="https://" onChange={(event) => updateField('websiteUrl', event.target.value)} /><Input ref={emailRef} label="E-mail de contact" type="email" value={form.organizerEmail} error={fieldErrors.organizerEmail} placeholder="nom@exemple.nc" onChange={(event) => updateField('organizerEmail', event.target.value)} /><Input label="Téléphone · facultatif" type="tel" value={form.organizerPhone} placeholder="+687" onChange={(event) => updateField('organizerPhone', event.target.value)} /></div>
             </EventFormSection>
             <PublishPanel remaining={remaining} publishing={publishing || uploadingPhotos} savingDraft={savingDraft} error={submitError} success={success} mode={editingId ? 'edit' : 'create'} onSaveDraft={handleSaveDraft} />

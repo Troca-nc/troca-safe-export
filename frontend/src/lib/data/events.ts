@@ -51,6 +51,7 @@ export function createEventPublishDraft(profile?: {
     organizerName: profile?.name || '',
     organizerEmail: profile?.email || '',
     organizerPhone: profile?.phone || '',
+    allowOrganizerMessages: true,
     websiteUrl: '',
     bookingUrl: '',
   }
@@ -100,6 +101,7 @@ export function loadLocalEventDraft(userId?: string | null): StoredEventDraft | 
       paidReservationMode: stored.paidReservationMode || (bookingUrl ? 'external' : 'onsite'),
       form: {
         ...stored.form,
+        allowOrganizerMessages: stored.form?.allowOrganizerMessages !== false,
         coverImageUrl,
         bookingUrl,
         photoUrls: normalizeEventPhotoUrls(stored.form?.photoUrls, coverImageUrl),
@@ -173,6 +175,7 @@ function buildEventPayload(form: EventPublishDraft, admissionMode: EventAdmissio
     organizer_name: form.organizerName.trim(),
     organizer_email: form.organizerEmail.trim(),
     organizer_phone: form.organizerPhone.trim() || null,
+    allow_organizer_messages: form.allowOrganizerMessages,
     website_url: form.websiteUrl.trim() || null,
     booking_url: admissionMode === 'paid' && paidReservationMode === 'external' ? form.bookingUrl.trim() : null,
     target_audience: 'particulier',
@@ -223,6 +226,7 @@ function normalizeManagedEvent(value: unknown): ManagedEventDraft {
       organizerName: String(row.organizer_name ?? ''),
       organizerEmail: String(row.organizer_email ?? ''),
       organizerPhone: String(row.organizer_phone ?? ''),
+      allowOrganizerMessages: Boolean(row.allow_organizer_messages),
       websiteUrl: String(row.website_url ?? ''),
       bookingUrl: String(row.booking_url ?? ''),
     },

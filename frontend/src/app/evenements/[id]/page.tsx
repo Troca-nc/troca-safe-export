@@ -2,12 +2,14 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowRight, CalendarDays, Clock3, Loader2, MapPin, Ticket } from 'lucide-react'
+import { ArrowRight, CalendarDays, Clock3, Loader2, MapPin, MessageCircle, Ticket } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
-import { eventsApi } from '@/lib/api'
+import { Button } from '@/components/ui/Button'
+import { Modal } from '@/components/ui/Modal'
+import { eventsApi, messagesApi } from '@/lib/api'
 import { useAuthActionStore } from '@/store/authActionStore'
 import { useAuthStore } from '@/store/authStore'
 
@@ -39,7 +41,8 @@ type EventDetail = {
   has_ticketing?: boolean
   is_free?: boolean
   organizer_name?: string | null
-  organizer_email?: string | null
+  organizer_id?: number | null
+  allow_organizer_messages?: boolean
   website_url?: string | null
   booking_url?: string | null
   ticket_types?: EventTicketType[]
@@ -61,6 +64,7 @@ function formatTicketPrice(value: number) {
 }
 
 export default function EventDetailPage() {
+  const router = useRouter()
   const routeParams = useParams<{ id: string }>()
   const eventId = Array.isArray(routeParams?.id) ? routeParams.id[0] : routeParams?.id || ''
   const { isAuthenticated, user } = useAuthStore()
@@ -74,6 +78,10 @@ export default function EventDetailPage() {
   const [buyerEmail, setBuyerEmail] = useState('')
   const [buyerPhone, setBuyerPhone] = useState('')
   const [quantities, setQuantities] = useState<Record<number, number>>({})
+  const [contactOpen, setContactOpen] = useState(false)
+  const [contactMessage, setContactMessage] = useState('')
+  const [contactSubmitting, setContactSubmitting] = useState(false)
+  const [contactError, setContactError] = useState('')
 
   useEffect(() => {
     let alive = true
@@ -91,6 +99,7 @@ export default function EventDetailPage() {
         if (!alive) return
         const data = response.data?.data as EventDetail | undefined
         setEvent(data || null)
+        if (data?.title) setContactMessage(`Bonjour, j’ai une question concernant l’événement « ${data.title} ».`)
         const initialQuantities: Record<number, number> = {}
         for (const ticket of data?.ticket_types || []) {
           initialQuantities[ticket.id] = ticket.remaining > 0 ? 1 : 0
@@ -209,6 +218,33 @@ export default function EventDetailPage() {
     }
   }
 
+  const openOrganizerContact = () => {
+    if (!event) return
+    if (!isAuthenticated) {
+      openAuthModal({ type: 'login', redirectTo: `/evenements/${event.id}` })
+      return
+    }
+    setContactError('')
+    setContactOpen(true)
+  }
+
+  const sendOrganizerMessage = async () => {
+    if (!event || !contactMessage.trim()) return
+    setContactSubmitting(true)
+    setContactError('')
+    try {
+      const response = await messagesApi.startConversation({ event_id: event.id, message: contactMessage.trim() })
+      const payload = response.data?.data ?? response.data ?? {}
+      const conversationId = payload.conversation_id ?? payload.conversationId ?? payload.id
+      setContactOpen(false)
+      router.push(conversationId ? `/messages?conv=${conversationId}` : '/messages')
+    } catch (err: any) {
+      setContactError(err?.response?.data?.error || 'Impossible d’envoyer le message pour le moment.')
+    } finally {
+      setContactSubmitting(false)
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[var(--color-bg-page)] text-night">
       <Header />
@@ -254,6 +290,11 @@ export default function EventDetailPage() {
                       <Link href={event.website_url} target="_blank" className="mt-2 inline-flex text-sm font-semibold text-[#0A7EA4]">
                         Site web
                       </Link>
+                    ) : null}
+                    {event.status === 'published' && event.allow_organizer_messages && Number(event.organizer_id) !== Number(user?.id) ? (
+                      <button type="button" onClick={openOrganizerContact} className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-control border border-ink px-4 text-sm font-semibold text-ink hover:bg-cream-sunken">
+                        <MessageCircle className="h-4 w-4" />Contacter l’organisateur
+                      </button>
                     ) : null}
                   </div>
                   <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background-secondary)] p-4">
@@ -350,6 +391,10 @@ export default function EventDetailPage() {
           </div>
         )}
       </section>
+      <Modal open={contactOpen} onClose={() => setContactOpen(false)} title="Contacter l’organisateur" footer={<><Button variant="secondary" onClick={() => setContactOpen(false)}>Annuler</Button><Button loading={contactSubmitting} onClick={() => void sendOrganizerMessage()}>Envoyer</Button></>}>
+        <label className="block"><span className="text-label text-ink">Votre message</span><textarea value={contactMessage} onChange={(event) => setContactMessage(event.target.value)} rows={5} className="mt-2 w-full rounded-field border border-warm-border bg-cream-surface p-3 outline-none focus:border-accent" /></label>
+        {contactError ? <p role="alert" className="mt-3 text-sm text-alert-error">{contactError}</p> : null}
+      </Modal>
     </main>
   )
 }

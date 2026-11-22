@@ -45,6 +45,7 @@ export type EventPublishDraft = {
   organizerName: string
   organizerEmail: string
   organizerPhone: string
+  allowOrganizerMessages: boolean
   websiteUrl: string
   bookingUrl: string
 }

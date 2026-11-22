@@ -141,6 +141,7 @@ function mapConversationRow(row, currentUserId) {
   return {
     id: row.id,
     annonce_id: row.annonce_id,
+    event_id: row.event_id ?? null,
     buyer_id: row.buyer_id,
     seller_id: row.seller_id,
     status: row.status,

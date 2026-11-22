@@ -32,11 +32,12 @@ async function run() {
                 if (normalized.startsWith('INSERT INTO events ')) {
                   const placeholders = [...normalized.matchAll(/\$(\d+)/g)].map((match) => Number(match[1]));
                   assert.strictEqual(Math.max(...placeholders), params.length);
-                  assert.strictEqual(params.length, 26);
+                  assert.strictEqual(params.length, 27);
                   assert.strictEqual(params[0], 41);
                   assert.strictEqual(params[1], 7);
                   assert.strictEqual(params[13], status || 'published');
                   assert.strictEqual(params[14], false);
+                  assert.strictEqual(params[26], true);
                   return { rows: [{
                     id: 42, bon_plan_id: 41, organizer_id: 7,
                     title: 'Synthetic event', status: params[13], is_free: params[16],
@@ -57,6 +58,7 @@ async function run() {
           title: 'Synthetic event', category: 'autre', event_date: '2026-10-01',
           event_time: '10:00', description: '', status, is_free: isFree, has_ticketing: false,
           price_xpf: 0, ticket_types: [],
+          allow_organizer_messages: true,
         },
       });
       assert.strictEqual(event.status, status || 'published');
