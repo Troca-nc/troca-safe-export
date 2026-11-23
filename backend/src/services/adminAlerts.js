@@ -3,6 +3,7 @@
 const { query } = require('../config/database');
 const { getRedisClient } = require('../config/redis');
 const { sendMail } = require('./emailService');
+const { readApiRequestWindow } = require('./apiRequestWindow');
 
 const ALERT_KEY = 'admin:alerts';
 const CRITICAL_EMAIL_KEY = 'admin:last_critical_email';
@@ -12,35 +13,36 @@ function parseRedisInteger(value, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-async function getErrorRate(windowMinutes = 15) {
-  const redis = await getRedisClient();
-  if (!redis) return 0;
-  const keys = [];
-  for await (const key of redis.scanIterator({ MATCH: 'errors:*', COUNT: 200 })) {
-    keys.push(key);
-  }
-  if (!keys.length) return 0;
+function positiveNumber(value, fallback) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
 
-  const limitTs = Date.now() - windowMinutes * 60 * 1000;
-  let total = 0;
-  for (const key of keys) {
-    const count = parseRedisInteger(await redis.get(key).catch(() => 0));
-    total += count;
-  }
-  return total / Math.max(1, windowMinutes * 60);
+function shouldTriggerApiErrorRateAlert(metrics, {
+  minimumRequests = 100,
+  threshold = 0.05,
+} = {}) {
+  return metrics.totalRequests >= minimumRequests && metrics.errorRate > threshold;
+}
+
+async function getApiErrorMetrics(windowMinutes = 15) {
+  const redis = await getRedisClient();
+  return readApiRequestWindow(redis, { windowMinutes });
 }
 
 async function checkAdminAlerts() {
   const alerts = [];
   const redis = await getRedisClient();
 
-  const errorRate = await getErrorRate(15);
-  if (errorRate > 0.05) {
+  const errorMetrics = await getApiErrorMetrics(15);
+  const minimumRequests = Math.ceil(positiveNumber(process.env.ADMIN_ERROR_RATE_MIN_REQUESTS, 100));
+  const threshold = positiveNumber(process.env.ADMIN_ERROR_RATE_THRESHOLD, 0.05);
+  if (shouldTriggerApiErrorRateAlert(errorMetrics, { minimumRequests, threshold })) {
     alerts.push({
       level: 'critical',
       type: 'error_rate',
       title: 'Taux d’erreur API élevé',
-      message: `Taux d’erreur API : ${(errorRate * 100).toFixed(1)}% sur 15 min`,
+      message: `Taux d’erreur API : ${(errorMetrics.errorRate * 100).toFixed(1)}% sur 15 min (${errorMetrics.serverErrors}/${errorMetrics.totalRequests} réponses 5xx, ${errorMetrics.rateLimited} réponses 429 séparées)`,
       action_url: '/errors',
     });
   }
@@ -122,4 +124,6 @@ async function checkAdminAlerts() {
 
 module.exports = {
   checkAdminAlerts,
+  getApiErrorMetrics,
+  shouldTriggerApiErrorRateAlert,
 }

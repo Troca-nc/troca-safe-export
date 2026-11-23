@@ -5,6 +5,7 @@ const { sanitizeLogPath } = require('../utils/logSanitizer');
 const os = require('os');
 const { query } = require('../config/database');
 const { getRedisClient } = require('../config/redis');
+const { recordApiRequestWindow } = require('./apiRequestWindow');
 
 const NODE_ID = `${process.pid}-${Math.random().toString(36).slice(2)}`;
 const NODE_ROLE = process.env.OBSERVABILITY_ROLE?.trim() || 'api';
@@ -345,6 +346,14 @@ async function incrementRedisCounts({ statusCode, isSlow = false, websocketEvent
 }
 
 async function recordHttpDistributed(entry) {
+  const client = await safeRedis();
+  if (client) {
+    await recordApiRequestWindow(client, {
+      statusCode: entry.statusCode,
+      requestId: entry.requestId,
+      timestamp: Date.now(),
+    }).catch(() => {});
+  }
   await incrementRedisCounts({
     statusCode: entry.statusCode,
     isSlow: entry.durationMs >= 1000,
