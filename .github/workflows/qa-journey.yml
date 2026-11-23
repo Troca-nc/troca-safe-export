@@ -70,6 +70,9 @@ jobs:
       JWT_ACCESS_EXPIRES: 15m
       JWT_REFRESH_EXPIRES: 7d
       INTERNAL_API_TOKEN: qa-only-internal-token-xxxxxxxxxxxxxxxx
+      FRONTEND_INTERNAL_API_TOKEN: qa-only-frontend-internal-token-xxxxxxxxxxxxxxxx
+      INTERNAL_FRONTEND_API_URL: http://127.0.0.1:3001/api
+      INTERNAL_FRONTEND_RATE_LIMIT_MAX: '20000'
       ADMIN_API_TOKEN: qa-only-admin-token-xxxxxxxxxxxxxxxxxxx
       BUSINESS_TIME_ZONE: Pacific/Noumea
       STORAGE_LOCAL_PATH: /tmp/kalico-qa-uploads
