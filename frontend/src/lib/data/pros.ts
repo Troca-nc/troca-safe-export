@@ -1,13 +1,8 @@
-import { cache } from 'react'
 import { proApi } from '@/lib/api'
-import { normalizeApiBase } from '@/lib/apiBase'
 import { demoOr } from '@/lib/demo'
-import { SITE_URL } from '@/types/seo.types'
-import type { ProPublicProfile, ProPublicReview, ProSummary } from '@/types/pro-public'
+import type { ProSummary } from '@/types/pro-public'
 
 type UnknownRecord = Record<string, unknown>
-type ApiResponse<T> = { data?: T }
-const API_BASE = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? `${SITE_URL}/api`)
 const record = (value: unknown): UnknownRecord => value && typeof value === 'object' ? value as UnknownRecord : {}
 const text = (value: unknown) => typeof value === 'string' ? value.trim() : ''
 const number = (value: unknown) => Number.isFinite(Number(value)) ? Number(value) : 0
@@ -46,31 +41,3 @@ export async function getProsDirectory(): Promise<ProSummary[]> {
     },
   )
 }
-
-export const fetchProPublicProfile = cache(async (id: string) => {
-  return demoOr(
-    async () => id === '1401' ? (await import('@/demo/fixtures/pros')).demoProProfile : null,
-    async () => {
-      try {
-        const response = await fetch(`${API_BASE}/pro/${id}`, { next: { revalidate: 300 } })
-        if (!response.ok) return null
-        const payload = (await response.json()) as ApiResponse<ProPublicProfile>
-        return payload.data ?? null
-      } catch { return null }
-    },
-  )
-})
-
-export const fetchProPublicReviews = cache(async (id: string, limit = 20) => {
-  return demoOr(
-    async () => id === '1401' ? (await import('@/demo/fixtures/pros')).demoProReviews.slice(0, limit) : [],
-    async () => {
-      try {
-        const response = await fetch(`${API_BASE}/pros/${id}/reviews?limit=${limit}`, { next: { revalidate: 300 } })
-        if (!response.ok) return []
-        const payload = (await response.json()) as ApiResponse<ProPublicReview[]>
-        return Array.isArray(payload.data) ? payload.data : []
-      } catch { return [] }
-    },
-  )
-})

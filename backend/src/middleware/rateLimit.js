@@ -39,6 +39,17 @@ const createRateLimit = ({ windowMs = 15 * 60 * 1000, max = 100, message, prefix
 // Limiteur général pour toutes les routes /api/
 const apiLimiter = createRateLimit({ windowMs: 15 * 60 * 1000, max: 100, prefix: 'api' })
 
+const configuredInternalFrontendMax = Number.parseInt(process.env.INTERNAL_FRONTEND_RATE_LIMIT_MAX || '', 10)
+const internalFrontendLimiter = createRateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: Number.isSafeInteger(configuredInternalFrontendMax) && configuredInternalFrontendMax > 0
+    ? configuredInternalFrontendMax
+    : 100,
+  prefix: 'internal-frontend',
+  keyGenerator: () => 'frontend',
+  message: 'Trop de lectures internes, veuillez réessayer plus tard.',
+})
+
 const authLimiter = createRateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
@@ -138,6 +149,7 @@ const uploadLimiter = createRateLimit({
 module.exports = {
   rateLimit: createRateLimit,
   apiLimiter,
+  internalFrontendLimiter,
   authLimiter,
   loginLimiter,
   registerLimiter,

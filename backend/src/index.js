@@ -14,7 +14,8 @@ const errorHandler          = require('./middleware/errorHandler');
 const { requestContext }    = require('./middleware/requestContext');
 const { requestLogger }     = require('./middleware/requestLogger');
 const { internalAuth }      = require('./middleware/internalAuth');
-const { apiLimiter, authLimiter }        = require('./middleware/rateLimit');
+const { classifyInternalFrontendRequest } = require('./middleware/internalFrontendRequest');
+const { apiLimiter, authLimiter, internalFrontendLimiter } = require('./middleware/rateLimit');
 const { csrfMiddleware }    = require('./middleware/csrf');
 const { initSocket, shutdownWebsocketBridge }        = require('./services/websocketServer');
 const { startAllJobs }      = require('./jobs/scheduler');
@@ -165,7 +166,12 @@ app.use((req, res, next) => {
 app.use(requestContext);
 app.use(requestLogger);
 app.use(csrfMiddleware);
-app.use('/api/', apiLimiter);
+app.use('/api/', classifyInternalFrontendRequest);
+app.use('/api/', (req, res, next) => (
+  req.isInternalFrontendRequest
+    ? internalFrontendLimiter(req, res, next)
+    : apiLimiter(req, res, next)
+));
 
 // ── Health check ──────────────────────────────────────────────
 

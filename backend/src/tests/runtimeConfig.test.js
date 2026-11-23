@@ -17,6 +17,8 @@ function validProductionEnv() {
     REDIS_URL: 'redis://:strong-password@redis:6379',
     JWT_SECRET: 'j'.repeat(64),
     INTERNAL_API_TOKEN: 'i'.repeat(32),
+    FRONTEND_INTERNAL_API_TOKEN: 'f'.repeat(32),
+    INTERNAL_FRONTEND_RATE_LIMIT_MAX: '5000',
     ADMIN_API_TOKEN: 'a'.repeat(32),
     DB_PASSWORD: 'd'.repeat(16),
   };

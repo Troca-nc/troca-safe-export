@@ -63,9 +63,12 @@ test.describe('production public smoke (read-only)', () => {
     await expect(page.getByText('Aucune action administrative ne peut être effectuée depuis cet écran.')).toBeVisible()
   })
 
-  test('public API healthcheck is healthy', async ({ request }) => {
+  test('public API healthcheck is healthy', async ({ request }, testInfo) => {
     const response = await request.get('/api/health')
     expect(response.status()).toBe(200)
-    await expect(response.json()).resolves.toMatchObject({ ok: true })
+    const payload = await response.json()
+    const baseURL = String(testInfo.project.use.baseURL || '')
+    const isLocalFrontend = /^http:\/\/(?:127\.0\.0\.1|localhost|0\.0\.0\.0)(?::\d+)?/i.test(baseURL)
+    expect(payload).toMatchObject(isLocalFrontend ? { status: 'ok' } : { ok: true })
   })
 })

@@ -12,9 +12,10 @@ import AnnonceDetail     from '@/components/annonces/AnnonceDetail'
 import JsonLd            from '@/components/seo/JsonLd'
 import { generateAnnonceMetadata } from '@/lib/seoHelpers'
 import { SITE_URL } from '@/types/seo.types'
-import { getListingDetail, getListingReviews, getSimilarListings, ListingNotFoundError } from '@/lib/data/listings'
+import { ListingNotFoundError } from '@/lib/data/listings'
+import { getServerListingDetail, getServerListingReviews, getServerSimilarListings } from '@/lib/data/serverListings'
 
-const fetchAnnonce = cache(getListingDetail)
+const fetchAnnonce = cache(getServerListingDetail)
 
 // ── Open Graph dynamique ──────────────────────────────────────
 export async function generateMetadata(
@@ -56,8 +57,8 @@ export default async function ListingDetailPage(
     throw error
   }
   const [reviews, similarListings] = await Promise.all([
-    getListingReviews(annonce.seller.id).catch(() => []),
-    getSimilarListings(annonce).catch(() => []),
+    getServerListingReviews(annonce.seller.id).catch(() => []),
+    getServerSimilarListings(annonce).catch(() => []),
   ])
 
   // JSON-LD schema.org Product pour le référencement Google Shopping

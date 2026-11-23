@@ -1,7 +1,6 @@
 import { cache } from 'react'
 
-import { SITE_URL } from '@/types/seo.types'
-import { normalizeApiBase } from '@/lib/apiBase'
+import { serverPublicFetch } from '@/lib/serverPublicApi'
 
 export type ProPublicReview = {
   id: number | string
@@ -123,11 +122,9 @@ type ApiResponse<T> = {
   data?: T
 }
 
-const API_BASE = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? `${SITE_URL}/api`)
-
 export const fetchProPublicProfile = cache(async (id: string) => {
   try {
-    const res = await fetch(`${API_BASE}/pro/${id}`, {
+    const res = await serverPublicFetch(`/pros/${encodeURIComponent(id)}`, {
       next: { revalidate: 300 },
     })
 
@@ -142,7 +139,7 @@ export const fetchProPublicProfile = cache(async (id: string) => {
 
 export const fetchProPublicReviews = cache(async (id: string, limit = 20) => {
   try {
-    const res = await fetch(`${API_BASE}/pros/${id}/reviews?limit=${limit}`, {
+    const res = await serverPublicFetch(`/pros/${encodeURIComponent(id)}/reviews?limit=${limit}`, {
       next: { revalidate: 300 },
     })
 

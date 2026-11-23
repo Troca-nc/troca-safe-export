@@ -21,7 +21,7 @@ require.cache[require.resolve('../services/authAccountService')] = {
 };
 
 const { authenticate, optionalAuth, requireAdmin } = require('../middleware/auth');
-const { apiLimiter, authLimiter, uploadLimiter } = require('../middleware/rateLimit');
+const { apiLimiter, authLimiter, internalFrontendLimiter, uploadLimiter } = require('../middleware/rateLimit');
 
 function describe(label, fn) {
   console.log(`\n${label}`);
@@ -48,6 +48,7 @@ describe('middleware exports', () => {
   it('expose les rate limiters', () => {
     assert.strictEqual(typeof apiLimiter, 'function');
     assert.strictEqual(typeof authLimiter, 'function');
+    assert.strictEqual(typeof internalFrontendLimiter, 'function');
     assert.strictEqual(typeof uploadLimiter, 'function');
   });
 });
