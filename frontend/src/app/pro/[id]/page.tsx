@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import Header from '@/components/layout/Header'
-import { generateNoindexMetadata } from '@/lib/seoHelpers'
 import { SITE_URL } from '@/types/seo.types'
 
 import PublicProView from '@/components/pro/PublicProView'
@@ -40,7 +39,7 @@ export async function generateMetadata(
   const profile = await fetchServerProPublicProfile(id)
 
   if (!profile) {
-    return generateNoindexMetadata('Vitrine professionnelle introuvable')
+    notFound()
   }
 
   const displayName = buildDisplayName(profile)

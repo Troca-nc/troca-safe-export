@@ -11,6 +11,12 @@ const RESPONSIVE_VIEWPORTS = [
 const PRODUCTION_ONLY_CONSOLE_NOISE = [
   /static\.cloudflareinsights\.com\/beacon\.min\.js.*Content Security Policy/i,
 ]
+const MISSING_PUBLIC_ROUTES = [
+  '/annonces/2147483647',
+  '/evenements/2147483647',
+  '/pro/2147483647',
+  '/profil/2147483647',
+] as const
 
 async function expectGuestHeaderReady(page: Page) {
   await expect(page.getByRole('status', { name: 'Chargement du compte' })).toHaveCount(0, { timeout: 15_000 })
@@ -71,4 +77,14 @@ test.describe('production public smoke (read-only)', () => {
     const isLocalFrontend = /^http:\/\/(?:127\.0\.0\.1|localhost|0\.0\.0\.0)(?::\d+)?/i.test(baseURL)
     expect(payload).toMatchObject(isLocalFrontend ? { status: 'ok' } : { ok: true })
   })
+
+  for (const path of MISSING_PUBLIC_ROUTES) {
+    test(`${path} returns a real HTTP 404`, async ({ request }) => {
+      const htmlResponse = await request.get(path)
+      expect(htmlResponse.status(), `${path} HTML status`).toBe(404)
+
+      const rscResponse = await request.get(path, { headers: { RSC: '1' } })
+      expect(rscResponse.status(), `${path} RSC status`).toBe(404)
+    })
+  }
 })

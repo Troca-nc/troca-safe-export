@@ -22,12 +22,12 @@ export async function generateMetadata(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<Metadata> {
   const { id } = await params
-  const annonce = await fetchAnnonce(id).catch(() => null)
-  if (!annonce) {
-    return {
-      title: 'Annonce introuvable | Kalico',
-      robots: { index: false },
-    }
+  let annonce
+  try {
+    annonce = await fetchAnnonce(id)
+  } catch (error) {
+    if (error instanceof ListingNotFoundError) notFound()
+    throw error
   }
 
   return generateAnnonceMetadata({
