@@ -15,6 +15,7 @@ const SUITES = [
   './security/containerReproducibility.test',
   './security/optionalProductionIntegrations.test',
   './security/uploadCachePolicy.test',
+  './apiRequestWindow.test',
   './reviewReportService.test',
   './reviewCreationPolicy.test',
   './reviewTokenService.test',
