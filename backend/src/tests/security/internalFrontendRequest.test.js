@@ -6,6 +6,7 @@ const {
   classifyInternalFrontendRequest,
   isAllowedInternalPublicRead,
 } = require('../../middleware/internalFrontendRequest');
+const { internalFrontendUsageWarning } = require('../../middleware/rateLimit');
 
 const TOKEN = 'f'.repeat(48);
 
@@ -66,5 +67,21 @@ describe('authenticated internal frontend reads', () => {
 
   it('treats a request carrying the token through the public proxy as public', () => {
     assert.strictEqual(classify({ token: TOKEN, forwardedFor: '203.0.113.10' }), false);
+  });
+
+  it('warns once after half of the fixed internal window is consumed', () => {
+    const resetTime = new Date('2026-11-23T10:15:00.000Z');
+    assert.strictEqual(internalFrontendUsageWarning({ used: 9999, limit: 20000, resetTime }), null);
+    const warning = internalFrontendUsageWarning({ used: 10000, limit: 20000, resetTime });
+    assert.deepStrictEqual(warning, {
+      used: 10000,
+      limit: 20000,
+      warningAt: 10000,
+      resetMs: resetTime.getTime(),
+    });
+    assert.strictEqual(
+      internalFrontendUsageWarning({ used: 10001, limit: 20000, resetTime }, resetTime.getTime()),
+      null
+    );
   });
 });

@@ -5,6 +5,10 @@
 const rateLimit = require('express-rate-limit')
 const { createRedisRateLimitStore } = require('../services/redisRateLimitStore')
 const { getTrustedClientIp } = require('../utils/clientIp')
+const { logger } = require('../utils/logger')
+
+const INTERNAL_FRONTEND_WINDOW_MS = 15 * 60 * 1000
+const INTERNAL_FRONTEND_WARNING_RATIO = 0.5
 
 const normalizeKeyPart = (value) => {
   const normalized = String(value ?? '').trim().toLowerCase()
@@ -41,7 +45,7 @@ const apiLimiter = createRateLimit({ windowMs: 15 * 60 * 1000, max: 100, prefix:
 
 const configuredInternalFrontendMax = Number.parseInt(process.env.INTERNAL_FRONTEND_RATE_LIMIT_MAX || '', 10)
 const internalFrontendLimiter = createRateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: INTERNAL_FRONTEND_WINDOW_MS,
   max: Number.isSafeInteger(configuredInternalFrontendMax) && configuredInternalFrontendMax > 0
     ? configuredInternalFrontendMax
     : 100,
@@ -49,6 +53,41 @@ const internalFrontendLimiter = createRateLimit({
   keyGenerator: () => 'frontend',
   message: 'Trop de lectures internes, veuillez réessayer plus tard.',
 })
+
+let lastWarnedInternalFrontendResetMs = 0
+
+function internalFrontendUsageWarning(rateLimit, lastWarnedResetMs = 0) {
+  const used = Number(rateLimit?.used)
+  const limit = Number(rateLimit?.limit)
+  const resetMs = rateLimit?.resetTime instanceof Date
+    ? rateLimit.resetTime.getTime()
+    : Number(rateLimit?.resetTime)
+  if (!Number.isSafeInteger(used) || !Number.isSafeInteger(limit) || limit <= 0) return null
+  if (!Number.isFinite(resetMs) || resetMs <= lastWarnedResetMs) return null
+
+  const warningAt = Math.ceil(limit * INTERNAL_FRONTEND_WARNING_RATIO)
+  if (used < warningAt) return null
+  return { used, limit, warningAt, resetMs }
+}
+
+function warnInternalFrontendUsage(req, _res, next) {
+  const warning = internalFrontendUsageWarning(
+    req.rateLimit,
+    lastWarnedInternalFrontendResetMs
+  )
+  if (warning) {
+    lastWarnedInternalFrontendResetMs = warning.resetMs
+    logger.warn('internal_frontend_rate_limit_half_consumed', {
+      used: warning.used,
+      limit: warning.limit,
+      warning_at: warning.warningAt,
+      window_ms: INTERNAL_FRONTEND_WINDOW_MS,
+      window_minutes: INTERNAL_FRONTEND_WINDOW_MS / 60_000,
+      reset_at: new Date(warning.resetMs).toISOString(),
+    })
+  }
+  next()
+}
 
 const authLimiter = createRateLimit({
   windowMs: 15 * 60 * 1000,
@@ -150,6 +189,8 @@ module.exports = {
   rateLimit: createRateLimit,
   apiLimiter,
   internalFrontendLimiter,
+  internalFrontendUsageWarning,
+  warnInternalFrontendUsage,
   authLimiter,
   loginLimiter,
   registerLimiter,

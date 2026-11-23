@@ -17,6 +17,7 @@ function requestLogger(req, res, next) {
       statusCode: res.statusCode,
       durationMs,
       userId: req.user?.id ?? null,
+      internalFrontend: Boolean(req.isInternalFrontendRequest),
     });
     logger.info('http_request', {
       request_id: req.requestId,
@@ -25,6 +26,7 @@ function requestLogger(req, res, next) {
       status_code: res.statusCode,
       duration_ms: durationMs,
       user_id: req.user?.id ?? null,
+      internal_frontend: Boolean(req.isInternalFrontendRequest),
       ip: req.ip,
       user_agent: req.get('user-agent'),
     });
