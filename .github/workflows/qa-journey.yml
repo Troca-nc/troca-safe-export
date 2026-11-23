@@ -71,7 +71,7 @@ jobs:
       JWT_REFRESH_EXPIRES: 7d
       INTERNAL_API_TOKEN: qa-only-internal-token-xxxxxxxxxxxxxxxx
       FRONTEND_INTERNAL_API_TOKEN: qa-only-frontend-internal-token-xxxxxxxxxxxxxxxx
-      INTERNAL_FRONTEND_API_URL: http://127.0.0.1:3001/api
+      INTERNAL_FRONTEND_API_URL: http://backend:3001/api
       INTERNAL_FRONTEND_RATE_LIMIT_MAX: '20000'
       ADMIN_API_TOKEN: qa-only-admin-token-xxxxxxxxxxxxxxxxxxx
       BUSINESS_TIME_ZONE: Pacific/Noumea
@@ -122,6 +122,7 @@ jobs:
 
       - name: Prepare isolated QA database and storage
         run: |
+          echo '127.0.0.1 backend' | sudo tee -a /etc/hosts >/dev/null
           mkdir -p "$STORAGE_LOCAL_PATH"
           npm run migrate --prefix backend
 
