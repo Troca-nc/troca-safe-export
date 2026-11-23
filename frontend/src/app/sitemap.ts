@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-import { normalizeApiBase } from '@/lib/apiBase'
+import { serverPublicFetch } from '@/lib/serverPublicApi'
 import { SITE_URL } from '@/types/seo.types'
 
 export const revalidate = 3600
@@ -10,9 +10,9 @@ type SitemapRow = {
   updated_at?: string | null
 }
 
-async function fetchRows(url: string): Promise<SitemapRow[]> {
+async function fetchRows(path: string): Promise<SitemapRow[]> {
   try {
-    const response = await fetch(url, { next: { revalidate: 3600 } })
+    const response = await serverPublicFetch(path, { next: { revalidate: 3600 } })
     if (!response.ok) return []
     const payload = await response.json()
     if (Array.isArray(payload)) return payload
@@ -24,11 +24,10 @@ async function fetchRows(url: string): Promise<SitemapRow[]> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const apiBase = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? `${SITE_URL}/api`)
   const [listings, pros, events] = await Promise.all([
-    fetchRows(`${apiBase}/listings?limit=1000&status=active`),
-    fetchRows(`${apiBase}/pros?limit=1000`),
-    fetchRows(`${apiBase}/events?status=published&limit=1000`),
+    fetchRows('/listings?limit=1000&status=active'),
+    fetchRows('/pros?limit=1000'),
+    fetchRows('/events?status=published&limit=1000'),
   ])
 
   const now = new Date().toISOString()

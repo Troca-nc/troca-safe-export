@@ -358,6 +358,7 @@ async function recordHttpDistributed(entry) {
     statusCode: entry.statusCode,
     durationMs: entry.durationMs,
     userId: entry.userId ?? null,
+    internalFrontend: Boolean(entry.internalFrontend),
     nodeId: NODE_ID,
     role: NODE_ROLE,
   });
@@ -651,6 +652,7 @@ function recordHttp(entry) {
     statusCode: entry.statusCode,
     durationMs: entry.durationMs,
     userId: entry.userId ?? null,
+    internalFrontend: Boolean(entry.internalFrontend),
   });
 
   if (entry.statusCode >= 500) {

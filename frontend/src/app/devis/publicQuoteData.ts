@@ -1,7 +1,6 @@
 import { cache } from 'react'
 
-import { SITE_URL } from '@/types/seo.types'
-import { normalizeApiBase } from '@/lib/apiBase'
+import { serverPublicFetch } from '@/lib/serverPublicApi'
 
 export type PublicQuoteItem = {
   id?: string
@@ -51,11 +50,9 @@ type ApiResponse<T> = {
   data?: T
 }
 
-const API_BASE = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? `${SITE_URL}/api`)
-
 export const fetchPublicQuote = cache(async (id: string, token?: string) => {
   try {
-    const res = await fetch(`${API_BASE}/pro-quotes/${id}`, {
+    const res = await serverPublicFetch(`/pro-quotes/${encodeURIComponent(id)}`, {
       headers: token ? { 'X-Kalico-Capability': token } : {},
       next: { revalidate: 120 },
     })

@@ -42,7 +42,7 @@ function asOptionalNumber(value: unknown) {
   return Number.isFinite(parsed) ? parsed : null
 }
 
-function normalizeListing(value: unknown): ListingSearchItem | null {
+export function normalizeListing(value: unknown): ListingSearchItem | null {
   const item = asRecord(value)
   const id = asText(item.id) || (typeof item.id === 'number' ? String(item.id) : '')
   const title = asText(item.title) || asText(item.titre)
@@ -238,7 +238,7 @@ function normalizeSeller(value: unknown): ListingSeller {
   }
 }
 
-function normalizeDetail(value: unknown): ListingDetail {
+export function normalizeDetail(value: unknown): ListingDetail {
   const item = asRecord(value)
   const id = asText(item.id) || String(item.id ?? '')
   const title = asText(item.title ?? item.titre)

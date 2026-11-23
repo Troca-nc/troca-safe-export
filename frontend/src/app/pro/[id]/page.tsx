@@ -2,13 +2,12 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import Header from '@/components/layout/Header'
-import { generateNoindexMetadata } from '@/lib/seoHelpers'
 import { SITE_URL } from '@/types/seo.types'
 
 import PublicProView from '@/components/pro/PublicProView'
-import { fetchProPublicProfile, fetchProPublicReviews } from '@/lib/data/pros'
+import { fetchServerProPublicProfile, fetchServerProPublicReviews } from '@/lib/data/serverPros'
 
-function buildDisplayName(profile: NonNullable<Awaited<ReturnType<typeof fetchProPublicProfile>>>) {
+function buildDisplayName(profile: NonNullable<Awaited<ReturnType<typeof fetchServerProPublicProfile>>>) {
   return (
     profile.display_name
     || profile.pro_company_name
@@ -17,7 +16,7 @@ function buildDisplayName(profile: NonNullable<Awaited<ReturnType<typeof fetchPr
   )
 }
 
-function buildDescription(profile: NonNullable<Awaited<ReturnType<typeof fetchProPublicProfile>>>, displayName: string) {
+function buildDescription(profile: NonNullable<Awaited<ReturnType<typeof fetchServerProPublicProfile>>>, displayName: string) {
   const parts = [
     profile.pro_category ? `${profile.pro_category}` : null,
     profile.pro_commune ? `à ${profile.pro_commune}` : null,
@@ -37,10 +36,10 @@ export async function generateMetadata(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<Metadata> {
   const { id } = await params
-  const profile = await fetchProPublicProfile(id)
+  const profile = await fetchServerProPublicProfile(id)
 
   if (!profile) {
-    return generateNoindexMetadata('Vitrine professionnelle introuvable')
+    notFound()
   }
 
   const displayName = buildDisplayName(profile)
@@ -76,8 +75,8 @@ export default async function ProPublicPage(
 ) {
   const { id } = await params
   const [profile, reviews] = await Promise.all([
-    fetchProPublicProfile(id),
-    fetchProPublicReviews(id, 20),
+    fetchServerProPublicProfile(id),
+    fetchServerProPublicReviews(id, 20),
   ])
 
   if (!profile) {

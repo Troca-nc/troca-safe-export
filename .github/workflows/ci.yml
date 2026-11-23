@@ -28,6 +28,9 @@ jobs:
       NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3000
       NEXT_PUBLIC_API_URL: http://127.0.0.1:3001/api
       NEXT_PUBLIC_ENABLE_MSW: 'false'
+      FRONTEND_INTERNAL_API_TOKEN: ci-only-frontend-internal-token-xxxxxxxxxxxxxxxx
+      INTERNAL_FRONTEND_API_URL: http://backend:3001/api
+      INTERNAL_FRONTEND_RATE_LIMIT_MAX: '20000'
       NODE_EXE: node
       K6_BASE_URL: http://127.0.0.1:3000
       K6_API_BASE_URL: http://127.0.0.1:3001
@@ -38,6 +41,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Resolve internal backend hostname
+        run: echo '127.0.0.1 backend' | sudo tee -a /etc/hosts >/dev/null
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

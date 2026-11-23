@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
-import { generateProfilMetadata, generateNoindexMetadata } from '@/lib/seoHelpers'
-import { normalizeApiBase } from '@/lib/apiBase'
+import { notFound } from 'next/navigation'
+import { cache } from 'react'
+import { generateProfilMetadata } from '@/lib/seoHelpers'
+import { serverPublicFetch } from '@/lib/serverPublicApi'
 import { SITE_URL } from '@/types/seo.types'
 
 type ProfilePayload = {
@@ -12,20 +14,15 @@ type ProfilePayload = {
   }
 }
 
-async function fetchProfile(id: string) {
-  const apiBase = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? `${SITE_URL}/api`)
-
-  try {
-    const res = await fetch(`${apiBase}/users/${id}`, {
-      next: { revalidate: 300 },
-    })
-    if (!res.ok) return null
-    const payload = (await res.json()) as ProfilePayload
-    return payload?.data ?? null
-  } catch {
-    return null
-  }
-}
+const fetchProfile = cache(async (id: string) => {
+  const res = await serverPublicFetch(`/users/${encodeURIComponent(id)}`, {
+    next: { revalidate: 300 },
+  })
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`Profile request failed with status ${res.status}`)
+  const payload = (await res.json()) as ProfilePayload
+  return payload?.data ?? null
+})
 
 export async function generateMetadata(
   { params }: { params: Promise<{ id: string }> }
@@ -33,7 +30,7 @@ export async function generateMetadata(
   const { id } = await params
   const profile = await fetchProfile(id)
   if (!profile) {
-    return generateNoindexMetadata('Profil introuvable')
+    notFound()
   }
 
   return {
@@ -49,6 +46,16 @@ export async function generateMetadata(
   }
 }
 
-export default function PublicProfileLayout({ children }: { children: React.ReactNode }) {
+export default async function PublicProfileLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const profile = await fetchProfile(id)
+  if (!profile) notFound()
+
   return children
 }

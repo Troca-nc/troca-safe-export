@@ -7,7 +7,8 @@ const REQUIRED_PRODUCTION = [
   'DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASSWORD',
   'REDIS_URL', 'REDIS_REQUIRED',
   'JWT_SECRET', 'JWT_ACCESS_EXPIRES', 'JWT_REFRESH_EXPIRES',
-  'INTERNAL_API_TOKEN', 'BUSINESS_TIME_ZONE', 'STORAGE_LOCAL_PATH',
+  'INTERNAL_API_TOKEN', 'FRONTEND_INTERNAL_API_TOKEN', 'INTERNAL_FRONTEND_RATE_LIMIT_MAX',
+  'BUSINESS_TIME_ZONE', 'STORAGE_LOCAL_PATH',
   'AWS_BUCKET', 'AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY',
   'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM',
   'TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_VERIFY_SID',
@@ -25,6 +26,7 @@ const OPTIONAL_INTEGRATIONS = {
 const MIN_LENGTHS = {
   JWT_SECRET: 64,
   INTERNAL_API_TOKEN: 32,
+  FRONTEND_INTERNAL_API_TOKEN: 32,
   ADMIN_API_TOKEN: 32,
   DB_PASSWORD: 16,
   REDIS_URL: 16,
@@ -57,6 +59,9 @@ function validateRuntimeConfig({ env = process.env, role = 'api' } = {}) {
   }
 
   if (env.REDIS_REQUIRED !== 'true') errors.push('REDIS_REQUIRED must be true');
+  if (!Number.isSafeInteger(Number(env.INTERNAL_FRONTEND_RATE_LIMIT_MAX)) || Number(env.INTERNAL_FRONTEND_RATE_LIMIT_MAX) <= 0) {
+    errors.push('INTERNAL_FRONTEND_RATE_LIMIT_MAX must be a positive integer');
+  }
   try {
     const baseUrl = new URL(env.BASE_URL);
     if (baseUrl.protocol !== 'https:') errors.push('BASE_URL must use HTTPS');
