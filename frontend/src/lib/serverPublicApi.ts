@@ -4,6 +4,12 @@ import { normalizeApiBase } from '@/lib/apiBase'
 
 const INTERNAL_HEADER = 'X-Kalico-Frontend-Token'
 
+type ServerPublicFetchInit = Omit<RequestInit, 'body' | 'headers' | 'method'> & {
+  method?: 'GET' | 'HEAD'
+  next?: { revalidate?: number }
+  capabilityToken?: string
+}
+
 function internalConfig() {
   const rawUrl = process.env.INTERNAL_FRONTEND_API_URL?.trim()
   const token = process.env.FRONTEND_INTERNAL_API_TOKEN?.trim()
@@ -20,19 +26,24 @@ function internalConfig() {
   return { apiBase, token }
 }
 
-export async function serverPublicFetch(path: string, init: RequestInit & { next?: { revalidate?: number } } = {}) {
+export async function serverPublicFetch(path: string, init: ServerPublicFetchInit = {}) {
   const method = String(init.method || 'GET').toUpperCase()
   if (method !== 'GET' && method !== 'HEAD') {
     throw new Error(`Internal public API only supports GET and HEAD, received ${method}`)
   }
 
   const { apiBase, token } = internalConfig()
-  const headers = new Headers(init.headers)
-  headers.set(INTERNAL_HEADER, token)
+  const { capabilityToken: rawCapabilityToken, ...fetchInit } = init
+  const headers = new Headers({
+    Accept: 'application/json',
+    [INTERNAL_HEADER]: token,
+  })
+  const capabilityToken = rawCapabilityToken?.trim()
+  if (capabilityToken) headers.set('X-Kalico-Capability', capabilityToken)
   const normalizedPath = path.startsWith('/') ? path : `/${path}`
 
   return fetch(`${apiBase}${normalizedPath}`, {
-    ...init,
+    ...fetchInit,
     method,
     headers,
     signal: init.signal ?? AbortSignal.timeout(5_000),

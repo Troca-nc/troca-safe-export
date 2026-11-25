@@ -24,23 +24,23 @@ export async function middleware(request: NextRequest) {
     const response = await serverPublicFetch(route.apiPath(id), {
       cache: 'no-store',
     })
-    if (response.status !== 404) return NextResponse.next()
+    if (response.status !== 404) {
+      const nextResponse = NextResponse.next()
+      nextResponse.headers.set('X-Kalico-Public-Preflight', 'hit')
+      return nextResponse
+    }
   } catch {
     return NextResponse.next()
   }
 
   const notFoundUrl = request.nextUrl.clone()
   notFoundUrl.pathname = '/__kalico_not_found__'
-  const notFoundResponse = await fetch(notFoundUrl, {
-    cache: 'no-store',
-    headers: request.headers,
-  })
-  const headers = new Headers(notFoundResponse.headers)
-  headers.set('X-Robots-Tag', 'noindex')
-  return new NextResponse(notFoundResponse.body, {
-    headers,
+  return NextResponse.rewrite(notFoundUrl, {
+    headers: {
+      'X-Kalico-Public-Preflight': 'not-found',
+      'X-Robots-Tag': 'noindex',
+    },
     status: 404,
-    statusText: 'Not Found',
   })
 }
 

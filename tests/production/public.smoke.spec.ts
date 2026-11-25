@@ -17,6 +17,12 @@ const MISSING_PUBLIC_ROUTES = [
   '/pro/2147483647',
   '/profil/2147483647',
 ] as const
+const REVERSE_PROXY_HEADERS = {
+  Connection: 'keep-alive',
+  'X-Forwarded-For': '203.0.113.10',
+  'X-Forwarded-Host': 'kalico.nc',
+  'X-Forwarded-Proto': 'https',
+}
 
 async function expectGuestHeaderReady(page: Page) {
   await expect(page.getByRole('status', { name: 'Chargement du compte' })).toHaveCount(0, { timeout: 15_000 })
@@ -80,11 +86,24 @@ test.describe('production public smoke (read-only)', () => {
 
   for (const path of MISSING_PUBLIC_ROUTES) {
     test(`${path} returns a real HTTP 404`, async ({ request }) => {
-      const htmlResponse = await request.get(path)
+      const htmlResponse = await request.get(path, { headers: { Accept: 'text/html' } })
       expect(htmlResponse.status(), `${path} HTML status`).toBe(404)
 
       const rscResponse = await request.get(path, { headers: { RSC: '1' } })
       expect(rscResponse.status(), `${path} RSC status`).toBe(404)
+
+      const proxyResponse = await request.get(path, { headers: REVERSE_PROXY_HEADERS })
+      expect(proxyResponse.status(), `${path} proxy status`).toBe(404)
+
+      const prefetchResponse = await request.get(path, {
+        headers: {
+          ...REVERSE_PROXY_HEADERS,
+          RSC: '1',
+          'Next-Router-Prefetch': '1',
+        },
+      })
+      expect(prefetchResponse.status(), `${path} prefetch status`).toBe(404)
+      expect(prefetchResponse.headers()['x-kalico-public-preflight'], `${path} preflight proof`).toBe('not-found')
     })
   }
 })

@@ -53,7 +53,7 @@ type ApiResponse<T> = {
 export const fetchPublicQuote = cache(async (id: string, token?: string) => {
   try {
     const res = await serverPublicFetch(`/pro-quotes/${encodeURIComponent(id)}`, {
-      headers: token ? { 'X-Kalico-Capability': token } : {},
+      capabilityToken: token,
       next: { revalidate: 120 },
     })
     if (!res.ok) return null
