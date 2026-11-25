@@ -118,6 +118,8 @@ jobs:
         run: npm run test:e2e:gate
         env:
           PLAYWRIGHT_USE_LOCAL_SERVER: 'true'
+          INTERNAL_FRONTEND_API_URL: http://127.0.0.1:3001/api
+          FRONTEND_INTERNAL_API_TOKEN: ci-only-frontend-internal-token-xxxxxxxxxxxxxxxx
           NODE_EXE: node
 
       - name: Upload Playwright report
