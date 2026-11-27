@@ -7,13 +7,12 @@ const { OAuth2Client } = require('google-auth-library')
 const appleSignin   = require('apple-signin-auth')
 const { query }     = require('../config/database')
 const { isConfiguredValue } = require('../config/env')
-const { generateTokens, getRefreshExpiresMs } = require('../config/jwt')
-const { setSecureCookie } = require('../config/cookies')
+const { setRefreshCookie } = require('../config/authCookies')
 const { socialAuthLimiter } = require('../middleware/rateLimit')
 const { logger } = require('../utils/logger')
+const { issueSessionTokens } = require('../services/authSessionService')
 
 const router       = express.Router()
-const REFRESH_COOKIE_NAME = 'kalico_refresh_token'
 const googleClientId = isConfiguredValue(process.env.GOOGLE_CLIENT_ID) ? process.env.GOOGLE_CLIENT_ID.trim() : ''
 const appleClientId = isConfiguredValue(process.env.APPLE_CLIENT_ID) ? process.env.APPLE_CLIENT_ID.trim() : ''
 const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null
@@ -59,12 +58,14 @@ async function upsertSocialUser({ email, prenom, nom, avatar_url, provider, prov
 
 // ── Réponse auth commune ──────────────────────────────────────────────────────
 
-function buildAuthResponse(user) {
-  const { accessToken, refreshToken } = generateTokens(user.id)
+async function buildAuthResponse(user) {
+  const { accessToken, refreshToken } = await issueSessionTokens(user.id, {
+    clientType: 'web',
+  })
 
   return {
-    access_token: accessToken,
-    refresh_token: refreshToken,
+    accessToken,
+    refreshToken,
     user: {
       id:         user.id,
       email:      user.email,
@@ -80,6 +81,15 @@ function buildAuthResponse(user) {
   }
 }
 
+function sendPersistenceError(res, err, event) {
+  logger.error(event, { error: err })
+  const status = err.status || 503
+  return res.status(status).json({
+    error: err.status ? err.message : 'Le service de session est temporairement indisponible.',
+    code: err.code || 'AUTH_DEPENDENCY_UNAVAILABLE',
+  })
+}
+
 // ── POST /api/auth/google ─────────────────────────────────────────────────────
 // Body : { id_token: string }  (token renvoyé par Google Sign-In SDK)
 
@@ -88,17 +98,22 @@ router.post('/google', socialAuthLimiter, async (req, res) => {
   if (!id_token) return res.status(400).json({ error: 'id_token requis' })
   if (!googleClient) return res.status(503).json({ error: 'Connexion Google non configurée' })
 
+  let payload
   try {
-    // Vérifier le token Google
     const ticket  = await googleClient.verifyIdToken({
       idToken:  id_token,
       audience: googleClientId,
     })
-    const payload = ticket.getPayload()
-    if (!payload?.email_verified) {
-      return res.status(401).json({ error: 'Email Google non vérifié' })
-    }
+    payload = ticket.getPayload()
+  } catch (err) {
+    logger.error('auth_google_token_error', { error: err })
+    return res.status(401).json({ error: 'Token Google invalide ou expiré' })
+  }
+  if (!payload?.email_verified) {
+    return res.status(401).json({ error: 'Email Google non vérifié' })
+  }
 
+  try {
     const user = await upsertSocialUser({
       email:       payload.email,
       prenom:      payload.given_name  || payload.name?.split(' ')[0] || 'Utilisateur',
@@ -107,18 +122,17 @@ router.post('/google', socialAuthLimiter, async (req, res) => {
       provider:    'google',
       provider_id: payload.sub,
     })
-    const auth = buildAuthResponse(user)
-    setSecureCookie(res, REFRESH_COOKIE_NAME, auth.refresh_token, { maxAge: getRefreshExpiresMs() })
+    const auth = await buildAuthResponse(user)
+    setRefreshCookie(res, auth.refreshToken)
 
     res.json({
       data: {
-        access_token: auth.access_token,
+        access_token: auth.accessToken,
         user: auth.user,
       },
     })
   } catch (err) {
-    logger.error('auth_google_error', { error: err })
-    res.status(401).json({ error: 'Token Google invalide ou expiré' })
+    return sendPersistenceError(res, err, 'auth_google_persistence_error')
   }
 })
 
@@ -131,16 +145,21 @@ router.post('/apple', socialAuthLimiter, async (req, res) => {
   if (!id_token) return res.status(400).json({ error: 'id_token requis' })
   if (!appleClientId) return res.status(503).json({ error: 'Connexion Apple non configurée' })
 
+  let payload
   try {
-    const payload = await appleSignin.verifyIdToken(id_token, {
+    payload = await appleSignin.verifyIdToken(id_token, {
       audience:        appleClientId,
       ignoreExpiration: false,
     })
+  } catch (err) {
+    logger.error('auth_apple_token_error', { error: err })
+    return res.status(401).json({ error: 'Token Apple invalide ou expiré' })
+  }
+  if (!payload.email) {
+    return res.status(401).json({ error: 'Email Apple manquant' })
+  }
 
-    if (!payload.email) {
-      return res.status(401).json({ error: 'Email Apple manquant' })
-    }
-
+  try {
     const user = await upsertSocialUser({
       email:       payload.email,
       prenom:      appleUser?.firstName || 'Utilisateur',
@@ -149,18 +168,17 @@ router.post('/apple', socialAuthLimiter, async (req, res) => {
       provider:    'apple',
       provider_id: payload.sub,
     })
-    const auth = buildAuthResponse(user)
-    setSecureCookie(res, REFRESH_COOKIE_NAME, auth.refresh_token, { maxAge: getRefreshExpiresMs() })
+    const auth = await buildAuthResponse(user)
+    setRefreshCookie(res, auth.refreshToken)
 
     res.json({
       data: {
-        access_token: auth.access_token,
+        access_token: auth.accessToken,
         user: auth.user,
       },
     })
   } catch (err) {
-    logger.error('auth_apple_error', { error: err })
-    res.status(401).json({ error: 'Token Apple invalide ou expiré' })
+    return sendPersistenceError(res, err, 'auth_apple_persistence_error')
   }
 })
 

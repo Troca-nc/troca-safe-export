@@ -20,12 +20,18 @@ const {
   phoneLimiter,
   refreshLimiter,
 } = require('../middleware/rateLimit');
+const { prepareRefreshRateLimit } = require('../middleware/refreshSession');
+const { verifyWebAuthOrigin } = require('../middleware/webAuthOrigin');
 const { sendWelcomeEmail, sendVerificationEmail } = require('../services/emailService');
 const { verifyTurnstileToken } = require('../services/turnstile');
 const { query } = require('../config/database');
 const { verifyCsrf } = require('../middleware/csrf');
-const { setSecureCookie, clearSecureCookie, getCookieValue } = require('../config/cookies');
-const { getRefreshExpiresMs } = require('../config/jwt');
+const {
+  clearRefreshCookies,
+  readRefreshToken,
+  setRefreshCookie,
+} = require('../config/authCookies');
+const { verifyAccessToken } = require('../config/jwt');
 const { deliverPasswordReset } = require('../services/passwordResetDeliveryService');
 const {
   normalizePhoneNumber,
@@ -44,9 +50,10 @@ const {
   resetPasswordWithToken,
 } = require('../services/authAccountService');
 const { addToTokenBlacklist } = require('../services/tokenService');
+const { revokeSession, revokeSessionByRefreshToken } = require('../services/authSessionService');
+const { disconnectSessionSockets, disconnectUserSockets } = require('../services/websocketServer');
 
 const router = express.Router();
-const REFRESH_COOKIE_NAME = 'kalico_refresh_token';
 
 const registerSchema = Joi.object({
   email: Joi.string().email().max(255).required(),
@@ -66,7 +73,7 @@ const loginSchema = Joi.object({
 });
 
 const refreshSchema = Joi.object({
-  refresh_token: Joi.string().required(),
+  refresh_token: Joi.string().optional(),
 });
 
 const forgotSchema = Joi.object({
@@ -84,25 +91,15 @@ const resendOtpSchema = Joi.object({
   channel: Joi.string().valid('sms', 'email').default('sms'),
 });
 
-function setRefreshCookie(res, refreshToken) {
-  setSecureCookie(res, REFRESH_COOKIE_NAME, refreshToken, {
-    maxAge: getRefreshExpiresMs(),
-  });
-}
-
-function readRefreshToken(req) {
-  const bodyToken = String(req.body?.refresh_token || '').trim();
-  if (bodyToken) return bodyToken;
-  return getCookieValue(req, REFRESH_COOKIE_NAME);
-}
-
 router.post('/register', registerLimiter, async (req, res, next) => {
   try {
     const { error, value } = registerSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
 
     await verifyTurnstileToken({ req, token: value.turnstile_token, ip: req.ip, action: 'register' });
-    const { user, verificationToken, accessToken, refreshToken } = await registerAccount(value);
+    const { user, verificationToken, accessToken, refreshToken } = await registerAccount(value, {
+      clientType: 'web',
+    });
     if (value.telephone) {
       const normalizedPhone = normalizePhoneNumber(value.telephone);
       await query('UPDATE users SET telephone = $1, phone_verified = FALSE, updated_at = NOW() WHERE id = $2', [normalizedPhone, user.id]);
@@ -134,7 +131,10 @@ router.post('/login', loginLimiter, async (req, res, next) => {
     if (error) return res.status(400).json({ error: error.details[0].message });
 
     await verifyTurnstileToken({ req, token: value.turnstile_token, ip: req.ip, action: 'login' });
-    const { user, accessToken, refreshToken } = await loginAccount(value, { ip: req.ip });
+    const { user, accessToken, refreshToken } = await loginAccount(value, {
+      ip: req.ip,
+      clientType: 'web',
+    });
     setRefreshCookie(res, refreshToken);
 
     return res.json({
@@ -155,12 +155,17 @@ router.post('/login', loginLimiter, async (req, res, next) => {
 });
 
 // TODO: test refresh rotation after deploy with Redis blacklist enabled.
-router.post('/refresh', refreshLimiter, async (req, res, next) => {
+router.post('/refresh', verifyWebAuthOrigin, prepareRefreshRateLimit, refreshLimiter, async (req, res, next) => {
   try {
-    const { error, value = {} } = refreshSchema.validate(req.body);
-    const refreshToken = String(value.refresh_token || readRefreshToken(req) || '').trim();
-    if (error && !refreshToken) return res.status(400).json({ error: 'refresh_token manquant.' });
-    if (!refreshToken) return res.status(400).json({ error: 'refresh_token manquant.' });
+    const { error } = refreshSchema.validate(req.body || {});
+    if (error) return res.status(400).json({ error: error.details[0].message });
+    const refreshToken = String(req.refreshToken || readRefreshToken(req) || '').trim();
+    if (!refreshToken) {
+      return res.status(401).json({
+        error: 'Token de rafraîchissement absent.',
+        code: 'REFRESH_MISSING',
+      });
+    }
 
     const { accessToken, refreshToken: newRefresh } = await refreshSessionWithRotation(refreshToken);
     setRefreshCookie(res, newRefresh);
@@ -184,23 +189,44 @@ router.get('/me', authenticate, async (req, res, next) => {
   }
 });
 
-router.post('/logout', verifyCsrf, async (req, res, next) => {
+async function logoutCurrentSession(req, res, next) {
   try {
     const header = req.headers.authorization;
     const accessToken = header && header.startsWith('Bearer ') ? header.split(' ')[1] : null;
-    const refresh_token = readRefreshToken(req);
+    const refreshToken = readRefreshToken(req);
+    let sessionId = null;
+    let accessPayload = null;
+
+    if (refreshToken) {
+      sessionId = await revokeSessionByRefreshToken(refreshToken, 'logout');
+    }
     if (accessToken) {
+      try {
+        accessPayload = verifyAccessToken(accessToken);
+      } catch {
+        accessPayload = null;
+      }
+      if (accessPayload?.sid) {
+        sessionId = String(accessPayload.sid);
+        await revokeSession(sessionId, 'logout');
+      }
+    }
+    if (accessToken && accessPayload) {
       await addToTokenBlacklist(accessToken);
     }
-    if (refresh_token) {
-      await deleteRefreshToken(refresh_token);
+    if (refreshToken && !sessionId) {
+      await deleteRefreshToken(refreshToken);
     }
-    clearSecureCookie(res, REFRESH_COOKIE_NAME);
+    if (sessionId) disconnectSessionSockets(sessionId);
+    clearRefreshCookies(res);
     return res.json({ message: 'Déconnecté avec succès.' });
   } catch (err) {
     next(err);
   }
-});
+}
+
+router.post('/logout', verifyWebAuthOrigin, verifyCsrf, logoutCurrentSession);
+router.post('/refresh/logout', verifyWebAuthOrigin, prepareRefreshRateLimit, refreshLimiter, verifyCsrf, logoutCurrentSession);
 
 router.post('/forgot-password', forgotPasswordLimiter, async (req, res, next) => {
   try {
@@ -310,11 +336,12 @@ router.post('/reset-password', async (req, res, next) => {
     const { error, value } = resetSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
 
-    const ok = await resetPasswordWithToken(value.token, value.password);
-    if (!ok) {
+    const userId = await resetPasswordWithToken(value.token, value.password);
+    if (!userId) {
       return res.status(400).json({ error: 'Lien invalide ou expiré.' });
     }
 
+    disconnectUserSockets(userId);
     return res.json({ message: 'Mot de passe réinitialisé avec succès.' });
   } catch (err) {
     next(err);

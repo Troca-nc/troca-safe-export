@@ -62,7 +62,11 @@ const errorHandler = (err, req, res, next) => {
     ? 'Erreur interne du serveur'
     : err.message || 'Erreur interne du serveur';
 
-  res.status(status).json({ error: message, request_id: req?.requestId ?? null });
+  res.status(status).json({
+    error: message,
+    ...(err.code ? { code: err.code } : {}),
+    request_id: req?.requestId ?? null,
+  });
 };
 
 module.exports = errorHandler;

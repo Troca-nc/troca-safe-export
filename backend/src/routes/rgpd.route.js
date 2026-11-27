@@ -87,6 +87,7 @@ router.post('/supprimer-compte', verifyCsrf, async (req, res) => {
       // 4. Supprimer les tokens push (ne plus notifier)
       await client.query(`DELETE FROM push_tokens WHERE user_id = $1`, [userId]);
       await client.query(`DELETE FROM refresh_tokens WHERE user_id = $1`, [userId]);
+      await client.query(`DELETE FROM auth_sessions WHERE user_id = $1`, [userId]);
       await client.query(`DELETE FROM password_reset_tokens WHERE user_id = $1`, [userId]);
       await client.query(`DELETE FROM email_verification_tokens WHERE user_id = $1`, [userId]);
 

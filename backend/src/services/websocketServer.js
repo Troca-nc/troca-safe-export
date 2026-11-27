@@ -7,6 +7,7 @@
 
 const { verifyAccessToken } = require('../config/jwt');
 const { query }             = require('../config/database');
+const { isAccessTokenBlacklisted } = require('./authAccountService');
 const { logger }            = require('../utils/logger');
 const { recordWebsocket }    = require('./observability');
 const { canAccessConversation, markConversationMessagesRead } = require('./messageConversationService');
@@ -64,23 +65,46 @@ function initSocket(httpServer) {
       if (!token) return next(new Error('AUTH_REQUIRED'));
 
       const payload = verifyAccessToken(token);
+      if (await isAccessTokenBlacklisted(token)) {
+        return next(new Error('TOKEN_REVOKED'));
+      }
       const result  = await query(
-        'SELECT id, prenom, nom, banned_until FROM users WHERE id = $1 AND deleted_at IS NULL',
-        [payload.sub]
+        `SELECT u.id, u.prenom, u.nom, u.banned_until, u.auth_invalid_before,
+                session.id AS auth_session_id, session.revoked_at AS auth_session_revoked_at,
+                session.expires_at AS auth_session_expires_at
+         FROM users u
+         LEFT JOIN auth_sessions session
+           ON session.id = $2 AND session.user_id = u.id
+         WHERE u.id = $1 AND u.deleted_at IS NULL`,
+        [payload.sub, payload.sid || null]
       );
 
       if (!result.rows[0]) return next(new Error('USER_NOT_FOUND'));
+      if (result.rows[0].auth_invalid_before && Number(payload.iat || 0) * 1000 <= new Date(result.rows[0].auth_invalid_before).getTime()) {
+        return next(new Error('SESSION_REVOKED'));
+      }
+      if (payload.sid && (
+        !result.rows[0].auth_session_id
+        || result.rows[0].auth_session_revoked_at
+        || new Date(result.rows[0].auth_session_expires_at).getTime() <= Date.now()
+      )) {
+        return next(new Error('SESSION_REVOKED'));
+      }
       if (result.rows[0].banned_until && new Date(result.rows[0].banned_until) > new Date()) {
         return next(new Error('USER_BANNED'));
       }
 
     socket.userId   = result.rows[0].id;
     socket.userName = `${result.rows[0].prenom} ${result.rows[0].nom}`;
+    socket.sessionId = payload.sid ? String(payload.sid) : null;
     markUserOnline(socket.userId);
     next();
-    } catch {
+    } catch (error) {
       recordWebsocket('auth_error');
-      next(new Error('AUTH_INVALID'));
+      if (['TokenExpiredError', 'JsonWebTokenError', 'NotBeforeError'].includes(error?.name)) {
+        return next(new Error('AUTH_INVALID'));
+      }
+      next(new Error('AUTH_UNAVAILABLE'));
     }
   });
 
@@ -88,6 +112,7 @@ function initSocket(httpServer) {
   _io.on('connection', (socket) => {
     const userId = socket.userId;
     socket.join(`user:${userId}`);
+    if (socket.sessionId) socket.join(`session:${socket.sessionId}`);
     socket.data.lastTypingAt = 0;
     socket.data.lastTypingState = null;
     recordWebsocket('connect', { user_id: userId, socket_id: socket.id });
@@ -187,4 +212,20 @@ function disconnectUserSockets(userId) {
   return true;
 }
 
-module.exports = { initSocket, getIO, emitNewMessage, notifyUser, disconnectUserSockets, emitConversationRead, shutdownWebsocketBridge };
+function disconnectSessionSockets(sessionId) {
+  const normalizedId = String(sessionId || '').trim();
+  if (!_io || !/^[0-9a-f-]{36}$/i.test(normalizedId)) return false;
+  _io.in(`session:${normalizedId}`).disconnectSockets(true);
+  return true;
+}
+
+module.exports = {
+  initSocket,
+  getIO,
+  emitNewMessage,
+  notifyUser,
+  disconnectSessionSockets,
+  disconnectUserSockets,
+  emitConversationRead,
+  shutdownWebsocketBridge,
+};

@@ -35,6 +35,7 @@ async function anonymizeAccount(userId, transaction = withTransaction) {
 
     for (const table of [
       'refresh_tokens',
+      'auth_sessions',
       'password_reset_tokens',
       'email_verification_tokens',
       'push_tokens',
