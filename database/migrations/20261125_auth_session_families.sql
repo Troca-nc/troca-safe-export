@@ -36,6 +36,42 @@ FROM refresh_tokens rt
 LEFT JOIN auth_sessions session ON session.id = rt.session_id
 WHERE session.id IS NULL;
 
+CREATE OR REPLACE FUNCTION attach_legacy_refresh_token_session()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.session_id IS NULL THEN
+    NEW.session_id := uuid_generate_v4();
+    INSERT INTO auth_sessions (
+      id, user_id, client_type, expires_at, last_used_at, created_at
+    ) VALUES (
+      NEW.session_id,
+      NEW.user_id,
+      'web',
+      NEW.expires_at,
+      COALESCE(NEW.created_at, NOW()),
+      COALESCE(NEW.created_at, NOW())
+    );
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'trg_attach_legacy_refresh_token_session'
+      AND tgrelid = 'refresh_tokens'::regclass
+      AND NOT tgisinternal
+  ) THEN
+    CREATE TRIGGER trg_attach_legacy_refresh_token_session
+      BEFORE INSERT ON refresh_tokens
+      FOR EACH ROW
+      EXECUTE FUNCTION attach_legacy_refresh_token_session();
+  END IF;
+END $$;
+
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -70,3 +106,5 @@ COMMENT ON COLUMN refresh_tokens.used_at IS
   'Rotation timestamp. Used token rows remain until expiry for reuse detection';
 COMMENT ON COLUMN refresh_tokens.session_id IS
   'Nullable during the backward-compatible rollout. PR C will enforce the foreign key after the compatibility window';
+COMMENT ON FUNCTION attach_legacy_refresh_token_session() IS
+  'Temporary rollback bridge. Attaches refresh tokens inserted by the legacy backend to a Web session family';

@@ -115,6 +115,9 @@ describe('auth session Web boundary', () => {
     assert.ok(!migration.includes('session_id SET NOT NULL'));
     assert.match(migration, /DELETE FROM refresh_tokens WHERE expires_at < NOW\(\)/);
     assert.match(migration, /DELETE FROM auth_sessions WHERE expires_at < NOW\(\)/);
+    assert.match(migration, /CREATE OR REPLACE FUNCTION attach_legacy_refresh_token_session\(\)/);
+    assert.match(migration, /BEFORE INSERT ON refresh_tokens/);
+    assert.match(migration, /IF NEW\.session_id IS NULL/);
   });
 
   it('classe un jeton du mauvais type comme JWT invalide', () => {

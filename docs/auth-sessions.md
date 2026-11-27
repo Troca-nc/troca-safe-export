@@ -42,6 +42,18 @@ ne doit jamais être transformée en token invalide.
   pour un futur bouton « Déconnecter tous les appareils ». Aucune interface
   n'est ajoutée dans ce lot.
 
+## Compatibilité de retour arrière
+
+Les anciens JWT sans claim `sid` restent acceptés pendant la fenêtre de
+compatibilité. L'ancien backend accepte aussi les JWT enrichis d'un `sid`, car
+il ignore ce claim supplémentaire.
+
+Un trigger temporaire rattache à une nouvelle famille Web tout refresh token
+inséré sans `session_id` par l'ancien backend pendant un retour arrière. Cela
+évite qu'un retour ultérieur au nouveau backend invalide ces sessions. La PR C
+retirera ce trigger, rendra `session_id` obligatoire et ajoutera sa clé
+étrangère après la fenêtre minimale de sept jours.
+
 ## Contrat natif futur
 
 Le contrat natif est désactivé par défaut avec
