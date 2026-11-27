@@ -57,7 +57,7 @@ function getRefreshExpiresMs() {
 /**
  * Génère un access token + refresh token pour un utilisateur
  */
-const generateTokens = (userId) => {
+const generateTokens = (userId, options = {}) => {
   const accessSecret = getAccessSecret();
   const refreshSecret = getRefreshSecret();
   const accessExpires = getAccessExpires();
@@ -65,14 +65,16 @@ const generateTokens = (userId) => {
   const accessJti = crypto.randomUUID();
   const refreshJti = crypto.randomUUID();
 
+  const sessionClaims = options.sessionId ? { sid: String(options.sessionId) } : {};
+
   const accessToken = jwt.sign(
-    { sub: userId, type: 'access' },
+    { sub: userId, type: 'access', ...sessionClaims },
     accessSecret,
     { expiresIn: accessExpires, jwtid: accessJti }
   );
 
   const refreshToken = jwt.sign(
-    { sub: userId, type: 'refresh' },
+    { sub: userId, type: 'refresh', ...sessionClaims },
     refreshSecret,
     { expiresIn: refreshExpires, jwtid: refreshJti }
   );
@@ -88,7 +90,7 @@ const generateTokens = (userId) => {
  */
 const verifyAccessToken = (token) => {
   const payload = jwt.verify(token, getAccessSecret());
-  if (payload.type !== 'access') throw new Error('Type de token invalide');
+  if (payload.type !== 'access') throw new jwt.JsonWebTokenError('Type de token invalide');
   return payload;
 };
 
@@ -97,8 +99,15 @@ const verifyAccessToken = (token) => {
  */
 const verifyRefreshToken = (token) => {
   const payload = jwt.verify(token, getRefreshSecret());
-  if (payload.type !== 'refresh') throw new Error('Type de token invalide');
+  if (payload.type !== 'refresh') throw new jwt.JsonWebTokenError('Type de token invalide');
   return payload;
 };
 
-module.exports = { generateTokens, getRefreshExpires, getRefreshExpiresMs, verifyAccessToken, verifyRefreshToken };
+module.exports = {
+  generateTokens,
+  getJwtSecret,
+  getRefreshExpires,
+  getRefreshExpiresMs,
+  verifyAccessToken,
+  verifyRefreshToken,
+};

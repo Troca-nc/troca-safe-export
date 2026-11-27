@@ -27,13 +27,14 @@ const keyByUserOrIp = (req) => {
   return `ip:${getIpKey(req)}`
 }
 
-const createRateLimit = ({ windowMs = 15 * 60 * 1000, max = 100, message, prefix = 'api', keyGenerator } = {}) =>
+const createRateLimit = ({ windowMs = 15 * 60 * 1000, max = 100, message, prefix = 'api', keyGenerator, skip } = {}) =>
   rateLimit({
     windowMs,
     max,
     standardHeaders: true,
     legacyHeaders: false,
     keyGenerator: keyGenerator || getIpKey,
+    skip,
     store: createRedisRateLimitStore(prefix),
     message: {
       error: message || `Trop de requêtes, veuillez réessayer dans ${Math.round(windowMs / 60000)} minutes.`,
@@ -41,7 +42,17 @@ const createRateLimit = ({ windowMs = 15 * 60 * 1000, max = 100, message, prefix
   })
 
 // Limiteur général pour toutes les routes /api/
-const apiLimiter = createRateLimit({ windowMs: 15 * 60 * 1000, max: 100, prefix: 'api' })
+const isRefreshSessionPath = (req) => {
+  const path = String(req.originalUrl || req.url || '').split('?')[0]
+  return path === '/api/auth/refresh' || path === '/api/auth/refresh/logout'
+}
+
+const apiLimiter = createRateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  prefix: 'api',
+  skip: isRefreshSessionPath,
+})
 
 const configuredInternalFrontendMax = Number.parseInt(process.env.INTERNAL_FRONTEND_RATE_LIMIT_MAX || '', 10)
 const internalFrontendLimiter = createRateLimit({
@@ -93,6 +104,7 @@ const authLimiter = createRateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   prefix: 'auth',
+  skip: (req) => req.path === '/refresh' || req.path === '/refresh/logout',
   message: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.',
 })
 
@@ -133,7 +145,7 @@ const refreshLimiter = createRateLimit({
   windowMs: 15 * 60 * 1000,
   max: 30,
   prefix: 'auth-refresh',
-  keyGenerator: keyByFields(['refresh_token']),
+  keyGenerator: (req) => req.refreshRateLimitKey || `invalid:${getIpKey(req)}`,
   message: 'Trop de rafraîchissements de session. Réessayez dans 15 minutes.',
 })
 

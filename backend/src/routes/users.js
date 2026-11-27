@@ -10,12 +10,14 @@
 const express = require('express');
 const bcrypt  = require('bcryptjs');
 const Joi     = require('joi');
-const { query } = require('../config/database');
+const { query, withTransaction } = require('../config/database');
 const { authenticate } = require('../middleware/auth');
 const { findUserById } = require('../services/authAccountService');
 const { getUserTrocBadges } = require('../services/trocWorkflowService');
 const { getUserPresence, getPresenceLabel } = require('../services/presenceService');
 const { getSellerResponseTime } = require('../services/sellerInsightsService');
+const { revokeAllUserSessionsWithClient } = require('../services/authSessionService');
+const { disconnectUserSockets } = require('../services/websocketServer');
 
 const router = express.Router();
 
@@ -239,7 +241,8 @@ router.put('/me', authenticate, async (req, res, next) => {
     const { current_password, new_password, ...profileFields } = value;
 
     // Changement de mot de passe
-    if (new_password) {
+    const passwordChanged = Boolean(new_password);
+    if (passwordChanged) {
       if (!current_password) {
         return res.status(400).json({ error: 'Mot de passe actuel requis pour le modifier.' });
       }
@@ -262,11 +265,19 @@ router.put('/me', authenticate, async (req, res, next) => {
     if (fields.length === 0) return res.status(400).json({ error: 'Aucun champ à modifier.' });
 
     params.push(req.user.id);
-    const result = await query(
-      `UPDATE users SET ${fields.join(', ')}, updated_at = NOW() WHERE id = $${p}
-       RETURNING id, email, prenom, nom, bio, commune_id, telephone, avatar_url, is_pro, phone_verified, onboarding_step`,
-      params
-    );
+    const result = await withTransaction(async (client) => {
+      const updated = await client.query(
+        `UPDATE users SET ${fields.join(', ')}, updated_at = NOW() WHERE id = $${p}
+         RETURNING id, email, prenom, nom, bio, commune_id, telephone, avatar_url, is_pro, phone_verified, onboarding_step`,
+        params
+      );
+      if (passwordChanged) {
+        await revokeAllUserSessionsWithClient(client, req.user.id, 'password_change');
+      }
+      return updated;
+    });
+
+    if (passwordChanged) disconnectUserSockets(req.user.id);
 
     return res.json({ data: result.rows[0] });
   } catch (err) {

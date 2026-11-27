@@ -4,9 +4,16 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { query, withTransaction } = require('../config/database');
 const { getRedisClient } = require('../config/redis');
-const { generateTokens, getRefreshExpiresMs, verifyAccessToken, verifyRefreshToken } = require('../config/jwt');
+const { getRefreshExpiresMs, verifyAccessToken } = require('../config/jwt');
 const { ensureNotificationPreferences } = require('./notificationPreferencesService');
 const { normalizePhoneNumber } = require('./phoneOtpService');
+const {
+  hashRefreshToken,
+  issueSessionTokens,
+  revokeAllUserSessionsWithClient,
+  revokeSessionByRefreshToken,
+  rotateRefreshToken: rotateSessionRefreshToken,
+} = require('./authSessionService');
 
 function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
@@ -25,10 +32,6 @@ function createHttpError(status, message, code) {
     err.code = code;
   }
   return err;
-}
-
-function hashRefreshToken(refreshToken) {
-  return crypto.createHash('sha256').update(String(refreshToken || '')).digest('hex');
 }
 
 function hashAccountActionToken(token) {
@@ -192,91 +195,50 @@ async function upsertPasswordResetToken(userId, token, expiresAt) {
   ).catch(() => {});
 }
 
-async function persistRefreshToken(userId, refreshToken, refreshExpiresAt) {
-  await query(
-    `INSERT INTO refresh_tokens (user_id, token, expires_at)
-     VALUES ($1, $2, $3)
-     ON CONFLICT DO NOTHING`,
-    [userId, hashRefreshToken(refreshToken), refreshExpiresAt]
-  ).catch(() => {});
-}
-
 async function deleteRefreshToken(refreshToken) {
-  await revokeRefreshToken(refreshToken);
+  await revokeSessionByRefreshToken(refreshToken, 'logout');
+  await blacklistRefreshToken(refreshToken);
 }
 
 async function blacklistRefreshToken(refreshToken) {
   const client = await getRedisClient();
   if (!client || !refreshToken) return false;
-
-  try {
-    await client.set(buildRefreshBlacklistKey(refreshToken), '1', {
-      PX: Math.max(1, getRefreshExpiresMs()),
-    });
-    return true;
-  } catch {
-    return false;
-  }
+  await client.set(buildRefreshBlacklistKey(refreshToken), '1', {
+    PX: Math.max(1, getRefreshExpiresMs()),
+  });
+  return true;
 }
 
 async function blacklistAccessToken(accessToken) {
   const client = await getRedisClient();
   if (!client || !accessToken) return false;
-
-  try {
-    const payload = verifyAccessToken(accessToken);
-    const ttlMs = Math.max(1, (Number(payload.exp || 0) * 1000) - Date.now());
-    await client.set(buildAccessBlacklistKey(accessToken), '1', {
-      PX: ttlMs,
-    });
-    return true;
-  } catch {
-    return false;
-  }
+  const payload = verifyAccessToken(accessToken);
+  const ttlMs = Math.max(1, (Number(payload.exp || 0) * 1000) - Date.now());
+  await client.set(buildAccessBlacklistKey(accessToken), '1', {
+    PX: ttlMs,
+  });
+  return true;
 }
 
 async function isRefreshTokenBlacklisted(refreshToken) {
   const client = await getRedisClient();
   if (!client || !refreshToken) return false;
-
-  try {
-    return Boolean(await client.get(buildRefreshBlacklistKey(refreshToken)));
-  } catch {
-    return false;
-  }
+  return Boolean(await client.get(buildRefreshBlacklistKey(refreshToken)));
 }
 
 async function isAccessTokenBlacklisted(accessToken) {
   const client = await getRedisClient();
   if (!client || !accessToken) return false;
-
-  try {
-    return Boolean(await client.get(buildAccessBlacklistKey(accessToken)));
-  } catch {
-    return false;
-  }
+  return Boolean(await client.get(buildAccessBlacklistKey(accessToken)));
 }
 
 async function revokeRefreshToken(refreshToken) {
-  await query(`DELETE FROM refresh_tokens WHERE token = $1`, [hashRefreshToken(refreshToken)]).catch(() => {});
-  await blacklistRefreshToken(refreshToken).catch(() => {});
+  await revokeSessionByRefreshToken(refreshToken, 'logout');
+  await blacklistRefreshToken(refreshToken);
 }
 
-async function rotateRefreshToken(userId, oldRefreshToken) {
-  const { accessToken, refreshToken: newRefresh, refreshExpiresAt } = generateTokens(userId);
-
-  await withTransaction(async (client) => {
-    await client.query(`DELETE FROM refresh_tokens WHERE token = $1`, [hashRefreshToken(oldRefreshToken)]);
-    await client.query(
-      `INSERT INTO refresh_tokens (user_id, token, expires_at)
-       VALUES ($1, $2, $3)`,
-      [userId, hashRefreshToken(newRefresh), refreshExpiresAt]
-    );
-  });
-
-  await blacklistRefreshToken(oldRefreshToken).catch(() => {});
-
-  return { accessToken, refreshToken: newRefresh };
+async function rotateRefreshToken(_userId, oldRefreshToken) {
+  return rotateSessionRefreshToken(oldRefreshToken);
 }
 
 async function findUserByEmail(email) {
@@ -326,7 +288,7 @@ async function findUserByIdentifier(identifier) {
   );
 }
 
-async function registerAccount({ email, password, prenom, nom, commune_id, account_type }) {
+async function registerAccount({ email, password, prenom, nom, commune_id, account_type }, sessionMeta = {}) {
   const normalizedEmail = normalizeEmail(email);
   const normalizedAccountType = normalizeAccountType(account_type);
   const existing = await query('SELECT id FROM users WHERE email = $1', [normalizedEmail]);
@@ -348,8 +310,7 @@ async function registerAccount({ email, password, prenom, nom, commune_id, accou
   const verification = createVerificationToken();
   await upsertEmailVerificationToken(user.id, verification.token, verification.expiresAt);
 
-  const { accessToken, refreshToken, refreshExpiresAt } = generateTokens(user.id);
-  await persistRefreshToken(user.id, refreshToken, refreshExpiresAt);
+  const { accessToken, refreshToken } = await issueSessionTokens(user.id, sessionMeta);
   await ensureNotificationPreferences(user.id).catch(() => {});
 
   return {
@@ -403,8 +364,7 @@ async function loginAccount({ email, password }, meta = {}) {
   }
 
   await clearLoginFailures(scopes);
-  const { accessToken, refreshToken, refreshExpiresAt } = generateTokens(user.id);
-  await persistRefreshToken(user.id, refreshToken, refreshExpiresAt);
+  const { accessToken, refreshToken } = await issueSessionTokens(user.id, meta);
 
   return {
     user: buildSafeUser(user),
@@ -416,38 +376,7 @@ async function loginAccount({ email, password }, meta = {}) {
 // SECURITY: rotation active, old refresh tokens are revoked and blacklisted on use.
 // TODO: test refresh rotation after deploy with Redis blacklist enabled.
 async function refreshSessionWithRotation(refreshToken) {
-  let payload;
-  try {
-    payload = verifyRefreshToken(refreshToken);
-  } catch {
-    throw createHttpError(401, 'Token de rafra?chissement invalide ou expir?.');
-  }
-
-  if (await isRefreshTokenBlacklisted(refreshToken)) {
-    throw createHttpError(401, 'Token de rafra?chissement invalide ou expir?.');
-  }
-
-  const tokenRow = await query(
-    `SELECT id FROM refresh_tokens WHERE token = $1 AND user_id = $2 AND expires_at > NOW()`,
-    [hashRefreshToken(refreshToken), payload.sub]
-  ).catch(() => ({ rows: [] }));
-  if (!tokenRow.rows[0]) {
-    throw createHttpError(401, 'Token de rafra?chissement invalide ou expir?.');
-  }
-
-  const user = await query(
-    `SELECT id, email, prenom, nom, is_admin, account_type,
-            CASE WHEN is_pro = TRUE AND pro_expires_at > NOW() THEN TRUE ELSE FALSE END AS is_pro,
-            CASE WHEN is_pro = TRUE AND pro_expires_at > NOW() THEN pro_plan ELSE NULL END AS pro_plan,
-            pro_expires_at, last_bon_plan_offer_at, email_verified
-     FROM users WHERE id = $1 AND deleted_at IS NULL`,
-    [payload.sub]
-  );
-  if (!user.rows[0]) {
-    throw createHttpError(401, 'Utilisateur introuvable.');
-  }
-
-  return rotateRefreshToken(payload.sub, refreshToken);
+  return rotateSessionRefreshToken(refreshToken);
 }
 
 async function requestPasswordReset(email) {
@@ -520,21 +449,22 @@ async function resendVerification(email) {
 }
 
 async function resetPasswordWithToken(token, password) {
-  const tokenRow = await query(
-    `SELECT user_id FROM password_reset_tokens
-     WHERE token = $1 AND expires_at > NOW()`,
-    [hashAccountActionToken(token)]
-  ).catch(() => ({ rows: [] }));
-
-  if (!tokenRow.rows[0]) {
-    return false;
-  }
-
   const hash = await bcrypt.hash(password, 12);
-  await query(`UPDATE users SET password_hash = $1 WHERE id = $2`, [hash, tokenRow.rows[0].user_id]);
-  await query(`DELETE FROM password_reset_tokens WHERE user_id = $1`, [tokenRow.rows[0].user_id]).catch(() => {});
+  return withTransaction(async (client) => {
+    const tokenRow = await client.query(
+      `SELECT user_id FROM password_reset_tokens
+       WHERE token = $1 AND expires_at > NOW()
+       FOR UPDATE`,
+      [hashAccountActionToken(token)]
+    );
+    const userId = tokenRow.rows[0]?.user_id;
+    if (!userId) return null;
 
-  return true;
+    await client.query(`UPDATE users SET password_hash = $1 WHERE id = $2`, [hash, userId]);
+    await client.query(`DELETE FROM password_reset_tokens WHERE user_id = $1`, [userId]);
+    await revokeAllUserSessionsWithClient(client, userId, 'password_reset');
+    return Number(userId);
+  });
 }
 
 module.exports = {
@@ -555,7 +485,6 @@ module.exports = {
   hashRefreshToken,
   loginAccount,
   normalizeEmail,
-  persistRefreshToken,
   refreshSessionWithRotation,
   registerAccount,
   resendVerification,

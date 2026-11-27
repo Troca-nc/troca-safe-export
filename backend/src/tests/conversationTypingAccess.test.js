@@ -36,6 +36,7 @@ function websocketHarness({ access = true } = {}) {
   const service = load('services/websocketServer.js', {
     '../config/jwt': { verifyAccessToken: () => ({ sub: 7 }) },
     '../config/database': { query: async () => ({ rows: [{ id: 7, prenom: 'Test', nom: 'User' }] }) },
+    './authAccountService': { isAccessTokenBlacklisted: async () => false },
     '../utils/logger': { logger: { info() {}, error() {} } },
     './observability': { recordWebsocket() {} },
     './messageConversationService': {

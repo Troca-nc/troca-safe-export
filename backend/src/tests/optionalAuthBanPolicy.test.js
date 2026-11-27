@@ -9,7 +9,11 @@ function harness({ user = { id: 7, banned_until: null }, tokenState = 'valid', q
   const auth = load('middleware/auth.js', {
     '../config/jwt': {
       verifyAccessToken(token) {
-        if (tokenState === 'invalid') throw new Error('Synthetic invalid token');
+        if (tokenState === 'invalid') {
+          const error = new Error('Synthetic invalid token');
+          error.name = 'JsonWebTokenError';
+          throw error;
+        }
         return { sub: 7, token };
       },
     },
@@ -30,8 +34,9 @@ function harness({ user = { id: 7, banned_until: null }, tokenState = 'valid', q
   async function invoke(header = 'Bearer synthetic') {
     const req = { headers: header ? { authorization: header } : {} };
     let calls = 0;
-    await auth.optionalAuth(req, {}, () => { calls++; });
-    return { req, calls };
+    let nextError = null;
+    await auth.optionalAuth(req, {}, (error) => { calls++; nextError = error || null; });
+    return { req, calls, nextError };
   }
   return { invoke, queries };
 }
@@ -61,8 +66,11 @@ async function run() {
   await check('missing account becomes anonymous', async () => {
     assert.strictEqual((await harness({ user: null }).invoke()).req.user, null);
   });
-  await check('database failure becomes anonymous', async () => {
-    assert.strictEqual((await harness({ queryError: true }).invoke()).req.user, null);
+  await check('database failure reports auth dependency unavailability', async () => {
+    const result = await harness({ queryError: true }).invoke();
+    assert.strictEqual(result.calls, 1);
+    assert.strictEqual(result.nextError.status, 503);
+    assert.strictEqual(result.nextError.code, 'AUTH_DEPENDENCY_UNAVAILABLE');
   });
   await check('missing bearer token stays anonymous without query', async () => {
     const h = harness(); const result = await h.invoke(null);

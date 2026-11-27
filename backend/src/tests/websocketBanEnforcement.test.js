@@ -5,7 +5,13 @@ const fs = require('fs');
 const path = require('path');
 const { load } = require('./paymentTransactionHarness');
 
-function harness({ user = { id: 7, prenom: 'Test', nom: 'User', banned_until: null }, token = 'valid', queryError = false } = {}) {
+function harness({
+  user = { id: 7, prenom: 'Test', nom: 'User', banned_until: null },
+  token = 'valid',
+  payload = { sub: 7 },
+  blacklisted = false,
+  queryError = false,
+} = {}) {
   let authMiddleware;
   let connectionHandler;
   const online = [];
@@ -19,16 +25,17 @@ function harness({ user = { id: 7, prenom: 'Test', nom: 'User', banned_until: nu
   }
   const forbidden = () => { throw new Error('Unexpected effect'); };
   const service = load('services/websocketServer.js', {
-    '../config/jwt': { verifyAccessToken(value) { if (value !== 'valid') throw new Error('bad token'); return { sub: 7 }; } },
+    '../config/jwt': { verifyAccessToken(value) { if (value !== 'valid') { const error = new Error('bad token'); error.name = 'JsonWebTokenError'; throw error; } return payload; } },
     '../config/database': {
       async query(sql, params) {
         queries.push({ sql, params: Array.from(params) });
-        assert.match(sql, /SELECT id, prenom, nom, banned_until FROM users WHERE id = \$1 AND deleted_at IS NULL/);
-        assert.deepStrictEqual(Array.from(params), [7]);
+        assert.match(sql, /FROM users u/);
+        assert.deepStrictEqual(Array.from(params), [7, payload.sid || null]);
         if (queryError) throw new Error('Synthetic DB failure');
         return { rows: user ? [user] : [] };
       },
     },
+    './authAccountService': { isAccessTokenBlacklisted: async () => blacklisted },
     '../utils/logger': { logger: { info() {}, error() {} } },
     './observability': { recordWebsocket(...args) { records.push(args); } },
     './messageConversationService': { canAccessConversation: forbidden, markConversationMessagesRead: forbidden },
@@ -82,9 +89,30 @@ async function run() {
     assert.strictEqual(h.queries.length, 0);
     assert.deepStrictEqual(h.online, []);
   });
+  await check('blacklisted access token is rejected', async () => {
+    const h = harness({ blacklisted: true });
+    assert.strictEqual((await h.authenticate()).message, 'TOKEN_REVOKED');
+    assert.strictEqual(h.queries.length, 0);
+  });
+  await check('revoked session family is rejected', async () => {
+    const sid = '123e4567-e89b-12d3-a456-426614174000';
+    const h = harness({
+      payload: { sub: 7, sid },
+      user: {
+        id: 7,
+        prenom: 'Test',
+        nom: 'User',
+        banned_until: null,
+        auth_session_id: sid,
+        auth_session_revoked_at: new Date().toISOString(),
+        auth_session_expires_at: new Date(Date.now() + 60_000).toISOString(),
+      },
+    });
+    assert.strictEqual((await h.authenticate()).message, 'SESSION_REVOKED');
+  });
   await check('database failure remains fail closed', async () => {
     const h = harness({ queryError: true });
-    assert.strictEqual((await h.authenticate()).message, 'AUTH_INVALID');
+    assert.strictEqual((await h.authenticate()).message, 'AUTH_UNAVAILABLE');
     assert.deepStrictEqual(h.online, []);
   });
   await check('missing token is rejected without database lookup', async () => {
@@ -96,6 +124,12 @@ async function run() {
     const h = harness();
     assert.strictEqual(h.service.disconnectUserSockets('7'), true);
     assert.deepStrictEqual(h.disconnectedRooms, [['user:7', true]]);
+  });
+  await check('session logout disconnects only the matching session room', async () => {
+    const h = harness();
+    const sessionId = '123e4567-e89b-12d3-a456-426614174000';
+    assert.strictEqual(h.service.disconnectSessionSockets(sessionId), true);
+    assert.deepStrictEqual(h.disconnectedRooms, [[`session:${sessionId}`, true]]);
   });
   for (const id of [null, undefined, 0, -1, 'x', 1.5]) {
     await check(`invalid disconnect identity ${String(id)} is ignored`, async () => {
