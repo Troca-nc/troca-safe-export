@@ -13,10 +13,12 @@ process.env.JWT_SECRET = process.env.JWT_SECRET || 'test_jwt_secret_minimum_64_c
 const databasePath = require.resolve('../config/database');
 const redisPath = require.resolve('../config/redis');
 const servicePath = require.resolve('../services/authAccountService');
+const sessionServicePath = require.resolve('../services/authSessionService');
 
 const originalDatabaseCache = require.cache[databasePath];
 const originalRedisCache = require.cache[redisPath];
 const originalServiceCache = require.cache[servicePath];
+const originalSessionServiceCache = require.cache[sessionServicePath];
 
 const queryCalls = [];
 const txCalls = [];
@@ -83,6 +85,13 @@ const dbStub = {
     const client = {
       query: async (sql, params) => {
         txCalls.push({ sql, params });
+        const normalized = sql.replace(/\s+/g, ' ').trim().toUpperCase();
+        if (normalized.startsWith('SELECT USER_ID FROM PASSWORD_RESET_TOKENS')) {
+          return { rows: [{ user_id: 22 }], rowCount: 1 };
+        }
+        if (normalized.startsWith('UPDATE AUTH_SESSIONS')) {
+          return { rows: [{ id: 'session-test' }], rowCount: 1 };
+        }
         return { rows: [], rowCount: 1 };
       },
     };
@@ -103,15 +112,24 @@ const redisClient = {
 
 require.cache[databasePath] = { exports: dbStub };
 require.cache[redisPath] = { exports: { getRedisClient: async () => redisClient } };
+require.cache[sessionServicePath] = {
+  exports: {
+    hashRefreshToken: (token) => crypto.createHash('sha256').update(String(token || '')).digest('hex'),
+    issueSessionTokens: async () => ({ accessToken: 'access', refreshToken: 'refresh' }),
+    revokeAllUserSessionsWithClient: async (client, userId, reason) => client.query(
+      'UPDATE auth_sessions SET revoked_at = NOW() WHERE user_id = $1 AND revocation_reason = $2',
+      [userId, reason]
+    ),
+    revokeSessionByRefreshToken: async () => null,
+    rotateRefreshToken: async () => ({ accessToken: 'access', refreshToken: 'refresh' }),
+  },
+};
 delete require.cache[servicePath];
 
 const {
-  buildRefreshBlacklistKey,
   confirmEmail,
-  deleteRefreshToken,
   hashAccountActionToken,
   hashRefreshToken,
-  refreshSessionWithRotation,
   resetPasswordWithToken,
   upsertEmailVerificationToken,
   upsertPasswordResetToken,
@@ -124,8 +142,8 @@ if (originalServiceCache) {
 } else {
   delete require.cache[servicePath];
 }
-
-const { generateTokens } = require('../config/jwt');
+if (originalSessionServiceCache) require.cache[sessionServicePath] = originalSessionServiceCache;
+else delete require.cache[sessionServicePath];
 
 function resetState() {
   queryCalls.length = 0;
@@ -150,7 +168,7 @@ function withRefreshExpiry(expiry, fn) {
     });
 }
 
-describe('authAccountService — refresh rotation', () => {
+describe('authAccountService — refresh token hashing', () => {
   it('produit une empreinte SHA-256 déterministe sans conserver le token brut', () => {
     const token = 'refresh-token-secret';
     const expected = crypto.createHash('sha256').update(token).digest('hex');
@@ -160,60 +178,6 @@ describe('authAccountService — refresh rotation', () => {
     assert.notStrictEqual(hashRefreshToken(token), token);
   });
 
-  it('rejette un refresh token déjà blacklisté', async () => {
-    resetState();
-
-    await withRefreshExpiry('2h', async () => {
-      const { refreshToken } = generateTokens(7);
-      redisState.set(buildRefreshBlacklistKey(refreshToken), '1');
-
-      await assert.rejects(() => refreshSessionWithRotation(refreshToken), /rafra/i);
-      assert.strictEqual(queryCalls.length, 0);
-      assert.strictEqual(txCalls.length, 0);
-      assert.ok(redisGets.includes(buildRefreshBlacklistKey(refreshToken)));
-    });
-  });
-
-  it('rotationne le refresh token et blackliste l ancien', async () => {
-    resetState();
-
-    await withRefreshExpiry('2h', async () => {
-      const { refreshToken } = generateTokens(7);
-      const result = await refreshSessionWithRotation(refreshToken);
-
-      assert.ok(typeof result.accessToken === 'string' && result.accessToken.length > 20);
-      assert.ok(typeof result.refreshToken === 'string' && result.refreshToken.length > 20);
-      assert.notStrictEqual(result.refreshToken, refreshToken);
-
-      const expectedKey = buildRefreshBlacklistKey(refreshToken);
-      const blacklistEntry = redisSets.find((entry) => entry.key === expectedKey);
-      assert.ok(blacklistEntry, 'Blacklist Redis non écrite');
-      assert.strictEqual(blacklistEntry.options.PX, 2 * 60 * 60 * 1000);
-
-      const lookup = queryCalls.find((call) => call.sql.toUpperCase().includes('SELECT ID FROM REFRESH_TOKENS'));
-      const deletion = txCalls.find((call) => call.sql.toUpperCase().includes('DELETE FROM REFRESH_TOKENS'));
-      const insertion = txCalls.find((call) => call.sql.toUpperCase().includes('INSERT INTO REFRESH_TOKENS'));
-      assert.strictEqual(lookup.params[0], hashRefreshToken(refreshToken));
-      assert.strictEqual(deletion.params[0], hashRefreshToken(refreshToken));
-      assert.strictEqual(insertion.params[1], hashRefreshToken(result.refreshToken));
-      assert.ok(!queryCalls.concat(txCalls).some((call) => call.params?.includes(refreshToken)));
-      assert.ok(!queryCalls.concat(txCalls).some((call) => call.params?.includes(result.refreshToken)));
-    });
-  });
-
-  it('révoque aussi un refresh token lors du logout', async () => {
-    resetState();
-
-    await withRefreshExpiry('2h', async () => {
-      const { refreshToken } = generateTokens(12);
-      await deleteRefreshToken(refreshToken);
-
-      const expectedKey = buildRefreshBlacklistKey(refreshToken);
-      assert.ok(queryCalls.some((call) => call.sql.toUpperCase().includes('DELETE FROM REFRESH_TOKENS') && call.params[0] === hashRefreshToken(refreshToken)));
-      assert.ok(!queryCalls.some((call) => call.params?.includes(refreshToken)));
-      assert.ok(redisSets.some((entry) => entry.key === expectedKey));
-    });
-  });
 });
 
 describe('authAccountService — account action tokens', () => {
@@ -261,9 +225,10 @@ describe('authAccountService — account action tokens', () => {
 
     const result = await resetPasswordWithToken(token, 'A-strong-test-password-2026!');
 
-    const lookup = queryCalls.find((call) => call.sql.toUpperCase().includes('SELECT USER_ID FROM PASSWORD_RESET_TOKENS'));
+    const lookup = txCalls.find((call) => call.sql.toUpperCase().includes('SELECT USER_ID FROM PASSWORD_RESET_TOKENS'));
     assert.strictEqual(lookup.params[0], hashAccountActionToken(token));
-    assert.strictEqual(result, true);
-    assert.ok(!queryCalls.some((call) => call.params?.includes(token)));
+    assert.strictEqual(result, 22);
+    assert.ok(!queryCalls.concat(txCalls).some((call) => call.params?.includes(token)));
+    assert.ok(txCalls.some((call) => call.sql.toUpperCase().includes('UPDATE AUTH_SESSIONS')));
   });
 });

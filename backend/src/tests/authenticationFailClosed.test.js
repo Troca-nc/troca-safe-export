@@ -28,8 +28,9 @@ function harness({ env = 'development', user = { id: 7, deleted_at: null, banned
       json(payload) { this.payload = payload; return this; },
     };
     let nextCalls = 0;
-    await auth.authenticate(req, res, () => { nextCalls++; });
-    return { req, res, nextCalls };
+    let nextError = null;
+    await auth.authenticate(req, res, (error) => { nextCalls++; nextError = error || null; });
+    return { req, res, nextCalls, nextError };
   }
 
   return { invoke, queries };
@@ -56,10 +57,11 @@ async function run() {
     });
     await check(`${env}: database failure fails closed`, async () => {
       const result = await harness({ env, queryError: true }).invoke();
-      assert.strictEqual(result.nextCalls, 0);
+      assert.strictEqual(result.nextCalls, 1);
       assert.strictEqual(result.req.user, undefined);
-      assert.strictEqual(result.res.statusCode, 401);
-      assert.strictEqual(result.res.payload.error, 'Token invalide');
+      assert.strictEqual(result.res.statusCode, 200);
+      assert.strictEqual(result.nextError?.status, 503);
+      assert.strictEqual(result.nextError?.code, 'AUTH_DEPENDENCY_UNAVAILABLE');
     });
   }
 

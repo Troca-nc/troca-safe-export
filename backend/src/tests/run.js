@@ -48,6 +48,8 @@ const SUITES = [
   './email.service.test',
   './eventTicketQrUx.contract.test',
   './authAccountService.test',
+  './authSessionService.test',
+  './authSessionBoundary.test',
   './accountDeletionService.test',
   './proEntitlementBoundary.test',
   './proPublicProjectionBoundary.test',
