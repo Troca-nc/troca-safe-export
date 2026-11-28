@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight, CalendarDays, Clock3, MapPin, Users } from 'lucide-react'
 
 import { proTransportApi } from '@/lib/api'
+import { loginHref } from '@/lib/authRedirect'
 import { useAuthStore } from '@/store/authStore'
 
 type DashboardData = {
@@ -58,7 +59,7 @@ export default function ProDashboardTransportPage() {
   useEffect(() => {
     if (!hasHydrated) return
     if (!isAuthenticated) {
-      router.replace('/connexion')
+      router.replace(loginHref())
       return
     }
     if (user && !user.is_pro) {

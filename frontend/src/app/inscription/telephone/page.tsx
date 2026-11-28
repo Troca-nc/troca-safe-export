@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useMemo } from 'react'
 import { ArrowRight, Phone, ShieldCheck } from 'lucide-react'
 import PhoneVerification from '@/components/profil/PhoneVerification'
+import { loginHref } from '@/lib/authRedirect'
 import { useAuthStore } from '@/store/authStore'
 
 function SocialPhoneCompletionContent() {
@@ -22,7 +23,7 @@ function SocialPhoneCompletionContent() {
     if (!hasHydrated) return
 
     if (!isAuthenticated) {
-      router.replace(`/connexion?next=${encodeURIComponent(next)}`)
+      router.replace(loginHref(next))
       return
     }
 

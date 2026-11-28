@@ -11,6 +11,7 @@ import { ErrorState } from '@/components/ui/Skeleton'
 import { useAuthSessionSync } from '@/hooks/useAuthSessionSync'
 import { getAccountOverview } from '@/lib/data/account'
 import { inferDemoAccount } from '@/lib/demoApi'
+import { redirectToLogin } from '@/lib/authRedirect'
 import type { AccountKind, AccountSubscriptionState } from '@/types/account'
 
 const DEMO_SUBSCRIPTIONS: AccountSubscriptionState[] = ['active', 'expiring_soon', 'payment_failed']
@@ -33,7 +34,7 @@ function ProfileContent() {
 
   useEffect(() => {
     if (!authReady || isAuthenticated || demoKind) return
-    window.location.assign('/connexion?next=/profil')
+    redirectToLogin({ path: '/profil' })
   }, [authReady, demoKind, isAuthenticated])
 
   const query = useQuery({

@@ -24,6 +24,7 @@ import {
   X,
   QrCode,
 } from 'lucide-react'
+import { loginHref } from '@/lib/authRedirect'
 
 import { useAuthStore } from '@/store/authStore'
 import Header from '@/components/layout/Header'
@@ -65,7 +66,7 @@ export default function ProDashboardLayout({ children }: { children: ReactNode }
   useEffect(() => {
     if (!hasHydrated) return
     if (!isAuthenticated) {
-      router.replace('/connexion')
+      router.replace(loginHref())
       return
     }
     if (user && !user.is_pro && !canAccessVerifiedPublicite) {

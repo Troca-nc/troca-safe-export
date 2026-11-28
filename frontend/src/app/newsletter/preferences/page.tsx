@@ -7,6 +7,7 @@ import { Check, Eye } from 'lucide-react'
 
 import { FALLBACK_CATEGORIES } from '@/lib/categoryCatalog'
 import { newsletterApi } from '@/lib/api'
+import { loginHref } from '@/lib/authRedirect'
 import { useAuthStore } from '@/store/authStore'
 
 const COMMUNES = [
@@ -48,7 +49,7 @@ export default function NewsletterPreferencesPage() {
   useEffect(() => {
     if (!hasHydrated) return
     if (!isAuthenticated) {
-      router.replace('/connexion?next=/newsletter/preferences')
+      router.replace(loginHref('/newsletter/preferences'))
     }
   }, [hasHydrated, isAuthenticated, router])
 

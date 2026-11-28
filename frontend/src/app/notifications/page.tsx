@@ -8,6 +8,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
 import { notificationsApi } from '@/lib/api'
+import { loginHref } from '@/lib/authRedirect'
 import { useAuthStore } from '@/store/authStore'
 
 type NotificationItem = {
@@ -36,7 +37,7 @@ export default function NotificationsPage() {
     if (!hasHydrated) return
 
     if (!isAuthenticated) {
-      router.replace('/connexion')
+      router.replace(loginHref())
       return
     }
 

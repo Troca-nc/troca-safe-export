@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 
 import { fretApi } from '@/lib/api'
+import { loginHref } from '@/lib/authRedirect'
 import { useAuthStore } from '@/store/authStore'
 
 type DashboardData = {
@@ -97,7 +98,7 @@ export default function ProDashboardFretPage() {
   useEffect(() => {
     if (!hasHydrated) return
     if (!isAuthenticated) {
-      router.replace('/connexion')
+      router.replace(loginHref())
       return
     }
     if (user && !user.is_pro) {
