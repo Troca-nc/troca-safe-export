@@ -13,6 +13,7 @@ const productionHostnames = new Set(['kalico-nc.com', 'www.kalico-nc.com', 'kali
 const isProductionTarget = productionHostnames.has(targetHostname)
 const BACKEND_BASE_URL = process.env.PLAYWRIGHT_BACKEND_URL || (isExternalUrl ? new URL(PLAYWRIGHT_BASE_URL).origin : 'http://127.0.0.1:3001')
 const BACKEND_HEALTH_URL = new URL('/api/health', BACKEND_BASE_URL).toString()
+const FRONTEND_HEALTH_URL = new URL('/api/health', PLAYWRIGHT_BASE_URL).toString()
 const SERVER_STATE_FILE = path.join(ROOT, 'playwright', '.server.json')
 const USE_DEMO_SERVER = process.env.PLAYWRIGHT_USE_DEMO_SERVER !== 'false'
 const USE_LOCAL_SERVERS = process.env.PLAYWRIGHT_USE_LOCAL_SERVER !== 'false' && !isExternalUrl
@@ -76,14 +77,14 @@ async function waitForHealthy(url: string, timeoutMs = 120_000) {
 }
 
 async function ensureDevServerStarted() {
-  const frontendHealthy = await fetch(PLAYWRIGHT_BASE_URL, { cache: 'no-store' }).then((res) => res.ok).catch(() => false)
+  const frontendHealthy = await fetch(FRONTEND_HEALTH_URL, { cache: 'no-store' }).then((res) => res.ok).catch(() => false)
   const backendHealthy = await fetch(BACKEND_HEALTH_URL, { cache: 'no-store' }).then((res) => res.ok).catch(() => false)
   if (frontendHealthy && backendHealthy) {
     return
   }
 
   if (!USE_LOCAL_SERVERS) {
-    await waitForHealthy(PLAYWRIGHT_BASE_URL)
+    await waitForHealthy(FRONTEND_HEALTH_URL)
     await waitForHealthy(BACKEND_HEALTH_URL)
     return
   }
@@ -106,7 +107,7 @@ async function ensureDevServerStarted() {
   fs.mkdirSync(path.dirname(SERVER_STATE_FILE), { recursive: true })
   fs.writeFileSync(SERVER_STATE_FILE, JSON.stringify({ pid: child.pid, startedAt: new Date().toISOString() }, null, 2), 'utf-8')
 
-  await waitForHealthy(PLAYWRIGHT_BASE_URL)
+  await waitForHealthy(FRONTEND_HEALTH_URL)
   await waitForHealthy(BACKEND_HEALTH_URL)
 }
 
