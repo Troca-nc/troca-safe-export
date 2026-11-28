@@ -277,7 +277,7 @@ export default function Header({
                   {account.avatarUrl ? (
                     <Image src={account.avatarUrl} alt="" width={32} height={32} className="h-8 w-8 rounded-pill object-cover" />
                   ) : (
-                    <span className={`inline-flex h-8 w-8 items-center justify-center text-caption font-semibold ${variant === 'pro' ? 'rounded-control bg-accent-soft text-accent-text' : 'rounded-pill bg-info/15 text-info-text'}`}>
+                    <span className={`inline-flex h-8 w-8 items-center justify-center text-caption font-semibold ${variant === 'pro' ? 'rounded-control bg-accent-soft text-accent-text' : 'rounded-pill bg-info/15 text-ink'}`}>
                       {variant === 'pro' ? companyName[0]?.toLocaleUpperCase('fr-FR') : account.initials}
                     </span>
                   )}
