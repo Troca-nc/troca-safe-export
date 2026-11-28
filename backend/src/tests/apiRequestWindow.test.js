@@ -7,7 +7,10 @@ const {
   readApiRequestWindow,
   recordApiRequestWindow,
 } = require('../services/apiRequestWindow');
-const { shouldTriggerApiErrorRateAlert } = require('../services/adminAlerts');
+const {
+  createApiErrorRateAlert,
+  shouldTriggerApiErrorRateAlert,
+} = require('../services/adminAlerts');
 
 function createRedisHarness() {
   const sets = new Map();
@@ -77,5 +80,18 @@ describe('Fenêtre glissante des erreurs API', () => {
     assert.notStrictEqual(KEYS.total, KEYS.serverErrors);
     assert.notStrictEqual(KEYS.total, KEYS.rateLimited);
     assert.notStrictEqual(KEYS.serverErrors, KEYS.rateLimited);
+  });
+
+  it('horodate chaque nouvelle alerte de taux d’erreur en UTC ISO', () => {
+    const timestamp = new Date('2026-11-28T10:30:00.000Z');
+    const alert = createApiErrorRateAlert({
+      totalRequests: 200,
+      serverErrors: 20,
+      rateLimited: 5,
+      errorRate: 0.1,
+    }, timestamp);
+
+    assert.strictEqual(alert.type, 'error_rate');
+    assert.strictEqual(alert.timestamp, '2026-11-28T10:30:00.000Z');
   });
 });
