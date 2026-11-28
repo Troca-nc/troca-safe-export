@@ -5,8 +5,7 @@ import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { BadgeCheck, Mail, RefreshCw, ShieldCheck, Sparkles } from 'lucide-react'
 import TurnstileChallenge from '@/components/auth/TurnstileChallenge'
-import { authApi, isStoredAccessTokenValid } from '@/lib/api'
-import { getStoredRefreshToken } from '@/lib/tokenStorage'
+import { authApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 
 type Status = 'loading' | 'success' | 'error'
@@ -47,7 +46,7 @@ function VerificationEmailContent() {
         const confirmedEmail = data?.data?.user?.email || email
         setVerifiedEmail(confirmedEmail)
 
-        if (isStoredAccessTokenValid() || getStoredRefreshToken()) {
+        if (useAuthStore.getState().sessionStatus === 'authenticated') {
           await refreshMe()
           if (!mounted) return
           if (useAuthStore.getState().isAuthenticated) {

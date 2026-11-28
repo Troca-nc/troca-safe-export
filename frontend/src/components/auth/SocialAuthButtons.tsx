@@ -6,7 +6,7 @@ import axios from 'axios'
 import { useAuthStore } from '@/store/authStore'
 import { API_ORIGIN } from '@/lib/api'
 import { consumeRedirectAfterLogin } from '@/lib/authRedirect'
-import { saveStoredTokens } from '@/lib/tokenStorage'
+import { sessionCoordinator } from '@/lib/sessionCoordinator'
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ''
 const APPLE_CLIENT_ID = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID ?? ''
@@ -127,7 +127,6 @@ export default function SocialAuthButtons({ redirectTo = '/', mode = 'connexion'
 
   const handleSocialSuccess = (data: {
     access_token: string
-    refresh_token: string
     user: {
       phone_verified?: boolean
       telephone?: string | null
@@ -135,7 +134,7 @@ export default function SocialAuthButtons({ redirectTo = '/', mode = 'connexion'
     }
   }) => {
     const target = consumeRedirectAfterLogin(redirectTo)
-    saveStoredTokens(data.access_token, data.refresh_token)
+    sessionCoordinator.setAuthenticated(data.access_token)
     setUser(data.user as any)
     router.push(target)
   }
@@ -143,7 +142,7 @@ export default function SocialAuthButtons({ redirectTo = '/', mode = 'connexion'
   const { trigger: triggerGoogle, loading: googleLoading } = useGoogleSignIn(async (id_token) => {
     setError('')
     try {
-      const { data } = await axios.post(`${API_ORIGIN}/api/auth/google`, { id_token })
+      const { data } = await axios.post(`${API_ORIGIN}/api/auth/google`, { id_token }, { withCredentials: true })
       handleSocialSuccess(data.data)
     } catch (err: any) {
       setError(err?.response?.data?.error || 'La connexion Google a échoué.')
@@ -167,7 +166,7 @@ export default function SocialAuthButtons({ redirectTo = '/', mode = 'connexion'
               lastName: appleResponse.user.name?.lastName,
             }
           : undefined,
-      })
+      }, { withCredentials: true })
       handleSocialSuccess(data.data)
     } catch (err: any) {
       if (err?.error !== 'popup_closed_by_user') {
