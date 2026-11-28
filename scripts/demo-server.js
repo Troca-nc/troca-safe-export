@@ -1122,25 +1122,6 @@ async function handleRoute(req, res) {
     return json(res, 200, { data: { ok: true } });
   }
 
-  const userProfileMatch = pathname.match(/^\/api\/users\/([^/]+)$/);
-  if (userProfileMatch && req.method === 'GET') {
-    const user = state.users.find((u) => String(u.id) === String(userProfileMatch[1]));
-    if (!user) return json(res, 404, { error: 'Utilisateur introuvable.' });
-    const reviews = state.reviews.filter((r) => String(r.user_id) === String(user.id));
-    const items = state.listings.filter((item) => String(item.user.id) === String(user.id));
-    return json(res, 200, {
-      data: {
-        ...publicUser(user),
-        note_moyenne: user.note_moyenne ?? user.rating,
-        nb_avis: reviews.length,
-        nb_annonces: items.length,
-        created_at: user.created_at,
-        commune_name: user.commune_name,
-        province_name: user.province_name,
-      },
-    });
-  }
-
   if (pathname === '/api/users/me' && req.method === 'PUT') {
     const user = requireAuth(req, res);
     if (!user) return;
@@ -1160,6 +1141,25 @@ async function handleRoute(req, res) {
     const user = requireAuth(req, res);
     if (!user) return;
     return json(res, 200, { data: publicUser(user) });
+  }
+
+  const userProfileMatch = pathname.match(/^\/api\/users\/([^/]+)$/);
+  if (userProfileMatch && req.method === 'GET') {
+    const user = state.users.find((u) => String(u.id) === String(userProfileMatch[1]));
+    if (!user) return json(res, 404, { error: 'Utilisateur introuvable.' });
+    const reviews = state.reviews.filter((r) => String(r.user_id) === String(user.id));
+    const items = state.listings.filter((item) => String(item.user.id) === String(user.id));
+    return json(res, 200, {
+      data: {
+        ...publicUser(user),
+        note_moyenne: user.note_moyenne ?? user.rating,
+        nb_avis: reviews.length,
+        nb_annonces: items.length,
+        created_at: user.created_at,
+        commune_name: user.commune_name,
+        province_name: user.province_name,
+      },
+    });
   }
 
   const reviewsMatch = pathname.match(/^\/api\/users\/([^/]+)\/reviews$/);
