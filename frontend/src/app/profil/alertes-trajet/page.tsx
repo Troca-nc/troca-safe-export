@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { BellRing, Plus, Trash2 } from 'lucide-react'
 
 import { covoitAlertsApi } from '@/lib/api'
+import { loginHref } from '@/lib/authRedirect'
 import { useAuthStore } from '@/store/authStore'
 
 const DAYS = [
@@ -47,7 +48,7 @@ export default function AlertesTrajetPage() {
 
   useEffect(() => {
     if (!hasHydrated) return
-    if (!user) router.replace('/connexion')
+    if (!user) router.replace(loginHref())
   }, [hasHydrated, router, user])
 
   useEffect(() => {

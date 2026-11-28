@@ -10,6 +10,17 @@ const siteUrlObject = new URL(siteUrl)
 const siteOrigin = siteUrlObject.origin
 const apiOrigin = new URL(apiUrl, siteUrl).origin
 const apiWsOrigin = apiOrigin.replace(/^http/, 'ws')
+const legacyApiProxyTarget = process.env.NEXT_PUBLIC_API_PROXY_TARGET?.trim()
+const testApiProxyTarget = process.env.KALICO_TEST_API_PROXY_TARGET?.trim()
+const buildProfile = process.env.KALICO_BUILD_PROFILE?.trim() || 'production'
+
+if (legacyApiProxyTarget) {
+  throw new Error('NEXT_PUBLIC_API_PROXY_TARGET is forbidden. Use the isolated test proxy profile.')
+}
+
+if (testApiProxyTarget && buildProfile !== 'test') {
+  throw new Error('KALICO_TEST_API_PROXY_TARGET is allowed only with KALICO_BUILD_PROFILE=test.')
+}
 
 const nextConfig = {
   generateBuildId: async () => {
@@ -37,6 +48,12 @@ const nextConfig = {
         permanent: true,
       },
     ]
+  },
+
+  async rewrites() {
+    const proxyTarget = buildProfile === 'test' ? testApiProxyTarget?.replace(/\/$/, '') : undefined
+    if (!proxyTarget) return []
+    return [{ source: '/api/:path*', destination: `${proxyTarget}/api/:path*` }]
   },
 
   // Variables d'environnement publiques exposées au client

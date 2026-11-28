@@ -9,6 +9,7 @@ import AnalyticsTracker from '@/components/layout/AnalyticsTracker'
 import JsonLd, { buildOrganizationSchema, buildWebSiteSchema } from '@/components/seo/JsonLd'
 import { ThemeProvider } from '@/components/ui/ThemeProvider'
 import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider'
+import { SessionBootstrap } from '@/components/providers/SessionBootstrap'
 import PaymentFailureBanner from '@/components/PaymentFailureBanner'
 import AuthRequiredModal from '@/components/auth/AuthRequiredModal'
 import { DemoRibbon } from '@/components/demo/DemoRibbon'
@@ -85,6 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${ibmPlexSans.className} bg-[var(--color-bg-page)] text-[var(--color-text-primary)] font-body antialiased overflow-x-clip md:overflow-x-visible`}>
         <ThemeProvider>
           <ReactQueryProvider>
+            <SessionBootstrap />
             <JsonLd data={buildOrganizationSchema()} />
             <JsonLd data={buildWebSiteSchema()} />
             <AnalyticsTracker />

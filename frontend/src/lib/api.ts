@@ -3,11 +3,10 @@
 
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig, type AxiosRequestConfig } from 'axios'
 
-import { rememberRedirectAfterLogin } from '@/lib/authRedirect'
-import { requestDraftSave } from '@/lib/draftEvents'
 import { isDemoMode, showDemoToast } from '@/lib/demoMode'
-import { clearStoredTokens, getStoredAccessToken, getStoredRefreshToken, saveStoredTokens } from '@/lib/tokenStorage'
+import { getStoredAccessToken } from '@/lib/tokenStorage'
 import { normalizeApiBase } from '@/lib/apiBase'
+import { sessionCoordinator } from '@/lib/sessionCoordinator'
 
 const API_URL = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL || 'https://kalico.nc/api')
 export const API_ORIGIN = API_URL.replace(/\/api$/, '')
@@ -52,9 +51,6 @@ function getAuthToken() {
   if (typeof window === 'undefined') return ''
   const token = getStoredAccessToken()
   if (!isStoredAccessTokenValid(token)) {
-    if (token) {
-      clearTokens()
-    }
     return ''
   }
   return token
@@ -96,15 +92,6 @@ function getCookieValue(name: string) {
 
   if (!cookie) return ''
   return decodeURIComponent(cookie.slice(prefix.length))
-}
-
-function redirectToLoginAfterAuthFailure() {
-  if (typeof window === 'undefined') return
-
-  requestDraftSave()
-  rememberRedirectAfterLogin()
-  clearTokens()
-  window.location.assign('/connexion')
 }
 
 function toCachedResponse<T>(response: AxiosResponse<T>): CachedResponse<T> {
@@ -206,9 +193,6 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 })
 
 // Intercepteur reponse : refresh automatique
-let isRefreshing = false
-let queue: Array<{ resolve: (v: string) => void; reject: (e: unknown) => void }> = []
-
 function isRefreshUrl(url?: string | null) {
   return Boolean(url && url.includes('/auth/refresh'))
 }
@@ -228,75 +212,23 @@ api.interceptors.response.use(
     }
 
     if (isRefreshUrl(original?.url)) {
-      queue.forEach((p) => p.reject(error))
-      queue = []
-      redirectToLoginAfterAuthFailure()
       return Promise.reject(error)
     }
 
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true
-
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          queue.push({ resolve, reject })
-        }).then((token) => {
-          original.headers.Authorization = `Bearer ${token}`
-          return api(original)
-        })
-      }
-
-      isRefreshing = true
-      const refreshToken = getStoredRefreshToken()
-
       try {
-        const { data } = await axios.post(
-          `${API_URL}/auth/refresh`,
-          refreshToken ? { refresh_token: refreshToken } : undefined,
-          { withCredentials: true }
-        )
-        const { access_token, refresh_token } = data.data
-        saveTokens(access_token, refresh_token)
-
-        queue.forEach((p) => p.resolve(access_token))
-        queue = []
-
-        original.headers.Authorization = `Bearer ${access_token}`
+        const accessToken = await sessionCoordinator.recoverAccessToken()
+        original.headers.Authorization = `Bearer ${accessToken}`
         return api(original)
       } catch (refreshError) {
-        const status = (refreshError as AxiosError)?.response?.status ?? null
-        if (status === 429 || (typeof status === 'number' && status >= 400 && status < 500)) {
-          queue.forEach((p) => p.reject(refreshError))
-          queue = []
-          redirectToLoginAfterAuthFailure()
-          return Promise.reject(refreshError)
-        }
-
-        queue.forEach((p) => p.reject(error))
-        queue = []
-        redirectToLoginAfterAuthFailure()
         return Promise.reject(refreshError)
-      } finally {
-        isRefreshing = false
       }
     }
 
     return Promise.reject(error)
   }
 )
-
-// Helpers tokens
-export const saveTokens = (access: string, refresh?: string | null) => {
-  saveStoredTokens(access, refresh)
-}
-
-export const clearTokens = () => {
-  clearStoredTokens()
-  if (typeof window !== 'undefined') {
-    window.localStorage.removeItem('user')
-  }
-  clearApiCache()
-}
 
 // Fonctions API
 
@@ -312,7 +244,7 @@ export const authApi = {
       ...data,
       ...(turnstileToken ? { turnstile_token: turnstileToken } : {}),
     }),
-  logout: () => api.post('/auth/logout'),
+  logout: () => api.post('/auth/refresh/logout'),
   me: () => api.get('/users/me'),
   verifyEmail: (token: string) => api.post('/auth/verify-email', { token }),
   forgotPassword: (identifier: string, turnstileToken?: string) =>

@@ -9,6 +9,7 @@ import Header from '@/components/layout/Header'
 import PassengerProfileModal from '@/components/covoiturage/PassengerProfileModal'
 import RideReviewModal from '@/components/covoiturage/RideReviewModal'
 import { covoiturageApi } from '@/lib/api'
+import { redirectToLogin } from '@/lib/authRedirect'
 import { useAuthStore } from '@/store/authStore'
 
 type Booking = {
@@ -251,7 +252,7 @@ export default function CovoiturageReservationsPage() {
   useEffect(() => {
     if (!hasHydrated) return
     if (!isAuthenticated || !user) {
-      window.location.assign('/connexion?next=/covoiturage/reservations')
+      redirectToLogin({ path: '/covoiturage/reservations' })
     }
   }, [hasHydrated, isAuthenticated, user])
 

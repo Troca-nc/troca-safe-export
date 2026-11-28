@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button'
 import { FilterChip, SegmentedControl, Switch } from '@/components/ui/Controls'
 import { Input } from '@/components/ui/Field'
 import { useAuthSessionSync } from '@/hooks/useAuthSessionSync'
+import { loginHref } from '@/lib/authRedirect'
 import {
   BON_PLAN_CATEGORIES,
   loadNotificationPreferences,
@@ -81,7 +82,7 @@ export default function NotificationPreferencesPage() {
   useEffect(() => {
     if (!hasHydrated) return
     if (!user && !demoProfile) {
-      router.replace('/connexion')
+      router.replace(loginHref())
       return
     }
     void load()

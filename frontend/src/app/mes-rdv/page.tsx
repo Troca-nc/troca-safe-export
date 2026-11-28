@@ -9,6 +9,7 @@ import FeedbackAlert from '@/components/ui/FeedbackAlert'
 import RdvBookingCard, { type RdvBookingItem } from '@/components/pro/RdvBookingCard'
 import { proBookingsApi } from '@/lib/api'
 import { showToast } from '@/lib/toast'
+import { redirectToLogin } from '@/lib/authRedirect'
 import { useAuthStore } from '@/store/authStore'
 
 type TabKey = 'all' | 'client' | 'pro'
@@ -34,7 +35,7 @@ export default function MesRdvPage() {
   useEffect(() => {
     if (!hasHydrated) return
     if (!isAuthenticated || !user) {
-      window.location.assign('/connexion?next=/mes-rdv')
+      redirectToLogin({ path: '/mes-rdv' })
     }
   }, [hasHydrated, isAuthenticated, user])
 

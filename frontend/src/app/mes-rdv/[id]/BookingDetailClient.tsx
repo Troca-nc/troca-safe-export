@@ -8,6 +8,7 @@ import Header from '@/components/layout/Header'
 import { type RdvBookingItem } from '@/components/pro/RdvBookingCard'
 import { proBookingsApi } from '@/lib/api'
 import { consumeCapabilityTokenFromFragment } from '@/lib/capabilityToken'
+import { redirectToLogin } from '@/lib/authRedirect'
 import { useAuthStore } from '@/store/authStore'
 
 type Props = {
@@ -82,7 +83,7 @@ export default function BookingDetailClient({ bookingId }: Props) {
   const handleContact = () => {
     if (!partnerId) return
     if (!isAuthenticated) {
-      window.location.assign(`/connexion?next=${encodeURIComponent(`/messages?user=${partnerId}`)}`)
+      redirectToLogin({ path: `/messages?user=${partnerId}` })
       return
     }
     window.location.assign(`/messages?user=${partnerId}`)

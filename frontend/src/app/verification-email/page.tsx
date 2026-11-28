@@ -5,8 +5,7 @@ import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { BadgeCheck, Mail, RefreshCw, ShieldCheck, Sparkles } from 'lucide-react'
 import TurnstileChallenge from '@/components/auth/TurnstileChallenge'
-import { authApi, isStoredAccessTokenValid } from '@/lib/api'
-import { getStoredRefreshToken } from '@/lib/tokenStorage'
+import { authApi } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 
 type Status = 'loading' | 'success' | 'error'
@@ -18,7 +17,10 @@ function VerificationEmailContent() {
   const email = searchParams.get('email') || ''
   const role = searchParams.get('role') === 'pro' ? 'pro' : 'particulier'
   const refreshMe = useAuthStore((state) => state.refreshMe)
+  const sessionStatus = useAuthStore((state) => state.sessionStatus)
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const verificationStarted = useRef(false)
+  const continuationStarted = useRef(false)
   const [status, setStatus] = useState<Status>(token ? 'loading' : 'error')
   const [message, setMessage] = useState(
     token ? 'Vérification en cours...' : "Vérifiez votre boîte mail pour confirmer votre compte."
@@ -26,6 +28,7 @@ function VerificationEmailContent() {
   const [resendBusy, setResendBusy] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
   const [verifiedEmail, setVerifiedEmail] = useState(email)
+  const [verificationCompleted, setVerificationCompleted] = useState(false)
   const [continuedSession, setContinuedSession] = useState(false)
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || ''
   const turnstileEnabled = Boolean(turnstileSiteKey && !turnstileSiteKey.startsWith('CHANGEME'))
@@ -42,25 +45,13 @@ function VerificationEmailContent() {
 
     let mounted = true
     authApi.verifyEmail(token)
-      .then(async ({ data }) => {
+      .then(({ data }) => {
         if (!mounted) return
         const confirmedEmail = data?.data?.user?.email || email
         setVerifiedEmail(confirmedEmail)
-
-        if (isStoredAccessTokenValid() || getStoredRefreshToken()) {
-          await refreshMe()
-          if (!mounted) return
-          if (useAuthStore.getState().isAuthenticated) {
-            setContinuedSession(true)
-            setStatus('success')
-            setMessage('Votre email est confirmé. Vous êtes connecté, redirection vers Kalico…')
-            window.setTimeout(() => router.replace(ctaHref), 900)
-            return
-          }
-        }
-
+        setVerificationCompleted(true)
         setStatus('success')
-        setMessage('Votre email est confirmé. Connectez-vous pour accéder à votre compte.')
+        setMessage('Votre email est confirmé. Restauration de votre session en cours…')
       })
       .catch((err: any) => {
         if (!mounted) return
@@ -71,7 +62,44 @@ function VerificationEmailContent() {
     return () => {
       mounted = false
     }
-  }, [ctaHref, email, refreshMe, router, token])
+  }, [email, token])
+
+  useEffect(() => {
+    if (!verificationCompleted) return
+
+    if (sessionStatus === 'bootstrapping' || sessionStatus === 'recovering') {
+      setMessage('Votre email est confirmé. Restauration de votre session en cours…')
+      return
+    }
+
+    if (sessionStatus === 'visitor' || !isAuthenticated) {
+      setMessage('Votre email est confirmé. Connectez-vous pour accéder à votre compte.')
+      return
+    }
+
+    if (continuationStarted.current) return
+    continuationStarted.current = true
+
+    let mounted = true
+    let redirectTimer: number | undefined
+    void refreshMe().then(() => {
+      if (!mounted) return
+      if (!useAuthStore.getState().isAuthenticated) {
+        continuationStarted.current = false
+        setMessage('Votre email est confirmé. Connectez-vous pour accéder à votre compte.')
+        return
+      }
+
+      setContinuedSession(true)
+      setMessage('Votre email est confirmé. Vous êtes connecté, redirection vers Kalico…')
+      redirectTimer = window.setTimeout(() => router.replace(ctaHref), 900)
+    })
+
+    return () => {
+      mounted = false
+      if (redirectTimer !== undefined) window.clearTimeout(redirectTimer)
+    }
+  }, [ctaHref, isAuthenticated, refreshMe, router, sessionStatus, verificationCompleted])
 
   const handleResend = async () => {
     if (!email) {

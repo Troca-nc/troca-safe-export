@@ -22,6 +22,7 @@ import {
   Star,
   Store,
 } from 'lucide-react'
+import { loginHref } from '@/lib/authRedirect'
 
 import Header from '@/components/layout/Header'
 import { Button } from '@/components/ui/Button'
@@ -135,7 +136,7 @@ export default function ProUpgradeFlow() {
   useEffect(() => {
     if (!hasHydrated) return
     if (!isAuthenticated) {
-      router.replace('/connexion?next=%2Fdevenir-pro')
+      router.replace(loginHref('/devenir-pro'))
       return
     }
     if (user?.is_pro) {

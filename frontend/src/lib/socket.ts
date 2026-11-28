@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client'
-import { getStoredAccessToken } from './tokenStorage'
+import { sessionCoordinator } from './sessionCoordinator'
 import { normalizeApiOrigin } from './apiBase'
 
 export type SocketConnectionState = 'connected' | 'reconnecting' | 'offline'
@@ -256,6 +256,14 @@ class ReliableMessagingSocket {
     this.setStatus('offline')
   }
 
+  updateAuthentication(token: string) {
+    this.manualDisconnect = false
+    this.ensureSocket(token)
+    if (this.socket && !this.socket.connected && this.listeners.size > 0) {
+      void this.connect()
+    }
+  }
+
   getSnapshot(): SocketStatusSnapshot {
     return {
       state: this.status,
@@ -269,10 +277,18 @@ const API_ORIGIN = normalizeApiOrigin(process.env.NEXT_PUBLIC_API_URL || 'https:
 
 const accessTokenProvider = () => {
   if (typeof window === 'undefined') return null
-  return getStoredAccessToken()
+  return sessionCoordinator.getAccessToken()
 }
 
 export const messagingSocket = new ReliableMessagingSocket(API_ORIGIN, accessTokenProvider)
+
+sessionCoordinator.subscribe((snapshot) => {
+  if (snapshot.status === 'visitor') {
+    messagingSocket.disconnect(true)
+  } else if (snapshot.status === 'authenticated' && snapshot.accessToken) {
+    messagingSocket.updateAuthentication(snapshot.accessToken)
+  }
+})
 
 export function getMessagingSocket() {
   void messagingSocket.connect()

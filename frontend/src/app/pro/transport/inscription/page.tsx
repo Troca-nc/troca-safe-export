@@ -7,6 +7,7 @@ import { ArrowRight, BadgeCheck, Upload } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
 import { proTransportApi } from '@/lib/api'
+import { loginHref } from '@/lib/authRedirect'
 import { useAuthStore } from '@/store/authStore'
 
 type FormState = {
@@ -67,7 +68,7 @@ export default function ProTransportInscriptionPage() {
   useEffect(() => {
     if (!hasHydrated) return
     if (!isAuthenticated) {
-      router.replace('/connexion')
+      router.replace(loginHref())
       return
     }
     if (user && !user.is_pro) {

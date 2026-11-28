@@ -106,6 +106,13 @@ export default defineConfig({
       },
     },
     {
+      name: 'session',
+      testMatch: /session\/.*\.spec\.ts$/,
+      use: {
+        ...desktop,
+      },
+    },
+    {
       name: 'prod-public',
       testMatch: /production\/public\.smoke\.spec\.ts$/,
       use: {

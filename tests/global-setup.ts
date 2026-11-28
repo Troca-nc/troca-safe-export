@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
 import { chromium, type FullConfig } from '@playwright/test'
-import { AUTH_DIR, authUserPath, captureAuthUser, captureSessionStorage, storageStatePath, type AuthRole, type AuthUserState } from './support/auth'
+import { AUTH_DIR, authUserPath, captureAuthUser, storageStatePath, type AuthRole, type AuthUserState } from './support/auth'
 import { loadDemoEnv } from '../scripts/loadDemoEnv'
 
 const ROOT = path.resolve(process.cwd())
@@ -13,6 +13,7 @@ const productionHostnames = new Set(['kalico-nc.com', 'www.kalico-nc.com', 'kali
 const isProductionTarget = productionHostnames.has(targetHostname)
 const BACKEND_BASE_URL = process.env.PLAYWRIGHT_BACKEND_URL || (isExternalUrl ? new URL(PLAYWRIGHT_BASE_URL).origin : 'http://127.0.0.1:3001')
 const BACKEND_HEALTH_URL = new URL('/api/health', BACKEND_BASE_URL).toString()
+const FRONTEND_HEALTH_URL = new URL('/api/health', PLAYWRIGHT_BASE_URL).toString()
 const SERVER_STATE_FILE = path.join(ROOT, 'playwright', '.server.json')
 const USE_DEMO_SERVER = process.env.PLAYWRIGHT_USE_DEMO_SERVER !== 'false'
 const USE_LOCAL_SERVERS = process.env.PLAYWRIGHT_USE_LOCAL_SERVER !== 'false' && !isExternalUrl
@@ -76,14 +77,14 @@ async function waitForHealthy(url: string, timeoutMs = 120_000) {
 }
 
 async function ensureDevServerStarted() {
-  const frontendHealthy = await fetch(PLAYWRIGHT_BASE_URL, { cache: 'no-store' }).then((res) => res.ok).catch(() => false)
+  const frontendHealthy = await fetch(FRONTEND_HEALTH_URL, { cache: 'no-store' }).then((res) => res.ok).catch(() => false)
   const backendHealthy = await fetch(BACKEND_HEALTH_URL, { cache: 'no-store' }).then((res) => res.ok).catch(() => false)
   if (frontendHealthy && backendHealthy) {
     return
   }
 
   if (!USE_LOCAL_SERVERS) {
-    await waitForHealthy(PLAYWRIGHT_BASE_URL)
+    await waitForHealthy(FRONTEND_HEALTH_URL)
     await waitForHealthy(BACKEND_HEALTH_URL)
     return
   }
@@ -106,20 +107,18 @@ async function ensureDevServerStarted() {
   fs.mkdirSync(path.dirname(SERVER_STATE_FILE), { recursive: true })
   fs.writeFileSync(SERVER_STATE_FILE, JSON.stringify({ pid: child.pid, startedAt: new Date().toISOString() }, null, 2), 'utf-8')
 
-  await waitForHealthy(PLAYWRIGHT_BASE_URL)
+  await waitForHealthy(FRONTEND_HEALTH_URL)
   await waitForHealthy(BACKEND_HEALTH_URL)
 }
 
 async function loginRole(page: import('@playwright/test').Page, role: AuthRole, email: string, password: string) {
-  const response = await fetch(`${BACKEND_BASE_URL}/api/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+  const response = await page.context().request.post(`${BACKEND_BASE_URL}/api/auth/login`, {
+    data: { email, password },
   })
 
   const payload = await response.json().catch(() => ({}))
-  if (!response.ok) {
-    throw new Error(`Login failed for ${role} (${email}): ${payload?.error || response.statusText}`)
+  if (!response.ok()) {
+    throw new Error(`Login failed for ${role} (${email}): ${payload?.error || response.statusText()}`)
   }
 
   const accessToken = payload?.data?.access_token
@@ -131,20 +130,9 @@ async function loginRole(page: import('@playwright/test').Page, role: AuthRole, 
     throw new Error(`Login failed for ${role} (${email}): user missing`)
   }
 
-  await page.goto(`${PLAYWRIGHT_BASE_URL}/`)
-  await page.evaluate((tokens) => {
-    window.sessionStorage.setItem('access_token', tokens.accessToken)
-    if (tokens.refreshToken) {
-      window.sessionStorage.setItem('refresh_token', tokens.refreshToken)
-    } else {
-      window.sessionStorage.removeItem('refresh_token')
-    }
-  }, {
-    accessToken,
-    refreshToken: payload?.refresh_token || null,
-  })
   captureAuthUser(role, user)
-  await captureSessionStorage(page, role)
+  await page.goto(`${PLAYWRIGHT_BASE_URL}/`)
+  await page.locator('html[data-session-status="authenticated"]').waitFor({ timeout: 15_000 })
   await page.context().storageState({ path: storageStatePath(role) })
 }
 

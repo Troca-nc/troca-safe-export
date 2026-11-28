@@ -6,6 +6,7 @@ import { ArrowLeft, CalendarDays, Clock3, MapPin, User2 } from 'lucide-react'
 
 import Header from '@/components/layout/Header'
 import { proTransportApi } from '@/lib/api'
+import { redirectToLogin } from '@/lib/authRedirect'
 import { useAuthStore } from '@/store/authStore'
 
 type RideItem = {
@@ -63,7 +64,7 @@ export default function MesCoursesPage() {
   useEffect(() => {
     if (!hasHydrated) return
     if (!isAuthenticated) {
-      window.location.replace('/connexion')
+      redirectToLogin({ replace: true })
       return
     }
   }, [hasHydrated, isAuthenticated])
