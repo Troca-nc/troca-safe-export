@@ -4,7 +4,19 @@ import {
 } from '../support/auth'
 
 const backendUrl = process.env.PLAYWRIGHT_BACKEND_URL || 'http://127.0.0.1:3001'
+const frontendUrl = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000'
 const mailpitUrl = process.env.PLAYWRIGHT_MAILPIT_URL || 'http://127.0.0.1:8025'
+
+async function proxySameOriginApi(page: Page) {
+  await page.route(`${frontendUrl}/api/**`, async (route) => {
+    const target = new URL(route.request().url())
+    const backend = new URL(backendUrl)
+    target.protocol = backend.protocol
+    target.hostname = backend.hostname
+    target.port = backend.port
+    await route.fulfill({ response: await route.fetch({ url: target.toString() }) })
+  })
+}
 
 async function dismissAuthModal(page: Page) {
   const closeButton = page.getByRole('button', { name: /^Fermer$/i })
@@ -88,6 +100,9 @@ test('inscription, publication, recherche et premier contact restent opérationn
 
   const buyerContext = await browser.newContext()
   const buyerPage = await buyerContext.newPage()
+
+  await proxySameOriginApi(page)
+  await proxySameOriginApi(buyerPage)
 
   await registerAccount(page.context().request, sellerEmail, 'Camille')
   await registerAccount(buyerContext.request, buyerEmail, 'Alex')
