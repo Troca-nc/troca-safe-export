@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
 import { chromium, type FullConfig } from '@playwright/test'
-import { AUTH_DIR, authUserPath, captureAuthUser, captureSessionStorage, storageStatePath, type AuthRole, type AuthUserState } from './support/auth'
+import { AUTH_DIR, authUserPath, captureAuthUser, storageStatePath, type AuthRole, type AuthUserState } from './support/auth'
 import { loadDemoEnv } from '../scripts/loadDemoEnv'
 
 const ROOT = path.resolve(process.cwd())
@@ -112,15 +112,13 @@ async function ensureDevServerStarted() {
 }
 
 async function loginRole(page: import('@playwright/test').Page, role: AuthRole, email: string, password: string) {
-  const response = await fetch(`${BACKEND_BASE_URL}/api/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+  const response = await page.context().request.post(`${BACKEND_BASE_URL}/api/auth/login`, {
+    data: { email, password },
   })
 
   const payload = await response.json().catch(() => ({}))
-  if (!response.ok) {
-    throw new Error(`Login failed for ${role} (${email}): ${payload?.error || response.statusText}`)
+  if (!response.ok()) {
+    throw new Error(`Login failed for ${role} (${email}): ${payload?.error || response.statusText()}`)
   }
 
   const accessToken = payload?.data?.access_token
@@ -132,20 +130,9 @@ async function loginRole(page: import('@playwright/test').Page, role: AuthRole, 
     throw new Error(`Login failed for ${role} (${email}): user missing`)
   }
 
-  await page.goto(`${PLAYWRIGHT_BASE_URL}/`)
-  await page.evaluate((tokens) => {
-    window.sessionStorage.setItem('access_token', tokens.accessToken)
-    if (tokens.refreshToken) {
-      window.sessionStorage.setItem('refresh_token', tokens.refreshToken)
-    } else {
-      window.sessionStorage.removeItem('refresh_token')
-    }
-  }, {
-    accessToken,
-    refreshToken: payload?.refresh_token || null,
-  })
   captureAuthUser(role, user)
-  await captureSessionStorage(page, role)
+  await page.goto(`${PLAYWRIGHT_BASE_URL}/`)
+  await page.locator('html[data-session-status="authenticated"]').waitFor({ timeout: 15_000 })
   await page.context().storageState({ path: storageStatePath(role) })
 }
 

@@ -39,6 +39,12 @@ const nextConfig = {
     ]
   },
 
+  async rewrites() {
+    const proxyTarget = process.env.NEXT_PUBLIC_API_PROXY_TARGET?.replace(/\/$/, '')
+    if (!proxyTarget) return []
+    return [{ source: '/api/:path*', destination: `${proxyTarget}/api/:path*` }]
+  },
+
   // Variables d'environnement publiques exposées au client
   env: {
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || 'https://kalico.nc',

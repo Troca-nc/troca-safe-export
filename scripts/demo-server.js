@@ -86,6 +86,23 @@ function readJson(req) {
   });
 }
 
+function readCookie(req, name) {
+  const header = String(req.headers.cookie || '');
+  for (const part of header.split(';')) {
+    const [rawName, ...rawValue] = part.split('=');
+    if (rawName.trim() === name) return decodeURIComponent(rawValue.join('=').trim());
+  }
+  return '';
+}
+
+function refreshCookie(token) {
+  return `kalico_refresh_token=${encodeURIComponent(token)}; HttpOnly; SameSite=Strict; Path=/api/auth/refresh`;
+}
+
+function clearedRefreshCookie() {
+  return 'kalico_refresh_token=; HttpOnly; SameSite=Strict; Path=/api/auth/refresh; Max-Age=0';
+}
+
 function slugify(value) {
   return String(value || '')
     .normalize('NFKD')
@@ -525,6 +542,14 @@ function buildAuthResponse(user) {
   return { user: publicUser(user), access_token, refresh_token };
 }
 
+function webAuthResponse(user) {
+  const auth = buildAuthResponse(user);
+  return {
+    data: { user: auth.user, access_token: auth.access_token },
+    refreshToken: auth.refresh_token,
+  };
+}
+
 function getAuthUser(req) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : '';
@@ -850,7 +875,8 @@ async function handleRoute(req, res) {
       phone: body.phone || null,
     };
     state.users.push(user);
-    return json(res, 201, { data: buildAuthResponse(user) });
+    const auth = webAuthResponse(user);
+    return json(res, 201, { data: auth.data }, { 'Set-Cookie': refreshCookie(auth.refreshToken) });
   }
 
   if (pathname === '/api/auth/login' && req.method === 'POST') {
@@ -858,23 +884,30 @@ async function handleRoute(req, res) {
     const user = state.users.find((u) => u.email.toLowerCase() === String(body.email || '').toLowerCase());
     if (!user) return json(res, 401, { error: 'Identifiants invalides.' });
     if (String(body.password || '') !== DEMO_PASSWORD) return json(res, 401, { error: 'Identifiants invalides.' });
-    return json(res, 200, { data: buildAuthResponse(user) });
+    const auth = webAuthResponse(user);
+    return json(res, 200, { data: auth.data }, { 'Set-Cookie': refreshCookie(auth.refreshToken) });
   }
 
   if (pathname === '/api/auth/refresh' && req.method === 'POST') {
-    const body = await readJson(req);
-    const userId = state.refreshByUserId.get(body.refresh_token);
-    if (!userId) return json(res, 401, { error: 'Refresh token invalide.' });
+    const refreshToken = readCookie(req, 'kalico_refresh_token');
+    const userId = state.refreshByUserId.get(refreshToken);
+    if (!userId) return json(res, 401, { error: 'Refresh token invalide.', code: 'REFRESH_INVALID' });
     const user = state.users.find((u) => String(u.id) === String(userId));
-    if (!user) return json(res, 401, { error: 'Utilisateur introuvable.' });
+    if (!user) return json(res, 401, { error: 'Utilisateur introuvable.', code: 'USER_NOT_FOUND' });
+    state.refreshByUserId.delete(refreshToken);
     const auth = buildAuthResponse(user);
-    return json(res, 200, { data: auth });
+    return json(
+      res,
+      200,
+      { data: { access_token: auth.access_token } },
+      { 'Set-Cookie': refreshCookie(auth.refresh_token) },
+    );
   }
 
-  if (pathname === '/api/auth/logout' && req.method === 'POST') {
-    const body = await readJson(req);
-    if (body.refresh_token) state.refreshByUserId.delete(body.refresh_token);
-    return json(res, 200, { data: { ok: true } });
+  if ((pathname === '/api/auth/logout' || pathname === '/api/auth/refresh/logout') && req.method === 'POST') {
+    const refreshToken = readCookie(req, 'kalico_refresh_token');
+    if (refreshToken) state.refreshByUserId.delete(refreshToken);
+    return json(res, 200, { data: { ok: true } }, { 'Set-Cookie': clearedRefreshCookie() });
   }
 
   if (pathname === '/api/auth/me' && req.method === 'GET') {

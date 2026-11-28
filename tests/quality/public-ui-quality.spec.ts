@@ -166,14 +166,6 @@ test.describe('qualité UI et contenu des pages publiques critiques', () => {
     const payload = Buffer.from(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3_600 })).toString('base64url')
     const accessToken = `test.${payload}.signature`
 
-    await page.addInitScript(({ token, storedUser }) => {
-      window.sessionStorage.setItem('access_token', token)
-      window.sessionStorage.setItem('refresh_token', 'test-refresh-token')
-      window.localStorage.setItem('auth-store', JSON.stringify({
-        state: { user: storedUser, isAuthenticated: true, demoProfile: null },
-        version: 0,
-      }))
-    }, { token: accessToken, storedUser: user })
     await page.route('**/api/auth/verify-email', (route) => route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -182,7 +174,7 @@ test.describe('qualité UI et contenu des pages publiques critiques', () => {
     await page.route('**/api/auth/refresh', (route) => route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ data: { access_token: accessToken, refresh_token: 'test-refresh-token' } }),
+      body: JSON.stringify({ data: { access_token: accessToken } }),
     }))
     await page.route('**/api/users/me', (route) => route.fulfill({
       status: 200,

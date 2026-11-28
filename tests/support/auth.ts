@@ -128,6 +128,14 @@ const AUTH_USERS: Record<AuthRole, AuthUserState> = {
   },
 }
 
+const AUTH_PASSWORDS: Record<AuthRole, string> = {
+  particulier: 'Demo1234!',
+  vendeur: 'Demo1234!',
+  pro: 'Demo1234!',
+  conducteur: 'Demo1234!',
+  admin: 'Demo1234!',
+}
+
 export function storageStatePath(role: AuthRole) {
   return path.join(AUTH_DIR, `${role}.json`)
 }
@@ -197,40 +205,23 @@ export async function restoreAuthStore(page: Page, state: unknown) {
 }
 
 export async function restoreAuthenticatedStore(page: Page, role: AuthRole) {
-  const session = readSessionStorage(role)
-  const accessToken = session.access_token || session.accessToken
-  if (!accessToken) {
-    throw new Error(`No access token found for ${role}`)
-  }
-
   const user = readAuthUser(role)
-  const refreshToken = session.refresh_token || session.refreshToken || null
+  const backendUrl = process.env.PLAYWRIGHT_BACKEND_URL || 'http://127.0.0.1:3001'
+  const login = await page.context().request.post(`${backendUrl}/api/auth/login`, {
+    data: { email: user.email, password: AUTH_PASSWORDS[role] },
+  })
+  expect(login.ok(), `Login Playwright impossible pour ${role}: ${login.status()}`).toBeTruthy()
 
-  await page.goto('/', { waitUntil: 'domcontentloaded' })
-  await page.evaluate(({ state, tokens }) => {
-    window.localStorage.setItem('auth-store', JSON.stringify({
-      state,
-      version: 0,
-    }))
+  await page.addInitScript(() => {
     window.sessionStorage.removeItem('pending_auth_action')
     window.sessionStorage.removeItem('redirect_after_login')
-    window.sessionStorage.setItem('access_token', tokens.accessToken)
-    if (tokens.refreshToken) {
-      window.sessionStorage.setItem('refresh_token', tokens.refreshToken)
-    } else {
-      window.sessionStorage.removeItem('refresh_token')
-    }
-  }, {
-    state: {
-      user,
-      isAuthenticated: true,
-      demoProfile: null,
-    },
-    tokens: {
-      accessToken,
-      refreshToken,
-    },
+    window.sessionStorage.removeItem('access_token')
+    window.sessionStorage.removeItem('refresh_token')
+    window.localStorage.removeItem('access_token')
+    window.localStorage.removeItem('refresh_token')
   })
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
+  await expect(page.locator('html')).toHaveAttribute('data-session-status', 'authenticated', { timeout: 15_000 })
 }
 
 export async function captureSessionStorage(page: Page, role: AuthRole) {

@@ -26,7 +26,8 @@ jobs:
       PLAYWRIGHT_ENABLE_MSW: 'false'
       PLAYWRIGHT_FRONTEND_MODE: production
       NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3000
-      NEXT_PUBLIC_API_URL: http://127.0.0.1:3001/api
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:3000/api
+      NEXT_PUBLIC_API_PROXY_TARGET: http://127.0.0.1:3001
       NEXT_PUBLIC_ENABLE_MSW: 'false'
       FRONTEND_INTERNAL_API_TOKEN: ci-only-frontend-internal-token-xxxxxxxxxxxxxxxx
       INTERNAL_FRONTEND_API_URL: http://backend:3001/api
