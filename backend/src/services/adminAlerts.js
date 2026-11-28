@@ -25,6 +25,17 @@ function shouldTriggerApiErrorRateAlert(metrics, {
   return metrics.totalRequests >= minimumRequests && metrics.errorRate > threshold;
 }
 
+function createApiErrorRateAlert(metrics, timestamp = new Date()) {
+  return {
+    level: 'critical',
+    type: 'error_rate',
+    title: 'Taux d’erreur API élevé',
+    message: `Taux d’erreur API : ${(metrics.errorRate * 100).toFixed(1)}% sur 15 min (${metrics.serverErrors}/${metrics.totalRequests} réponses 5xx, ${metrics.rateLimited} réponses 429 séparées)`,
+    action_url: '/errors',
+    timestamp: timestamp.toISOString(),
+  };
+}
+
 async function getApiErrorMetrics(windowMinutes = 15) {
   const redis = await getRedisClient();
   return readApiRequestWindow(redis, { windowMinutes });
@@ -38,13 +49,7 @@ async function checkAdminAlerts() {
   const minimumRequests = Math.ceil(positiveNumber(process.env.ADMIN_ERROR_RATE_MIN_REQUESTS, 100));
   const threshold = positiveNumber(process.env.ADMIN_ERROR_RATE_THRESHOLD, 0.05);
   if (shouldTriggerApiErrorRateAlert(errorMetrics, { minimumRequests, threshold })) {
-    alerts.push({
-      level: 'critical',
-      type: 'error_rate',
-      title: 'Taux d’erreur API élevé',
-      message: `Taux d’erreur API : ${(errorMetrics.errorRate * 100).toFixed(1)}% sur 15 min (${errorMetrics.serverErrors}/${errorMetrics.totalRequests} réponses 5xx, ${errorMetrics.rateLimited} réponses 429 séparées)`,
-      action_url: '/errors',
-    });
+    alerts.push(createApiErrorRateAlert(errorMetrics));
   }
 
   const currentAdminAlerts = redis ? await redis.get(ALERT_KEY).catch(() => null) : null;
@@ -124,6 +129,7 @@ async function checkAdminAlerts() {
 
 module.exports = {
   checkAdminAlerts,
+  createApiErrorRateAlert,
   getApiErrorMetrics,
   shouldTriggerApiErrorRateAlert,
 }
