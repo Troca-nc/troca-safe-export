@@ -1,23 +1,10 @@
 import { expect, test, type Page } from '@playwright/test'
 import {
   dismissOnboardingWizard,
-  restoreAuthStore,
 } from '../support/auth'
 
 const backendUrl = process.env.PLAYWRIGHT_BACKEND_URL || 'http://127.0.0.1:3001'
 const mailpitUrl = process.env.PLAYWRIGHT_MAILPIT_URL || 'http://127.0.0.1:8025'
-
-async function installSession(page: Page, accessToken: string, user: unknown) {
-  await restoreAuthStore(page, {
-    user,
-    isAuthenticated: true,
-    demoProfile: null,
-  })
-  await page.addInitScript((token) => {
-    window.sessionStorage.setItem('access_token', token)
-    window.sessionStorage.removeItem('refresh_token')
-  }, accessToken)
-}
 
 async function dismissAuthModal(page: Page) {
   const closeButton = page.getByRole('button', { name: /^Fermer$/i })
@@ -87,15 +74,9 @@ async function registerAccount(
   })
   const responseBody = await registration.text()
   expect(registration.status(), responseBody).toBe(201)
-  const payload = JSON.parse(responseBody) as {
-    data?: { access_token?: string; user?: unknown }
-  }
+  const payload = JSON.parse(responseBody) as { data?: { access_token?: string; user?: unknown } }
   expect(payload.data?.access_token).toBeTruthy()
   expect(payload.data?.user).toBeTruthy()
-  return {
-    accessToken: payload.data!.access_token!,
-    user: payload.data!.user!,
-  }
 }
 
 test('inscription, publication, recherche et premier contact restent opérationnels', async ({ browser, page, request }) => {
@@ -105,22 +86,21 @@ test('inscription, publication, recherche et premier contact restent opérationn
   const title = `Vélo QA ${suffix}`
   const contactMessage = `Bonjour, test de contact QA ${suffix}`
 
-  const seller = await registerAccount(request, sellerEmail, 'Camille')
-  const buyer = await registerAccount(request, buyerEmail, 'Alex')
+  const buyerContext = await browser.newContext()
+  const buyerPage = await buyerContext.newPage()
+
+  await registerAccount(page.context().request, sellerEmail, 'Camille')
+  await registerAccount(buyerContext.request, buyerEmail, 'Alex')
   await waitForRegistrationEmails(request, sellerEmail)
   await waitForRegistrationEmails(request, buyerEmail)
 
-  await installSession(page, seller.accessToken, seller.user)
   await page.goto('/')
   await dismissOnboardingWizard(page)
 
   await publishSale(page, title)
 
-  const buyerContext = await browser.newContext()
-  const buyerPage = await buyerContext.newPage()
   let conversationId = ''
   try {
-    await installSession(buyerPage, buyer.accessToken, buyer.user)
     await buyerPage.goto('/')
     await dismissOnboardingWizard(buyerPage)
 
