@@ -374,4 +374,3 @@ class SessionCoordinator {
 }
 
 export const sessionCoordinator = new SessionCoordinator()
-
